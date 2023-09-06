@@ -141,6 +141,10 @@ public class FRService extends TransConnService {
       }
       Thread.currentThread().setName("REQ-" + admin.getId().getReqId());
 
+      if (BatchUtil.excludeForEnvironment(this.context, entityManager, admin)) {
+        continue;
+      }
+
       // System.out.println(">>>> Req ID >>> " + admin.getId().getReqId());
       // hard coding the req. id below
       // if (admin.getId().getReqId() != reQId) {

@@ -163,7 +163,7 @@ public class MCOPtEsHandler extends MCOHandler {
                 if (!StringUtils.isEmpty(addrType)) {
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-
+                  LOG.info("Spain MCOPtEsHandler Update from CreateCMR: " + record.getCmrNum());
                   // name3 in rdc = Address Con't on SOF
                   addr.setCmrStreetAddressCont(record.getCmrName3());
                   addr.setCmrName3(null);
@@ -482,6 +482,14 @@ public class MCOPtEsHandler extends MCOHandler {
           data.setSpecialTaxCd(StringUtils.isEmpty(cust.getTaxCd()) ? "" : cust.getTaxCd());
         }
       }
+
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
+
+        if ("Y".equals(admin.getProspLegalInd())) {
+          data.setCustPrefLang("S");
+        }
+      }
     }
 
     if (SystemLocation.PORTUGAL.equalsIgnoreCase(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
@@ -783,7 +791,9 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
-    // To Do
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) && SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+      data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
+    }
   }
 
   @Override
@@ -1573,6 +1583,10 @@ public class MCOPtEsHandler extends MCOHandler {
     super.convertDnBImportValues(entityManager, admin, data);
     if (SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
       data.setCustPrefLang("S");
+
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setVatInd(StringUtils.isNotBlank(data.getVat()) ? "T" : "N");
+      }
     }
   }
 

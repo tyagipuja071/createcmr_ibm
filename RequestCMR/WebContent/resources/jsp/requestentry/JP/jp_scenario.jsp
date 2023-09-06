@@ -142,6 +142,16 @@
       <cmr:label fieldId="" forRadioOrCheckbox="true">
         Update Company only
       </cmr:label>
+      <br>
+      <input type="radio" name="jpScenarioU" value="CR">
+      <cmr:label fieldId="" forRadioOrCheckbox="true">
+        ROL Flag Change on Company No
+      </cmr:label>
+      <br>
+      <input type="radio" name="jpScenarioU" value="AR">
+      <cmr:label fieldId="" forRadioOrCheckbox="true">
+        ROL Flag Change on Account No
+      </cmr:label>
     </cmr:column>
   </cmr:row>
   <cmr:buttonsRow>

@@ -596,16 +596,6 @@ public abstract class AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    // case DuplicateCMR:
-    // if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(country)) {
-    // return true;
-    // }
-    // details.append("The name already matches a current record with CMR No. "
-    // + checkResult.getCmrNo()).append("\n");
-    // engineData.addRejectionComment("DUPC", "The name already has matches a
-    // current record with CMR No. " + checkResult.getCmrNo(),
-    // checkResult.getCmrNo(), checkResult.getKunnr());
-    // return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
@@ -677,13 +667,6 @@ public abstract class AutomationUtil {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
       break;
-    // case DuplicateCMR:
-    // details.append("The name already matches a current record with CMR No. "
-    // + checkResult.getCmrNo()).append("\n");
-    // engineData.addRejectionComment("DUPC", "The name already has matches a
-    // current record with CMR No. " + checkResult.getCmrNo(),
-    // checkResult.getCmrNo(), checkResult.getKunnr());
-    // return false;
     case DuplicateCheckError:
       details.append("Duplicate CMR check using customer name and address match failed to execute.").append("\n");
       engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name and address match failed to execute.");
@@ -712,7 +695,7 @@ public abstract class AutomationUtil {
    * @return
    */
   protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages) {
-    LOG.debug("Validating Private Person record for " + name);
+    LOG.debug("***Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
       String cmrNo = "";
@@ -969,6 +952,7 @@ public abstract class AutomationUtil {
    * @param details
    */
   protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
+    LOG.debug("***AutomationUtil.removeDuplicateAddresses");
     Addr zs01 = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -982,6 +966,7 @@ public abstract class AutomationUtil {
     boolean removed = false;
     details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
+      LOG.debug("***AutomationUtil.removeDuplicateAddresses found more than one address");
       Addr addr = it.next();
       if (!payGoAddredited) {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
@@ -1369,6 +1354,7 @@ public abstract class AutomationUtil {
    */
 
   public static boolean compareCustomerNames(Addr addr1, Addr addr2) {
+    LOG.debug("***AutomationUtil.compareCustomerNames");
     String customerName1 = addr1.getCustNm1() + (StringUtils.isNotBlank(addr1.getCustNm2()) ? " " + addr1.getCustNm2() : "");
     String customerName2 = addr2.getCustNm1() + (StringUtils.isNotBlank(addr2.getCustNm2()) ? " " + addr2.getCustNm2() : "");
 
@@ -1388,6 +1374,7 @@ public abstract class AutomationUtil {
   }
 
   public List<String> checkDuplicateRequest(EntityManager entityManager, RequestData requestData) {
+    LOG.debug("Duplicate Request check with customer name and Address for Private person record");
     List<String> dupReqIds = new ArrayList<>();
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();

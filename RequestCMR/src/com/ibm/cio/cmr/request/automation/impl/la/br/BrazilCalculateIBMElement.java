@@ -108,16 +108,21 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       overrides.addOverride(getProcessCode(), "DATA", "LOCN_NO", data.getLocationNumber(), "");
     }
 
+    // skip setting of sbo via state for this scenarios
+    final List<String> skipScenarios = Arrays.asList("IBMEM", "PRIPE", "BUSPR", "INTER");
+    final List<String> skipSBO = Arrays.asList("515", "979", "461", "010");
+
     // Set Data.SALES_BO_CD for stateProv Coverage change !!
     final List<String> STATEPROV_763 = Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
     final List<String> STATEPROV_504 = Arrays.asList("DF", "GO", "MT", "MS");
     final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
-    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C")) {
-      if ("RJ".equals(soldTo.getStateProv())) {
+    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C")
+        && (!skipScenarios.contains(data.getCustSubGrp()) && !skipSBO.contains(data.getSalesBusOffCd()))) {
+      if ("ES".equals(soldTo.getStateProv()) || "RJ".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
       } else if ("SP".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "764");
-      } else if ("ES".equals(soldTo.getStateProv()) || "MG".equals(soldTo.getStateProv())) {
+      } else if ("MG".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "556");
       } else if (STATEPROV_758.contains(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "758");
@@ -278,9 +283,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
           LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
         }
-
-        details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
 
       boolean checkIfFiscalCodeExists = true;
@@ -496,9 +498,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
         }
 
-        details.append("Sales Rep No = " + (String) rootMatch[8] + "001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), (String) rootMatch[8] + "001");
-
         // commented for defect CMR-392
         /*
          * details.append("ISIC = " + (String) rootMatch[10] + "\n");
@@ -641,9 +640,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
           LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
         }
-
-        details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
 
       if (cnaeRecord != null) {
@@ -751,6 +747,13 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
     // scenario fields start
     if ("C".equals(admin.getReqType()) || ("U".equals(admin.getReqType()) && "REAC".equalsIgnoreCase(admin.getReqReason()))) {
+      if (!sboToBeUnchanged) {
+        if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && "ES".equals(soldTo.getStateProv())) {
+          LOG.debug("Setting DATA.SALES_BO_CD for StateProv 'ES' to '761'");
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
+        }
+      }
+
       if ("COMME".equalsIgnoreCase(scenarioSubType)) {
         // SET IBM Bank Number
         details.append("IBM BANK NO = " + "34A" + "\n");
@@ -802,37 +805,33 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
         // SET SBO
         if (!sboToBeUnchanged) {
-          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "606");
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "461");
         }
-        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
+        details.append("Search Term/Sales Branch Office = " + "461" + "\n");
 
         // SET MRC
         if (!sboToBeUnchanged) {
-          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "9");
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Z");
         }
-        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
+        details.append("Market Responsibility Code (MRC) = " + "Z" + "\n");
 
         // SET Country Use based on MRC
         if (!sboToBeUnchanged) {
-          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "9");
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Z");
         }
-        details.append("Country Use = " + data.getMrcCd() + "\n");
+        details.append("Country Use = " + "Z" + "\n");
 
         // SET ISU based on MRC
-        String isu = getISUCode(entityManager, "9", "");
+        String isu = getISUCode(entityManager, "Z", "");
         if (!sboToBeUnchanged) {
           overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
         }
-        details.append("ISU = " + data.getIsuCd() + "\n");
+        details.append("ISU = " + isu + "\n");
 
         // SET Client Tier based on MRC and ISU
-        String clientTier = getClientTier(entityManager, "9", isu);
+        String clientTier = getClientTier(entityManager, "Z", isu);
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-
-        // SET Sales Rep No
-        details.append("Sales Rep No = " + "606900" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), "606900");
 
         // SET Partnership Indicator
         details.append("Partnership Ind = " + CmrConstants.DEFAULT_BUSPR_PARTNERSHIP_IND + "\n");
@@ -885,10 +884,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
 
-        // SET Sales Rep No
-        details.append("Sales Rep No = " + "010200" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), "010200");
-
         // SET Partnership Indicator
         details.append("Partnership Ind = " + CmrConstants.DEFAULT_BUSPR_PARTNERSHIP_IND + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "PARTNERSHIP_IND", data.getPartnershipInd(), CmrConstants.DEFAULT_BUSPR_PARTNERSHIP_IND);
@@ -923,8 +918,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       } else if ("CC3CC".equalsIgnoreCase(scenarioSubType)) {
         if (midasResponse != null && midasResponse.isSuccess()) {
           String abbrevName = (midasResponse.getRecord().getCompanyName().length() > 26)
-              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26)
-              : "CC3/" + (midasResponse.getRecord().getCompanyName());
+              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26) : "CC3/" + (midasResponse.getRecord().getCompanyName());
           LOG.debug("Sold To Company Name : " + midasResponse.getRecord().getCompanyName());
           // SET Abbreviated Name
           details.append("Abbreviated Name (TELX1) = " + abbrevName + "\n");
@@ -963,10 +957,6 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         String clientTier = getClientTier(entityManager, "Y", isu);
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-
-        // SET Sales Rep No
-        details.append("Sales Rep No = " + "509001" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), "509001");
 
         // SET ISIC
         details.append("ISIC = " + "7499" + "\n");
@@ -1082,8 +1072,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
   private void checkContactsForAutomationRequest(EntityManager entityManager, Admin admin, Data data, LAHandler geoHandler) {
 
     boolean hasEM001 = false;
-    boolean hasLE001 = false;
-    boolean hasCF001 = false;
+
     LOG.debug("Getting contact info from V2 inputs..");
     String sql = ExternalizedQuery.getSql("BR.GET_DISTINCT_MAILS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1098,20 +1087,9 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           if (type.equals("EM")) {
             LOG.debug("Found EM-001 Contact on the request.");
             hasEM001 = true;
-          } else if (type.equals("CF")) {
-            LOG.debug("Found CF-001 Contact on the request.");
-            hasCF001 = true;
-          } else if (type.equals("LE")) {
-            LOG.debug("Found LE-001 Contact on the request.");
-            hasLE001 = true;
           }
         }
       }
-    }
-
-    if (hasEM001 && hasCF001 && hasLE001) {
-      LOG.debug("Request has all 3 required contacts, skipping contact creation.");
-      return;
     }
 
     String email = data.getEmail1();
@@ -1121,16 +1099,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         geoHandler.createNewEmailContact(entityManager, data, admin, email, "EM", "001");
         LOG.debug("Created contact EM-001 for request id: " + admin.getId().getReqId());
       }
-      if (!hasLE001) {
-        geoHandler.createNewEmailContact(entityManager, data, admin, email, "LE", "001");
-        LOG.debug("Created contact LE-001 for request id: " + admin.getId().getReqId());
-      }
-      if (!hasCF001) {
-        geoHandler.createNewEmailContact(entityManager, data, admin, email, "CF", "001");
-        LOG.debug("Created contact CF-001 for request id: " + admin.getId().getReqId());
-      }
     }
-
   }
 
   /**
@@ -1307,23 +1276,23 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             LOG.debug("Warning: State Fiscal Code cannot be determined from Sintegra .\n");
           }
         } else {
-            consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
-            if (consultaResponse.isSuccess()) {
-              ConsultaCCCResponse consulta = consultaResponse.getRecord();
-              if (consulta != null) {
-                status = consulta.getStateFiscalCodeStatus();
-                if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
-                    || "Ativa".equalsIgnoreCase(status)) {
-                  stateFiscalCode = consulta.getStateFiscalCode();
-                } else {
-          status = "ISENTO";
-          stateFiscalCode = "ISENTO";
-                }
+          consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
+          if (consultaResponse.isSuccess()) {
+            ConsultaCCCResponse consulta = consultaResponse.getRecord();
+            if (consulta != null) {
+              status = consulta.getStateFiscalCodeStatus();
+              if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
+                  || "Ativa".equalsIgnoreCase(status)) {
+                stateFiscalCode = consulta.getStateFiscalCode();
+              } else {
+                status = "ISENTO";
+                stateFiscalCode = "ISENTO";
               }
-            } else {
-              status = "ISENTO";
-              stateFiscalCode = "ISENTO";
             }
+          } else {
+            status = "ISENTO";
+            stateFiscalCode = "ISENTO";
+          }
 
           details.append(addrTypeDesc + " State Fiscal Code cannot be determined from Sintegra.Setting to ISENTO\n");
           details.append(addrTypeDesc + " State Fiscal Code Status = " + status + "\n");

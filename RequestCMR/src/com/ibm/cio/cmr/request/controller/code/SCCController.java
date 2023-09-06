@@ -283,4 +283,16 @@ public class SCCController extends BaseController {
   }
   // CREATCMR-5627
 
+  // CREATCMR-9311: export the scc list to excel file
+  @RequestMapping(value = "/code/exportToExcel", method = { RequestMethod.POST, RequestMethod.GET })
+  public void exportSCCList(HttpServletRequest request, HttpServletResponse response, SCCModel model) throws CmrException {
+
+    List<SCCModel> results = service.search(model, request);
+    try {
+      service.exportToExcel(results, response);
+    } catch (Exception e) {
+      LOG.debug("Cannot export Requester statistics", e);
+    }
+  }
+  // CREATCMR-9311 end
 }

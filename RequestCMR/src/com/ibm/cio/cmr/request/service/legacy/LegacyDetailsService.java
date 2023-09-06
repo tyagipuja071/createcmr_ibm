@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 
 /**
@@ -35,7 +36,7 @@ public class LegacyDetailsService extends BaseSimpleService<LegacyDirectObjectCo
     String country = (String) params.getParam("country");
     String cmrNo = (String) params.getParam("cmrNo");
     String realCty = (String) params.getParam("realCty");
-
+    
     LegacyDirectObjectContainer container = new LegacyDirectObjectContainer();
     if (!StringUtils.isBlank(country) && !StringUtils.isBlank(cmrNo)) {
 
@@ -73,7 +74,11 @@ public class LegacyDetailsService extends BaseSimpleService<LegacyDirectObjectCo
 
       sql = ExternalizedQuery.getSql("LEGACY.SEARCH.KNA1");
       query = new PreparedQuery(entityManager, sql);
-      query.setParameter("KATR6", realCty);
+      if (SystemLocation.IRELAND.equals(realCty)){
+        query.setParameter("KATR6", realCty);
+      } else {
+        query.setParameter("KATR6", country);
+      }
       query.setParameter("CMR_NO", cmrNo);
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
       query.setForReadOnly(true);

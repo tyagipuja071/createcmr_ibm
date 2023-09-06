@@ -1118,7 +1118,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
       admin.setWarnMsgSentDt(null);
 
-      // POOJA TYAGI
       // setDisableProc(model, admin); // FOR LA and EMEA
       if (StringUtils.isEmpty(admin.getLockInd())) {
         admin.setLockInd(CmrConstants.YES_NO.N.toString());
@@ -4944,10 +4943,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setEmail3(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("EMAIL3") - 1)));
           model.setInacCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("INAC_CD") - 1)));
           model.setCompany(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COMPANY") - 1)));
-          model.setMrktChannelInd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("MARKETING_CHNL_INDC_VALUE") - 1)));
           model.setCollBoId(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COLL_BO_ID") - 1)));
           model.setSalesBusOffCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("SALES_BO_CD") - 1)));
-          model.setRepTeamMemberNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("REP_TEAM_MEMBER_NO") - 1)));
           model.setCollectorNameNo(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COLLECTOR_NO") - 1)));
           model.setCodCondition(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_CONDITION") - 1)));
           model.setCodReason(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("COD_RSN") - 1)));

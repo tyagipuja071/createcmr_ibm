@@ -5225,8 +5225,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.NORDX);
-  GEOHandler.addAfterConfig(prospectFilter, GEOHandler.NORDX);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.NORDX, null, true);
 
 });

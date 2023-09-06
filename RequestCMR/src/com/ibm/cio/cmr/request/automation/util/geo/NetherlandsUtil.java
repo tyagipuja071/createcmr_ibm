@@ -122,7 +122,7 @@ public class NetherlandsUtil extends AutomationUtil {
     case SCENARIO_BP_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
 
-    case SCENARIO_PRIVATE_CUSTOMER:
+    //case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
       Person person = null;
       if (StringUtils.isNotBlank(zs01.getCustNm1())) {
@@ -169,11 +169,13 @@ public class NetherlandsUtil extends AutomationUtil {
     String bgId = data.getBgId();
     String commercialFin = "";
 
-    if (StringUtils.isNotBlank(coverageId)) {
-      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage());
-      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), sortl);
-      details.append("-BO Team: " + sortl);
-    }
+    /*
+     * if (StringUtils.isNotBlank(coverageId)) { String sortl =
+     * getSORTLfromCoverage(entityManager, container.getFinalCoverage());
+     * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+     * "ENGINEERING_BO", data.getEngineeringBo(), sortl);
+     * details.append("-BO Team: " + sortl); }
+     */
 
     if (covFrom != null && !"BGNONE".equals(bgId.trim())) {
       commercialFin = computeSBOForCovBelux(entityManager, QUERY_BG_SBO_BENELUX, bgId, data.getCmrIssuingCntry(), false);
@@ -213,10 +215,14 @@ public class NetherlandsUtil extends AutomationUtil {
 
       if (fields != null) {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
-        if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
-          details.append("BO Team : " + fields.getEngineeringBO()).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), fields.getEngineeringBO());
-        }
+        /*
+         * if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
+         * details.append("BO Team : " +
+         * fields.getEngineeringBO()).append("\n");
+         * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+         * "ENGINEERING_BO", data.getEngineeringBo(),
+         * fields.getEngineeringBO()); }
+         */
         if (StringUtils.isNotBlank(fields.getInac())) {
           details.append(" INAC/NAC Code : " + fields.getInac()).append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), fields.getInac());
@@ -265,9 +271,12 @@ public class NetherlandsUtil extends AutomationUtil {
         sortlList.add(sortl);
         // SpainFieldsContainer fieldValues = new SpainFieldsContainer();
       }
-    }
-    sortl = sortlList.get(0);
-    return sortl;
+      sortl = sortlList.get(0);
+    } else {
+      // Handle the case when the list is empty
+      LOG.debug("The list is empty.");
+    }    
+    return sortl;    
   }
 
   private NLFieldsContainer calculate32SValuesFromIMSNL(EntityManager entityManager, Data data) {
@@ -294,10 +303,11 @@ public class NetherlandsUtil extends AutomationUtil {
       query.setParameter("ISSUING_CNTRY", SystemLocation.NETHERLANDS);
       engineeringBOs = query.getResults();
     }
-    if (engineeringBOs != null && engineeringBOs.size() == 1) {
-      String engineeringBO = (String) engineeringBOs.get(0)[0];
-      container.setEngineeringBO(engineeringBO);
-    }
+    /*
+     * if (engineeringBOs != null && engineeringBOs.size() == 1) { String
+     * engineeringBO = (String) engineeringBOs.get(0)[0];
+     * container.setEngineeringBO(engineeringBO); }
+     */
 
     // setINACValues
     List<Object[]> inacValues = new ArrayList<>();
@@ -366,8 +376,31 @@ public class NetherlandsUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    Admin admin = requestData.getAdmin();
+
+    boolean isPaygo = "Y".equals(admin.getPaygoProcessIndc());
+    boolean isScenarioCovered = "LOCAL".equals(data.getCustGrp())
+        && !(SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario));
+    boolean hasDunsNo = StringUtils.isNotEmpty(data.getDunsNo());
+    boolean isFromP2LApi = "Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId());
+
+    LOG.debug("isPaygo: " + isPaygo + ", isScenarioCovered: " + isScenarioCovered + ", hasDunsNo: " + hasDunsNo + ", isFromP2LApi: " + isFromP2LApi);
+    if (hasDunsNo && !isPaygo && isFromP2LApi && isScenarioCovered && StringUtils.isEmpty(data.getTaxCd2())) {
+      details.append("KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.\n");
+      engineData.addNegativeCheckStatus("_missingKvkValue",
+          "KVK is a mandatory field for all Local scenarios except Private person and IBM Employee.");
+    } else {
+      details.append("Field Computation skipped.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
+    return results;
   }
 
   @Override

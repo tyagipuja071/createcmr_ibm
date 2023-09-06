@@ -144,53 +144,44 @@
 			</p>
 		</cmr:column>
 	</cmr:row>
+	<cmr:row addBackground="true">
+		<cmr:column span="2" containerForField="Company">
+			<p>
+				<cmr:label fieldId="company">
+					<cmr:fieldLabel fieldId="Company" />:
+				</cmr:label>
+				<cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_IBM_TAB" />
+			</p>
+		</cmr:column>
+		<cmr:column span="1" width="140" containerForField="INACCode">
+			<p>
+				<cmr:label fieldId="inacCd">
+					<cmr:fieldLabel fieldId="INACCode" />:
+				</cmr:label>
+				<cmr:field size="80" fieldId="INACCode" id="inacCd" path="inacCd" />
+			</p>
+		</cmr:column>
+	</cmr:row>
 	
-		<cmr:row  addBackground="true">
-			<cmr:column span="2" containerForField="Company">
-				<p>
-					<cmr:label fieldId="company">
-						<cmr:fieldLabel fieldId="Company" />:
-					</cmr:label>
-					<cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_IBM_TAB" />
-				</p>
-			</cmr:column>
-			<cmr:column span="1" width="140" containerForField="INACCode">
-				<p>
-					<cmr:label fieldId="inacCd">
-						<cmr:fieldLabel fieldId="INACCode" />:
-          </cmr:label>
-					<cmr:field size="80" fieldId="INACCode" id="inacCd" path="inacCd" />
-				</p>
-			</cmr:column>
-			<cmr:column span="2" containerForField="ISU">
-				<p>
-					<cmr:label fieldId="isuCd">
-						<cmr:fieldLabel fieldId="ISU" />:
-          </cmr:label>
-					<cmr:field fieldId="ISU" id="isuCd" path="isuCd" />
-				</p>
-			</cmr:column>
-		</cmr:row>
-	
-
 	<cmr:row addBackground="true">
 		<cmr:column span="2" containerForField="CollectorNameNo">
 			<p>
 				<cmr:label fieldId="collectorNameNo">
 					<cmr:fieldLabel fieldId="CollectorNameNo" />:
-          </cmr:label>
-				<cmr:field fieldId="CollectorNameNo" id="collectorNameNo"
-					path="collectorNameNo" />
+				</cmr:label>
+				<cmr:field fieldId="CollectorNameNo" id="collectorNameNo" path="collectorNameNo" />
 			</p>
 		</cmr:column>
 		<cmr:column span="2" containerForField="SalesBusOff">
 			<p>
 				<cmr:label fieldId="salesBusOffCd">
 					<cmr:fieldLabel fieldId="SalesBusOff" />:
-          </cmr:label>
-				<cmr:field fieldId="SalesBusOff" id="salesBusOffCd"
-					path="salesBusOffCd" />
+				</cmr:label>
+				<cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" />
 			</p>
 		</cmr:column>
 	</cmr:row>
+	<form:hidden path="isuCd" id="isuCd" />
+	<!-- temporary placeholder for Update Reason value -->
+	<form:hidden path="mexicoBillingName" id="mexicoBillingName" />
 </cmr:view>

@@ -214,7 +214,26 @@
         cb[i].removeAttribute('disabled');
       }
     }
-    FormManager.doAction('frmCMR', YourActions.Save, true);
+
+    var uiReqStatus = FormManager.getActualValue('reqStatus');
+    var reqId = FormManager.getActualValue('reqId');
+    var dbReqStatus = "";
+
+    var result = cmr.query("WW.GET_REQ_STATUS", {
+      REQ_ID: reqId
+    });
+    if (result != null && result.ret1 != '' && result.ret1 != null) {
+      dbReqStatus = result.ret1;
+    }
+
+    // prevent from overwriting the DB REQ_STATUS
+    // if another tab is open with different UI REQ_STATUS
+    if (uiReqStatus == dbReqStatus) {
+      FormManager.doAction('frmCMR', YourActions.Save, true);
+    } else {
+      cmr.showAlert("Unable to save the request. Request Status mismatch from database." +
+      "<br><br>Please reload the page.");
+    }
   }
   
   function noSaveBeforeLeave(){
@@ -374,7 +393,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="dplChkTs" />
     </c:if>
     <form:hidden path="dplChkResult" />
-	<cmr:view forCountry="754,866,624,788,724,618,848">    
+	<cmr:view forCountry="754,866,624,788,724,618,848,706,838">    
     	<form:hidden path="vatAcknowledge" />
     </cmr:view>
     <form:hidden path="dplChkUsrId" />
@@ -398,7 +417,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS,NORDX" exceptForCountry="706,618,862,780,866,754,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,755,897,649">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS,NORDX" exceptForCountry="706,618,862,780,866,754,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,755,897,649,616,796">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -597,7 +616,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <cmr:tabs>
       <cmr:tab label="${ui.tab.general}" id="MAIN_GENERAL_TAB" active="true" sectionId="GENERAL_REQ_TAB" gridIds="COMMENT_LIST_GRID" />
       <cmr:tab label="${ui.tab.address}" id="MAIN_NAME_TAB" sectionId="NAME_REQ_TAB" gridIds="ADDRESS_GRID" />
-      <cmr:tab label="${ui.tab.customer}" id="MAIN_CUST_TAB" sectionId="CUST_REQ_TAB" />
+      <cmr:tab label="${ui.tab.customer}" id="MAIN_CUST_TAB" sectionId="CUST_REQ_TAB" gridIds="LICENSES_GRID"/>
       <cmr:tab label="${ui.tab.ibm}" id="MAIN_IBM_TAB" sectionId="IBM_REQ_TAB" />
       <cmr:view forGEO="LA">
         <cmr:tab label="${ui.tab.contactInfo}" id="MAIN_CONTACTINFO_TAB" sectionId="CONTACTINFO_REQ_TAB" gridIds="CONTACTINFO_GRID" />

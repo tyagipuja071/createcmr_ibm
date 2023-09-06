@@ -1418,6 +1418,7 @@ public class LegacyDirectService extends TransConnService {
         
         // CREATCMR - 8014 -> for API Requests
     	String reqAddrSeq = addr.getId().getAddrSeq(); 
+    	
         if(StringUtils.isNotEmpty(reqAddrSeq) && reqAddrSeq.length() < 5) {
         	String paddedSeq = StringUtils.leftPad(reqAddrSeq, 5, '0');
         	addr.getId().setAddrSeq(paddedSeq);

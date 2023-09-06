@@ -57,7 +57,7 @@ function afterConfigForDE() {
 
   if (_IMSHandler == null) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      setSboOnIMS();
+      setSboOnIMS(FormManager.getActualValue('isicCd'));
     });
   }
 
@@ -66,7 +66,7 @@ function afterConfigForDE() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setSearchTermDE();
+
       lockCtcFieldOnIsu();
     });
   }
@@ -164,7 +164,23 @@ function vatExemptIBMEmp() {
 
 var oldIsicValue = null;
 function saveOldIsic() {
-  oldIsicValue = FormManager.getActualValue('isicCd');
+	if(PageManager.isReadOnly()){
+		return;
+	}
+	oldIsicValue = FormManager.getActualValue('isicCd');
+	// CREATCMR - 9967 
+	var oldISIC = null;
+	var requestId = FormManager.getActualValue('reqId');
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	qParams = {
+		REQ_ID: requestId,
+	};
+	var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+	oldISIC = result.ret1;
+	if (['COMME', 'GOVMT', '3PA', 'SENSI', 'DC', 'CROSS', 'XDC', 'X3PA', '3PADC','BROKR'].includes(custSubGrp) &&
+		(oldISIC != null || oldISIC != undefined || oldISIC != '')) {
+		FormManager.setValue('isicCd', oldISIC);
+	}
 }
 
 function setSboOnIMS(value) {
@@ -1257,13 +1273,15 @@ function addVatIndValidator(){
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
-      FormManager.readOnly('vatInd');
+      FormManager.enable('vatInd');
+    // FormManager.readOnly('vatInd');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
       FormManager.setValue('vatInd', '');
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
-      FormManager.readOnly('vatInd');
+      FormManager.enable('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
@@ -1383,6 +1401,14 @@ function similarAddrCheckValidator() {
       })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+//function setCoverageValuesForAPI() {
+//	var ssid = FormManager.getActualValue('sourceSystId');
+//	if(ssid != '' && (ssid == 'Saas-Test' || ssid == 'PayGo-Test')) {
+//	      setAbbreviatedNameBasedOnAddressType();
+//	}
+//}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1410,6 +1436,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.DE);
   // GEOHandler.addAfterConfig(setISUValuesOnUpdate, GEOHandler.DE);
   GEOHandler.addAfterConfig(saveOldIsic, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(saveOldIsic, GEOHandler.DE);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GERMANY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GERMANY ], null, true);
   GEOHandler.addAfterConfig(defaultCapIndicator, SysLoc.GERMANY);
   GEOHandler.addAfterConfig(disableAutoProcForProcessor, GEOHandler.DE);
@@ -1448,4 +1475,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
+
 });

@@ -27,10 +27,13 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+
+import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
@@ -43,6 +46,10 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+
+import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
+
 
 public class UKIUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(UKIUtil.class);
@@ -348,6 +355,7 @@ public class UKIUtil extends AutomationUtil {
         details.append(" - " + field + "\n");
       }
     }
+    
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;
@@ -523,6 +531,21 @@ public class UKIUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+
+    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      if ("Z".equals(data.getSpecialTaxCd())) {
+        LicenseService service = new LicenseService();
+        List<Licenses> newLicenses = service.getLicensesByIndc(entityManager, data.getId().getReqId(), LicenseService.NEW_LICENSE_INDC);
+        if (newLicenses.size() > 0) {
+          details.append("A new license has been added, so the request will now be placed in CMDE's queue.\n");
+          engineData.addNegativeCheckStatus("_updatedToZTaxCode", "A new license has been added, so the request will now be placed in CMDE's queue.");
+          results.setResults("Review Required");
+          results.setDetails(details.toString());
+          return results;
+        }
+      }
+    }
+
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");
@@ -609,23 +632,34 @@ public class UKIUtil extends AutomationUtil {
         }
       }
     }
-
-    List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210", "7221", "7229", "7250", "7123", "9802");
-    if (!(SCENARIO_INTERNAL.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_BUSINESS_PARTNER.equals(scenario))) {
-      if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd) && isicList.contains(isicCd)) {
-        details.append("Setting ISU-CTC to '32N' for ISIC: " + isicCd).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
-        results.setProcessOutput(overrides);
-        results.setResults("Calculated.");
-      } else if ("32".equals(data.getIsuCd()) && "N".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd) && !isicList.contains(isicCd)) {
-        details.append("Setting ISU-CTC to '32S' for ISIC: " + isicCd).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
-        results.setProcessOutput(overrides);
-        results.setResults("Calculated.");
-      }
-    }
+    // List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210",
+    // "7221", "7229", "7250", "7123", "9802");
+    // if (!(SCENARIO_INTERNAL.equals(scenario) ||
+    // SCENARIO_PRIVATE_PERSON.equals(scenario) ||
+    // SCENARIO_BUSINESS_PARTNER.equals(scenario))) {
+    // if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) &&
+    // StringUtils.isNotBlank(isicCd) && isicList.contains(isicCd)) {
+    // details.append("Setting ISU-CTC to '32N' for ISIC: " +
+    // isicCd).append("\n");
+    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+    // "DATA", "ISU_CD", data.getIsuCd(), "32");
+    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+    // "DATA", "CLIENT_TIER", data.getClientTier(), "N");
+    // results.setProcessOutput(overrides);
+    // results.setResults("Calculated.");
+    // } else if ("32".equals(data.getIsuCd()) &&
+    // "N".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd) &&
+    // !isicList.contains(isicCd)) {
+    // details.append("Setting ISU-CTC to '32S' for ISIC: " +
+    // isicCd).append("\n");
+    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+    // "DATA", "ISU_CD", data.getIsuCd(), "32");
+    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+    // "DATA", "CLIENT_TIER", data.getClientTier(), "S");
+    // results.setProcessOutput(overrides);
+    // results.setResults("Calculated.");
+    // }
+    // }
 
     if (details.toString().length() == 0) {
       details.append("No specific fields to calculate.");
@@ -633,6 +667,15 @@ public class UKIUtil extends AutomationUtil {
       results.setProcessOutput(overrides);
     }
 
+    // for P2L Conversions , checking mandatory fields
+
+    // first identity if P2L
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd())) {
+      if ("COMME".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isEmpty(data.getTaxCd1()) && !"Y".equalsIgnoreCase(data.getRestrictInd())) {
+        details.append("CRN is a mandatory field. Processor Review will be required.\n");
+        engineData.addNegativeCheckStatus("_crnMissing", "CRN is a mandatory field.");
+      }
+    }
     results.setDetails(details.toString());
     LOG.debug(results.getDetails());
     return results;
@@ -732,12 +775,10 @@ public class UKIUtil extends AutomationUtil {
         }
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
-        details.append("ISU : " + fields.getIsu()).append("\n");
-        details.append("Client Tier : " + fields.getCtc()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
-        details.append("ISU : " + fields.getIsu()).append("\n");
-        details.append("Client Tier : " + fields.getCtc()).append("\n");
+        details.append("ISU : " + (StringUtils.isNotBlank(fields.getIsu()) ? fields.getIsu() : data.getIsuCd())).append("\n");
+        details.append("Client Tier : " + (StringUtils.isNotBlank(fields.getCtc()) ? fields.getCtc() : data.getClientTier())).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(),
             !StringUtils.isBlank(fields.getIsu()) ? fields.getIsu() : data.getIsuCd());
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(),
@@ -1088,6 +1129,7 @@ public class UKIUtil extends AutomationUtil {
       zp01count = Integer.parseInt(sResult[1].toString());
       zd01count = Integer.parseInt(sResult[2].toString());
     }
+
     return Arrays.asList(zi01count, zp01count, zd01count);
   }
 }

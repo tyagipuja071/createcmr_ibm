@@ -302,7 +302,7 @@ span.bold {
                   <td class="dnb-label inner-det">&nbsp;</td>
                   <td class="inner-det">&nbsp;</td>
                 </tr>
-                <tr ng-show="cust.id.sofCntryCode == '758'">
+                <tr>
                   <td class="dnb-label inner-det">Company State/Province (Italy):</td>
                   <td class="inner-det" ng-bind-html="addr.itCompanyProvCd"></td>
                   <td class="dnb-label inner-det">Company Postal Address (Italy):</td>
@@ -324,7 +324,7 @@ span.bold {
           </em>
         </caption>
         <tbody ng-show="expExt">
-          <tr ng-show="cust.id.sofCntryCode == '758'">
+          <tr>
             <td class="dnb-label">Billing Address Name (NORMABB):</td>
             <td ng-bind-html="ext.itBillingName"></td>
             <td class="dnb-label">Billing Address Street (INDABB):</td>
@@ -332,7 +332,7 @@ span.bold {
             <td class="dnb-label">Billing Billing Address City(CITABB):</td>
             <td ng-bind-html="ext.itBillingCity"></td>
           </tr>
-          <tr ng-show="cust.id.sofCntryCode == '758'">
+          <tr>
             <td class="dnb-label">Billing Customer No. (CODCC):</td>
             <td ng-bind-html="ext.itBillingCustomerNo"></td>
             <td class="dnb-label">Company Customer No. (CODCP):</td>
@@ -340,7 +340,7 @@ span.bold {
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          <tr ng-show="cust.id.sofCntryCode == '758'">
+          <tr>
             <td class="dnb-label">Codice IVA (IVA):</td>
             <td ng-bind-html="ext.itIVA"></td>
             <td class="dnb-label">Codice Fiscale (CODFIS):</td>
@@ -348,7 +348,7 @@ span.bold {
             <td class="dnb-label">SSV Code (CODSSV):</td>
             <td ng-bind-html="ext.itCodeSSV"></td>
           </tr>
-          <tr ng-show="cust.id.sofCntryCode == '758'">
+          <tr>
             <td class="dnb-label">Tipo Client (TIPOCL):</td>
             <td ng-bind-html="ext.tipoCliente"></td>
             <td class="dnb-label">Codice Destinatio/Uficio (CODDES):</td>
@@ -358,7 +358,7 @@ span.bold {
           </tr>
           
           
-          <tr ng-show="cust.id.sofCntryCode == '706'">
+          <tr>
             <td class="dnb-label">SIRET/SIREN (SIRET):</td>
             <td ng-bind-html="ext.siret"></td>
             <td class="dnb-label">Nature Client (CNCLA):</td>
@@ -366,7 +366,7 @@ span.bold {
             <td class="dnb-label">INAC Cont. (IAN01):</td>
             <td ng-bind-html="ext.frInacCont"></td>
           </tr>
-          <tr ng-show="cust.id.sofCntryCode == '706'">
+          <tr>
             <td class="dnb-label">Penalties De Retard (AGIOS):</td>
             <td ng-bind-html="ext.frPenalties"></td>
             <td class="dnb-label">Affacturage (AFFAC):</td>
@@ -374,7 +374,7 @@ span.bold {
             <td class="dnb-label">Type De Facturation (CTECH):</td>
             <td ng-bind-html="ext.frFactureType"></td>
           </tr>
-          <tr ng-show="cust.id.sofCntryCode == '706'">
+          <tr>
             <td class="dnb-label">Tarif Particulier (TAPAR):</td>
             <td ng-bind-html="ext.frTarif"></td>
             <td class="dnb-label">Nombre De Jours (IGSNJ):</td>
@@ -382,7 +382,7 @@ span.bold {
             <td class="dnb-label">Forme Juridique (TADMI):</td>
             <td ng-bind-html="ext.frLegalForm"></td>
           </tr>
-          <tr ng-show="cust.id.sofCntryCode == '706'">
+          <tr>
             <td class="dnb-label">Code APE (TACPA):</td>
             <td ng-bind-html="ext.frCodeAPE"></td>
             <td class="dnb-label">Top Liste Speciale (TLSPE):</td>
@@ -390,7 +390,7 @@ span.bold {
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           </tr>
-          <tr ng-show="cust.id.sofCntryCode == '693'">
+          <tr>
             <td class="dnb-label">DIC (DIC):</td>
             <td ng-bind-html="ext.bankAcctNo"></td>
             <td>&nbsp;</td>

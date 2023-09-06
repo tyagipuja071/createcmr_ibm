@@ -58,12 +58,12 @@
 </cmr:row>
 <cmr:row addBackground="true">
   <cmr:column span="4">
-    <cmr:label fieldId="custNm3">
+    <cmr:label fieldId="cnCustName1">
       <cmr:fieldLabel fieldId="CustomerName3" />: 
       <cmr:info text="${ui.info.custNm3JP}" />
     </cmr:label>
     <cmr:delta text="-" id="delta-custNm3" />
-    <cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3" size="400" />
+    <cmr:field fieldId="CustomerName3" id="cnCustName1" path="cnCustName1" size="400" />
   </cmr:column>
 </cmr:row>
 <cmr:row addBackground="true">
@@ -73,6 +73,15 @@
     </cmr:label>
     <cmr:delta text="-" id="delta-addrTxt" />
     <cmr:field fieldId="AddressTxt" id="addrTxt" path="addrTxt" size="400" />
+  </cmr:column>
+</cmr:row>
+<cmr:row addBackground="true">
+  <cmr:column span="4">
+    <cmr:label fieldId="cnAddrTxt">
+    <cmr:fieldLabel fieldId="JpStreetAddress1" />: 
+    </cmr:label>
+    <cmr:delta text="-" id="delta-cnAddrTxt" />
+    <cmr:field fieldId="JpStreetAddress1" id="cnAddrTxt" path="cnAddrTxt" size="400" />
   </cmr:column>
 </cmr:row>
 <cmr:row addBackground="true">  
@@ -113,7 +122,23 @@
   </cmr:column>
  </cmr:row>
 </cmr:view>
- <cmr:row>
+ <cmr:row> 
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="cnCity">
+        <cmr:fieldLabel fieldId="JpCityEN" />:
+      </cmr:label>
+      <cmr:field fieldId="JpCityEN" id="cnCity" path="cnCity" />
+    </p>
+  </cmr:column>
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="cnDistrict">
+        <cmr:fieldLabel fieldId="JpDistrict" />:
+      </cmr:label>
+      <cmr:field fieldId="JpDistrict" id="cnDistrict" path="cnDistrict" />
+    </p>
+  </cmr:column>
   <cmr:column span="2">
     <p>
       <cmr:label fieldId="postCd">
@@ -140,6 +165,14 @@
              <cmr:delta text="-" id="delta-office" />
       </cmr:label>
       <cmr:field fieldId="Office" id="office" path="office" />
+    </p>
+  </cmr:column>
+  <cmr:column span="2" containerForField="TaigaCode">
+    <p>
+      <cmr:label fieldId="poBoxPostCd">
+        <cmr:fieldLabel fieldId="TaigaCode" />:
+      </cmr:label>
+      <cmr:field fieldId="TaigaCode" id="poBoxPostCd" path="poBoxPostCd" />
     </p>
   </cmr:column>
   </cmr:row>

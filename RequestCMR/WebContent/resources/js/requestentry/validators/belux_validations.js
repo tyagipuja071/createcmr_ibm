@@ -1840,6 +1840,12 @@ function addCmrNoValidator() {
           return new ValidationResult(null, true);
         }
         if (cmrNo != '' && cmrNo != null) {
+
+          var isProspect = FormManager.getActualValue('prospLegalInd');
+          if ('Y' == isProspect && cmrNo.startsWith('P') && cmrNo.length == 6) {
+            return new ValidationResult(null, true);
+          }
+
           if (cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
           } else if (isNaN(cmrNo)) {
@@ -2202,13 +2208,16 @@ function addVatIndValidator() {
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
-      FormManager.readOnly('vatInd');
+      FormManager.enable('vatInd');
+    // FormManager.readOnly('vatInd');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
+      
       FormManager.setValue('vatInd', '');
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
-      FormManager.readOnly('vatInd');
+      FormManager.enable('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');

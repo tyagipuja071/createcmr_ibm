@@ -651,7 +651,7 @@ public class BeLuxUtil extends AutomationUtil {
               if ("U".equals(admin.getReqType()) && payGoAddredited) {
                 LOG.debug("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
                 checkDetails.append("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
-                admin.setPaygoProcessIndc("Y");
+            //    admin.setPaygoProcessIndc("Y");
               } else if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("X");

@@ -51,11 +51,11 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
       	<script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
     <%  } %>
   </cmr:view>
-  <cmr:view exceptForCountry="726,666,862,755,866,754">
+  <cmr:view exceptForCountry="726,666,862,755">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
-  <cmr:view forCountry="754,866">
-  <script src="${resourcesPath}/js/requestentry/validators/uki_validations.js?${cmrv}" type="text/javascript"></script>
+  <cmr:view forCountry="754">
+  <script src="${resourcesPath}/js/requestentry/licenses.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
 </cmr:view>
 <cmr:view forCountry="758">

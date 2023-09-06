@@ -103,8 +103,10 @@ public class NewZealandUtil extends AutomationUtil {
     boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
     if (companyProofProvided) {
       details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
-      details.append("This Request will be routed to CMDE.\n");
-      engineData.addRejectionComment("OTH", "This Request will be routed to CMDE.", "", "");
+      // CREATCMR-9157: remove the 'routed to CMDE' related messages
+      // details.append("This Request will be routed to CMDE.\n");
+      // engineData.addRejectionComment("OTH", "This Request will be routed to
+      // CMDE.", "", "");
       admin.setCompVerifiedIndc("Y");
       entityManager.merge(admin);
       entityManager.flush();
@@ -136,6 +138,14 @@ public class NewZealandUtil extends AutomationUtil {
       }
     }
 
+    LOG.debug("engineData.getPendingChecks() != null ? " + (engineData.getPendingChecks() != null));
+    LOG.debug("engineData.getPendingChecks().containsKey(\"DnBMatch\") ? " + (engineData.getPendingChecks().containsKey("DnBMatch")));
+    LOG.debug("engineData.getPendingChecks().containsKey(\"DNBCheck\") ? " + (engineData.getPendingChecks().containsKey("DNBCheck")));
+    LOG.debug("engineData.getPendingChecks().containsKey(\"_dnbOverride\") ? " + (engineData.getPendingChecks().containsKey("_dnbOverride")));
+    LOG.debug("data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase(\"DNBO\") ? "
+        + (data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")));
+
+    // CREATCMR-9157： do NZAPI matching
     if ("C".equals(admin.getReqType()) && !RELEVANT_SCENARIO.contains(scenario) && SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry())
         && "LOCAL".equalsIgnoreCase(custType) && engineData.getPendingChecks() != null
         && (engineData.getPendingChecks().containsKey("DnBMatch") || engineData.getPendingChecks().containsKey("DNBCheck")
@@ -163,7 +173,7 @@ public class NewZealandUtil extends AutomationUtil {
           details.append("\nThe Customer Name doesn't match NZBN API");
           cmdeReview = true;
           details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
-          details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+          details.append(" - Name:  " + response.getRecord().getName() + " \n");
         }
 
         ModelMap apiMatchMap = addrNZBNAPIMatch(zs01, CmrConstants.RDC_SOLD_TO, response.getRecord());
@@ -198,20 +208,45 @@ public class NewZealandUtil extends AutomationUtil {
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
 
           boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-          }
 
+          // CREATCMR-8553: if the address matches with mailing address in DNB,
+          // show mailing address in automation details.
+          // check against D&B
+          ModelMap map = new ModelMap();
+          DnBMatchingResponse matchedDNBRecord = null;
+          if (matches != null) {
+            for (DnBMatchingResponse record : matches) {
+              ModelMap nzDNBMatchMap = DnBUtil.closelyMatchesDnbNmAndAddr(data.getCmrIssuingCntry(), addr, admin, record, null, false, true);
+              LOG.debug("dnbNmMatch : " + nzDNBMatchMap.get("dnbNmMatch") + ",dnbAddrMatch : " + nzDNBMatchMap.get("dnbAddrMatch")
+                  + ",dnbAddrMatchWithMailing : " + nzDNBMatchMap.get("dnbAddrMatchWithMailing"));
+              if (((boolean) nzDNBMatchMap.get("dnbNmMatch")) && ((boolean) nzDNBMatchMap.get("dnbAddrMatch"))) {
+                matchedDNBRecord = record;
+                map.putAll(nzDNBMatchMap);
+                matchesDnb = true;
+                break;
+              }
+            }
+          }
           LOG.debug("matchesDnb : " + matchesDnb);
 
           if (matchesDnb) {
             details.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-            for (DnBMatchingResponse dnb : matches) {
-              details.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-              details.append(" - Name.:  " + dnb.getDnbName() + " \n");
-              details.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                  + dnb.getDnbCountry() + "\n\n");
+            // CREATCMR-8553: if the address matches with mailing address in
+            // DNB, show mailing address in automation details.
+            if (matchedDNBRecord != null) {
+              details.append(" - DUNS No.:  " + matchedDNBRecord.getDunsNo() + " \n");
+              details.append(" - Name:  " + matchedDNBRecord.getDnbName() + " \n");
+              if ((boolean) map.get("dnbAddrMatchWithMailing")) {
+                details.append(" - Mailing Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " "
+                    + (matchedDNBRecord.getMailingDnbStreetLine2() == null ? "" : matchedDNBRecord.getMailingDnbStreetLine2()) + " "
+                    + (matchedDNBRecord.getMailingDnbCity() == null ? "" : matchedDNBRecord.getMailingDnbCity()) + " "
+                    + (matchedDNBRecord.getMailingDnbPostalCd() == null ? "" : matchedDNBRecord.getMailingDnbPostalCd()) + " "
+                    + (matchedDNBRecord.getMailingDnbCountry() == null ? "" : matchedDNBRecord.getMailingDnbCountry()) + "\n\n");
+              } else {
+                details.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " "
+                    + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " "
+                    + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
+              }
             }
           } else {
             // CREATCMR-8430: add NZBN API check for new addresses
@@ -459,7 +494,7 @@ public class NewZealandUtil extends AutomationUtil {
           details.append("The Customer Name and Former Customer Name doesn't match from DNB & NZBN API");
           if (response != null && response.isSuccess() && response.getRecord() != null) {
             details.append(" Call NZBN API result - NZBN:  " + response.getRecord().getBusinessNumber() + " \n");
-            details.append(" - Name.:  " + response.getRecord().getName() + " \n");
+            details.append(" - Name:  " + response.getRecord().getName() + " \n");
             if (response.getRecord().getPreviousEntityNames() != null) {
               String[] historicalNameList = new String[response.getRecord().getPreviousEntityNames().length];
               historicalNameList = response.getRecord().getPreviousEntityNames();
@@ -571,9 +606,24 @@ public class NewZealandUtil extends AutomationUtil {
                 AutomationResponse<NZBNValidationResponse> nZBNAPIresponse = null;
                 boolean matchesDnb = false;
                 boolean matchesAddAPI = false;
+
+                // check against D&B
+                // CREATCMR-8553: if the address matches with mailing address in
+                // DNB, show mailing address in automation details
+                ModelMap map = new ModelMap();
+                DnBMatchingResponse matchedDNBRecord = null;
                 if (matches != null) {
-                  // check against D&B
-                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                  for (DnBMatchingResponse record : matches) {
+                    ModelMap nzDNBMatchMap = DnBUtil.closelyMatchesDnbNmAndAddr(data.getCmrIssuingCntry(), addr, admin, record, null, false, true);
+                    LOG.debug("dnbNmMatch : " + nzDNBMatchMap.get("dnbNmMatch") + ",dnbAddrMatch : " + nzDNBMatchMap.get("dnbAddrMatch")
+                        + ",dnbAddrMatchWithMailing : " + nzDNBMatchMap.get("dnbAddrMatchWithMailing"));
+                    if (((boolean) nzDNBMatchMap.get("dnbNmMatch")) && ((boolean) nzDNBMatchMap.get("dnbAddrMatch"))) {
+                      matchedDNBRecord = record;
+                      map.putAll(nzDNBMatchMap);
+                      matchesDnb = true;
+                      break;
+                    }
+                  }
                 }
 
                 StringBuffer matchedAddr = new StringBuffer();
@@ -598,11 +648,24 @@ public class NewZealandUtil extends AutomationUtil {
                 if (matchesDnb || matchesAddAPI) {
                   if (matchesDnb) {
                     checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                    for (DnBMatchingResponse dnb : matches) {
-                      checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                      checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                          + dnb.getDnbCountry() + "\n\n");
+                    // CREATCMR-8553: if the address matches with mailing
+                    // address in DNB, show mailing address in automation
+                    // details
+                    if (matchedDNBRecord != null) {
+                      checkDetails.append(" - DUNS No.:  " + matchedDNBRecord.getDunsNo() + " \n");
+                      checkDetails.append(" - Name:  " + matchedDNBRecord.getDnbName() + " \n");
+                      if ((boolean) map.get("dnbAddrMatchWithMailing")) {
+                        checkDetails.append(" - Mailing Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " "
+                            + (matchedDNBRecord.getMailingDnbStreetLine2() == null ? "" : matchedDNBRecord.getMailingDnbStreetLine2()) + " "
+                            + (matchedDNBRecord.getMailingDnbCity() == null ? "" : matchedDNBRecord.getMailingDnbCity()) + " "
+                            + (matchedDNBRecord.getMailingDnbPostalCd() == null ? "" : matchedDNBRecord.getMailingDnbPostalCd()) + " "
+                            + (matchedDNBRecord.getMailingDnbCountry() == null ? "" : matchedDNBRecord.getMailingDnbCountry()) + "\n\n");
+                      } else {
+                        checkDetails.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " "
+                            + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " "
+                            + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry()
+                            + "\n\n");
+                      }
                     }
                   } else {
                     checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches NZBN API records:\n");
@@ -643,18 +706,44 @@ public class NewZealandUtil extends AutomationUtil {
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
 
             boolean matchesDnb = false;
+
+            // check against D&B
+            // CREATCMR-8553: if the address matches with mailing address in
+            // DNB, show mailing address in automation details
+            ModelMap map = new ModelMap();
+            DnBMatchingResponse matchedDNBRecord = null;
             if (matches != null) {
-              // check against D&B
-              matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              for (DnBMatchingResponse record : matches) {
+                ModelMap nzDNBMatchMap = DnBUtil.closelyMatchesDnbNmAndAddr(data.getCmrIssuingCntry(), addr, admin, record, null, false, true);
+                LOG.debug("dnbNmMatch : " + nzDNBMatchMap.get("dnbNmMatch") + ",dnbAddrMatch : " + nzDNBMatchMap.get("dnbAddrMatch")
+                    + ",dnbAddrMatchWithMailing : " + nzDNBMatchMap.get("dnbAddrMatchWithMailing"));
+                if (((boolean) nzDNBMatchMap.get("dnbNmMatch")) && ((boolean) nzDNBMatchMap.get("dnbAddrMatch"))) {
+                  matchedDNBRecord = record;
+                  map.putAll(nzDNBMatchMap);
+                  matchesDnb = true;
+                  break;
+                }
+              }
             }
 
             if (matchesDnb) {
               checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-              for (DnBMatchingResponse dnb : matches) {
-                checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                    + dnb.getDnbCountry() + "\n\n");
+              // CREATCMR-8553: if the address matches with mailing address in
+              // DNB, show mailing address in automation details
+              if (matchedDNBRecord != null) {
+                checkDetails.append(" - DUNS No.:  " + matchedDNBRecord.getDunsNo() + " \n");
+                checkDetails.append(" - Name:  " + matchedDNBRecord.getDnbName() + " \n");
+                if ((boolean) map.get("dnbAddrMatchWithMailing")) {
+                  checkDetails.append(" - Mailing Address:  " + matchedDNBRecord.getMailingDnbStreetLine1() + " "
+                      + (matchedDNBRecord.getMailingDnbStreetLine2() == null ? "" : matchedDNBRecord.getMailingDnbStreetLine2()) + " "
+                      + (matchedDNBRecord.getMailingDnbCity() == null ? "" : matchedDNBRecord.getMailingDnbCity()) + " "
+                      + (matchedDNBRecord.getMailingDnbPostalCd() == null ? "" : matchedDNBRecord.getMailingDnbPostalCd()) + " "
+                      + (matchedDNBRecord.getMailingDnbCountry() == null ? "" : matchedDNBRecord.getMailingDnbCountry()) + "\n\n");
+                } else {
+                  checkDetails.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " "
+                      + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " "
+                      + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
+                }
               }
             } else {
               // CREATCMR-8430: add NZBN API check for new addresses

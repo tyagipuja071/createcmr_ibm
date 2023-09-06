@@ -637,6 +637,26 @@ public class BluePagesHelper {
     return false;
   }
 
+  public static boolean isUserInJPBlueGroup(String intranetId) {
+    cwa2 bpAPI = BluePagesHelper.getCWA2();
+    String groups = SystemParameters.getString("JP_BLUE_GROUP");
+    if (!StringUtils.isEmpty(groups)) {
+      String[] blueGroups = groups.split(",");
+      ReturnCode retCode = null;
+      for (String blueGroup : blueGroups) {
+        if (bpAPI.groupExist(blueGroup.trim())) {
+          retCode = bpAPI.inAGroup(intranetId, blueGroup);
+          if (cwaapi.SUCCESS.equals(retCode)) {
+            return true;
+          }
+        } else {
+          LOG.debug("Group " + blueGroup + " does not exist. Skipping.");
+        }
+      }
+    }
+    return false;
+  }
+
   /**
    * Return an array of possible name arrangements of how names are stored in
    * BluePages. This list can be extended in future if more possible

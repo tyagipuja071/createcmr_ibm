@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -72,6 +73,8 @@ public class BrazilRetrieveDataController {
         } else if ("ZI01".equals(item.getCmrAddrTypeCode())) {
           muniFiscalCodeUS = item.getCmrFiscalCd();
         }
+        String collectorNo = (item != null && StringUtils.isNotBlank(item.getCmrCollectorNo())) ? item.getCmrCollectorNo() : "";
+        LOG.debug("BR cmr search (collector no) : " + collectorNo);
       }
 
       EntityManager entityManager = JpaManager.getEntityManager();

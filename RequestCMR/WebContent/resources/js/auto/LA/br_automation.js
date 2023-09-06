@@ -150,6 +150,10 @@ function handleUpdateReason() {
       if (val == 'AUCO') {
         FormManager.setValue('reqReason', 'AUCO');
         FormManager.readOnly('reqReason');
+
+        // temporary placeholder for Update Reason value
+        FormManager.setValue('mexicoBillingName', val);
+        FormManager.readOnly('mexicoBillingName');
       }
     });
   }
@@ -162,6 +166,9 @@ function handleUpdateReason() {
         if ((_kukla == 33 || _kukla == 34 || _kukla == 35) && _vat == _vatEndUser) {
           FormManager.enable('vatEndUser');
         }
+
+        FormManager.setValue('mexicoBillingName', val);
+        FormManager.readOnly('mexicoBillingName');
       } else {
         if (_vatEndUser != null && _vatEndUser != '') {
           FormManager.setValue('vatEndUser', _vatEndUser);
@@ -177,6 +184,9 @@ function handleUpdateReason() {
       if (val == 'REAC') {
         FormManager.setValue('reqReason', 'REAC');
         FormManager.readOnly('reqReason');
+
+        FormManager.setValue('mexicoBillingName', val);
+        FormManager.readOnly('mexicoBillingName');
       }
     });
   }
@@ -191,6 +201,9 @@ function handleUpdateReason() {
         FormManager.show('ISU', 'isuCd');
         FormManager.show('CollectorNameNo', 'collectorNameNo');
         FormManager.show('SalesBusOff', 'salesBusOffCd');
+
+        FormManager.setValue('mexicoBillingName', val);
+        FormManager.readOnly('mexicoBillingName');
       } else {
         FormManager.hide('Company', 'company');
         FormManager.hide('INACCode', 'inacCd');

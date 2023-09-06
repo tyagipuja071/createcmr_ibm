@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.GeoContactInfoModel;
 import com.ibm.cio.cmr.request.model.requestentry.GeoTaxInfoModel;
+import com.ibm.cio.cmr.request.model.requestentry.LicenseModel;
 import com.ibm.cio.cmr.request.model.window.MassDataSummaryModel;
 import com.ibm.cio.cmr.request.model.window.RequestSummaryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
@@ -43,6 +44,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.service.requestentry.AdminService;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.service.requestentry.TaxInfoService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -999,7 +1001,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         }
         if (!(SystemLocation.CYPRUS.equals(cmrCountry) || SystemLocation.SPAIN.equals(cmrCountry) || SystemLocation.PORTUGAL.equals(cmrCountry)
             || SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.UNITED_KINGDOM.equals(cmrCountry)
-            || SystemLocation.IRELAND.equals(cmrCountry)) && !equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())
+            || SystemLocation.IRELAND.equals(cmrCountry) || SystemLocation.JAPAN.equals(cmrCountry))
+            && !equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "POBoxPostalCode"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
@@ -1667,4 +1670,16 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     }
     return reqType;
   }
+
+  public List<LicenseModel> getNewLicenses(HttpServletRequest request, long reqId) {
+    LicenseService service = new LicenseService();
+    EntityManager entityManager = JpaManager.getEntityManager();
+    return service.getNewLicenses(reqId, entityManager);
+  }
+
+  public List<LicenseModel> getNewLicenses(EntityManager entityManager, long reqId) throws CmrException {
+    LicenseService service = new LicenseService();
+    return service.getNewLicenses(reqId, entityManager);
+  }
+
 }

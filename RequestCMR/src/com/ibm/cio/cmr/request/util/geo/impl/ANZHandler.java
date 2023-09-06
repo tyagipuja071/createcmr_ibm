@@ -10,26 +10,28 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasAddress;
-import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Address;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
  * {@link GEOHandler} for:
@@ -41,12 +43,12 @@ import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
  * @author JeffZAMORA
  * 
  */
-public class ANZHandler extends APHandler {
+public class ANZHandler extends GEOHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
   private static final String[] NZ_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5", "G", "H" };
   private static final String[] AU_SUPPORTED_ADDRESS_USES = { "2", "B", "G", "H", "D", "3", "A", "7", "6", "5", "1" };
-
+  private static final List<String> fields = new ArrayList<>();
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.AUSTRALIA, "AU");
     LANDED_CNTRY_MAP.put(SystemLocation.NEW_ZEALAND, "NZ");
@@ -54,271 +56,8 @@ public class ANZHandler extends APHandler {
   private static final Logger LOG = Logger.getLogger(ANZHandler.class);
 
   public static void main(String[] args) {
-    // parse testing
-    WtaasAddress address = new WtaasAddress();
-    address.getValues().put(Address.Line1, "CUSTOMER NAME");
-    address.getValues().put(Address.Line2, "CUSTOMER NAME CON'T");
-    address.getValues().put(Address.Line3, "ATT OSCAR");
-    address.getValues().put(Address.Line4, "STREET NAME");
-    address.getValues().put(Address.Line5, "CITY                STS POSTCODE");
-    // address.getValues().put(Address.Line6, "<PH> CBS CBPOST");
-
-    FindCMRRecordModel record = new FindCMRRecordModel();
-    ANZHandler handler = new ANZHandler();
-    handler.handleWTAASAddressImport(null, SystemLocation.AUSTRALIA, null, record, address);
-
-    record = new FindCMRRecordModel();
-    record.setCmrName3("NAME3");
-    // record.setCmrName4("NAME4");
-    record.setCmrStreetAddress("STREET");
-    handler.handleRDcRecordValues(record);
-    System.out.println("Street: " + record.getCmrStreetAddress());
-    System.out.println("Street Con't: " + record.getCmrStreetAddressCont());
-    System.out.println("Dept: " + record.getCmrDept());
   }
 
-  @Override
-  protected void handleWTAASAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel mainRecord,
-      FindCMRRecordModel record, WtaasAddress address) {
-
-    String line1 = address.get(Address.Line1);
-    String line2 = address.get(Address.Line2);
-    String line3 = address.get(Address.Line3);
-    String line4 = address.get(Address.Line4);
-    String line5 = address.get(Address.Line5);
-    String line6 = address.get(Address.Line6);
-    List<String> linesToCheck = Arrays.asList(line2, line3, line4, line5, line6);
-
-    // line 1 - always customer name
-    if (SystemLocation.AUSTRALIA.equals(cmrIssuingCntry)) {
-      record.setCmrName1Plain(line1.trim());
-    } else if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
-      // only get name if it's mailing
-      linesToCheck = Arrays.asList(line1, line2, line3, line4, line5, line6);
-      if (address.getAddressUse().contains("1")) {
-        record.setCmrName1Plain(line1.trim());
-      }
-    }
-
-    List<String> lines = new ArrayList<String>();
-
-    for (String line : linesToCheck) {
-      if (!StringUtils.isEmpty(line)) {
-        lines.add(line.trim());
-      }
-    }
-    // max line count = 5, lines list size max = 4
-    int lineCount = lines.size() + 1;
-
-    // last line is always city + state(21) + postal code(25) for AUS and city +
-    // postal code(25)
-    String line = lines.get(lines.size() - 1);
-
-    String city = null;
-    String state = null;
-    String postalCode = null;
-
-    boolean crossBorder = line.startsWith("<");
-    if (crossBorder) {
-      // cross border handling
-      String[] data = extractCountry(line6);
-      if (data[0] != null) {
-        String landCntry = getCountryCode(entityManager, data[0]);
-        if (landCntry != null) {
-          LOG.debug("Setting cross border country to " + landCntry);
-          record.setCmrCountryLanded(landCntry);
-        }
-      }
-      if (data[1] != null) {
-        if (data[1].contains(" ")) {
-          state = data[1].substring(0, data[1].indexOf(" ")).trim();
-          postalCode = data[1].substring(data[1].indexOf(" ") + 1).trim();
-          record.setCmrState(state);
-          record.setCmrPostalCode(postalCode);
-        } else {
-          record.setCmrPostalCode(data[1].trim());
-        }
-      }
-    } else {
-      line = StringUtils.rightPad(line, 30, ' ');
-      if (SystemLocation.AUSTRALIA.equals(cmrIssuingCntry)) {
-        city = line.substring(0, 20).trim();
-        state = line.substring(20, 24).trim();
-      } else if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
-        city = line.substring(0, 24).trim();
-        state = null;
-      }
-      postalCode = line.substring(24).trim();
-
-      record.setCmrCity(city);
-      record.setCmrState(!StringUtils.isEmpty(state) ? state : null);
-      record.setCmrPostalCode(!StringUtils.isEmpty(postalCode) ? postalCode : null);
-      record.setCmrCountryLanded(LANDED_CNTRY_MAP.get(cmrIssuingCntry));
-    }
-
-    // second to last line is always street
-    line = lines.get(lines.size() - 2);
-    record.setCmrStreetAddress(line);
-
-    line = null;
-    // handle possibilities of 4 or 5 inputs
-    if (lineCount == 5) {
-      // name, name con't, attn/street con't, street, city
-      line = lines.get(0);
-      record.setCmrName2Plain(line);
-
-      line = lines.get(1);
-    } else if (lineCount == 4) {
-      // name, name con't OR attn/street con't, street, city
-      line = lines.get(0);
-    }
-    if (!StringUtils.isEmpty(line)) {
-      if (isStreet(line)) {
-        record.setCmrStreetAddressCont(line);
-      } else if (isAttn(line)) {
-        record.setCmrDept(line);
-      } else {
-        // cannot be mapped, put at street con't
-        record.setCmrStreetAddressCont(line);
-      }
-
-    }
-
-    if (StringUtils.isBlank(record.getCmrName1Plain()) && SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
-      // handle special case in NZ when address does not have name
-      record.setCmrName1Plain(mainRecord.getCmrName1Plain());
-      record.setCmrName2Plain(mainRecord.getCmrName2Plain());
-    }
-    logExtracts(record);
-
-  }
-
-  @Override
-  protected String getMappedAddressType(String country, String rdcType, String addressSeq) {
-    switch (country) {
-    case SystemLocation.AUSTRALIA:
-      if (StringUtils.isNumeric(addressSeq)) {
-        addressSeq = StringUtils.leftPad(addressSeq, 2, '0');
-      }
-      if ("ZS01".equals(rdcType) && "07".equals(addressSeq)) {
-        return "ZS01"; // contract
-      }
-      if ("ZP01".equals(rdcType) && "01".equals(addressSeq)) {
-        return "ZP01"; // bill to
-      }
-      if ("ZI01".equals(rdcType) && "02".equals(addressSeq)) {
-        return "ZI01"; // install at
-      }
-      if ("ZI01".equals(rdcType) && "03".equals(addressSeq)) {
-        return "ZF01"; // shipment
-      }
-      if ("ZI01".equals(rdcType) && "G".equals(addressSeq)) {
-        return "CTYG"; // address G
-      }
-      if ("ZP01".equals(rdcType) && "H".equals(addressSeq)) {
-        return "CTYH"; // address H
-      }
-      return null;
-    case SystemLocation.NEW_ZEALAND:
-      if (StringUtils.isNumeric(addressSeq)) {
-        addressSeq = StringUtils.leftPad(addressSeq, 2, '0');
-      }
-      if ("ZS01".equals(rdcType) && "02".equals(addressSeq)) {
-        return "ZS01"; // install
-      }
-      if ("ZP01".equals(rdcType) && "01".equals(addressSeq)) {
-        return "ZP01"; // bill
-      }
-      if ("ZI01".equals(rdcType) && "09".equals(addressSeq)) {
-        return "ZI01"; // ship
-      }
-      if ("ZI01".equals(rdcType) && "03".equals(addressSeq)) {
-        return "ZF01"; // software shipment, not yet mapped in LOV
-      }
-      if ("ZI01".equals(rdcType) && "G".equals(addressSeq)) {
-        return "CTYG"; // address G, not yet mapped in LOV
-      }
-      if ("ZP01".equals(rdcType) && "H".equals(addressSeq)) {
-        return "CTYH"; // address G, not yet mapped in LOV
-      }
-      return null;
-    }
-    return null;
-  }
-
-  @Override
-  public String getMappedAddressUse(String country, String createCmrAddrType) {
-    switch (country) {
-    case SystemLocation.AUSTRALIA:
-      switch (createCmrAddrType) {
-      case "ZP01":
-        // Billing
-        return "2";
-      case "ZS01":
-        // Contract
-        return "B";
-      case "CTYG":
-        // Ctry Use G
-        return "G";
-      case "CTYH":
-        // Ctry Use H
-        return "H";
-      case "EDUC":
-        // Education
-        return "D";
-      case "ZI01":
-        // Installing
-        return "3";
-      case "MAIL":
-        // Mailing
-        return "A";
-      case "PUBB":
-        // Publication Bill to
-        return "7";
-      case "PUBS":
-        // Publication Ship To
-        return "6";
-      case "ZF01":
-        // Software shipment
-        return "5";
-      case "STAT":
-        // Statement
-        return "1";
-      }
-      return null;
-    case SystemLocation.NEW_ZEALAND:
-      switch (createCmrAddrType) {
-      case "ZP01":
-        // Billing
-        return "2";
-      case "ZS01":
-        // Installing
-        return "3";
-      case "MAIL":
-        // Mailing
-        return "1";
-      case "XXXX":
-        // Mailing
-        return "1";
-      case "ZI01":
-        // Shipping
-        return "4";
-      case "ZF01":
-        // Software shipment
-        return "5";
-      case "CTYG":
-        // Ctry Use G
-        return "G";
-      case "CTYH":
-        // Ctry Use H
-        return "H";
-      }
-      return null;
-    }
-    return null;
-  }
-
-  @Override
   public boolean shouldAddWTAASAddess(String country, WtaasAddress address) {
 
     boolean shouldAddWTAASAddr = false;
@@ -340,125 +79,7 @@ public class ANZHandler extends APHandler {
   }
 
   @Override
-  public String getAddrTypeForWTAASAddrUse(String country, String wtaasAddressUse) {
-    String[] uses = wtaasAddressUse.split("");
-    for (String use : uses) {
-      if (!StringUtils.isBlank(use)) {
-        switch (country) {
-        case SystemLocation.AUSTRALIA:
-          switch (use) {
-          case "2":
-            // Billing
-            return "ZP01";
-          case "B":
-            // Contract
-            return "ZS01";
-          case "G":
-            // Ctry Use G
-            return "CTYG";
-          case "H":
-            // Ctry Use H
-            return "CTYH";
-          case "D":
-            // Education
-            return "EDUC";
-          case "3":
-            // Installing
-            return "ZI01";
-          case "A":
-            // Mailing
-            return "MAIL";
-          case "7":
-            // Publication Bill to
-            return "PUBB";
-          case "6":
-            // Publication Ship To
-            return "PUBS";
-          case "5":
-            // Software shipment
-            return "ZF01";
-          case "1":
-            // Statement
-            return "STAT";
-          }
-          return null;
-        case SystemLocation.NEW_ZEALAND:
-          switch (use) {
-          case "2":
-            // Billing
-            return "ZP01";
-          case "3":
-            // Installing
-            return "ZS01";
-          case "1":
-            // Mailing
-            return "MAIL";
-          case "4":
-            // Shipping
-            return "ZI01";
-          case "5":
-            // Software shipment
-            return "ZF01";
-          case "G":
-            // Ctry Use G
-            return "CTYG";
-          case "H":
-            // Ctry Use H
-            return "CTYH";
-          }
-          return null;
-        }
-      }
-    }
-    return null;
-  }
-
-  // special handling for NZ Mailing
-
-  @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    Addr mailing = getAddressByType(entityManager, "MAIL", addr.getId().getReqId());
-    if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
-      if (mailing == null) {
-        // create a dummy mailing
-        AddrPK pk = new AddrPK();
-        pk.setReqId(addr.getId().getReqId());
-        pk.setAddrType("XXXX");
-        pk.setAddrSeq("X");
-
-        mailing = entityManager.find(Addr.class, pk);
-        if (mailing == null) {
-          mailing = new Addr();
-          mailing.setId(pk);
-          mailing.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
-
-          LOG.debug("Creating dummy mailing address..");
-          entityManager.persist(mailing);
-          entityManager.flush();
-        }
-      }
-
-      AdminPK adminPK = new AdminPK();
-      adminPK.setReqId(addr.getId().getReqId());
-      Admin admin = entityManager.find(Admin.class, adminPK);
-      if (admin.getReqType().equals("C") && !addr.getLandCntry().equalsIgnoreCase("NZ")) {
-        if (addr.getPostCd().length() > 6) {
-          addr.setPostCd("0121");
-        }
-      }
-    }
-  }
-
-  private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
-    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", addrType);
-    List<Addr> addrList = query.getResults(1, Addr.class);
-    if (addrList != null && addrList.size() > 0) {
-      return addrList.get(0);
-    }
-    return null;
   }
 
   @Override
@@ -472,7 +93,6 @@ public class ANZHandler extends APHandler {
     results.removeAll(addrsToRemove);
   }
 
-  @Override
   protected void handleRDcRecordValues(FindCMRRecordModel record) {
     String name3 = record.getCmrName3();
     String name4 = record.getCmrName4();
@@ -557,6 +177,7 @@ public class ANZHandler extends APHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##RegionCode", "miscBillCd");
+    map.put("##CustClass", "custClass");
     return map;
   }
 
@@ -587,7 +208,8 @@ public class ANZHandler extends APHandler {
 
       // CREATCMR-8430: return false for mailing address matching if
       // MailingDnbAddress is blank
-      if ("796".equals(issuingCountry) && StringUtils.isNotBlank(address) && StringUtils.isBlank(MailingDnbAddress)) {
+      // CREATCMR-8553: for AU, if mailing address is null in DNB, return false;
+      if (StringUtils.isNotBlank(address) && StringUtils.isBlank(MailingDnbAddress)) {
         return false;
       }
 
@@ -727,6 +349,21 @@ public class ANZHandler extends APHandler {
       if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12) {
         data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
       }
+
+      String custSubGrp = data.getCustSubGrp();
+      List<String> custSubGrpList = Arrays.asList("NRML", "INTER", "DUMMY", "AQSTN", "BLUMX", "MKTPC", "ECSYS", "ESOSW", "CROSS", "XAQST", "XBLUM",
+          "XMKTP", "XESO", "PRIV", "NRMLC", "KYND");
+      if (custSubGrpList.contains(custSubGrp) && SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
+        data.setEngineeringBo("9920");
+      }
+      data.setRepTeamMemberNo("000000");
+      if (data.getSubIndustryCd() != null
+          && ("G".equals(data.getSubIndustryCd().substring(0, 1)) || "Y".equals(data.getSubIndustryCd().substring(0, 1)))) {
+        data.setGovType("Y");
+      } else {
+        data.setGovType("N");
+      }
+      data.setMrcCd("");
     }
     entityManager.merge(data);
     entityManager.flush();
@@ -754,4 +391,230 @@ public class ANZHandler extends APHandler {
         data.setAbbrevNm(abbrevNM);
   }
 
+  @Override
+  public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
+      throws Exception {
+    List<FindCMRRecordModel> recordsFromSearch = source.getItems();
+    List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
+
+    if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
+      doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
+      if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
+        source.setItems(filteredRecords);
+      }
+    }
+    
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
+    if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
+      List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+      List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+      for (Object tempRecObj : recordsToCheck) {
+        if (tempRecObj instanceof FindCMRRecordModel) {
+          FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+          String addrSeq = tempRec.getCmrAddrSeq();
+          String cmrIssuingCntry = tempRec.getCmrIssuedBy();
+          if (StringUtils.isNotEmpty(addrSeq)) {
+            if ("G".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
+              tempRec.setCmrAddrTypeCode("CTYG");
+            }
+            if ("H".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
+              tempRec.setCmrAddrTypeCode("CTYH");
+            }
+            if ("03".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
+              tempRec.setCmrAddrTypeCode("ZF01");
+            }
+          }
+
+          recordsToReturn.add(tempRec);
+        }
+      }
+    }
+
+  }
+
+  @Override
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "796".equals(data.getCmrIssuingCntry())) {
+      admin.setOldCustNm1(mainRecord.getCmrName1Plain());
+      admin.setOldCustNm2(mainRecord.getCmrName2Plain());
+    }
+  }
+
+  @Override
+  public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    address.setCustNm1(currentRecord.getCmrName1Plain());
+    address.setCustNm2(currentRecord.getCmrName2Plain());
+    String name3 = currentRecord.getCmrName3();
+    String name4 = currentRecord.getCmrName4();
+    String stras = currentRecord.getCmrStreetAddress();
+
+    if (StringUtils.isNotEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {
+      address.setAddrTxt(name4);
+      address.setAddrTxt2(stras);
+      address.setDept(name3.substring(4));
+    }
+
+    if (StringUtils.isEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {
+      if (name4.contains("ATTN")) {
+        address.setDept(name4.substring(4));
+        address.setAddrTxt(stras);
+      } else {
+        address.setAddrTxt(name4);
+        address.setAddrTxt2(stras);
+      }
+    }
+
+    if (StringUtils.isEmpty(name3) && StringUtils.isEmpty(name4) && StringUtils.isNotEmpty(stras)) {
+      address.setAddrTxt(stras);
+    }
+  }
+
+  @Override
+  public int getName1Length() {
+    return 35;
+  }
+
+  @Override
+  public int getName2Length() {
+    return 35;
+  }
+
+  @Override
+  public void setAdminDefaultsOnCreate(Admin admin) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public boolean retrieveInvalidCustomersForCMRSearch(String cmrIssuingCntry) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public boolean customerNamesOnAddress() {
+    return true;
+  }
+
+  @Override
+  public boolean useSeqNoFromImport() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean skipOnSummaryUpdate(String cntry, String field) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
+
+    if (fields.size() == 0) {
+      fields
+          .addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "DEPT", "STATE_PROV", "CITY1", "POST_CD", "LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "SAP_NO"));
+    }
+    return fields;
+  }
+
+  @Override
+  public boolean hasChecklist(String cmrIssiungCntry) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String addrSeq = "";
+    if ("796".equals(cmrIssuingCntry)) {
+      if ("CTYH".equals(addrType)) {
+        addrSeq = "H";
+      }
+      if ("CTYG".equals(addrType)) {
+        addrSeq = "G";
+      }
+      if ("ZI01".equals(addrType)) {
+        addrSeq = "09";
+      }
+      if ("ZS01".equals(addrType)) {
+        addrSeq = "02";
+      }
+      if ("ZP01".equals(addrType)) {
+        addrSeq = "01";
+      }
+    }
+    if ("616".equals(cmrIssuingCntry)) {
+      if ("CTYH".equals(addrType)) {
+        addrSeq = "H";
+      }
+      if ("CTYG".equals(addrType)) {
+        addrSeq = "G";
+      }
+      if ("ZI01".equals(addrType)) {
+        addrSeq = "02";
+      }
+      if ("ZF01".equals(addrType)) {
+        addrSeq = "03";
+      }
+      if ("ZS01".equals(addrType)) {
+        addrSeq = "07";
+      }
+      if ("ZP01".equals(addrType)) {
+        addrSeq = "01";
+      }
+    }
+    return addrSeq;
+  }
 }

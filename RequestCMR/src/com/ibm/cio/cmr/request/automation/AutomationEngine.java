@@ -294,8 +294,8 @@ public class AutomationEngine {
           } else {
             actionsOnError.add(element.getActionOnError());
             if (element.isStopOnError()) {
-              // if ((element instanceof CompanyVerifier) && payGoAddredited) {
-              if (element instanceof CompanyVerifier) {
+              if ((element instanceof CompanyVerifier) && payGoAddredited) {
+                // if (element instanceof CompanyVerifier) {
                 // don't stop for paygo accredited and verifier element
                 LOG.debug("Error in " + element.getProcessDesc() + " but continuing process for PayGo.");
               } else {
@@ -346,6 +346,10 @@ public class AutomationEngine {
         sccIsValid = true;
       }
     } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
+      checkNZBNAPI(stopExecution, actionsOnError);
+    }
+
+    if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
       checkNZBNAPI(stopExecution, actionsOnError);
     }
 
@@ -427,17 +431,17 @@ public class AutomationEngine {
           moveForPayGo = true;
         }
 
-        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited) {
-          admin.setPaygoProcessIndc("Y");
+        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI","CBPRI").contains(data.getCustSubGrp())) {
+     //   admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk())) {
-            // admin.setPaygoProcessIndc("Y");
+      //      admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
-            // admin.setPaygoProcessIndc("Y");
+        //    admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }

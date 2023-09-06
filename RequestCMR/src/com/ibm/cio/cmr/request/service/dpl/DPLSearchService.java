@@ -113,6 +113,8 @@ public class DPLSearchService extends BaseSimpleService<Object> {
 
     RequestData reqData = processRequest(entityManager, params);
     String companyName = extractMainCompanyName(reqData, params);
+    boolean success = true;
+    try {
     List<DPLSearchResults> results = getPlainDPLSearchResults(entityManager, params);
 
     int resultCount = 0;
@@ -160,7 +162,6 @@ public class DPLSearchService extends BaseSimpleService<Object> {
 
     LOG.debug("Attaching " + fileName + " to Request " + reqId);
 
-    boolean success = true;
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
       pdf.exportToPdf(null, null, null, bos, null);
 
@@ -175,6 +176,9 @@ public class DPLSearchService extends BaseSimpleService<Object> {
           success = false;
         }
       }
+    }
+    } catch (Exception e){
+      success = false;
     }
     return success;
 
@@ -395,10 +399,11 @@ public class DPLSearchService extends BaseSimpleService<Object> {
           results.add(result);
         } else {
           LOG.debug("An error was encountered when trying to search: " + resp.getMsg());
-          break;
+          throw new Exception("DPL search cannot be performed at the moment.");
         }
       } catch (Exception e) {
         LOG.warn("DPL Search encountered an error for " + searchString, e);
+        throw new Exception("DPL search cannot be performed at the moment.");
       }
 
     }

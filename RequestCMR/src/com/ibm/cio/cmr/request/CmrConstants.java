@@ -441,7 +441,7 @@ public class CmrConstants {
 
   }
 
-  public static final List<String> CONTACT_TYPE_BR_LST = Arrays.asList("LE", "EM", "CF");
+  public static final List<String> CONTACT_TYPE_BR_LST = Arrays.asList("EM");
 
   public static Map<String, Object> HARDWARE_BO_REPTEAM_MAP;
   public static Map<String, Object> ES_POSTAL_CUSLOC_EBO_MAP;
@@ -944,17 +944,21 @@ public class CmrConstants {
   public static final String CN_ECO_LEADER_APPROVAL_DESC = "Ecosystem market leader Approval Request China";
   public static final String CN_TECH_LEADER_APPROVAL_DESC = "Technology market leader Approval Request China";
 
+  public static final String JP_ROL_APPROVAL_DESC = "Japan ROL Change Approval";
+
   public static final List<String> DE_CND_ISSUING_COUNTRY_VAL = Arrays.asList("724", "619", "621", "627", "647", "791", "640", "759", "839", "843",
       "859");
   public static final List<String> ORDER_BLK_LIST = Arrays.asList("88");
 
   public static final List<String> LA_COUNTRIES = Arrays.asList("613", "629", "655", "661", "663", "681", "683", "829", "731", "735", "799", "811",
       "813", "815", "869", "871", "631", "781");
+  
+  public static final List<String> ANZ_COUNTRIES = Arrays.asList("616", "796");
 
-  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806",
-      "846");
+  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806","846","706");
 
   public static final String VAT_ACKNOWLEDGE_YES = "Yes";
   public static final String VAT_ACKNOWLEDGE_NA = "N/A";
   public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");
+  public static final String CMRBPPortal = "CreateCMR-BP";
 }

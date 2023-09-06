@@ -861,7 +861,7 @@ function addHandlersForGR() {
   lockUnlockField();
   if (_custSubTypeHandlerGr == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     _custSubTypeHandlerGr = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      FormManager.setValue('salesTeamCd', '');
+     // FormManager.setValue('salesTeamCd', '');
       resetSubIndustryCdGR();
     });
   }
@@ -1028,7 +1028,7 @@ function addPOBoxValidatorGR() {
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
 }
 
-function setVatValidatorGRCYTR() {
+function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
   console.log(">>>> setVatValidatorGRCYTR ");
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -1036,16 +1036,32 @@ function setVatValidatorGRCYTR() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-      FormManager.readOnly('vat');
-    }
-    if (vatInd == 'N') {
-      FormManager.clearValue('vat');
-    }
-    if (undefined != vatInd && vatInd != '' && vatInd != 'N' && cntry == SysLoc.GREECE) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      FormManager.enable('vat');
-    }
+    
+    if (scenarioChanged)
+  {
+    if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS'
+    	|| FormManager.getActualValue('custSubGrp') == 'PRICU') {
+    	FormManager.resetValidations('vat');
+    	FormManager.setValue('vatExempt', 'Y');
+    }else
+	{
+		  checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+	      FormManager.setValue('vatExempt', false);
+	}
+  }
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+        FormManager.setValue('vatExempt', false);
+      }
+    
+    if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+        FormManager.clearValue('vat');
+        FormManager.readOnly('vat');
+      }
+      if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+        FormManager.enable('vat');
+      }
   }
 }
 
@@ -2415,7 +2431,7 @@ function lockUnlockFieldForGR() {
   console.log(">>>> lockUnlockFieldForGR");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ]);
+  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ,'CROSS']);
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('isuCd');
@@ -2485,7 +2501,7 @@ function setEntepriseGR() {
   var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'BUSPR', 'CRBUS', 'CRINT', 'IBMEM', 'INTER' ]);
-  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP' ]);
+  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP','CROSS' ]);
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN' ]);
 
   var isuCtc = isuCd + clientTier;

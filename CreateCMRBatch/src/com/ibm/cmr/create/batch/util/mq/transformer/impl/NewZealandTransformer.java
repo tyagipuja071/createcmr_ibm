@@ -255,7 +255,7 @@ public class NewZealandTransformer extends ANZTransformer {
 
   @Override
   public String[] getAddressOrder() {
-    return new String[] { "ZS01", "ZP01", "ZI01", "MAIL", "XXXX" };
+    return new String[] { "ZS01", "ZP01", "ZI01", "MAIL", "XXXX", "CTYG", "CTYH" };
   }
 
   @Override

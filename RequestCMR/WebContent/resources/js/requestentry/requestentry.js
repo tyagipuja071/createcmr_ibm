@@ -9,6 +9,7 @@
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 var NORDX = [ '846', '806', '702', '678' ];
+var ROW = [ '706', '838' ];
 var comp_proof_INAUSG = false;
 var flag = false;
 var addrMatchResultForNZCreate;
@@ -69,6 +70,14 @@ function processRequestAction() {
   var action = FormManager.getActualValue('yourAction');
   if (action == '') {
     cmr.showAlert('Please select an action from the choices.');
+  }
+
+  // prevent from overwriting the DB REQ_STATUS
+  // if another tab is open with different UI REQ_STATUS
+  if (!isReqStatusEqualBetweenUIandDB()) {
+    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." + "<br><br>Please reload the page.");
+
+    return;
   }
 
   /* Your Actions processing here */
@@ -136,24 +145,43 @@ function processRequestAction() {
     var findDnbResult = FormManager.getActualValue('findDnbResult');
     var reqType = FormManager.getActualValue('reqType');
     var vatInd = FormManager.getActualValue('vatInd');
+    var vat = FormManager.getActualValue('vat');
     var custGrp = FormManager.getActualValue('custGrp');
     var reqId = FormManager.getActualValue('reqId');
     var crossScenTyp = [ 'CROSS', 'LUCRO', 'EECRO', 'LTCRO', 'LVCRO', 'FOCRO', 'GLCRO', 'ISCRO' ];
+
     if (custGrp == null || custGrp == '') {
       custGrp = getCustGrp();
     }
+
     var oldVat = cmr.query('GET.OLD.VAT.VALUE', {
       REQ_ID : reqId
     });
+
+    var oldVatInd = cmr.query('GET.OLD.VATIND.VALUE', {
+      REQ_ID : reqId
+    });
+
     var oldVatValue = oldVat.ret1 != undefined ? oldVat.ret1 : '';
+    var oldVatIndValue = oldVatInd.ret1 != undefined ? oldVatInd.ret1 : '';
+
     var personalInfoPrivacyNoticeCntryList = [ '858', '834', '818', '856', '778', '749', '643', '852', '744', '615', '652', '616', '796', '641', '738', '736', '766', '760' ];
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR') && checkIfDataOrAddressFieldsUpdated(frmCMR)) {
       cmr.showAlert('Request cannot be submitted for update because No data/address changes made on request. ');
     } else if (FormManager.validate('frmCMR') && !comp_proof_INAUSG) {
-      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry'))) && (vatInd == 'N')
-          && (!crossScenTyp.includes(custGrp)) && ((oldVatValue == '' && reqType == 'U') || (reqType == 'C'))) {
+      if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (reqType == 'C')) {
+        findVatInd();
+      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (!crossScenTyp.includes(custGrp)) && (oldVatIndValue == 'T' || oldVatIndValue == 'E') && (reqType == 'U')) {
+        findVatInd();
+      } else if ((GEOHandler.GROUP1.includes(FormManager.getActualValue('cmrIssuingCntry')) || NORDX.includes(FormManager.getActualValue('cmrIssuingCntry')) || ROW.includes(FormManager
+          .getActualValue('cmrIssuingCntry')))
+          && (vatInd == 'N') && (crossScenTyp.includes(custGrp)) && (oldVatIndValue == 'E') && (reqType == 'U')) {
         findVatInd();
       } else if (checkForConfirmationAttachments()) {
         showDocTypeConfirmDialog();
@@ -275,6 +303,7 @@ function processRequestAction() {
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
+
   } else if (action == YourActions.Processing_Create_Up_Complete) {
     var cmrNo = FormManager.getActualValue('cmrNo');
     var disAutoProc = FormManager.getActualValue('disableAutoProc');
@@ -346,6 +375,7 @@ function processRequestAction() {
 
   } else if (action == YourActions.Exit) {
     exitWithoutSaving();
+
   } else if (action == YourActions.Reprocess_Checks) {
     var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
     if (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') {
@@ -407,10 +437,31 @@ function verifyGlcChangeIN() {
 
 function getCustGrp() {
   var custGrp = null;
+  var cntryLocCd = FormManager.getActualValue('cmrIssuingCntry');
   var issueCntry = getIssuingCntry();
-  var zs01LandCntry = getZS01LandCntry();
+  var zs01LandCntry = getZS01LandedCntry();
+  var isSubRegion = false;
+  var FIsubRegion = [ 'LV', 'LT', 'EE' ];
+  var DKsubRegion = [ 'FO', 'GL', 'IS' ];
+  var BEsubRegion = [ 'BE', 'LU' ];
+
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID : reqId,
+    };
+  }
+  var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
+  var zs01LandCntryCd = results.ret2 != undefined ? results.ret2 : '';
+
+  if ((FIsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '702') || (DKsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '678')
+      || (BEsubRegion.includes(zs01LandCntryCd) && cntryLocCd == '624')) {
+    isSubRegion = true;
+  }
 
   if (issueCntry == zs01LandCntry) {
+    custGrp = 'LOCAL'
+  } else if (isSubRegion) {
     custGrp = 'LOCAL'
   } else {
     custGrp = 'CROSS'
@@ -418,7 +469,7 @@ function getCustGrp() {
   return custGrp;
 }
 
-function getZS01LandCntry() {
+function getZS01LandedCntry() {
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
@@ -1852,6 +1903,10 @@ function handleRequiredDnBSearch() {
         cmr.hideNode('dnbRequired');
         cmr.hideNode('dnbRequiredIndc');
       }
+      if(FormManager.getActualValue('cmrIssuingCntry') == '760' && (FormManager.getActualValue('custSubGrp') == 'RACMR'||FormManager.getActualValue('custSubGrp') == 'BFKSC')){
+        cmr.hideNode('dnbRequired');
+        cmr.hideNode('dnbRequiredIndc');
+      }
     });
   }
 
@@ -3061,4 +3116,20 @@ function doNZBNAPIMatch() {
       CANCEL : 'No'
     });
   }
+}
+
+function isReqStatusEqualBetweenUIandDB() {
+
+  var uiReqStatus = FormManager.getActualValue('reqStatus');
+  var reqId = FormManager.getActualValue('reqId');
+  var dbReqStatus = "";
+
+  var result = cmr.query("WW.GET_REQ_STATUS", {
+    REQ_ID : reqId
+  });
+  if (result != null && result.ret1 != '' && result.ret1 != null) {
+    dbReqStatus = result.ret1;
+  }
+
+  return uiReqStatus == dbReqStatus;
 }

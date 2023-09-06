@@ -977,7 +977,7 @@ public class USHandler extends GEOHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
-
+ 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIsicCd(), newData.getIsicCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "USSicmen", "-"));
@@ -1240,7 +1240,7 @@ public class USHandler extends GEOHandler {
           || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
         admin.setMainCustNm1("KYNDRYL INC");
       }
-      data.setVatInd("N");
+      
     }
 
     if (admin != null && "CSP".equals(admin.getReqReason())) {
@@ -1312,7 +1312,13 @@ public class USHandler extends GEOHandler {
     if ("U".equals(admin.getReqType())) {
       data.setCustSubGrp("");
     }
-
+    
+    // CREATCMR-9433
+    if (StringUtils.isEmpty(data.getVatInd())){
+      data.setVatInd("N");
+    }
+   
+    
   }
 
   @Override
@@ -1344,8 +1350,7 @@ public class USHandler extends GEOHandler {
         || ("E".equals(currentData.getBpAcctTyp()) && ("BPQS".equals(currentData.getRestrictTo()) || "IRCSO".equals(currentData.getRestrictTo())))) {
       currentData.setAbbrevNm("");
       currentData.setSearchTerm("");
-    }
-
+    }    
     RequestEntryService service = new RequestEntryService();
     service.updateEntity(currentData, entityManager);
     // CREATCMR-6342

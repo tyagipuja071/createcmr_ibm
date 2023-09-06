@@ -543,7 +543,15 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
       return {
         validate : function() {
           var reqType = FormManager.getActualValue('reqType');
-          var vat = FormManager.getActualValue('vat');
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+          // if Chile, Colombia, Venezuela are the CMR issuing country
+          // proxy's the taxCd1 value to vat to proceed with the validation
+          if (cmrIssuingCntry == '655' || cmrIssuingCntry == '661' || cmrIssuingCntry == '871') {
+            var vat = FormManager.getActualValue('taxCd1');
+          } else {
+            var vat = FormManager.getActualValue('vat');
+          }
 
           if (!vat || vat == '' || vat.trim() == '') {
             return new ValidationResult(null, true);
@@ -1333,7 +1341,7 @@ dojo.addOnLoad(function() {
   GEOHandler.AFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
        '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
 
-  GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '624', '649', '866', '754' ];
+  GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '649', '866', '754' ];
   GEOHandler.AllCountries =  ['229' ,'358' ,'359' ,'363' ,'373' ,'382' ,'383' ,'428' ,'433' ,'440' ,'443' ,'446' ,'461' ,'465' ,'479' ,'498' ,'602' ,'603' ,'607' ,'608' ,'610' ,'613' ,'614' ,'615' ,'616' ,'618' ,'619' ,'620' ,'621' ,'624' ,'626' ,'627' ,'629' ,'631' ,'635' ,'636' ,'637' ,'638' ,'640' ,'641' ,'642' ,'643' ,'644' ,'645' ,'646' ,'647' ,'649' ,'651' ,'652' ,'655' ,'656' ,'661' ,'662' ,'663' ,'666' ,'667' ,'668' ,'669' ,'670' ,'677' ,'678' ,'680' ,'681' ,'682' ,'683' ,'691' ,'692' ,'693' ,'694' ,'695' ,'698' ,'699' ,'700' ,'702' ,'704' ,'705' ,'706' ,'707' ,'708' ,'711' ,'713' ,'717' ,'718' ,'724' ,'725' ,'726' ,'729' ,'731' ,'733' ,'735' ,'736' ,'738' ,'740' ,'741' ,'742' ,'744' ,'745' ,'749' ,'750' ,'752' ,'753' ,'754' ,'755' ,'756' ,'758' ,'759' ,'760' ,'762' ,'764' ,'766' ,'767' ,'768' ,'769' ,'770' ,'772' ,'778' ,'780' ,'781' ,'782' ,'787' ,'788' ,'791' ,'796' ,'799' ,'804' ,'805' ,'806' ,'808' ,'810' ,'811' ,'813' ,'815' ,'818' ,'820' ,'821' ,'822' ,'823' ,'825' ,'826' ,'827' ,'829' ,'831' ,'832' ,'833' ,'834' ,'835' ,'838' ,'839' ,'840' ,'841' ,'842' ,'843' ,'846' ,'848' ,'849' ,'850' ,'851' ,'852' ,'853' ,'855' ,'856' ,'857' ,'858' ,'859' ,'862' ,'864' ,'865' ,'866' ,'869' ,'871' ,'876' ,'881' ,'883' ,'889' ,'897' ,'714' ,'720' ,'790' ,'675' ,'879' ,'880'];
   
   GEOHandler.registerWWValidator(addCMRSearchValidator);
@@ -1393,9 +1401,8 @@ dojo.addOnLoad(function() {
   // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
   GEOHandler.addAfterConfig(updateProspectLegalInd,  GEOHandler.AllCountries);
-  
-  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']);  
-  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846']); 
+  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']);  
+  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']); 
   GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];

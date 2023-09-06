@@ -823,8 +823,12 @@ public class NLHandler extends BaseSOFHandler {
 
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-    // data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
-    // LOG.trace("DPCEBO: " + data.getEngineeringBo());
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setEngineeringBo("333D3");
+    } else {
+      data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
+    }
+    LOG.trace("DPCEBO: " + data.getEngineeringBo());
 
     String kna1KVK = getKna1KVK(mainRecord.getCmrNum());
     String cmrtcextKVK = getCmrtcextKVK(mainRecord.getCmrNum());
@@ -843,7 +847,11 @@ public class NLHandler extends BaseSOFHandler {
     data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
     LOG.trace("EconomicCd: " + data.getEconomicCd());
 
-    data.setEngineeringBo(this.currentImportValues.get("SBO"));
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setEngineeringBo("333D3");
+    } else {
+      data.setEngineeringBo(this.currentImportValues.get("SBO"));
+    }
     LOG.trace("BOTeam: " + data.getEngineeringBo());
 
     data.setIbmDeptCostCenter(this.currentImportValues.get("DepartmentNumber"));
@@ -1041,6 +1049,7 @@ public class NLHandler extends BaseSOFHandler {
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCmrOwner("IBM");
+    data.setEngineeringBo("333D3");// CREATCMR-8926
   }
 
   @Override
@@ -1066,6 +1075,10 @@ public class NLHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    // CREATCMR-8926
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setEngineeringBo("333D3");
+    }
 
   }
 
@@ -2782,7 +2795,18 @@ public class NLHandler extends BaseSOFHandler {
   }
 
   @Override
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+    Addr zs01Addr = null;
+    zs01Addr = getAddressByType(entityManager, CmrConstants.ADDR_TYPE.ZS01.toString(), admin.getId().getReqId());
+    if (zs01Addr != null && "NL".equals(zs01Addr.getLandCntry())) {
+      String taxCd2 = StringUtils.isNotBlank(data.getTaxCd1()) ? data.getTaxCd1() : "";
+      data.setTaxCd2(taxCd2);
+    }
+  }
+
+  @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
   }
+
 }

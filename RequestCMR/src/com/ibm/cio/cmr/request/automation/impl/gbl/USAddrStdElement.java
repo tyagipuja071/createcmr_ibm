@@ -230,6 +230,7 @@ public class USAddrStdElement extends OverridingElement {
 
       String cityToUse = addr.getCity1();
       String countyCodeToUse = addr.getCounty();
+      String postCdToUse = addr.getPostCd();
 
       if (stdCityResp != null) {
         if (stdCityResp.isCityMatched()) {
@@ -240,24 +241,41 @@ public class USAddrStdElement extends OverridingElement {
             overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), stdCityResp.getStandardCity());
             cityToUse = stdCityResp.getStandardCity();
           }
+
+          LOG.debug("Standard Postal Code: " + stdCityResp.getStandardPostalCd());
+          details.append(" Standard Postal Code: " + stdCityResp.getStandardPostalCd() + "\n");
+
+          if (!addr.getPostCd().trim().equalsIgnoreCase(stdCityResp.getStandardPostalCd().trim())) {
+            overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), stdCityResp.getStandardPostalCd());
+            postCdToUse = stdCityResp.getStandardPostalCd();
+          }
         } else {
           List<String> cityNames = new ArrayList<String>();
+          List<String> postalCodes = new ArrayList<String>();
           if (stdCityResp.getSuggested() != null && !stdCityResp.getSuggested().isEmpty()) {
             for (County county : stdCityResp.getSuggested()) {
               if (!cityNames.contains(county.getCity().toUpperCase().trim())) {
                 cityNames.add(county.getCity().toUpperCase().trim());
+                postalCodes.add(county.getZip().toUpperCase().trim());
               }
             }
           }
           if (cityNames.size() == 1) {
             details.append(" Standard City Name: " + cityNames.get(0) + "\n");
+            details.append(" Standard Postal Code: " + postalCodes.get(0) + "\n");
             if (!addr.getCity1().trim().equalsIgnoreCase(cityNames.get(0))) {
               overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), cityNames.get(0));
               cityToUse = cityNames.get(0);
             }
+            if (!addr.getPostCd().trim().equalsIgnoreCase(postalCodes.get(0))) {
+              overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), postalCodes.get(0));
+              postCdToUse = postalCodes.get(0);
+            }
           } else {
             LOG.debug("Standard City Name cannot be determined. Found: " + stdCityResp.getStandardCity());
             details.append(" Standard City cannot be determined. Multiple City name suggestions found.\n");
+            LOG.debug("Standard Postal Code cannot be determined. Found: " + stdCityResp.getStandardPostalCd());
+            details.append(" Standard Postal Code cannot be determined. Multiple Postal code suggestions found.\n");
             hasIssues = true;
           }
         }
@@ -452,9 +470,14 @@ public class USAddrStdElement extends OverridingElement {
     }
 
     String sql = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+    if (!"US".equals(landCntry)) {
+      sql = sql.replace("AND N_ST = :N_ST", " ");
+    }
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("LAND_CNTRY", landCntry);
-    query.setParameter("N_ST", stateProv);
+    if ("US".equals(landCntry)) {
+      query.setParameter("N_ST", stateProv);
+    }
     query.setParameter("C_CNTY", county);
     query.setParameter("N_CITY", city1.toUpperCase());
 

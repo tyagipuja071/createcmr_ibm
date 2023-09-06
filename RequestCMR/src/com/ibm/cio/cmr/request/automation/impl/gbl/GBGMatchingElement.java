@@ -82,222 +82,233 @@ public class GBGMatchingElement extends MatchingElement {
     GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
 
+    ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
+    boolean skipFindGbgForPrivates = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
+
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
-    // added flow to skip gbg matching
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_GBG)) {
-      // ensure a GBG is set
-      GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
-      if (gbg != null) {
-        StringBuilder details = new StringBuilder();
-        details.append("GBG already computed by external process: ");
-        details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
-        details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
-        details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
-        result.setDetails(details.toString());
-        result.setResults("Skipped");
-        result.setProcessOutput(output);
-      } else {
-        result.setDetails("GBG Matching skipped due to previous element execution results.");
-        result.setResults("Skipped");
-        result.setProcessOutput(output);
-      }
-      return result;
-    }
+    if (skipFindGbgForPrivates) {
+      StringBuilder details = new StringBuilder();
+      details.append("Find GBG skipped for this request scenario.");
+      result.setDetails(details.toString());
+      result.setResults("Skipped");
+      result.setProcessOutput(output);
+      LOG.debug("Skip processing of element for privates.");
+    } else {
 
-    if (currentAddress != null) {
-
-      request.setCity(currentAddress.getCity1());
-
-      if (geoHandler != null && !geoHandler.customerNamesOnAddress()) {
-        request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
-      } else {
-        request.setCustomerName(
-            currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
-      }
-
-      String nameUsed = request.getCustomerName();
-      LOG.debug("Checking GBG for " + nameUsed);
-      // usedNames.add(nameUsed.toUpperCase());
-      request.setIssuingCountry(data.getCmrIssuingCntry());
-      request.setStreetLine1(currentAddress.getAddrTxt());
-      request.setStreetLine2(currentAddress.getAddrTxt2());
-      request.setLandedCountry(currentAddress.getLandCntry());
-      request.setPostalCode(currentAddress.getPostCd());
-      request.setStateProv(currentAddress.getStateProv());
-      if (!StringUtils.isBlank(data.getVat())) {
-        request.setOrgId(data.getVat());
-      }
-      request.setMinConfidence("6");
-
-      if ("ZS01".equals(address)) {
-        if (StringUtils.isBlank(data.getDunsNo())) {
-          // duns has not been computed yet, check if any matching has been
-          // performed
-          if (dnbMatching != null && dnbMatching.getConfidenceCode() > 7) {
-            request.setDunsNo(dnbMatching.getDunsNo());
-          }
+      // added flow to skip gbg matching
+      if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_GBG)) {
+        // ensure a GBG is set
+        GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
+        if (gbg != null) {
+          StringBuilder details = new StringBuilder();
+          details.append("GBG already computed by external process: ");
+          details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+          details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+          details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+          result.setDetails(details.toString());
+          result.setResults("Skipped");
+          result.setProcessOutput(output);
         } else {
-          request.setDunsNo(data.getDunsNo());
+          result.setDetails("GBG Matching skipped due to previous element execution results.");
+          result.setResults("Skipped");
+          result.setProcessOutput(output);
         }
+        return result;
       }
 
-      if (automationUtil != null) {
-        automationUtil.tweakGBGFinderRequest(entityManager, request, requestData, engineData);
-      }
+      if (currentAddress != null) {
 
-      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-          MatchingServiceClient.class);
-      client.setRequestMethod(Method.Get);
-      client.setReadTimeout(1000 * 60 * 30);
+        request.setCity(currentAddress.getCity1());
 
-      LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
-      ObjectMapper mapper = new ObjectMapper();
-      String json = mapper.writeValueAsString(rawResponse);
-
-      TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
-      };
-      MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
-
-      if (response != null && response.getMatched()) {
-        StringBuilder details = new StringBuilder();
-        List<GBGResponse> gbgMatches = response.getMatches();
-        Collections.sort(gbgMatches, new GBGComparator(request.getLandedCountry()));
-
-        // get default landed country
-        String defaultLandCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
-
-        result.setResults("Matches Found");
-        details.append(gbgMatches.size() + " record(s) found.");
-        if (gbgMatches.size() > 5) {
-          gbgMatches = gbgMatches.subList(0, 4);
-          details.append("Showing top 5 matches only.");
+        if (geoHandler != null && !geoHandler.customerNamesOnAddress()) {
+          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+        } else {
+          request.setCustomerName(
+              currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
         }
-        boolean domesticGBGFound = false;
-        for (GBGResponse gbg : gbgMatches) {
-          if (gbg.isDomesticGBG()) {
-            domesticGBGFound = true;
-            break;
-          }
-        }
-        List<String> emeaCntries = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL, SystemLocation.TURKEY,
-            SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
-        int itemNo = 0;
-        for (GBGResponse gbg : gbgMatches) {
-          if (gbg.isDomesticGBG()) {
-            itemNo++;
-            details.append("\n");
-            if (gbg.isDnbMatch()) {
-              LOG.debug("Matches found via D&B matching..");
-              details.append("\n").append("Found via DUNS matching:");
-              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                  itemNo);
-            } else if (gbg.isVatMatch()) {
-              LOG.debug("Matches found via ORG ID matching..");
-              details.append("\n").append("Found via ORG ID matching:");
-              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                  itemNo);
-            }
-            output.addMatch(getProcessCode(), "BG_ID", gbg.getBgId(), "Derived", "Derived", "GBG", itemNo);
-            output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
-            output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
-            output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
-            details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
-            details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
-            details.append("\n").append("Country: " + gbg.getCountry());
-            details.append("\n").append("CMR Count: " + gbg.getCmrCount());
-            details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
-            details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
-            if (gbg.isDnbMatch()) {
-              details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
-            }
 
-            if (itemNo == 1 && gbg.isDomesticGBG()) {
-              if ("641".equals(data.getCmrIssuingCntry()) && "C".equals(admin.getReqType()) && "ECOSY".equals(data.getCustSubGrp())) {
-                List<String> s1GBGIDList = SystemParameters.getList("CN_S1_GBG_ID_LIST");
-                if (s1GBGIDList.contains(gbg.getGbgId())) {
-                  result.setDetails("GBG computing result is S1 GBG ID on the request.");
-                  engineData.addRejectionComment("OTH", "GBG computing result is S1 GBG ID on the request.", "", "");
-                  result.setResults("S1 GBG ID");
-                  result.setOnError(true);
-                  super.setStopOnError(true);
-                  super.setActionOnError(ActionOnError.fromCode("R"));
-                }
-              }
-              engineData.put(AutomationEngineData.GBG_MATCH, gbg);
+        String nameUsed = request.getCustomerName();
+        LOG.debug("Checking GBG for " + nameUsed);
+        // usedNames.add(nameUsed.toUpperCase());
+        request.setIssuingCountry(data.getCmrIssuingCntry());
+        request.setStreetLine1(currentAddress.getAddrTxt());
+        request.setStreetLine2(currentAddress.getAddrTxt2());
+        request.setLandedCountry(currentAddress.getLandCntry());
+        request.setPostalCode(currentAddress.getPostCd());
+        request.setStateProv(currentAddress.getStateProv());
+        if (!StringUtils.isBlank(data.getVat())) {
+          request.setOrgId(data.getVat());
+        }
+        request.setMinConfidence("6");
+
+        if ("ZS01".equals(address)) {
+          if (StringUtils.isBlank(data.getDunsNo())) {
+            // duns has not been computed yet, check if any matching has been
+            // performed
+            if (dnbMatching != null && dnbMatching.getConfidenceCode() > 7) {
+              request.setDunsNo(dnbMatching.getDunsNo());
             }
           } else {
-            itemNo++;
-            details.append("\n");
-            if (gbg.isDnbMatch()) {
-              if (StringUtils.isNotBlank(gbg.getLdeRule())) {
-                importLDE(entityManager, requestData, gbg.getLdeRule());
-              }
-              if (StringUtils.isNotBlank(data.getInacType()) && skipFindGbgForNoInacNac(data.getInacType(), data.getCompany())) {
-                details.append("Find GBG skipped for this request, creating CMR without GBG.");
-                result.setDetails(details.toString());
-                result.setResults("Skipped");
-                result.setProcessOutput(output);
-                LOG.debug("Skip processing of element as no Inac, Nacs or Compay Number found attached with the matching GBG.");
-              } else if ((StringUtils.isNotBlank(data.getInacType()) && "N".equals(data.getInacType()) && StringUtils.isNotBlank(data.getInacCd()))
-                  || StringUtils.isNotBlank(data.getCompany())) {
-                engineData.addNegativeCheckStatus("_noInacOnGbg", " request need to be send to CMDE queue for further review. ");
-                details.append("No INAC found on matching gbg. The request need to be send to CMDE queue for further review.\n");
-              } else {
+            request.setDunsNo(data.getDunsNo());
+          }
+        }
+
+        if (automationUtil != null) {
+          automationUtil.tweakGBGFinderRequest(entityManager, request, requestData, engineData);
+        }
+
+        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+            MatchingServiceClient.class);
+        client.setRequestMethod(Method.Get);
+        client.setReadTimeout(1000 * 60 * 30);
+
+        LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+        MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(rawResponse);
+
+        TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
+        };
+        MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
+
+        if (response != null && response.getMatched()) {
+          StringBuilder details = new StringBuilder();
+          List<GBGResponse> gbgMatches = response.getMatches();
+          Collections.sort(gbgMatches, new GBGComparator(request.getLandedCountry()));
+
+          // get default landed country
+          String defaultLandCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
+
+          result.setResults("Matches Found");
+          details.append(gbgMatches.size() + " record(s) found.");
+          if (gbgMatches.size() > 5) {
+            gbgMatches = gbgMatches.subList(0, 4);
+            details.append("Showing top 5 matches only.");
+          }
+          boolean domesticGBGFound = false;
+          for (GBGResponse gbg : gbgMatches) {
+            if (gbg.isDomesticGBG()) {
+              domesticGBGFound = true;
+              break;
+            }
+          }
+          int itemNo = 0;
+          for (GBGResponse gbg : gbgMatches) {
+            if (gbg.isDomesticGBG()) {
+              itemNo++;
+              details.append("\n");
+              if (gbg.isDnbMatch()) {
                 LOG.debug("Matches found via D&B matching..");
                 details.append("\n").append("Found via DUNS matching:");
                 output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
                     itemNo);
-                output.addMatch(getProcessCode(), "BG_ID", gbg.getBgId(), "Derived", "Derived", "GBG", itemNo);
-                output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
-                output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
-                output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
-                details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
-                details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
-                details.append("\n").append("Country: " + gbg.getCountry());
-                details.append("\n").append("CMR Count: " + gbg.getCmrCount());
-                details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
-                details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
-                if (gbg.isDnbMatch()) {
-                  details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
+              } else if (gbg.isVatMatch()) {
+                LOG.debug("Matches found via ORG ID matching..");
+                details.append("\n").append("Found via ORG ID matching:");
+                output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
+                    itemNo);
+              }
+              output.addMatch(getProcessCode(), "BG_ID", gbg.getBgId(), "Derived", "Derived", "GBG", itemNo);
+              output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
+              output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
+              output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
+              details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+              details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+              details.append("\n").append("Country: " + gbg.getCountry());
+              details.append("\n").append("CMR Count: " + gbg.getCmrCount());
+              details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+              details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
+              if (gbg.isDnbMatch()) {
+                details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
+              }
+
+              if (itemNo == 1 && gbg.isDomesticGBG()) {
+                if ("641".equals(data.getCmrIssuingCntry()) && "C".equals(admin.getReqType()) && "ECOSY".equals(data.getCustSubGrp())) {
+                  List<String> s1GBGIDList = SystemParameters.getList("CN_S1_GBG_ID_LIST");
+                  if (s1GBGIDList.contains(gbg.getGbgId())) {
+                    result.setDetails("GBG computing result is S1 GBG ID on the request.");
+                    engineData.addRejectionComment("OTH", "GBG computing result is S1 GBG ID on the request.", "", "");
+                    result.setResults("S1 GBG ID");
+                    result.setOnError(true);
+                    super.setStopOnError(true);
+                    super.setActionOnError(ActionOnError.fromCode("R"));
+                  }
+                }
+                engineData.put(AutomationEngineData.GBG_MATCH, gbg);
+              }
+            } else {
+              itemNo++;
+              details.append("\n");
+              if (gbg.isDnbMatch()) {
+                if (StringUtils.isNotBlank(gbg.getLdeRule())) {
+                  importLDE(entityManager, requestData, gbg.getLdeRule());
+                }
+                if (StringUtils.isNotBlank(data.getInacType()) && skipFindGbgForNoInacNac(data.getInacType(), data.getCompany())) {
+                  details.append("Find GBG skipped for this request, creating CMR without GBG.");
+                  result.setDetails(details.toString());
+                  result.setResults("Skipped");
+                  result.setProcessOutput(output);
+                  LOG.debug("Skip processing of element as no Inac, Nacs or Compay Number found attached with the matching GBG.");
+                } else if ((StringUtils.isNotBlank(data.getInacType()) && "N".equals(data.getInacType()) && StringUtils.isNotBlank(data.getInacCd()))
+                    || StringUtils.isNotBlank(data.getCompany())) {
+                  engineData.addNegativeCheckStatus("_noInacOnGbg", " request need to be send to CMDE queue for further review. ");
+                  details.append("No INAC found on matching gbg. The request need to be send to CMDE queue for further review.\n");
+                } else {
+                  LOG.debug("Matches found via D&B matching..");
+                  details.append("\n").append("Found via DUNS matching:");
+                  output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
+                      itemNo);
+                  output.addMatch(getProcessCode(), "BG_ID", gbg.getBgId(), "Derived", "Derived", "GBG", itemNo);
+                  output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
+                  output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
+                  output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
+                  details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+                  details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+                  details.append("\n").append("Country: " + gbg.getCountry());
+                  details.append("\n").append("CMR Count: " + gbg.getCmrCount());
+                  details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+                  details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
+                  if (gbg.isDnbMatch()) {
+                    details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
+                  }
                 }
               }
             }
           }
-        }
 
-        // else if (itemNo > 1) {
-        // LOG.debug("Multiple matches for Global Buying Groups retrieved");
-        // details.append("\n").append(
-        // "Mutilple matches for Global Buying Groups retrieved. Using the
-        // highest quality match for further calculations. CMDE review will be
-        // required.");
-        // engineData.addNegativeCheckStatus("_nonLocalGBGFound", "Mutiple
-        // matches for Global Buying Groups retrieved.");
+          // else if (itemNo > 1) {
+          // LOG.debug("Multiple matches for Global Buying Groups retrieved");
+          // details.append("\n").append(
+          // "Mutilple matches for Global Buying Groups retrieved. Using the
+          // highest quality match for further calculations. CMDE review will be
+          // required.");
+          // engineData.addNegativeCheckStatus("_nonLocalGBGFound", "Mutiple
+          // matches for Global Buying Groups retrieved.");
 
-        // }
+          // }
 
-        result.setProcessOutput(output);
-        result.setDetails(details.toString());
-        if (!domesticGBGFound && countryUtil != null) {
-          countryUtil.emptyINAC(entityManager, requestData, engineData);
+          result.setProcessOutput(output);
+          result.setDetails(details.toString());
+          if (!domesticGBGFound && countryUtil != null) {
+            countryUtil.emptyINAC(entityManager, requestData, engineData);
+          }
+        } else {
+          countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+          if (countryUtil != null) {
+            countryUtil.emptyINAC(entityManager, requestData, engineData);
+          }
+          result.setDetails("No GBG was found using DUNS hierarchy matching.");
+          result.setResults("No Matches");
+          result.setOnError(false);
         }
       } else {
-        countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
-        if (countryUtil != null) {
-          countryUtil.emptyINAC(entityManager, requestData, engineData);
-        }
-        result.setDetails("No GBG was found using DUNS hierarchy matching.");
-        result.setResults("No Matches");
-        result.setOnError(false);
+        result.setDetails("Missing main address on the request.");
+        engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
+        result.setResults("Missing Address");
+        result.setOnError(true);
       }
-    } else {
-      result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
-      result.setResults("Missing Address");
-      result.setOnError(true);
     }
     return result;
   }
@@ -385,12 +396,12 @@ public class GBGMatchingElement extends MatchingElement {
         }
         handler.setGBGValues(entityManager, requestData, "SIC", value);
       } else if (ruleField.contains("NAC")) {
-        data.setInacCd(value);
         if (StringUtils.isNumeric(value)) {
           data.setInacType("I");
         } else {
           data.setInacType("N");
         }
+        data.setInacCd(value);
         handler.setGBGValues(entityManager, requestData, "INAC", value);
       }
       updateEntity(data, entityManager);

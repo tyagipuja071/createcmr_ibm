@@ -116,19 +116,6 @@ public class ImportExternalDataElement extends OverridingElement {
               mainCustNm = response.getRecord() != null ? " " + AutomationUtil.getCleanString(response.getRecord().getCompanyName()) + " " : "";
             }
           }
-
-          if (!mainCustNm.contains(" IBM ") && !mainCustNm.contains(" PROXXI ")) {
-            // CODE fix for CMR-7831
-            details.append(
-                "Only IBM VAT/CNPJ is allowed to create request for Internal Scenario.\nPlease use IBM VAT/CNPJ or choose a different scenario to proceed.\n");
-            engineData.addRejectionComment("OTH",
-                "Only IBM VAT/CNPJ is allowed to create request for Internal Scenario.\nPlease use IBM VAT/CNPJ or choose a different scenario to proceed.",
-                "", "");
-            results.setResults("Scenario Invalid");
-            results.setDetails(details.toString());
-            results.setOnError(true);
-            return results;
-          }
         }
 
       } else {

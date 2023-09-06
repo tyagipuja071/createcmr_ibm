@@ -1,5 +1,7 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
@@ -12,9 +14,13 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
  * 
@@ -46,7 +52,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
     String cmrIssuingCntry = data.getCmrIssuingCntry();
 
     if ("Y".equals(admin.getScenarioVerifiedIndc())) {
-      log.debug("Skip processing of element");
+      log.debug("***Skip processing of element");
       result.setDetails("Skip processing of element");
       result.setOnError(false);
       output.setSuccess(true);
@@ -57,10 +63,40 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       // method that will perform country specific check
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
       log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
+      boolean isPrivateSubScenario = scenarioExceptions != null ? scenarioExceptions.isSkipFindGbgForPrivates() : false;
+      // creatcmr-9798 
+      boolean isDnBExempt = DnBUtil.isDnbExempt(entityManager, admin.getSourceSystId());
+      if (!isDnBExempt) {
+        if (isPrivateSubScenario ) {
+          boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
+          log.debug("checking for close match");
+          if (foundCloseMatch) {
+            admin.setReqReason("DUPD");
+            output.setSuccess(false);
+            output.setMessage("Request should be re-submitted as a company or private Indivuduals");
+            result.setDetails("Request should be re-submitted as a company or private Indivuduals");
+            result.setOnError(true);
+            result.setResults("Request should be re-submitted as a company or private Indivuduals");
+            engineData.addRejectionComment("DUPD", "DUNS closely matching name and address in 'Private Household leads to automatic rejection", "",
+                "");
+            log.debug("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
+            return result;
+          }
+        }
+      } else {
+        log.debug("***DnB Exempted");
+        result.setDetails("DnB Exempted");
+        result.setOnError(false);
+        output.setSuccess(true);
+        output.setMessage("DnB Exempted");
+      }
       if (countryUtil != null) {
+        log.debug("***Perform country util checks");
+
         boolean countryCheck = false;
         countryCheck = countryUtil.performScenarioValidation(entityManager, requestData, engineData, result, details, output);
         if (countryCheck) {
+          log.debug("***countryCheck is true");
           output.setSuccess(true);
           output.setMessage("Scenario Valid");
           details.insert(0, "Scenario Checks Performed Successfully.\n" + (details.length() > 0 ? "Details:\n" : ""));
@@ -88,6 +124,31 @@ public class GBLScenarioCheckElement extends ValidatingElement {
     result.setResults(output.getMessage());
     result.setProcessOutput(output);
     return result;
+  }
+
+  public boolean checkDunsMatchOnPrivates(RequestData requestData, AutomationEngineData engineData, String addrType) throws Exception {
+    boolean hasValidMatches = false;
+    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
+    if (response != null && response.getMatched()) {
+      hasValidMatches = DnBUtil.hasValidMatches(response);
+      List<DnBMatchingResponse> dnbMatches = response.getMatches();
+
+      if (hasValidMatches) {
+        for (DnBMatchingResponse dnbRecord : dnbMatches) {
+          Addr soldTo = requestData.getAddress("ZS01");
+          Admin admin = requestData.getAdmin();
+          Data data = requestData.getData();
+          // call a method to check customer name and address
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
+          log.debug("GBLScenarioCheckElement (closelyMatches) of request id " + data.getId().getReqId() + " = " + closelyMatches);
+          if (closelyMatches) {
+            return true;
+          }
+        }
+      }
+      log.debug("GBLScenarioCheckElement.checkDunsMatchOnPrivates --> FALSE");
+    }
+    return false;
   }
 
   @Override

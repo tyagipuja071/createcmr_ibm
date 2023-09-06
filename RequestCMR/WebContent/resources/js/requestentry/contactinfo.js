@@ -24,6 +24,10 @@ function addToContactInfoList() {
   var email1FrmDB = null;
   cmr.currentCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (FormManager.validate('frmCMR_contactInfoModal', true)) {
+    if (contactSeqVal && contactSeqVal.length > 0 && !contactSeqVal.match("^[0]{1}[0]{1}[1-3]{1}")) {
+      MessageMgr.showErrorMessage('Invalid <strong>Contact Number Sequence</strong> value.  Only the formats 001, 002, or 003 are allowed.', true);
+      return;
+    }
     if (cmr.currentCntry == SysLoc.BRAZIL) {
       var email1Val = FormManager.getActualValue('email1');
       if (cmr.currentModalAction == "ADD" || cmr.currentModalAction == "COPY" || cmr.currentModalAction == "UPDATE") {
@@ -89,7 +93,7 @@ function addToContactInfoList() {
         }// create req
 
         if (cmr.currentRequestType == 'U') {
-          if (cmr.currentModalAction == 'ADD' || cmr.currentModalAction == 'COPY') {
+          if (cmr.currentModalAction == 'ADD' || cmr.currentModalAction == 'COPY' || cmr.currentModalAction == 'UPDATE') {
             queryParams = {
               REQ_ID : cmr.currentReqId,
               TYPE : contactTypeVal

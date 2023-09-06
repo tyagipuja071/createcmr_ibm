@@ -25,7 +25,7 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.EUVatValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.FieldComputationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GBGMatchingElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GBLScenarioCheckElement;
-import com.ibm.cio.cmr.request.automation.impl.gbl.GOEDeterminationElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.GOEAssignmentElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.INGSTValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.ImportCMRElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
@@ -86,10 +86,10 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String US_DUP_CHK = "US_DUP_CHK";
   public static final String US_BP_PROCESS = "US_BP_PROCESS";
   public static final String US_SOS_RPA_CHECK = "US_SOS_RPA_CHECK";
-  
+
   // CA
   public static final String CA_CMDE_CHECK = "CA_CMDE_CHECK";
-  
+
   // EMEA
   public static final String EMEA_ABBREV_CHECK = "EMEA_ABBREV_CHECK";
 
@@ -116,7 +116,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(GBL_DPL_CHECK, DPLCheckElement.class);
     put(GBL_MATCH_DNB, DnBMatchingElement.class);
     put(GBL_APPROVALS, DefaultApprovalsElement.class);
-    put(GBL_GOE, GOEDeterminationElement.class);
+    put(GBL_GOE, GOEAssignmentElement.class);
     put(GBL_DPL_SEARCH, DPLSearchElement.class);
     put(GBL_CMR_IMPORT, ImportCMRElement.class);
     put(GBL_REQ_CHECK, DupReqCheckElement.class);
@@ -150,7 +150,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(CN_API_CHECK, CNAPICheckElement.class);
     put(CN_DUP_CMR_CHECK, CNDupCMRCheckElement.class);
     put(CN_DUP_REQ_CHECK, CNDupReqCheckElement.class);
-    
+
     // CA
     put(CA_CMDE_CHECK, CACMDERequesterCheck.class);
   }

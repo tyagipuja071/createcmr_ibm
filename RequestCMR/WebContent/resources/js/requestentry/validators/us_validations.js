@@ -11,6 +11,8 @@ var _usIsicHandler = null;
 var _usCustClassHandler = null;
 var _usSicm = "";
 var _kukla = "";
+var _usIsicHandler = null;
+var _usCustClassHandler = null;
 var _enterpriseHandler = null;
 var _usRestrictToHandler = null;
 var affiliateArray = {
@@ -378,6 +380,42 @@ function addAddressRecordTypeValidator() {
             return new ValidationResult(null, false, 'The request should contain exactly one Install At address and one optional Invoice To address.');
           } else {
             return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), null, 'frmCMR');
+
+}
+
+function addInstallAtPOBoxValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('===== addInstallAtPoBoxValidator');
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.USA) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var invoiceToCnt = 0;
+          var installAtCnt = 0;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            type = record.addrType;
+            addrTxt = record.addrTxt;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              const
+              regex = /PO\s?BOX|P\.O\.\s?BOX|BOX/gi;
+              if (regex.test(addrTxt)) {
+                return new ValidationResult(null, false, 'PO BOX is strictly not allowed for Install At, please provide physical address.');
+              }
+              return new ValidationResult(null, true);
+            }
           }
         }
       }
@@ -1038,6 +1076,23 @@ function addDivStreetCountValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addInstallAtPoBoxValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('addrType') == 'ZS01') {
+          const
+          regex = /PO\s?BOX|P\.O\.\s?BOX|BOX/gi;
+          if (regex.test(FormManager.getActualValue('addrTxt'))) {
+            return new ValidationResult(null, false, 'PO BOX is strictly not allowed for Install At, please provide physical address.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function hideKUKLA() {
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.show('CustClass', 'custClass');
@@ -1419,6 +1474,42 @@ function addressQuotationValidator() {
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
 }
 
+function custClassIsicValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var result1 = null;
+        var rdcKukla = null;
+        var onChangedKukla = null;
+        var result2 = null;
+        var rdcIsic = null;
+        var onChangedIsic = null;
+
+        onChangedKukla = FormManager.getActualValue('custClass');
+        var result1 = getIsicAndKuklaFromDataRdc("custClass");
+
+        onChangedIsic = FormManager.getActualValue('usSicmen');
+        var result2 = getIsicAndKuklaFromDataRdc("usSicmen");
+
+        if (result1 != null) {
+          rdcKukla = result1;
+        }
+
+        if (result2 != null) {
+          rdcIsic = result2;
+        }
+
+        if (FormManager.getActualValue('reqType') == 'U') {
+          if (onChangedIsic == '9500' && onChangedKukla != '60' || onChangedIsic != '9500' && onChangedKukla == '60') {
+            return new ValidationResult(null, false, 'Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 // CREATCMR-7213
 function federalIsicCheck() {
   FormManager.addFormValidator((function() {
@@ -1486,6 +1577,7 @@ dojo.addOnLoad(function() {
   // true);
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(addInstallAtPOBoxValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
   // GEOHandler.registerValidator(addCustName1Validator, [ SysLoc.USA ], null,
   // true);
@@ -1521,8 +1613,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null,
   // true);
   // CREATCMR-6255
-  // GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ],
-  // null, true);
+  GEOHandler.registerValidator(addInstallAtPoBoxValidator, [ SysLoc.USA ], null, true);
 
   GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(setBPNameValuesUS, [ SysLoc.USA ]);

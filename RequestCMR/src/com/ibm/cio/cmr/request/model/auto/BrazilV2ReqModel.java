@@ -32,6 +32,9 @@ public class BrazilV2ReqModel extends BaseV2RequestModel {
   private String collectorNameNo;
   private String salesBusOffCd;
 
+  // temporary placeholder for Update Reason value
+  private String mexicoBillingName;
+
   public String getVat() {
     return vat;
   }
@@ -158,6 +161,14 @@ public class BrazilV2ReqModel extends BaseV2RequestModel {
 
   public void setSalesBusOffCd(String salesBusOffCd) {
     this.salesBusOffCd = salesBusOffCd;
+  }
+
+  public String getMexicoBillingName() {
+    return mexicoBillingName;
+  }
+
+  public void setMexicoBillingName(String mexicoBillingName) {
+    this.mexicoBillingName = mexicoBillingName;
   }
 
 }

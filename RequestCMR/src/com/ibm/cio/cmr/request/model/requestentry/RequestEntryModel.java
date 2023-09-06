@@ -420,6 +420,26 @@ public class RequestEntryModel extends BaseModel {
   private String footnoteNo;
   private String fomeZero;
   private int companySize;
+  
+  //JP new fields for AR
+  private String jpCloseDays;
+  private String jpCloseDays1;
+  private String jpCloseDays2;
+  private String jpCloseDays3;
+  private String jpCloseDays4;
+  private String jpCloseDays5;
+  private String jpPayCycles;
+  private String jpPayCycles1;
+  private String jpPayCycles2;
+  private String jpPayCycles3;
+  private String jpPayCycles4;
+  private String jpPayCycles5;
+  private String jpPayDays;
+  private String jpPayDays1;
+  private String jpPayDays2;
+  private String jpPayDays3;
+  private String jpPayDays4;
+  private String jpPayDays5;
 
   // CH Specific
   private String custLangCd;
@@ -469,6 +489,11 @@ public class RequestEntryModel extends BaseModel {
   private String mexicoBillingName;
 
   private long overrideReqId;
+
+  // license number fields
+  private String licenseNumber;
+  private String licenseValidFrom;
+  private String licenseValidTo;
 
   public String getMexicoBillingName() {
     return mexicoBillingName;
@@ -3218,5 +3243,172 @@ public class RequestEntryModel extends BaseModel {
   public void setVatAcknowledge(String vatAcknowledge) {
     this.vatAcknowledge = vatAcknowledge;
   }
+  
+  public String getLicenseNumber() {
+    return licenseNumber;
+  }
 
+  public void setLicenseNumber(String licenseNumber) {
+    this.licenseNumber = licenseNumber;
+  }
+
+  public String getLicenseValidFrom() {
+    return licenseValidFrom;
+  }
+
+  public void setLicenseValidFrom(String licenseValidFrom) {
+    this.licenseValidFrom = licenseValidFrom;
+  }
+
+  public String getLicenseValidTo() {
+    return licenseValidTo;
+  }
+
+  public void setLicenseValidTo(String licenseValidTo) {
+    this.licenseValidTo = licenseValidTo;
+  }
+  
+  public String getJpCloseDays() {
+    return jpCloseDays;
+  }
+
+  public void setJpCloseDays(String jpCloseDays) {
+    this.jpCloseDays = jpCloseDays;
+  }
+
+  public String getJpCloseDays1() {
+    return jpCloseDays1;
+  }
+
+  public void setJpCloseDays1(String jpCloseDays1) {
+    this.jpCloseDays1 = jpCloseDays1;
+  }
+
+  public String getJpCloseDays2() {
+    return jpCloseDays2;
+  }
+
+  public void setJpCloseDays2(String jpCloseDays2) {
+    this.jpCloseDays2 = jpCloseDays2;
+  }
+
+  public String getJpCloseDays3() {
+    return jpCloseDays3;
+  }
+
+  public void setJpCloseDays3(String jpCloseDays3) {
+    this.jpCloseDays3 = jpCloseDays3;
+  }
+
+  public String getJpCloseDays4() {
+    return jpCloseDays4;
+  }
+
+  public void setJpCloseDays4(String jpCloseDays4) {
+    this.jpCloseDays4 = jpCloseDays4;
+  }
+
+  public String getJpCloseDays5() {
+    return jpCloseDays5;
+  }
+
+  public void setJpCloseDays5(String jpCloseDays5) {
+    this.jpCloseDays5 = jpCloseDays5;
+  }
+
+  public String getJpPayCycles() {
+    return jpPayCycles;
+  }
+
+  public void setJpPayCycles(String jpPayCycles) {
+    this.jpPayCycles = jpPayCycles;
+  }
+
+  public String getJpPayCycles1() {
+    return jpPayCycles1;
+  }
+
+  public void setJpPayCycles1(String jpPayCycles1) {
+    this.jpPayCycles1 = jpPayCycles1;
+  }
+
+  public String getJpPayCycles2() {
+    return jpPayCycles2;
+  }
+
+  public void setJpPayCycles2(String jpPayCycles2) {
+    this.jpPayCycles2 = jpPayCycles2;
+  }
+
+  public String getJpPayCycles3() {
+    return jpPayCycles3;
+  }
+
+  public void setJpPayCycles3(String jpPayCycles3) {
+    this.jpPayCycles3 = jpPayCycles3;
+  }
+
+  public String getJpPayCycles4() {
+    return jpPayCycles4;
+  }
+
+  public void setJpPayCycles4(String jpPayCycles4) {
+    this.jpPayCycles4 = jpPayCycles4;
+  }
+
+  public String getJpPayCycles5() {
+    return jpPayCycles5;
+  }
+
+  public void setJpPayCycles5(String jpPayCycles5) {
+    this.jpPayCycles5 = jpPayCycles5;
+  }
+
+  public String getJpPayDays() {
+    return jpPayDays;
+  }
+
+  public void setJpPayDays(String jpPayDays) {
+    this.jpPayDays = jpPayDays;
+  }
+
+  public String getJpPayDays1() {
+    return jpPayDays1;
+  }
+
+  public void setJpPayDays1(String jpPayDays1) {
+    this.jpPayDays1 = jpPayDays1;
+  }
+
+  public String getJpPayDays2() {
+    return jpPayDays2;
+  }
+
+  public void setJpPayDays2(String jpPayDays2) {
+    this.jpPayDays2 = jpPayDays2;
+  }
+
+  public String getJpPayDays3() {
+    return jpPayDays3;
+  }
+
+  public void setJpPayDays3(String jpPayDays3) {
+    this.jpPayDays3 = jpPayDays3;
+  }
+
+  public String getJpPayDays4() {
+    return jpPayDays4;
+  }
+
+  public void setJpPayDays4(String jpPayDays4) {
+    this.jpPayDays4 = jpPayDays4;
+  }
+
+  public String getJpPayDays5() {
+    return jpPayDays5;
+  }
+
+  public void setJpPayDays5(String jpPayDays5) {
+    this.jpPayDays5 = jpPayDays5;
+  }
 }

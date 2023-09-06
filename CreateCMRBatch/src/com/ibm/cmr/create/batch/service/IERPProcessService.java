@@ -476,8 +476,10 @@ public class IERPProcessService extends BaseBatchService {
               wfHistCmt = statusMessage.toString();
             }
 
+            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
             statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
-
+            }
+            
             createCommentLog(em, admin, statusMessage.toString());
 
             String disableAutoProc = "N";
@@ -656,8 +658,8 @@ public class IERPProcessService extends BaseBatchService {
                   + " has FAILED processing. Status: NOT COMPLETED. Response message: " + ncMessage);
               wfHistCmt = statusMessage.toString();
             }
-
-            if (!SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+            
+            if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry()) && !SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
               statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
             }
             createCommentLog(em, admin, statusMessage.toString());
@@ -874,6 +876,11 @@ public class IERPProcessService extends BaseBatchService {
               }
 
               if (response.getRecords() != null && response.getRecords().size() != 0) {
+            	  if(index >= response.getRecords().size() ){
+            		  LOG.debug("size = " + response.getRecords().size());
+            		  LOG.debug("index = " + index);
+            		  break;
+            	  }
 
                 if (CmrConstants.RDC_SOLD_TO.equals(response.getRecords().get(index).getAddressType())) {
                   String[] addrSeqs = response.getRecords().get(index).getSeqNo().split(",");
@@ -1531,14 +1538,18 @@ public class IERPProcessService extends BaseBatchService {
       DataRdc dataRdc = getDataRdcRecords(em, data);
       boolean isDataUpdated = false;
       boolean isAdminUpdated = false;
-      isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+    	  isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      		}else{
+      			isDataUpdated = true;
+      		}
       isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
       isDataUpdated = isAdminUpdated || isDataUpdated;
 
       if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) && !isDataUpdated) {
         isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
       }
-
+      
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses
 
