@@ -1555,17 +1555,18 @@ function addBillingAddrValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-/*function addCMRValidator(){
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
-   if (FormManager.getActualValue('reqType') == 'C'){
-	if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
-      if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-       return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search');
-        }
-      }
-    } 
-}*/
+/*
+ * function addCMRValidator(){ var role =
+ * FormManager.getActualValue('userRole').toUpperCase(); var custSubType =
+ * FormManager.getActualValue('custSubGrp'); if
+ * (FormManager.getActualValue('reqType') == 'C'){
+ * if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' ||
+ * FormManager.getActualValue('findCmrResult') == 'REJECTED')) { if (role ==
+ * "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' ||
+ * custSubType == '3PAVA' || custSubType == 'CRO3P')) { return new
+ * ValidationResult(null, false,'For 3rd party scenario please import a CMR via
+ * CMR search'); } } } }
+ */
 
 function setVATForItaly() {
   var reqType = FormManager.getActualValue('reqType');
@@ -3595,6 +3596,27 @@ function validateSingleReactParentCMR() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function StcOrderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -3627,12 +3649,13 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
-//GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
+  // GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateCodiceDesIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateCMRNumberForIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.ITALY ], null, true);
 
 });
