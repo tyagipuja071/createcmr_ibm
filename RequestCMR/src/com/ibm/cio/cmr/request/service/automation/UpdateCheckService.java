@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.automation.UpdateCheckModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 
 /**
  * @author PoojaTyagi
@@ -49,6 +50,8 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
       Admin admin = requestData.getAdmin();
       if (data != null) {
         entityManager.detach(data);
+        // CREATCMR-10246 not copying due to field name difference
+        setModeOfPayment(reqEntryModel);
         PropertyUtils.copyProperties(data, reqEntryModel);
       }
       if (admin != null) {
@@ -88,5 +91,13 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
     }
 
     return updtChkModel;
+  }
+
+  private void setModeOfPayment(RequestEntryModel reqEntryModel) {
+    if (PageManager.fromGeo("MCO", reqEntryModel.getCmrIssuingCntry()) || PageManager.fromGeo("NORDX", reqEntryModel.getCmrIssuingCntry())
+        || PageManager.fromGeo("EMEA", reqEntryModel.getCmrIssuingCntry())) {
+      reqEntryModel.setModeOfPayment(reqEntryModel.getPaymentMode());
+    }
+
   }
 }
