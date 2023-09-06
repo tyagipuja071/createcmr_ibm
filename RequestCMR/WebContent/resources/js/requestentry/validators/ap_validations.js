@@ -364,7 +364,7 @@ function addAfterConfigAP() {
     // FormManager.removeValidator('clientTier', Validators.REQUIRED);
     addVatValidationforSingapore();
     // CREATCMR-10202
-    if ((custSubGrp == 'CROSS' || custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM') && _pagemodel.apCustClusterId != null) {
+    if (custSubGrp == 'CROSS' || custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM') {
       FormManager.setValue('apCustClusterId', '09052');
       FormManager.readOnly('apCustClusterId');
       FormManager.setValue('isuCd', '5K');
@@ -2790,14 +2790,14 @@ function onIsicChange() {
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther(value);
   }
-// if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
-// '') {
-// FormManager.readOnly('isicCd');
-// } else {
-// FormManager.enable('isicCd');
-// }
-  if ((dplCheck == 'AF' || dplCheck == 'SF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834')
-      && (custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS' || custSubGrp == 'ESOSW')) {
+  // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
+  // '') {
+  // FormManager.readOnly('isicCd');
+  // } else {
+  // FormManager.enable('isicCd');
+  // }
+  if ((dplCheck == 'AP' || dplCheck == 'AF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834')
+    && (custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS' || custSubGrp == 'ESOSW')) {
     FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
   }
@@ -2817,67 +2817,67 @@ function setIsic() {
 }
 
 function updateIndustryClass() {
-	 console.log('>>>> updateIndustryClass >>>>');
-	  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-	  if (subIndustryCd != null && subIndustryCd.length > 1) {
-	    var _industryClass = subIndustryCd.substr(0, 1);
-	    FormManager.setValue('IndustryClass', _industryClass);
-	    if(_industryClass =='Y' || _industryClass =='G' ){
-	      FormManager.enable('taxCd2');
-	      FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Government Customer Type' ], 'MAIN_IBM_TAB');
-	    }else{
-	      FormManager.removeValidator('taxCd2', Validators.REQUIRED);
-	      FormManager.readOnly('taxCd2');
-	      FormManager.setValue('taxCd2', '');
-	    }
-	    setAnzKuklaFor();
-	    updateCluster(_industryClass);
-	  }
+  console.log('>>>> updateIndustryClass >>>>');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (subIndustryCd != null && subIndustryCd.length > 1) {
+    var _industryClass = subIndustryCd.substr(0, 1);
+    FormManager.setValue('IndustryClass', _industryClass);
+    if (_industryClass == 'Y' || _industryClass == 'G') {
+      FormManager.enable('taxCd2');
+      FormManager.addValidator('taxCd2', Validators.REQUIRED, ['Government Customer Type'], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+      FormManager.readOnly('taxCd2');
+      FormManager.setValue('taxCd2', '');
+    }
+    setAnzKuklaFor();
+    updateCluster(_industryClass);
+  }
 }
 
 function setAnzKuklaFor() {
-	  console.log('>>>> setAnzKukla >>>>');
-	  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-	  var reqType = FormManager.getActualValue('reqType');
-	  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-	  var govCustType =   FormManager.getActualValue('taxCd2');
-	  var industryClass = FormManager.getActualValue('subIndustryCd');
-	  var subScenariotype = FormManager.getActualValue('custSubGrp');
-	  var sKukla = '11'
-	  
-	  if (viewOnlyPage == 'true' || reqType != 'C') {
-	    return;
-	  }
-	  if (cmrIssuCntry != '616' && cmrIssuCntry != '796') {
-	    return;
-	  }
-	  if (cmrIssuCntry == '796') {
-	    if (subScenariotype == 'INTER') {
-	      sKukla = '81';
-	    } else if (subScenariotype == 'PRIV') {
-	      sKukla = '60';
-	    } else if (industryClass != null && (industryClass.substring(0, 1) =='Y' || industryClass.substring(0, 1) =='G')
-	        && (subScenariotype ==  'XESO' || subScenariotype == 'XAQST' || subScenariotype == 'AQSTN' || subScenariotype == 'CROSS'
-	            || subScenariotype == 'ESOSW' || subScenariotype == 'NRML')) {
-	      sKukla = '14';
-	    } else {
-	      sKukla = '11';
-	    }
-	  } else if (cmrIssuCntry == '616') {
-	    if (subScenariotype == 'INTER' || subScenariotype == 'XINT') {
-	      sKukla = '81';
-	    } else if (subScenariotype == 'PRIV' || subScenariotype == 'XPRIV') {
-	      sKukla = '60';
-	    } else if ((subScenariotype == 'AQSTN' || subScenariotype == 'NRML' || subScenariotype == 'ESOSW'
-	        || subScenariotype == 'CROSS' || subScenariotype == 'XAQST' || subScenariotype == 'NRMLC')
-	        && govCustType != null && govCustType.length == 3) {
-	      sKukla = govCustType.substring(1, 3);
-	    } else {
-	      sKukla = '11';
-	    }
-	  }
-	  FormManager.setValue('custClass', sKukla);
-	}
+  console.log('>>>> setAnzKukla >>>>');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var govCustType = FormManager.getActualValue('taxCd2');
+  var industryClass = FormManager.getActualValue('subIndustryCd');
+  var subScenariotype = FormManager.getActualValue('custSubGrp');
+  var sKukla = '11'
+
+  if (viewOnlyPage == 'true' || reqType != 'C') {
+    return;
+  }
+  if (cmrIssuCntry != '616' && cmrIssuCntry != '796') {
+    return;
+  }
+  if (cmrIssuCntry == '796') {
+    if (subScenariotype == 'INTER') {
+      sKukla = '81';
+    } else if (subScenariotype == 'PRIV') {
+      sKukla = '60';
+    } else if (industryClass != null && (industryClass.substring(0, 1) == 'Y' || industryClass.substring(0, 1) == 'G')
+      && (subScenariotype == 'XESO' || subScenariotype == 'XAQST' || subScenariotype == 'AQSTN' || subScenariotype == 'CROSS'
+        || subScenariotype == 'ESOSW' || subScenariotype == 'NRML')) {
+      sKukla = '14';
+    } else {
+      sKukla = '11';
+    }
+  } else if (cmrIssuCntry == '616') {
+    if (subScenariotype == 'INTER' || subScenariotype == 'XINT') {
+      sKukla = '81';
+    } else if (subScenariotype == 'PRIV' || subScenariotype == 'XPRIV') {
+      sKukla = '60';
+    } else if ((subScenariotype == 'AQSTN' || subScenariotype == 'NRML' || subScenariotype == 'ESOSW'
+      || subScenariotype == 'CROSS' || subScenariotype == 'XAQST' || subScenariotype == 'NRMLC')
+      && govCustType != null && govCustType.length == 3) {
+      sKukla = govCustType.substring(1, 3);
+    } else {
+      sKukla = '11';
+    }
+  }
+  FormManager.setValue('custClass', sKukla);
+}
 
 function updateCluster(value) {
   console.log('>>>> updateCluster >>>>');
@@ -4236,7 +4236,7 @@ var _govCustTypeHandler = null;
 function addGovCustTypHanlder() {
   _govIndcHandler = dojo.connect(FormManager.getField('taxCd2'), 'onChange', function (value) {
     //setAbbrevNameforGovType();
-	  setAnzKuklaFor();
+    setAnzKuklaFor();
   });
 }
 
