@@ -38,6 +38,7 @@ function custSubGrpHandler() {
   if (_custSubGrpHandler == null) {
     _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       onIsicChange();
+      prospectFilterISBU();
     });
   }
 }
@@ -83,6 +84,16 @@ function resetGstExempt() {
     console.log(">>> Process gstExempt remove * >> ");
     FormManager.resetValidations('vat');
     FormManager.readOnly('vat');
+  }
+}
+
+function prospectFilterISBU() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  if (ifProspect == 'Y') {
+    setISBUScenarioLogic();
   }
 }
 
@@ -1414,11 +1425,11 @@ function addSectorIsbuLogicOnSubIndu() {
     searchArryAndSetValue(arryIndCdForSectorCSI, _industryClass, 'sectorCd', 'CSI');
     searchArryAndSetValue(arryIndCdForSectorEXC, _industryClass, 'sectorCd', 'EXC');
   }
-  // updateIsbuCd();
+   updateIsbuCd();
 }
 
 function updateIsbuCd() {
-  addSectorIsbuLogicOnSubIndu();
+  // addSectorIsbuLogicOnSubIndu();
   console.log(">>>> updateIsbuCd >>>>");
   var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
@@ -3271,8 +3282,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setCTCIsuByCluster, GEOHandler.AP);
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, GEOHandler.AP);
+  GEOHandler.addAfterConfig(setCTCIsuByCluster,  [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, [ SysLoc.INDIA ]);
   
   GEOHandler.addAfterTemplateLoad(setISUDropDownValues, GEOHandler.AP);
 
