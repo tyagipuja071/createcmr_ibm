@@ -2030,6 +2030,28 @@ function addressQuotationValidatorNL() {
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
 }
+
+function StcOrderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -2098,4 +2120,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addNlIsuHandler, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.NL);
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.NL, null, true);
+
 });

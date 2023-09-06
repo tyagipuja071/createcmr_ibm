@@ -7297,7 +7297,7 @@ function lockRequireFieldsUKI() {
     FormManager.readOnly('inacCd');
     return;
   }
-  
+
   if (reqType == 'C') {
     if (custSubGroup == 'PRICU' || custSubGroup == 'BUSPR' || custSubGroup == 'INTER') {
       FormManager.readOnly('inacCd');
@@ -10624,83 +10624,27 @@ function addChangeTaxCdValidLicenseValidator() {
               return new ValidationResult(null, false, 'The license(s) are still valid. Tax code changes are not allowed. Please change the Tax Code back to Z.');
             }
           }
+          
+function StcOrderBlockValidation() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
         }
         return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
-function addMandatoryLicenseValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        if (reqType == 'U') {
-          var taxCd = FormManager.getActualValue('specialTaxCd');
-          if (taxCd == 'Z') {
-            var reqId = FormManager.getActualValue('reqId');
-
-            var qParams = {
-              REQ_ID : reqId,
-            };
-            var oldTaxRes = cmr.query('GET_SPECIAL_TAX_CD_OLD', qParams);
-            var oldTaxCd = oldTaxRes.ret1;
-
-            if (oldTaxCd != 'Z' && !hasValidLicenseDate()) {
-              return new ValidationResult(null, false, 'The Tax Code value has been changed to Z. Please add a valid license.');
-            }
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
-function addTaxCodeZAndNewLicenseValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        if (reqType == 'U') {
-          var taxCd = FormManager.getActualValue('specialTaxCd');
-
-          if (taxCd != 'Z' && isNewLicenseAdded()) {
-            return new ValidationResult(null, false, 'Adding new licenses is only allowed if the Tax Code is Z. Please set the Tax Code to Z or remove the new license.');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
-}
-
-function hasValidLicenseDate() {
-  var today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
-    for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
-      var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
-      var validTo = record.validTo[0]
-      if (today < validTo) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function isNewLicenseAdded() {
-  if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
-    for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
-      var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
-      var changeIndc = record.currentIndc[0];
-      if ('N' == changeIndc) {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 dojo.addOnLoad(function() {
@@ -11011,4 +10955,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSboSrForIsuCtcIE, [ SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addCmrNoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.EMEA, null, true);
+
 });
