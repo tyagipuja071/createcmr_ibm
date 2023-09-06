@@ -3505,6 +3505,28 @@ function addressQuotationValidatorMCO() {
   FormManager.addValidator('prefSeqNo', Validators.NO_QUOTATION, [ 'Sequence Number' ]);
 
 }
+
+function StcOrderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -3632,5 +3654,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(addISUHandlerEs, [ SysLoc.SPAIN ]);
   // GEOHandler.addAfterConfig(addISUHandlerEs, [ SysLoc.SPAIN ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
+  GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
 
 });

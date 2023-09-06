@@ -2234,6 +2234,28 @@ function addressQuotationValidatorBELUX() {
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 }
+
+function StcOrderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if ((ordBlk != null || ordBlk != '') && (stcOrdBlk != null || stcOrdBlk != '')) {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -2312,5 +2334,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(saveOldIsuCtc, GEOHandler.BELUX);
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.BELUX, null, true);
 
 });

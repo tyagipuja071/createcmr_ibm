@@ -1772,9 +1772,12 @@ public class EMEAHandler extends BaseSOFHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-    data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-    LOG.trace("EmbargoCode: " + data.getEmbargoCd());
-
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    data.setEmbargoCd(embargoCode);
+    LOG.trace("EmbargoCode: " + embargoCode);
+    if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(this.currentImportValues.get("EmbargoCode"));
+    }
     if (!SystemLocation.ITALY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
 
       // defect 1299146
