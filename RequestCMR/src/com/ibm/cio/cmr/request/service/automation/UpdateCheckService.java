@@ -49,7 +49,10 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
       Admin admin = requestData.getAdmin();
       if (data != null) {
         entityManager.detach(data);
+        // CREATCMR-10246 not copying due to filed name difference
+        setModeOfPayment(reqEntryModel);
         PropertyUtils.copyProperties(data, reqEntryModel);
+
       }
       if (admin != null) {
         entityManager.detach(admin);
@@ -88,5 +91,10 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
     }
 
     return updtChkModel;
+  }
+
+  private void setModeOfPayment(RequestEntryModel reqEntryModel) {
+    reqEntryModel.setModeOfPayment(reqEntryModel.getPaymentMode());
+
   }
 }
