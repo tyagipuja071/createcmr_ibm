@@ -22,6 +22,7 @@ import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
@@ -582,8 +583,22 @@ public class JPHandler extends GEOHandler {
               copy.setCmrSapNumber(null);
             }
             LOG.debug("Adding " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
-            addedRecords.add(copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq());
-            converted.add(copy);
+
+            if ("BPWPQ".equals(reqEntry.getCustSubGrp()) && !copy.getCmrAddrTypeCode().equals("ZS01")) {
+              LOG.debug("Skip " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
+            } else {
+              addedRecords.add(copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq());
+              converted.add(copy);
+              if ("BPWPQ".equals(reqEntry.getCustSubGrp()) && copy.getCmrAddrTypeCode().equals("ZS01")) {
+                FindCMRRecordModel addrCopy = new FindCMRRecordModel();
+                PropertyUtils.copyProperties(addrCopy, copy);
+                addrCopy.setCmrAddrTypeCode("ZS02");
+                addrCopy.setCmrAddrUse("1");
+                addrCopy.setCmrAddrType("Install At");
+                converted.add(addrCopy);
+              }
+            }
+
           }
         }
       }
@@ -623,6 +638,9 @@ public class JPHandler extends GEOHandler {
             // this is an address on CRIS only, add to the request
             LOG.debug("Adding ADU " + adu + " to the request.");
             cmrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
+            if (cmrType.equals("ZS02") && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
+              continue;
+            }
             if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq())) {
               record = new FindCMRRecordModel();
               record.setCmrAddrTypeCode(cmrType);
@@ -713,6 +731,10 @@ public class JPHandler extends GEOHandler {
     record.setCmrCustPhone(sbPhone.toString());
     record.setCmrCountryLanded("JP");
     record.setCmrPostalCode(establishment.getPostCode());
+    if ("BPWPQ".equals(reqEntry.getCustSubGrp())) {
+      record.setBillingCustNo(reqEntry.getBillToCustNo());
+      record.setCreditToCustNo(reqEntry.getCreditToCustNo());
+    }
     converted.add(record);
 
     source.setItems(converted);
@@ -730,8 +752,12 @@ public class JPHandler extends GEOHandler {
     // data.setIcmsInd(mainRecord.getSR());
     data.setBillingProcCd(mainRecord.getBillingProcessCode());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode());
-    data.setCreditToCustNo(mainRecord.getCreditToCustNo());
-    data.setBillToCustNo(mainRecord.getBillingCustNo());
+
+    if (!"BPWPQ".equals(data.getCustSubGrp())) {
+      data.setCreditToCustNo(mainRecord.getCreditToCustNo());
+      data.setBillToCustNo(mainRecord.getBillingCustNo());
+    }
+
     data.setTier2(mainRecord.getTier2());
     // data.setAbbrevNm(mainRecord.getCmrName3() == null ?
     // mainRecord.getCmrName3() : mainRecord.getCmrName3().trim());
@@ -2265,10 +2291,23 @@ public class JPHandler extends GEOHandler {
   }
 
   @Override
-  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
+  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     setCSBOAfterImport(entityManager, admin, data);
     // setAccountAbbNmAfterImport(entityManager, admin, data);
     // updateBillToCustomerNoAfterImport(data);
+
+    if ("BPWPQ".equals(data.getCustSubGrp())) {
+      // Bill to Customer
+      Addr addrBillto = getZP01FromRDC(entityManager, data, "ZP01", "2");
+      String seqNo = "1";
+      // copy ZP01 to ADU2 and ADU7
+      if (addrBillto != null) {
+        LOG.debug("creating bill to related address...");
+        saveAddrCopy(entityManager, admin, data, addrBillto, "ZP01", seqNo);
+        saveAddrCopy(entityManager, admin, data, addrBillto, "ZI01", seqNo);
+      }
+    }
+
   }
 
   private void updateBillToCustomerNoAfterImport(Data data) {
@@ -3241,5 +3280,50 @@ public class JPHandler extends GEOHandler {
     query.setParameter("MANDT", mandt);
     query.setForReadOnly(true);
     return query.getSingleResult(Knb1.class);
+  }
+  
+  private void saveAddrCopy(EntityManager entityManager, Admin admin, Data data, Addr addr, String addrType, String seqNo) throws Exception {
+    Addr addrCopy = SerializationUtils.clone(addr);
+    addrCopy.getId().setAddrType(addrType);
+    addrCopy.getId().setAddrSeq(seqNo);
+    entityManager.persist(addrCopy);
+    entityManager.flush();
+    AddrRdc addrRdc = new AddrRdc();
+    PropertyUtils.copyProperties(addrRdc, addr);
+    AddrRdc addrRdcCopy = SerializationUtils.clone(addrRdc);
+    addrRdcCopy.getId().setAddrType(addrType);
+    addrRdcCopy.getId().setAddrSeq(seqNo);
+    entityManager.persist(addrRdcCopy);
+    entityManager.flush();
+  }
+
+  private Addr getZP01FromRDC(EntityManager entityManager, Data data, String addrType, String seqNo) {
+    Addr address = null;
+    String sqlRDC = ExternalizedQuery.getSql("KNA1.JP.ZP01_BILLTO");
+    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC.setParameter("KATR6", data.getCmrIssuingCntry());
+    queryRDC.setParameter("ZZKV_CUSNO", data.getBillToCustNo());
+    queryRDC.setParameter("KTOKD", addrType);
+    queryRDC.setParameter("ZZKV_SEQNO", seqNo);
+    Kna1 kna1 = queryRDC.getSingleResult(Kna1.class);
+    address = new Addr();
+    AddrPK newAddrId = new AddrPK();
+    newAddrId.setAddrType(addrType);
+    newAddrId.setAddrSeq(seqNo);
+    newAddrId.setReqId(data.getId().getReqId());
+    address.setId(newAddrId);
+    address.setImportInd("Y");
+    address.setSapNo("");
+    address.setIerpSitePrtyId("");
+    address.setCustNm1(kna1.getName1());
+    address.setCustNm2(kna1.getName2());
+    address.setAddrTxt(kna1.getStras());
+    address.setLandCntry(kna1.getLand1());
+    address.setPostCd(kna1.getPstlz());
+    address.setCity1(kna1.getOrt01());
+    address.setStateProv(kna1.getRegio());
+    address.setCustPhone(kna1.getTelf1());
+    return address;
   }
 }

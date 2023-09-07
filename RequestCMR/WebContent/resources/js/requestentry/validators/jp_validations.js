@@ -1011,7 +1011,7 @@ function setFieldsRequired() {
     FormManager.setValue('tier2', '');
     FormManager.readOnly('tier2');
 
-    FormManager.setValue('billToCustNo', '');
+    // FormManager.setValue('billToCustNo', '');
     FormManager.enable('billToCustNo');
 
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
@@ -6418,6 +6418,56 @@ function addDnBSearchValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function findImportCMR() {
+  var creditToCustNo = FormManager.getActualValue('creditToCustNo');
+  var billToCustNo = FormManager.getActualValue('billToCustNo');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (creditToCustNo == '' || billToCustNo == '') {
+    cmr.showAlert('Please input the both Credit and Bill To Customer No. to search for.');
+    return;
+  }
+  cmr.importcmr = creditToCustNo;
+  cmr.importcntry = cntry;
+  cmr.showConfirm('doImportCmrs()', 'Records with Credit Customer Number ' + cmrNo + ' will be imported by the system. The data will replace all the current data on the request. Continue?', null,
+      null, {
+        OK : 'Yes',
+        CANCEL : 'Cancel'
+      });
+}
+
+function doImportCmrs(addressOnly) {
+  var cmrNo = cmr.importcmr;
+  var addrType = '';
+  var addrSeq = '';
+  var result = cmr.currentCmrResult;
+  if (result && result.data.addressType) {
+    addrType = result.data.addressType;
+    addrSeq = result.data.addressSeq;
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  cmr.showProgress('Importing records with Credit Customer Number ' + cmrNo + '.  This process might take a while. Please wait..');
+  document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
+      + cmrNo + '&system=cmr' + (cmr.searchIssuingCntry != null ? '&searchIssuingCntry=' + cmr.searchIssuingCntry : '') + (cmr.skipAddress != null ? '&skipAddress=' + cmr.skipAddress : ''));
+  document.forms['frmCMR'].submit();
+}
+
+function disableBpImport() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var btnImportBp = FormManager.getActualValue('btnImportBp');
+  if (reqType == 'C') {
+    if (custSubGrp == 'BPWPQ') {
+      document.getElementById("btnImportBp").style.visibility = "visible";
+    } else {
+      document.getElementById("btnImportBp").style.visibility = "hidden";
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -6466,7 +6516,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
-
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
@@ -6538,5 +6587,8 @@ dojo.addOnLoad(function() {
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
+
+  GEOHandler.addAfterConfig(disableBpImport, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableBpImport, GEOHandler.JP);
 
 });
