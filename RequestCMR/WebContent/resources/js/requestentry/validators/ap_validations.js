@@ -51,7 +51,7 @@ function addHandlersForAP() {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function (value) {
       cmr
         .showAlert(
-          '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of "VAT Registration Status" is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting \'No 鈥� VAT unapplicable\', you are confirming that this customer has no VAT# then "VAT Registration Status" is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()', 'VatRegistrationStatus', {
+          '<div align="center"><strong>VAT Registration Status validation </strong></div> <br/> Please note: <br/> <ul style="list-style-type:circle"> <li>You have to make sure the selection(Yes/No) of "VAT Registration Status" is correct for the Thailand VAT# you have filled. This is specific to the moment you submit this request.<br/>The status can be validated via VES Thailand: <a href="https://eservice.rd.go.th/rd-ves-web/search/vat" target="_blank" rel="noopener noreferrer"> https://eservice.rd.go.th/rd-ves-web/search/vat </a> </li><br/> <li> By selecting \'No – VAT unapplicable\', you are confirming that this customer has no VAT# then "VAT Registration Status" is not applicable for the same.</li> </ul>', 'VAT Registration Status validation', 'vatRegistrationForSG()', 'VatRegistrationStatus', {
           OK: 'I confirm',
         });
     });
@@ -1274,23 +1274,27 @@ function defaultCMRNumberPrefixforSingapore() {
 }
 
 // CREATCMR-7656
-function defaultCMRNumberPrefixforNewZealand() {
-  console.log('>>>> defaultCMRNumberPrefixforNewZealand >>>>');
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (reqType == 'C') {
-    if (custSubGrp == 'INTER') {
-      FormManager.enable('cmrNoPrefix');
-      FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ? '990---' : _pagemodel.cmrNoPrefix);
-      FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CMR Number Prefix'], 'MAIN_IBM_TAB');
-    }
-    else {
-      FormManager.setValue('cmrNoPrefix', '');
-      FormManager.readOnly('cmrNoPrefix');
-      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-    }
-  }
+function defaultCMRNumberPrefixforANZ() {
+  console.log('>>>> defaultCMRNumberPrefixforANZ >>>>');
+  FormManager.hide('CmrNoPrefix', 'cmrNoPrefix');
+  //FormManager.show('MrcCd','mrcCd');
+  //FormManager.show('RepTeamMemberNo', 'repTeamMemberNo');
+  
+//  var reqType = FormManager.getActualValue('reqType');
+//  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+//  var custSubGrp = FormManager.getActualValue('custSubGrp');
+//  if (reqType == 'C') {
+//    if (custSubGrp == 'INTER') {
+//      FormManager.enable('cmrNoPrefix');
+//      FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ? '990---' : _pagemodel.cmrNoPrefix);
+//      FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CMR Number Prefix'], 'MAIN_IBM_TAB');
+//    }
+//    else {
+//      FormManager.setValue('cmrNoPrefix', '');
+//      FormManager.readOnly('cmrNoPrefix');
+//      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+//    }
+//  }
 }
 
 // CREATCMR-7656
@@ -8598,8 +8602,10 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, [SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA]);
   GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforSingapore, [SysLoc.SINGAPORE]);
   // CREATCMR-7656
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefixforNewZealand, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforNewZealand, [SysLoc.NEW_ZEALAND]);
+  GEOHandler.addAfterConfig(defaultCMRNumberPrefixforANZ, [SysLoc.NEW_ZEALAND]);
+  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforANZ, [SysLoc.NEW_ZEALAND]);
+  GEOHandler.addAfterConfig(defaultCMRNumberPrefixforANZ, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforANZ, [SysLoc.AUSTRALIA]);
   // 2333
   GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
