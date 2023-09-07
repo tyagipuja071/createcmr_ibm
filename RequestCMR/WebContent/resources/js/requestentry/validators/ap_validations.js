@@ -2776,26 +2776,40 @@ function onIsicChange() {
   var cmrResult = FormManager.getActualValue('findCmrResult');
   var dnbResult = FormManager.getActualValue('findDnbResult');
   var dplCheck = FormManager.getActualValue('dplChkResult');
-  var cntrySet = new Set (['744', '834','616']);
-  
+  var cntrySet = new Set([ '744', '834', '616', '796' ]);
+
   if (reqType != 'C' && role != 'REQUESTER' && !cntrySet.has(cmrIssuingCntry)) {
-    return ;
+    return;
   }
-  
-// FormManager.readOnly('isicCd');
-  if (cmrResult != '' && cmrResult == 'Accepted' ) {
-    setIsicCdIfCmrResultAccepted(value);
-  } else if (dnbResult != '' && dnbResult == 'Accepted') {
-    setIsicCdIfDnbResultAccepted(value);
-  } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
-    setIsicCdIfDnbAndCmrResultOther(value);
+
+  // FormManager.readOnly('isicCd');
+  if (cmrResult != '' && cmrResult == 'Accepted') {
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.enable('isicCd');
+    } else {
+      setIsicCdIfCmrResultAccepted(value);
+    }
   }
-// if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
-// '') {
-// FormManager.readOnly('isicCd');
-// } else {
-// FormManager.enable('isicCd');
-// }
+  if (dnbResult != '' && dnbResult == 'Accepted') {
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.readOnly('isicCd');
+    } else {
+      setIsicCdIfDnbResultAccepted(value);
+    }
+  }
+  if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.readOnly('isicCd');
+    } else {
+      setIsicCdIfDnbAndCmrResultOther(value);
+    }
+  }
+  // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
+  // '') {
+  // FormManager.readOnly('isicCd');
+  // } else {
+  // FormManager.enable('isicCd');
+  // }
   if ((dplCheck == 'AP' || dplCheck == 'AF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834')
       && (custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS' || custSubGrp == 'ESOSW')) {
     FormManager.readOnly('apCustClusterId');
