@@ -2763,6 +2763,7 @@ function setIsicCdIfDnbAndCmrResultOther(value){
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
+  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function onIsicChange() {
@@ -8029,10 +8030,11 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     } else if(clusterSGAllInac){
       console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
       cmt = '%';
-    } else if(!custSubGrpListSg.includes(custSubGrp)){
-      cmt = '%'+ cluster +'%';
-      console.log('setInacCdTypeStatus() >>>> cmt='+cmt);
-    }
+    } 
+//    else if(!custSubGrpListSg.includes(custSubGrp)){
+//      cmt = '%'+ cluster +'%';
+//      console.log('setInacCdTypeStatus() >>>> cmt='+cmt);
+//    }
     
     var qParams = {
         _qall : 'Y',
