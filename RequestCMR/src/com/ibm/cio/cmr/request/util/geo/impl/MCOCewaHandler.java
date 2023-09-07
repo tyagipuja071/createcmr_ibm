@@ -892,4 +892,13 @@ public class MCOCewaHandler extends MCOHandler {
     }
   }
 
+  @Override
+  public boolean hasChecklist(String cmrIssiungCntry) {
+    if (SystemLocation.SOUTH_SUDAN.equals(cmrIssiungCntry)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }
