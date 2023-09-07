@@ -202,7 +202,8 @@
       <cmr:label fieldId="creditToCustNo">
             <cmr:fieldLabel fieldId="CreditToCustNo" />:
           </cmr:label>
-          <cmr:field path="creditToCustNo" id="creditToCustNo" fieldId="CreditToCustNo" tabId="MAIN_IBM_TAB" />
+          <cmr:field path="creditToCustNo" id="creditToCustNo" fieldId="CreditToCustNo" tabId="MAIN_IBM_TAB" />          
+          <img title="Import the CMR" id="btnImportBp" class="cmr-proceed2-icon" src="${resourcesPath}/images/search2.png" onclick="findImportCMR()" />
         </p>
       </cmr:column>
   </cmr:row>  
