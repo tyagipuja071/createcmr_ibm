@@ -646,8 +646,8 @@ function onCustSubGrpChange() {
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     console.log('custSubGrp CHANGED here >>>>');
     FormManager.readOnly('subIndustryCd');
-//    if (FormManager.getActualValue('viewOnlyPage') != 'true')
-//      FormManager.enable('isicCd');
+// if (FormManager.getActualValue('viewOnlyPage') != 'true')
+// FormManager.enable('isicCd');
        
     if (FormManager.getActualValue('reqType') == 'C') {  
       setLockIsicfromDNB();
@@ -1184,15 +1184,16 @@ function filterInacCd(cmrIssuCntry, clusters,inacType,inacCd) {
   }
 }
 
-//var _isicHandler = null;
-//function onIsicChangeHandler() {
-//  console.log('>>>> onIsicChangeHandler >>>>');
-//  if (_isicHandler == null) {
-//    _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-//      onIsicChange();
-//    });
-//  }
-//}
+// var _isicHandler = null;
+// function onIsicChangeHandler() {
+// console.log('>>>> onIsicChangeHandler >>>>');
+// if (_isicHandler == null) {
+// _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange',
+// function(value) {
+// onIsicChange();
+// });
+// }
+// }
 
 function onIsicChange() {
   console.log('>>>> onIsicChange >>>>');
@@ -1216,12 +1217,14 @@ function onIsicChange() {
   } else if (dnbResult != '' && dnbResult == 'Accepted') {
     setIsicCdIfDnbResultAccepted(value);
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+    FormManager.readOnly('isicCd');
     setIsicCdIfDnbAndCmrResultOther(value);
   }
 }
 
 function setIsicCdIfCmrResultAccepted(value) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var cmrResult = FormManager.getActualValue('findCmrResult');
   console.log(">>>>setDefaultValueForCreate()>>>> SubGrp="+custSubGrp);
   var reqId = FormManager.getActualValue('reqId');
   var isicCdInDB = '';
@@ -1242,7 +1245,9 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.setValue('isicCd', isicCdInDB);
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
-  } else {
+  } else if(cmrResult != '' && cmrResult == 'Accepted'){
+    FormManager.enable('isicCd');
+   } else {
     FormManager.readOnly('isicCd');
     FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
@@ -3080,9 +3085,9 @@ function setLockIsicfromDNB() {
   if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
   } 
-//  else {
-//    FormManager.enable('isicCd');
-//  }
+// else {
+// FormManager.enable('isicCd');
+// }
 }
 
 function addressQuotationValidatorGCG() {
