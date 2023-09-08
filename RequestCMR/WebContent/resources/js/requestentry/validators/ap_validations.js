@@ -315,12 +315,12 @@ function addAfterConfigAP() {
 
   if (role == 'REQUESTER' && reqType == 'C') {
     /*
-      * if (cntry == SysLoc.NEW_ZEALAND) { if (custSubGrp == 'INTER' || custSubGrp ==
-      * 'XINT' || custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM' || custSubGrp ==
-      * 'BLUMX' || custSubGrp == 'XBLUM' || custSubGrp == 'MKTPC' || custSubGrp ==
-      * 'XMKTP') FormManager.readOnly('clientTier'); else
-      * FormManager.enable('clientTier'); }
-      */
+     * if (cntry == SysLoc.NEW_ZEALAND) { if (custSubGrp == 'INTER' ||
+     * custSubGrp == 'XINT' || custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM' ||
+     * custSubGrp == 'BLUMX' || custSubGrp == 'XBLUM' || custSubGrp == 'MKTPC' ||
+     * custSubGrp == 'XMKTP') FormManager.readOnly('clientTier'); else
+     * FormManager.enable('clientTier'); }
+     */
     if ((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA || cntry == SysLoc.INDONESIA || cntry == SysLoc.PHILIPPINES || cntry == SysLoc.SINGAPORE || cntry == SysLoc.THAILAND || cntry == SysLoc.MALASIA) && (custSubGrp == 'ECSYS' || custSubGrp == 'XECO')) {
       FormManager.setValue('mrcCd', '3');
       FormManager.setValue('clientTier', 'Y');
@@ -1277,24 +1277,26 @@ function defaultCMRNumberPrefixforSingapore() {
 function defaultCMRNumberPrefixforANZ() {
   console.log('>>>> defaultCMRNumberPrefixforANZ >>>>');
   FormManager.hide('CmrNoPrefix', 'cmrNoPrefix');
-  //FormManager.show('MrcCd','mrcCd');
-  //FormManager.show('RepTeamMemberNo', 'repTeamMemberNo');
-  
-//  var reqType = FormManager.getActualValue('reqType');
-//  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-//  var custSubGrp = FormManager.getActualValue('custSubGrp');
-//  if (reqType == 'C') {
-//    if (custSubGrp == 'INTER') {
-//      FormManager.enable('cmrNoPrefix');
-//      FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ? '990---' : _pagemodel.cmrNoPrefix);
-//      FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CMR Number Prefix'], 'MAIN_IBM_TAB');
-//    }
-//    else {
-//      FormManager.setValue('cmrNoPrefix', '');
-//      FormManager.readOnly('cmrNoPrefix');
-//      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-//    }
-//  }
+  // FormManager.show('MrcCd','mrcCd');
+  // FormManager.show('RepTeamMemberNo', 'repTeamMemberNo');
+
+  // var reqType = FormManager.getActualValue('reqType');
+  // var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  // var custSubGrp = FormManager.getActualValue('custSubGrp');
+  // if (reqType == 'C') {
+  // if (custSubGrp == 'INTER') {
+  // FormManager.enable('cmrNoPrefix');
+  // FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ?
+  // '990---' : _pagemodel.cmrNoPrefix);
+  // FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CMR Number
+  // Prefix'], 'MAIN_IBM_TAB');
+  // }
+  // else {
+  // FormManager.setValue('cmrNoPrefix', '');
+  // FormManager.readOnly('cmrNoPrefix');
+  // FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+  // }
+  // }
 }
 
 // CREATCMR-7656
@@ -2764,6 +2766,7 @@ function setIsicCdIfDnbAndCmrResultOther(value) {
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
+  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function onIsicChange() {
@@ -2780,7 +2783,7 @@ function onIsicChange() {
   var apCustClusterId = FormManager.getActualValue('apCustClusterId');
   var clientTier = FormManager.getActualValue('clientTier');
 
-  var cntrySet = new Set(['744', '834', '616']);
+  var cntrySet = new Set(['744', '834', '616', '796']);
 
   if (reqType != 'C' && role != 'REQUESTER' && !cntrySet.has(cmrIssuingCntry)) {
     return;
@@ -2788,10 +2791,20 @@ function onIsicChange() {
 
   // FormManager.readOnly('isicCd');
   if (cmrResult != '' && cmrResult == 'Accepted') {
-    setIsicCdIfCmrResultAccepted(value);
-  } else if (dnbResult != '' && dnbResult == 'Accepted') {
-    setIsicCdIfDnbResultAccepted(value);
-  } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.enable('isicCd');
+    } else {
+      setIsicCdIfCmrResultAccepted(value);
+    }
+  }
+  if (dnbResult != '' && dnbResult == 'Accepted') {
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.readOnly('isicCd');
+    } else {
+      setIsicCdIfDnbResultAccepted(value);
+    }
+  }
+  if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
     setIsicCdIfDnbAndCmrResultOther(value);
   }
   // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
@@ -3604,7 +3617,8 @@ function setCTCIsuByClusterANZ() {
                 FormManager.readOnly('isuCd');
               }
             } else if ((custSubGrp.includes('BLUMX') || custSubGrp.includes('MKTPC') || custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')) && (_cluster == '00001' || _cluster == '00002')) {
-              // CREATCMR-7653 cluster/QTC/ISU: default as 00002/Z/21 - lock field
+              // CREATCMR-7653 cluster/QTC/ISU: default as 00002/Z/21 - lock
+              // field
               if (_cmrIssuingCntry == '796' && custSubGrp.includes('DUMMY') && _cluster == '00002') {
                 FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
                 FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
@@ -3653,9 +3667,12 @@ function setCTCIsuByClusterANZ() {
       }
     }
 
-    // if (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'DUMMY'
-    // || custSubGrp == 'INTER' || custSubGrp == 'XBLUM' || custSubGrp == 'XMKTP' ||
-    // custSubGrp == 'XDUMM' || custSubGrp == 'XINT' || _cluster.includes('71101')
+    // if (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp ==
+    // 'DUMMY'
+    // || custSubGrp == 'INTER' || custSubGrp == 'XBLUM' || custSubGrp ==
+    // 'XMKTP' ||
+    // custSubGrp == 'XDUMM' || custSubGrp == 'XINT' ||
+    // _cluster.includes('71101')
     // || _cluster.includes('71100') || _cluster.includes('00001') ||
     // _cluster.includes('00002')) {
     // FormManager.setValue('isuCd', '34');
@@ -4239,7 +4256,7 @@ function addGovIndcHanlder() {
 var _govCustTypeHandler = null;
 function addGovCustTypHanlder() {
   _govIndcHandler = dojo.connect(FormManager.getField('taxCd2'), 'onChange', function (value) {
-    //setAbbrevNameforGovType();
+    // setAbbrevNameforGovType();
     setAnzKuklaFor();
   });
 }
@@ -8073,10 +8090,11 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     } else if (clusterSGAllInac) {
       console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
       cmt = '%';
-    } else if (!custSubGrpListSg.includes(custSubGrp)) {
-      cmt = '%' + cluster + '%';
-      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
     }
+    // else if(!custSubGrpListSg.includes(custSubGrp)){
+    // cmt = '%'+ cluster +'%';
+    // console.log('setInacCdTypeStatus() >>>> cmt='+cmt);
+    // }
 
     var qParams = {
       _qall: 'Y',
@@ -8655,8 +8673,10 @@ dojo.addOnLoad(function () {
   GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [SysLoc.SINGAPORE]);
   GEOHandler.addAfterTemplateLoad(setCollCdFrSingapore, [SysLoc.SINGAPORE]);
   // CREATCMR-9955 remove character limitation in below scenario
-  // GEOHandler.registerValidator(addAddressLengthValidators, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND], null, true);
-  // GEOHandler.registerValidator(addStreetValidationChkReq, [SysLoc.AUSTRALIA], null, true);
+  // GEOHandler.registerValidator(addAddressLengthValidators, [SysLoc.AUSTRALIA,
+  // SysLoc.NEW_ZEALAND], null, true);
+  // GEOHandler.registerValidator(addStreetValidationChkReq, [SysLoc.AUSTRALIA],
+  // null, true);
   GEOHandler.registerValidator(validateContractAddrAU, [SysLoc.AUSTRALIA], null, true);
   GEOHandler.registerValidator(validateCustNameForNonContractAddrs, [SysLoc.AUSTRALIA], null, true);
   GEOHandler.registerValidator(validateStreetAddrCont2, [SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
