@@ -1279,22 +1279,22 @@ function defaultCMRNumberPrefixforANZ() {
   FormManager.hide('CmrNoPrefix', 'cmrNoPrefix');
   //FormManager.show('MrcCd','mrcCd');
   //FormManager.show('RepTeamMemberNo', 'repTeamMemberNo');
-  
-//  var reqType = FormManager.getActualValue('reqType');
-//  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-//  var custSubGrp = FormManager.getActualValue('custSubGrp');
-//  if (reqType == 'C') {
-//    if (custSubGrp == 'INTER') {
-//      FormManager.enable('cmrNoPrefix');
-//      FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ? '990---' : _pagemodel.cmrNoPrefix);
-//      FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CMR Number Prefix'], 'MAIN_IBM_TAB');
-//    }
-//    else {
-//      FormManager.setValue('cmrNoPrefix', '');
-//      FormManager.readOnly('cmrNoPrefix');
-//      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-//    }
-//  }
+
+  //  var reqType = FormManager.getActualValue('reqType');
+  //  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  //  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  //  if (reqType == 'C') {
+  //    if (custSubGrp == 'INTER') {
+  //      FormManager.enable('cmrNoPrefix');
+  //      FormManager.setValue('cmrNoPrefix', _pagemodel.cmrNoPrefix == null ? '990---' : _pagemodel.cmrNoPrefix);
+  //      FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CMR Number Prefix'], 'MAIN_IBM_TAB');
+  //    }
+  //    else {
+  //      FormManager.setValue('cmrNoPrefix', '');
+  //      FormManager.readOnly('cmrNoPrefix');
+  //      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+  //    }
+  //  }
 }
 
 // CREATCMR-7656
@@ -2764,6 +2764,7 @@ function setIsicCdIfDnbAndCmrResultOther(value) {
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
+  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function onIsicChange() {
@@ -2780,7 +2781,7 @@ function onIsicChange() {
   var apCustClusterId = FormManager.getActualValue('apCustClusterId');
   var clientTier = FormManager.getActualValue('clientTier');
 
-  var cntrySet = new Set(['744', '834', '616']);
+  var cntrySet = new Set(['744', '834', '616', '796']);
 
   if (reqType != 'C' && role != 'REQUESTER' && !cntrySet.has(cmrIssuingCntry)) {
     return;
@@ -2788,11 +2789,25 @@ function onIsicChange() {
 
   // FormManager.readOnly('isicCd');
   if (cmrResult != '' && cmrResult == 'Accepted') {
-    setIsicCdIfCmrResultAccepted(value);
-  } else if (dnbResult != '' && dnbResult == 'Accepted') {
-    setIsicCdIfDnbResultAccepted(value);
-  } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
-    setIsicCdIfDnbAndCmrResultOther(value);
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.enable('isicCd');
+    } else {
+      setIsicCdIfCmrResultAccepted(value);
+    }
+  }
+  if (dnbResult != '' && dnbResult == 'Accepted') {
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.readOnly('isicCd');
+    } else {
+      setIsicCdIfDnbResultAccepted(value);
+    }
+  }
+  if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+    if (cntrySet.has(cmrIssuingCntry)) {
+      FormManager.readOnly('isicCd');
+    } else {
+      setIsicCdIfDnbAndCmrResultOther(value);
+    }
   }
   // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
   // '') {
@@ -8073,10 +8088,11 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     } else if (clusterSGAllInac) {
       console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
       cmt = '%';
-    } else if (!custSubGrpListSg.includes(custSubGrp)) {
-      cmt = '%' + cluster + '%';
-      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
     }
+    //    else if(!custSubGrpListSg.includes(custSubGrp)){
+    //      cmt = '%'+ cluster +'%';
+    //      console.log('setInacCdTypeStatus() >>>> cmt='+cmt);
+    //    }
 
     var qParams = {
       _qall: 'Y',
