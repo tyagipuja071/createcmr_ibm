@@ -2168,6 +2168,7 @@ function setIsicCdIfDnbAndCmrResultOther(value) {
     FormManager.setValue('isicCd', '');
     FormManager.enable('isicCd');
   }
+  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function onIsicChange() {
