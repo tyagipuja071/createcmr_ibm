@@ -2806,11 +2806,7 @@ function onIsicChange() {
     }
   }
   if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
-    if (cntrySet.has(cmrIssuingCntry)) {
-      FormManager.readOnly('isicCd');
-    } else {
       setIsicCdIfDnbAndCmrResultOther(value);
-    }
   }
   // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
   // '') {
