@@ -1178,6 +1178,22 @@ function isPrivateScenario() {
   return ["PRICU", "PRIPE", "FIPRI", "DKPRI", "BEPRI", "CHPRI","LUPRI"].includes(custSubGrp);
 }
 
+function prospectFilter() {
+  console.log('>>> prospectFilter');
+  if (_inacHandler == null) {
+    _inacHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      var ifProspect = FormManager.getActualValue('prospLegalInd');
+      if (dijit.byId('prospLegalInd')) {
+        ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+      }
+      if (ifProspect == 'Y') {
+        FormManager.clearValue('inacCd');
+        FormManager.enable('inacCd');
+      }
+    });
+  }
+}
+
 function setVatIndFieldsForGrp1AndNordx() {
   if (isViewOnly()) {
     return;
@@ -1309,4 +1325,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
+  GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
+  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries)
 });
