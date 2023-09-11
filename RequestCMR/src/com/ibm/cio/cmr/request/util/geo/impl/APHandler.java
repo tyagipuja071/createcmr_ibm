@@ -486,7 +486,7 @@ public abstract class APHandler extends GEOHandler {
       for (IndiaProvCdStateCityMapping mapping : provCdArCdMappings) {
         String mappingCity = AutomationUtil.getCleanString(mapping.getCity());
         String requestCity = StringUtils.isNotEmpty(addr.getCity1()) ? addr.getCity1().toUpperCase() : "";
-        if (mappingCity.contains(requestCity)) {
+        if (StringUtils.isNotEmpty(mappingCity) && mappingCity.contains(requestCity)) {
           data.setBusnType(mapping.getProvinceCd());
           data.setTerritoryCd(mapping.getProvinceCd());
           data.setCollectionCd(mapping.getArCode());
@@ -500,7 +500,7 @@ public abstract class APHandler extends GEOHandler {
         for (IndiaProvCdStateCityMapping mapping : provCdArCdMappings) {
           String mappingState = AutomationUtil.getCleanString(mapping.getState());
           String requestState = getStateDesc(entityManager, addr.getStateProv());
-          if (mappingState.contains(requestState)) {
+          if (StringUtils.isNotEmpty(mappingState) && mappingState.contains(requestState)) {
             data.setBusnType(mapping.getProvinceCd());
             data.setTerritoryCd(mapping.getProvinceCd());
             data.setCollectionCd(mapping.getArCode());
