@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -135,6 +136,25 @@ public class JPHandler extends GEOHandler {
     } else {
       return false;
     }
+  }
+
+  private static final Map<String, String> INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP;
+  static {
+    Map<String, String> map = new HashMap<>();
+    map.put("ZS01", "3");
+    map.put("ZP01", "2");
+    map.put("ZI01", "7");
+    map.put("ZP02", "A");
+    map.put("ZP03", "B");
+    map.put("ZP04", "C");
+    map.put("ZP05", "D");
+    map.put("ZI03", "E");
+    map.put("ZP06", "F");
+    map.put("ZP07", "G");
+    map.put("ZP08", "H");
+    map.put("ZC01", "0");
+    map.put("ZE01", "3");
+    INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP = Collections.unmodifiableMap(map);
   }
 
   /**
@@ -1671,6 +1691,18 @@ public class JPHandler extends GEOHandler {
       return null;
   }
 
+  private List<IntlAddr> getAllIntlAddrByReqId(long reqId, EntityManager entityManager) {
+    String qryIntlAddrListById = ExternalizedQuery.getSql("GET.INTL_ADDR_LIST_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, qryIntlAddrListById);
+    query.setParameter("REQ_ID", reqId);
+    List<IntlAddr> intlAddrList = query.getResults(IntlAddr.class);
+    if (intlAddrList != null && intlAddrList.size() > 0) {
+      return intlAddrList;
+
+    }
+    return null;
+  }
+
   @Override
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     IntlAddr iAddr = new IntlAddr();
@@ -2306,6 +2338,38 @@ public class JPHandler extends GEOHandler {
       }
     }
 
+    setEnglishAddrFieldsFromRDC(entityManager, admin, data);
+  }
+
+  private void setEnglishAddrFieldsFromRDC(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    String cmrNo = CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) ? admin.getModelCmrNo() : data.getCmrNo();
+
+    if (StringUtils.isNotBlank(cmrNo)) {
+      List<Kna1> kna1List = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), cmrNo);
+
+      if (kna1List != null && !kna1List.isEmpty()) {
+        List<IntlAddr> intlAddrs = getAllIntlAddrByReqId(admin.getId().getReqId(), entityManager);
+        if (intlAddrs != null) {
+          for (IntlAddr intlAddr : intlAddrs) {
+            processIntlAddr(intlAddr, kna1List, entityManager);
+          }
+          entityManager.flush();
+        }
+      }
+    }
+  }
+
+  private void processIntlAddr(IntlAddr intlAddr, List<Kna1> kna1List, EntityManager entityManager) {
+    String kna1SeqNum = INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP.get(intlAddr.getId().getAddrType());
+    Kna1 kna1 = kna1List.stream().filter(k -> k.getZzkvSeqno().equals(kna1SeqNum)).findAny().orElse(null);
+
+    if (kna1 != null) {
+      intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
+      intlAddr.setAddrTxt(kna1.getStras());
+      intlAddr.setCity1(kna1.getOrt01());
+      intlAddr.setCity2(kna1.getOrt02());
+      entityManager.merge(intlAddr);
+    }
   }
 
   private void updateBillToCustomerNoAfterImport(Data data) {
