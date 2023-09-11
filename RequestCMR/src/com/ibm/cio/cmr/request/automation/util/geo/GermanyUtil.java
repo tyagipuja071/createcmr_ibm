@@ -901,7 +901,7 @@ public class GermanyUtil extends AutomationUtil {
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
-          if (dataChange != null && !"CAP Record".equals(dataChange.getDataField())) {
+          if (dataChange != null && !"CAP Record".equals(dataChange.getDataField()) && dataChange.getNewData() != null) {
             otherFieldsChanged = true;
             break;
           }
@@ -1128,7 +1128,16 @@ public class GermanyUtil extends AutomationUtil {
                   isNegativeCheckNeedeed = false;
                   break;
 
-                } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
+                } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) && shipTo != null
+                    && (changes.isAddressChanged(addrType))) {
+                  validation.setSuccess(true);
+                  LOG.debug("Updates to relevant addresses is found.Updates verified.");
+                  detail.append("Updates to relevant addresses found but have been marked as Verified.");
+                  validation.setMessage("Validated");
+                  isNegativeCheckNeedeed = false;
+                  break;
+
+                 } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
                   validation.setSuccess(true);
                   LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
