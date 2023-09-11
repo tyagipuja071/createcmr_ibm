@@ -227,6 +227,21 @@ function addAfterConfigAP() {
     FormManager.enable('subIndustryCd');
   }
 
+  if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
+    if (role == 'REQUESTER' || role == 'VIEWER' || role == 'PROCESSOR') {
+      FormManager.setValue('mrcCd', '3');
+      FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('apCustClusterId');
+      if (cntry == '616') {
+        FormManager.setValue('apCustClusterId', "09057");
+        FormManager.setValue('isuCd', '5K');
+      } else if (cntry == '834') {
+        FormManager.setValue('apCustClusterId', "09052");
+        FormManager.setValue('isuCd', '5K');
+      }
+    }
+  }
   if (reqType == 'C' && custSubGrp == 'ECOSY' && (cntry == '738' || cntry == '736')) {
     FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
@@ -363,11 +378,12 @@ function addAfterConfigAP() {
   if (cntry == '834') {
     // FormManager.removeValidator('clientTier', Validators.REQUIRED);
     addVatValidationforSingapore();
-    // CREATCMR-10202
-    if (custSubGrp == 'CROSS' || custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM') {
-      FormManager.setValue('apCustClusterId', '09052');
-      FormManager.readOnly('apCustClusterId');
-      FormManager.setValue('isuCd', '5K');
+    // CREATCMR-7885
+    if (reqType == 'C' && ['ASLOM', 'NRML', 'CROSS'].includes(custSubGrp)) {
+      console.log('addAfterConfigAP >>> 834/ASLOM/NRML/CROSS >>> Set Cluster default as BLANK.');
+      if (custSubGrp == 'CROSS' && _pagemodel.apCustClusterId == null) {
+        FormManager.setValue('apCustClusterId', '00000');
+      }
     }
   }
   // CREATCMR-5269
@@ -1451,22 +1467,13 @@ function applyClusterFilters() {
 
 function resetFieldsAfterCustSubGrpChange() {
   console.log(">>>> resetInacNacCdAfterCustSubGrpChange >>>>");
-  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp')
-  var clientTier = FormManager.getActualValue('clientTier')
-  var apCustClusterId = FormManager.getActualValue('apCustClusterId')
-  if (cmrIssuingCntry == '616' && (custSubGrp == 'ESOSW' || custSubGrp == 'KYNDR' || custSubGrp == 'CROSS')) {
-    FormManager.setValue('apCustClusterId', "09057");
+  if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
     FormManager.setValue('isuCd', '5K');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('apCustClusterId');
-  }
-  else {
+  } else {
     FormManager.setValue('isuCd', '');
     // FormManager.setValue('inacType', '');
     // FormManager.setValue('inacCd', '');
   }
-
 }
 
 function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray, clusterArray) {
@@ -2794,11 +2801,6 @@ function onIsicChange() {
   // } else {
   // FormManager.enable('isicCd');
   // }
-  if ((dplCheck == 'AP' || dplCheck == 'AF') && (cmrIssuingCntry == '616' || cmrIssuingCntry == '834')
-    && (custSubGrp == 'KYNDR' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS' || custSubGrp == 'ESOSW')) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-  }
 }
 
 function setPrivate() {
@@ -3067,6 +3069,7 @@ function setCtcOnIsuCdChangeASEAN() {
 
 function setCtcOnIsuCdChangeANZ(isuCd) {
   console.log('>>>> setCtcOnIsuCdChangeANZ >>>>');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -3084,6 +3087,9 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
   } else {
     if (cntry != '736' && cntry != '738' && cntry != '744') {
       FormManager.enable('clientTier');
+    }
+    if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
+      FormManager.readOnly('clientTier');
     }
     handleObseleteExpiredDataForUpdate();
   }
