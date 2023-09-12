@@ -562,6 +562,7 @@ public class MCOCewaHandler extends MCOHandler {
             String tin = "";// 15
             String isuCd = "";// 7
             String clientTier = "";// 8
+            String stcOrdBlk = "";// 10
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -573,14 +574,16 @@ public class MCOCewaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(9);
               embargo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
-              cof = validateColValFromCell(currCell);
+              stcOrdBlk = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
-              cod = validateColValFromCell(currCell);
+              cof = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(12);
-              vat = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(14);
-              deptNo = validateColValFromCell(currCell);
+              cod = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
+              vat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(15);
+              deptNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(14);
               phoneNoData = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
               isuCd = validateColValFromCell(currCell);
@@ -588,9 +591,9 @@ public class MCOCewaHandler extends MCOHandler {
               clientTier = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNoData = df.formatCellValue(row.getCell(13));
+                phoneNoData = df.formatCellValue(row.getCell(14));
               }
-              currCell = (XSSFCell) row.getCell(15);
+              currCell = (XSSFCell) row.getCell(16);
               tin = validateColValFromCell(currCell);
             }
 
@@ -748,6 +751,10 @@ public class MCOCewaHandler extends MCOHandler {
                   LOG.trace("Phone number should have numeric values only.");
                   error.addError((row.getRowNum() + 1), "", "Phone number should have numeric values only. ");
                 }
+              }
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(embargo)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
               }
             }
 

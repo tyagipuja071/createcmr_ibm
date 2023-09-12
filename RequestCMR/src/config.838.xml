@@ -93,6 +93,12 @@
           <length>1</length>
         </column>
         <column>
+           <label>STC order block code</label>
+           <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+           <width>2</width>
+           <lovId>TaxExemptStatus3</lovId>
+         </column>
+        <column>
           <label>Mode of Payment</label>
           <dbColumn>MODE_OF_PAYMENT</dbColumn>
           <width>20</width>

@@ -2201,11 +2201,16 @@ public class MEHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 14;// default index
+      int stcOrdBlkIndex = 15;// default index
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
         currCell = row.getCell(cellIndex);
         String cellVal = validateColValFromCell(currCell);
         if ("Order block code".equals(cellVal)) {
           ordBlkIndex = cellIndex;
+          break;
+        }
+        if ("STC order block code".equals(cellVal)) {
+          stcOrdBlkIndex = cellIndex;
           break;
         }
       }
@@ -2219,6 +2224,8 @@ public class MEHandler extends BaseSOFHandler {
         }
         currCell = row.getCell(ordBlkIndex);
         String ordBlk = validateColValFromCell(currCell);
+        currCell = row.getCell(stcOrdBlkIndex);
+        String stcOrdBlk = validateColValFromCell(currCell);
         currCell = row.getCell(6);
         isuCd = validateColValFromCell(currCell);
         currCell = row.getCell(7);
@@ -2236,6 +2243,10 @@ public class MEHandler extends BaseSOFHandler {
           }
         }
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+          if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+            LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+          }
           if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
               || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
             LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");

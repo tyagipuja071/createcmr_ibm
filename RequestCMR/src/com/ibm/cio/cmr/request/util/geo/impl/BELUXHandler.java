@@ -2276,6 +2276,7 @@ public class BELUXHandler extends BaseSOFHandler {
     XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
     row = sheet.getRow(0);// data field name row
     int ordBlkIndex = 16;// default index
+    int stcOrdBlkIndex = 17;
     int cmrNoIndex = 0;// 0
     String cmrNo = null;
     for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
@@ -2283,6 +2284,10 @@ public class BELUXHandler extends BaseSOFHandler {
       String cellVal = validateColValFromCell(currCell);
       if ("Order block code".equals(cellVal)) {
         ordBlkIndex = cellIndex;
+        break;
+      }
+      if ("STC order block code".equals(cellVal)) {
+        stcOrdBlkIndex = cellIndex;
         break;
       }
     }
@@ -2299,12 +2304,19 @@ public class BELUXHandler extends BaseSOFHandler {
         LOG.trace("Order Block Code should only @, D, P, J. >> ");
         error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, D, P, J. ");
       }
+      currCell = row.getCell(stcOrdBlkIndex);
+      String stcOrdBlk = validateColValFromCell(currCell);
+      if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+        LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+        error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+      }
 
       currCell = row.getCell(cmrNoIndex);
       cmrNo = validateColValFromCell(currCell);
       if (isDivCMR(cmrNo)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
-        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+        error.addError((row.getRowNum() + 1), "CMR No.",
+            "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
       }
 
       if (is93CMR(cmrNo)) {

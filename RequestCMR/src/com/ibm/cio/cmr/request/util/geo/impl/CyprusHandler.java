@@ -3419,6 +3419,8 @@ public class CyprusHandler extends BaseSOFHandler {
             String enterpriseNo = ""; // 5
             String isuCd = ""; // 7
             String ctc = ""; // 8
+            String stcOrdBlk = ""; // 10
+            String ordBlk = ""; // 9
             List<String> checkList = null;
             long count = 0;
             if (row.getRowNum() == 2001) {
@@ -3492,6 +3494,10 @@ public class CyprusHandler extends BaseSOFHandler {
               isuCd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
               ctc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              ordBlk = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              stcOrdBlk = validateColValFromCell(currCell);
             }
 
             TemplateValidation error = new TemplateValidation(name);
@@ -3643,6 +3649,10 @@ public class CyprusHandler extends BaseSOFHandler {
                   LOG.trace("Enterprise number should have numeric values only.");
                   error.addError((row.getRowNum() + 1), "Enterprise No.", "Enterprise number should have numeric values only. ");
                 }
+              }
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
