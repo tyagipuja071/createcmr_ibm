@@ -1058,6 +1058,8 @@ public class MCOSaHandler extends MCOHandler {
             String isuCd = ""; // 10
             String clientTier = ""; // 11
             String enterprise = ""; // 17
+            String ordBlk = "";// 12
+            String stcOrdBlk = "";// 13
 
             boolean isDummyUpdate = true;
 
@@ -1112,13 +1114,19 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(9);
               inac = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(12);
+              ordBlk = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(13);
+              stcOrdBlk = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
               codFlag = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(15);
+              currCell = (XSSFCell) row.getCell(16);
               zs01Phone = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(16);
+              currCell = (XSSFCell) row.getCell(17);
               intDeptNum = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
@@ -1127,7 +1135,7 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(10);
               isuCd = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(17);
+              currCell = (XSSFCell) row.getCell(18);
               enterprise = validateColValFromCell(currCell);
             }
 
@@ -1170,6 +1178,11 @@ public class MCOSaHandler extends MCOHandler {
             }
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+              }
+
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");

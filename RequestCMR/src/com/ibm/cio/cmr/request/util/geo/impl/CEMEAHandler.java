@@ -2208,6 +2208,97 @@ public class CEMEAHandler extends BaseSOFHandler {
             String stateProv = ""; // 09
             String landCntry = ""; // 10
             String hardWareMaster = "";// 11
+      XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
+      row = sheet.getRow(0);// data field name row
+      int ordBlkIndex = 12;// default index
+      int stcOrdBlkIndex = 13;
+      int isuCdIndex = 6; //
+      int ctcIndex = 7; //
+      int fiscalCdIndex = 16; // default index
+      for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+        currCell = row.getCell(cellIndex);
+        String cellVal = validateColValFromCell(currCell);
+        if ("Order block code".equals(cellVal)) {
+          ordBlkIndex = cellIndex;
+          // break;
+        }
+        if ("STC order block code".equals(cellVal)) {
+          stcOrdBlkIndex = cellIndex;
+          break;
+        }
+        if ("ISU Code".equals(cellVal)) {
+          isuCdIndex = cellIndex;
+          // break;
+        }
+        if ("Client Tier".equals(cellVal)) {
+          ctcIndex = cellIndex;
+          // break;
+        }
+        if ("Fiscal Code".equals(cellVal)) {
+          fiscalCdIndex = cellIndex;
+          break;
+        }
+      }
+
+      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        TemplateValidation error = new TemplateValidation("Data");
+        row = sheet.getRow(rowIndex);
+        if (row == null) {
+          return; // stop immediately when row is blank
+        }
+        currCell = row.getCell(ordBlkIndex);
+        String ordBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
+          LOG.trace("Order Block Code should only @, E, R, J. >> ");
+          error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J. ");
+        }
+        currCell = row.getCell(stcOrdBlkIndex);
+        String stcOrdBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+        }
+        currCell = row.getCell(fiscalCdIndex);
+        String fiscalCd = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {
+          LOG.trace("fiscal code should consist only of digits");
+          error.addError((rowIndex + 1), "Fiscal Code", " fiscal code should consist only of digits.");
+        }
+        currCell = row.getCell(isuCdIndex);
+        String isuCd = validateColValFromCell(currCell);
+        currCell = row.getCell(ctcIndex);
+        String ctc = validateColValFromCell(currCell);
+        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+          LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
+          error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
+            LOG.trace("The row " + (rowIndex + 1)
+                + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((rowIndex + 1), "Client Tier",
+                ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+            LOG.trace("The row " + (rowIndex + 1)
+                + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((rowIndex + 1), "Client Tier",
+                ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+            LOG.trace("The row " + (rowIndex + 1)
+                + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((rowIndex + 1), "Client Tier",
+                ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+          }
+        } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd))) && !"@".equalsIgnoreCase(ctc)) {
+          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+          error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+        }
+        for (String name : countryAddrss) {
+          sheet = book.getSheet(name);
+          // Address Sheet
 
             // Data Sheet
 

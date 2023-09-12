@@ -10672,7 +10672,7 @@ function StcOrderBlockValidation() {
     return {
       validate : function() {
         // var role = FormManager.getActualValue('userRole').toUpperCase();
-        var ordBlk = FormManager.getActualValue('ordBlk');
+        var ordBlk = FormManager.getActualValue('embargoCd');
         var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
         if (ordBlk == null || ordBlk == '') {
           if (stcOrdBlk == 'ST' || stcOrdBlk == '') {
