@@ -647,7 +647,7 @@ public class MCOFstHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(9);
               embargo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
-              stcordBlk = validateColValFromCell(currCell);
+              stcOrdBlk = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
               cof = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(12);
