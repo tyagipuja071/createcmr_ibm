@@ -3615,6 +3615,8 @@ public class GreeceHandler extends BaseSOFHandler {
             String dataInac = ""; // 8
             String dataIsu = ""; // 9
             String dataCtc = ""; // 10
+            String ordBlk = ""; // 5
+            String stcOrdBlk = ""; // 6
             String dataModeOfPayment = ""; // 11
             String dataSalesRep = ""; // 13
             String cmrNo = ""; // 0
@@ -3652,20 +3654,22 @@ public class GreeceHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(5);
               dataEmbargo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
-              dataCollection = validateColValFromCell(currCell);
+              stcOrdBlk = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
-              dataEnterprise = validateColValFromCell(currCell);
+              dataCollection = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
-              dataInac = validateColValFromCell(currCell);
+              dataEnterprise = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
-              dataIsu = validateColValFromCell(currCell);
+              dataInac = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
-              dataCtc = validateColValFromCell(currCell);
+              dataIsu = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
-              dataModeOfPayment = validateColValFromCell(currCell);
+              dataCtc = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(12);
-              phoneNo = validateColValFromCell(currCell);
+              dataModeOfPayment = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
+              phoneNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(14);
               dataSalesRep = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(dataAbbrevName) || StringUtils.isNotBlank(dataAbbrevLoc) || StringUtils.isNotBlank(dataIsic)

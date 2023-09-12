@@ -137,7 +137,7 @@
         <column>
           <label>ISIC</label>
           <dbColumn>ISIC_CD</dbColumn>
-          <width>20</width>
+          <width>2</width>
           <bdsId>ISIC</bdsId>
         </column>
         <column>
@@ -145,6 +145,12 @@
           <dbColumn>EMBARGO_CD</dbColumn>
           <width>10</width>
           <length>1</length>
+        </column>
+        <column>
+          <label>STC order block code</label>
+          <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+          <width>10</width>
+          <lovId>TaxExemptStatus3</lovId>
         </column>
         <!-- 
         <column>

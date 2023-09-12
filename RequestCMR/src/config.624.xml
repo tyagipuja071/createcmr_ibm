@@ -142,7 +142,13 @@
 					<dbColumn>EMBARGO_CD</dbColumn>
 					<width>25</width>
 					<length>2</length>
-				</column>
+				</column>  
+                <column>
+                    <label>STC order block code</label>
+                    <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+                    <width>2</width>
+                    <lovId>TaxExemptStatus3</lovId>
+                </column>
 			</columns>
 		</tab>
 		<tab name="Sold-to" type="Address" typeCode="ZS01">

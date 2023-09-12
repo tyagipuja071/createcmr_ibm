@@ -2193,15 +2193,20 @@ public class CEMEAHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 12;// default index
+      int stcOrdBlkIndex = 13;
       int isuCdIndex = 6; //
       int ctcIndex = 7; //
-      int fiscalCdIndex = 15; // default index
+      int fiscalCdIndex = 16; // default index
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
         currCell = row.getCell(cellIndex);
         String cellVal = validateColValFromCell(currCell);
         if ("Order block code".equals(cellVal)) {
           ordBlkIndex = cellIndex;
           // break;
+        }
+        if ("STC order block code".equals(cellVal)) {
+          stcOrdBlkIndex = cellIndex;
+          break;
         }
         if ("ISU Code".equals(cellVal)) {
           isuCdIndex = cellIndex;
@@ -2228,6 +2233,12 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, R, J. >> ");
           error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J. ");
+        }
+        currCell = row.getCell(stcOrdBlkIndex);
+        String stcOrdBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
         }
         currCell = row.getCell(fiscalCdIndex);
         String fiscalCd = validateColValFromCell(currCell);

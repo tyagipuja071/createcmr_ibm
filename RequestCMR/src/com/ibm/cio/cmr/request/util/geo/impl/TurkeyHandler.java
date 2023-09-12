@@ -4046,18 +4046,21 @@ public class TurkeyHandler extends BaseSOFHandler {
             String name4 = "";// 10
             TemplateValidation error = new TemplateValidation(name);
             if ("Data".equalsIgnoreCase(name)) {
-              String isuCd = ""; // 10
-              String clientTier = ""; // 11
+              String isuCd = ""; // 11
+              String clientTier = ""; // 12
               String cmrNo = ""; // 0
-              String ordBlk = "";
+              String ordBlk = ""; // 6
+              String stcOrdBlk = ""; // 7
               currCell = (XSSFCell) row.getCell(0);
               cmrNo = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(11);
+              currCell = (XSSFCell) row.getCell(12);
               clientTier = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(10);
+              currCell = (XSSFCell) row.getCell(11);
               isuCd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               ordBlk = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              stcOrdBlk = validateColValFromCell(currCell);
               if (StringUtils.isEmpty(cmrNo)) {
                 LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
@@ -4066,6 +4069,10 @@ public class TurkeyHandler extends BaseSOFHandler {
               if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "Y".equals(ordBlk) || "C".equals(ordBlk) || "J".equals(ordBlk))) {
                 LOG.trace("Embargo should only @, Y, C, J. >> ");
                 error.addError((row.getRowNum() + 1), "Embargo Code", "Embargo Code should be only @, Y, C, J. ");
+              }
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
