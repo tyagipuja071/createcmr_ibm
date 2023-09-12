@@ -2263,6 +2263,7 @@ public class NLHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 15;// default index
+      int stcOrdBlkIndex = 16;//
       int cmrNoIndex = 0;// 0
       String cmrNo = null;
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
@@ -2270,6 +2271,10 @@ public class NLHandler extends BaseSOFHandler {
         String cellVal = validateColValFromCell(currCell);
         if ("Order block code".equals(cellVal)) {
           ordBlkIndex = cellIndex;
+          break;
+        }
+        if ("STC order block code".equals(cellVal)) {
+          stcOrdBlkIndex = cellIndex;
           break;
         }
       }
@@ -2286,6 +2291,12 @@ public class NLHandler extends BaseSOFHandler {
             || "6".equals(ordBlk) || "7".equals(ordBlk) || "J".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, P, 5, 6, 7, J. >> ");
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, P, 5, 6, 7, J. ");
+        }
+        currCell = row.getCell(stcOrdBlkIndex);
+        String stcOrdBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
         }
 
         currCell = row.getCell(cmrNoIndex);

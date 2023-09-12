@@ -1787,6 +1787,8 @@ public class ItalyHandler extends BaseSOFHandler {
         String indirizzoEmail = ""; // 17
         String isu = ""; // 18
         String clientTier = ""; // 19
+        String ordBlk = ""; // 22
+        String stcOrdBlk = ""; // 23
 
         row = sheet.getRow(rowIndex);
         if (row == null) {
@@ -1844,6 +1846,12 @@ public class ItalyHandler extends BaseSOFHandler {
         currCell = row.getCell(19);
         clientTier = validateColValFromCell(currCell);
 
+        currCell = row.getCell(22);
+        ordBlk = validateColValFromCell(currCell);
+
+        currCell = row.getCell(23);
+        stcOrdBlk = validateColValFromCell(currCell); 
+         
         LOG.debug("Fiscal Code =====> " + fiscalCode);
         LOG.debug("VAT #/ N.PARTITA I.V.A. =====> " + vatNumPartitaIVA);
         LOG.debug("Tax Code/ Code IVA =====> " + taxCodeIVACode);
@@ -1905,6 +1913,10 @@ public class ItalyHandler extends BaseSOFHandler {
                 "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Client Tier",
                 ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
+          }
+          if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+            LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
           }
         }
 

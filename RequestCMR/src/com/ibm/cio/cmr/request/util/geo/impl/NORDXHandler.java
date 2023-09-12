@@ -1102,14 +1102,15 @@ public class NORDXHandler extends BaseSOFHandler {
             String collection = ""; // 7
             String payment = ""; // 8
             String embargo = ""; // 9
-            String isu = ""; // 10
-            String ctc = ""; // 11
-            String leadingAccount = ""; // 12
-            String sortl = ""; // 13
-            String vat = ""; // 14
-            String salesRep = ""; // 15
-            String phone = ""; // 16
-            String language = ""; // 17
+            String isu = ""; // 11
+            String ctc = ""; // 12
+            String leadingAccount = ""; // 13
+            String sortl = ""; // 14
+            String vat = ""; // 15
+            String salesRep = ""; // 16
+            String phone = ""; // 17
+            String language = ""; // 18
+            String stcOrdBlk = ""; // 10
 
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
@@ -1192,15 +1193,21 @@ public class NORDXHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(9);
               embargo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              stcOrdBlk = validateColValFromCell(currCell);
               if (StringUtils.isNotBlank(embargo) && !"@JDK".contains(embargo)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Embargo code",
                     ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.<br>");
               }
-              currCell = (XSSFCell) row.getCell(11);
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(embargo)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+              }
+              currCell = (XSSFCell) row.getCell(12);
               ctc = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(10);
+              currCell = (XSSFCell) row.getCell(11);
               isu = validateColValFromCell(currCell);
               if ((StringUtils.isNotBlank(isu) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isu))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
@@ -1235,7 +1242,7 @@ public class NORDXHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
               }
-              currCell = (XSSFCell) row.getCell(12);
+              currCell = (XSSFCell) row.getCell(13);
               leadingAccount = validateColValFromCell(currCell);
               if ("@".equals(leadingAccount)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
@@ -1257,7 +1264,7 @@ public class NORDXHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "INAC", ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
               }
 
-              currCell = (XSSFCell) row.getCell(13);
+              currCell = (XSSFCell) row.getCell(14);
               sortl = validateColValFromCell(currCell);
               if (!StringUtils.isBlank(sortl) && !sortl.matches("^[A-Za-z0-9]+$")) {
                 LOG.trace(
@@ -1266,7 +1273,7 @@ public class NORDXHandler extends BaseSOFHandler {
                     ":Note that SORTL should be only alphanumeric. Please fix and upload the template again.<br>");
               }
 
-              currCell = (XSSFCell) row.getCell(14);
+              currCell = (XSSFCell) row.getCell(15);
               vat = validateColValFromCell(currCell);
               String vatTxt = df.formatCellValue(currCell);
               // if (!StringUtils.isBlank(phone) &&
@@ -1277,7 +1284,7 @@ public class NORDXHandler extends BaseSOFHandler {
                     "The row " + (row.getRowNum() + 1) + ":Note that VAT format is incorrect. Please fix and upload the template again.<br>");
               }
 
-              currCell = (XSSFCell) row.getCell(15);
+              currCell = (XSSFCell) row.getCell(16);
               salesRep = validateColValFromCell(currCell);
               if ("@".equals(salesRep)) {
                 LOG.trace(
@@ -1292,7 +1299,7 @@ public class NORDXHandler extends BaseSOFHandler {
                     ":Note that Sales Rep only accept AlphaNumeric. Please fix and upload the template again.<br>");
               }
 
-              currCell = (XSSFCell) row.getCell(16);
+              currCell = (XSSFCell) row.getCell(17);
               phone = validateColValFromCell(currCell);
               String phoneTxt = df.formatCellValue(currCell);
               // if (!StringUtils.isBlank(phone) &&

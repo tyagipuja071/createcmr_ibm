@@ -1666,6 +1666,11 @@ public class IsraelHandler extends EMEAHandler {
         if (StringUtils.isNotBlank(embargoCode) && !(Arrays.asList(embargoCodes).contains(embargoCode))) {
           error.addError(rowIndex + 1, "<br>Embargo Code", "Invalid Embargo Code. Only D, J and @ are valid.");
         }
+        String stcOrdBlk = validateColValFromCell(row.getCell(9));
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(embargoCode)) {
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+        }
         // Client Tier
         // String ctc = validateColValFromCell(row.getCell(11));
         // if (StringUtils.isNotBlank(ctc) && (!"Q".equals(ctc) &&
@@ -1674,17 +1679,17 @@ public class IsraelHandler extends EMEAHandler {
         // Only uppercase Q, Y and @ are valid.");
         // }
         // Enterprise Number
-        String enterpriseNumber = validateColValFromCell(row.getCell(12));
+        String enterpriseNumber = validateColValFromCell(row.getCell(13));
         if (StringUtils.isNotBlank(enterpriseNumber) && !StringUtils.isNumeric(enterpriseNumber)) {
           error.addError(rowIndex + 1, "<br>Enterprise Number", "Enterprise Number should be numeric only.");
         }
         // SBO
-        String sbo = validateColValFromCell(row.getCell(13));
+        String sbo = validateColValFromCell(row.getCell(14));
         if (StringUtils.isNotBlank(sbo) && !StringUtils.isNumeric(sbo)) {
           error.addError(rowIndex + 1, "<br>SBO", "SBO should be numeric only.");
         }
         // INAC/NAC
-        String inac = validateColValFromCell(row.getCell(14));
+        String inac = validateColValFromCell(row.getCell(15));
         if (StringUtils.isNotBlank(inac)) {
           if (!StringUtils.isNumeric(inac) && !"@@@@".equals(inac)) {
             String firstTwoInacChar = StringUtils.substring(inac, 0, 2);
@@ -1703,7 +1708,7 @@ public class IsraelHandler extends EMEAHandler {
           }
         }
         // Sales Rep
-        String salesRep = validateColValFromCell(row.getCell(15));
+        String salesRep = validateColValFromCell(row.getCell(16));
         if (StringUtils.isNotBlank(salesRep) && !StringUtils.isAlphanumeric(salesRep)) {
           error.addError(rowIndex + 1, "<br>Sales Rep", "Sales Rep should be alphanumeric only.");
         }
@@ -1713,7 +1718,7 @@ public class IsraelHandler extends EMEAHandler {
         }
         // KUKLA
         String isic = validateColValFromCell(row.getCell(3));
-        String kukla = validateColValFromCell(row.getCell(17));
+        String kukla = validateColValFromCell(row.getCell(18));
         if (StringUtils.isEmpty(isic)) {
           isic = "";
         }
@@ -1728,25 +1733,25 @@ public class IsraelHandler extends EMEAHandler {
         }
 
         // phone
-        if (row.getCell(16) != null) {
-          row.getCell(16).setCellType(CellType.STRING);
+        if (row.getCell(17) != null) {
+          row.getCell(17).setCellType(CellType.STRING);
         }
-        String phoneNum = validateColValFromCell(row.getCell(16));
+        String phoneNum = validateColValFromCell(row.getCell(17));
         if (StringUtils.isNotBlank(phoneNum)) {
           if (phoneNum.charAt(0) == '+' || phoneNum.charAt(0) == '-') {
             phoneNum = phoneNum.substring(1);
           }
 
           if (StringUtils.isNumeric(phoneNum)) {
-            if (!row.getCell(16).getCellStyle().getCoreXf().getQuotePrefix()) {
+            if (!row.getCell(17).getCellStyle().getCoreXf().getQuotePrefix()) {
               error.addError(rowIndex + 1, "<br>Phone Number", "Please add leading apostrophe (').");
             }
           }
         }
 
         // validate ISU and CTC combination
-        String isuCd = validateColValFromCell(row.getCell(10));
-        String ctc = validateColValFromCell(row.getCell(11));
+        String isuCd = validateColValFromCell(row.getCell(11));
+        String ctc = validateColValFromCell(row.getCell(12));
         if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
           error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
