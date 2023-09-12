@@ -6520,28 +6520,28 @@ function validateFiscalLengthOnIdentIT() {
               name : 'taxCd1'
             }, false, 'For Ident Client C ' + lbl1 + ' must be of 11 digits.');
           }
-          if (ident == 'D' && (fiscal == undefined || fiscal != '' || fiscal.length != 16 || !fiscal.match("^[0-9a-zA-Z]*$"))) {
+          if (ident == 'D' && (fiscal == undefined || fiscal == '' || fiscal.length != 16 || !fiscal.match("^[0-9a-zA-Z]*$"))) {
             return new ValidationResult({
               id : 'taxCd1',
               type : 'text',
               name : 'taxCd1'
             }, false, 'For Ident Client D ' + lbl1 + ' must be of 16 alphanumerics.');
           }
-          if (ident == 'X' && (fiscal != undefined || fiscal != '' || fiscal.length != 16)) {
+          if (ident == 'X' && (fiscal == undefined || fiscal == '' || fiscal.length != 16)) {
             return new ValidationResult({
               id : 'taxCd1',
               type : 'text',
               name : 'taxCd1'
             }, false, 'For Ident Client X ' + lbl1 + ' must be of 16 chars');
           }
-          if (ident == 'X' && (fiscal != undefined || fiscal != '' || !fiscal.match("^(?=.*[a-zA-Z])(?=.*[0-9])[0-9a-zA-Z]*$"))) {
+          if (ident == 'X' && (fiscal == undefined || fiscal == '' || !fiscal.match("^(?=.*[a-zA-Z])(?=.*[0-9])[0-9a-zA-Z]*$"))) {
             return new ValidationResult({
               id : 'taxCd1',
               type : 'text',
               name : 'taxCd1'
             }, false, 'For Ident Client X ' + lbl1 + ' must contain alphanumeric characters.');
           }
-          if ((ident == 'N' || ident == 'Y') && (fiscal != undefined || fiscal != '')) {
+          if (fiscal != undefined && (ident == 'N' || ident == 'Y') && fiscal != '') {
             FormManager.removeValidator('taxCd1', Validators.REQUIRED);
             return new ValidationResult({
               id : 'taxCd1',
