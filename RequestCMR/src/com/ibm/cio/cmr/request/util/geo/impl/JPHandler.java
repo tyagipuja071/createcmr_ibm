@@ -602,12 +602,12 @@ public class JPHandler extends GEOHandler {
             }
             LOG.debug("Adding " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
 
-            if ("BPWPQ".equals(reqEntry.getCustSubGrp()) && !copy.getCmrAddrTypeCode().equals("ZS01")) {
+            if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && !copy.getCmrAddrTypeCode().equals("ZS01")) {
               LOG.debug("Skip " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
             } else {
               addedRecords.add(copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq());
               converted.add(copy);
-              if ("BPWPQ".equals(reqEntry.getCustSubGrp()) && copy.getCmrAddrTypeCode().equals("ZS01")) {
+              if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && copy.getCmrAddrTypeCode().equals("ZS01")) {
                 FindCMRRecordModel addrCopy = new FindCMRRecordModel();
                 PropertyUtils.copyProperties(addrCopy, copy);
                 addrCopy.setCmrAddrTypeCode("ZS02");
@@ -656,7 +656,7 @@ public class JPHandler extends GEOHandler {
             // this is an address on CRIS only, add to the request
             LOG.debug("Adding ADU " + adu + " to the request.");
             cmrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
-            if (cmrType.equals("ZS02") && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
+            if ("C".equals(reqEntry.getReqType()) && cmrType.equals("ZS02") && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
               continue;
             }
             if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq())) {
@@ -749,7 +749,7 @@ public class JPHandler extends GEOHandler {
     record.setCmrCustPhone(sbPhone.toString());
     record.setCmrCountryLanded("JP");
     record.setCmrPostalCode(establishment.getPostCode());
-    if ("BPWPQ".equals(reqEntry.getCustSubGrp())) {
+    if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
       record.setBillingCustNo(reqEntry.getBillToCustNo());
       record.setCreditToCustNo(reqEntry.getCreditToCustNo());
     }
@@ -771,7 +771,7 @@ public class JPHandler extends GEOHandler {
     data.setBillingProcCd(mainRecord.getBillingProcessCode());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode());
 
-    if (!"BPWPQ".equals(data.getCustSubGrp())) {
+    if ("C".equals(admin.getReqType()) && !"BPWPQ".equals(data.getCustSubGrp())) {
       data.setCreditToCustNo(mainRecord.getCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
     }
@@ -2326,7 +2326,7 @@ public class JPHandler extends GEOHandler {
     // setAccountAbbNmAfterImport(entityManager, admin, data);
     // updateBillToCustomerNoAfterImport(data);
 
-    if ("BPWPQ".equals(data.getCustSubGrp())) {
+    if ("C".equals(admin.getReqType()) && "BPWPQ".equals(data.getCustSubGrp())) {
       // Bill to Customer
       Addr addrBillto = getZP01FromRDC(entityManager, data, "ZP01", "2");
       String seqNo = "1";
