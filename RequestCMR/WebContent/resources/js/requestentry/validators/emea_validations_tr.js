@@ -3760,7 +3760,7 @@ function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
     if (scenarioChanged)
     {
     if (FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'INTER'
-    	|| FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'XINT') {
+    	|| FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     	FormManager.resetValidations('vat');
     	FormManager.setValue('vatExempt', 'Y');
     }else
