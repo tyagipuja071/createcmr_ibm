@@ -2736,6 +2736,18 @@ function getImportIndForIndia(reqId) {
 }
 
 
+function prospectFilterISBU() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  if (ifProspect == 'Y') {
+    setISBUScenarioLogic();
+    FormManager.readOnly('isicCd');
+  }
+}
+
+
 function lockInacTypeForIGF() {
   console.log('>>>> lockInacTypeForIGF >>>>');
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -3063,16 +3075,6 @@ function setDefaultOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function prospectFilterISBU() {
-  var ifProspect = FormManager.getActualValue('prospLegalInd');
-  if (dijit.byId('prospLegalInd')) {
-    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
-  }
-  if (ifProspect == 'Y') {
-    setISBUScenarioLogic();
-    FormManager.readOnly('isicCd');
-  }
-}
 
 function setLockIsicfromDNB() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
