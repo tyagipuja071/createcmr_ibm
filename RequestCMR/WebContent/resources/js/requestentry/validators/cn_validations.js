@@ -4141,6 +4141,61 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addCompanyProofAttachValidation() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var reqType = FormManager.getActualValue('reqType');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0 || reqType == 'C') {
+          return new ValidationResult(null, true);
+        }
+
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var name = null;
+          var count = 0;
+          var updateInd = null;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            name = record.custNm1;
+            updateInd = record.updateInd;
+
+            if (typeof (type) == 'object') {
+              updateInd = updateInd[0];
+            }
+
+            if ((updateInd == 'U' || updateInd == 'N')) {
+              count++;
+            }
+
+          }
+          if (count > 0 && checkForCompanyProofAttachment()) {
+            return new ValidationResult(null, false, 'Company proof is mandatory since address has been updated or added.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function checkForCompanyProofAttachment() {
+  var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+    ID: id
+  });
+  if (ret == null || ret.ret1 == null) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -4240,4 +4295,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(addCompanyProofAttachValidation, [SysLoc.CHINA]);
 });
