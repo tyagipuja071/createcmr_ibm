@@ -108,7 +108,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
   private static final String STATUS_CHG_CMT_PRE_PREFIX = "ACTION \"";
   private static final String STATUS_CHG_CMT_MID_PREFIX = "\" changed the REQUEST STATUS to \"";
   private static final String STATUS_CHG_CMT_POST_PREFIX = "\"" + "\n ";
-  private CheckListModel checklist;
+  private Map<Long, CheckListModel> checklist = new HashMap<>();
 
   @Override
   protected Logger initLogger() {
@@ -1372,11 +1372,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     service.makeApprovalsObsolete(entityManager, reqId, user);
   }
 
-  public synchronized void saveChecklist(EntityManager entityManager, long reqId, AppUser user) {
-    if (!isCheckListValid()) {
+  public void saveChecklist(EntityManager entityManager, long reqId, AppUser user) {
+    if (!isCheckListValid(reqId)) {
       this.log.debug("Checklist is blank for Request " + reqId + ", skipping saving.");
       return;
     }
+    CheckListModel currentCheckList = this.checklist.get(reqId);
     this.log.debug("Processing checklist for request " + reqId);
     String sql = ExternalizedQuery.getSql("REQENTRY.GETCHECKLIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1396,7 +1397,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
 
     try {
-      PropertyUtils.copyProperties(checklist, this.checklist);
+      PropertyUtils.copyProperties(checklist, currentCheckList);
     } catch (Exception e) {
       this.log.warn("Cannot copy properties.", e);
     }
@@ -1420,8 +1421,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  private boolean isCheckListValid() {
-    if (this.checklist == null) {
+  private boolean isCheckListValid(Long reqId) {
+    if (this.checklist == null || this.checklist.size() == 0) {
+      return false;
+    }
+    CheckListModel checklist = this.checklist.get(reqId);
+    if (checklist == null) {
       return false;
     }
     for (Field field : CheckListModel.class.getDeclaredFields()) {
@@ -1429,7 +1434,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         field.setAccessible(true);
         String value = null;
         try {
-          value = (String) field.get(this.checklist);
+          value = (String) field.get(checklist);
         } catch (Exception e) {
           this.log.warn("Field " + field.getName() + " cannot be retrieved from checklist model");
         }
@@ -1449,12 +1454,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     return query.getSingleResult(ProlifChecklist.class);
   }
 
-  public CheckListModel getChecklist() {
+  public Map<Long, CheckListModel> getChecklist() {
     return checklist;
   }
 
-  public void setChecklist(CheckListModel checklist) {
-    this.checklist = checklist;
+  public void setChecklist(RequestEntryModel model, CheckListModel checklist) {
+    this.checklist.put(model.getReqId(), checklist);
   }
 
   /**
