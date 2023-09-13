@@ -472,7 +472,7 @@ public class RequestEntryController extends BaseController {
     try {
       String action = model.getAction();
       if (!"CLM".equals(action)) {
-        service.setChecklist(checklist);
+        service.setChecklist(model, checklist);
       }
       service.processTransaction(model, request);
 
