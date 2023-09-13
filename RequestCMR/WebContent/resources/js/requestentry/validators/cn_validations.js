@@ -4141,18 +4141,6 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
-function checkForCompanyProofAttachment() {
-  var id = FormManager.getActualValue('reqId');
-  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
-    ID: id
-  });
-  if (ret == null || ret.ret1 == null) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
