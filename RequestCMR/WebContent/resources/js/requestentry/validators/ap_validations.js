@@ -2723,12 +2723,13 @@ function setIsicCdIfCmrResultAccepted(value) {
   }
 }
 
-function getIsicDataRDCValue(){
+function getIsicDataRDCValue() {
   var result = cmr.query('GET.ISIC_OLD_BY_REQID', {
-    REQ_ID : FormManager.getActualValue('reqId')
+    REQ_ID: FormManager.getActualValue('reqId')
   });
   return result.ret1;
 }
+
 function setIsicCdIfDnbResultAccepted(value) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond2 = new Set([ 'AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM', 'NRMLC', 'KYNDR' ]);
@@ -2780,6 +2781,8 @@ function onIsicChange() {
   var cmrResult = FormManager.getActualValue('findCmrResult');
   var dnbResult = FormManager.getActualValue('findDnbResult');
   var dplCheck = FormManager.getActualValue('dplChkResult');
+  var apCustClusterId = FormManager.getActualValue('apCustClusterId');
+  var clientTier = FormManager.getActualValue('clientTier');
   var cntrySet = new Set(['744', '834', '616']);
 
   if (reqType != 'C' && role != 'REQUESTER' && !cntrySet.has(cmrIssuingCntry)) {

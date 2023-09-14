@@ -1264,7 +1264,6 @@ function onIsicChange() {
   } else if (dnbResult != '' && dnbResult == 'Accepted') {
     setIsicCdIfDnbResultAccepted(value);
   } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
-    FormManager.readOnly('isicCd');
     setIsicCdIfDnbAndCmrResultOther(value);
   }
 }
@@ -1292,7 +1291,6 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
   } else {
-    FormManager.enable('isicCd');
     FormManager.readOnly('isicCd');
     FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
@@ -3118,15 +3116,13 @@ function setLockIsicfromDNB() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
- var isDnbRecord = FormManager.getActualValue('findDnbResult');
-  var isicCd = FormManager.getActualValue('isicCd');
-  if (isDnbRecord =='Accepted') {
-    if(isicCd !='') {
-      FormManager.readOnly('isicCd');
-    } else {
-      FormManager.enable('isicCd');
-    }
-  } 
+  var isDnbRecord = FormManager.getActualValue('findDnbResult');
+  if (isDnbRecord == 'Accepted' && FormManager.getActualValue('isicCd') != '') {
+    FormManager.readOnly('isicCd');
+  }
+  // else {
+  // FormManager.enable('isicCd');
+  // }
 }
 
 function addressQuotationValidatorGCG() {
