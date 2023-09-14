@@ -26,6 +26,10 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -50,6 +54,7 @@ import com.ibm.cio.cmr.request.entity.SalesPaymentPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -89,6 +94,9 @@ public class JPHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(JPHandler.class);
 
   private static final String[] JP_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "ISU", "ClientTier", "LocalTax1", "SensitiveFlag" };
+
+  protected static final String[] JP_MASS_UPDATE_SHEET_NAMES = { "Data", "Company", "ADU-3", "ADU-1", "ADU-2", "ADU-7", "ADU-A", "ADU-B", "ADU-C",
+      "ADU-D", "ADU-E", "ADU-F", "ADU-G", "ADU-H", "ADU-4" };
 
   private CRISAccount currentAccount = null;
 
@@ -2993,7 +3001,1568 @@ public class JPHandler extends GEOHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country, Admin admin) {
+    LOG.debug("inside JP validateMassUpdateTemplateDupFills handler...");
+
+    XSSFCell currCell = null;
+    boolean isDataFilled = false;
+    boolean isCompanyFilled = false;
+
+    boolean isADU3Filled = false;
+    boolean isADU1Filled = false;
+    boolean isADU2Filled = false;
+    boolean isADU7Filled = false;
+
+    boolean isADUAFilled = false;
+    boolean isADUBFilled = false;
+    boolean isADUCFilled = false;
+    boolean isADUDFilled = false;
+    boolean isADUEFilled = false;
+    boolean isADUFFilled = false;
+    boolean isADUGFilled = false;
+    boolean isADUHFilled = false;
+
+    boolean isADU4Filled = false;
+
+    Map<String, HashSet<String>> mapCmrSeq = new HashMap<String, HashSet<String>>();
+
+    for (String name : JP_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating Japan mass update template --> sheet " + name);
+
+      if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            // DATA SHEET
+            String cmrNo = "";
+            String accountAbbrevName = "";
+            String jsic = "";
+            String custClass = "";
+            String officeCd = "";
+            String inacCd = "";
+            String billingProcessCd = "";
+            String postalForCsbo = "";
+
+            // ADDRESS SHEET
+            String addrSeq = "";
+            String custNameKanji = "";
+            String nameKanjiContinue = "";
+            String katakana = "";
+            String fullEnglishName = "";
+            String address = "";
+            String postalCode = "";
+            String branchOffice = "";
+            String department = "";
+            String building = "";
+            String location = "";
+            String telNo = "";
+            String fax = "";
+            String contact = "";
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            // ========================================================================================================
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              accountAbbrevName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              jsic = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              custClass = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              officeCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              inacCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              billingProcessCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalForCsbo = validateColValFromCell(currCell);
+
+              // Data Sheet
+              if (StringUtils.isNotBlank(accountAbbrevName) || StringUtils.isNotBlank(jsic) || StringUtils.isNotBlank(custClass)
+                  || StringUtils.isNotBlank(officeCd) || StringUtils.isNotBlank(inacCd) || StringUtils.isNotBlank(billingProcessCd)
+                  || StringUtils.isNotBlank(postalForCsbo)) {
+                isDataFilled = true;
+              }
+
+              if ((isDataFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              } else if (mapCmrSeq.containsKey(cmrNo)) {
+                error.addError(row.getRowNum() + 1, "<br>CMR No.", "Duplicate CMR No. It should be entered only once.");
+              } else {
+                mapCmrSeq.put(cmrNo, new HashSet<String>());
+              }
+
+              // Account Abbreviated Name
+              if (isDataFilled && "@".equals(accountAbbrevName)) {
+                error.addError((row.getRowNum() + 1), "<br>Account Abbreviated Name", "@ value for Account Abbreviated Name is not allowed.");
+              }
+
+              // JSIC
+              if (isDataFilled && "@".equals(jsic)) {
+                error.addError((row.getRowNum() + 1), "<br>JSIC", "@ value for JSIC is not allowed.");
+              }
+
+              // Customer Class
+              if (isDataFilled && "@".equals(custClass)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Class", "@ value for Customer Class is not allowed.");
+              }
+
+              // Office Code
+              if (isDataFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Office Code", "@ value for Office Code is not allowed.");
+              }
+            }
+
+            // ========================================================================================================
+            if ("Company".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // Company Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isCompanyFilled = true;
+              }
+
+              if ((isCompanyFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isCompanyFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isCompanyFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isCompanyFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isCompanyFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isCompanyFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isCompanyFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isCompanyFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isCompanyFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-3".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-3 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU3Filled = true;
+              }
+
+              if ((isADU3Filled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADU3Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADU3Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU3Filled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADU3Filled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADU3Filled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADU3Filled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADU3Filled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADU3Filled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-1".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-1 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU1Filled = true;
+              }
+
+              if ((isADU1Filled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADU1Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADU1Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU1Filled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADU1Filled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADU1Filled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADU1Filled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADU1Filled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADU1Filled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-2".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-2 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU2Filled = true;
+              }
+
+              if ((isADU2Filled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADU2Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADU2Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU2Filled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADU2Filled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADU2Filled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADU2Filled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADU2Filled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADU2Filled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-7".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-7 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU7Filled = true;
+              }
+
+              if ((isADU7Filled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADU7Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADU7Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU7Filled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADU7Filled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADU7Filled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADU7Filled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADU7Filled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADU7Filled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-A".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-A Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUAFilled = true;
+              }
+
+              if ((isADUAFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUAFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUAFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUAFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUAFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUAFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUAFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUAFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUAFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-B".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-B Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUBFilled = true;
+              }
+
+              if ((isADUBFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUBFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUBFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUBFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUBFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUBFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUBFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUBFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUBFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-C".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-C Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUCFilled = true;
+              }
+
+              if ((isADUCFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUCFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUCFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUCFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUCFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUCFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUCFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUCFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUCFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-D".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-D Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUDFilled = true;
+              }
+
+              if ((isADUDFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUDFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUDFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUDFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUDFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUDFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUDFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUDFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUDFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-E".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-E Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUEFilled = true;
+              }
+
+              if ((isADUEFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUEFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUEFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUEFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUEFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUEFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUEFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUEFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUEFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-F".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-F Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUFFilled = true;
+              }
+
+              if ((isADUFFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUFFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUFFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUFFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUFFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUFFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUFFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUFFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUFFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-G".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-G Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUGFilled = true;
+              }
+
+              if ((isADUGFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUGFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUGFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUGFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUGFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUGFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUGFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUGFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUGFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-H".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-H Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUHFilled = true;
+              }
+
+              if ((isADUHFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADUHFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADUHFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUHFilled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADUHFilled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADUHFilled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADUHFilled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADUHFilled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADUHFilled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+
+            // ========================================================================================================
+            if ("ADU-4".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-4 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU4Filled = true;
+              }
+
+              if ((isADU4Filled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              }
+
+              if ((isADU4Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              }
+
+              if (isADU4Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU4Filled && "@".equals(custNameKanji)) {
+                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
+              }
+
+              // Katakana
+              if (isADU4Filled && "@".equals(katakana)) {
+                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              }
+
+              // Full English Name
+              if (isADU4Filled && "@".equals(fullEnglishName)) {
+                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              // Address
+              if (isADU4Filled && "@".equals(address)) {
+                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              }
+
+              // Postal Code
+              if (isADU4Filled && "@".equals(postalCode)) {
+                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // Tel No
+              if (isADU4Filled && "@".equals(officeCd)) {
+                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              }
+
+            }
+          }
+        }
+      } // end if
+    } // end for
+
   }
 
   public static String addJpRALogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
