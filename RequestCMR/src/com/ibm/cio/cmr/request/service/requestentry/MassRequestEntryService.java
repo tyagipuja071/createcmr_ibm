@@ -7022,6 +7022,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "EMBARGO_CD":
         muModel.setMiscBillCd(tempVal);
         break;
+      case "TAX_EXEMPT_STATUS_3":
+        muModel.setTaxExemptStatus3(tempVal);
+        break;
       case "MAILING_COND":
         muModel.setOutCityLimit(tempVal);
         break;
