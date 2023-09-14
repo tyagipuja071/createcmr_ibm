@@ -657,8 +657,17 @@ public class IsraelHandler extends EMEAHandler {
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-      data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-      LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+      String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+      if (StringUtils.isBlank(embargoCode)) {
+        embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+      }
+      if (!"ST".equalsIgnoreCase(embargoCode)) {
+        data.setEmbargoCd(embargoCode);
+        LOG.trace("EmbargoCode: " + embargoCode);
+      } else if ("ST".equalsIgnoreCase(embargoCode)) {
+        data.setTaxExemptStatus3(embargoCode);
+        LOG.trace(" STC Order Block Code : " + embargoCode);
+      }
 
       if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
         data.setPpsceid("");

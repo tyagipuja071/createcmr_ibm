@@ -998,11 +998,23 @@ public class CEMEAHandler extends BaseSOFHandler {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
       // CMR-2096-Austria - "Central order block code"
-      data.setOrdBlk(mainRecord.getCmrOrderBlock());
-      LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
+      if (!"ST".equals(mainRecord.getCmrOrderBlock())) {
+        data.setOrdBlk(mainRecord.getCmrOrderBlock());
+        LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
+      }
 
-      data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-      LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+      String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+      if (StringUtils.isBlank(embargoCode)) {
+        embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+      }
+      if (!"ST".equalsIgnoreCase(embargoCode)) {
+        data.setEmbargoCd(embargoCode);
+        LOG.trace("EmbargoCode: " + embargoCode);
+      } else if ("ST".equalsIgnoreCase(embargoCode)) {
+        data.setTaxExemptStatus3(embargoCode);
+        LOG.trace(" STC Order Block Code : " + embargoCode);
+      }
+
       data.setAgreementSignDate(this.currentImportValues.get("AECISUBDate"));
       LOG.trace("AECISubDate: " + data.getAgreementSignDate());
       data.setBpSalesRepNo(this.currentImportValues.get("TeleCovRep"));
@@ -1027,6 +1039,9 @@ public class CEMEAHandler extends BaseSOFHandler {
       // Currency code for Austria
       data.setLegacyCurrencyCd(this.currentImportValues.get("CurrencyCode"));
       LOG.trace("Currency: " + data.getLegacyCurrencyCd());
+
+      data.setOrdBlk(mainRecord.getCmrOrderBlock());
+      LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
 
       EntityManager em = JpaManager.getEntityManager();
       String sql = ExternalizedQuery.getSql("AT.GET.ZS01.DATLT");
@@ -1750,7 +1765,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
-        "GEO_LOCATION_CD", "DUNS_NO", "ABBREV_LOCN", "TAX_CD1", "ORD_BLK", "ENTERPRISE"));// CMR-1947:add
+        "GEO_LOCATION_CD", "DUNS_NO", "ABBREV_LOCN", "TAX_CD1", "ORD_BLK", "ENTERPRISE", "TAX_EXEMPT_STATUS_3"));// CMR-1947:add
     // Abbrev_locn
     // field
     // change
