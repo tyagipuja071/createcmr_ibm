@@ -3117,12 +3117,14 @@ function setLockIsicfromDNB() {
     return;
   }
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
-  if (isDnbRecord == 'Accepted' && FormManager.getActualValue('isicCd') != '') {
-    FormManager.readOnly('isicCd');
+  var isicCd = FormManager.getActualValue('isicCd');
+  if (isDnbRecord =='Accepted') {
+    if(isicCd !='') {
+      FormManager.readOnly('isicCd');
+    } else {
+      FormManager.enable('isicCd');
+    }
   }
-  // else {
-  // FormManager.enable('isicCd');
-  // }
 }
 
 function addressQuotationValidatorGCG() {
