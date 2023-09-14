@@ -122,6 +122,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           $scope.recordsDnb = [];
           $scope.recordsCmrL = [];
           $scope.recordsCmrP = [];
+          $scope.prospectCmr = false;
           if (subCntry.length > 3) {
             mainCntry = subCntry.substr(0, 3);
             var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
@@ -130,6 +131,15 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
             if (byModel && byModel.ret1 == 'Y') {
               $scope.allowByModel = false;
             }
+          }
+          var isProspectCmr = cmr.query('CHECK_CMR_AUFSD_KNA1', {
+            MANDT : cmr.MANDT,
+            CMR_NO : crit.cmrNo,
+            CNTRY_CD : FormManager.getActualValue('issuingCntry'),
+            EMBARGO_CD : '75'
+          });
+          if (isProspectCmr && isProspectCmr.ret1 == 1) {
+            $scope.prospectCmr = true;
           }
           var localLangDataFlg = cmr.query('HIDE_LOCAL_LANG_DATA', {
             CNTRY_CD : FormManager.getActualValue('issuingCntry')
