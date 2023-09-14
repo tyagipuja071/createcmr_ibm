@@ -1212,7 +1212,7 @@ function onIsicChange() {
     return ;
   }
   
-  if (cmrResult != '' && cmrResult == 'Accepted' ) {
+  if (cmrResult != '' && cmrResult == 'Accepted') {
     setIsicCdIfCmrResultAccepted(value);
   } else if (dnbResult != '' && dnbResult == 'Accepted') {
     setIsicCdIfDnbResultAccepted(value);
@@ -1224,7 +1224,6 @@ function onIsicChange() {
 
 function setIsicCdIfCmrResultAccepted(value) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cmrResult = FormManager.getActualValue('findCmrResult');
   console.log(">>>>setDefaultValueForCreate()>>>> SubGrp="+custSubGrp);
   var reqId = FormManager.getActualValue('reqId');
   var isicCdInDB = '';
@@ -1245,9 +1244,8 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.setValue('isicCd', isicCdInDB);
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
-  } else if(cmrResult != '' && cmrResult == 'Accepted'){
+  } else {
     FormManager.enable('isicCd');
-   } else {
     FormManager.readOnly('isicCd');
     FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
@@ -1685,11 +1683,7 @@ var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onC
                      FormManager.readOnly('mrcCd');
                    } 
                  } 
-                  
-                   
-                   
-               
-               
+
                }
         }
       if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || clusterDesc[0].ret1.includes('S&S') || clusterDesc[0].ret1.includes('Strategic'))) {
@@ -3082,12 +3076,14 @@ function setLockIsicfromDNB() {
     return;
   }
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
-  if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
-    FormManager.readOnly('isicCd');
+  var isicCd = FormManager.getActualValue('isicCd');
+  if (isDnbRecord =='Accepted') {
+    if(isicCd !='') {
+      FormManager.readOnly('isicCd');
+    } else {
+      FormManager.enable('isicCd');
+    }
   } 
-// else {
-// FormManager.enable('isicCd');
-// }
 }
 
 function addressQuotationValidatorGCG() {
@@ -3288,7 +3284,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
   SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
   // CREATCMR-7589
-//  GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+// GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA,
+// SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
 
