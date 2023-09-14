@@ -2732,17 +2732,28 @@ function getIsicDataRDCValue() {
 
 function setIsicCdIfDnbResultAccepted(value) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM', 'NRMLC']);
-  var cond3 = new Set(['INTER', 'PRIV', 'XPRIV', 'DUMMY', 'IGF']);
+  var cond2 = new Set([ 'AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM', 'NRMLC', 'KYNDR' ]);
+  var cond3 = new Set([ 'INTER', 'PRIV', 'XPRIV', 'DUMMY', 'IGF' ]);
   if (cond2.has(custSubGrp)) {
     var oldISIC = getIsicDataRDCValue();
     FormManager.setValue('isicCd', oldISIC);
-    FormManager.readOnly('isicCd');
+    // FormManager.readOnly('isicCd');
+    if (value == '') {
+      FormManager.enable('isicCd');
+    } else {
+      FormManager.readOnly('isicCd');
+    }
   } else if (cond3.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
+    // FormManager.readOnly('isicCd');
+    if (value == '') {
+      FormManager.enable('isicCd');
+    } else {
+      FormManager.readOnly('isicCd');
+    }
+  } else if (custSubGrp == '' && value != '') {
     FormManager.readOnly('isicCd');
   }
-
 }
 
 function setIsicCdIfDnbAndCmrResultOther(value) {
@@ -2772,8 +2783,7 @@ function onIsicChange() {
   var dplCheck = FormManager.getActualValue('dplChkResult');
   var apCustClusterId = FormManager.getActualValue('apCustClusterId');
   var clientTier = FormManager.getActualValue('clientTier');
-
-  var cntrySet = new Set(['744', '834', '616', '796']);
+  var cntrySet = new Set(['744', '834', '616']);
 
   if (reqType != 'C' && role != 'REQUESTER' && !cntrySet.has(cmrIssuingCntry)) {
     return;
@@ -2781,20 +2791,11 @@ function onIsicChange() {
 
   // FormManager.readOnly('isicCd');
   if (cmrResult != '' && cmrResult == 'Accepted') {
-    if (cntrySet.has(cmrIssuingCntry)) {
-      FormManager.enable('isicCd');
-    } else {
-      setIsicCdIfCmrResultAccepted(value);
-    }
-  }
-  if (dnbResult != '' && dnbResult == 'Accepted') {
-    if (cntrySet.has(cmrIssuingCntry)) {
-      FormManager.readOnly('isicCd');
-    } else {
-      setIsicCdIfDnbResultAccepted(value);
-    }
-  }
-  if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+    setIsicCdIfCmrResultAccepted(value);
+  } else if (dnbResult != '' && dnbResult == 'Accepted') {
+    setIsicCdIfDnbResultAccepted(value);
+  } else if (cmrResult == 'No Results' || cmrResult == 'Rejected' || dnbResult == 'No Results' || dnbResult == 'Rejected') {
+    FormManager.readOnly('isicCd');
     setIsicCdIfDnbAndCmrResultOther(value);
   }
   // if (dplCheck == 'AF' && isicCd != null && isicCd != undefined && isicCd !=
