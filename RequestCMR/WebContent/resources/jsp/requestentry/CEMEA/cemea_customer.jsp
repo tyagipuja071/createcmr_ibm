@@ -152,6 +152,7 @@
       </p>
     </cmr:column>
      <!-- STC order block code field addn -->
+   <cmr:view  exceptForCountry="618">  
   <cmr:column span="2" containerForField="TaxExemptStatus3">
       <p>
         <cmr:label fieldId="taxExemptStatus3">
@@ -162,6 +163,7 @@
         <cmr:field path="taxExemptStatus3" id="taxExemptStatus3" fieldId="TaxExemptStatus3" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    </cmr:view>
     <cmr:column span="2" containerForField="OrdBlk" forCountry="618">
       <p>
         <cmr:label fieldId="ordBlk">
