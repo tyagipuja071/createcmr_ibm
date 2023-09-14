@@ -133,7 +133,9 @@
 						tabId="MAIN_CUST_TAB" />
 				</p>
 			</cmr:column>
-      <!-- STC order block code field addn -->
+		</cmr:view>
+          <!-- STC order block code field addn -->
+   <cmr:view  exceptForCountry="780">   
   <cmr:column span="2" containerForField="TaxExemptStatus3">
       <p>
         <cmr:label fieldId="taxExemptStatus3">
@@ -144,8 +146,7 @@
         <cmr:field path="taxExemptStatus3" id="taxExemptStatus3" fieldId="TaxExemptStatus3" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-		</cmr:view>
-	
+	</cmr:view>
 	<!-- Type Of Customer for MCO,MCO1 -->
 		<!-- CommercialFinanced,CodFlag MCO1 -->
 		<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
