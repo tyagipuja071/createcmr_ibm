@@ -44,6 +44,7 @@ import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
+import com.ibm.cio.cmr.request.entity.IntlAddrPK;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.SalesPayment;
 import com.ibm.cio.cmr.request.entity.SalesPaymentPK;
@@ -366,8 +367,9 @@ public class JPHandler extends GEOHandler {
         rdc.setId(rdcpk);
 
         entityManager.persist(rdc);
-
         entityManager.flush();
+
+        createIntlAddrFromCompanyNo(entityManager, addr, company.getCompanyNo());
       }
 
       if ("C".equals(custType)) {
@@ -440,6 +442,8 @@ public class JPHandler extends GEOHandler {
 
           entityManager.flush();
 
+          createIntlAddrFromEstabAndCompanyNo(entityManager, addr, company.getCompanyNo(), establishment.getEstablishmentNo());
+
         }
       }
 
@@ -475,6 +479,75 @@ public class JPHandler extends GEOHandler {
     }
 
     return searchModel;
+  }
+
+  private void createIntlAddrFromCompanyNo(EntityManager entityManager, Addr addr, String companyNo) throws Exception {
+    List<Kna1> kna1List = getKna1ListByZzkvNode1(entityManager, SystemConfiguration.getValue("MANDT"), companyNo);
+
+    Kna1 resultKna1 = null;
+
+    if (kna1List != null) {
+      LOG.debug("Getting Company information from KNA1 -- ZORG");
+      resultKna1 = kna1List.stream().filter(kna1 -> "ZORG".equals(kna1.getKtokd())).findFirst().orElse(null);
+
+      if (resultKna1 == null) {
+        LOG.debug("Getting Company information from KNA1 -- ZS01");
+        resultKna1 = kna1List.stream().filter(kna1 -> "ZS01".equals(kna1.getKtokd())).findFirst().orElse(null);
+      }
+    }
+
+    saveIntlAddr(entityManager, resultKna1, addr);
+  }
+
+  private void createIntlAddrFromEstabAndCompanyNo(EntityManager entityManager, Addr addr, String companyNo, String estabNo) throws Exception {
+    List<Kna1> kna1List = getKna1ListByZzkvNode1Estab(entityManager, SystemConfiguration.getValue("MANDT"), companyNo, estabNo);
+    Kna1 resultKna1 = null;
+    if (kna1List != null) {
+      if (resultKna1 == null) {
+        LOG.debug("Getting Establishment information from KNA1 -- ZS01");
+        resultKna1 = kna1List.stream().filter(kna1 -> "ZS01".equals(kna1.getKtokd())).findFirst().orElse(null);
+      }
+    }
+
+    saveIntlAddr(entityManager, resultKna1, addr);
+  }
+
+  private void saveIntlAddr(EntityManager entityManager, Kna1 resultKna1, Addr addr) {
+    if (resultKna1 != null) {
+      IntlAddr intlAddr = new IntlAddr();
+      IntlAddrPK intlAddrPK = new IntlAddrPK();
+
+      intlAddrPK.setAddrSeq(addr.getId().getAddrSeq());
+      intlAddrPK.setAddrType(addr.getId().getAddrType());
+      intlAddrPK.setReqId(addr.getId().getReqId());
+
+      intlAddr.setId(intlAddrPK);
+      intlAddr.setIntlCustNm1(resultKna1.getName1() + resultKna1.getName2());
+      intlAddr.setAddrTxt(resultKna1.getStras());
+      intlAddr.setCity1(resultKna1.getOrt01());
+      intlAddr.setCity2(resultKna1.getOrt02());
+      intlAddr.setLangCd(StringUtils.isEmpty(getCustPrefLang(addr, entityManager)) ? "1" : getCustPrefLang(addr, entityManager));
+      if (intlAddr != null) {
+        entityManager.merge(intlAddr);
+        entityManager.flush();
+      }
+    }
+  }
+
+  private String getCustPrefLang(Addr addr, EntityManager entityManager) {
+    Data custPrefLang = null;
+    String qryIntlAddrById = ExternalizedQuery.getSql("BATCH.GET_DATA");
+    PreparedQuery query = new PreparedQuery(entityManager, qryIntlAddrById);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+
+    custPrefLang = query.getSingleResult(Data.class);
+
+    if (custPrefLang == null) {
+      return "";
+    } else {
+      return custPrefLang.getCustPrefLang();
+    }
+
   }
 
   @Override
@@ -3066,6 +3139,35 @@ public class JPHandler extends GEOHandler {
     String sql = ExternalizedQuery.getSql("JP.GET.KNA1.BY_CMR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    return query.getResults(Kna1.class);
+  }
+
+  private static List<Kna1> getKna1ListByZzkvNode1(EntityManager entityManager, String mandt, String companyNo) throws Exception {
+    if (StringUtils.isEmpty(companyNo)) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("JP.GET.KNA1.BY_ZZKV_NODE1");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ZZKV_NODE1", companyNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    return query.getResults(Kna1.class);
+  }
+
+  private static List<Kna1> getKna1ListByZzkvNode1Estab(EntityManager entityManager, String mandt, String companyNo, String estabNo)
+      throws Exception {
+    if (StringUtils.isEmpty(companyNo)) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("JP.GET.KNA1.BY_ZZKV_NODE1_ESTAB");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ZZKV_NODE1", companyNo);
+    query.setParameter("ZZKV_ESTAB", estabNo);
+
     query.setParameter("KATR6", SystemLocation.JAPAN);
     query.setParameter("MANDT", mandt);
     query.setForReadOnly(true);
