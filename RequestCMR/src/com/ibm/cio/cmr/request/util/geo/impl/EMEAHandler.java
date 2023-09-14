@@ -1773,11 +1773,17 @@ public class EMEAHandler extends BaseSOFHandler {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
     String embargoCode = (this.currentImportValues.get("EmbargoCode"));
-    data.setEmbargoCd(embargoCode);
-    LOG.trace("EmbargoCode: " + embargoCode);
-    if ("ST".equalsIgnoreCase(embargoCode)) {
-      data.setTaxExemptStatus3(this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
     }
+    if (!"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
+
     if (!SystemLocation.ITALY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
 
       // defect 1299146

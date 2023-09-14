@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,12 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
   private static final Logger LOG = Logger.getLogger(ImportCMRService.class);
+  public static final List<String> EMEA_DB2_COUNTRIES = Arrays.asList("624", "788", "603", "607", "358", "626", "699", "644", "704", "668", "651",
+      "740", "694", "695", "705", "787", "820", "826", "821", "707", "693", "708", "363", "359", "889", "741", "758 ", "680", "610", "620", "840",
+      "636", "841", "645", "692", "669", "810", "881", "667", "662", "865", "383", "745", "698", "656", "753", "725", "691", "879", "675", "750",
+      "752", "637", "762", "764", "767", "768", "770", "772", "700", "769", "382", "717", "373", "642", "782", "880", "804", "805", "808", "823",
+      "670", "831", "827", "832", "635", "876", "833", "835", "864", "842", "850", "851", "718", "729", "862", "857", "677", "849", "883", "825",
+      "678", "702", "806", "846", "726", "755", "822", "838", "666 ", "866", "754");
 
   @Autowired
   RequestEntryService reqEntryService;
@@ -609,8 +616,12 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     data.setCovId(record.getCmrCoverage());
     data.setBgId(record.getCmrBuyingGroup());
     data.setGeoLocationCd(record.getCmrGeoLocCd());
-    data.setOrdBlk(record.getCmrOrderBlock());
-
+    Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
+    if (isEmeaDB2Cntry && "ST".equals(record.getCmrOrderBlock())) {
+      data.setTaxExemptStatus3(record.getCmrOrderBlock());
+    } else {
+      data.setOrdBlk(record.getCmrOrderBlock());
+    }
     data.setCovDesc(record.getCmrCoverageName());
     data.setBgDesc(record.getCmrBuyingGroupDesc());
     data.setBgRuleId(record.getCmrLde());

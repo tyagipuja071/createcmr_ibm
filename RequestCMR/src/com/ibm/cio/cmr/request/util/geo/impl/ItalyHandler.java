@@ -897,7 +897,17 @@ public class ItalyHandler extends BaseSOFHandler {
       }
     }
 
-    data.setEmbargoCd(embargo);
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (!"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
     // new IT fields
     data.setIcmsInd(tipoClinte);
     data.setHwSvcsRepTeamNo(coddes);

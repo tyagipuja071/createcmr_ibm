@@ -457,8 +457,18 @@ public class MCOPtEsHandler extends MCOHandler {
     LOG.trace("SplTaxCode: " + data.getSpecialTaxCd());
     data.setSalesBusOffCd(this.currentImportValues.get("SBO"));
     LOG.trace("SBO: " + data.getSalesBusOffCd());
-    data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-    LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (!"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
     // Mukesh: Defect 1698949: FVT: Mismatch between Data.AC_ADMIN_BO and
     // CMRTCUST.RACBO
     data.setAcAdminBo(this.currentImportValues.get("AccAdBo"));
