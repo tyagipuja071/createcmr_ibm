@@ -1294,6 +1294,7 @@ function defaultCMRNumberPrefixforANZ() {
   console.log('>>>> defaultCMRNumberPrefixforANZ >>>>');
   FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
   FormManager.hide('CmrNoPrefix', 'cmrNoPrefix');
+  setAnzKuklaFor();
 }
 
 // CREATCMR-7656
@@ -1467,6 +1468,7 @@ function applyClusterFilters() {
 
 function resetFieldsAfterCustSubGrpChange() {
   console.log(">>>> resetInacNacCdAfterCustSubGrpChange >>>>");
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
     FormManager.setValue('isuCd', '5K');
   } else {
