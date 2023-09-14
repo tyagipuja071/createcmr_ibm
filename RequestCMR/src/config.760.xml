@@ -1,0 +1,1386 @@
+<template id="760" for="UPDATE">
+	<tabs>
+		<tab name="Data" type="Data">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>20</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Account Abbreviated Name</label>
+					<dbColumn>ABBREV_NM</dbColumn>
+					<width>28</width>
+					<length>22</length>
+				</column>
+				<column>
+					<label>JSIC</label>
+					<dbColumn>JSIC_CD</dbColumn>
+					<width>16</width>
+					<lovId>JSICCd</lovId>
+				</column>
+				<column>
+					<label>Customer Class</label>
+					<dbColumn>CUST_CLASS</dbColumn>
+					<width>20</width>
+					<lovId>CustClass</lovId>
+				</column>
+				<column>
+					<label>Office Code</label>
+					<dbColumn>SALES_BO_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>INAC/NAC Code</label>
+					<dbColumn>INAC_CD</dbColumn>
+					<width>20</width>
+					<lovId>INACCode</lovId>
+				</column>
+				<column>
+					<label>Billing Process Code</label>
+					<dbColumn>BILLING_PROC_CD</dbColumn>
+					<width>20</width>
+					<length>2</length>
+				</column>
+				<column>
+					<label>Postal Code (for CSBO only)</label>
+					<dbColumn>CS_BO</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="Company" type="Address" typeCode="ZC01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-3" type="Address" typeCode="ZS01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-1" type="Address" typeCode="ZS02">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-2" type="Address" typeCode="ZP01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-7" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<!-- A -->
+		<tab name="ADU-A" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-B" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-C" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-D" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-E" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-F" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-G" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-H" type="Address" typeCode="ZI01">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>
+		<tab name="ADU-4" type="Address" typeCode="ZP09">
+			<columns>
+				<column exactLength="true">
+					<label>CMR Number</label>
+					<dbColumn>CMR_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Address Sequence</label>
+					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+					<width>16</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>Customer Name-KANJI</label>
+					<dbColumn>CUST_NM1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Name-KANJI Continue</label>
+					<dbColumn>CUST_NM2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Katakana</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Full English Name</label>
+					<dbColumn>CUST_NM3</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Address</label>
+					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
+					<label>Branch/Office</label>
+					<dbColumn>OFFICE</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				
+				<column>
+					<label>Department</label>
+					<dbColumn>DEPT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Building</label>
+					<dbColumn>BLDG</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>Location</label>
+					<dbColumn>LOCN_CD</dbColumn>
+					<width>20</width>
+					<lovId>LocationCode</lovId>
+				</column>
+				<column>
+					<label>Tel No</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>FAX</label>
+					<dbColumn>CUST_FAX</dbColumn>
+					<width>20</width>
+					<length>16</length>
+				</column>
+				<column>
+					<label>Contact</label>
+					<dbColumn>CONTACT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+			</columns>
+		</tab>		
+	</tabs>
+</template>

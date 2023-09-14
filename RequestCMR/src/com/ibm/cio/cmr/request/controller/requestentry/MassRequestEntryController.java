@@ -64,6 +64,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.SWISSHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -568,7 +569,8 @@ public class MassRequestEntryController extends BaseController {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else if ("618".equals(cmrIssuingCntry) || "706".equals(cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
-          } else if (LegacyDirectUtil.isCountryDREnabled(eManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)) {
+          } else if (LegacyDirectUtil.isCountryDREnabled(eManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)
+              || JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else {
             docLink = SystemConfiguration.getSystemProperty("massupdate." + cmrIssuingCntry);

@@ -1335,6 +1335,21 @@ function addEditAddressModal_onLoad() {
       }
 
     }
+    
+    if (FormManager.getActualValue('cmrIssuingCntry') == '760' && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
+      FormManager.setValue('cnCustName1', details.ret59);
+      cmr.oldcncustname = details.ret59;
+      FormManager.setValue('cnCustName2', details.ret60);
+      cmr.oldcncustname2 = details.ret60;
+      FormManager.setValue('cnAddrTxt2', details.ret61);
+      cmr.oldcnaddrtxt2 = details.ret61;
+      FormManager.setValue('cnAddrTxt', details.ret62);
+      cmr.oldcnaddrtxt = details.ret62;
+      FormManager.setValue('cnCity', details.ret63);
+      FilteringDropdown.val_cnCity = details.ret63;
+      FormManager.setValue('cnDistrict', details.ret64);
+      cmr.oldcndistrict = details.ret64;
+    }
 
     storeTgmeCompare(false, details);
 

@@ -885,7 +885,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       iAddr.setCity2(cmr.getCmrCity2());
     }
     if (iAddr != null) {
-      entityManager.persist(iAddr);
+      entityManager.merge(iAddr);
       entityManager.flush();
     }
   }
