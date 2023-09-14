@@ -1022,7 +1022,8 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
         validate : function() {
           var reqType = FormManager.getActualValue('reqType');
           var vat = FormManager.getActualValue('vat');
-
+          var custSubType = FormManager.getActualValue('custSubGrp');
+          
           if (!vat || vat == '' || vat.trim() == '') {
             return new ValidationResult(null, true);
           } else if (reqType == 'U' && vat == '@') {
@@ -1049,7 +1050,22 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
           }
           console.log('ZS01 VAT Country: ' + zs01Cntry);
 
+          if(zs01Cntry=='MX' && (custSubType=='CBCOM' || custSubType=='CBPRI'  ))
+    	  {
+    	  if(custSubType=='CBCOM')
+    		  {
+    		  zs01Cntry=zs01Cntry+"CBCOMM";
+    		  }
+    	  if(custSubType=='CBPRI')
+		  {
+		  zs01Cntry=zs01Cntry+"CBPRIV";
+		  }
+    	  var result = cmr.validateVAT(zs01Cntry, vat);
+    	  }
+      else
+    	  {
           var result = cmr.validateVAT(zs01Cntry, vat);
+    	  }
           if (result && !result.success) {
             if (result.errorPattern == null) {
               return new ValidationResult({
