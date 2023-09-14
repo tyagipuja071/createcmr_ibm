@@ -529,6 +529,8 @@ public class ChinaUtil extends AutomationUtil {
     List<Addr> addrs = handler.getAddrByReqId(entityManager, data.getId().getReqId());
     Addr zs01addr = requestData.getAddress("ZS01");
     IntlAddr intlZS01Addr = handler.getIntlAddrById(zs01addr, entityManager);
+    boolean cmdeReview = false;
+    List<Addr> addresses = null;
 
     if (addrs.size() > 0) {
       for (int i = 0; i < addrs.size(); i++) {
@@ -567,18 +569,59 @@ public class ChinaUtil extends AutomationUtil {
         entityManager.merge(intlAddr);
         entityManager.flush();
       }
-      details.append("Chinese&English name updated automatically for all address types.");
+      details.append("Chinese&English name updated automatically for all address types.\n");
       validation.setSuccess(true);
       validation.setMessage("Successful");
     } else {
-      details.append("Chinese&English name no need to be updated automatically.");
+      details.append("Chinese&English name no need to be updated automatically.\n");
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          if ("Y".equals(addr.getChangedIndc())) {
+            if (RELEVANT_ADDRESSES.contains(addrType)) {
+              // if (isRelevantAddressFieldUpdated(changes, addr)) {
+              // if customer name has been updated on any address , simply
+              // send to CMDE
+              List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+              for (UpdatedNameAddrModel change : addrChanges) {
+                if (("Customer Name English".equals(change.getDataField()) || "Customer Name Chinese".equals(change.getDataField())
+                    || "Customer Name Con't English".equals(change.getDataField()) || "Customer Name Con't Chinese".equals(change.getDataField())
+                    || "Customer Name Con't 2 English".equals(change.getDataField()) || "Customer Name Con't Chinese 2".equals(change.getDataField()))
+                    && CmrConstants.RDC_SOLD_TO.equalsIgnoreCase(addr.getId().getAddrType())) {
+                  // CMDE Review
+                  cmdeReview = true;
+                  details.append(
+                      "Update of Customer Name by the requester for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified.\n");
+                  engineData.addPositiveCheckStatus("Update of Customer Name for " + addrType + "(" + addr.getId().getAddrSeq()
+                      + ") needs to be verified. Forwarding request to CMDE");
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
     }
 
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
-
     return true;
   }
 
