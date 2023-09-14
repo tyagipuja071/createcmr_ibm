@@ -4105,40 +4105,33 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
-function addCompanyProofAttachValidation() {
-  FormManager.addFormValidator((function () {
+function addChangeNameAttachmentValidator() {
+  FormManager.addFormValidator((function() {
     return {
-      validate: function () {
+      validate : function() {
         var reqType = FormManager.getActualValue('reqType');
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0 || reqType == 'C') {
-          return new ValidationResult(null, true);
-        }
-
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var name = null;
-          var count = 0;
-          var updateInd = null;
-
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
+        var mainCustNm1 = FormManager.getActualValue("custNm1");
+        var oldCustNm1 = FormManager.getActualValue("oldCustNm1");
+        var mainCustNm2 = FormManager.getActualValue("custNm2");
+        var oldCustNm2 = FormManager.getActualValue("oldCustNm2");
+        var custNm3 = FormManager.getActualValue("custNm3");
+        var oldCustNm3 = FormManager.getActualValue("oldCustNm3");
+        var cnCustName1 = FormManager.getActualValue("cnCustName1");
+        var oldCnCustName1= FormManager.getActualValue("oldcnCustName1");
+        var cnCustName2 = FormManager.getActualValue("cnCustName2");
+        var oldCnCustName2= FormManager.getActualValue("oldCnCustName2");
+        var cnCustName3= FormManager.getActualValue("cnCustName3");
+        var oldCnCustName3= FormManager.getActualValue("oldCnCustName3");
+        
+        if (typeof (_pagemodel) != 'undefined') {
+          if (reqType == 'U' && (mainCustNm1 != oldCustNm1 || mainCustNm2 != oldCustNm2 
+              || custNm3 != oldCustNm3 || cnCustName1 != oldCnCustName1 || cnCustName2 != oldCnCustName2)
+              || cnCustName3 != oldCnCustName3) {
+            if (checkForCompanyProofAttachment()) {
+              return new ValidationResult(null, false, 'Company proof is mandatory since customer name has been updated or added.');
+            } else {
+              return new ValidationResult(null, true);
             }
-            name = record.custNm1;
-            updateInd = record.updateInd;
-
-            if (typeof (type) == 'object') {
-              updateInd = updateInd[0];
-            }
-
-            if ((updateInd == 'U' || updateInd == 'N')) {
-              count++;
-            }
-
-          }
-          if (count > 0 && checkForCompanyProofAttachment()) {
-            return new ValidationResult(null, false, 'Company proof is mandatory since address has been updated or added.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -4256,5 +4249,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
-  GEOHandler.registerValidator(addCompanyProofAttachValidation, [SysLoc.CHINA]);
+  GEOHandler.registerValidator(addChangeNameAttachmentValidator, GEOHandler.CN, null, true);
 });
