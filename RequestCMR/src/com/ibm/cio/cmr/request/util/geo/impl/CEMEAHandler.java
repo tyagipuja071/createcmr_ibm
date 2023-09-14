@@ -998,8 +998,10 @@ public class CEMEAHandler extends BaseSOFHandler {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
       // CMR-2096-Austria - "Central order block code"
-      data.setOrdBlk(mainRecord.getCmrOrderBlock());
-      LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
+      if (!"ST".equals(mainRecord.getCmrOrderBlock())) {
+        data.setOrdBlk(mainRecord.getCmrOrderBlock());
+        LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
+      }
 
       String embargoCode = (this.currentImportValues.get("EmbargoCode"));
       if (StringUtils.isBlank(embargoCode)) {
@@ -1037,6 +1039,9 @@ public class CEMEAHandler extends BaseSOFHandler {
       // Currency code for Austria
       data.setLegacyCurrencyCd(this.currentImportValues.get("CurrencyCode"));
       LOG.trace("Currency: " + data.getLegacyCurrencyCd());
+
+      data.setOrdBlk(mainRecord.getCmrOrderBlock());
+      LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
 
       EntityManager em = JpaManager.getEntityManager();
       String sql = ExternalizedQuery.getSql("AT.GET.ZS01.DATLT");
