@@ -155,8 +155,10 @@ public class EMEAHandler extends BaseSOFHandler {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
       // name4 in rdc = Attn on SOF
-      record.setCmrDept(record.getCmrName4());
-      record.setCmrName4(null);
+      if (!("866".equals(SystemLocation.UNITED_KINGDOM) || ("754".equals(SystemLocation.IRELAND)))) {
+        record.setCmrDept(record.getCmrName4());
+        record.setCmrName4(null);
+      }
       if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
         record.setCmrStreetAddressCont(record.getCmrName4());
         record.setCmrName3(record.getCmrName3());
@@ -164,11 +166,6 @@ public class EMEAHandler extends BaseSOFHandler {
         // name3 in rdc = Address Con't on SOF
         record.setCmrStreetAddressCont(record.getCmrName3());
         record.setCmrName3(null);
-      }
-      // name4 in rdc = Attn on SOF
-      if (!("866".equals(SystemLocation.UNITED_KINGDOM) || ("754".equals(SystemLocation.IRELAND)))) {
-        record.setCmrDept(record.getCmrName4());
-        record.setCmrName4(null);
       }
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
         if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
