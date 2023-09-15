@@ -155,8 +155,8 @@ public class EMEAHandler extends BaseSOFHandler {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
       // name4 in rdc = Attn on SOF
-      record.setCmrDept(record.getCmrName4());
-      record.setCmrName4(null);
+      // record.setCmrDept(record.getCmrName4());
+      // record.setCmrName4(null);
       if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
         record.setCmrStreetAddressCont(record.getCmrName4());
         record.setCmrName3(record.getCmrName3());
