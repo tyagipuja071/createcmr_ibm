@@ -180,8 +180,10 @@ public class JPHandler extends GEOHandler {
 
     String cmrNo = searchModel.getCmrNum();
     String addrTypeParam = addrType;
-    String addrTypeModel = importIbmRelatedCmr(entityManager, request, reqentry, params, searchModel, addrType, addrTypeParam);
-    addrType = addrTypeModel;
+    if ("C".equals(reqentry.getReqType()) && "BQICL".equals(reqentry.getCustSubGrp()) && "EAIR".equals(addrTypeParam)) {
+      String addrTypeModel = importIbmRelatedCmr(entityManager, request, reqentry, params, searchModel, addrType, addrTypeParam);
+      addrType = addrTypeModel;
+    }
 
     CRISCompany company = null;
     CRISEstablishment establishment = null;
@@ -4976,14 +4978,12 @@ public class JPHandler extends GEOHandler {
 
   private String importIbmRelatedCmr(EntityManager entityManager, HttpServletRequest request, RequestEntryModel reqentry, ParamContainer params,
       ImportCMRModel searchModel, String addrType, String addrTypeParam) throws Exception {
-    if ("C".equals(reqentry.getReqType()) && "BQICL".equals(reqentry.getCustSubGrp()) && "EAIR".equals(addrTypeParam)) {
-      String companyNo = getCompanyNoByIbmRelatedCmr(entityManager, SystemConfiguration.getValue("MANDT"), searchModel.getCmrNum());
-      // retrieve company address via ibm related cmr no
-      if (companyNo != null && !companyNo.isEmpty()) {
-        addrType = "ZC01";
-        reqentry.setCustType("EA");
-        searchModel.setCmrNum(companyNo);
-      }
+    String companyNo = getCompanyNoByIbmRelatedCmr(entityManager, SystemConfiguration.getValue("MANDT"), searchModel.getCmrNum());
+    // retrieve company address via ibm related cmr no
+    if (companyNo != null && !companyNo.isEmpty()) {
+      addrType = "ZC01";
+      reqentry.setCustType("EA");
+      searchModel.setCmrNum(companyNo);
     }
     return addrType;
   }
