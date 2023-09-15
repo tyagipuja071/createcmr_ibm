@@ -127,18 +127,16 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       return new DropdownModel();
     }
 
-    if (fieldId.contains("County")) {
-      System.out.print("breakpoint");
-    }
+    DropdownModel model = null;
+    List<DropdownItemModel> itemList = new ArrayList<DropdownItemModel>();
 
     PreparedQuery query = getBDSSql(fieldId, entityManager, params, null);
-
-    DropdownModel model = null;
 
     if (query != null) {
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults(-1);
       if (results != null && results.size() > 0) {
+        Object[] row = null;
         model = new DropdownModel();
         model.setIdentifier("id");
         model.setLabel("name");
@@ -147,9 +145,22 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         blankOption.setName("");
         model.addItems(blankOption); // blank option
 
-        boolean filterOutDuplicates = shouldFilterDuplicates(params);
+        DropdownItemModel item = null;
 
-        addItemsAndCodeToDropdownList(model, results, true);
+        List<String> codes = new ArrayList<String>();
+        for (Object obj : results) {
+
+          row = (Object[]) obj;
+          if (!codes.contains(row[0].toString())) {
+            item = new DropdownItemModel();
+            item.setName(row[1] != null ? row[1].toString() : "");
+            item.setName(escapeText(item.getName()));
+            item.setId(row[0] != null ? row[0].toString() : "");
+            itemList.add(item);
+            model.addItems(item);
+            codes.add(item.getId());
+          }
+        }
       }
     }
 
@@ -218,7 +229,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       }
 
       if (!StringUtils.isEmpty(bds.getOrderByField())) {
-        if (!"897".equals(params.getParam("cmrIssuingCntry"))) {
+        if (!"897".equals((String) params.getParam("cmrIssuingCntry"))) {
           if ("CMRIssuingCountry".equalsIgnoreCase(fieldId) && "Y".equals(params.getParam("newRequest"))) {
             // special handling
             bdsQuery.append(" order by CD asc");
@@ -238,57 +249,6 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
     }
 
     return bdsQuery;
-  }
-
-  private boolean shouldFilterDuplicates(ParamContainer params) {
-    // US County
-    // if (((String) params.getParam("fieldId")).equalsIgnoreCase("County") &&
-    // ((String) params.getParam("landCntry")).equalsIgnoreCase("US")) {
-    // return false;
-    // }
-
-    return true;
-  }
-
-  private void addItemsAndCodeToDropdownList(DropdownModel model, List<Object[]> results, boolean fiterOutDuplicates) {
-    List<DropdownItemModel> itemList = new ArrayList<DropdownItemModel>();
-    List<String> codes = new ArrayList<String>();
-
-    for (Object obj : results) {
-      Object[] row = (Object[]) obj;
-      if (fiterOutDuplicates) {
-        addUniqueCodeItems(itemList, model, codes, row, fiterOutDuplicates);
-      } else {
-        addDuplicatedCodeItems(itemList, model, codes, row, fiterOutDuplicates);
-      }
-    }
-  }
-
-  private void addDuplicatedCodeItems(List<DropdownItemModel> itemList, DropdownModel model, List<String> codes, Object[] row,
-      boolean fiterOutDuplicates) {
-    addDropdownItems(itemList, model, codes, row, fiterOutDuplicates);
-  }
-
-  private void addUniqueCodeItems(List<DropdownItemModel> itemList, DropdownModel model, List<String> codes, Object[] row,
-      boolean fiterOutDuplicates) {
-    if (!codes.contains(row[0].toString())) {
-      addDropdownItems(itemList, model, codes, row, fiterOutDuplicates);
-    }
-  }
-
-  private void addDropdownItems(List<DropdownItemModel> itemList, DropdownModel model, List<String> codes, Object[] row, boolean fiterOutDuplicates) {
-    DropdownItemModel item = setListItem(row, fiterOutDuplicates);
-    itemList.add(item);
-    model.addItems(item);
-    codes.add(item.getId());
-  }
-
-  private DropdownItemModel setListItem(Object[] row, boolean fiterOutDuplicates) {
-    DropdownItemModel item = new DropdownItemModel();
-    item.setName(row[1] != null ? row[1].toString() : "");
-    item.setName(escapeText(item.getName()));
-    item.setId(row[0] != null ? row[0].toString() : "");
-    return item;
   }
 
   /**
