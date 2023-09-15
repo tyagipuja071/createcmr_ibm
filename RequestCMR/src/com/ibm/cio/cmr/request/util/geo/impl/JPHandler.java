@@ -180,6 +180,11 @@ public class JPHandler extends GEOHandler {
 
     RequestEntryModel reqentry = (RequestEntryModel) params.getParam("model");
 
+    String cmrNo = searchModel.getCmrNum();
+    String addrTypeParam = addrType;
+    String addrTypeModel = importIbmRelatedCmr(entityManager, request, reqentry, params, searchModel, addrType, addrTypeParam);
+    addrType = addrTypeModel;
+
     CRISCompany company = null;
     CRISEstablishment establishment = null;
     if ("ZC01".equals(addrType)) {
@@ -249,6 +254,19 @@ public class JPHandler extends GEOHandler {
               data.setJsicCd(establishment != null && establishment.getJsic() != null ? establishment.getJsic().trim()
                   : company != null && company.getJsic() != null ? company.getJsic().trim() : null);
               break;
+            case "BQICL":
+              if ("C".equals(reqentry.getReqType()) && "EAIR".equals(addrTypeParam)) {
+                if (StringUtils.isNotBlank(cmrNo)) {
+                  Kna1 kna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), cmrNo, "ZS01");
+                  if (kna1 != null) {
+                    data.setIsicCd(kna1.getZzkvSic() != null ? kna1.getZzkvSic() : "");
+                    data.setSearchTerm(kna1.getSortl() != null ? kna1.getSortl() : "");
+                    data.setCustClass(kna1.getKukla() != null ? kna1.getKukla() : "");
+                    data.setInacCd(kna1.getZzkvInac() != null ? kna1.getZzkvInac() : "");
+                    data.setCustPrefLang(kna1.getSpras() != null ? kna1.getSpras() : "");
+                  }
+                }
+              }
             case "":
             default:
               // only for requester
@@ -1760,6 +1778,9 @@ public class JPHandler extends GEOHandler {
     addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
 
     setFieldBeforeAddrSave(entityManager, addr);
+
+    setAbbrevBeforeAddrSave(entityManager, addr);
+
   }
 
   public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
@@ -2411,13 +2432,15 @@ public class JPHandler extends GEOHandler {
 
     if ("C".equals(admin.getReqType()) && "BPWPQ".equals(data.getCustSubGrp())) {
       // Bill to Customer
-      Addr addrBillto = getZP01FromRDC(entityManager, data, "ZP01", "2");
-      String seqNo = "1";
-      // copy ZP01 to ADU2 and ADU7
-      if (addrBillto != null) {
-        LOG.debug("creating bill to related address...");
-        saveAddrCopy(entityManager, admin, data, addrBillto, "ZP01", seqNo);
-        saveAddrCopy(entityManager, admin, data, addrBillto, "ZI01", seqNo);
+      if (StringUtils.isNotBlank(data.getBillToCustNo())) {
+        Addr addrBillto = getZP01FromRDC(entityManager, data, "ZP01", "2");
+        String seqNo = "1";
+        // copy ZP01 to ADU2 and ADU7
+        if (addrBillto != null) {
+          LOG.debug("creating bill to related address...");
+          saveAddrCopy(entityManager, admin, data, addrBillto, "ZP01", seqNo);
+          saveAddrCopy(entityManager, admin, data, addrBillto, "ZI01", seqNo);
+        }
       }
     }
 
@@ -5061,4 +5084,65 @@ public class JPHandler extends GEOHandler {
     address.setCustPhone(kna1.getTelf1());
     return address;
   }
+
+  private String importIbmRelatedCmr(EntityManager entityManager, HttpServletRequest request, RequestEntryModel reqentry, ParamContainer params,
+      ImportCMRModel searchModel, String addrType, String addrTypeParam) throws Exception {
+    if ("C".equals(reqentry.getReqType()) && "BQICL".equals(reqentry.getCustSubGrp()) && "EAIR".equals(addrTypeParam)) {
+      String companyNo = getCompanyNoByIbmRelatedCmr(entityManager, SystemConfiguration.getValue("MANDT"), searchModel.getCmrNum());
+      // retrieve company address via ibm related cmr no
+      if (companyNo != null && !companyNo.isEmpty()) {
+        addrType = "ZC01";
+        reqentry.setCustType("EA");
+        searchModel.setCmrNum(companyNo);
+      }
+    }
+    return addrType;
+  }
+
+  private String getCompanyNoByIbmRelatedCmr(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
+    if (StringUtils.isEmpty(cmrNo)) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("JP.GET.COMPANY.BY.IBMCMR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    String compnyNo = query.getSingleResult(String.class);
+    return compnyNo;
+  }
+
+  private static Kna1 getKna1ByType(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception {
+    if (StringUtils.isEmpty(cmrNo)) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("JP.GET.KNA1.BY_CMR_TYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KTOKD", addrType);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Kna1.class);
+  }
+
+  private void setAbbrevBeforeAddrSave(EntityManager entityManager, Addr addr) {
+    DataPK pk = new DataPK();
+    pk.setReqId(addr.getId().getReqId());
+    Data data = entityManager.find(Data.class, pk);
+    String custSubGrp = data.getCustSubGrp() == null ? "" : data.getCustSubGrp();
+    String accountAbbNm = "";
+    if ("BQICL".equals(custSubGrp) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
+      if (addr.getCustNm3() != null) {
+        if (addr.getCustNm3().length() > 22) {
+          accountAbbNm = addr.getCustNm3().substring(0, 22);
+        }
+        data.setAbbrevNm(accountAbbNm.toUpperCase());
+        entityManager.merge(data);
+        entityManager.flush();
+      }
+    }
+  }
+
 }

@@ -6422,49 +6422,82 @@ function findImportCMR() {
   var creditToCustNo = FormManager.getActualValue('creditToCustNo');
   var billToCustNo = FormManager.getActualValue('billToCustNo');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (creditToCustNo == '' || billToCustNo == '') {
-    cmr.showAlert('Please input the both Credit and Bill To Customer No. to search for.');
-    return;
+  var ibmRelatedCmr = FormManager.getActualValue('proxiLocnNo');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'BPWPQ') {
+    if (creditToCustNo == '' || billToCustNo == '') {
+      cmr.showAlert('Please input the both Credit and Bill To Customer No. to search for.');
+      return;
+    }
+    cmr.importcmr = creditToCustNo;
+    cmr.importcntry = cntry;
+    cmr.showConfirm('doImportCmrs()', 'Records with Credit Customer Number ' + creditToCustNo + ' Bill to Customer ' + billToCustNo
+        + ' will be imported by the system. The data will replace all the current data on the request. Continue?', null, null, {
+      OK : 'Yes',
+      CANCEL : 'Cancel'
+    });
   }
-  cmr.importcmr = creditToCustNo;
-  cmr.importcntry = cntry;
-  cmr.showConfirm('doImportCmrs()', 'Records with Credit Customer Number ' + cmrNo + ' will be imported by the system. The data will replace all the current data on the request. Continue?', null,
-      null, {
-        OK : 'Yes',
-        CANCEL : 'Cancel'
-      });
+  if (custSubGrp == 'BQICL') {
+    if (ibmRelatedCmr == '') {
+      cmr.showAlert('Please input the IBM Related CMR to search for.');
+      return;
+    }
+    cmr.importcmr = ibmRelatedCmr;
+    cmr.importcntry = cntry;
+    cmr.showConfirm('doImportCmrs(true)', 'Records with IBM Related CMR ' + ibmRelatedCmr + ' will be imported by the system. The data will replace all the current data on the request. Continue?',
+        null, null, {
+          OK : 'Yes',
+          CANCEL : 'Cancel'
+        });
+  }
 }
 
 function doImportCmrs(addressOnly) {
   var cmrNo = cmr.importcmr;
   var addrType = '';
   var addrSeq = '';
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var message = '';
   var result = cmr.currentCmrResult;
   if (result && result.data.addressType) {
     addrType = result.data.addressType;
     addrSeq = result.data.addressSeq;
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  cmr.showProgress('Importing records with Credit Customer Number ' + cmrNo + '.  This process might take a while. Please wait..');
+  if (custSubGrp == 'BPWPQ') {
+    message = 'Importing records with Credit Customer Number ';
+  }
+  if (custSubGrp == 'BQICL') {
+    addrType = 'EAIR';
+    message = 'Importing records with IBM Relate CMR ';
+  }
+  cmr.showProgress(message + cmrNo + '.  This process might take a while. Please wait..');
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
       + cmrNo + '&system=cmr' + (cmr.searchIssuingCntry != null ? '&searchIssuingCntry=' + cmr.searchIssuingCntry : '') + (cmr.skipAddress != null ? '&skipAddress=' + cmr.skipAddress : ''));
   document.forms['frmCMR'].submit();
 }
 
-function disableBpImport() {
+function disableBpBqiImport() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
-  var btnImportBp = FormManager.getActualValue('btnImportBp');
   if (reqType == 'C') {
     if (custSubGrp == 'BPWPQ') {
       document.getElementById("btnImportBp").style.visibility = "visible";
     } else {
       document.getElementById("btnImportBp").style.visibility = "hidden";
     }
+    if (custSubGrp == 'BQICL') {
+      document.getElementById("btnIbmRelateCmr").style.visibility = "visible";
+    } else {
+      document.getElementById("btnIbmRelateCmr").style.visibility = "hidden";
+    }
+  } else {
+    document.getElementById("btnImportBp").style.visibility = "hidden";
+    document.getElementById("btnIbmRelateCmr").style.visibility = "hidden";
   }
 }
 
@@ -6588,7 +6621,7 @@ dojo.addOnLoad(function() {
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
 
-  GEOHandler.addAfterConfig(disableBpImport, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(disableBpImport, GEOHandler.JP);
+  GEOHandler.addAfterConfig(disableBpBqiImport, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(disableBpBqiImport, GEOHandler.JP);
 
 });
