@@ -45,6 +45,8 @@ import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.Knb1;
 import com.ibm.cio.cmr.request.entity.Knb1PK;
+import com.ibm.cio.cmr.request.entity.NotifList;
+import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.entity.SalesPayment;
 import com.ibm.cio.cmr.request.entity.SalesPaymentPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
@@ -60,6 +62,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AdminService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -3241,5 +3244,52 @@ public class JPHandler extends GEOHandler {
     query.setParameter("MANDT", mandt);
     query.setForReadOnly(true);
     return query.getSingleResult(Knb1.class);
+  }
+
+  public static void addJpSrwzLogicOnPRC(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    // in order to skip TC -
+    // 1, set req status COM
+    // 2, handle notify list
+    // 3, handle wf history
+    String custSubGroup = data.getCustSubGrp();
+    String action = model.getAction();
+    LOG.debug("skipping TC in addJpSrwzLogicOnPRC. reqId " + admin.getId().getReqId());
+    if ("ISOCU".equals(custSubGroup) && (CmrConstants.Processing_Validation_Complete().equals(model.getAction())
+        || CmrConstants.All_Processing_Complete().equals(model.getAction()) || "PCC".equals(model.getAction()))) {
+      try {
+        admin.setReqStatus("COM");
+        handleNotifyList(entityManager, admin, data, model);
+        handleWfHist(entityManager, admin, data, model);
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        LOG.error("ERROR in addJpSrwzLogicOnPRC. reqId " + admin.getId().getReqId() + ". Message: " + e);
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public static void handleNotifyList(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    // 1, check if there is notify list record
+    // 2, update latest record
+    AdminService adminService = new AdminService();
+
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.CHECKNOTIFLIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setParameter("USER_ID", admin.getRequesterId());
+    if (!query.exists()) {
+      NotifList notif = new NotifList();
+      NotifListPK pk = new NotifListPK();
+      pk.setReqId(admin.getId().getReqId());
+      pk.setNotifId(admin.getRequesterId());
+      notif.setId(pk);
+      notif.setNotifNm(admin.getRequesterNm());
+
+      adminService.createEntity(notif, entityManager);
+    }
+  }
+
+  public static void handleWfHist(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    // super
   }
 }
