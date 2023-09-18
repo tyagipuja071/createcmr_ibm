@@ -78,7 +78,7 @@ public class MCOCewaHandler extends MCOHandler {
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
       String embargoCode = (this.currentImportValues.get("EmbargoCode"));
-      if (StringUtils.isBlank(embargoCode)) {
+      if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
         embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
       }
       if (!"ST".equalsIgnoreCase(embargoCode)) {
