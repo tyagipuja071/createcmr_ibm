@@ -1225,7 +1225,7 @@ public class BELUXHandler extends BaseSOFHandler {
     if (StringUtils.isBlank(embargoCode)) {
       embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
     }
-    if (!"ST".equalsIgnoreCase(embargoCode)) {
+    if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
       data.setEmbargoCd(embargoCode);
       LOG.trace("EmbargoCode: " + embargoCode);
     } else if ("ST".equalsIgnoreCase(embargoCode)) {
