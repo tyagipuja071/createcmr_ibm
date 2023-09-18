@@ -144,9 +144,12 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         blankOption.setId("");
         blankOption.setName("");
         model.addItems(blankOption); // blank option
+
         DropdownItemModel item = null;
+
         List<String> codes = new ArrayList<String>();
         for (Object obj : results) {
+
           row = (Object[]) obj;
           if (!codes.contains(row[0].toString())) {
             item = new DropdownItemModel();
@@ -210,9 +213,6 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       sb.append(" TXT from ").append(bds.getSchema() + "." + bds.getTbl());
       sb.append(" where length(" + bds.getCd() + ") > 0 ");
       // if ("897".equals((String) params.getParam("cmrIssuingCntry"))) {
-      if ("County".equals(fieldId)) {
-        sb.setLength(0);
-      }
       // }
       // new REFT tables do not have MANDT. removing this for all.
       // if (!BDS_NO_MANDT.contains(bds.getTbl())) {
@@ -330,7 +330,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.setParameter("LAND1", params.getParam("landCntry"));
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     }
-    
+
     // CREATCMR-8323
     if ("StateProvUS".equalsIgnoreCase(fieldId)) {
       query.append(" and LAND1 = :LAND1 ");
@@ -346,7 +346,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.setParameter("LAND1", params.getParam("landCntry"));
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     }
-    
+
     if ("TransportZone".equalsIgnoreCase(fieldId)) {
       // no dependency for now
       // query.append(" and SPRAS = 'E' ");
@@ -355,20 +355,20 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
     }
 
     if ("County".equalsIgnoreCase(fieldId)) {
-      // support only US for now
-      // query.append(" and 'US' = :LAND1 ");
-      // query.append(
-      // " and REFT_STATE_PROV_KEY = (select REFT_STATE_PROV_KEY from
-      // CMMA.REFT_STATE_PROV_W where STATE_PROV_CD = :REGIO and
-      // REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W
-      // where COUNTRY_CD = :LAND1)) ");
-      // query.setParameter("REGIO", params.getParam("stateProv"));
-      // query.setParameter("LAND1", params.getParam("landCntry"));
+      if (params.getParam("landCntry").equals("US")) {
+        query.append(" and 'US' = :LAND1 ");
+        query.append(
+            " and REFT_STATE_PROV_KEY = (select REFT_STATE_PROV_KEY from CMMA.REFT_STATE_PROV_W where STATE_PROV_CD = :REGIO and REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1)) ");
+        query.setParameter("REGIO", params.getParam("stateProv"));
+        query.setParameter("LAND1", params.getParam("landCntry"));
+      } else {
+        query = new PreparedQuery(entityManager, "");
+        query.append(
+            "SELECT trim(LPAD(C_CNTY,3,0)) TXT, trim(N_CNTY) CD FROM CREQCMR.US_CMR_SCC WHERE LAND_CNTRY = :LAND1 AND N_ST = :N_ST GROUP BY N_CNTY, C_CNTY ORDER BY N_CNTY, C_CNTY ");
+        query.setParameter("LAND1", params.getParam("landCntry"));
+        query.setParameter("N_ST", params.getParam("stateProv"));
+      }
 
-      query.append(
-          "SELECT trim(LPAD(C_CNTY,3,0)) TXT, trim(N_CNTY) CD FROM CREQCMR.US_CMR_SCC WHERE LAND_CNTRY = :LAND1 AND N_ST = :N_ST GROUP BY N_CNTY, C_CNTY ORDER BY N_CNTY, C_CNTY ");
-      query.setParameter("LAND1", params.getParam("landCntry"));
-      query.setParameter("N_ST", params.getParam("stateProv"));
     }
 
     if ("Subindustry".equalsIgnoreCase(fieldId)) {
