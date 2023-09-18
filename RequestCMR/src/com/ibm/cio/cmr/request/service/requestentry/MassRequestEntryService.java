@@ -1046,30 +1046,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           Scorecard score = entity.getEntity(Scorecard.class);
           score.getId().setReqId(reqId);
           createEntity(score, entityManager);
-        } else if (model.getCmrIssuingCntry().equalsIgnoreCase("760")) {
-          // create the MassUpdt record
-          MassUpdt massUpdt = new MassUpdt();
-          MassUpdtPK pk = new MassUpdtPK();
-          // massUpdt.setRowStatusCd(rowStatusCd);
-          pk.setIterationId(0);
-          pk.setSeqNo(0);
-          pk.setParReqId(reqId);
-
-          massUpdt.setId(pk);
-          massUpdt.setRowStatusCd("");
-          massUpdt.setCmrNo("");
-          createEntity(massUpdt, entityManager);
-
-          // create the MassUpdtData record
-          MassUpdtData massUpdtData = new MassUpdtData();
-          MassUpdtDataPK pk1 = new MassUpdtDataPK();
-          pk1.setIterationId(0);
-          pk1.setSeqNo(0);
-          pk1.setParReqId(reqId);
-          massUpdtData.setId(pk1);
-          createEntity(massUpdtData, entityManager);
-
-          admin.setIterationId(0);
         }
       }
 
@@ -5401,10 +5377,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileNORDX(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
-                } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
-                  if (!validateMassUpdateFileJP(filePath, data, admin, data.getCmrIssuingCntry())) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
                 } else {
                   if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
@@ -5491,50 +5463,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForLA(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
-                  } else if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
-                    // JAPAN
-                    setMassUpdateListForJP(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
-                    if (!PageManager.fromGeo("JP", cmrIssuingCntry)) {
-                      setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
+                    if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
+                      // JAPAN
+                      setMassUpdateListForJP(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                     }
                   }
-                  /*
-                   * DENNIS: COMMENTED THE FOLLOWING BECAUSE DYNAMIC MASS UPDATE
-                   * IS NOT NEEDED YET FOR OTHER COUNTRIES
-                   */
-                  // if (PageManager.fromGeo("EMEA", cmrIssuingCntry)) {
-                  // setMassUpdateListEMEA(modelList, item.getInputStream(),
-                  // reqId, newIterId, filePath);
-                  // } else if (DEHandler.isIERPCountry(cmrIssuingCntry) ||
-                  // CNDHandler.isCNDCountry(cmrIssuingCntry)) {
-                  // setMassUpdateListDECND(modelList, item.getInputStream(),
-                  // reqId, newIterId, filePath);
-                  // } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
-                  // setMassUpdateListLA(modelList, item.getInputStream(),
-                  // reqId, newIterId, filePath);
-                  // } else if (PageManager.fromGeo("MCO1", cmrIssuingCntry) ||
-                  // PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
-                  // setMassUpdateListMCO(modelList, item.getInputStream(),
-                  // reqId, newIterId, filePath);
-                  // } else if (PageManager.fromGeo("CEMEA", cmrIssuingCntry)) {
-                  // setMassUpdateListCEMEA(modelList, item.getInputStream(),
-                  // reqId, newIterId, filePath);
-                  // } else if (PageManager.fromGeo("NORDX", cmrIssuingCntry)) {
-                  // setMassUpdateListNORDX(modelList, item.getInputStream(),
-                  // reqId, newIterId, filePath);
-                  // } else {
-                  // if
-                  // (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager,
-                  // data.getCmrIssuingCntry())) {
-                  // setMassUpdateListForLegacyDirect(entityManager,
-                  // legacyDirectModelCol, filePath, reqId, newIterId,
-                  // filePath);
-                  // } else {
-                  // setMassUpdateList(modelList, item.getInputStream(), reqId,
-                  // newIterId, filePath);
-                  // }
-                  // }
 
                   if (!"760".equalsIgnoreCase(cmrIssuingCntry)) {
                     RequestEntryModel model = new RequestEntryModel();
@@ -5973,10 +5907,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "SALES_BO_CD":
         // office code
         if (StringUtils.isNotBlank(tempVal)) {
-          // JOYCE TODO need to call a method to set ISIC SUBINDUSTRY MRC CTC
-          // ISU SORTL
+          muModel.setModeOfPayment(tempVal);
         }
-        muModel.setModeOfPayment(tempVal);
         break;
       case "INAC_CD":
         muModel.setInacCd(tempVal);
@@ -5986,10 +5918,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CS_BO":
         if (StringUtils.isNotBlank(tempVal)) {
-          // JOYCE TODO get csbo value based on postal
-          String csbo = "";
+          muModel.setRepTeamMemberNo(tempVal);
         }
-        muModel.setRepTeamMemberNo(tempVal);
         break;
       case "CMR_NO":
         muModel.setCmrNo(tempVal);
