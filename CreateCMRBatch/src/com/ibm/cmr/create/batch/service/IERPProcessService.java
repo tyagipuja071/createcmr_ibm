@@ -552,21 +552,20 @@ public class IERPProcessService extends BaseBatchService {
           List<ProcessResponse> responses = null;
           String rdcProcessingMessage = "";
           String wfHistCmt = "";
-          String rdcOrderBlk = IERPRequestUtils.getOrderBlockFromDataRdc(em, admin);
           DataRdc dataRdc = getDataRdcRecords(em, data);
+          String rdcOrderBlk = dataRdc.getCustAcctType();
           String dataOrderBlk = data.getCustAcctType();
           StringBuilder comment = new StringBuilder();
           HashMap<String, Object> overallResponse = null;
           boolean firstRun = false;
-          if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
+          
+          // For temporary reactivate
+          if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
             rdcOrderBlk = dataRdc.getOrdBlk();
-          } else if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
-              && ("PCP".equals(admin.getReqStatus()) || "PCR".equals(admin.getReqStatus()))) {
             data.setOrdBlk("");
+            dataOrderBlk = data.getOrdBlk();
           }
-          if ("TREC".equals(admin.getReqReason()) && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
-            rdcOrderBlk = "88";
-          }
+          
           if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
               && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && (rdcOrderBlk != null && !StringUtils.isBlank(rdcOrderBlk))
               && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
