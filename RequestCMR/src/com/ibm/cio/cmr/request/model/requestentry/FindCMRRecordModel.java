@@ -232,6 +232,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String attach;
   private String custGroup;
   private String custClass;
+  private String inspbydebi;
 
   // Italy Legacy Fields
   private String hwSvcsRepTeamNo;
@@ -2491,6 +2492,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setCmrFiscalCd(String cmrFiscalCd) {
     this.cmrFiscalCd = cmrFiscalCd;
+  }
+
+  public String getInspbydebi() {
+    return inspbydebi;
+  }
+
+  public void setInspbydebi(String inspbydebi) {
+    this.inspbydebi = inspbydebi;
   }
 
 }
