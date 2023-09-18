@@ -922,6 +922,7 @@ public class JPHandler extends GEOHandler {
       data.setSalesBusOffCd(
           mainRecord.getSboSub() != null && mainRecord.getSboSub().length() == 3 ? mainRecord.getSboSub().substring(1) : mainRecord.getSboSub());
     }
+    data.setIdentClient(mainRecord.getInspbydebi());
     handleData4RAOnImport(data);
   }
 
