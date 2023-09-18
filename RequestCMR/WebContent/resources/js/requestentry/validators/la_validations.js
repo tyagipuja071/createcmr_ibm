@@ -1319,48 +1319,14 @@ function addVatValidatorInAddressModalForBrazil() {
         var value = FormManager.getActualValue('vat');
         var lbl = FormManager.getLabel('VAT');
         var reqType = cmr.currentRequestType;
-        if (reqType != 'C') {
-          if (value && value.length > 0 && !value.match("^[0-9]+$") && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
+        if (value && (value.length != 14 || !value.match("^[0-9]+$"))) {
             return new ValidationResult({
               id : 'vat',
               type : 'text',
               name : 'vat'
-            }, false, 'The value for ' + lbl + ' is invalid. Only digits are allowed.');
+            }, false, 'The value for ' + lbl + ' is invalid. Vat value should be 14 digits.');
           }
-        } else {
-          var lCntry = FormManager.getActualValue('landCntry');
-          if (value && value.length > 0 && !value.match("^[0-9]+$") && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL && lCntry == 'BR') {
-            return new ValidationResult({
-              id : 'vat',
-              type : 'text',
-              name : 'vat'
-            }, false, 'The value for ' + lbl + ' is invalid. Only digits are allowed.');
-          } else if (value && value.length > 0 && !value.match("^[0-9a-zA-Z]*$") && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL && lCntry != '' && lCntry != 'BR') {
-            return new ValidationResult({
-              id : 'vat',
-              type : 'text',
-              name : 'vat'
-            }, false, 'The value for ' + lbl + ' is invalid. Only digits and alphabets combination is allowed.');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var value = FormManager.getActualValue('vat');
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-        if (value.length > 0 && value.length != 11 && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL && (custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM')) {
-          return new ValidationResult({
-            id : 'vat',
-            type : 'text',
-            name : 'vat'
-          }, false, 'The VAT value should be of exactly 11 digits.');
-        }
+        
         return new ValidationResult(null, true);
       }
     };
@@ -3239,7 +3205,8 @@ dojo.addOnLoad(function() {
   // CREATCMR-531
   GEOHandler.registerValidator(addTaxCode1ValidatorForOtherLACntries, SSAMX_COUNTRIES, null, false, false);
   // GEOHandler.registerValidator(addTaxCodesValidator, GEOHandler.LA);
-  // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ], null, false, false);
+  // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ], null,
+  // false, false);
   
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHILE , 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.COLOMBIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.COLOMBIA ], null, true);
@@ -3322,7 +3289,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCtcBySBOForBrazil, SysLoc.BRAZIL);
 
   GEOHandler.addAfterTemplateLoad(toggleTaxRegimeForCrossMx, [ SysLoc.MEXICO ]);
-  //Checklist
+  // Checklist
   GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.VENEZUELA ]);
   GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VENEZUELA ]);
   GEOHandler.addAfterConfig(addChecklistBtnHandler, [ SysLoc.VENEZUELA ]);
