@@ -465,6 +465,7 @@ public class JPHandler extends GEOHandler {
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
     FindCMRRecordModel mainRecord = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
+    String mandt = SystemConfiguration.getValue("MANDT");
     boolean onlyCrisAddrFlag = false;
     if (mainRecord == null) {
       mainRecord = new FindCMRRecordModel();
@@ -488,6 +489,10 @@ public class JPHandler extends GEOHandler {
     if (establishment == null) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_ESTABLISHMENT_DATA);
     }
+    
+    List<Kna1> l = getKna1List(entityManager, mandt, mainRecord.getCmrNum());
+    String rol = l.get(0).getInspbydebi();
+    mainRecord.setInspbydebi(rol);
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
       mainRecord.setCmrDuns(company.getDunsNo());
     }
@@ -691,6 +696,7 @@ public class JPHandler extends GEOHandler {
     record.setCmrCustPhone(sbPhone.toString());
     record.setCmrCountryLanded("JP");
     record.setCmrPostalCode(company.getPostCode());
+    record.setInspbydebi(rol);
     converted.add(record);
 
     // add here establishment fields
@@ -839,6 +845,9 @@ public class JPHandler extends GEOHandler {
 
     if ("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType())) {
       address.setContact(null);
+      if("ZC01".equals(address.getId().getAddrType())) {
+        address.setRol(currentRecord.getInspbydebi());
+      }
     } else {
       address.setContact(currentRecord.getCmrName4() == null ? currentRecord.getCmrName4()
           : currentRecord.getCmrName4().trim().length() > 15 ? currentRecord.getCmrName4().trim().substring(0, 15)
