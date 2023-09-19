@@ -26,9 +26,11 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.controller.BaseController;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.code.CrisReportModel;
 import com.ibm.cio.cmr.request.model.legacy.AttachListModel;
 import com.ibm.cio.cmr.request.model.legacy.LegacySearchModel;
 import com.ibm.cio.cmr.request.model.legacy.LegacySearchResultModel;
+import com.ibm.cio.cmr.request.service.code.CrisReportService;
 import com.ibm.cio.cmr.request.service.legacy.AttachListService;
 import com.ibm.cio.cmr.request.service.legacy.LegacyDetailsService;
 import com.ibm.cio.cmr.request.service.legacy.LegacySearchService;
@@ -63,6 +65,9 @@ public class LegacySearchController extends BaseController {
   @Autowired
   private AttachListService attachService;
 
+  @Autowired
+  private CrisReportService crisReportService;
+
   /**
    * Handles the refresh page
    * 
@@ -70,7 +75,9 @@ public class LegacySearchController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/legacysearch", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/legacysearch",
+      method = RequestMethod.GET)
   public @ResponseBody ModelAndView showLegacySearchPage(HttpServletRequest request) {
     LOG.debug("Showing Legacy Search page..");
     ModelMap map = new ModelMap();
@@ -94,7 +101,9 @@ public class LegacySearchController extends BaseController {
    * @return
    * @throws CmrException
    */
-  @RequestMapping(value = "/legacysearch/process", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/legacysearch/process",
+      method = RequestMethod.POST)
   public @ResponseBody ModelMap showLegacySearchPage(HttpServletRequest request, LegacySearchModel model) throws CmrException {
     LOG.debug("Showing Legacy Search page..");
     ModelMap map = new ModelMap();
@@ -115,7 +124,9 @@ public class LegacySearchController extends BaseController {
    * @return
    * @throws CmrException
    */
-  @RequestMapping(value = "/legacydetails/process", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/legacydetails/process",
+      method = RequestMethod.GET)
   public @ResponseBody ModelMap showLegacySearchPage(HttpServletRequest request, @RequestParam("cmrNo") String cmrNo,
       @RequestParam("country") String country, @RequestParam("realCty") String realCty) throws CmrException {
     LOG.debug("Processing Legacy Details for CMR No. " + cmrNo + " under " + country);
@@ -138,7 +149,9 @@ public class LegacySearchController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/searchhome", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/searchhome",
+      method = RequestMethod.GET)
   public @ResponseBody ModelAndView showSearchHomePage(HttpServletRequest request) {
     LOG.debug("Showing Search Home page..");
     ModelMap map = new ModelMap();
@@ -161,7 +174,9 @@ public class LegacySearchController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/mqsearch", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/mqsearch",
+      method = RequestMethod.GET)
   public @ResponseBody ModelAndView showMQSearchPage(HttpServletRequest request) {
     LOG.debug("Showing MQ Search page..");
     ModelMap map = new ModelMap();
@@ -177,7 +192,9 @@ public class LegacySearchController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/mqsearch/process", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/mqsearch/process",
+      method = RequestMethod.GET)
   public @ResponseBody ModelMap processMQSearch(HttpServletRequest request, @RequestParam("cmrNo") String cmrNo,
       @RequestParam("country") String country) throws CmrException {
     LOG.debug("Processing MQ Search for CMR No. " + cmrNo + " under " + country);
@@ -199,7 +216,9 @@ public class LegacySearchController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/attachlist", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/attachlist",
+      method = RequestMethod.GET)
   public @ResponseBody ModelAndView showAttachmentList(HttpServletRequest request) {
     LOG.debug("Showing Attachment page..");
     ModelMap map = new ModelMap();
@@ -228,7 +247,9 @@ public class LegacySearchController extends BaseController {
    * @return
    * @throws CmrException
    */
-  @RequestMapping(value = "/attachlist/get", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/attachlist/get",
+      method = RequestMethod.GET)
   public @ResponseBody ModelMap getAttachmentList(HttpServletRequest request) throws CmrException {
     ModelMap map = new ModelMap();
     String reqId = request.getParameter("reqId");
@@ -248,7 +269,9 @@ public class LegacySearchController extends BaseController {
     return map;
   }
 
-  @RequestMapping(value = "/attachlist/dl", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/attachlist/dl",
+      method = RequestMethod.POST)
   public void downloadAttachment(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     String fileName = request.getParameter("fileName");
@@ -275,6 +298,62 @@ public class LegacySearchController extends BaseController {
     } catch (Exception e) {
       LOG.debug("Error in downloading file.", e);
     }
+  }
+
+  /**
+   * Handles the refresh page
+   *
+   * @param request
+   * @param model
+   * @return
+   */
+  @RequestMapping(
+      value = "/crisreport",
+      method = RequestMethod.GET)
+  public @ResponseBody ModelAndView showCrisReportPage(HttpServletRequest request) {
+    LOG.debug("Showing CRIS Report page..");
+    ModelMap map = new ModelMap();
+
+    AppUser user = AppUser.getUser(request);
+
+    if (user == null) {
+      map.put("ERROR", ERROR_MSG);
+    }
+
+    ModelAndView mv = new ModelAndView("crisreport");
+    setPageKeys("SEARCH_HOME", "CRISREPORT", mv);
+    return mv;
+  }
+
+  @RequestMapping(
+      value = "/crisreport/export",
+      method = RequestMethod.GET)
+  public void generateReport(HttpServletRequest request, HttpServletResponse response, CrisReportModel model) throws CmrException {
+
+    String timeframe = request.getParameter("timeframe");
+    ParamContainer params = new ParamContainer();
+
+    params.addParam("timeframe", timeframe);
+
+    try {
+      List<CrisReportModel> records = crisReportService.process(request, params);
+      if (records != null) {
+        if (timeframe.equalsIgnoreCase("RAONDEMAND")) {
+          crisReportService.raOnDemandExportToCsvFile(records, timeframe, response);
+        } else if (timeframe.equalsIgnoreCase("TAIGADAILY")) {
+          crisReportService.taigaDailyExportToTextFile(records, timeframe, response);
+        } else if (timeframe.equalsIgnoreCase("TAIGAMONTHLY")) {
+          crisReportService.taigaMonthlyExportToTextFile(records, timeframe, response);
+        } else if (timeframe.equalsIgnoreCase("ROLDAILY")) {
+          crisReportService.rolDailyExportToTextFile(records, timeframe, response);
+        } else if (timeframe.equalsIgnoreCase("ROLMONTHLY")) {
+          crisReportService.rolMonthlyExportToTextFile(records, timeframe, response);
+        }
+      }
+    } catch (Exception e) {
+      LOG.debug("Cannot export Japan CRIS Report for Users.", e);
+    }
+    LOG.info("Successfully exported Japan CRIS Report for Users to a text file.");
   }
 
 }
