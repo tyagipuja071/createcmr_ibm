@@ -163,6 +163,8 @@ public class JPHandler extends GEOHandler {
     map.put("ZP08", "H");
     map.put("ZC01", "0");
     map.put("ZE01", "3");
+    map.put("ZS02", "1");
+
     INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP = Collections.unmodifiableMap(map);
   }
 
