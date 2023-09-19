@@ -567,6 +567,95 @@ public class IERPRequestUtils extends RequestUtils {
     return cnEcoNotifyList;
   }
 
+  public static String getCsboByPostal(EntityManager entityMgr, String postCd) {
+    String csbo = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.CSBO.BY.POSTAL");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("POST_CD", postCd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      csbo = result[1] != null ? (String) result[1] : "";
+    }
+    LOG.debug("getCsboByPostal() --> postCd (" + postCd + ") csbo (" + csbo + ")");
+    return csbo;
+  }
+
+  public static String getLocationByPostal(EntityManager entityMgr, String postCd) {
+    String locn = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.LOCN.BY.POSTAL");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("POST_CD", postCd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      locn = result[1] != null ? (String) result[1] : "";
+    }
+    LOG.debug("getLocationByPostal() --> postCd (" + postCd + ") csbo (" + locn + ")");
+    return locn;
+  }
+
+  public static String getIsicByJsic(EntityManager entityMgr, String jsic) {
+    String isic = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.ISIC.BY.JSIC");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("JSIC_CD", jsic);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      isic = result[1] != null ? (String) result[1] : "";
+    }
+    LOG.debug("getIsicByJsic() --> jsic (" + jsic + ") isic (" + isic + ")");
+    return isic;
+  }
+
+  public static Object[] getSubindustryISUByIsic(EntityManager entityMgr, String isic) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.SUBIND.ISU");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("ZZKV_SIC", isic);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getSubindustryISUByIsic() --> isic (" + isic + ") subind (" + result[1] + ") isu (" + result[2] + ")");
+    return result;
+  }
+
+  public static Object[] getIsicMrcCtcIsuSortlJP(EntityManager entityMgr, String ofcd) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.MAPPED.FIELDS.BY.OFCD");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("OFFICE_CD", ofcd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getIsicMrcCtcIsuSortlJP() --> ofcd (" + ofcd + ") isic (" + result[1] + ") mrc (" + result[2] + ") ctc (" + result[3] + ") isu ("
+        + result[4] + ") sortl (" + result[5] + ")");
+    return result;
+
+  }
+
   public static void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country,
       Admin admin) {
     GEOHandler handler = getGEOHandler(country);
