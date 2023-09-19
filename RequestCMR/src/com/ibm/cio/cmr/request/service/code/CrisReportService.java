@@ -66,72 +66,81 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     CrisReportModel crisReportModel = null;
 
     List<Object[]> records = q.getResults();
-    for (Object[] record : records) {
-      crisReportModel = new CrisReportModel();
 
-      // entities for TAIGA & ROL
-      // both for Daily and Monthly report
-      crisReportModel.setKunnr((String) record[0]);
-      crisReportModel.setChgts((Timestamp) record[1]);
-      crisReportModel.setRecordNo((String) record[2]);
-      crisReportModel.setRecType((String) record[3]);
-      crisReportModel.setCompanyNo((String) record[7]);
-      crisReportModel.setOldValue((String) record[4]);
-      crisReportModel.setNewValue((String) record[5]);
-      crisReportModel.setName((String) record[6]);
-      crisReportModel.setCompName((String) record[8]);
+    if (timeframe != "RAONDEMAND") {
+      for (Object[] record : records) {
+        crisReportModel = new CrisReportModel();
 
-      // entities for RA ON DEMAND report
-      crisReportModel.setCpno((String) record[9]);
-      crisReportModel.setUserId((String) record[10]);
-      crisReportModel.setDate((String) record[11]);
-      crisReportModel.setCc((String) record[12]);
-      crisReportModel.setPayFrom((String) record[13]);
-      crisReportModel.setBillTo((String) record[14]);
+        // entities for TAIGA & ROL
+        // both for Daily and Monthly report
+        crisReportModel.setKunnr((String) record[0]);
+        crisReportModel.setChgts((Timestamp) record[1]);
+        crisReportModel.setRecordNo((String) record[2]);
+        crisReportModel.setRecType((String) record[3]);
+        crisReportModel.setCompanyNo((String) record[7]);
+        crisReportModel.setOldValue((String) record[4]);
+        crisReportModel.setNewValue((String) record[5]);
+        crisReportModel.setName((String) record[6]);
+        crisReportModel.setCompName((String) record[8]);
 
-      crisReportModel.setDue1((String) record[15]);
-      crisReportModel.setCycle1((String) record[16]);
-      crisReportModel.setPay1((String) record[17]);
-      crisReportModel.setG1((String) record[18]);
+        results.add(crisReportModel);
+      }
+    } else {
+      for (Object[] record : records) {
+        crisReportModel = new CrisReportModel();
 
-      crisReportModel.setDue2((String) record[19]);
-      crisReportModel.setCycle2((String) record[29]);
-      crisReportModel.setPay2((String) record[21]);
-      crisReportModel.setG2((String) record[22]);
+        // entities for RA ON DEMAND report
+        crisReportModel.setCpno((String) record[0]);
+        crisReportModel.setUserId((String) record[1]);
+        crisReportModel.setDate((String) record[2]);
+        crisReportModel.setCc((String) record[3]);
+        crisReportModel.setPayFrom((String) record[3]);
+        crisReportModel.setBillTo((String) record[4]);
 
-      crisReportModel.setDue3((String) record[23]);
-      crisReportModel.setCycle3((String) record[24]);
-      crisReportModel.setPay3((String) record[25]);
-      crisReportModel.setG3((String) record[26]);
+        crisReportModel.setDue1((String) record[5]);
+        crisReportModel.setCycle1((String) record[6]);
+        crisReportModel.setPay1((String) record[7]);
+        crisReportModel.setG1((String) record[8]);
 
-      crisReportModel.setDue4((String) record[27]);
-      crisReportModel.setCycle4((String) record[28]);
-      crisReportModel.setPay4((String) record[29]);
-      crisReportModel.setG4((String) record[30]);
+        crisReportModel.setDue2((String) record[9]);
+        crisReportModel.setCycle2((String) record[10]);
+        crisReportModel.setPay2((String) record[11]);
+        crisReportModel.setG2((String) record[12]);
 
-      crisReportModel.setDue5((String) record[31]);
-      crisReportModel.setCycle5((String) record[32]);
-      crisReportModel.setPay5((String) record[33]);
-      crisReportModel.setG5((String) record[34]);
+        crisReportModel.setDue3((String) record[13]);
+        crisReportModel.setCycle3((String) record[14]);
+        crisReportModel.setPay3((String) record[15]);
+        crisReportModel.setG3((String) record[16]);
 
-      crisReportModel.setDue6((String) record[35]);
-      crisReportModel.setCycle6((String) record[36]);
-      crisReportModel.setPay6((String) record[37]);
-      crisReportModel.setG6((String) record[38]);
+        crisReportModel.setDue4((String) record[17]);
+        crisReportModel.setCycle4((String) record[18]);
+        crisReportModel.setPay4((String) record[19]);
+        crisReportModel.setG4((String) record[20]);
 
-      crisReportModel.setDue7((String) record[39]);
-      crisReportModel.setCycle7((String) record[40]);
-      crisReportModel.setPay7((String) record[41]);
-      crisReportModel.setG7((String) record[42]);
+        crisReportModel.setDue5((String) record[21]);
+        crisReportModel.setCycle5((String) record[22]);
+        crisReportModel.setPay5((String) record[23]);
+        crisReportModel.setG5((String) record[24]);
 
-      crisReportModel.setDue8((String) record[43]);
-      crisReportModel.setCycle8((String) record[44]);
-      crisReportModel.setPay8((String) record[45]);
-      crisReportModel.setG8((String) record[46]);
+        crisReportModel.setDue6((String) record[25]);
+        crisReportModel.setCycle6((String) record[26]);
+        crisReportModel.setPay6((String) record[27]);
+        crisReportModel.setG6((String) record[28]);
 
-      crisReportModel.setReceiptInf((String) record[47]);
+        crisReportModel.setDue7((String) record[29]);
+        crisReportModel.setCycle7((String) record[30]);
+        crisReportModel.setPay7((String) record[31]);
+        crisReportModel.setG7((String) record[32]);
 
-      results.add(crisReportModel);
+        crisReportModel.setDue8((String) record[33]);
+        crisReportModel.setCycle8((String) record[34]);
+        crisReportModel.setPay8((String) record[35]);
+        crisReportModel.setG8((String) record[36]);
+
+        crisReportModel.setReceiptInf((String) record[37]);
+
+        results.add(crisReportModel);
+      }
     }
 
     return results;
@@ -295,21 +304,24 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
         osw.write("COMPANY NAME: " + report.getCompName());
         osw.write(System.lineSeparator());
         osw.write(System.lineSeparator());
-        osw.write("COMPANY # \t");
-        osw.write("COMPANY NAME \t\t\t\t\t");
+        osw.write("CUSTOMER # \t");
+        osw.write("CUSTOMER NAME \t\t\t\t\t");
         osw.write("OLD FLAG ");
         osw.write(System.lineSeparator());
         osw.write("-------- ");
         osw.write("----------------------------------------------------- ");
         osw.write("---------- ");
         osw.write(System.lineSeparator());
-        osw.write(report.getKunnr() + "\t");
+        osw.write(report.getRecordNo() + "\t\t");
         osw.write(report.getName() + "\t\t\t");
         osw.write(report.getOldValue());
         osw.write(System.lineSeparator());
         osw.write("-------------------------------------------------------------------------");
         osw.write(System.lineSeparator());
-        osw.write("\t\t" + "<<<*** COMPANY TOTAL =  ***>>>");
+
+        osw.write("\t\t" + "<<<*** COMPANY TOTAL = ***>>>");
+        osw.write(System.lineSeparator());
+        osw.write(System.lineSeparator());
       }
 
       osw.write("-------------------------------------------------------------------------");
