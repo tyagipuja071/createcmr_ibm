@@ -137,6 +137,9 @@ boolean isTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId())
             <%if (isTaxTeam || (user != null && (user.isAdmin()))){%>
             <li id="USSCC_TAB"><a href="javascript: goToUrl('${contextPath}/code/scclist?taxTeamFlag=Y')">US SCC</a></li>
             <%}%>
+            <%if (user !=null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
+              <li id="CRISREPORT_TAB"><a href="javascript: goToUrl('${contextPath}/crisreport')">CRIS Report</a></li>
+            <%}%>
         </c:if>
         
 
