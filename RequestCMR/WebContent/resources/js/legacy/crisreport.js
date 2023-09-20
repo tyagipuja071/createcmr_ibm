@@ -15,19 +15,29 @@ app.controller('CrisReportController', ['$scope', '$document', '$http', '$timeou
         $http({
           url : cmr.CONTEXT_ROOT + '/crisreport/export.json?timeframe=' + $scope.timeframe,
           method : 'GET',
-          responseType : 'blob' // Set the responseType to blob
+          responseType : 'blob' // Expecting a binary data
         }).then(function(response) {
           cmr.hideProgress();
           console.log('success');
 
+          // Determine file type from Content-Type header
+          var contentType = response.headers('Content-Type');
+          var fileExtension = '.txt'; // Default to .txt
+          var mimeType = 'text/plain'; // Default MIME type
+
+          if (contentType.includes('text/csv')) {
+            fileExtension = '.csv';
+            mimeType = 'text/csv';
+          }
+
           // Handle file download
           var blob = new Blob([ response.data ], {
-            type : 'text/plain'
-          }); // Adjust the type if needed
+            type : mimeType
+          });
           var downloadUrl = window.URL.createObjectURL(blob);
           var a = document.createElement("a");
           a.href = downloadUrl;
-          a.download = "CRISReport.txt";
+          a.download = "CRISReport" + fileExtension;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
