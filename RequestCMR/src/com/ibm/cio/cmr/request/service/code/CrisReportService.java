@@ -30,7 +30,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   private static final Logger LOG = Logger.getLogger(CrisReportService.class);
 
   private Date date = new Date();
-  private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  private SimpleDateFormat dateFormat = new SimpleDateFormat("yy-MM-dd");
 
   @Override
   protected List<CrisReportModel> doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
@@ -194,7 +194,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       osw.write(System.lineSeparator());
       osw.write("COMPANY NAME: " + companyName);
       osw.write(System.lineSeparator());
-      osw.write("CUSTOMER # \t");
+      osw.write("CUST # \t");
       osw.write("CUSTOMER NAME \t\t\t\t\t");
       osw.write("OLD CODE ");
       osw.write(System.lineSeparator());
@@ -204,7 +204,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       osw.write(System.lineSeparator());
 
       for (CrisReportModel report : records) {
-        osw.write(report.getKunnr() + "\t");
+        osw.write(report.getRecordNo() + "\t");
         osw.write(report.getName() + "\t\t\t");
         osw.write(report.getOldValue());
         osw.write(System.lineSeparator());
@@ -255,7 +255,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       osw.write(System.lineSeparator());
 
       for (CrisReportModel report : records) {
-        osw.write(report.getKunnr() + "\t");
+        osw.write(report.getCompanyNo() + "\t");
         osw.write(report.getName() + "\t\t\t");
         osw.write(report.getNewValue());
         osw.write(System.lineSeparator());
@@ -293,18 +293,19 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     // Writing to HTTP response output stream
     try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
 
-      osw.write("*** ACCOUNT ROL FLAG DAILY AUDIT REPORT *** AS OF DATE: ");
+      osw.write("*** ACCOUNT ROL FLAG DAILY AUDIT REPORT *** AS OF DATE: " + dateFormat.format(date));
       osw.write(System.lineSeparator());
       osw.write(System.lineSeparator());
 
       for (CrisReportModel report : records) {
+
         osw.write("COMPANY NUMBER: " + report.getCompanyNo() + "\t");
         osw.write("NEW ROL FLAG: " + report.getNewValue());
         osw.write(System.lineSeparator());
         osw.write("COMPANY NAME: " + report.getCompName());
         osw.write(System.lineSeparator());
         osw.write(System.lineSeparator());
-        osw.write("CUSTOMER # \t");
+        osw.write("CUST # \t");
         osw.write("CUSTOMER NAME \t\t\t\t\t");
         osw.write("OLD FLAG ");
         osw.write(System.lineSeparator());
@@ -372,8 +373,8 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       osw.write(System.lineSeparator());
 
       for (CrisReportModel report : records) {
-        osw.write(report.getKunnr() + "\t");
-        osw.write(report.getName() + "\t\t\t");
+        osw.write(report.getRecordNo() + "\t");
+        osw.write(report.getCompName() + "\t\t\t");
         osw.write(report.getNewValue());
         osw.write(System.lineSeparator());
       }
