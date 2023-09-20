@@ -882,8 +882,6 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
 
-    
-
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -9126,7 +9124,7 @@ function StcOrderBlockValidation() {
     return {
       validate : function() {
         // var role = FormManager.getActualValue('userRole').toUpperCase();
-        var ordBlk = FormManager.getActualValue('ordBlk');
+        var ordBlk = FormManager.getActualValue('embargoCd');
         var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
         if (ordBlk == null || ordBlk == '') {
           if (stcOrdBlk == 'ST' || stcOrdBlk == '') {
