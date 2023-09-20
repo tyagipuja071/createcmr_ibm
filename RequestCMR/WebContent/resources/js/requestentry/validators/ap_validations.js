@@ -7131,7 +7131,7 @@ function checkCustomerNameForKYND() {
         var role = FormManager.getActualValue('userRole').toUpperCase();
         var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-        if (reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYND' && (action == 'SFP' || action == 'VAL')) {
+        if (reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYNDR' && (action == 'SFP' || action == 'VAL')) {
           // CREATCMR-7884
           if (custNm1.indexOf('KYNDRYL') == -1) {
             errorMsg = 'Customer name must contain word \'Kyndryl\'';
