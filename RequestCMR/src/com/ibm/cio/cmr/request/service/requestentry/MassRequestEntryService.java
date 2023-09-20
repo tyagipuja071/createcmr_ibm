@@ -5784,7 +5784,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muaModel.setAddrTxt(tempVal);
         break;
       case "POST_CD":
-        muaModel.setPostCd(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          String postal = tempVal.replace("-", "");
+          muaModel.setPostCd(postal);
+          String locn = IERPRequestUtils.getLocationByPostal(entityManager, postal);
+          if (StringUtils.isNotBlank(locn)) {
+            muaModel.setCounty(locn);
+          }
+        }
         break;
       case "OFFICE":
         muaModel.setDivn(tempVal);
@@ -5896,7 +5903,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muModel.setAbbrevNm(tempVal);
         break;
       case "JSIC_CD":
-        muModel.setAffiliate(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setAffiliate(tempVal);
+        }
         break;
       case "SECONDARY_LOCN_NO":
         muModel.setIbmBankNumber(tempVal);
@@ -5905,9 +5914,70 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muModel.setCustClass(tempVal);
         break;
       case "SALES_BO_CD":
-        // office code
         if (StringUtils.isNotBlank(tempVal)) {
+          // Set Office Code
           muModel.setModeOfPayment(tempVal);
+
+          // pull isic by office code
+          Object[] result = IERPRequestUtils.getIsicMrcCtcIsuSortlJP(entityManager, tempVal);
+          if (result != null) {
+            String isic = result[1] != null ? (String) result[1] : "";
+            String mrc = result[2] != null ? (String) result[2] : "";
+            String ctc = result[3] != null ? (String) result[3] : "";
+            String sortl = result[5] != null ? (String) result[5] : "";
+
+            // if isic not found in bo_codes_map search via
+            // jsic in isic_to_jsic_map
+            if (StringUtils.isBlank(isic)) {
+              String jsic = muModel.getAffiliate() != null ? muModel.getAffiliate() : "";
+              if (StringUtils.isNotBlank(jsic)) {
+                isic = IERPRequestUtils.getIsicByJsic(entityManager, jsic);
+              }
+            }
+            // if isic is blank default to 0000
+            if (StringUtils.isBlank(isic)) {
+              isic = "0000";
+              muModel.setIsicCd(isic);
+            } else {
+              muModel.setIsicCd(isic);
+            }
+
+            // Set Subindustry, ISU
+            String cmrNoSubstr = muModel.getCmrNo() != null ? muModel.getCmrNo().substring(0, 2) : "";
+            if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+              muModel.setSubIndustryCd("ZF");
+            } else {
+              // pull subindustry thru isic
+              Object[] subindIsu = IERPRequestUtils.getSubindustryISUByIsic(entityManager, isic);
+              if (subindIsu != null) {
+                String subind = subindIsu[1] != null ? (String) subindIsu[1] : "";
+                String isuCd = subindIsu[2] != null ? (String) subindIsu[2] : "";
+                if (StringUtils.isNotBlank(subind)) {
+                  muModel.setSubIndustryCd(subind);
+                }
+                if (StringUtils.isNotBlank(isuCd)) {
+                  muModel.setIsuCd(isuCd);
+                }
+              }
+            }
+
+            // Set MRC
+            if (StringUtils.isNotBlank(mrc)) {
+              muModel.setRestrictInd(mrc);
+            }
+
+            // Set CTC
+            if (StringUtils.isNotBlank(ctc)) {
+              muModel.setClientTier(ctc);
+            } else {
+              muModel.setClientTier("Z");
+            }
+
+            // Set SORTL
+            if (StringUtils.isNotBlank(sortl)) {
+              muModel.setSearchTerm(sortl);
+            }
+          }
         }
         break;
       case "INAC_CD":
@@ -5918,7 +5988,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CS_BO":
         if (StringUtils.isNotBlank(tempVal)) {
-          muModel.setRepTeamMemberNo(tempVal);
+          String postal = tempVal.replace("-", "");
+          String csbo = IERPRequestUtils.getCsboByPostal(entityManager, postal);
+          if (StringUtils.isNotBlank(csbo)) {
+            muModel.setRepTeamMemberNo(csbo);
+          }
         }
         break;
       case "CMR_NO":
