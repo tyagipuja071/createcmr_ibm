@@ -261,11 +261,11 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
+				<column number="true" exactLength="true" minLength="14">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>
-					<length>16</length>
+					<length>14</length>
 				</column>
 				<column>
 					<label>Tax Code 1</label>
@@ -343,11 +343,11 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
+				<column number="true" exactLength="true" minLength="14">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>
-					<length>16</length>
+					<length>14</length>
 				</column>
 				<column>
 					<label>Tax Code 1</label>
@@ -425,11 +425,11 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
+				<column number="true" exactLength="true" minLength="14">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>
-					<length>16</length>
+					<length>14</length>
 				</column>
 				<column>
 					<label>Tax Code 1</label>
@@ -507,11 +507,11 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
+				<column number="true" exactLength="true" minLength="14">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>
-					<length>16</length>
+					<length>14</length>
 				</column>
 				<column>
 					<label>Tax Code 1</label>
