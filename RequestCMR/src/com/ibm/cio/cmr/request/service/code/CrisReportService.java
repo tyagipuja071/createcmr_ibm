@@ -61,6 +61,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     LOG.debug("Querying selected CRIS User Report...");
     String sql = ExternalizedQuery.getSql(sqlQuery);
     q = new PreparedQuery(entityManager, sql);
+    q.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
 
     List<CrisReportModel> results = new ArrayList<CrisReportModel>();
     CrisReportModel crisReportModel = null;
