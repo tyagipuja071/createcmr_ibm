@@ -30,19 +30,39 @@ app.controller('CrisReportController', ['$scope', '$document', '$http', '$timeou
             mimeType = 'text/csv';
           }
 
+          // Determine the filename based on $scope.timeframe
+          var fileName = "CRISReport"; // Default name
+          switch ($scope.timeframe) {
+            case 'ROLMONTHLY':
+              fileName = 'rol_monthly';
+              break;
+            case 'ROLDAILY':
+              fileName = 'rol_daily';
+              break;
+            case 'TAIGAMONTHLY':
+              fileName = 'taiga_monthly';
+              break;
+            case 'TAIGADAILY':
+              fileName = 'taiga_daily';
+              break;
+            case 'RAONDEMAND':
+              fileName = 'RA_appended_ddname';
+              break;
+          }
+
           // Handle file download
-          var blob = new Blob([ response.data ], {
-            type : mimeType
+          var blob = new Blob([response.data], {
+            type: mimeType
           });
           var downloadUrl = window.URL.createObjectURL(blob);
           var a = document.createElement("a");
           a.href = downloadUrl;
-          a.download = "CRISReport" + fileExtension;
+          a.download = fileName + fileExtension;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
 
-        }, function(response) {
+        }, function (response) {
           cmr.hideProgress();
           console.log('error: ');
           console.log(response);
