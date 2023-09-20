@@ -81,6 +81,12 @@ AppUser user = AppUser.getUser(request);
                 <td style="font-size:13px">Compare KYC results against EVS (NON PROD FUNCTION)</td>
               </tr>
             <%}%>
+            <%if (user !=null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
+              <tr>
+                <td><a style="cursor:pointer;font-size:13px" title="CRIS Report" href="${contextPath}/crisreport">CRIS Report</a></td>
+                <td style="font-size:13px">Japan Report for CRIS Users.</td>
+              </tr>
+              <%}%>
             </tbody>
           </table>
           </div>
