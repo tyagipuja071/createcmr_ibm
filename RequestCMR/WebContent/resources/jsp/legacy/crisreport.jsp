@@ -119,10 +119,10 @@
               <th scope="col" width="20%"><span style="color:red">*</span>Timeframe:</th>
               <td>
                 <select ng-model="timeframe">
-                  <option value="RAONDEMAND">RA On-Demand</option>
-                  <option value="TAIGADAILY">TAIGA Daily</option>
+                  <!-- <option value="RAONDEMAND">RA On-Demand</option> -->
+                  <!-- <option value="TAIGADAILY">TAIGA Daily</option> -->
                   <option value="TAIGAMONTHLY">TAIGA Monthly</option>
-                  <option value="ROLDAILY">ROL Daily</option>
+                  <!-- <option value="ROLDAILY">ROL Daily</option> -->
                   <option value="ROLMONTHLY">ROL Monthly</option>
                 </select>
               </td>
