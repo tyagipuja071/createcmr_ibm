@@ -38,6 +38,8 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   @Override
   protected List<CrisReportModel> doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     String timeframe = request.getParameter("timeframe");
+    String dateFrom = request.getParameter("dateFrom");
+    String dateTo = request.getParameter("dateTo");
 
     PreparedQuery q = null;
     String sqlQuery = "";
@@ -65,6 +67,8 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     String sql = ExternalizedQuery.getSql(sqlQuery);
     q = new PreparedQuery(entityManager, sql);
     q.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    q.setParameter("DATEFROM", dateFrom);
+    q.setParameter("DATETO", dateTo);
 
     List<CrisReportModel> results = new ArrayList<CrisReportModel>();
     CrisReportModel crisReportModel = null;
@@ -432,8 +436,26 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".csv\"");
 
     try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
-    }
+      // Writing header
+      osw.write("CPNO,USERID,DATE,CC,PAY FROM,BILL TO,DUE1,CYCLE1,PAY1,G1,DUE2,CYCLE2,PAY2,G2,DUE3,CYCLE3,PAY3,G3,"
+          + "DUE4,CYCLE4,PAY4,G4,DUE5,CYCLE5,PAY5,G5,DUE6,CYCLE6,PAY6,G6,DUE7,CYCLE7,PAY7,G7,DUE8,CYCLE8,PAY8,G8,RECEIPT INF");
+      osw.write(System.lineSeparator());
 
+      // Writing data
+      for (CrisReportModel report : records) {
+
+        // G* fields should be blank as well as RECEIPT INF
+        osw.write(report.getCpno() + "," + report.getUserId() + "," + report.getDate() + "," + report.getCc() + "," + report.getPayFrom() + ","
+            + report.getBillTo() + "," + report.getDue1() + "," + report.getCycle1() + "," + report.getPay1() + "," + "'" + "," + report.getDue2()
+            + "," + report.getCycle2() + "," + report.getPay2() + "," + "'" + "," + report.getDue3() + "," + report.getCycle3() + ","
+            + report.getPay3() + "," + "'" + "," + report.getDue4() + "," + report.getCycle4() + "," + report.getPay4() + "," + "'" + ","
+            + report.getDue5() + "," + report.getCycle5() + "," + report.getPay5() + "," + "'" + "," + report.getDue6() + "," + report.getCycle6()
+            + "," + report.getPay6() + "," + "'" + "," + report.getDue7() + "," + report.getCycle7() + "," + report.getPay7() + "," + "'" + ","
+            + report.getDue8() + "," + report.getCycle8() + "," + report.getPay8() + "," + "'" + "," + "");
+
+        osw.write(System.lineSeparator());
+      }
+    }
   }
 
 }
