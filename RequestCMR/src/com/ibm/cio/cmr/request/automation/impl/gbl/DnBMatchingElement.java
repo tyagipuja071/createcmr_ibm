@@ -252,7 +252,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
             if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
                 && data.getCustGrp().equalsIgnoreCase("LOCAL")
-                && data.getCustSubGrp().equalsIgnoreCase("COMME")) {
+                && data.getCustSubGrp().equalsIgnoreCase("COMME") && payGoAddredited) {
               boolean taxCd2Found = false;
               String taxCd2Val = null;
               long confCode = 0L;
@@ -303,9 +303,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 else
 
                 {
-                  if (data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
-                   
-                  } else {
+                  if (!data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
                     if (taxCd2Found) {
                       data.setTaxCd2(taxCd2Val);
                     } else {
