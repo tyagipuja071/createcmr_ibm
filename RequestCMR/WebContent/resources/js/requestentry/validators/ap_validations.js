@@ -2752,20 +2752,10 @@ function setIsicCdIfDnbResultAccepted(value) {
   if (cond2.has(custSubGrp)) {
     var oldISIC = getIsicDataRDCValue();
     FormManager.setValue('isicCd', oldISIC);
-    // FormManager.readOnly('isicCd');
-    if (value == '') {
-      FormManager.enable('isicCd');
-    } else {
-      FormManager.readOnly('isicCd');
-    }
+    FormManager.readOnly('isicCd');
   } else if (cond3.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
-    // FormManager.readOnly('isicCd');
-    if (value == '') {
-      FormManager.enable('isicCd');
-    } else {
-      FormManager.readOnly('isicCd');
-    }
+    FormManager.readOnly('isicCd');
   } else if (custSubGrp == '' && value != '') {
     FormManager.readOnly('isicCd');
   }
