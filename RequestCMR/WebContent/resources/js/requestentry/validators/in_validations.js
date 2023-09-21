@@ -1263,7 +1263,6 @@ function setIsicCdIfCmrResultAccepted(value) {
         break;
     }
   }
-  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function setIsicCdIfDnbResultAccepted(value){
@@ -1278,7 +1277,6 @@ function setIsicCdIfDnbResultAccepted(value){
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
   } 
-  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function setIsicCdIfDnbAndCmrResultOther(value){
@@ -3076,14 +3074,12 @@ function setLockIsicfromDNB() {
     return;
   }
   var isDnbRecord = FormManager.getActualValue('findDnbResult');
-  var isicCd = FormManager.getActualValue('isicCd');
-  if (isDnbRecord =='Accepted') {
-    if(isicCd !='') {
-      FormManager.readOnly('isicCd');
-    } else {
-      FormManager.enable('isicCd');
-    }
+  if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
+    FormManager.readOnly('isicCd');
   } 
+// else {
+// FormManager.enable('isicCd');
+// }
 }
 
 function addressQuotationValidatorGCG() {
