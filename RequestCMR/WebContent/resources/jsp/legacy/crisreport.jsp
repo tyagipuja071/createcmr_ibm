@@ -128,6 +128,19 @@
               </td>
             </tr>
             <tr>
+              <cmr:note
+                text="Date Range is only applicable for RA On-Demand Report.">
+              </cmr:note>
+            </tr>
+            <tr>
+              <th scope="col">Date Range:</th>
+              <td>
+                <input type="date" ng-model="crit.dateFrom">
+                <span class="to">to</span>
+                <input type="date" ng-model="crit.dateTo">
+              </td>
+            </tr>
+            <tr>
               <td colspan="2">
                 <input type="button" class="btn-search" value="Get Report" style="margin-left:10px" ng-click="getReport()">
                 </th>
