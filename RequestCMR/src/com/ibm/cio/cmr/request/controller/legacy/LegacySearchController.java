@@ -344,7 +344,7 @@ public class LegacySearchController extends BaseController {
       List<CrisReportModel> records = crisReportService.process(request, params);
       if (records != null) {
         if (timeframe.equalsIgnoreCase("RAONDEMAND")) {
-          crisReportService.raOnDemandExportToCsvFile(records, timeframe, response);
+          crisReportService.raOnDemandExportToCsvFile(records, timeframe, dateFrom, dateTo, response);
         } else if (timeframe.equalsIgnoreCase("TAIGADAILY")) {
           crisReportService.taigaDailyExportToTextFile(records, timeframe, response);
         } else if (timeframe.equalsIgnoreCase("TAIGAMONTHLY")) {
