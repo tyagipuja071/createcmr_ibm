@@ -127,12 +127,7 @@
                 </select>
               </td>
             </tr>
-            <tr>
-              <cmr:note
-                text="Date Range is only applicable for RA On-Demand Report.">
-              </cmr:note>
-            </tr>
-            <tr>
+            <tr ng-show="showDateFields">
               <th scope="col">Date Range:</th>
               <td>
                 <input type="date" ng-model="crit.dateFrom">
