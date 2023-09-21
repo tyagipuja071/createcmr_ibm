@@ -5,30 +5,39 @@ app.controller('CrisReportController', ['$scope', '$document', '$http', '$timeou
   $scope.listed = false;
   $scope.files = [];
 
+  $scope.showDateFields = ($scope.timeframe === 'RAONDEMAND');
+  $scope.$watch('timeframe', function (newVal) {
+    $scope.showDateFields = (newVal === 'RAONDEMAND');
+  });
+
+  if ($scope.crit) {
+    console.log($scope.crit.dateFrom);
+    console.log($scope.crit.dateTo);
+  }
+
   $scope.getReport = function () {
     if (!$scope.timeframe) {
       alert('A timeframe must be selected.');
       return;
     }
 
-    console.log($scope.crit.dateFrom);
-    console.log($scope.crit.dateTo);
-    if ($scope.crit.dateFrom && $scope.crit.dateTo && $scope.crit.dateFrom > $scope.crit.dateTo){
+    if ($scope.crit && $scope.crit.dateFrom && $scope.crit.dateTo && $scope.crit.dateFrom > $scope.crit.dateTo) {
       alert('Date From must be earlier than Create Date To.');
       return;
     }
-    var paramString = JSON.stringify($scope.crit);
+    var paramString = $scope.crit ? JSON.stringify($scope.crit) : '{}';
+
     var params = JSON.parse(paramString);
-    if ($scope.crit.dateFrom){
+    if ($scope.crit && $scope.crit.dateFrom) {
       params.dateFrom = moment($scope.crit.dateFrom).format('YYYY-MM-DD');
     }
-    if ($scope.crit.dateTo){
+    if ($scope.crit && $scope.crit.dateTo) {
       params.dateTo = moment($scope.crit.dateTo).format('YYYY-MM-DD');
     }
 
     cmr.showProgress('Exporting request details. Please wait...');
     $http({
-      url: cmr.CONTEXT_ROOT + '/crisreport/export.json?timeframe='+$scope.timeframe + '&dateFrom='+params.dateFrom + '&dateTo='+params.dateTo,
+      url: cmr.CONTEXT_ROOT + '/crisreport/export.json?timeframe=' + $scope.timeframe + '&dateFrom=' + params.dateFrom + '&dateTo=' + params.dateTo,
       method: 'GET',
       responseType: 'blob' // Expecting a binary data
     }).then(function (response) {
