@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -63,7 +65,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       }
     }
 
-    LOG.debug("Querying selected CRIS User Report...");
+    LOG.info("Querying selected CRIS User Report...");
     String sql = ExternalizedQuery.getSql(sqlQuery);
     q = new PreparedQuery(entityManager, sql);
     q.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
@@ -75,7 +77,13 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     List<CrisReportModel> results = new ArrayList<CrisReportModel>();
     CrisReportModel crisReportModel = null;
 
+    Instant start = Instant.now();
+    LOG.info("Query Start Time: " + start);
     List<Object[]> records = q.getResults();
+    Instant finish = Instant.now();
+    LOG.info("Query End Time: " + finish);
+    long timeElapsed = Duration.between(start, finish).toMillis();
+    LOG.info("Query Elapsed Time: " + timeElapsed + " milliseconds");
 
     if (!timeframe.equals("RAONDEMAND")) {
       for (Object[] record : records) {
@@ -171,7 +179,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void taigaDailyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -247,7 +255,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void taigaMonthlyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -298,7 +306,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void rolDailyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -376,7 +384,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void rolMonthlyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -429,7 +437,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void raOnDemandExportToCsvFile(List<CrisReportModel> records, String timeframe, String dateFrom, String dateTo, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .csv file..");
 
     String type = "text/csv";
     String fileName = "CRISReport";
