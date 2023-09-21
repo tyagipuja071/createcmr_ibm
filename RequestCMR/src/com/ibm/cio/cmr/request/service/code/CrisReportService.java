@@ -8,7 +8,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -171,44 +173,50 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     response.setContentType(type);
     response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".txt\"");
 
+    // Group records by reportNo
+    Map<String, List<CrisReportModel>> groupedRecords = new HashMap<>();
+    for (CrisReportModel report : records) {
+      String recordNo = report.getRecordNo();
+      if (!groupedRecords.containsKey(recordNo)) {
+        groupedRecords.put(recordNo, new ArrayList<>());
+      }
+      groupedRecords.get(recordNo).add(report);
+    }
+
     // Writing to HTTP response output stream
     try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
-
-      String companyNo = null;
-      String newValue = null;
-      String companyName = null;
-
-      if (records.size() == 0) {
-        companyNo = "";
-        newValue = "";
-        companyName = "";
-      } else {
-        companyNo = records.get(0).getCompanyNo();
-        newValue = records.get(0).getNewValue();
-        companyName = records.get(0).getCompName();
-      }
 
       osw.write("*** ACCOUNT TAIGA CODE DAILY AUDIT REPORT *** AS OF DATE: " + dateFormat.format(date));
       osw.write(System.lineSeparator());
       osw.write(System.lineSeparator());
-      osw.write("COMPANY NUMBER: " + companyNo + "\t");
-      osw.write("NEW TAIGA CODE: " + newValue);
-      osw.write(System.lineSeparator());
-      osw.write("COMPANY NAME: " + companyName);
-      osw.write(System.lineSeparator());
-      osw.write("CUST # \t");
-      osw.write("CUSTOMER NAME \t\t\t\t\t");
-      osw.write("OLD CODE ");
-      osw.write(System.lineSeparator());
-      osw.write("-------- ");
-      osw.write("----------------------------------------------------- ");
-      osw.write("---------- ");
-      osw.write(System.lineSeparator());
 
-      for (CrisReportModel report : records) {
-        osw.write(report.getRecordNo() + "\t");
-        osw.write(report.getName() + "\t\t\t");
-        osw.write(report.getOldValue());
+      for (Map.Entry<String, List<CrisReportModel>> entry : groupedRecords.entrySet()) {
+        List<CrisReportModel> groupedReports = entry.getValue();
+
+        osw.write("COMPANY NUMBER: " + groupedReports.get(0).getCompanyNo() + "\t");
+        osw.write("NEW TAIGA CODE: " + groupedReports.get(0).getNewValue());
+        osw.write(System.lineSeparator());
+        osw.write("COMPANY NAME: " + groupedReports.get(0).getCompName());
+        osw.write(System.lineSeparator());
+        osw.write(System.lineSeparator());
+        osw.write("CUST # \t\t");
+        osw.write("CUSTOMER NAME \t\t\t\t\t");
+        osw.write("OLD CODE ");
+        osw.write(System.lineSeparator());
+        osw.write("-------- ");
+        osw.write("----------------------------------------------------- ");
+        osw.write("---------- ");
+        osw.write(System.lineSeparator());
+
+        for (CrisReportModel report : groupedReports) {
+          osw.write(report.getRecordNo() + "\t\t");
+          osw.write(report.getName() + "\t\t\t");
+          osw.write(report.getOldValue());
+          osw.write(System.lineSeparator());
+        }
+
+        osw.write("-------------------------------------------------------------------------");
+        osw.write(System.lineSeparator());
         osw.write(System.lineSeparator());
       }
 
@@ -292,6 +300,16 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     response.setContentType(type);
     response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".txt\"");
 
+    // Group records by reportNo
+    Map<String, List<CrisReportModel>> groupedRecords = new HashMap<>();
+    for (CrisReportModel report : records) {
+      String recordNo = report.getRecordNo();
+      if (!groupedRecords.containsKey(recordNo)) {
+        groupedRecords.put(recordNo, new ArrayList<>());
+      }
+      groupedRecords.get(recordNo).add(report);
+    }
+
     // Writing to HTTP response output stream
     try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
 
@@ -299,30 +317,34 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       osw.write(System.lineSeparator());
       osw.write(System.lineSeparator());
 
-      for (CrisReportModel report : records) {
+      for (Map.Entry<String, List<CrisReportModel>> entry : groupedRecords.entrySet()) {
+        List<CrisReportModel> groupedReports = entry.getValue();
 
-        osw.write("COMPANY NUMBER: " + report.getCompanyNo() + "\t");
-        osw.write("NEW ROL FLAG: " + report.getNewValue());
+        osw.write("COMPANY NUMBER: " + groupedReports.get(0).getCompanyNo() + "\t");
+        osw.write("NEW ROL FLAG: " + groupedReports.get(0).getNewValue());
         osw.write(System.lineSeparator());
-        osw.write("COMPANY NAME: " + report.getCompName());
+        osw.write("COMPANY NAME: " + groupedReports.get(0).getCompName());
         osw.write(System.lineSeparator());
         osw.write(System.lineSeparator());
-        osw.write("CUST # \t");
+        osw.write("CUST # \t\t");
         osw.write("CUSTOMER NAME \t\t\t\t\t");
         osw.write("OLD FLAG ");
         osw.write(System.lineSeparator());
         osw.write("-------- ");
         osw.write("----------------------------------------------------- ");
         osw.write("---------- ");
-        osw.write(System.lineSeparator());
-        osw.write(report.getRecordNo() + "\t\t");
-        osw.write(report.getName() + "\t\t\t");
-        osw.write(report.getOldValue());
+
+        for (CrisReportModel report : groupedReports) {
+          osw.write(System.lineSeparator());
+          osw.write(report.getRecordNo() + "\t\t");
+          osw.write(report.getName() + "\t\t\t");
+          osw.write(report.getOldValue());
+        }
+
         osw.write(System.lineSeparator());
         osw.write("-------------------------------------------------------------------------");
         osw.write(System.lineSeparator());
-
-        osw.write("\t\t" + "<<<*** COMPANY TOTAL = ***>>>");
+        osw.write("\t\t" + "<<<*** COMPANY TOTAL = " + groupedReports.size() + " ***>>>");
         osw.write(System.lineSeparator());
         osw.write(System.lineSeparator());
       }
