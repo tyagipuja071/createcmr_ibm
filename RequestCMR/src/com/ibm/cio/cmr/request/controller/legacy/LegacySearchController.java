@@ -331,15 +331,20 @@ public class LegacySearchController extends BaseController {
   public void generateReport(HttpServletRequest request, HttpServletResponse response, CrisReportModel model) throws CmrException {
 
     String timeframe = request.getParameter("timeframe");
+    String dateFrom = request.getParameter("dateFrom");
+    String dateTo = request.getParameter("dateTo");
+
     ParamContainer params = new ParamContainer();
 
     params.addParam("timeframe", timeframe);
+    params.addParam("dateFrom", dateFrom);
+    params.addParam("dateTo", dateTo);
 
     try {
       List<CrisReportModel> records = crisReportService.process(request, params);
       if (records != null) {
         if (timeframe.equalsIgnoreCase("RAONDEMAND")) {
-          crisReportService.raOnDemandExportToCsvFile(records, timeframe, response);
+          crisReportService.raOnDemandExportToCsvFile(records, timeframe, dateFrom, dateTo, response);
         } else if (timeframe.equalsIgnoreCase("TAIGADAILY")) {
           crisReportService.taigaDailyExportToTextFile(records, timeframe, response);
         } else if (timeframe.equalsIgnoreCase("TAIGAMONTHLY")) {
@@ -353,7 +358,7 @@ public class LegacySearchController extends BaseController {
     } catch (Exception e) {
       LOG.debug("Cannot export Japan CRIS Report for Users.", e);
     }
-    LOG.info("Successfully exported Japan CRIS Report for Users to a text file.");
+    LOG.info("Successfully exported Japan CRIS Report for Users.");
   }
 
 }

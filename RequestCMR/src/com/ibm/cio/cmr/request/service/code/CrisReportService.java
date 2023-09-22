@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +40,8 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   @Override
   protected List<CrisReportModel> doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     String timeframe = request.getParameter("timeframe");
+    String dateFrom = request.getParameter("dateFrom");
+    String dateTo = request.getParameter("dateTo");
 
     PreparedQuery q = null;
     String sqlQuery = "";
@@ -61,17 +65,27 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       }
     }
 
-    LOG.debug("Querying selected CRIS User Report...");
+    LOG.info("Querying selected CRIS User Report...");
     String sql = ExternalizedQuery.getSql(sqlQuery);
     q = new PreparedQuery(entityManager, sql);
     q.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    if (timeframe.equals("RAONDEMAND")) {
+      q.setParameter("DATEFROM", dateFrom);
+      q.setParameter("DATETO", dateTo);
+    }
 
     List<CrisReportModel> results = new ArrayList<CrisReportModel>();
     CrisReportModel crisReportModel = null;
 
+    Instant start = Instant.now();
+    LOG.info("Query Start Time: " + start);
     List<Object[]> records = q.getResults();
+    Instant finish = Instant.now();
+    LOG.info("Query End Time: " + finish);
+    long timeElapsed = Duration.between(start, finish).toMillis();
+    LOG.info("Query Elapsed Time: " + timeElapsed + " milliseconds");
 
-    if (timeframe != "RAONDEMAND") {
+    if (!timeframe.equals("RAONDEMAND")) {
       for (Object[] record : records) {
         crisReportModel = new CrisReportModel();
 
@@ -95,53 +109,53 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
 
         // entities for RA ON DEMAND report
         crisReportModel.setCpno((String) record[0]);
-        crisReportModel.setUserId((String) record[1]);
-        crisReportModel.setDate((String) record[2]);
-        crisReportModel.setCc((String) record[3]);
-        crisReportModel.setPayFrom((String) record[3]);
-        crisReportModel.setBillTo((String) record[4]);
+        crisReportModel.setUserId("'");
+        crisReportModel.setDate((Timestamp) record[34]);
+        crisReportModel.setCc("'");
+        crisReportModel.setPayFrom((String) record[2]);
+        crisReportModel.setBillTo((String) record[0]);
 
-        crisReportModel.setDue1((String) record[5]);
-        crisReportModel.setCycle1((String) record[6]);
-        crisReportModel.setPay1((String) record[7]);
-        crisReportModel.setG1((String) record[8]);
+        crisReportModel.setDue1((String) record[4]);
+        crisReportModel.setCycle1((String) record[5]);
+        crisReportModel.setPay1((String) record[6]);
+        crisReportModel.setG1("'");
 
-        crisReportModel.setDue2((String) record[9]);
-        crisReportModel.setCycle2((String) record[10]);
-        crisReportModel.setPay2((String) record[11]);
-        crisReportModel.setG2((String) record[12]);
+        crisReportModel.setDue2((String) record[7]);
+        crisReportModel.setCycle2((String) record[8]);
+        crisReportModel.setPay2((String) record[9]);
+        crisReportModel.setG2("'");
 
-        crisReportModel.setDue3((String) record[13]);
-        crisReportModel.setCycle3((String) record[14]);
-        crisReportModel.setPay3((String) record[15]);
-        crisReportModel.setG3((String) record[16]);
+        crisReportModel.setDue3((String) record[10]);
+        crisReportModel.setCycle3((String) record[11]);
+        crisReportModel.setPay3((String) record[12]);
+        crisReportModel.setG3("'");
 
-        crisReportModel.setDue4((String) record[17]);
-        crisReportModel.setCycle4((String) record[18]);
-        crisReportModel.setPay4((String) record[19]);
-        crisReportModel.setG4((String) record[20]);
+        crisReportModel.setDue4((String) record[13]);
+        crisReportModel.setCycle4((String) record[14]);
+        crisReportModel.setPay4((String) record[15]);
+        crisReportModel.setG4("'");
 
-        crisReportModel.setDue5((String) record[21]);
-        crisReportModel.setCycle5((String) record[22]);
-        crisReportModel.setPay5((String) record[23]);
-        crisReportModel.setG5((String) record[24]);
+        crisReportModel.setDue5((String) record[16]);
+        crisReportModel.setCycle5((String) record[17]);
+        crisReportModel.setPay5((String) record[18]);
+        crisReportModel.setG5("'");
 
-        crisReportModel.setDue6((String) record[25]);
-        crisReportModel.setCycle6((String) record[26]);
-        crisReportModel.setPay6((String) record[27]);
-        crisReportModel.setG6((String) record[28]);
+        crisReportModel.setDue6((String) record[19]);
+        crisReportModel.setCycle6((String) record[20]);
+        crisReportModel.setPay6((String) record[21]);
+        crisReportModel.setG6("'");
 
-        crisReportModel.setDue7((String) record[29]);
-        crisReportModel.setCycle7((String) record[30]);
-        crisReportModel.setPay7((String) record[31]);
-        crisReportModel.setG7((String) record[32]);
+        crisReportModel.setDue7((String) record[22]);
+        crisReportModel.setCycle7((String) record[23]);
+        crisReportModel.setPay7((String) record[24]);
+        crisReportModel.setG7("'");
 
-        crisReportModel.setDue8((String) record[33]);
-        crisReportModel.setCycle8((String) record[34]);
-        crisReportModel.setPay8((String) record[35]);
-        crisReportModel.setG8((String) record[36]);
+        crisReportModel.setDue8((String) record[25]);
+        crisReportModel.setCycle8((String) record[26]);
+        crisReportModel.setPay8((String) record[27]);
+        crisReportModel.setG8("'");
 
-        crisReportModel.setReceiptInf((String) record[37]);
+        crisReportModel.setReceiptInf("'");
 
         results.add(crisReportModel);
       }
@@ -165,7 +179,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void taigaDailyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -241,7 +255,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void taigaMonthlyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -292,7 +306,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void rolDailyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -370,7 +384,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void rolMonthlyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
     String type = "text/plain";
     String fileName = "CRISReport";
@@ -420,10 +434,10 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  public void raOnDemandExportToCsvFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
+  public void raOnDemandExportToCsvFile(List<CrisReportModel> records, String timeframe, String dateFrom, String dateTo, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    LOG.info("Exporting Japan CRIS Report for Users to a text file..");
+    LOG.info("Exporting Japan CRIS Report for Users to .csv file..");
 
     String type = "text/csv";
     String fileName = "CRISReport";
@@ -432,8 +446,27 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".csv\"");
 
     try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
-    }
+      // Writing header
+      osw.write("CPNO,USERID,DATE,CC,PAY FROM,BILL TO,DUE1,CYCLE1,PAY1,G1,DUE2,CYCLE2,PAY2,G2,DUE3,CYCLE3,PAY3,G3,"
+          + "DUE4,CYCLE4,PAY4,G4,DUE5,CYCLE5,PAY5,G5,DUE6,CYCLE6,PAY6,G6,DUE7,CYCLE7,PAY7,G7,DUE8,CYCLE8,PAY8,G8,RECEIPT INF");
+      osw.write(System.lineSeparator());
 
+      // Writing data
+      for (CrisReportModel report : records) {
+
+        // G* fields should be blank as well as RECEIPT INF
+        osw.write(report.getCpno() + "," + report.getUserId() + "," + report.getDate() + "," + report.getCc() + "," + report.getPayFrom() + ","
+            + report.getBillTo() + "," + report.getDue1() + "," + report.getCycle1() + "," + report.getPay1() + "," + "'" + "," + report.getDue2()
+            + "," + report.getCycle2() + "," + report.getPay2() + "," + "'" + "," + report.getDue3() + "," + report.getCycle3() + ","
+            + report.getPay3() + "," + "'" + "," + report.getDue4() + "," + report.getCycle4() + "," + report.getPay4() + "," + "'" + ","
+            + report.getDue5() + "," + report.getCycle5() + "," + report.getPay5() + "," + "'" + "," + report.getDue6() + "," + report.getCycle6()
+            + "," + report.getPay6() + "," + "'" + "," + report.getDue7() + "," + report.getCycle7() + "," + report.getPay7() + "," + "'" + ","
+            + report.getDue8() + "," + report.getCycle8() + "," + report.getPay8() + "," + "'" + "," + "");
+
+        osw.write(System.lineSeparator());
+      }
+      osw.write("OUTPUT DURATION: " + dateFrom + "-" + dateTo);
+    }
   }
 
 }
