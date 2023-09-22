@@ -1877,12 +1877,12 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
       FormManager.readOnly('taxCd1');
       FormManager.enable('collectionCd');
       FormManager.readOnly('enterprise');
-      FormManager.resetValidations('vat');
-      FormManager.readOnly('identClient');
+//      FormManager.resetValidations('vat');
+//      FormManager.readOnly('identClient');
       FormManager.resetValidations('taxCd1');
       FormManager.resetValidations('enterprise');
-      FormManager.resetValidations('identClient');
-      FormManager.readOnly('vat');
+//      FormManager.resetValidations('identClient');
+//      FormManager.readOnly('vat');
     }
 
   } else if (reqType == 'C' && role == 'PROCESSOR') {
@@ -6233,7 +6233,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
       if (checkImportIndc == 'Y') {
         console
             .log(">getOldValuesIT> importIndc is Y -Non editable fields- are ('clientTier', 'isuCd', 'repTeamMemberNo', 'salesBusOffCd', 'inacCd','affiliate', 'specialTaxCd' , 'collectionCd','vat', 'taxCd1')");
-        FormManager.readOnly('identClient');
+//        FormManager.readOnly('identClient');
         if (custSubType != undefined && custSubType != '' && (custSubType != '3PAIT' && custSubType != '3PASM' && custSubType != '3PAVA')) {
           // FormManager.readOnly('isuCd');
           // FormManager.readOnly('inacCd');
