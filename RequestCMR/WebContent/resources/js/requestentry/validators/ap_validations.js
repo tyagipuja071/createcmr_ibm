@@ -2756,7 +2756,8 @@ function setIsicCdIfDnbResultAccepted(value) {
   } else if (cond3.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
-  } else if (custSubGrp == '' && value != '') {
+  } 
+  if ((custSubGrp == '' || custSubGrp != '') && value != '') {
     FormManager.readOnly('isicCd');
   }
 }
@@ -8619,7 +8620,7 @@ dojo.addOnLoad(function() {
 // SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
