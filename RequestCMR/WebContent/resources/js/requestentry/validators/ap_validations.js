@@ -2741,7 +2741,8 @@ function setIsicCdIfDnbResultAccepted(value) {
   } else if (cond3.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
-  } else if (custSubGrp == '' && value != '') {
+  } 
+  if ((custSubGrp == '' || custSubGrp != '') && value != '') {  
     FormManager.readOnly('isicCd');
   }
 }
