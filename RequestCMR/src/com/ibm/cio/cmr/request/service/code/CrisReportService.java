@@ -69,6 +69,10 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     String sql = ExternalizedQuery.getSql(sqlQuery);
     q = new PreparedQuery(entityManager, sql);
     q.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    if (timeframe.equals("TAIGADAILY") || timeframe.equals("ROLDAILY")) {
+      q.setParameter("DATEFROM", dateFrom);
+      q.setParameter("DATETO", dateTo);
+    }
     if (timeframe.equals("RAONDEMAND")) {
       q.setParameter("DATEFROM", dateFrom);
       q.setParameter("DATETO", dateTo);
@@ -85,12 +89,11 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     long timeElapsed = Duration.between(start, finish).toMillis();
     LOG.info("Query Elapsed Time: " + timeElapsed + " milliseconds");
 
-    if (!timeframe.equals("RAONDEMAND")) {
+    if (timeframe.equals("TAIGADAILY") || timeframe.equals("ROLDAILY")) {
       for (Object[] record : records) {
         crisReportModel = new CrisReportModel();
 
-        // entities for TAIGA & ROL
-        // both for Daily and Monthly report
+        // entities for TAIGA & ROL both for Daily report
         crisReportModel.setKunnr((String) record[0]);
         crisReportModel.setChgts((Timestamp) record[1]);
         crisReportModel.setRecordNo((String) record[2]);
@@ -103,7 +106,19 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
 
         results.add(crisReportModel);
       }
-    } else {
+
+    } else if (timeframe.equals("TAIGAMONTHLY") || timeframe.equals("ROLMONTHLY")) {
+      for (Object[] record : records) {
+        crisReportModel = new CrisReportModel();
+
+        // entities for TAIGA & ROL Monthly report
+        crisReportModel.setCompanyNo((String) record[0]);
+        crisReportModel.setCompName((String) record[1]);
+        crisReportModel.setNewValue((String) record[2]);
+
+        results.add(crisReportModel);
+      }
+    } else if (timeframe.equals("RAONDEMAND")) {
       for (Object[] record : records) {
         crisReportModel = new CrisReportModel();
 
@@ -112,7 +127,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
         crisReportModel.setUserId("'");
         crisReportModel.setDate((Timestamp) record[34]);
         crisReportModel.setCc("'");
-        crisReportModel.setPayFrom((String) record[2]);
+        crisReportModel.setPayFrom((String) record[1]);
         crisReportModel.setBillTo((String) record[0]);
 
         crisReportModel.setDue1((String) record[4]);
@@ -223,9 +238,21 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
         osw.write(System.lineSeparator());
 
         for (CrisReportModel report : groupedReports) {
-          osw.write(report.getRecordNo() + "\t\t");
-          osw.write(report.getName() + "\t\t\t");
-          osw.write(report.getOldValue());
+          if (report.getRecordNo() != null) {
+            osw.write(report.getRecordNo() + "\t\t");
+          } else {
+            osw.write("" + "\t\t");
+          }
+          if (report.getName() != null) {
+            osw.write(report.getName() + "\t\t\t");
+          } else {
+            osw.write("" + "\t\t\t");
+          }
+          if (report.getOldValue() != null) {
+            osw.write(report.getOldValue());
+          } else {
+            osw.write("");
+          }
           osw.write(System.lineSeparator());
         }
 
@@ -279,9 +306,21 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       osw.write(System.lineSeparator());
 
       for (CrisReportModel report : records) {
-        osw.write(report.getCompanyNo() + "\t");
-        osw.write(report.getName() + "\t\t\t");
-        osw.write(report.getNewValue());
+        if (report.getCompanyNo() != null) {
+          osw.write(report.getCompanyNo() + "\t");
+        } else {
+          osw.write("" + "\t");
+        }
+        if (report.getCompName() != null) {
+          osw.write(report.getCompName() + "\t\t\t");
+        } else {
+          osw.write("" + "\t\t\t");
+        }
+        if (report.getNewValue() != null) {
+          osw.write(report.getNewValue());
+        } else {
+          osw.write("");
+        }
         osw.write(System.lineSeparator());
       }
 
@@ -350,9 +389,21 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
 
         for (CrisReportModel report : groupedReports) {
           osw.write(System.lineSeparator());
-          osw.write(report.getRecordNo() + "\t\t");
-          osw.write(report.getName() + "\t\t\t");
-          osw.write(report.getOldValue());
+          if (report.getRecordNo() != null) {
+            osw.write(report.getRecordNo() + "\t\t");
+          } else {
+            osw.write("" + "\t\t");
+          }
+          if (report.getName() != null) {
+            osw.write(report.getName() + "\t\t\t");
+          } else {
+            osw.write("" + "\t\t\t");
+          }
+          if (report.getOldValue() != null) {
+            osw.write(report.getOldValue());
+          } else {
+            osw.write("");
+          }
         }
 
         osw.write(System.lineSeparator());
@@ -411,9 +462,22 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       osw.write(System.lineSeparator());
 
       for (CrisReportModel report : records) {
-        osw.write(report.getRecordNo() + "\t");
-        osw.write(report.getCompName() + "\t\t\t");
-        osw.write(report.getNewValue());
+        if (report.getCompanyNo() != null) {
+          osw.write(report.getCompanyNo() + "\t");
+        } else {
+          osw.write("" + "\t");
+        }
+        if (report.getCompName() != null) {
+          osw.write(report.getCompName() + "\t\t\t");
+        } else {
+          osw.write("" + "\t\t\t");
+        }
+        if (report.getNewValue() != null) {
+          osw.write(report.getNewValue());
+        } else {
+          osw.write("");
+        }
+
         osw.write(System.lineSeparator());
       }
 
@@ -437,7 +501,15 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   public void raOnDemandExportToCsvFile(List<CrisReportModel> records, String timeframe, String dateFrom, String dateTo, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmSS");
+
     LOG.info("Exporting Japan CRIS Report for Users to .csv file..");
+
+    // Format date to write
+    String rmvDshDateFrom = dateFrom.replaceAll("\\-", "");
+    String formatDateFrom = rmvDshDateFrom.substring(2, 8);
+    String rmvDshDateTo = dateTo.replaceAll("\\-", "");
+    String formatDateTo = rmvDshDateTo.substring(2, 8);
 
     String type = "text/csv";
     String fileName = "CRISReport";
@@ -453,9 +525,10 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
 
       // Writing data
       for (CrisReportModel report : records) {
+        String formatDate = dateFormat.format(report.getDate());
 
         // G* fields should be blank as well as RECEIPT INF
-        osw.write(report.getCpno() + "," + report.getUserId() + "," + report.getDate() + "," + report.getCc() + "," + report.getPayFrom() + ","
+        osw.write(report.getCpno() + "," + report.getUserId() + "," + formatDate + "," + report.getCc() + "," + report.getPayFrom() + ","
             + report.getBillTo() + "," + report.getDue1() + "," + report.getCycle1() + "," + report.getPay1() + "," + "'" + "," + report.getDue2()
             + "," + report.getCycle2() + "," + report.getPay2() + "," + "'" + "," + report.getDue3() + "," + report.getCycle3() + ","
             + report.getPay3() + "," + "'" + "," + report.getDue4() + "," + report.getCycle4() + "," + report.getPay4() + "," + "'" + ","
@@ -465,7 +538,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
 
         osw.write(System.lineSeparator());
       }
-      osw.write("OUTPUT DURATION: " + dateFrom + "-" + dateTo);
+      osw.write(formatDateFrom + "-" + formatDateTo + "(OUTPUT DURATION: " + formatDateFrom + "-" + formatDateTo + ")");
     }
   }
 
