@@ -8670,7 +8670,7 @@ dojo.addOnLoad(function () {
   // SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
