@@ -5493,8 +5493,8 @@ function autoPopulateIdentClientIT() {
   }
 
   if (scenario == 'CROSS') {
-    FormManager.resetValidations('vat');
-    FormManager.enable('vat');
+//    FormManager.resetValidations('vat');
+//    FormManager.enable('vat');
     FormManager.resetValidations('taxCd1');
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesCross);
 
@@ -6659,10 +6659,13 @@ function setVATOnIdentClientChangeIT() {
         FormManager.setValue('taxCd1', '');
         FormManager.readOnly('taxCd1');
       }
-    } else if (ident == 'X' || ident == 'N' || ident == 'Y') {
+    } else if (ident == 'X' || ident == 'Y') {
       FormManager.readOnly('vat');
       FormManager.setValue('vat', '');
       FormManager.resetValidations('vat');
+    } else if (ident == 'N') {
+      FormManager.enable('vat');
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
       FormManager.readOnly('vat');
     }
@@ -8915,7 +8918,7 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
 
   if (checkImportIndc != 'Y') {
     var ident = FormManager.getActualValue('identClient');
-    FormManager.enable('identClient');
+//    FormManager.enable('identClient');
     if (FormManager.getActualValue('reqType') == 'C' && 'CROSS' == FormManager.getActualValue('custGrp')) {
       var checkImportIndc = getImportedIndcForItaly();
       if (ident == 'N') {
