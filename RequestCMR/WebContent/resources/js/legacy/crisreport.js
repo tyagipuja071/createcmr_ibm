@@ -5,9 +5,9 @@ app.controller('CrisReportController', ['$scope', '$document', '$http', '$timeou
   $scope.listed = false;
   $scope.files = [];
 
-  $scope.showDateFields = ($scope.timeframe === 'RAONDEMAND');
+  $scope.showDateFields = ($scope.timeframe === ('RAONDEMAND') || ($scope.timeframe === ('TAIGADAILY') || ($scope.timeframe === ('ROLDAILY'))));
   $scope.$watch('timeframe', function (newVal) {
-    $scope.showDateFields = (newVal === 'RAONDEMAND');
+    $scope.showDateFields = (newVal === ('RAONDEMAND') || (newVal === ('TAIGADAILY') || (newVal === ('ROLDAILY'))));
   });
 
   if ($scope.crit) {
@@ -35,7 +35,7 @@ app.controller('CrisReportController', ['$scope', '$document', '$http', '$timeou
       params.dateTo = moment($scope.crit.dateTo).format('YYYY-MM-DD');
     }
 
-    cmr.showProgress('Exporting request details. Please wait...');
+    cmr.showProgress('Exporting report. Please wait...');
     $http({
       url: cmr.CONTEXT_ROOT + '/crisreport/export.json?timeframe=' + $scope.timeframe + '&dateFrom=' + params.dateFrom + '&dateTo=' + params.dateTo,
       method: 'GET',
