@@ -185,6 +185,12 @@ public class SingaporeUtil extends AutomationUtil {
       eleResults.append("Error On Field Calculation.");
     }
 
+    // for P2L Conversions , checking mandatory fields
+    // first identity if P2L
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isBlank(data.getVat())) {
+      details.append("UEN is a mandatory field. Processor Review will be required.\n");
+      engineData.addNegativeCheckStatus("_uenMissing", "UEN is a mandatory field.");
+    }
     results.setDetails(details.toString());
     results.setResults(eleResults.toString());
     results.setProcessOutput(overrides);
