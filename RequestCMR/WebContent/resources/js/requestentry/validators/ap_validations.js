@@ -2698,7 +2698,6 @@ function custSubGrpHandler() {
   if (_custSubGrpHandler == null) {
     _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       onIsicChange();
-   //
     });
   }
 }
