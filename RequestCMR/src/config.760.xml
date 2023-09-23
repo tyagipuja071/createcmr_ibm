@@ -28,7 +28,7 @@
 				</column>
 				<column>
 					<label>Office Code</label>
-					<dbColumn>SALES_BO_CD</dbColumn>
+					<dbColumn>INSTALL_BRANCH_OFF</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>
@@ -49,6 +49,12 @@
 					<dbColumn>CS_BO</dbColumn>
 					<width>20</width>
 					<length>10</length>
+				</column>
+				<column>
+					<label>ROL Flag</label>
+					<dbColumn>OUT_CITY_LIMIT</dbColumn>
+					<width>10</width>
+					<length>1</length>
 				</column>
 			</columns>
 		</tab>
@@ -143,6 +149,12 @@
 					<dbColumn>CONTACT</dbColumn>
 					<width>35</width>
 					<length>35</length>
+				</column>
+				<column>
+					<label>ROL Flag</label>
+					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
+					<width>10</width>
+					<length>1</length>
 				</column>
 			</columns>
 		</tab>
@@ -527,7 +539,7 @@
 			</columns>
 		</tab>
 		<!-- A -->
-		<tab name="ADU-A" type="Address" typeCode="ZI01">
+		<tab name="ADU-A" type="Address" typeCode="ZP02">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
@@ -622,7 +634,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="ADU-B" type="Address" typeCode="ZI01">
+		<tab name="ADU-B" type="Address" typeCode="ZP03">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
@@ -717,7 +729,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="ADU-C" type="Address" typeCode="ZI01">
+		<tab name="ADU-C" type="Address" typeCode="ZP04">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
@@ -812,7 +824,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="ADU-D" type="Address" typeCode="ZI01">
+		<tab name="ADU-D" type="Address" typeCode="ZP05">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
@@ -907,7 +919,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="ADU-E" type="Address" typeCode="ZI01">
+		<tab name="ADU-E" type="Address" typeCode="ZI03">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
@@ -1002,7 +1014,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="ADU-F" type="Address" typeCode="ZI01">
+		<tab name="ADU-F" type="Address" typeCode="ZP06">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
@@ -1097,7 +1109,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="ADU-G" type="Address" typeCode="ZI01">
+		<tab name="ADU-G" type="Address" typeCode="ZP07">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
@@ -1192,7 +1204,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="ADU-H" type="Address" typeCode="ZI01">
+		<tab name="ADU-H" type="Address" typeCode="ZP08">
 			<columns>
 				<column exactLength="true">
 					<label>CMR Number</label>
