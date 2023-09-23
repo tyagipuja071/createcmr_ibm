@@ -751,10 +751,6 @@ public class JPHandler extends GEOHandler {
             // this is an address on CRIS only, add to the request
             LOG.debug("Adding ADU " + adu + " to the request.");
             cmrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
-            // if ("C".equals(reqEntry.getReqType()) && cmrType.equals("ZS02")
-            // && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
-            // continue;
-            // }
             if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq())) {
               record = new FindCMRRecordModel();
               record.setCmrAddrTypeCode(cmrType);
