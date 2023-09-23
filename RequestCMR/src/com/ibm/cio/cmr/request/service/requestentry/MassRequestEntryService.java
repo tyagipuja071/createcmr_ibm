@@ -5805,13 +5805,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muaModel.setBldg(tempVal);
         break;
       case "LOCN_CD":
-        if (StringUtils.isNotBlank(muaModel.getPostCd()) && StringUtils.isNotBlank(muaModel.getAddrType())) {
-          String locn = ""; // JOYCE TODO call a method to set location based on
-                            // postal code
-          if (StringUtils.isNotBlank(locn))
-            muaModel.setCounty(locn);
-        }
-        muaModel.setCounty(tempVal);
         break;
       case "CUST_PHONE":
         muaModel.setCustPhone(tempVal);
@@ -5821,6 +5814,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CONTACT":
         muaModel.setCity2(tempVal);
+        break;
+      case "HW_INSTL_MSTR_FLG":
+        muaModel.setHwInstlMstrFlg(tempVal);
         break;
       case "LAND_CNTRY":
         muaModel.setLandCntry(tempVal);
@@ -5915,7 +5911,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_CLASS":
         muModel.setCustClass(tempVal);
         break;
-      case "SALES_BO_CD":
+      case "INSTALL_BRANCH_OFF":
         if (StringUtils.isNotBlank(tempVal)) {
           // Set Office Code
           muModel.setModeOfPayment(tempVal);
@@ -5999,6 +5995,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CMR_NO":
         muModel.setCmrNo(tempVal);
+        break;
+      case "OUT_CITY_LIMIT":
+        muModel.setOutCityLimit(tempVal);
         break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
