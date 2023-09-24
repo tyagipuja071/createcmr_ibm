@@ -28,7 +28,7 @@
 				</column>
 				<column>
 					<label>Office Code</label>
-					<dbColumn>INSTALL_BRANCH_OFF</dbColumn>
+					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>

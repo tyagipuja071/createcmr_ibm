@@ -690,6 +690,12 @@ var DB_MASS_UPDT_ADDR_FIELDS = [ {
 }, {
   id : 'County',
   name : 'COUNTY'
+}, {
+  id : 'Rol-Account',
+  name : 'OUT_CITY_LIMIT'
+}, {
+  id : 'Rol-Company',
+  name : 'HW_INSTL_MSTR_FLG'  
 } ];
 
 var DB_UPDT_BY_ENT_DATA_FIELDS = [ {
