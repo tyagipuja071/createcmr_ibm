@@ -29,10 +29,10 @@ app.controller('CrisReportController', ['$scope', '$document', '$http', '$timeou
 
     var params = JSON.parse(paramString);
     if ($scope.crit && $scope.crit.dateFrom) {
-      params.dateFrom = moment($scope.crit.dateFrom).format('YYYY-MM-DD');
+      params.dateFrom = moment($scope.crit.dateFrom).format('YYYY-MM-DD HH:mm:ss');
     }
     if ($scope.crit && $scope.crit.dateTo) {
-      params.dateTo = moment($scope.crit.dateTo).format('YYYY-MM-DD');
+      params.dateTo = moment($scope.crit.dateTo).format('YYYY-MM-DD HH:mm:ss');
     }
 
     cmr.showProgress('Exporting report. Please wait...');
