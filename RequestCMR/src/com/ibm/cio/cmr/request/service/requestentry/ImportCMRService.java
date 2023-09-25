@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -64,6 +65,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
+import com.itextpdf.styledxmlparser.jsoup.internal.StringUtil;
 
 /**
  * @author Jeffrey Zamora
@@ -74,11 +76,12 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
   private static final Logger LOG = Logger.getLogger(ImportCMRService.class);
   public static final List<String> EMEA_DB2_COUNTRIES = Arrays.asList("624", "788", "603", "607", "358", "626", "699", "644", "704", "668", "651",
-      "740", "694", "695", "705", "787", "820", "826", "821", "707", "693", "708", "363", "359", "889", "741", "758 ", "680", "610", "620", "840",
+      "740", "694", "695", "705", "787", "820", "826", "821", "707", "693", "708", "363", "359", "889", "741", "758", "680", "610", "620", "840",
       "636", "841", "645", "692", "669", "810", "881", "667", "662", "865", "383", "745", "698", "656", "753", "725", "691", "879", "675", "750",
       "752", "637", "762", "764", "767", "768", "770", "772", "700", "769", "382", "717", "373", "642", "782", "880", "804", "805", "808", "823",
       "670", "831", "827", "832", "635", "876", "833", "835", "864", "842", "850", "851", "718", "729", "862", "857", "677", "849", "883", "825",
-      "678", "702", "806", "846", "726", "755", "822", "838", "666 ", "866", "754");
+      "678", "702", "806", "846", "726", "755", "822", "838", "666", "866", "754");
+  public static final List<String> EMEA_RDC_COUNTRIES = Arrays.asList("618", "724", "848", "706", "780");
 
   @Autowired
   RequestEntryService reqEntryService;
@@ -90,7 +93,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
   @Override
   public ImportCMRModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
-
     if (this.reqEntryService == null) {
       this.reqEntryService = new RequestEntryService();
     }
@@ -362,6 +364,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         if (rdc != null) {
           PropertyUtils.copyProperties(rdc, data);
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
+          // STC OB for emea DB2 countries
+          Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
+          if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+            rdc.setTaxExempt3(data.getTaxExemptStatus3());
+          }
           reqEntryService.updateEntity(rdc, entityManager);
         } else {
           // recreate missing one
@@ -371,6 +378,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           rdc.setId(rdcpk);
           PropertyUtils.copyProperties(rdc, data);
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
+          // STC OB for emea DB2 countries
+          Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
+          if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+            rdc.setTaxExempt3(data.getTaxExemptStatus3());
+          }
           reqEntryService.createEntity(rdc, entityManager);
         }
 
@@ -400,6 +412,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         rdc.setId(rdcpk);
         PropertyUtils.copyProperties(rdc, data);
         rdc.setCmrNo(cmrNo); // retain CMR no in old file
+        // STC OB for emea DB2 countries
+        Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
+        if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+          rdc.setTaxExempt3(data.getTaxExemptStatus3());
+        }
         reqEntryService.createEntity(rdc, entityManager);
       }
 
@@ -639,7 +656,14 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     // }
 
     data.setMilitary("X".equals(record.getMilitaryFlag()) ? "Y" : null);
-
+    // STC OB
+    if (isEmeaDB2Cntry) {
+      String embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+      if ("ST".equalsIgnoreCase(embargoCode)) {
+        data.setTaxExemptStatus3(embargoCode);
+        LOG.trace(" STC Order Block Code : " + embargoCode);
+      }
+    }
     if (converter != null) {
       converter.setDataValuesOnImport(admin, data, results, record);
     }
@@ -973,6 +997,24 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       }
     }
     return geoHandler;
+  }
+
+  public static String getRdcAufsd(String cmrNo, String cntry) {
+    String rdcAufsd = "";
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("WW.GET_RDC_AUFSD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("KTOKD", "ZS01");
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    if (result != null) {
+      rdcAufsd = result;
+    }
+    return rdcAufsd;
   }
 
   /**
