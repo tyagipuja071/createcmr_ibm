@@ -203,6 +203,10 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     String type = "text/plain";
     String fileName = "CRISReport";
 
+    // Format dateFrom and dateTo according to expected output
+    String startDate = dateFrom.substring(2, 10);
+    String endDate = dateTo.substring(2, 10);
+
     response.setContentType(type);
     response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".txt\"");
 
@@ -219,7 +223,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     // Writing to HTTP response output stream
     try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
 
-      osw.write("*** ACCOUNT TAIGA CODE DAILY AUDIT REPORT *** AS OF DATE: " + dateFormat.format(date));
+      osw.write("*** ACCOUNT TAIGA CODE DAILY AUDIT REPORT *** AS OF DATE: " + startDate + " - " + endDate);
       osw.write(System.lineSeparator());
       osw.write(System.lineSeparator());
 
@@ -354,6 +358,10 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     String type = "text/plain";
     String fileName = "CRISReport";
 
+    // Format dateFrom and dateTo according to expected output
+    String startDate = dateFrom.substring(2, 10);
+    String endDate = dateTo.substring(2, 10);
+
     response.setContentType(type);
     response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".txt\"");
 
@@ -370,7 +378,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     // Writing to HTTP response output stream
     try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
 
-      osw.write("*** ACCOUNT ROL FLAG DAILY AUDIT REPORT *** AS OF DATE: " + dateFormat.format(date));
+      osw.write("*** ACCOUNT ROL FLAG DAILY AUDIT REPORT *** AS OF DATE: " + startDate + " - " + endDate);
       osw.write(System.lineSeparator());
       osw.write(System.lineSeparator());
 
