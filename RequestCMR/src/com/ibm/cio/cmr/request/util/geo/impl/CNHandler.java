@@ -632,7 +632,8 @@ public class CNHandler extends GEOHandler {
             LOG.debug("No Parent for DUNS " + dnbData.getDunsNo());
             break;
           } else {
-            //this DNB is for 'GuoZiWei', it is a special case, need to get ParDunsNo.
+            // this DNB is for 'GuoZiWei', it is a special case, need to get
+            // ParDunsNo.
             if ("544957715".equals(dnbData.getDuDunsNo()) && dnbData.getParDunsNo() != null && !dunsNo.equals(dnbData.getParDunsNo())) {
               dunsNo = dnbData.getParDunsNo();
               break;
@@ -1485,6 +1486,11 @@ public class CNHandler extends GEOHandler {
 
     iAddr = query.getSingleResult(IntlAddr.class);
 
+    // try with removed padded zeros in addr seq
+    if (iAddr == null) {
+      query.setParameter("ADDR_SEQ", StringUtils.stripStart(addr.getId().getAddrSeq(), "0"));
+      iAddr = query.getSingleResult(IntlAddr.class);
+    }
     return iAddr;
   }
 
