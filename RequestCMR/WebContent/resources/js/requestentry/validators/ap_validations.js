@@ -428,6 +428,12 @@ function addAfterConfigAP() {
     setDefaultValueForNZCreate();
     setLockIsicNZfromDNB();
   }
+ // CREATCMR-10215
+  var isDnbRecord = FormManager.getActualValue('findDnbResult');
+  if (cntry == '834' && isDnbRecord == 'Accepted') {
+    console.log(">>> SG-834 >>> Lock ISIC For D&B Import.");
+    FormManager.readOnly('isicCd');
+  }
 }
 
 function saveClusterVal() {
