@@ -553,7 +553,6 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    */
   public static String dateFrom(String dateFrom) {
 
-    // Covert dateFrom and dateTo to Japan time zone
     String fDateFrom = LocalDateTime.parse(dateFrom).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toString();
 
     // Format to SQL readable date format
@@ -570,7 +569,6 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    */
   public static String dateTo(String dateTo) {
 
-    // Covert dateFrom and dateTo to Japan time zone
     String fDateTo = LocalDateTime.parse(dateTo).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toString();
 
     // Format to SQL readable date format
