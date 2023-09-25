@@ -7042,16 +7042,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
 
-  // CREATCMR-9709
-  GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addAfterConfig(disableRolTaigaCode, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(disableFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(disableRolTaigaCode, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(addrTypeOnChange, GEOHandler.JP);
-  GEOHandler.addAddrFunction(disableRolTaigaCode, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(setRolForCustGrp, GEOHandler.JP);
-
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
 
