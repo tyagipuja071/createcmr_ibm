@@ -261,7 +261,7 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column number="true" exactLength="true" minLength="14">
+				<column number="true">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>
@@ -343,7 +343,7 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column number="true" exactLength="true" minLength="14">
+				<column number="true">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>
@@ -425,7 +425,7 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column number="true" exactLength="true" minLength="14">
+				<column number="true">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>
@@ -507,7 +507,7 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column number="true" exactLength="true" minLength="14">
+				<column number="true">
 					<label>VAT</label>
 					<dbColumn>DIVN</dbColumn>
 					<width>20</width>

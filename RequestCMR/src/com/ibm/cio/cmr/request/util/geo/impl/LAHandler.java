@@ -4579,6 +4579,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4625,6 +4627,11 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
               }
 
+              // VAT
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
+              }
+
             }
             if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -4647,6 +4654,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4692,6 +4701,10 @@ public class LAHandler extends GEOHandler {
               if (isShipToFilled && "@".equals(postal)) {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
               }
+
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
+              }
             }
             if ("Bill-To".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -4714,6 +4727,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4759,6 +4774,10 @@ public class LAHandler extends GEOHandler {
               if (isBillToFilled && "@".equals(postal)) {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
               }
+
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
+              }
             }
             if ("Sold-To".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -4781,6 +4800,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4825,6 +4846,11 @@ public class LAHandler extends GEOHandler {
               // Postal Code
               if (isSoldToFilled && "@".equals(postal)) {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // vat
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
               }
             }
 
