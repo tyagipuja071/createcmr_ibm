@@ -5909,7 +5909,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_CLASS":
         muModel.setCustClass(tempVal);
         break;
-      case "INSTALL_BRANCH_OFF":
+      case "SALES_BO_CD":
         if (StringUtils.isNotBlank(tempVal)) {
           // Set Office Code
           muModel.setModeOfPayment(tempVal);
