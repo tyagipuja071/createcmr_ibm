@@ -344,15 +344,15 @@ public class LegacySearchController extends BaseController {
       List<CrisReportModel> records = crisReportService.process(request, params);
       if (records != null) {
         if (timeframe.equalsIgnoreCase("RAONDEMAND")) {
-          crisReportService.raOnDemandExportToCsvFile(records, timeframe, dateFrom, dateTo, response);
+          crisReportService.raOnDemandExportToCsvFile(response, records, timeframe, dateFrom, dateTo);
         } else if (timeframe.equalsIgnoreCase("TAIGADAILY")) {
-          crisReportService.taigaDailyExportToTextFile(records, timeframe, response);
+          crisReportService.taigaDailyExportToTextFile(response, records, timeframe, dateFrom, dateTo);
         } else if (timeframe.equalsIgnoreCase("TAIGAMONTHLY")) {
-          crisReportService.taigaMonthlyExportToTextFile(records, timeframe, response);
+          crisReportService.taigaMonthlyExportToTextFile(response, records, timeframe);
         } else if (timeframe.equalsIgnoreCase("ROLDAILY")) {
-          crisReportService.rolDailyExportToTextFile(records, timeframe, response);
+          crisReportService.rolDailyExportToTextFile(response, records, timeframe, dateFrom, dateTo);
         } else if (timeframe.equalsIgnoreCase("ROLMONTHLY")) {
-          crisReportService.rolMonthlyExportToTextFile(records, timeframe, response);
+          crisReportService.rolMonthlyExportToTextFile(response, records, timeframe);
         }
       }
     } catch (Exception e) {
