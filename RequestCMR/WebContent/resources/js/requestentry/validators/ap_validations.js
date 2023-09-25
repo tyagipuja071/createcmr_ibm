@@ -5684,9 +5684,9 @@ function addCtcObsoleteValidator() {
           return new ValidationResult(null, true);
         }
 
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (reqType == 'C' && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "B" || clientTier == "M" || clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
           // CREATCMR-7884
-          var cntry = FormManager.getActualValue('cmrIssuingCntry');
           if (clientTier == "T" && cntry == '796') {
             var custSubGrp = FormManager.getActualValue('custSubGrp');
             var custSubGrpList = ['NRML', 'ESOSW', 'XESO', 'CROSS'];
@@ -5707,7 +5707,7 @@ function addCtcObsoleteValidator() {
             }
             return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
           } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "B" || clientTier == "M" || clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
-            if (clientTier == "T" && (cntry == '736' || cntry == '738')) {
+            if (clientTier == "T" && (cntry == '736' || cntry == '738' || cntry == '834')) {
               return new ValidationResult(null, true);
             }
             return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
@@ -5715,7 +5715,7 @@ function addCtcObsoleteValidator() {
             return new ValidationResult(null, true);
           }
         } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "B" || clientTier == "M" || clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
-          if (clientTier == "T" && (cntry == '736' || cntry == '738')) {
+          if (clientTier == "T" && (cntry == '736' || cntry == '738' || cntry == '834')) {
             return new ValidationResult(null, true);
           }
           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
@@ -8616,7 +8616,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterConfig(addVatValidationforSingapore, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addressNameSameValidator, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(addCompanyProofForSG, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(additionalAddrNmValidator, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(additionalAddrNmValidatorNZ, [SysLoc.NEW_ZEALAND], null, true);
   GEOHandler.registerValidator(additionalAddrNmValidatorOldNZ, [SysLoc.NEW_ZEALAND], null, true);
