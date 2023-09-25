@@ -431,6 +431,12 @@ function addAfterConfigAP() {
     setDefaultValueForNZCreate();
     setLockIsicNZfromDNB();
   }
+   // CREATCMR-10215
+  var isDnbRecord = FormManager.getActualValue('findDnbResult');
+  if (cntry == '834' && isDnbRecord == 'Accepted') {
+    console.log(">>> SG-834 >>> Lock ISIC For D&B Import.");
+    FormManager.readOnly('isicCd');
+  }
 }
 
 function saveClusterVal() {
@@ -8105,7 +8111,7 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
     // LOCK GB Seg(QTC)/ISU
     FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
+    FormManager.readOnly('isuCd');   
   }
 }
 
