@@ -8,6 +8,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,8 +43,9 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
   @Override
   protected List<CrisReportModel> doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     String timeframe = request.getParameter("timeframe");
-    String dateFrom = request.getParameter("dateFrom");
-    String dateTo = request.getParameter("dateTo");
+
+    String jpDateFrom = dateFrom(request.getParameter("dateFrom").replace(" ", "T"));
+    String jpDateTo = dateTo(request.getParameter("dateTo").replace(" ", "T"));
 
     PreparedQuery q = null;
     String sqlQuery = "";
@@ -70,12 +74,12 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
     q = new PreparedQuery(entityManager, sql);
     q.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     if (timeframe.equals("TAIGADAILY") || timeframe.equals("ROLDAILY")) {
-      q.setParameter("DATEFROM", dateFrom);
-      q.setParameter("DATETO", dateTo);
+      q.setParameter("DATEFROM", jpDateFrom);
+      q.setParameter("DATETO", jpDateTo);
     }
     if (timeframe.equals("RAONDEMAND")) {
-      q.setParameter("DATEFROM", dateFrom);
-      q.setParameter("DATETO", dateTo);
+      q.setParameter("DATEFROM", jpDateFrom);
+      q.setParameter("DATETO", jpDateTo);
     }
 
     List<CrisReportModel> results = new ArrayList<CrisReportModel>();
@@ -191,8 +195,8 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    * @throws IllegalAccessException
    */
 
-  public void taigaDailyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
-      throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
+  public void taigaDailyExportToTextFile(HttpServletResponse response, List<CrisReportModel> records, String timeframe, String dateFrom,
+      String dateTo) throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
 
@@ -279,7 +283,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    * @throws IllegalAccessException
    */
 
-  public void taigaMonthlyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
+  public void taigaMonthlyExportToTextFile(HttpServletResponse response, List<CrisReportModel> records, String timeframe)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
@@ -342,7 +346,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    * @throws IllegalAccessException
    */
 
-  public void rolDailyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
+  public void rolDailyExportToTextFile(HttpServletResponse response, List<CrisReportModel> records, String timeframe, String dateFrom, String dateTo)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
@@ -432,7 +436,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    * @throws IllegalAccessException
    */
 
-  public void rolMonthlyExportToTextFile(List<CrisReportModel> records, String timeframe, HttpServletResponse response)
+  public void rolMonthlyExportToTextFile(HttpServletResponse response, List<CrisReportModel> records, String timeframe)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     LOG.info("Exporting Japan CRIS Report for Users to .txt file..");
@@ -498,7 +502,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  public void raOnDemandExportToCsvFile(List<CrisReportModel> records, String timeframe, String dateFrom, String dateTo, HttpServletResponse response)
+  public void raOnDemandExportToCsvFile(HttpServletResponse response, List<CrisReportModel> records, String timeframe, String dateFrom, String dateTo)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmSS");
@@ -540,6 +544,40 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       }
       osw.write(formatDateFrom + "-" + formatDateTo + "(OUTPUT DURATION: " + formatDateFrom + "-" + formatDateTo + ")");
     }
+  }
+
+  /**
+   * Convert dateFrom to Japan time zone
+   *
+   * @param dateFrom
+   */
+  public static String dateFrom(String dateFrom) {
+
+    // Covert dateFrom and dateTo to Japan time zone
+    String fDateFrom = LocalDateTime.parse(dateFrom).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toString();
+
+    // Format to SQL readable date format
+    String jpDateFrom = fDateFrom.replace("T", " ").substring(0, 16).concat(":00");
+
+    return jpDateFrom;
+
+  }
+
+  /**
+   * Convert dateTo to Japan time zone
+   *
+   * @param dateFrom
+   */
+  public static String dateTo(String dateTo) {
+
+    // Covert dateFrom and dateTo to Japan time zone
+    String fDateTo = LocalDateTime.parse(dateTo).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toString();
+
+    // Format to SQL readable date format
+    String jpDateTo = fDateTo.replace("T", " ").substring(0, 16).concat(":00");
+
+    return jpDateTo;
+
   }
 
 }
