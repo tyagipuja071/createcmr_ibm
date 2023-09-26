@@ -974,7 +974,7 @@ public class ItalyHandler extends BaseSOFHandler {
       data.setVat(vat);
     }
     data.setIdentClient(identClient);
-    data.setSpecialTaxCd(taxCode);
+    data.setSpecialTaxCd(taxCode != null ? taxCode : cExt.getItIVA());
 
     if (!"IT".equals(countryLanded)) {
       data.setTaxCd1("");
