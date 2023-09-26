@@ -203,6 +203,9 @@ function afterConfigForFR() {
     FormManager.readOnly('taxCd1');
   }
   //addVatExemptHandler();
+  if (reqType == 'U') {
+    return;
+  }
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     if (value != '' || value != 'undefined') {
       var landedCountry = getSoldToLanded();
@@ -3956,6 +3959,9 @@ function setCTCValues() {
 function setCtcByIsu(value) {
   if (!value) {
     value = FormManager.getActualValue('isuCd');
+  }
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
   }
   if (value == '32') {
     FormManager.setValue('clientTier', 'T');

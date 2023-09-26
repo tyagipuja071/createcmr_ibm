@@ -619,7 +619,7 @@ function setClientTierBasedOnIsuUKI() {
     '34' : 'Q',
     '36' : 'Y'
   };
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType == 'U') {
     return;
   }
   if (isuCd != null && isuCd != undefined && isuCd != '') {
@@ -7580,7 +7580,7 @@ function addEmbargoCodeValidatorUKI() {
 
 function autoPopulateISUClientTierUK() {
   var reqType = FormManager.getActualValue('reqType');
-  if (cmr.currentRequestType != 'C') {
+  if (reqType != 'C') {
     return;
   }
   var custSubGroup = FormManager.getActualValue('custSubGrp');
