@@ -164,6 +164,10 @@ var FilteringDropdown = (function() {
           queryParams.nocache = 'Y';
         }
       }
+      // To avoid fetching incorrect data from cached values
+      if (queryParams.fieldId == 'RequestReason' && !queryParams.cmrIssuingCntry) {
+        queryParams.cmrIssuingCntry = '*';
+      }
     }
     _PENDING_DD.push(fieldId);
     dojo.xhrGet({
