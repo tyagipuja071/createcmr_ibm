@@ -420,26 +420,37 @@ public class RequestEntryModel extends BaseModel {
   private String footnoteNo;
   private String fomeZero;
   private int companySize;
-  
-  //JP new fields for AR
+
+  // JP new fields for AR
   private String jpCloseDays;
   private String jpCloseDays1;
   private String jpCloseDays2;
   private String jpCloseDays3;
   private String jpCloseDays4;
   private String jpCloseDays5;
+  private String jpCloseDays6;
+  private String jpCloseDays7;
+  private String jpCloseDays8;
+
   private String jpPayCycles;
   private String jpPayCycles1;
   private String jpPayCycles2;
   private String jpPayCycles3;
   private String jpPayCycles4;
   private String jpPayCycles5;
+  private String jpPayCycles6;
+  private String jpPayCycles7;
+  private String jpPayCycles8;
+
   private String jpPayDays;
   private String jpPayDays1;
   private String jpPayDays2;
   private String jpPayDays3;
   private String jpPayDays4;
   private String jpPayDays5;
+  private String jpPayDays6;
+  private String jpPayDays7;
+  private String jpPayDays8;
 
   // CH Specific
   private String custLangCd;
@@ -489,6 +500,9 @@ public class RequestEntryModel extends BaseModel {
   private String mexicoBillingName;
 
   private long overrideReqId;
+
+  // new JP fields
+  private String marketingContCd;
 
   public String getMexicoBillingName() {
     return mexicoBillingName;
@@ -3381,5 +3395,85 @@ public class RequestEntryModel extends BaseModel {
 
   public void setJpPayDays5(String jpPayDays5) {
     this.jpPayDays5 = jpPayDays5;
+  }
+
+  public String getMarketingContCd() {
+    return marketingContCd;
+  }
+
+  public void setMarketingContCd(String marketingContCd) {
+    this.marketingContCd = marketingContCd;
+  }
+
+  public String getJpCloseDays6() {
+    return jpCloseDays6;
+  }
+
+  public void setJpCloseDays6(String jpCloseDays6) {
+    this.jpCloseDays6 = jpCloseDays6;
+  }
+
+  public String getJpCloseDays7() {
+    return jpCloseDays7;
+  }
+
+  public void setJpCloseDays7(String jpCloseDays7) {
+    this.jpCloseDays7 = jpCloseDays7;
+  }
+
+  public String getJpCloseDays8() {
+    return jpCloseDays8;
+  }
+
+  public void setJpCloseDays8(String jpCloseDays8) {
+    this.jpCloseDays8 = jpCloseDays8;
+  }
+
+  public String getJpPayCycles6() {
+    return jpPayCycles6;
+  }
+
+  public void setJpPayCycles6(String jpPayCycles6) {
+    this.jpPayCycles6 = jpPayCycles6;
+  }
+
+  public String getJpPayCycles7() {
+    return jpPayCycles7;
+  }
+
+  public void setJpPayCycles7(String jpPayCycles7) {
+    this.jpPayCycles7 = jpPayCycles7;
+  }
+
+  public String getJpPayCycles8() {
+    return jpPayCycles8;
+  }
+
+  public void setJpPayCycles8(String jpPayCycles8) {
+    this.jpPayCycles8 = jpPayCycles8;
+  }
+
+  public String getJpPayDays6() {
+    return jpPayDays6;
+  }
+
+  public void setJpPayDays6(String jpPayDays6) {
+    this.jpPayDays6 = jpPayDays6;
+  }
+
+  public String getJpPayDays7() {
+    return jpPayDays7;
+  }
+
+  public void setJpPayDays7(String jpPayDays7) {
+    this.jpPayDays7 = jpPayDays7;
+  }
+
+  public String getJpPayDays8() {
+    return jpPayDays8;
+  }
+
+  public void setJpPayDays8(String jpPayDays8) {
+    this.jpPayDays8 = jpPayDays8;
   }
 }
