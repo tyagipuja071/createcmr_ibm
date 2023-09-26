@@ -4146,6 +4146,12 @@ function addChangeNameAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        // Manual Address, Name change is disabled for Temporary reactivate requests. 
+        // Skipping the validation to avoid validation messages for automatic State Prov
+        // corrections for update type requests
+        if (FormManager.getActualValue('reqReason') == 'TREC') {
+          return;
+        }
         var reqType = FormManager.getActualValue('reqType');
         var mainCustNm1 = FormManager.getActualValue("custNm1");
         var oldCustNm1 = FormManager.getActualValue("oldCustNm1");
