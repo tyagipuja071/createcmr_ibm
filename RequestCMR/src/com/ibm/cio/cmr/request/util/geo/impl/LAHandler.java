@@ -4629,7 +4629,7 @@ public class LAHandler extends GEOHandler {
 
               // VAT
               if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
-                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
               }
 
             }
@@ -4703,7 +4703,7 @@ public class LAHandler extends GEOHandler {
               }
 
               if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
-                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
               }
             }
             if ("Bill-To".equalsIgnoreCase(sheet.getSheetName())) {
@@ -4776,7 +4776,7 @@ public class LAHandler extends GEOHandler {
               }
 
               if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
-                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
               }
             }
             if ("Sold-To".equalsIgnoreCase(sheet.getSheetName())) {
@@ -4850,7 +4850,7 @@ public class LAHandler extends GEOHandler {
 
               // vat
               if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
-                error.addError((row.getRowNum() + 1), "<br>VAT", "Vat should have 14 digits numeric value");
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
               }
             }
 
