@@ -271,11 +271,7 @@
     
     <class>com.ibm.cio.cmr.request.entity.Knb1</class>
     <class>com.ibm.cio.cmr.request.entity.Knb1PK</class>
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> refs/remotes/origin/yellow_japan_extended_dualwrite
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />
