@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +32,13 @@ import com.ibm.cio.cmr.request.service.DropDownService;
 public class DropdownListController extends BaseController {
 
   private static Map<String, DropdownModel> cachedFixedItems = new HashMap<String, DropdownModel>();
+  private static List<String> noCacheFields = Arrays.asList("RequestReason");
 
   @Autowired
   private DropDownService service;
 
-  @RequestMapping(value = "/dropdown/{queryId}/list")
+  @RequestMapping(
+      value = "/dropdown/{queryId}/list")
   public ModelMap getDropdownValues(@PathVariable String queryId, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     ParamContainer params = new ParamContainer();
@@ -49,6 +52,10 @@ public class DropdownListController extends BaseController {
       if ("nocache".equals(paramName)) {
         nocache = true;
       }
+    }
+    String fieldId = (String) params.getParam("fieldId");
+    if (noCacheFields.contains(fieldId)) {
+      nocache = true;
     }
     params.addParam("queryId", queryId);
 
@@ -64,12 +71,10 @@ public class DropdownListController extends BaseController {
 
     boolean lovForCntry = false;
     if ("BDS".equalsIgnoreCase(queryId)) {
-      String fieldId = (String) params.getParam("fieldId");
       items = paramCount == 1 ? cachedFixedItems.get(fieldId) : null;
       addToCache = items == null && paramCount == 1; // fieldID not counted
       bdsOrLov = true;
     } else if ("LOV".equalsIgnoreCase(queryId)) {
-      String fieldId = (String) params.getParam("fieldId");
       items = paramCount <= 2 ? cachedFixedItems.get(fieldId) : null;
       if (!StringUtils.isEmpty(cmrIssuingCntry)) {
         items = cachedFixedItems.get(fieldId + "_" + cmrIssuingCntry);
@@ -98,7 +103,6 @@ public class DropdownListController extends BaseController {
 
     if (addToCache && !nocache) {
       if (bdsOrLov) {
-        String fieldId = (String) params.getParam("fieldId");
         if (lovForCntry) {
           cachedFixedItems.put(fieldId + "_" + cmrIssuingCntry, items);
         } else {
