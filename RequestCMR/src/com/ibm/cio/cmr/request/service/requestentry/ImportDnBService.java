@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,6 +54,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
@@ -898,7 +898,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     scorecard.setFindDnbResult(CmrConstants.Scorecard_Not_Done);
   }
 
-  private void updateDnbValues(EntityManager entityManager, FindCMRRecordModel record) {
+  protected void updateDnbValues(EntityManager entityManager, FindCMRRecordModel record) {
     String land1 = record.getCmrCountryLanded();
     String mandt = SystemConfiguration.getValue("MANDT");
     String state = record.getCmrState();
