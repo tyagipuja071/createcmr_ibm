@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.io.IOException;
 //import java.sql.SQLException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -23,6 +24,7 @@ import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
@@ -31,6 +33,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -82,6 +87,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CRISServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.IndexUpdateClient;
 import com.ibm.cmr.services.client.cris.CRISAccount;
 import com.ibm.cmr.services.client.cris.CRISAddress;
 import com.ibm.cmr.services.client.cris.CRISCompany;
@@ -89,7 +95,10 @@ import com.ibm.cmr.services.client.cris.CRISEstablishment;
 import com.ibm.cmr.services.client.cris.CRISFullAccountRequest;
 import com.ibm.cmr.services.client.cris.CRISQueryRequest;
 import com.ibm.cmr.services.client.cris.CRISQueryResponse;
+import com.ibm.cmr.services.client.index.IndexUpdateRequest;
+import com.ibm.cmr.services.client.index.IndexUpdateResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
+import com.ibm.json.java.JSONObject;
 
 /**
  * 
@@ -612,7 +621,7 @@ public class JPHandler extends GEOHandler {
     if (establishment == null) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_ESTABLISHMENT_DATA);
     }
-    
+
     List<Kna1> l = getKna1List(entityManager, mandt, mainRecord.getCmrNum());
     String rol = l.get(0).getInspbydebi();
     mainRecord.setInspbydebi(rol);
@@ -927,18 +936,27 @@ public class JPHandler extends GEOHandler {
     data.setJpCloseDays3(jpCloseDaysStr.length() >= 6 ? jpCloseDaysStr.substring(4, 6) : null);
     data.setJpCloseDays4(jpCloseDaysStr.length() >= 8 ? jpCloseDaysStr.substring(6, 8) : null);
     data.setJpCloseDays5(jpCloseDaysStr.length() >= 10 ? jpCloseDaysStr.substring(8, 10) : null);
+    data.setJpCloseDays6(jpCloseDaysStr.length() >= 12 ? jpCloseDaysStr.substring(10, 12) : null);
+    data.setJpCloseDays7(jpCloseDaysStr.length() >= 14 ? jpCloseDaysStr.substring(12, 14) : null);
+    data.setJpCloseDays8(jpCloseDaysStr.length() >= 16 ? jpCloseDaysStr.substring(14, 16) : null);
 
     data.setJpPayDays1(jpPayDaysStr.length() >= 2 ? jpPayDaysStr.substring(0, 2) : null);
     data.setJpPayDays2(jpPayDaysStr.length() >= 4 ? jpPayDaysStr.substring(2, 4) : null);
     data.setJpPayDays3(jpPayDaysStr.length() >= 6 ? jpPayDaysStr.substring(4, 6) : null);
     data.setJpPayDays4(jpPayDaysStr.length() >= 8 ? jpPayDaysStr.substring(6, 8) : null);
     data.setJpPayDays5(jpPayDaysStr.length() >= 10 ? jpPayDaysStr.substring(8, 10) : null);
+    data.setJpPayDays6(jpPayDaysStr.length() >= 12 ? jpPayDaysStr.substring(10, 12) : null);
+    data.setJpPayDays7(jpPayDaysStr.length() >= 14 ? jpPayDaysStr.substring(12, 14) : null);
+    data.setJpPayDays8(jpPayDaysStr.length() >= 16 ? jpPayDaysStr.substring(14, 16) : null);
 
     data.setJpPayCycles1(jpPayCyclesStr.length() >= 1 ? jpPayCyclesStr.substring(0, 1) : null);
     data.setJpPayCycles2(jpPayCyclesStr.length() >= 2 ? jpPayCyclesStr.substring(1, 2) : null);
     data.setJpPayCycles3(jpPayCyclesStr.length() >= 3 ? jpPayCyclesStr.substring(2, 3) : null);
     data.setJpPayCycles4(jpPayCyclesStr.length() >= 4 ? jpPayCyclesStr.substring(3, 4) : null);
     data.setJpPayCycles5(jpPayCyclesStr.length() >= 5 ? jpPayCyclesStr.substring(4, 5) : null);
+    data.setJpPayCycles6(jpPayCyclesStr.length() >= 6 ? jpPayCyclesStr.substring(5, 6) : null);
+    data.setJpPayCycles7(jpPayCyclesStr.length() >= 7 ? jpPayCyclesStr.substring(6, 7) : null);
+    data.setJpPayCycles8(jpPayCyclesStr.length() >= 8 ? jpPayCyclesStr.substring(7, 8) : null);
   }
 
   @Override
@@ -984,7 +1002,7 @@ public class JPHandler extends GEOHandler {
 
     if ("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType())) {
       address.setContact(null);
-      if("ZC01".equals(address.getId().getAddrType())) {
+      if ("ZC01".equals(address.getId().getAddrType())) {
         address.setRol(currentRecord.getInspbydebi());
       }
     } else {
@@ -1682,6 +1700,10 @@ public class JPHandler extends GEOHandler {
     String jpCloseDay3 = StringUtils.isNoneEmpty(data.getJpCloseDays3()) ? data.getJpCloseDays3() : "  ";
     String jpCloseDay4 = StringUtils.isNoneEmpty(data.getJpCloseDays4()) ? data.getJpCloseDays4() : "  ";
     String jpCloseDay5 = StringUtils.isNoneEmpty(data.getJpCloseDays5()) ? data.getJpCloseDays5() : "  ";
+    String jpCloseDay6 = StringUtils.isNoneEmpty(data.getJpCloseDays6()) ? data.getJpCloseDays6() : "  ";
+    String jpCloseDay7 = StringUtils.isNoneEmpty(data.getJpCloseDays7()) ? data.getJpCloseDays7() : "  ";
+    String jpCloseDay8 = StringUtils.isNoneEmpty(data.getJpCloseDays8()) ? data.getJpCloseDays8() : "  ";
+
     if (jpCloseDay1.length() == 1) {
       jpCloseDay1 = " " + jpCloseDay1;
     }
@@ -1697,7 +1719,17 @@ public class JPHandler extends GEOHandler {
     if (jpCloseDay5.length() == 1) {
       jpCloseDay5 = " " + jpCloseDay5;
     }
-    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3 + jpCloseDay4 + jpCloseDay5);
+    if (jpCloseDay6.length() == 1) {
+      jpCloseDay6 = " " + jpCloseDay6;
+    }
+    if (jpCloseDay7.length() == 1) {
+      jpCloseDay7 = " " + jpCloseDay7;
+    }
+    if (jpCloseDay8.length() == 1) {
+      jpCloseDay8 = " " + jpCloseDay8;
+    }
+
+    data.setJpCloseDays(jpCloseDay1 + jpCloseDay2 + jpCloseDay3 + jpCloseDay4 + jpCloseDay5 + jpCloseDay6 + jpCloseDay7 + jpCloseDay8);
   }
 
   private void handleJpPayDay(Data data) {
@@ -1706,6 +1738,10 @@ public class JPHandler extends GEOHandler {
     String jpPayDay3 = StringUtils.isNoneEmpty(data.getJpPayDays3()) ? data.getJpPayDays3() : "  ";
     String jpPayDay4 = StringUtils.isNoneEmpty(data.getJpPayDays4()) ? data.getJpPayDays4() : "  ";
     String jpPayDay5 = StringUtils.isNoneEmpty(data.getJpPayDays5()) ? data.getJpPayDays5() : "  ";
+    String jpPayDay6 = StringUtils.isNoneEmpty(data.getJpPayDays6()) ? data.getJpPayDays6() : "  ";
+    String jpPayDay7 = StringUtils.isNoneEmpty(data.getJpPayDays7()) ? data.getJpPayDays7() : "  ";
+    String jpPayDay8 = StringUtils.isNoneEmpty(data.getJpPayDays8()) ? data.getJpPayDays8() : "  ";
+
     if (jpPayDay1.length() == 1) {
       jpPayDay1 = " " + jpPayDay1;
     }
@@ -1721,7 +1757,17 @@ public class JPHandler extends GEOHandler {
     if (jpPayDay5.length() == 1) {
       jpPayDay5 = " " + jpPayDay5;
     }
-    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3 + jpPayDay4 + jpPayDay5);
+    if (jpPayDay6.length() == 1) {
+      jpPayDay6 = " " + jpPayDay6;
+    }
+    if (jpPayDay7.length() == 1) {
+      jpPayDay7 = " " + jpPayDay7;
+    }
+    if (jpPayDay8.length() == 1) {
+      jpPayDay8 = " " + jpPayDay8;
+    }
+
+    data.setJpPayDays(jpPayDay1 + jpPayDay2 + jpPayDay3 + jpPayDay4 + jpPayDay5 + jpPayDay6 + jpPayDay7 + jpPayDay8);
   }
 
   private void handleJpPayCycle(Data data) {
@@ -1730,8 +1776,11 @@ public class JPHandler extends GEOHandler {
     String jpPayCycle3 = StringUtils.isNoneEmpty(data.getJpPayCycles3()) ? data.getJpPayCycles3() : " ";
     String jpPayCycle4 = StringUtils.isNoneEmpty(data.getJpPayCycles4()) ? data.getJpPayCycles4() : " ";
     String jpPayCycle5 = StringUtils.isNoneEmpty(data.getJpPayCycles5()) ? data.getJpPayCycles5() : " ";
+    String jpPayCycle6 = StringUtils.isNoneEmpty(data.getJpPayCycles6()) ? data.getJpPayCycles6() : " ";
+    String jpPayCycle7 = StringUtils.isNoneEmpty(data.getJpPayCycles7()) ? data.getJpPayCycles7() : " ";
+    String jpPayCycle8 = StringUtils.isNoneEmpty(data.getJpPayCycles8()) ? data.getJpPayCycles8() : " ";
 
-    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3 + jpPayCycle4 + jpPayCycle5);
+    data.setJpPayCycles(jpPayCycle1 + jpPayCycle2 + jpPayCycle3 + jpPayCycle4 + jpPayCycle5 + jpPayCycle6 + jpPayCycle7 + jpPayCycle8);
   }
 
   @Override
@@ -2738,6 +2787,28 @@ public class JPHandler extends GEOHandler {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
 
+  }
+
+  private static void indexFindCMRData(Data data) throws Exception {
+
+    LOG.debug("Indexing Japan CMR No: " + data.getCmrNo());
+    if (StringUtils.isNotBlank(data.getCmrNo())) {
+      IndexUpdateRequest request = new IndexUpdateRequest();
+      request.setMandt(SystemConfiguration.getValue("MANDT"));
+      request.setKatr6("760");
+      request.setCmrNo(data.getCmrNo());
+
+      String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      IndexUpdateClient client = CmrServicesFactory.getInstance().createClient(baseUrl, IndexUpdateClient.class);
+      IndexUpdateResponse response = client.executeAndWrap(IndexUpdateClient.BASIC_APP_ID, request, IndexUpdateResponse.class);
+      printObject(response);
+    }
+  }
+
+  public static void printObject(Object obj) throws JsonGenerationException, JsonMappingException, IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonString = mapper.writeValueAsString(obj);
+    System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(JSONObject.parse(jsonString)));
   }
 
   /**
@@ -4702,6 +4773,29 @@ public class JPHandler extends GEOHandler {
       handleCmrNo2(entityManager, mandt, kna1.getId().getKunnr(), data.getCmrNo2(), kna1);
     }
 
+    List<Knb1> knb1List = getKnb1Records(entityManager, data.getCmrNo());
+    LOG.info("KNB1 size: " + knb1List.size());
+    if (knb1List != null && !knb1List.isEmpty()) {
+      for (Knb1 knb1 : knb1List) {
+        knb1.setZamio(data.getModeOfPayment() != null ? data.getModeOfPayment() : "");
+        knb1.setZterm(data.getMarketingContCd() != null ? data.getMarketingContCd() : "");
+        knb1.setKnrzb(data.getDealerNo() != null ? data.getDealerNo() : "");
+
+        entityManager.merge(knb1);
+        entityManager.flush();
+      }
+    }
+
+    indexFindCMRData(data);
+  }
+
+  private static List<Knb1> getKnb1Records(EntityManager entityManager, String cmrNo) {
+    String sql = ExternalizedQuery.getSql("GET.KNB1.RECORDS.BY.ZZKV_CUSNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    return query.getResults(Knb1.class);
   }
 
   private static List<Kna1> getKna1List(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
@@ -4784,6 +4878,7 @@ public class JPHandler extends GEOHandler {
     salesPayment.setLastUpdtBy(userId);
     salesPayment.setLastUpdtTs(ts);
     salesPayment.setSalesTeamUpdtDt(ts);
+    salesPayment.setContractSignDt(data.getAgreementSignDate());
 
     String jpCloseDaysStr1 = jpCloseDaysStr.length() >= 2 ? jpCloseDaysStr.substring(0, 2).trim() : "";
     String jpCloseDaysStr2 = jpCloseDaysStr.length() >= 4 ? jpCloseDaysStr.substring(2, 4).trim() : "";
@@ -4853,6 +4948,7 @@ public class JPHandler extends GEOHandler {
     salesPayment.setLastUpdtBy(userId);
     salesPayment.setLastUpdtTs(ts);
     salesPayment.setSalesTeamUpdtDt(ts);
+    salesPayment.setContractSignDt(data.getAgreementSignDate());
 
     String jpCloseDaysStr1 = jpCloseDaysStr.length() >= 2 ? jpCloseDaysStr.substring(0, 2).trim() : "";
     String jpCloseDaysStr2 = jpCloseDaysStr.length() >= 4 ? jpCloseDaysStr.substring(2, 4).trim() : "";
@@ -4908,7 +5004,7 @@ public class JPHandler extends GEOHandler {
     salesPayment.setPayCycleCd7(jpPayCyclesStr7.isEmpty() ? null : jpPayCyclesStr7);
     salesPayment.setPayCycleCd8(jpPayCyclesStr8.isEmpty() ? null : jpPayCyclesStr8);
   }
-  
+
   private static void handleCmrNo2(EntityManager entityManager, String mandt, String kunnr, String cmrNo2, Kna1 kna1) throws Exception {
     if (mandt == null || kunnr == null || cmrNo2 == null || "".equals(cmrNo2)) {
       return;
@@ -5016,7 +5112,7 @@ public class JPHandler extends GEOHandler {
     query.setForReadOnly(true);
     return query.getSingleResult(Knb1.class);
   }
-  
+
   private String importIbmRelatedCmr(EntityManager entityManager, HttpServletRequest request, RequestEntryModel reqentry, ParamContainer params,
       ImportCMRModel searchModel, String addrType, String addrTypeParam) throws Exception {
     String companyNo = getCompanyNoByIbmRelatedCmr(entityManager, SystemConfiguration.getValue("MANDT"), searchModel.getCmrNum());
