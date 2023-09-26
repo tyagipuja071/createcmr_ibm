@@ -357,7 +357,7 @@ function addrTypeOnChange() {
 
 function handleFields4RAOnPageLoad() {
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
-  console.log('isJPBlueGroupFlg:'+isJPBlueGroupFlg);
+   console.log('isJPBlueGroupFlg:'+isJPBlueGroupFlg);
   if (isJPBlueGroupFlg == 'true') {
     FormManager.readOnly('requestingLob');
     FormManager.readOnly('reqReason');
@@ -400,9 +400,11 @@ function handleRAFields() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpCloseDays4', 'jpCloseDays5', 
-  'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayCycles4', 'jpPayCycles5',
-   'jpPayDays1', 'jpPayDays2', 'jpPayDays3', 'jpPayDays4', 'jpPayDays5' ];
+  var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpCloseDays4', 'jpCloseDays5', 'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayCycles4', 'jpPayCycles5', 'jpPayDays1',
+      'jpPayDays2', 'jpPayDays3', 'jpPayDays4', 'jpPayDays5',
+      // Adding fields for Day 6 to 8
+      'jpCloseDays6', 'jpCloseDays7', 'jpCloseDays8', 'jpPayCycles6', 'jpPayCycles7', 'jpPayCycles8', 'jpPayDays6', 'jpPayDays7', 'jpPayDays8', 'agreementSignDate', 'modeOfPayment',
+      'marketingContCd', 'dealerNo' ];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'RACMR') {
     setRAFieldsMandatory();
@@ -430,16 +432,28 @@ function showRAFieldsValue() {
     FormManager.setValue('jpCloseDays3', _jpCloseDays.substring(4, 6));
     FormManager.setValue('jpCloseDays4', _jpCloseDays.substring(6, 8));
     FormManager.setValue('jpCloseDays5', _jpCloseDays.substring(8, 10));
+    FormManager.setValue('jpCloseDays6', _jpCloseDays.substring(10, 12));
+    FormManager.setValue('jpCloseDays7', _jpCloseDays.substring(12, 14));
+    FormManager.setValue('jpCloseDays8', _jpCloseDays.substring(14, 16));
+
     FormManager.setValue('jpPayCycles1', _jpPayCycles.substring(0, 1));
     FormManager.setValue('jpPayCycles2', _jpPayCycles.substring(1, 2));
     FormManager.setValue('jpPayCycles3', _jpPayCycles.substring(2, 3));
     FormManager.setValue('jpPayCycles4', _jpPayCycles.substring(3, 4));
     FormManager.setValue('jpPayCycles5', _jpPayCycles.substring(4, 5));
+    FormManager.setValue('jpPayCycles6', _jpPayCycles.substring(5, 6));
+    FormManager.setValue('jpPayCycles7', _jpPayCycles.substring(6, 7));
+    FormManager.setValue('jpPayCycles8', _jpPayCycles.substring(7, 8));
+
     FormManager.setValue('jpPayDays1', _jpPayDays.substring(0, 2));
     FormManager.setValue('jpPayDays2', _jpPayDays.substring(2, 4));
     FormManager.setValue('jpPayDays3', _jpPayDays.substring(4, 6));
     FormManager.setValue('jpPayDays4', _jpPayDays.substring(6, 8));
     FormManager.setValue('jpPayDays5', _jpPayDays.substring(8, 10));
+    FormManager.setValue('jpPayDays6', _jpPayDays.substring(10, 12));
+    FormManager.setValue('jpPayDays7', _jpPayDays.substring(12, 14));
+    FormManager.setValue('jpPayDays8', _jpPayDays.substring(14, 16));
+
   }
 }
 
@@ -531,7 +545,30 @@ function setSalesPaymentFieldsValue(kunnr) {
     FormManager.setValue('jpCloseDays5', results.ret14);
     FormManager.setValue('jpPayCycles5', results.ret15);
     FormManager.setValue('jpPayDays5', results.ret16);
+    // Fields for Day 6
+    FormManager.setValue('jpCloseDays6', results.ret17);
+    FormManager.setValue('jpPayCycles6', results.ret18);
+    FormManager.setValue('jpPayDays6', results.ret19);
+    // Fields for Day 7
+    FormManager.setValue('jpCloseDays7', results.ret20);
+    FormManager.setValue('jpPayCycles7', results.ret21);
+    FormManager.setValue('jpPayDays7', results.ret22);
+    // Fields for Day 8
+    FormManager.setValue('jpCloseDays8', results.ret23);
+    FormManager.setValue('jpPayCycles8', results.ret24);
+    FormManager.setValue('jpPayDays8', results.ret25);
+
+    FormManager.setValue('agreementSignDate', results.ret26);
   }
+
+  var resultsKnb1 = cmr.query('JP.GET.KNB1.BY_KUNNR', qParams);
+
+  if (resultsKnb1 != null && resultsKnb1.ret1 != undefined) {
+    FormManager.setValue('modeOfPayment', results.ret2);
+    FormManager.setValue('marketingContCd', results.ret3);
+    FormManager.setValue('dealerNo', results.ret4);
+  }
+
 }
 
 function disableAddrFieldsForRA() {
