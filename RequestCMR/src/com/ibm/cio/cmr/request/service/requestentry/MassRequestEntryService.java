@@ -681,7 +681,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     // CMR-7562 - append legacy only addresses here
-    cmrs.addAll(getAddressesNotInRdc(cmrs, entityManager, cmrNo, cmrCntry));
+    if (!model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+      cmrs.addAll(getAddressesNotInRdc(cmrs, entityManager, cmrNo, cmrCntry));
+    }
 
     if (cmrs.size() > 0) {
       String type = null;
@@ -719,6 +721,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
           if (!StringUtils.isEmpty(muAddr.getCustNm2())) {
             addr.setCustNm2(muAddr.getCustNm2());
+          }
+
+          if (model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+            if (!StringUtils.isEmpty(muAddr.getCustNm3())) {
+              addr.setCustNm1(muAddr.getCustNm3());
+              addr.setCustNm2("");
+            }
           }
 
           tempExtractAddr.add(addr);
@@ -5771,10 +5780,24 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muaModel.setAddrType(tempVal);
         break;
       case "CUST_NM1":
-        muaModel.setCustNm1(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          String custNm1 = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
+          String custNm2 = tempVal.length() > 17 ? tempVal.substring(17) : "";
+
+          if (StringUtils.isNotBlank(custNm1)) {
+            muaModel.setCustNm1(tempVal);
+          }
+          if (StringUtils.isNotBlank(custNm2)) {
+            custNm2 = custNm2.length() > 17 ? custNm2.substring(0, 17) : custNm2;
+            muaModel.setCustNm2(custNm2);
+          }
+        }
         break;
       case "CUST_NM2":
-        muaModel.setCustNm2(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          tempVal = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
+          muaModel.setCustNm2(tempVal);
+        }
         break;
       case "CUST_NM3":
         muaModel.setCustNm3(tempVal);
