@@ -1369,10 +1369,10 @@ function setAccountAbbNmRequired() {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
     }
     break;
-//  case 'ISOCU':
-//    FormManager.readOnly('abbrevNm');
-//    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-//    break;
+    case 'ISOCU':
+      FormManager.readOnly('abbrevNm');
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+      break;
 //  case 'BCEXA':
 //  case 'BFKSC':
 //    FormManager.clearValue('abbrevNm');
