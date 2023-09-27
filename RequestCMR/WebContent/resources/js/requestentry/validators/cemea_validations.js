@@ -285,7 +285,7 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
 
     if (landCntry == 'SA' && postCode == '') {
       FormManager.setValue('postCd', '00000');
-    } else if ((landCntry == 'RO' && stateProv == 'B') && (reqType == 'C' || reqType == 'U')) {
+    } else if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U')) {
       FormManager.setValue('custNm1', FormManager.getActualValue('custNm1').toUpperCase());
       FormManager.setValue('custNm2', FormManager.getActualValue('custNm2').toUpperCase());
       FormManager.setValue('custNm3', FormManager.getActualValue('custNm3').toUpperCase());
