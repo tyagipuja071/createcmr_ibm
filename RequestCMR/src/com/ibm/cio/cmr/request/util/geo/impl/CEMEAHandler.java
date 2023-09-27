@@ -2280,9 +2280,14 @@ public class CEMEAHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(11);
               hardWareMaster = validateColValFromCell(currCell);
 
+              char lastDigit = city.charAt(city.length() - 1);
+
               if (!StringUtils.isBlank(cmrNo) && "RO".equals(landCntry) && ("B".equals(stateProv) || "".equals(stateProv))) {
                 if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
                     || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
+                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                }
+                if (!(lastDigit == '1' || lastDigit == '2' || lastDigit == '3' || lastDigit == '4' || lastDigit == '5' || lastDigit == '6')) {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 } else if (!custName1.equals(custName1.toUpperCase()) && !StringUtils.isBlank(custName1)) {
                   error.addError(row.getRowNum(), "Customer Name 1", "The address data must be entered in capital letters'. <br>");
