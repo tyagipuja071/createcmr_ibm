@@ -1050,7 +1050,7 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
           }
           console.log('ZS01 VAT Country: ' + zs01Cntry);
 
-          if(zs01Cntry=='MX' && (custSubType=='CBCOM' || custSubType=='CBPRI'  ))
+          if(reqType == 'C' && zs01Cntry=='MX' && (custSubType=='CBCOM' || custSubType=='CBPRI'  ))
     	  {
     	  if(custSubType=='CBCOM')
     		  {
