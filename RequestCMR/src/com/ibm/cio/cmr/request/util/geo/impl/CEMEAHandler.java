@@ -160,7 +160,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   private static final List<String> CEE_COUNTRIES_LIST = Arrays.asList("358", "359", "363", "603", "607", "626", "644", "651", "668", "693", "694",
       "695", "699", "704", "705", "707", "708", "740", "741", "787", "820", "821", "826", "889");
 
-  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
+  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Data", "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
       "Install At" };
 
   @Override
@@ -997,7 +997,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (!this.currentImportValues.isEmpty() && !SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-        if (!"ST".equals(mainRecord.getCmrOrderBlock())) {
+      if (!"ST".equals(mainRecord.getCmrOrderBlock())) {
         data.setOrdBlk(mainRecord.getCmrOrderBlock());
         LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
       }
@@ -1013,7 +1013,7 @@ public class CEMEAHandler extends BaseSOFHandler {
         data.setTaxExemptStatus3(embargoCode);
         LOG.trace(" STC Order Block Code : " + embargoCode);
       }
-      
+
       data.setAgreementSignDate(this.currentImportValues.get("AECISUBDate"));
       LOG.trace("AECISubDate: " + data.getAgreementSignDate());
       data.setBpSalesRepNo(this.currentImportValues.get("TeleCovRep"));
@@ -1506,7 +1506,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       results.add(update);
     }
 
-  if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())
         && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
@@ -2276,8 +2276,9 @@ public class CEMEAHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(11);
               hardWareMaster = validateColValFromCell(currCell);
 
-              if (!StringUtils.isBlank(cmrNo) && "RO".equals(landCntry) && "B".equals(stateProv)) {
-                if (!StringUtils.isBlank(city) && city.equalsIgnoreCase("BUCHAREST")) {
+              if (!StringUtils.isBlank(cmrNo) && "RO".equals(landCntry) && ("B".equals(stateProv) || "".equals(stateProv))) {
+                if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
+                    || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 } else if (!custName1.equals(custName1.toUpperCase()) && !StringUtils.isBlank(custName1)) {
                   error.addError(row.getRowNum(), "Customer Name 1", "The address data must be entered in capital letters'. <br>");

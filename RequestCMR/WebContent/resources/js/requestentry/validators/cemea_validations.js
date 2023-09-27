@@ -285,12 +285,13 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
 
     if (landCntry == 'SA' && postCode == '') {
       FormManager.setValue('postCd', '00000');
-    } else if ((landCntry == 'RO' && stateProv == 'B') && (reqType == 'C' || reqType == 'U')) {
+    } else if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U')) {
       FormManager.setValue('custNm1', FormManager.getActualValue('custNm1').toUpperCase());
       FormManager.setValue('custNm2', FormManager.getActualValue('custNm2').toUpperCase());
       FormManager.setValue('custNm3', FormManager.getActualValue('custNm3').toUpperCase());
       FormManager.setValue('custNm4', FormManager.getActualValue('custNm4').toUpperCase());
       FormManager.setValue('addrTxt', FormManager.getActualValue('addrTxt').toUpperCase());
+      FormManager.setValue('city1', FormManager.getActualValue('city1').toUpperCase());
     }
 
     /**
@@ -5368,30 +5369,31 @@ function retainVatValueAT() {
 }
 // CREATCMR-9427
 function addProvinceCityValidator() {
-  FormManager.addFormValidator((function () {
+  FormManager.addFormValidator((function() {
     return {
-      validate: function () {
+      validate : function() {
         var reqType = FormManager.getActualValue('reqType');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var landCntry = FormManager.getActualValue('landCntry');
         var stateProv = FormManager.getActualValue('stateProv');
         var city = FormManager.getActualValue('city1');
         var addrType = FormManager.getActualValue('addrType');
+        var variationCityList = [ 'BUCHAREST', 'BUKAREST', 'BUCUREŞTI', 'BUCURESTI' ];
 
-        if ((landCntry == 'RO' && stateProv == 'B') && (reqType == 'C' || reqType == 'U')) {
+        if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U') && (stateProv == 'B' || stateProv == '')) {
           if (addrType == 'ZP02') {
 
             if ((city.substr(0, 18) == 'BUCUREȘTI SECTORUL' && city.length == '20')
-              && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
+                && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
               return new ValidationResult(null, true);
-            } else {
+            } else if (variationCityList.includes(city)) {
               return new ValidationResult(null, false, 'Correct format for city is BUCUREȘTI SECTORUL \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
             }
           }
           if ((city.substr(0, 16) == 'BUCHAREST SECTOR' && city.length == '18')
-            && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
+              && (city.at(-1) == '1' || city.at(-1) == '2' || city.at(-1) == '3' || city.at(-1) == '4' || city.at(-1) == '5' || city.at(-1) == '6')) {
             return new ValidationResult(null, true);
-          } else {
+          } else if (variationCityList.includes(city)) {
             return new ValidationResult(null, false, 'Correct format for city is BUCHAREST SECTOR \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
           }
         }
