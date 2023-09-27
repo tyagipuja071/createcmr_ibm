@@ -1330,6 +1330,9 @@ public class IERPProcessService extends BaseBatchService {
             && (StringUtils.isEmpty(cmrNo) || cmrNo.startsWith("P"))) {
           if (cmrNo != null && cmrNo.startsWith("P"))
             cmrNo = "";
+          if ("INTER".equals(data.getCustSubGrp())) {
+            data.setCustClass("81");
+          }
           cmrNo = generateCMRNoForIERP(data);
           // to avoid dup cmr, use this list to check
           if (!StringUtils.isEmpty(cmrNo) && cmrNoList.contains(cmrNo)) {
