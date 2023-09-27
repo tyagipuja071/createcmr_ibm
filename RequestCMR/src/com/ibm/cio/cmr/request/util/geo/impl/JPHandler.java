@@ -3375,6 +3375,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isCompanyFilled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
