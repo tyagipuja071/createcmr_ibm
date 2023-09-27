@@ -534,9 +534,9 @@ function setSalesPaymentFieldsValue(kunnr) {
   var resultsKnb1 = cmr.query('JP.GET.KNB1.BY_KUNNR', qParams);
 
   if (resultsKnb1 != null && resultsKnb1.ret1 != undefined) {
-    FormManager.setValue('modeOfPayment', results.ret2);
-    FormManager.setValue('marketingContCd', results.ret3);
-    FormManager.setValue('dealerNo', results.ret4);
+    FormManager.setValue('modeOfPayment', resultsKnb1.ret2);
+    FormManager.setValue('marketingContCd', resultsKnb1.ret3);
+    FormManager.setValue('dealerNo', resultsKnb1.ret4);
   }
 
 }
