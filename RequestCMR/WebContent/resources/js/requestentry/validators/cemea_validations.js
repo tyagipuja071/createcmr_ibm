@@ -5387,19 +5387,19 @@ function addProvinceCityValidator() {
             if (variationCityList.includes(city)) {
               return new ValidationResult(null, false, 'Correct format for city is BUCUREȘTI SECTORUL \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
             }
-            if ((city.substr(0, 18) == 'BUCUREȘTI SECTORUL' && city.length == '20') && (cityLastDigit.includes(city.at(-1)))) {
-              return new ValidationResult(null, true);
-            } else {
+            if ((city.substr(0, 18) == 'BUCUREȘTI SECTORUL') && (!cityLastDigit.includes(city.at(-1)))) {
               return new ValidationResult(null, false, 'Correct format for city is BUCUREȘTI SECTORUL \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+            } else {
+              return new ValidationResult(null, true);
             }
           }
           if (variationCityList.includes(city)) {
             return new ValidationResult(null, false, 'Correct format for city is BUCHAREST SECTOR \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
           }
-          if ((city.substr(0, 16) == 'BUCHAREST SECTOR' && city.length == '18') && (cityLastDigit.includes(city.at(-1)))) {
-            return new ValidationResult(null, true);
-          } else {
+          if ((city.substr(0, 16) == 'BUCHAREST SECTOR') && (!cityLastDigit.includes(city.at(-1)))) {
             return new ValidationResult(null, false, 'Correct format for city is BUCHAREST SECTOR \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+          } else {
+            return new ValidationResult(null, true);
           }
         }
       }
