@@ -274,6 +274,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         String cmrNoVal = addr.getCmrNo();
         String custName1Val = addr.getCustNm1();
         String custName2Val = addr.getCustNm2();
+        if (model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+          if (!StringUtils.isEmpty(addr.getCustNm3())) {
+            addr.setCustNm1(addr.getCustNm3());
+            addr.setCustNm2("");
+          }
+        }
         String custToUse = "";
         Map<String, String> dplStatRowMap = null;
 

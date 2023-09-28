@@ -599,7 +599,7 @@ public class IERPRequestUtils extends RequestUtils {
       Object[] result = results.get(0);
       locn = result[1] != null ? (String) result[1] : "";
     }
-    LOG.debug("getLocationByPostal() --> postCd (" + postCd + ") csbo (" + locn + ")");
+    LOG.debug("getLocationByPostal() --> postCd (" + postCd + ") locn (" + locn + ")");
     return locn;
   }
 
@@ -642,7 +642,7 @@ public class IERPRequestUtils extends RequestUtils {
     String sql = ExternalizedQuery.getSql("JP.MASS.GET.MAPPED.FIELDS.BY.OFCD");
 
     PreparedQuery query = new PreparedQuery(entityMgr, sql);
-    query.setParameter("OFFICE_CD", ofcd);
+    query.setParameter("OFFICE_CD", StringUtils.leftPad(ofcd, 3, "0"));
     query.setForReadOnly(true);
 
     List<Object[]> results = query.getResults();
