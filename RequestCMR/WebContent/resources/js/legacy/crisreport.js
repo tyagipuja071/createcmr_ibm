@@ -35,6 +35,11 @@ app.controller('CrisReportController', ['$scope', '$document', '$http', '$timeou
       params.dateTo = moment($scope.crit.dateTo).format('YYYY-MM-DD HH:mm:ss');
     }
 
+    if (params.dateFrom == null || params.dateTo == null) {
+      alert('A date must be selected.');
+      return;
+    }
+
     cmr.showProgress('Exporting report. Please wait...');
     $http({
       url: cmr.CONTEXT_ROOT + '/crisreport/export.json?timeframe=' + $scope.timeframe + '&dateFrom=' + params.dateFrom + '&dateTo=' + params.dateTo,
