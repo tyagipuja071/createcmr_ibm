@@ -1264,7 +1264,7 @@ public class NLHandler extends BaseSOFHandler {
   @Override
   public boolean hasChecklist(String cmrIssiungCntry) {
 
-    return false;
+    return true;
   }
 
   @Override
