@@ -1067,7 +1067,7 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
           }
     	  result = cmr.validateVAT(zs01Cntry, vat);
     	  }
-      if(!zs01Cntry=='MX')
+      if(zs01Cntry !='MX')
     	  {
           result = cmr.validateVAT(zs01Cntry, vat);
     	  }
