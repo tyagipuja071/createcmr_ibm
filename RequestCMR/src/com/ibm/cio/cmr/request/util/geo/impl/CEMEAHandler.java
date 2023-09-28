@@ -2284,6 +2284,9 @@ public class CEMEAHandler extends BaseSOFHandler {
                 if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
                     || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                }
+                if (!(Pattern.compile("[1-6]").matcher(city.substring(city.length() - 1)).find())) {
+                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 } else if (!custName1.equals(custName1.toUpperCase()) && !StringUtils.isBlank(custName1)) {
                   error.addError(row.getRowNum(), "Customer Name 1", "The address data must be entered in capital letters'. <br>");
                 } else if (!name2.equals(name2.toUpperCase()) && !StringUtils.isBlank(name2)) {
