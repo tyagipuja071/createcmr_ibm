@@ -127,51 +127,51 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
         crisReportModel = new CrisReportModel();
 
         // entities for RA ON DEMAND report
-        crisReportModel.setCpno("'" + (String) record[0]);
+        crisReportModel.setCpno((String) record[0]);
         crisReportModel.setUserId((String) record[1]);
-        crisReportModel.setDate("'" + (String) record[2]);
+        crisReportModel.setDate((String) record[2]);
         crisReportModel.setCc((String) record[3]);
-        crisReportModel.setPayFrom("'" + (String) record[4]);
-        crisReportModel.setBillTo("'" + (String) record[5]);
+        crisReportModel.setPayFrom((String) record[4]);
+        crisReportModel.setBillTo((String) record[5]);
 
-        crisReportModel.setDue1("'" + (String) record[8]);
-        crisReportModel.setCycle1("'" + (String) record[9]);
-        crisReportModel.setPay1("'" + (String) record[10]);
+        crisReportModel.setDue1((String) record[8]);
+        crisReportModel.setCycle1((String) record[9]);
+        crisReportModel.setPay1((String) record[10]);
         crisReportModel.setG1("'");
 
-        crisReportModel.setDue2("'" + (String) record[11]);
-        crisReportModel.setCycle2("'" + (String) record[12]);
-        crisReportModel.setPay2("'" + (String) record[13]);
+        crisReportModel.setDue2((String) record[11]);
+        crisReportModel.setCycle2((String) record[12]);
+        crisReportModel.setPay2((String) record[13]);
         crisReportModel.setG2("'");
 
-        crisReportModel.setDue3("'" + (String) record[14]);
-        crisReportModel.setCycle3("'" + (String) record[15]);
-        crisReportModel.setPay3("'" + (String) record[16]);
+        crisReportModel.setDue3((String) record[14]);
+        crisReportModel.setCycle3((String) record[15]);
+        crisReportModel.setPay3((String) record[16]);
         crisReportModel.setG3("'");
 
-        crisReportModel.setDue4("'" + (String) record[17]);
-        crisReportModel.setCycle4("'" + (String) record[18]);
-        crisReportModel.setPay4("'" + (String) record[19]);
+        crisReportModel.setDue4((String) record[17]);
+        crisReportModel.setCycle4((String) record[18]);
+        crisReportModel.setPay4((String) record[19]);
         crisReportModel.setG4("'");
 
-        crisReportModel.setDue5("'" + (String) record[20]);
-        crisReportModel.setCycle5("'" + (String) record[21]);
+        crisReportModel.setDue5((String) record[20]);
+        crisReportModel.setCycle5((String) record[21]);
         crisReportModel.setPay5((String) record[22]);
         crisReportModel.setG5("'");
 
-        crisReportModel.setDue6("'" + (String) record[23]);
-        crisReportModel.setCycle6("'" + (String) record[24]);
-        crisReportModel.setPay6("'" + (String) record[25]);
+        crisReportModel.setDue6((String) record[23]);
+        crisReportModel.setCycle6((String) record[24]);
+        crisReportModel.setPay6((String) record[25]);
         crisReportModel.setG6("'");
 
-        crisReportModel.setDue7("'" + (String) record[26]);
-        crisReportModel.setCycle7("'" + (String) record[27]);
-        crisReportModel.setPay7("'" + (String) record[28]);
+        crisReportModel.setDue7((String) record[26]);
+        crisReportModel.setCycle7((String) record[27]);
+        crisReportModel.setPay7((String) record[28]);
         crisReportModel.setG7("'");
 
-        crisReportModel.setDue8("'" + (String) record[29]);
-        crisReportModel.setCycle8("'" + (String) record[30]);
-        crisReportModel.setPay8("'" + (String) record[31]);
+        crisReportModel.setDue8((String) record[29]);
+        crisReportModel.setCycle8((String) record[30]);
+        crisReportModel.setPay8((String) record[31]);
         crisReportModel.setG8("'");
 
         crisReportModel.setReceiptInf("");
@@ -537,14 +537,19 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
       for (CrisReportModel report : records) {
 
         // G* fields should be blank as well as RECEIPT INF
-        osw.write(report.getCpno() + "," + report.getUserId() + "," + report.getDate() + "," + report.getCc() + "," + report.getPayFrom() + ","
-            + report.getBillTo() + "," + report.getDue1() + "," + report.getCycle1() + "," + report.getPay1() + "," + report.getG1() + ","
-            + report.getDue2() + "," + report.getCycle2() + "," + report.getPay2() + "," + report.getG2() + "," + report.getDue3() + ","
-            + report.getCycle3() + "," + report.getPay3() + "," + report.getG3() + "," + report.getDue4() + "," + report.getCycle4() + ","
-            + report.getPay4() + "," + report.getG4() + "," + report.getDue5() + "," + report.getCycle5() + "," + report.getPay5() + ","
-            + report.getG5() + "," + report.getDue6() + "," + report.getCycle6() + "," + report.getPay6() + "," + report.getG6() + ","
-            + report.getDue7() + "," + report.getCycle7() + "," + report.getPay7() + "," + report.getG7() + "," + report.getDue8() + ","
-            + report.getCycle8() + "," + report.getPay8() + "," + report.getG8() + "," + report.getReceiptInf());
+        osw.write(formatFieldValue(report.getCpno()) + "," + report.getUserId() + "," + formatFieldValue(report.getDate()) + "," + report.getCc()
+            + "," + formatFieldValue(report.getPayFrom()) + "," + formatFieldValue(report.getBillTo()) + "," + formatFieldValue(report.getDue1())
+            + "," + formatFieldValue(report.getCycle1()) + "," + formatFieldValue(report.getPay1()) + "," + report.getG1() + ","
+            + formatFieldValue(report.getDue2()) + "," + formatFieldValue(report.getCycle2()) + "," + formatFieldValue(report.getPay2()) + ","
+            + report.getG2() + "," + formatFieldValue(report.getDue3()) + "," + formatFieldValue(report.getCycle3()) + ","
+            + formatFieldValue(report.getPay3()) + "," + report.getG3() + "," + formatFieldValue(report.getDue4()) + ","
+            + formatFieldValue(report.getCycle4()) + "," + formatFieldValue(report.getPay4()) + "," + report.getG4() + ","
+            + formatFieldValue(report.getDue5()) + "," + formatFieldValue(report.getCycle5()) + "," + formatFieldValue(report.getPay5()) + ","
+            + report.getG5() + "," + formatFieldValue(report.getDue6()) + "," + formatFieldValue(report.getCycle6()) + ","
+            + formatFieldValue(report.getPay6()) + "," + report.getG6() + "," + formatFieldValue(report.getDue7()) + ","
+            + formatFieldValue(report.getCycle7()) + "," + formatFieldValue(report.getPay7()) + "," + report.getG7() + ","
+            + formatFieldValue(report.getDue8()) + "," + formatFieldValue(report.getCycle8()) + "," + formatFieldValue(report.getPay8()) + ","
+            + report.getG8() + "," + report.getReceiptInf());
 
         osw.write(System.lineSeparator());
       }
@@ -582,6 +587,21 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
 
     return jpDateTo;
 
+  }
+
+  /**
+   * Append an ' and set ' if null
+   *
+   * @param fieldValue
+   * @return
+   */
+  public String formatFieldValue(String fieldValue) {
+    if (fieldValue != null) {
+      fieldValue = "'" + fieldValue;
+    } else {
+      fieldValue = "'  ";
+    }
+    return fieldValue;
   }
 
 }
