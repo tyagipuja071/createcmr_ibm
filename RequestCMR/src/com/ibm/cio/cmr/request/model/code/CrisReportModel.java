@@ -16,7 +16,7 @@ public class CrisReportModel {
 
   private String cpno;
   private String userId;
-  private Timestamp date;
+  private String date;
   private String cc;
   private String payFrom;
   private String billTo;
@@ -142,12 +142,12 @@ public class CrisReportModel {
     this.userId = userId;
   }
 
-  public Timestamp getDate() {
+  public String getDate() {
     return date;
   }
 
-  public void setDate(Timestamp record) {
-    this.date = record;
+  public void setDate(String date) {
+    this.date = date;
   }
 
   public String getCc() {
