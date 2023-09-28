@@ -2492,9 +2492,28 @@ public class JPHandler extends GEOHandler {
     }
   }
 
-  private void processIntlAddr(IntlAddr intlAddr, List<Kna1> kna1List, EntityManager entityManager) {
+  private void processIntlAddr(IntlAddr intlAddr, List<Kna1> kna1List, EntityManager entityManager) throws Exception {
     String kna1SeqNum = INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP.get(intlAddr.getId().getAddrType());
     Kna1 kna1 = kna1List.stream().filter(k -> k.getZzkvSeqno().equals(kna1SeqNum)).findAny().orElse(null);
+
+    // Special handling for company type
+    if (intlAddr != null && intlAddr.getId() != null && "ZC01".equals(intlAddr.getId().getAddrType())) {
+      // Retrieve the 'sold to' record (where '3' indicates 'sold to' in
+      // kna1List)
+      String soldToSeqNo = "3";
+      kna1 = kna1List.stream().filter(k -> k.getZzkvSeqno().equals(soldToSeqNo)).findAny().orElse(null);
+
+      // Get the company number
+      String soldToCompanyNo = kna1.getZzkvNode1();
+
+      /// Query kna1 records using the company number to obtain English values
+      if (StringUtils.isNotBlank(soldToCompanyNo)) {
+        List<Kna1> kna1ListForCompany = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), soldToCompanyNo);
+
+        // Get the the ZORG record
+        kna1 = kna1ListForCompany.stream().filter(k -> "ZORG".equals(k.getKtokd())).findFirst().orElse(null);
+      }
+    }
 
     if (kna1 != null) {
       intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
