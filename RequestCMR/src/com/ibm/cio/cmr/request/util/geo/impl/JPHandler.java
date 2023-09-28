@@ -4840,4 +4840,9 @@ public class JPHandler extends GEOHandler {
     address.setCustPhone(kna1.getTelf1());
     return address;
   }
+
+  @Override
+  public boolean shouldAutoDplSearchMassUpdate() {
+    return true;
+  }
 }
