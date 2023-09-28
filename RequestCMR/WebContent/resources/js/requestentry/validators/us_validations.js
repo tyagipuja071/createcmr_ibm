@@ -410,7 +410,7 @@ function addInstallAtPOBoxValidator() {
             }
             if (type == 'ZS01') {
               const
-              regex = /PO\s?BOX|P\.O\.\s?BOX|BOX/gi;
+              regex = /\bP\.?\s?O\.?\s?Box\b|\bPost\s?Office\s?Box\b|\bPO\s?B\d+\b/i;
               if (regex.test(addrTxt)) {
                 return new ValidationResult(null, false, 'PO BOX is strictly not allowed for Install At, please provide physical address.');
               }
@@ -1082,7 +1082,7 @@ function addInstallAtPoBoxValidator() {
       validate : function() {
         if (FormManager.getActualValue('addrType') == 'ZS01') {
           const
-          regex = /PO\s?BOX|P\.O\.\s?BOX|BOX/gi;
+          regex = /\bP\.?\s?O\.?\s?Box\b|\bPost\s?Office\s?Box\b|\bPO\s?B\d+\b/i;
           if (regex.test(FormManager.getActualValue('addrTxt'))) {
             return new ValidationResult(null, false, 'PO BOX is strictly not allowed for Install At, please provide physical address.');
           }
