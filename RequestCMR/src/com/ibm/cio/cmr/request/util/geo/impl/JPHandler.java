@@ -767,11 +767,6 @@ public class JPHandler extends GEOHandler {
   }
 
   @Override
-  public boolean shouldAutoDplSearchMassUpdate() {
-    return true;
-  }
-
-  @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     setProdTypeCheckedOnImport(data);
     data.setDunsNo(mainRecord.getCmrDuns());
@@ -4847,5 +4842,10 @@ public class JPHandler extends GEOHandler {
     address.setStateProv(kna1.getRegio());
     address.setCustPhone(kna1.getTelf1());
     return address;
+  }
+
+  @Override
+  public boolean shouldAutoDplSearchMassUpdate() {
+    return true;
   }
 }
