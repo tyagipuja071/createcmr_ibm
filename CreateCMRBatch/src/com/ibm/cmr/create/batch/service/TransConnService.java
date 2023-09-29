@@ -1484,6 +1484,12 @@ public class TransConnService extends BaseBatchService {
     if (LOG.isTraceEnabled()) {
       DebugUtil.printObjectAsJson(LOG, request);
     }
+
+    if ("C".equals(admin.getReqType()) && StringUtils.isBlank(request.getCmrNo())
+        && ("BFKSC".equals(data.getCustSubGrp()) || "BCEXA".equals(data.getCustSubGrp()))) {
+      request.setCmrNo("BCBF");
+    }
+
     ProcessResponse response = null;
     String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
     if (applicationId == null) {
