@@ -4720,6 +4720,9 @@ public class JPHandler extends GEOHandler {
             }
           }
         }
+        if (error.hasErrors()) {
+          validations.add(error);
+        }
       } // end if
     } // end for
 
