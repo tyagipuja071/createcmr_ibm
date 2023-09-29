@@ -2147,6 +2147,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
     iAddr = query.getSingleResult(IntlAddr.class);
 
+    // try with removed padded zeros in addr seq
+    if (iAddr == null) {
+      query.setParameter("ADDR_SEQ", StringUtils.stripStart(addr.getId().getAddrSeq(), "0"));
+      iAddr = query.getSingleResult(IntlAddr.class);
+    }
+
     return iAddr;
   }
 
