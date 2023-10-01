@@ -51,6 +51,12 @@
 					<length>10</length>
 				</column>
 				<column>
+					<label>CSBO</label>
+					<dbColumn>CSBO</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
 					<label>ROL Flag</label>
 					<dbColumn>OUT_CITY_LIMIT</dbColumn>
 					<width>10</width>

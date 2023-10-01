@@ -6020,6 +6020,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           }
         }
         break;
+      case "CSBO":
+        if (StringUtils.isNotBlank(tempVal)) {
+          boolean isValid = IERPRequestUtils.isCsboValid(entityManager, tempVal);
+          if (isValid) {
+            muModel.setNewEntp(tempVal);
+          }
+        }
+        break;
       case "CMR_NO":
         muModel.setCmrNo(tempVal);
         break;

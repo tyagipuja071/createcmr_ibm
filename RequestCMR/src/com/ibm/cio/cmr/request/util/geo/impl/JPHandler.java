@@ -722,8 +722,9 @@ public class JPHandler extends GEOHandler {
             }
             LOG.debug("Adding " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
 
-            if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && !copy.getCmrAddrTypeCode().equals("ZS01")
-                && !copy.getCmrAddrTypeCode().equals("ZS02") && !copy.getCmrAddrTypeCode().equals("ZP01")) {
+            if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && !"".equals(reqEntry.getCreditToCustNo())
+                && !"".equals(reqEntry.getBillToCustNo()) && !copy.getCmrAddrTypeCode().equals("ZS01") && !copy.getCmrAddrTypeCode().equals("ZS02")
+                && !copy.getCmrAddrTypeCode().equals("ZP01")) {
               LOG.debug("Skip " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
             } else {
               addedRecords.add(copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq());
@@ -921,7 +922,8 @@ public class JPHandler extends GEOHandler {
       data.setSalesBusOffCd(
           mainRecord.getSboSub() != null && mainRecord.getSboSub().length() == 3 ? mainRecord.getSboSub().substring(1) : mainRecord.getSboSub());
     }
-    if ("C".equals(admin.getReqType()) && "BPWPQ".equals(data.getCustSubGrp())) {
+    if ("C".equals(admin.getReqType()) && "BPWPQ".equals(data.getCustSubGrp()) && !"".equals(data.getCreditToCustNo())
+        && !"".equals(data.getBillToCustNo())) {
       data.setTier2("");
     }
     data.setIdentClient(mainRecord.getInspbydebi());
@@ -1146,6 +1148,11 @@ public class JPHandler extends GEOHandler {
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if ("BPWPQ".equals(data.getCustSubGrp()) && !"".equals(data.getCreditToCustNo()) && !"".equals(data.getBillToCustNo())) {
+        admin.setCustType("A");
+      }
+    }
   }
 
   @Override
