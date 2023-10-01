@@ -586,6 +586,24 @@ public class IERPRequestUtils extends RequestUtils {
     return csbo;
   }
 
+  public static boolean isCsboValid(EntityManager entityMgr, String csbo) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.CSBO.EXIST");
+    
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("CS_BO", csbo);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      LOG.debug("isCsboValid() --> csbo (" + csbo + ") --> true");
+      return true;
+    } else {
+      LOG.debug("isCsboValid() --> csbo (" + csbo + ") --> false");
+      return false;
+    }
+  }
+
   public static String getLocationByPostal(EntityManager entityMgr, String postCd) {
     String locn = "";
 
