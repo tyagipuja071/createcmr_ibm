@@ -6322,7 +6322,8 @@ function resetBPWPQValue() {
       // _pagemodel.salesTeamCd);
       FormManager.readOnly('salesTeamCd');
 
-      FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' : _pagemodel.clientTier);
+      // FormManager.setValue('tier2', _pagemodel.clientTier == '' ? '' :
+      // _pagemodel.clientTier);
       FormManager.readOnly('tier2');
 
       FormManager.setValue('billToCustNo', _pagemodel.billToCustNo == '' ? '' : _pagemodel.billToCustNo);
