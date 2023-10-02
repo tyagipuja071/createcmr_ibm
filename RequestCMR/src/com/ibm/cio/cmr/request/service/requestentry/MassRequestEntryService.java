@@ -5845,7 +5845,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muaModel.setCity2(tempVal);
         break;
       case "HW_INSTL_MSTR_FLG":
-        muaModel.setHwInstlMstrFlg(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setHwInstlMstrFlg(tempVal);
+        }
         break;
       case "LAND_CNTRY":
         muaModel.setLandCntry(tempVal);
