@@ -6034,8 +6034,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muModel.setCmrNo(tempVal);
         break;
       case "OUT_CITY_LIMIT":
-        muModel.setOutCityLimit(tempVal);
-        break;
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setOutCityLimit(tempVal);
+          break;
+        }
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;
