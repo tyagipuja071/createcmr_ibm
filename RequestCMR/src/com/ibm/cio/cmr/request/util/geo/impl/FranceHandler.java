@@ -939,9 +939,9 @@ public class FranceHandler extends GEOHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(
-        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
-            "VAT", "VAT_IND","COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
+        "GEO_LOCATION_CD", "DUNS_NO"));
     return fields;
   }
 
@@ -1401,10 +1401,23 @@ public class FranceHandler extends GEOHandler {
             if ("Data".equals(name)) {
               String isuCd = ""; // 5
               String ctc = ""; // 6
+              String ordBlk = ""; // 9
+
               currCell = (XSSFCell) row.getCell(5);
               isuCd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               ctc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              ordBlk = validateColValFromCell(currCell);
+
+              if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk) || "ST".equals(ordBlk))) {
+                TemplateValidation error = new TemplateValidation(name);
+                String rowNumber = "Row" + row.getRowNum() + ": ";
+                LOG.trace("Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.");
+                error.addError((rowIndex + 1), rowNumber + "Order block",
+                    "Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 TemplateValidation error = new TemplateValidation(name);
