@@ -38,7 +38,7 @@ public class KscReportsService extends BaseBatchService {
 
   private static final Logger LOG = Logger.getLogger(KscReportsService.class);
 
-  private static final int JAPAN_DATE_ADJUST_FROM_GMT = 9;
+  private static final int JAPAN_DATE_ADJUST_FROM_GMT = -9;
 
   private static final String DAILY = "D";
   private static final String MONTHLY = "M";
@@ -202,11 +202,11 @@ public class KscReportsService extends BaseBatchService {
     if (this.referenceDate != null) {
       // directly use supplied date as reference
 
-      // add 9 hours for JP time
-      Timestamp from = adjustTime(this.referenceDate, 9);
+      // minus 9 hours for JP time
+      Timestamp from = adjustTime(this.referenceDate, -9);
 
-      // add 9 hours for JP time plus 24 hours for 1 day
-      Timestamp to = adjustTime(this.referenceDate, 33);
+      // minus 9 hours for JP time plus 24 hours for 1 day
+      Timestamp to = adjustTime(this.referenceDate, 15);
 
       return new DateRangeContainer(from, to);
     } else {
