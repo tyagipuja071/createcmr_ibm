@@ -823,7 +823,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
         addrLength = 35;
       }
-      
+
       if (SystemLocation.IRELAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.UNITED_KINGDOM.equals(reqModel.getCmrIssuingCntry())) {
         String street = cmr.getCmrStreetAddress();
         String streetCont = cmr.getCmrDept();
@@ -852,10 +852,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         } else {
           addr.setAddrTxt(street);
           if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
-            if (cmr.getCmrDept().length() > addrLength) {
-              addr.setDept(cmr.getCmrDept().substring(0, addrLength));
+            if (StringUtils.isNotBlank(streetCont) && streetCont.length() > addrLength) {
+              addr.setDept(streetCont.substring(0, addrLength));
             } else {
-              addr.setDept(cmr.getCmrDept());
+              addr.setDept(streetCont);
             }
           }
         }
@@ -903,7 +903,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     }
 
   }
-  
+
   private void setJPIntlAddr(EntityManager entityManager, Addr addr, FindCMRRecordModel cmr) {
     IntlAddr iAddr = null;
     AddressService addSvc = new AddressService();
