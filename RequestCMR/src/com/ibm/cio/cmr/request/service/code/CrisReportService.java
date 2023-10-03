@@ -564,7 +564,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    */
   public static String dateFrom(String dateFrom) {
 
-    String fDateFrom = LocalDateTime.parse(dateFrom).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toString();
+    String fDateFrom = LocalDateTime.parse(dateFrom).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Etc/GMT+9")).toString();
 
     // Format to SQL readable date format
     String jpDateFrom = fDateFrom.replace("T", " ").substring(0, 16).concat(":00");
@@ -580,7 +580,7 @@ public class CrisReportService extends BaseSimpleService<List<CrisReportModel>> 
    */
   public static String dateTo(String dateTo) {
 
-    String fDateTo = LocalDateTime.parse(dateTo).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Tokyo")).toString();
+    String fDateTo = LocalDateTime.parse(dateTo).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Etc/GMT+9")).toString();
 
     // Format to SQL readable date format
     String jpDateTo = fDateTo.replace("T", " ").substring(0, 16).concat(":00");
