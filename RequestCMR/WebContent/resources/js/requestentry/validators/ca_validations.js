@@ -590,6 +590,7 @@ function afterConfigForCA() {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('cmrNo');
   }
+  addFieldHandlers();
 
   if ('U' == FormManager.getActualValue('reqType')) {
     var stateProv = getSoldToStateProv();
