@@ -412,12 +412,12 @@ function AddressDetailsModal_onLoad() {
             ADDR_SEQ : cmr.addrdetails.ret3.replace(/^0+/, ''),
           };
           var record = cmr.query('INTL_ADDR_DETAILS', qParams);
-    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', record.ret5);
-    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', record.ret6);
-    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', record.ret8);
-    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', record.ret9);
-    _assignDetailsValue('#AddressDetailsModal #cnCity_view', record.ret10);
-    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', record.ret11);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', record.ret1);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', record.ret2);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', (record.ret3 != undefined ? record.ret3 : '' )+ (record.ret4 != undefined ? record.ret4 : '' ));
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', record.ret5);
+    _assignDetailsValue('#AddressDetailsModal #cnCity_view', record.ret6);
+    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', record.ret7);
    // _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
    // _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
     //_assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
