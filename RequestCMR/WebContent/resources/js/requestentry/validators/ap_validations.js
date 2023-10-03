@@ -188,7 +188,22 @@ function addAfterConfigAP() {
     FormManager.enable('IndustryClass');
     FormManager.enable('subIndustryCd');
   }
-  
+
+  if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
+    if (role == 'REQUESTER' || role == 'VIEWER' || role == 'PROCESSOR') {
+      FormManager.setValue('mrcCd', '3');
+      FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('apCustClusterId');
+      if (cntry == '616') {
+        FormManager.setValue('apCustClusterId', "09057");
+        FormManager.setValue('isuCd', '5K');
+      } else if (cntry == '834') {
+        FormManager.setValue('apCustClusterId', "09052");
+        FormManager.setValue('isuCd', '5K');
+      }
+    }
+  }
   if (reqType == 'C' && custSubGrp == 'ECOSY' && (cntry == '738' || cntry == '736')) {
     FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
@@ -1140,6 +1155,16 @@ function onCustSubGrpChange() {
     setCollectionCd();
     
   });
+}
+
+function resetFieldsAfterCustSubGrpChange() {
+  console.log(">>>> resetInacNacCdAfterCustSubGrpChange >>>>");
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
+    FormManager.setValue('isuCd', '5K');
+  } else {
+    FormManager.setValue('isuCd', '');
+  }
 }
 
 function setCollectionCd() {
@@ -2477,6 +2502,7 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
     return;
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (isuCd == null) {
     isuCd = FormManager.getActualValue('isuCd');
   }
@@ -2491,6 +2517,10 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
     if (cntry != '736' && cntry != '738') {
       FormManager.enable('clientTier');
     }
+    if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
+      FormManager.readOnly('clientTier');
+    }
+    handleObseleteExpiredDataForUpdate();
   }
     handleObseleteExpiredDataForUpdate();  
 }
@@ -6380,8 +6410,8 @@ function checkCustomerNameForKYND() {
         var reqType = FormManager.getActualValue('reqType');
         var role = FormManager.getActualValue('userRole').toUpperCase();
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        
-        if(reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYND' && (action=='SFP' || action=='VAL')){
+
+        if (reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYNDR' && (action == 'SFP' || action == 'VAL')) {
           // CREATCMR-7884
           if(custNm1.indexOf('KYNDRYL')==-1){
             errorMsg = 'Customer name must contain word \'Kyndryl\'';
