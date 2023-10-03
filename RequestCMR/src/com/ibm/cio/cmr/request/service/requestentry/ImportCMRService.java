@@ -852,10 +852,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         } else {
           addr.setAddrTxt(street);
           if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
-            if (StringUtils.isNotBlank(streetCont) && cmr.getCmrDept().length() > addrLength) {
-              addr.setDept(cmr.getCmrDept().substring(0, addrLength));
+            if (StringUtils.isNotBlank(streetCont) && streetCont.length() > addrLength) {
+              addr.setDept(streetCont.substring(0, addrLength));
             } else {
-              addr.setDept(cmr.getCmrDept());
+              addr.setDept(streetCont);
             }
           }
         }
