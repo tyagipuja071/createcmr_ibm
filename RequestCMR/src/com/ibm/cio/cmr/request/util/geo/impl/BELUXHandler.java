@@ -2292,7 +2292,7 @@ public class BELUXHandler extends BaseSOFHandler {
     XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
     row = sheet.getRow(0);// data field name row
     int ordBlkIndex = 16;// default index
-    int stcOrdBlkIndex = 17;
+    int stcOrdBlkIndex = 23;
     int cmrNoIndex = 0;// 0
     String cmrNo = null;
     for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {

@@ -93,7 +93,7 @@
                 <column>
                     <label>STC order block code</label>
                     <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
-                    <width>2</width>
+                    <width>15</width>
                     <lovId>TaxExemptStatus3</lovId>
                 </column>
 				<column>

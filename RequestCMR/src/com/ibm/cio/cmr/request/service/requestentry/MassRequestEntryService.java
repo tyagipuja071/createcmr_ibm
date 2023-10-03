@@ -278,6 +278,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           if (!StringUtils.isEmpty(addr.getCustNm3())) {
             addr.setCustNm1(addr.getCustNm3());
             addr.setCustNm2("");
+            custName1Val = addr.getCustNm3();
+            custName2Val = "";
           }
         }
         String custToUse = "";
@@ -701,7 +703,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         String muAddrSeqNo = "";
         String cmrsModsSeqNo = "";
 
-        if (muAddr.getAddrSeqNo().length() != cmrsMods.getCmrAddrSeq().length()) {
+        if (!model.getCmrIssuingCntry().equals(SystemLocation.JAPAN) && (muAddr.getAddrSeqNo().length() != cmrsMods.getCmrAddrSeq().length())) {
           muAddrSeqNo = LegacyDirectUtil.handleLDSeqNoScenario(muAddr.getAddrSeqNo(), true);
           cmrsModsSeqNo = LegacyDirectUtil.handleLDSeqNoScenario(cmrsMods.getCmrAddrSeq(), true);
         }
@@ -5815,9 +5817,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "POST_CD":
         if (StringUtils.isNotBlank(tempVal)) {
           String postal = tempVal.replace("-", "");
-          muaModel.setPostCd(postal);
           String locn = IERPRequestUtils.getLocationByPostal(entityManager, postal);
           if (StringUtils.isNotBlank(locn)) {
+            muaModel.setPostCd(tempVal);
             muaModel.setCounty(locn);
           }
         }
@@ -5843,7 +5845,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muaModel.setCity2(tempVal);
         break;
       case "HW_INSTL_MSTR_FLG":
-        muaModel.setHwInstlMstrFlg(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setHwInstlMstrFlg(tempVal);
+        }
         break;
       case "LAND_CNTRY":
         muaModel.setLandCntry(tempVal);
@@ -6020,12 +6024,22 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           }
         }
         break;
+      case "CSBO":
+        if (StringUtils.isNotBlank(tempVal)) {
+          boolean isValid = IERPRequestUtils.isCsboValid(entityManager, tempVal);
+          if (isValid) {
+            muModel.setNewEntp(tempVal);
+          }
+        }
+        break;
       case "CMR_NO":
         muModel.setCmrNo(tempVal);
         break;
       case "OUT_CITY_LIMIT":
-        muModel.setOutCityLimit(tempVal);
-        break;
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setOutCityLimit(tempVal);
+          break;
+        }
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;
