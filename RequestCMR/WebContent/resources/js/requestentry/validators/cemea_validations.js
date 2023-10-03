@@ -5691,5 +5691,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.registerValidator(addProvinceCityValidator, [SysLoc.ROMANIA], null, true);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEMEA_COPY, null, true);
-  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEE, null, true);
+  // GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEE, null,
+  // true);
 });
