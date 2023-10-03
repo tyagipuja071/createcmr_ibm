@@ -278,6 +278,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           if (!StringUtils.isEmpty(addr.getCustNm3())) {
             addr.setCustNm1(addr.getCustNm3());
             addr.setCustNm2("");
+            custName1Val = addr.getCustNm3();
+            custName2Val = "";
           }
         }
         String custToUse = "";
@@ -701,7 +703,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         String muAddrSeqNo = "";
         String cmrsModsSeqNo = "";
 
-        if (muAddr.getAddrSeqNo().length() != cmrsMods.getCmrAddrSeq().length()) {
+        if (!model.getCmrIssuingCntry().equals(SystemLocation.JAPAN) && (muAddr.getAddrSeqNo().length() != cmrsMods.getCmrAddrSeq().length())) {
           muAddrSeqNo = LegacyDirectUtil.handleLDSeqNoScenario(muAddr.getAddrSeqNo(), true);
           cmrsModsSeqNo = LegacyDirectUtil.handleLDSeqNoScenario(cmrsMods.getCmrAddrSeq(), true);
         }
