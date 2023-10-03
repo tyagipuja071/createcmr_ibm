@@ -5817,9 +5817,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "POST_CD":
         if (StringUtils.isNotBlank(tempVal)) {
           String postal = tempVal.replace("-", "");
-          muaModel.setPostCd(postal);
           String locn = IERPRequestUtils.getLocationByPostal(entityManager, postal);
           if (StringUtils.isNotBlank(locn)) {
+            muaModel.setPostCd(tempVal);
             muaModel.setCounty(locn);
           }
         }
