@@ -1276,6 +1276,12 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.setCustNm3(currentRecord.getCmrName3());
     }
 
+    if ("826".equals(country)) {
+      address.setCity1(StringUtils.isNotBlank(address.getCity1()) ? address.getCity1().toUpperCase() : "");
+      address.setCustNm1(StringUtils.isNotBlank(address.getCustNm1()) ? address.getCustNm1().toUpperCase() : "");
+      address.setAddrTxt(StringUtils.isNotBlank(address.getAddrTxt()) ? address.getAddrTxt().toUpperCase() : "");
+    }
+
     // FINAL TRIM
     if (address.getCustNm1() != null && address.getCustNm1().trim().length() > 35) {
       address.setCustNm1(address.getCustNm1().trim().substring(0, 35));
@@ -2276,30 +2282,34 @@ public class CEMEAHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(11);
               hardWareMaster = validateColValFromCell(currCell);
 
-              if (!StringUtils.isBlank(cmrNo) && "RO".equals(landCntry) && ("B".equals(stateProv) || "".equals(stateProv))) {
+              if (!StringUtils.isBlank(cmrNo) && "RO".equals(landCntry) && ("B".equals(stateProv) || "@".equals(stateProv))) {
                 if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
                     || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 }
-                if (!(Pattern.compile("[1-6]").matcher(city.substring(city.length() - 1)).find())) {
+
+                if (!StringUtils.isBlank(city) && Pattern.compile("[0,7,8,9]").matcher(city.substring(city.length() - 1)).find()
+                    && "BUCHAREST SECTOR".equals(city.substring(0, 16))) {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
-                } else if (!custName1.equals(custName1.toUpperCase()) && !StringUtils.isBlank(custName1)) {
+                }
+
+                if (!StringUtils.isBlank(custName1) && !custName1.equals(custName1.toUpperCase())) {
                   error.addError(row.getRowNum(), "Customer Name 1", "The address data must be entered in capital letters'. <br>");
-                } else if (!name2.equals(name2.toUpperCase()) && !StringUtils.isBlank(name2)) {
+                } else if (!StringUtils.isBlank(name2) && !name2.equals(name2.toUpperCase())) {
                   error.addError(row.getRowNum(), "Customer Name 2", "The address data must be entered in capital letters'. <br>");
-                } else if (!name3.equals(name3.toUpperCase()) && !StringUtils.isBlank(name3)) {
+                } else if (!StringUtils.isBlank(name3) && !name3.equals(name3.toUpperCase())) {
                   error.addError(row.getRowNum(), "Customer Name 3", "The address data must be entered in capital letters'. <br>");
-                } else if (!AttnPerson.equals(AttnPerson.toUpperCase()) && !StringUtils.isBlank(AttnPerson)) {
+                } else if (!StringUtils.isBlank(AttnPerson) && !AttnPerson.equals(AttnPerson.toUpperCase())) {
                   error.addError(row.getRowNum(), "Att. Person", "The address data must be entered in capital letters'. <br>");
-                } else if (!street.equals(street.toUpperCase()) && !StringUtils.isBlank(street)) {
+                } else if (!StringUtils.isBlank(street) && !street.equals(street.toUpperCase())) {
                   error.addError(row.getRowNum(), "Street", "The address data must be entered in capital letters'. <br>");
-                } else if (!postalCode.equals(postalCode.toUpperCase()) && !StringUtils.isBlank(postalCode)) {
+                } else if (!StringUtils.isBlank(postalCode) && !postalCode.equals(postalCode.toUpperCase())) {
                   error.addError(row.getRowNum(), "Postal Code", "The address data must be entered in capital letters'. <br>");
-                } else if (!city.equals(city.toUpperCase()) && !StringUtils.isBlank(city)) {
+                } else if (!StringUtils.isBlank(city) && !city.equals(city.toUpperCase())) {
                   error.addError(row.getRowNum(), "City", "The address data must be entered in capital letters'. <br>");
-                } else if (!stateProv.equals(stateProv.toUpperCase()) && !StringUtils.isBlank(stateProv)) {
+                } else if (!StringUtils.isBlank(stateProv) && !stateProv.equals(stateProv.toUpperCase())) {
                   error.addError(row.getRowNum(), "State/Province", "The address data must be entered in capital letters'. <br>");
-                } else if (!hardWareMaster.equals(hardWareMaster.toUpperCase()) && !StringUtils.isBlank(hardWareMaster)) {
+                } else if (!StringUtils.isBlank(hardWareMaster) && !hardWareMaster.equals(hardWareMaster.toUpperCase())) {
                   error.addError(row.getRowNum(), "Hardware Master", "The address data must be entered in capital letters'. <br>");
                 }
               }
