@@ -4103,7 +4103,7 @@ public class EMEAHandler extends BaseSOFHandler {
         String ordBlk = validateColValFromCell(currCell);
         if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
           LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
         }
 
         validations.add(error);
@@ -4221,7 +4221,7 @@ public class EMEAHandler extends BaseSOFHandler {
           }
           if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
             LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
           }
           if (error.hasErrors()) {
             validations.add(error);
@@ -4569,7 +4569,7 @@ public class EMEAHandler extends BaseSOFHandler {
         }
         if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
           LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
         }
 
         validations.add(error);

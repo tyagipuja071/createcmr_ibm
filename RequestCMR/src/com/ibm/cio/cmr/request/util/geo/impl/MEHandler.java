@@ -2268,7 +2268,7 @@ public class MEHandler extends BaseSOFHandler {
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
           if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
             LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br>");
           }
           if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
               || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
