@@ -902,7 +902,7 @@ public class ItalyHandler extends BaseSOFHandler {
       }
     }
 
-     String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
     if (StringUtils.isBlank(embargoCode)) {
       embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
     }
@@ -1220,7 +1220,7 @@ public class ItalyHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       results.add(update);
     }
- if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getTaxExemptStatus3(), "TaxExemptStatus3", cmrCountry));
@@ -1867,8 +1867,8 @@ public class ItalyHandler extends BaseSOFHandler {
         ordBlk = validateColValFromCell(currCell);
 
         currCell = row.getCell(23);
-        stcOrdBlk = validateColValFromCell(currCell); 
-         
+        stcOrdBlk = validateColValFromCell(currCell);
+
         LOG.debug("Fiscal Code =====> " + fiscalCode);
         LOG.debug("VAT #/ N.PARTITA I.V.A. =====> " + vatNumPartitaIVA);
         LOG.debug("Tax Code/ Code IVA =====> " + taxCodeIVACode);
@@ -1933,7 +1933,7 @@ public class ItalyHandler extends BaseSOFHandler {
           }
           if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
             LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
           }
         }
 

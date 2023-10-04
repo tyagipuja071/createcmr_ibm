@@ -773,7 +773,7 @@ public class MCOCewaHandler extends MCOHandler {
               }
               if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(embargo)) {
                 LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
               }
             }
 

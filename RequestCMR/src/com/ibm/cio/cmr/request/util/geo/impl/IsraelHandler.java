@@ -1678,7 +1678,7 @@ public class IsraelHandler extends EMEAHandler {
         String stcOrdBlk = validateColValFromCell(row.getCell(9));
         if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(embargoCode)) {
           LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
         }
         // Client Tier
         // String ctc = validateColValFromCell(row.getCell(11));
