@@ -5998,16 +5998,16 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             }
 
             // Set CTC
-            if (StringUtils.isNotBlank(ctc)) {
-              muModel.setClientTier(ctc);
-            } else {
-              muModel.setClientTier("Z");
-            }
+            muModel.setClientTier(ctc);
 
             // Set SORTL
             if (StringUtils.isNotBlank(sortl)) {
               muModel.setSearchTerm(sortl);
             }
+          } else {
+            // office code not found
+            // set client tier to Z
+            muModel.setClientTier("Z");
           }
         }
         break;
