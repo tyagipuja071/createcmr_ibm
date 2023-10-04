@@ -1756,7 +1756,7 @@ function clientTierCodeValidator() {
 
   // if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType ==
   // 'C') || (isuCode != '34' && reqType == 'U')) {
-  var activeIsuCd = [ '32', '34', '36' ];
+  var activeIsuCd = [ '32', '34', '36', '21' ];
   var activeCtc = [ 'Q', 'Y', 'T' ];
 
   if (!activeIsuCd.includes(isuCode)) {
@@ -1943,7 +1943,7 @@ function setPPSCEIDRequired() {
   if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+  if (subGrp=='BUSPR' || subGrp=='CBBUS') {  
     FormManager.enable('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   } else {
