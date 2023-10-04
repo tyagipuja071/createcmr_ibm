@@ -2358,11 +2358,11 @@ public class CEMEAHandler extends BaseSOFHandler {
                 String stcOrdBlk = validateColValFromCell(currCell);
                 if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
                   LOG.trace("Order Block Code should only @, E, R, J. >> ");
-                  error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J. ");
+                  error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");
                 }
                 if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
                   LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                  error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should only @,ST ");
+                  error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
                 }
                 currCell = (XSSFCell) row.getCell(fiscalCdIndex);
                 String fiscalCd = validateColValFromCell(currCell);
