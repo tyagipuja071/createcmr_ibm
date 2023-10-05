@@ -2355,7 +2355,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
   case 'BCEXA':
     break;
   case 'BFKSC':
-    setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType);
+    setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role);
     break;
   case 'STOSB':
   case 'STOSC':
@@ -6504,7 +6504,7 @@ function setMandtAndOptFieldsForBFKSCScenario(custType) {
   }
 }
 
-function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType) {
+function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
 
   if (addrType == 'ZC01') {
     FormManager.setValue('city2', getCompanyNo(addrType) != null ? getCompanyNo(addrType) : '');
