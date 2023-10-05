@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,8 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -185,7 +186,7 @@ public abstract class BaseSOFHandler extends GEOHandler {
         try {
           SAXParserFactory factory = SAXParserFactory.newInstance();
           factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
           factory.newSAXParser().parse(new InputSource(bis), handler);
         } finally {
           bis.close();

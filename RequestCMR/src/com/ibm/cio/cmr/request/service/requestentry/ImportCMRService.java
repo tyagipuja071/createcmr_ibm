@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,7 @@ import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -223,7 +225,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           // convert Prospect to Legal CMR
           admin.setReqType("C");
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
-          if("Y".equals(admin.getProspLegalInd())){
+          if ("Y".equals(admin.getProspLegalInd())) {
             data.setInacCd(null);
           }
           admin.setDelInd(null);
@@ -363,7 +365,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
           // STC OB for emea DB2 countries
           Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
-          if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+          if (isEmeaDB2Cntry && !StringUtils.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
             rdc.setTaxExempt3(data.getTaxExemptStatus3());
           }
           reqEntryService.updateEntity(rdc, entityManager);
@@ -377,7 +379,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
           // STC OB for emea DB2 countries
           Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
-          if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+          if (isEmeaDB2Cntry && !StringUtils.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
             rdc.setTaxExempt3(data.getTaxExemptStatus3());
           }
           reqEntryService.createEntity(rdc, entityManager);
@@ -411,7 +413,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         rdc.setCmrNo(cmrNo); // retain CMR no in old file
         // STC OB for emea DB2 countries
         Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
-        if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+        if (isEmeaDB2Cntry && !StringUtils.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
           rdc.setTaxExempt3(data.getTaxExemptStatus3());
         }
         reqEntryService.createEntity(rdc, entityManager);
@@ -637,7 +639,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     if (isEmeaDB2Cntry && "ST".equals(record.getCmrOrderBlock())) {
       data.setTaxExemptStatus3(record.getCmrOrderBlock());
     } else {
-    data.setOrdBlk(record.getCmrOrderBlock());
+      data.setOrdBlk(record.getCmrOrderBlock());
     }
     data.setCovDesc(record.getCmrCoverageName());
     data.setBgDesc(record.getCmrBuyingGroupDesc());
