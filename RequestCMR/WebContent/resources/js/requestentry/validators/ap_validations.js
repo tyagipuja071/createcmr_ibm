@@ -2037,7 +2037,7 @@ function onInacTypeChange() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   custSubGrp = FormManager.getActualValue('custSubGrp');
-  inacCd = FormManager.getActualValue('inacCd');
+
   if (reqType == 'C') {
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
@@ -2106,9 +2106,8 @@ function onInacTypeChange() {
                 if (inacCdValue.length == 1) {
                   FormManager.setValue('inacCd', inacCdValue[0]);
                 }
-                if ((cntry == '616' ||cntry == '834' ) && custSubGrp == 'KYNDR') {
+                if (cntry == '616' && custSubGrp == 'KYNDR') {
                   FormManager.readOnly('inacType');
-                  FormManager.readOnly('inacCd');
                 }
               }
             }
@@ -2236,10 +2235,6 @@ function onIsicChange() {
   // } else {
   // FormManager.enable('isicCd');
   // }
-  if ((cmrIssuingCntry == '616') && custSubGrp == 'KYNDR' && role == 'VIEWER') {
-    FormManager.setValue('inacCd', '6272');
-    FormManager.setValue('inacType', 'I');
-  } 
 }
 function setPrivate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -4961,7 +4956,6 @@ function lockInacTypeForIGF() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqId = FormManager.getActualValue('reqId');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry')
 
   if (role == 'REQUESTER' && custSubGrp == 'IGF') {
     if (_importIndIN != null) {
@@ -4970,9 +4964,6 @@ function lockInacTypeForIGF() {
         FormManager.readOnly('inacType');
       }
     }
-  }
-  if ((cntry == '834') && custSubGrp == 'KYNDR') {
-    FormManager.readOnly('inacType');
   }
 }
 
@@ -6183,6 +6174,7 @@ FormManager.addFormValidator((function() {
      var role = FormManager.getActualValue('userRole').toUpperCase();
      var custGrp = FormManager.getActualValue('custGrp');
      var custSubGrp = FormManager.getActualValue('custSubGrp');
+     var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
      
      if (reqType == 'C' && role == 'REQUESTER' && custGrp == 'LOCAL' && custSubGrp == 'PRIV' && action=='SFP') {
        if(custNm1.indexOf('PRIVATE LIMITED')>-1){
@@ -6203,6 +6195,11 @@ FormManager.addFormValidator((function() {
          errorMsg = 'Customer Name can not contain \'Limited\'';
        } else if(custNm1.indexOf('LTD')>-1){
          errorMsg = 'Customer Name can not contain \'Ltd\'';
+       }
+     } else if(cmrIssuingCntry !="616" && (reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYNDR' && (action=='SFP' || action=='VAL'))){
+       // CREATCMR-7884
+       if(custNm1.indexOf('KYNDRYL')==-1){
+         errorMsg = 'Customer name must contain word \'Kyndryl\'';
        }
      } 
      if (errorMsg != '') {
@@ -7401,14 +7398,9 @@ function setInacCdTypeStatus(){
       console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-
-      if ((cntry == '834') && custSubGrp == 'KYNDR') {
-        FormManager.setValue('inacType', 'I');
-        FormManager.setValue('inacCd', '6272');
-      } else {
-        FormManager.enable('inacCd');
-        FormManager.enable('inacType');
-      }
+      FormManager.enable('inacCd');
+      FormManager.enable('inacType');
+  
     }
     // LOCK GB Seg(QTC)/ISU
     FormManager.readOnly('clientTier');
