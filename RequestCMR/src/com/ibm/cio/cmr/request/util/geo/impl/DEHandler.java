@@ -430,8 +430,8 @@ public class DEHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX",
-        "ADDR_TXT", "CUST_PHONE"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD",
+        "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE"));
     return fields;
   }
 
@@ -950,10 +950,10 @@ public class DEHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "SBO/Search Term", "Enter valid values for SBO/Search Term");
               }
 
-              if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
-                LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
+              if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk) || "ST".equals(ordBlk))) {
+                LOG.trace("Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Order block",
-                    "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
+                    "Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.");
                 // validations.add(error);
               }
 

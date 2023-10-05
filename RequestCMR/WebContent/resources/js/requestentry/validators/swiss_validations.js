@@ -912,10 +912,10 @@ function addEmbargoCdValidator() {
         if (typeof (_pagemodel) != 'undefined') {
           reqType = FormManager.getActualValue('reqType');
         }
-        if (emabrgoCd == null || emabrgoCd == '88' || emabrgoCd == '94' || emabrgoCd == '' || (Number(countpaygo) == 1 && role == 'Processor')) {
+        if (emabrgoCd == null || emabrgoCd == '88' || emabrgoCd == '94' || emabrgoCd == 'ST' || emabrgoCd == '' || (Number(countpaygo) == 1 && role == 'Processor')) {
           return new ValidationResult(null, true);
         } else {
-          return new ValidationResult(null, false, 'Value of Emabrgo code can only be 88, 94 or blank.');
+          return new ValidationResult(null, false, 'Value of Emabrgo code can only be 88, 94, ST or blank.');
         }
       }
     };

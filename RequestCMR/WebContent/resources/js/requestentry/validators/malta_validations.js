@@ -856,16 +856,16 @@ function addOrdBlkValidator() {
           reqType = FormManager.getActualValue('reqType');
         }
         if ("C" == reqType) {
-          if (ordBlk == null || ordBlk == '88' || ordBlk == '94' || ordBlk == '') {
+          if (ordBlk == null || ordBlk == '88' || ordBlk == '94' || ordBlk == 'ST' || ordBlk == '') {
             return new ValidationResult(null, true);
           } else {
-            return new ValidationResult(null, false, 'Value of Order block can only be 88 or 94 or blank.');
+            return new ValidationResult(null, false, 'Value of Order block can only be 88 or ST or 94 or blank.');
           }
         } else {
-          if (ordBlk == null || ordBlk == '88' || ordBlk == '94' || ordBlk == '@' || ordBlk == '') {
+          if (ordBlk == null || ordBlk == '88' || ordBlk == '94' || ordBlk == '@' || ordBlk == '' || ordBlk == 'ST') {
             return new ValidationResult(null, true);
           } else {
-            return new ValidationResult(null, false, 'Value of Order block can only be 88 or 94 or @ or blank.');
+            return new ValidationResult(null, false, 'Value of Order block can only be 88 or 94 or ST or @ or blank.');
           }
         }
       }

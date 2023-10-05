@@ -902,7 +902,17 @@ public class ItalyHandler extends BaseSOFHandler {
       }
     }
 
-    data.setEmbargoCd(embargo);
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
     // new IT fields
     data.setIcmsInd(tipoClinte);
     data.setHwSvcsRepTeamNo(coddes);
@@ -1208,6 +1218,13 @@ public class ItalyHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxExemptStatus3(), "TaxExemptStatus3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxExempt3(), "TaxExemptStatus3", cmrCountry));
       results.add(update);
     }
 
@@ -1787,6 +1804,8 @@ public class ItalyHandler extends BaseSOFHandler {
         String indirizzoEmail = ""; // 17
         String isu = ""; // 18
         String clientTier = ""; // 19
+        String ordBlk = ""; // 22
+        String stcOrdBlk = ""; // 23
 
         row = sheet.getRow(rowIndex);
         if (row == null) {
@@ -1843,6 +1862,12 @@ public class ItalyHandler extends BaseSOFHandler {
 
         currCell = row.getCell(19);
         clientTier = validateColValFromCell(currCell);
+
+        currCell = row.getCell(22);
+        ordBlk = validateColValFromCell(currCell);
+
+        currCell = row.getCell(23);
+        stcOrdBlk = validateColValFromCell(currCell);
 
         LOG.debug("Fiscal Code =====> " + fiscalCode);
         LOG.debug("VAT #/ N.PARTITA I.V.A. =====> " + vatNumPartitaIVA);
@@ -1905,6 +1930,10 @@ public class ItalyHandler extends BaseSOFHandler {
                 "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Client Tier",
                 ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
+          }
+          if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+            LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
           }
         }
 

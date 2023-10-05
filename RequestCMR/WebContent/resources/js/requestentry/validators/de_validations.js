@@ -752,7 +752,7 @@ function addOrderBlockValidator() {
         return new ValidationResult(null, true);
 
         // below not used, keeping for now
-        if (!ordBlk || ordBlk == '88') {
+        if (!ordBlk || ordBlk == '88' ||  ordBlk == 'ST') {
           return new ValidationResult(null, true);
         } else {
 

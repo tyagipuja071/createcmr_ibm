@@ -1525,8 +1525,17 @@ public class CyprusHandler extends BaseSOFHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-    data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-    LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
 
     if (!SystemLocation.ITALY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
 
@@ -2511,6 +2520,14 @@ public class CyprusHandler extends BaseSOFHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxExemptStatus3(), "TaxExemptStatus3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxExempt3(), "TaxExemptStatus3", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
@@ -3419,6 +3436,8 @@ public class CyprusHandler extends BaseSOFHandler {
             String enterpriseNo = ""; // 5
             String isuCd = ""; // 7
             String ctc = ""; // 8
+            String stcOrdBlk = ""; // 10
+            String ordBlk = ""; // 9
             List<String> checkList = null;
             long count = 0;
             if (row.getRowNum() == 2001) {
@@ -3492,6 +3511,10 @@ public class CyprusHandler extends BaseSOFHandler {
               isuCd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
               ctc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              ordBlk = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              stcOrdBlk = validateColValFromCell(currCell);
             }
 
             TemplateValidation error = new TemplateValidation(name);
@@ -3623,6 +3646,10 @@ public class CyprusHandler extends BaseSOFHandler {
                   LOG.trace("Enterprise number should have numeric values only.");
                   error.addError((row.getRowNum() + 1), "Enterprise No.", "Enterprise number should have numeric values only. ");
                 }
+              }
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
