@@ -2236,6 +2236,10 @@ function onIsicChange() {
   // } else {
   // FormManager.enable('isicCd');
   // }
+  if ((cmrIssuingCntry == '616') && custSubGrp == 'KYNDR' && role == 'VIEWER') {
+    FormManager.setValue('inacCd', '6272');
+    FormManager.setValue('inacType', 'I');
+  } 
 }
 function setPrivate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -6200,13 +6204,7 @@ FormManager.addFormValidator((function() {
        } else if(custNm1.indexOf('LTD')>-1){
          errorMsg = 'Customer Name can not contain \'Ltd\'';
        }
-     } else if(reqType == 'C' && role == 'REQUESTER' && custSubGrp == 'KYNDR' && (action=='SFP' || action=='VAL')){
-       // CREATCMR-7884
-       if(custNm1.indexOf('KYNDRYL')==-1){
-         errorMsg = 'Customer name must contain word \'Kyndryl\'';
-       }
-     }
-     
+     } 
      if (errorMsg != '') {
        return new ValidationResult(null, false, errorMsg);
      }
