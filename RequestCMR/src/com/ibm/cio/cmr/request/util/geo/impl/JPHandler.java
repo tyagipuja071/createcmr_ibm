@@ -3299,9 +3299,10 @@ public class JPHandler extends GEOHandler {
               }
 
               // Account Abbreviated Name
-              if (isDataFilled && "@".equals(accountAbbrevName)) {
-                error.addError((row.getRowNum() + 1), "<br>Account Abbreviated Name", "@ value for Account Abbreviated Name is not allowed.");
-              }
+              // if (isDataFilled && "@".equals(accountAbbrevName)) {
+              // error.addError((row.getRowNum() + 1), "<br>Account Abbreviated
+              // Name", "@ value for Account Abbreviated Name is not allowed.");
+              // }
 
               // JSIC
               if (isDataFilled && "@".equals(jsic)) {
@@ -3389,9 +3390,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isCompanyFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isCompanyFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isCompanyFilled && "@".equals(katakana)) {
@@ -3497,9 +3500,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADU3Filled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADU3Filled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADU3Filled && "@".equals(katakana)) {
@@ -3598,9 +3603,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADU1Filled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADU1Filled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADU1Filled && "@".equals(katakana)) {
@@ -3699,9 +3706,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADU2Filled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADU2Filled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADU2Filled && "@".equals(katakana)) {
@@ -3800,9 +3809,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADU7Filled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADU7Filled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADU7Filled && "@".equals(katakana)) {
@@ -3901,9 +3912,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUAFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUAFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUAFilled && "@".equals(katakana)) {
@@ -4002,9 +4015,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUBFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUBFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUBFilled && "@".equals(katakana)) {
@@ -4103,9 +4118,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUCFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUCFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUCFilled && "@".equals(katakana)) {
@@ -4204,9 +4221,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUDFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUDFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUDFilled && "@".equals(katakana)) {
@@ -4305,9 +4324,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUEFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUEFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUEFilled && "@".equals(katakana)) {
@@ -4406,9 +4427,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUFFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUFFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUFFilled && "@".equals(katakana)) {
@@ -4507,9 +4530,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUGFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUGFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUGFilled && "@".equals(katakana)) {
@@ -4608,9 +4633,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADUHFilled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADUHFilled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADUHFilled && "@".equals(katakana)) {
@@ -4709,9 +4736,11 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              if (isADU4Filled && "@".equals(custNameKanji)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Name-KANJI", "@ value for Customer Name-KANJI is not allowed.");
-              }
+              // if (isADU4Filled && "@".equals(custNameKanji)) {
+              // error.addError((row.getRowNum() + 1), "<br>Customer
+              // Name-KANJI", "@ value for Customer Name-KANJI is not
+              // allowed.");
+              // }
 
               // Katakana
               if (isADU4Filled && "@".equals(katakana)) {
