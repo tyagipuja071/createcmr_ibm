@@ -4127,11 +4127,10 @@ function showHideJSIC() {
       }
     }
     break;
-  case 'BCEXA':
-    break;
   case 'BFKSC':
     setJSICForBFKSCScanario(custType);
     break;
+  case 'BCEXA':
   case 'ABIJS':
   case 'AHIJE':
   case 'AUITS':
