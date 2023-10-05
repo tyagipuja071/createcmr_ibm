@@ -124,6 +124,7 @@ function afterConfigForNL() {
 
   // CREATCMR-788
   addressQuotationValidatorNL();
+
 }
 
 function lockDunsNo() {
@@ -2000,6 +2001,52 @@ function addVatIndValidator() {
   }
 }
 
+function setChecklistStatus() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
+
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+
+      for (var i = 0; i < noOfTextBoxes; i++) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
+            && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+      }
+
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
+}
 function addNLChecklistValidator() {
   console.log(">>>>  addNLChecklistValidator");
   var reqType = FormManager.getActualValue('reqType');
@@ -2176,7 +2223,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addPhoneValidatorNL, GEOHandler.NL);
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NL);
 
-  GEOHandler.registerValidator(addNLChecklistValidator, GEOHandler.NL);
   GEOHandler.registerValidator(addKVKLengthValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorNL, GEOHandler.NL, null, true);
   // GEOHandler.registerValidator(addAbrrevNameLengthValidator, GEOHandler.NL,
@@ -2209,6 +2255,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
 
+  GEOHandler.registerValidator(addNLChecklistValidator, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.NL);
   GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.NL);
   GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.NL);
 });
