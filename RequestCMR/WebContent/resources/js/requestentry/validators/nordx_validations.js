@@ -5019,6 +5019,29 @@ function setVatIndFields(){
   }
 }
 
+function StcOrderBlockValidation() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('embargoCd');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST' || stcOrdBlk == '') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if (ordBlk != '' && stcOrdBlk != '') {
+                    return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -5122,7 +5145,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
-
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.NORDX, null, true);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setVatIndFields, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NORDX);

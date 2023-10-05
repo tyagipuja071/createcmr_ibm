@@ -160,7 +160,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   private static final List<String> CEE_COUNTRIES_LIST = Arrays.asList("358", "359", "363", "603", "607", "626", "644", "651", "668", "693", "694",
       "695", "699", "704", "705", "707", "708", "740", "741", "787", "820", "821", "826", "889");
 
-  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
+  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Data", "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
       "Install At" };
 
   @Override
@@ -997,12 +997,23 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (!this.currentImportValues.isEmpty() && !SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-      // CMR-2096-Austria - "Central order block code"
-      data.setOrdBlk(mainRecord.getCmrOrderBlock());
-      LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
+      if (!"ST".equals(mainRecord.getCmrOrderBlock())) {
+        data.setOrdBlk(mainRecord.getCmrOrderBlock());
+        LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
+      }
 
-      data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-      LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+      String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+      if (StringUtils.isBlank(embargoCode)) {
+        embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+      }
+      if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
+        data.setEmbargoCd(embargoCode);
+        LOG.trace("EmbargoCode: " + embargoCode);
+      } else if ("ST".equalsIgnoreCase(embargoCode)) {
+        data.setTaxExemptStatus3(embargoCode);
+        LOG.trace(" STC Order Block Code : " + embargoCode);
+      }
+     
       data.setAgreementSignDate(this.currentImportValues.get("AECISUBDate"));
       LOG.trace("AECISubDate: " + data.getAgreementSignDate());
       data.setBpSalesRepNo(this.currentImportValues.get("TeleCovRep"));
@@ -1028,6 +1039,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       data.setLegacyCurrencyCd(this.currentImportValues.get("CurrencyCode"));
       LOG.trace("Currency: " + data.getLegacyCurrencyCd());
 
+      data.setOrdBlk(mainRecord.getCmrOrderBlock());
+      LOG.trace("OrdBlk ======= : " + data.getOrdBlk());
       EntityManager em = JpaManager.getEntityManager();
       String sql = ExternalizedQuery.getSql("AT.GET.ZS01.DATLT");
       PreparedQuery query = new PreparedQuery(em, sql);
@@ -1493,6 +1506,14 @@ public class CEMEAHandler extends BaseSOFHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())
+        && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxExemptStatus3(), "TaxExemptStatus3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxExempt3(), "TaxExemptStatus3", cmrCountry));
+      results.add(update);
+    }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getPhone1(), newData.getPhone1())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Phone1", "-"));
@@ -1741,7 +1762,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
-        "GEO_LOCATION_CD", "DUNS_NO", "ABBREV_LOCN", "TAX_CD1", "ORD_BLK", "ENTERPRISE"));// CMR-1947:add
+        "GEO_LOCATION_CD", "DUNS_NO", "ABBREV_LOCN", "TAX_CD1", "ORD_BLK", "ENTERPRISE", "TAX_EXEMPT_STATUS_3"));// CMR-1947:add
     // Abbrev_locn
     // field
     // change
@@ -2193,6 +2214,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 12;// default index
+      int stcOrdBlkIndex = 13;
+
       int isuCdIndex = 6; //
       int ctcIndex = 7; //
       int fiscalCdIndex = 15; // default index
@@ -2203,6 +2226,10 @@ public class CEMEAHandler extends BaseSOFHandler {
           ordBlkIndex = cellIndex;
           // break;
         }
+        if ("STC order block code".equals(cellVal)) {
+                  stcOrdBlkIndex = cellIndex;
+                  break;
+                }
         if ("ISU Code".equals(cellVal)) {
           isuCdIndex = cellIndex;
           // break;
@@ -2225,10 +2252,17 @@ public class CEMEAHandler extends BaseSOFHandler {
         }
         currCell = row.getCell(ordBlkIndex);
         String ordBlk = validateColValFromCell(currCell);
+        currCell = row.getCell(stcOrdBlkIndex);
+        String stcOrdBlk = validateColValFromCell(currCell);
+              
         if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, R, J. >> ");
-          error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J. ");
+          error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");
         }
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                  LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                  error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+                }
         currCell = row.getCell(fiscalCdIndex);
         String fiscalCd = validateColValFromCell(currCell);
         if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {

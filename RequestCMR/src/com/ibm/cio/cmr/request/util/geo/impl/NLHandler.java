@@ -857,8 +857,17 @@ public class NLHandler extends BaseSOFHandler {
     data.setIbmDeptCostCenter(this.currentImportValues.get("DepartmentNumber"));
     LOG.trace("DepartmentNumber: " + data.getIbmDeptCostCenter());
 
-    data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-    LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
 
     data.setEnterprise(this.currentImportValues.get("EnterpriseNo"));
     LOG.trace("EnterpriseNo: " + data.getEnterprise());
@@ -1292,6 +1301,14 @@ public class NLHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxExemptStatus3(), "TaxExemptStatus3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxExempt3(), "TaxExemptStatus3", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
@@ -1783,7 +1800,7 @@ public class NLHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ABBREV_LOCN"));// CMR-1947:add
+        "DUNS_NO", "ABBREV_LOCN", "TAX_EXEMPT_STATUS_3"));// CMR-1947:add
     // Abbrev_locn
     // field
     // change
@@ -2263,6 +2280,7 @@ public class NLHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 15;// default index
+      int stcOrdBlkIndex = 16;//
       int cmrNoIndex = 0;// 0
       String cmrNo = null;
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
@@ -2270,6 +2288,10 @@ public class NLHandler extends BaseSOFHandler {
         String cellVal = validateColValFromCell(currCell);
         if ("Order block code".equals(cellVal)) {
           ordBlkIndex = cellIndex;
+          break;
+        }
+        if ("STC order block code".equals(cellVal)) {
+          stcOrdBlkIndex = cellIndex;
           break;
         }
       }
@@ -2286,6 +2308,12 @@ public class NLHandler extends BaseSOFHandler {
             || "6".equals(ordBlk) || "7".equals(ordBlk) || "J".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, P, 5, 6, 7, J. >> ");
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, P, 5, 6, 7, J. ");
+        }
+        currCell = row.getCell(stcOrdBlkIndex);
+        String stcOrdBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br>");
         }
 
         currCell = row.getCell(cmrNoIndex);

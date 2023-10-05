@@ -40,7 +40,8 @@ public class RequestChangeContainer {
   private static final Logger LOG = Logger.getLogger(RequestChangeContainer.class);
 
   private static final List<String> SKIP_RETRIEVE_VALUE_FIELDS_COUNTRIES = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND,
-      SystemLocation.FRANCE, SystemLocation.GERMANY, SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND, SystemLocation.SPAIN);
+      SystemLocation.FRANCE, SystemLocation.GERMANY, SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND, SystemLocation.SPAIN,
+      SystemLocation.NETHERLANDS, SystemLocation.BELGIUM);
   private static final List<String> RETRIEVE_VALUE_FIELDS = Arrays.asList("Buying Group ID", "Global Buying Group ID", "BG LDE Rule",
       "Coverage Type/ID", "GEO Location Code");
 

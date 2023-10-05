@@ -228,6 +228,8 @@ public class DataModel extends BaseModel {
 
   private String embargoCd;
 
+  private String taxExemptStatus3;
+
   private String agreementSignDate;
 
   private String cisServiceCustIndc;
@@ -1274,4 +1276,13 @@ public class DataModel extends BaseModel {
   public void setVatInd(String vatInd) {
     this.vatInd = vatInd;
   }
+  
+  public String getTaxExemptStatus3() {
+    return taxExemptStatus3;
+  }
+
+  public void setTaxExemptStatus3(String taxExemptStatus3) {
+    this.taxExemptStatus3 = taxExemptStatus3;
+  }
+  
 }

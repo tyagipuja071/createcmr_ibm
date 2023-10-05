@@ -64,6 +64,12 @@
 					<lovId>EmbargoCode</lovId>
 				</column>
 				<column>
+                    <label>STC order block code</label>
+                    <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+                    <width>15</width>
+                    <lovId>TaxExemptStatus3</lovId>
+                </column>
+				<column>
 					<label>CoF</label>
 					<dbColumn>OUT_CITY_LIMIT</dbColumn>
 					<length>1</length>

@@ -457,8 +457,18 @@ public class MCOPtEsHandler extends MCOHandler {
     LOG.trace("SplTaxCode: " + data.getSpecialTaxCd());
     data.setSalesBusOffCd(this.currentImportValues.get("SBO"));
     LOG.trace("SBO: " + data.getSalesBusOffCd());
-    data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-    LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
     // Mukesh: Defect 1698949: FVT: Mismatch between Data.AC_ADMIN_BO and
     // CMRTCUST.RACBO
     data.setAcAdminBo(this.currentImportValues.get("AccAdBo"));
@@ -1204,6 +1214,8 @@ public class MCOPtEsHandler extends MCOHandler {
             String dataEnterpriseNo = ""; // 5
             String isuCd = ""; // 9
             String clientTier = ""; // 10
+            String ordBlk = "";
+            String stcOrdBlk = "";
             List<String> checkList = null;
             long count = 0;
             if (row.getRowNum() == 2001) {
@@ -1255,9 +1267,17 @@ public class MCOPtEsHandler extends MCOHandler {
               if (country.equals("822")) {
                 currCell = (XSSFCell) row.getCell(5);
                 dataEnterpriseNo = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(11);
+                ordBlk = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(12);
+                stcOrdBlk = validateColValFromCell(currCell);
               } else {
                 currCell = (XSSFCell) row.getCell(7);
                 dataEnterpriseNo = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(13);
+                ordBlk = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(14);
+                stcOrdBlk = validateColValFromCell(currCell);
               }
               currCell = (XSSFCell) row.getCell(7);
               isuCd = validateColValFromCell(currCell);
@@ -1420,6 +1440,11 @@ public class MCOPtEsHandler extends MCOHandler {
                 }
               }
 
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+              }
+
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
@@ -1483,6 +1508,10 @@ public class MCOPtEsHandler extends MCOHandler {
                   isuCd = validateColValFromCell(currCell);
                   currCell = (XSSFCell) row.getCell(10);
                   clientTier = validateColValFromCell(currCell);
+                  currCell = (XSSFCell) row.getCell(13);
+                  ordBlk = validateColValFromCell(currCell);
+                  currCell = (XSSFCell) row.getCell(14);
+                  stcOrdBlk = validateColValFromCell(currCell);
                 }
 
                 if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
@@ -1495,6 +1524,11 @@ public class MCOPtEsHandler extends MCOHandler {
                     error.addError((row.getRowNum() + 1), "Collection Code",
                         "Collection code should be exactly 2 characters. Please fix and upload the template again.");
                   }
+                }
+
+                if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                  LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                  error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
                 }
 
                 if ((!("@").equals(enterprise)) && (!StringUtils.isEmpty(enterprise))) {

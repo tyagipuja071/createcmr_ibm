@@ -83,6 +83,12 @@
 					<lovId>EmbargoCode</lovId>
 				</column>
 				<column>
+                    <label>STC order block code</label>
+                    <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+                    <width>15</width>
+                    <lovId>TaxExemptStatus3</lovId>
+                </column>
+				<column>
 					<label>COD Flag</label>
 					<dbColumn>MILITARY</dbColumn>
 					<width>30</width>

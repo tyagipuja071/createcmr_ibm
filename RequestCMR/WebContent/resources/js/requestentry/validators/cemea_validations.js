@@ -358,7 +358,7 @@ function orderBlockValidation() {
           var ordBlk = FormManager.getActualValue('ordBlk');
           if (role == 'PROCESSOR') {
             if (ordBlk != '') {
-              if (ordBlk == '88' || ordBlk == '94') {
+              if (ordBlk == '88' || ordBlk == '94' || ordBlk == 'ST') {
               } else {
                 return new ValidationResult(null, false, 'Only blank, 88, 94 are allowed.');
               }
@@ -368,6 +368,29 @@ function orderBlockValidation() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function StcOrderBlockValidation() {
+
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('embargoCd');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST' || stcOrdBlk == '') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if (ordBlk != '' && stcOrdBlk != '') {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
 }
 
 /**
@@ -5601,7 +5624,7 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.CEMEA_CHECKLIST);
   GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.CEMEA_CHECKLIST);
-
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEMEA_COPY, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
 });

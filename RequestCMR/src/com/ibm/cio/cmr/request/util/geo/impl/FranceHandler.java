@@ -1401,10 +1401,23 @@ public class FranceHandler extends GEOHandler {
             if ("Data".equals(name)) {
               String isuCd = ""; // 5
               String ctc = ""; // 6
+              String ordBlk = ""; // 9
+
               currCell = (XSSFCell) row.getCell(5);
               isuCd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               ctc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              ordBlk = validateColValFromCell(currCell);
+
+              if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk) || "ST".equals(ordBlk))) {
+                TemplateValidation error = new TemplateValidation(name);
+                String rowNumber = "Row" + row.getRowNum() + ": ";
+                LOG.trace("Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.");
+                error.addError((rowIndex + 1), rowNumber + "Order block",
+                    "Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 TemplateValidation error = new TemplateValidation(name);

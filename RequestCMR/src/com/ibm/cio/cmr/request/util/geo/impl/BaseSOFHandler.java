@@ -620,4 +620,22 @@ public abstract class BaseSOFHandler extends GEOHandler {
   public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     return null;
   }
+
+  public static String getRdcAufsd(String cmrNo, String cntry) {
+    String rdcAufsd = "";
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("WW.GET_RDC_AUFSD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("KTOKD", "ZS01");
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    if (result != null) {
+      rdcAufsd = result;
+    }
+    return rdcAufsd;
+  }
 }

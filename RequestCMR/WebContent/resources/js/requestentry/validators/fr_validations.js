@@ -3425,14 +3425,14 @@ function orderBlockCodeValidator() {
         var paygorecord = cmr.query('CMR_CHECK_PAYGO', qParams);
         var countpaygo = paygorecord.ret1;
         var orderBlockCd = FormManager.getActualValue('ordBlk');
-        if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '' || (Number(countpaygo) == 1 && role == 'Processor')) {
+        if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == 'ST' || orderBlockCd == '' || (Number(countpaygo) == 1 && role == 'Processor')) {
           return new ValidationResult(null, true);
         } else {
           return new ValidationResult({
             id : 'ordBlk',
             type : 'text',
             name : 'ordBlk'
-          }, false, 'Order Block Code value should be only 94 or 88 or empty.');
+          }, false, 'Order Block Code value should be only 94 or 88 or ST or empty.');
         }
 
         return new ValidationResult(null, true);

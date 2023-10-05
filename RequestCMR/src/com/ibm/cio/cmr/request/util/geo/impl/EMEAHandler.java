@@ -1771,8 +1771,17 @@ public class EMEAHandler extends BaseSOFHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-    data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-    LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
 
     if (!SystemLocation.ITALY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
 
@@ -3009,6 +3018,13 @@ public class EMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxExemptStatus3(), "TaxExemptStatus3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxExempt3(), "TaxExemptStatus3", cmrCountry));
+      results.add(update);
+    }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())
         && SystemLocation.TURKEY.equals(cmrCountry)) {
       update = new UpdatedDataModel();
@@ -3983,6 +3999,20 @@ public class EMEAHandler extends BaseSOFHandler {
       countryAddrss = TR_MASS_UPDATE_SHEET_NAMES;
 
       XSSFSheet dataSheet = book.getSheet("Data");
+      int ordBlkIndex = 12;// default index
+      int stcOrdBlkIndex = 13;
+      for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+        currCell = row.getCell(cellIndex);
+        String cellVal = validateColValFromCell(currCell);
+        if ("Order block code".equals(cellVal)) {
+          ordBlkIndex = cellIndex;
+          // break;
+        }
+        if ("STC order block code".equals(cellVal)) {
+          stcOrdBlkIndex = cellIndex;
+          break;
+        }
+      }
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
         String clientTier = null; // 9
         String isuCd = null; // 8
@@ -4010,6 +4040,16 @@ public class EMEAHandler extends BaseSOFHandler {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
+
+        currCell = row.getCell(stcOrdBlkIndex);
+        String stcOrdBlk = validateColValFromCell(currCell);
+        currCell = row.getCell(ordBlkIndex);
+        String ordBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+        }
+
         validations.add(error);
       }
 
@@ -4030,6 +4070,8 @@ public class EMEAHandler extends BaseSOFHandler {
         String salesRep = null;
         String isuCd = null; // 8
         String clientTier = null; // 9
+        String ordBlk = ""; // 12
+        String stcOrdBlk = ""; // 13
         String cmrNo = ""; // 0
         TemplateValidation error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
@@ -4039,6 +4081,10 @@ public class EMEAHandler extends BaseSOFHandler {
         if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
           currCell = row.getCell(0);
           cmrNo = validateColValFromCell(currCell);
+          currCell = row.getCell(12);
+          ordBlk = validateColValFromCell(currCell);
+          currCell = row.getCell(13);
+          stcOrdBlk = validateColValFromCell(currCell);
           currCell = row.getCell(4);
           collectionCd = validateColValFromCell(currCell);
           if (country.equals(SystemLocation.IRELAND)) {
@@ -4116,6 +4162,10 @@ public class EMEAHandler extends BaseSOFHandler {
                 "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Client Tier",
                 ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
+          }
+          if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+            LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
           }
           if (error.hasErrors()) {
             validations.add(error);
@@ -4387,10 +4437,17 @@ public class EMEAHandler extends BaseSOFHandler {
     XSSFSheet dataSheet = book.getSheet("Data");
     String isuCd = ""; // 9
     String clientTier = "";// 10
+    String ordBlk = "";// 5
+    String stcOrdBlk = ""; // 6
+
     for (Row row : dataSheet) {
       if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
         currCell = (XSSFCell) row.getCell(9);
         isuCd = validateColValFromCell(currCell);
+        currCell = (XSSFCell) row.getCell(5);
+        ordBlk = validateColValFromCell(currCell);
+        currCell = (XSSFCell) row.getCell(6);
+        stcOrdBlk = validateColValFromCell(currCell);
         currCell = (XSSFCell) row.getCell(10);
         clientTier = validateColValFromCell(currCell);
         TemplateValidation error = new TemplateValidation("DATA");
@@ -4409,6 +4466,11 @@ public class EMEAHandler extends BaseSOFHandler {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
+        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+        }
+
         validations.add(error);
 
       }

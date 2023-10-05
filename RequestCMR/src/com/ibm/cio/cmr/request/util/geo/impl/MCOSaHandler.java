@@ -360,6 +360,18 @@ public class MCOSaHandler extends MCOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
+
+    String embargoCode = (this.currentImportValues.get("EmbargoCode"));
+    if (StringUtils.isBlank(embargoCode)) {
+      embargoCode = getRdcAufsd(data.getCmrNo(), data.getCmrIssuingCntry());
+    }
+    if (embargoCode != null && embargoCode.length() < 2 && !"ST".equalsIgnoreCase(embargoCode)) {
+      data.setEmbargoCd(embargoCode);
+      LOG.trace("EmbargoCode: " + embargoCode);
+    } else if ("ST".equalsIgnoreCase(embargoCode)) {
+      data.setTaxExemptStatus3(embargoCode);
+      LOG.trace(" STC Order Block Code : " + embargoCode);
+    }
     boolean ifUpdt = false;
     ifUpdt = "U".equals(admin.getReqType());
 
@@ -1058,6 +1070,8 @@ public class MCOSaHandler extends MCOHandler {
             String isuCd = ""; // 10
             String clientTier = ""; // 11
             String enterprise = ""; // 17
+            String ordBlk = "";// 12
+            String stcOrdBlk = "";// 13
 
             boolean isDummyUpdate = true;
 
@@ -1112,13 +1126,19 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(9);
               inac = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(12);
+              ordBlk = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(13);
+              stcOrdBlk = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
               codFlag = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(15);
+              currCell = (XSSFCell) row.getCell(16);
               zs01Phone = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(16);
+              currCell = (XSSFCell) row.getCell(17);
               intDeptNum = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
@@ -1127,7 +1147,7 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(10);
               isuCd = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(17);
+              currCell = (XSSFCell) row.getCell(18);
               enterprise = validateColValFromCell(currCell);
             }
 
@@ -1161,6 +1181,11 @@ public class MCOSaHandler extends MCOHandler {
             }
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+              }
+
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
@@ -1428,6 +1453,13 @@ public class MCOSaHandler extends MCOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxExemptStatus3(), "TaxExemptStatus3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxExempt3(), "TaxExemptStatus3", cmrCountry));
       results.add(update);
     }
 
