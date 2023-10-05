@@ -983,6 +983,8 @@ function setFieldsRequired() {
   case 'STOSI':
     break;
   case 'BCEXA':
+    FormManager.disable('outsourcingService');
+    FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
     break;
   case 'BFKSC':
     setMandtAndOptFieldsForBFKSCScenario(custType);
@@ -2353,6 +2355,55 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
     }
     break;
   case 'BCEXA':
+      if (addrType == 'ZC01') {
+        FormManager.setValue('city2', getCompanyNo(addrType) != null ? getCompanyNo(addrType) : '');
+        setAddrFieldOptional('city2', 'City2');
+        setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
+        setAddrFieldOptional('custNm2', 'CustomerName2');
+        setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
+        setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
+        setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
+        setAddrFieldMandatory('addrTxt', 'AddressTxt', 'Address');
+        setAddrFieldOptional('bldg', 'Building');
+        setAddrFieldHide('companySize', 'CompanySize');
+        setAddrFieldHide('office', 'Office');
+        setAddrFieldHide('custFax', 'CustFax');
+        setAddrFieldHide('dept', 'Department');
+        setAddrFieldHide('contact', 'Contact');
+        setAddrFieldHide('custFax', 'CustFax');
+        setAddrFieldHide('divn', 'Division');
+        setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
+        setAddrFieldHide('locationCode', 'LocationCode');
+        setAddrFieldHide('rol', 'ROL');
+        if (cmr.currentRequestType == 'C') {
+          setAddrFieldHide('bldg', 'Building');
+        }
+      } else {
+        setAddrFieldHide('custNm1', 'CustomerName1');
+        setAddrFieldHide('custNm2', 'CustomerName2');
+        setAddrFieldHide('custNm3', 'CustomerName3');
+        setAddrFieldHide('custNm4', 'CustomerName4');
+        setAddrFieldHide('postCd', 'PostalCode');
+        setAddrFieldHide('locationCode', 'LocationCode');
+        setAddrFieldHide('addrTxt', 'AddressTxt');
+        // setAddrFieldHide('bldg', 'Building');
+        setAddrFieldHide('office', 'Office');
+        setAddrFieldHide('custFax', 'CustFax');
+        setAddrFieldHide('dept', 'Department');
+        setAddrFieldHide('contact', 'Contact');
+        setAddrFieldHide('custFax', 'CustFax');
+        setAddrFieldHide('divn', 'Division');
+        setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
+        setAddrFieldHide('rol', 'ROL');
+        setAddrFieldHide('city2', 'City2');
+        setAddrFieldHide('companySize', 'CompanySize');
+      }
+      if (role == 'REQUESTER' && (cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U')) {
+        setAddrFieldHide('bldg', 'Building');
+      }
+      if (role == 'PROCESSOR' && (cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U')) {
+        setAddrFieldOptional('bldg', 'Building');
+      }
     break;
   case 'BFKSC':
     setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role);
@@ -4443,6 +4494,7 @@ function setCSBOOnScenarioChange() {
     case 'BPWPQ':
     case 'ISOCU':
     case 'BCEXA':
+      FormManager.setValue('csBo', '');
       break;
     case 'BFKSC':
       setCSBOForBFKScenario(custType);
@@ -4950,6 +5002,17 @@ function removeDefaultValueTelNo() {
     }
     break;
   case 'BCEXA':
+    if (changed) {
+      if (cmr.addressMode == 'newAddress') {
+        if (addrType == 'ZC01') {
+          setAddrFieldMandatory('custPhone', 'CustPhone', 'Phone #');
+          FormManager.setValue('custPhone', '00-0000-0000');
+        } else {
+          setAddrFieldHide('custPhone', 'CustPhone');
+          FormManager.setValue('custPhone', '');
+        }
+      }
+    }
     break;
   case 'BFKSC':
     if (changed) {
