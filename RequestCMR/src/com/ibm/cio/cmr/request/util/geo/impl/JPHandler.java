@@ -2579,6 +2579,8 @@ public class JPHandler extends GEOHandler {
         addPostCdCSBOLogic(entityManager, admin, data);
         break;
       case "BPWPQ":
+        addPostCdCSBOLogic(entityManager, admin, data);
+        break;
       case "ISOCU":
       case "BCEXA":
       case "BFKSC":
@@ -2612,6 +2614,8 @@ public class JPHandler extends GEOHandler {
       case "WHCMR":
       case "OUTSC":
       case "BPWPQ":
+        addPostCdCSBOLogic(entityManager, admin, data);
+        break;
       case "ISOCU":
       case "STOSB":
       case "STOSC":
