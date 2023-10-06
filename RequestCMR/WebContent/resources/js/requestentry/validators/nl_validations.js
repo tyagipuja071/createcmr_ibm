@@ -510,18 +510,16 @@ function setClientTierValues(isuCd) {
  * 
  * var boTeam = []; var selectedBoTeam = []; if (isuCd != '') { var isuCtc =
  * isuCd + clientTier; var qParams = null; var results = null; var
- * selectedResults = null;
- *  // 32S changed to 34Q on 2021 2H coverage // BO Team will be based on IMS
- * for 32S // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) { if (ims != '' &&
- * ims.length > 1 && (isuCtc == '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY :
- * cntry, ISU : '%' + isuCd + clientTier + '%' // CLIENT_TIER : '%' +
- * ims.substring(0, 1) + '%' }; results = cmr.query('GET.BOTEAMLIST.BYISU',
- * qParams); }
- *  // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) { if (ims != '' &&
- * ims.length > 1 && (isuCtc == '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY :
- * cntry, ISU : '%' + isuCd + clientTier + '%', CLIENT_TIER : '%' +
- * ims.substring(0, 1) + '%' }; selectedResults =
- * cmr.query('GET.BOTEAMLIST.BYISUCTC', qParams); }
+ * selectedResults = null; // 32S changed to 34Q on 2021 2H coverage // BO Team
+ * will be based on IMS for 32S // if (ims != '' && ims.length > 1 && (isuCtc ==
+ * '32S')) { if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) { qParams = {
+ * _qall : 'Y', ISSUING_CNTRY : cntry, ISU : '%' + isuCd + clientTier + '%' //
+ * CLIENT_TIER : '%' + ims.substring(0, 1) + '%' }; results =
+ * cmr.query('GET.BOTEAMLIST.BYISU', qParams); } // if (ims != '' && ims.length >
+ * 1 && (isuCtc == '32S')) { if (ims != '' && ims.length > 1 && (isuCtc ==
+ * '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY : cntry, ISU : '%' + isuCd +
+ * clientTier + '%', CLIENT_TIER : '%' + ims.substring(0, 1) + '%' };
+ * selectedResults = cmr.query('GET.BOTEAMLIST.BYISUCTC', qParams); }
  * 
  * if (results != null || selectedResults != null) {
  * 
@@ -1021,13 +1019,13 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
     FormManager.addFormValidator((function() {
       var landCntry = cntry;
       var addrType = aType;
-      var result=null;
+      var result = null;
       return {
         validate : function() {
           var reqType = FormManager.getActualValue('reqType');
           var vat = FormManager.getActualValue('vat');
           var custSubType = FormManager.getActualValue('custSubGrp');
-          
+
           if (!vat || vat == '' || vat.trim() == '') {
             return new ValidationResult(null, true);
           } else if (reqType == 'U' && vat == '@') {
@@ -1053,46 +1051,39 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
             }
           }
           console.log('ZS01 VAT Country: ' + zs01Cntry);
-     if((reqType == 'C' && zs01Cntry=='MX') || zs01Cntry !='MX')
-    	 {
-          if(reqType == 'C' && zs01Cntry=='MX')
-    	  {
-    	  if(custSubType=='CBCOM')
-    		  {
-    		  zs01Cntry=zs01Cntry+"CBCOMM";
-    		  }
-    	  else if(custSubType=='CBPRI')
-		  {
-		  zs01Cntry=zs01Cntry+"CBPRIV";
-		  }
-    	  else{
-              zs01Cntry='MX';
-          }
-    	  result = cmr.validateVAT(zs01Cntry, vat);
-    	  }
-      if(zs01Cntry !='MX')
-    	  {
-          result = cmr.validateVAT(zs01Cntry, vat);
-    	  }
-          if (result && !result.success) {
-            if (result.errorPattern == null) {
-              return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
-              }, false, result.errorMessage + '.');
-            } else {
-              var msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
-              return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
-              }, false, msg);
+          if ((reqType == 'C' && zs01Cntry == 'MX') || zs01Cntry != 'MX') {
+            if (reqType == 'C' && zs01Cntry == 'MX') {
+              if (custSubType == 'CBCOM') {
+                zs01Cntry = zs01Cntry + "CBCOMM";
+              } else if (custSubType == 'CBPRI') {
+                zs01Cntry = zs01Cntry + "CBPRIV";
+              } else {
+                zs01Cntry = 'MX';
+              }
+              result = cmr.validateVAT(zs01Cntry, vat);
             }
-          } else {
-            return new ValidationResult(null, true);
+            if (zs01Cntry != 'MX') {
+              result = cmr.validateVAT(zs01Cntry, vat);
+            }
+            if (result && !result.success) {
+              if (result.errorPattern == null) {
+                return new ValidationResult({
+                  id : 'vat',
+                  type : 'text',
+                  name : 'vat'
+                }, false, result.errorMessage + '.');
+              } else {
+                var msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+                return new ValidationResult({
+                  id : 'vat',
+                  type : 'text',
+                  name : 'vat'
+                }, false, msg);
+              }
+            } else {
+              return new ValidationResult(null, true);
+            }
           }
-        }
         }
       };
     })(), tabName, formName);
@@ -1961,9 +1952,9 @@ function setPPSCEIDRequired() {
   if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
- // if (subGrp.includes('BP') || subGrp.includes('BUS')) {
-  if (subGrp=='BUSPR' || subGrp=='CBBUS') {  
- FormManager.enable('ppsceid');
+  // if (subGrp.includes('BP') || subGrp.includes('BUS')) {
+  if (subGrp == 'BUSPR' || subGrp == 'CBBUS') {
+    FormManager.enable('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.clearValue('ppsceid');
@@ -2021,7 +2012,7 @@ function addVatIndValidator() {
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
-    // FormManager.readOnly('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
       FormManager.setValue('vatInd', '');
@@ -2075,6 +2066,53 @@ function StcOrderBlockValidation() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function setChecklistStatus() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
+
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+
+      for (var i = 0; i < noOfTextBoxes; i++) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
+            && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+      }
+
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
 }
 
 function addNLChecklistValidator() {
@@ -2204,7 +2242,6 @@ function checkChecklistButtons() {
   }
 }
 
-
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -2240,7 +2277,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addPhoneValidatorNL, GEOHandler.NL);
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NL);
 
-  GEOHandler.registerValidator(addNLChecklistValidator, GEOHandler.NL);
   GEOHandler.registerValidator(addKVKLengthValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorNL, GEOHandler.NL, null, true);
   // GEOHandler.registerValidator(addAbrrevNameLengthValidator, GEOHandler.NL,
@@ -2276,6 +2312,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockFields, GEOHandler.NL);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.NL, null, true);
 
+  GEOHandler.registerValidator(addNLChecklistValidator, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.NL);
   GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.NL);
   GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.NL);
 });

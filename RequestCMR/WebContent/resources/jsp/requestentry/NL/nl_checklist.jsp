@@ -24,6 +24,15 @@
     Mongolia, Myanmar (Burma), Oman, Pakistan, Palestine, Qatar, Russia, Saudi Arabia, Sudan, Syrian Arab Republic, Taiwan, 
     Tajikstan, Turkmenistan, Ukraine, United Arab Emirates, Uzbekistan, Venezuela, Vietnam, Yemen
    </cmr:chk-block>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Company Full Name: ">
+      <%=RequestUtils.generateChecklistLocalAddress(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Complete Address: ">
+      <%=RequestUtils.generateChecklistFreeTxtField1(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Nature of Business:  Provide web site (if available): ">
+      <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
+   </cmr:chk-lbl-field>
    <cmr:chk-section name="Section A:  Denied Parties List Status" >
       <cmr:chk-entry number="1" section="A">
          Is the Customer on the DPL?
