@@ -3293,10 +3293,9 @@ public class JPHandler extends GEOHandler {
               }
 
               // Account Abbreviated Name
-              // if (isDataFilled && "@".equals(accountAbbrevName)) {
-              // error.addError((row.getRowNum() + 1), "<br>Account Abbreviated
-              // Name", "@ value for Account Abbreviated Name is not allowed.");
-              // }
+              if (isDataFilled && "@".equals(accountAbbrevName)) {
+                error.addError((row.getRowNum() + 1), "<br>Account Abbreviated Name", "@ value for Account Abbreviated Name is not allowed.");
+              }
 
               // JSIC
               if (isDataFilled && "@".equals(jsic)) {
