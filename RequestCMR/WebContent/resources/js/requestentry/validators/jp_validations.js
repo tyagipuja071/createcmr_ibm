@@ -987,7 +987,7 @@ function setFieldsRequired() {
     FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
     break;
   case 'BFKSC':
-    setMandtAndOptFieldsForBFKSCScenario(custType);
+    setFieldsForBFKSCScenario(custType);
     break;
   case 'INTER':
     if (!isPageLoad && setFieldsRequiredCount > 2) {
@@ -3467,8 +3467,9 @@ function setCSBOOnAddrSave() {
     case 'BPWPQ':
     case 'ISOCU':
     case 'BCEXA':
-    case 'BFKSC':
       FormManager.setValue('csBo', '');
+      break;
+    case 'BFKSC':
       break;
     case 'ABIJS':
     case 'AHIJE':
@@ -4434,7 +4435,7 @@ function setCSBORequired() {
     if (role == 'REQUESTER') {
       FormManager.removeValidator('csBo', Validators.REQUIRED);
     } else if (role == 'PROCESSOR') {
-      if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC') {
+      if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == 'BCEXA') {
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       } else {
         FormManager.enable('csBo');
@@ -6495,74 +6496,90 @@ function disableBpBqiImport() {
   }
 }
 
-function setMandtAndOptFieldsForBFKSCScenario(custType) {
+function setFieldsForBFKSCScenario(custType) {
   FormManager.disable('outsourcingService');
   FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
 
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-    FormManager.addValidator('jsicCd', Validators.REQUIRED, [ 'JSIC' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
 
-    FormManager.enable('oemInd');
-    FormManager.addValidator('oemInd', Validators.REQUIRED, [ 'OEM' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('oemInd', 'N');
+    FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
+    FormManager.removeValidator('crsCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+  } else {
+    FormManager.readOnly('email2');
+    FormManager.removeValidator('email2', Validators.REQUIRED);
 
-    FormManager.enable('leasingCompanyIndc');
-    FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('leasingCompanyIndc', 'N');
+    FormManager.readOnly('oemInd');
+    FormManager.removeValidator('oemInd', Validators.REQUIRED);
+    FormManager.setValue('oemInd', '');
 
-    FormManager.enable('educAllowCd');
+    FormManager.setValue('leasingCompanyIndc', '');
+    FormManager.readOnly('leasingCompanyIndc');
+    FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
 
-    FormManager.enable('custClass');
-    FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Customer Class' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('custClass', '11');
+    FormManager.readOnly('educAllowCd');
+    FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
 
-    FormManager.enable('iinInd');
-    FormManager.addValidator('iinInd', Validators.REQUIRED, [ 'IIN' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('iinInd', 'N');
+    FormManager.setValue('custClass', '');
+    FormManager.readOnly('custClass');
+    FormManager.removeValidator('custClass', Validators.REQUIRED);
 
-    FormManager.enable('valueAddRem');
-    FormManager.addValidator('valueAddRem', Validators.REQUIRED, [ 'VAR' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('valueAddRem', 'N');
+    FormManager.setValue('iinInd', '');
+    FormManager.readOnly('iinInd');
+    FormManager.removeValidator('iinInd', Validators.REQUIRED);
 
-    FormManager.enable('channelCd');
-    FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('channelCd', 'N');
+    FormManager.setValue('valueAddRem', '');
+    FormManager.readOnly('valueAddRem');
+    FormManager.removeValidator('valueAddRem', Validators.REQUIRED);
 
-    FormManager.enable('siInd');
-    FormManager.addValidator('siInd', Validators.REQUIRED, [ 'SI' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('siInd', 'N');
+    FormManager.setValue('channelCd', '');
+    FormManager.readOnly('channelCd');
+    FormManager.removeValidator('channelCd', Validators.REQUIRED);
 
-    FormManager.enable('crsCd');
+    FormManager.setValue('siInd', '');
+    FormManager.readOnly('siInd');
+    FormManager.removeValidator('siInd', Validators.REQUIRED);
 
-    FormManager.enable('creditCd');
-    FormManager.addValidator('creditCd', Validators.REQUIRED, [ 'CAR Code' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('creditCd', 'D');
+    FormManager.setValue('crsCd', '');
+    FormManager.readOnly('crsCd');
+    FormManager.removeValidator('crsCd', Validators.REQUIRED);
 
-    FormManager.enable('govType');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
-    FormManager.setValue('govType', 'M');
+    FormManager.setValue('creditCd', '');
+    FormManager.readOnly('creditCd');
+    FormManager.removeValidator('creditCd', Validators.REQUIRED);
 
-    FormManager.enable('inacType');
-    FormManager.enable('inacCd');
+    FormManager.setValue('govType', '');
+    FormManager.readOnly('govType');
+    FormManager.removeValidator('govType', Validators.REQUIRED);
 
-    FormManager.enable('repTeamMemberNo');
+    FormManager.readOnly('inacCd');
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
 
-    FormManager.enable('salesTeamCd');
-    FormManager.addValidator('salesTeamCd', Validators.REQUIRED, [ 'Sales/Team No (Dealer No.)' ], 'MAIN_IBM_TAB');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
 
-    FormManager.enable('salesBusOffCd');
-    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Office Code' ], 'MAIN_IBM_TAB');
+    FormManager.readOnly('salesTeamCd');
+    FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
 
-    FormManager.enable('csDiv');
-    FormManager.addValidator('csDiv', Validators.REQUIRED, [ 'CS DIV' ], 'MAIN_IBM_TAB');
-    FormManager.setValue('csDiv', '2');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
 
-    FormManager.enable('invoiceSplitCd');
-    FormManager.addValidator('invoiceSplitCd', Validators.REQUIRED, [ 'Invoice Split Code' ], 'MAIN_IBM_TAB');
-    FormManager.setValue('invoiceSplitCd', 'BN');
+    FormManager.setValue('csDiv', '');
+    FormManager.readOnly('csDiv');
+    FormManager.removeValidator('csDiv', Validators.REQUIRED);
 
-    FormManager.enable('billingProcCd');
-    FormManager.addValidator('billingProcCd', Validators.REQUIRED, [ 'Billing Process Code' ], 'MAIN_IBM_TAB');
+    FormManager.readOnly('billingProcCd');
+    FormManager.removeValidator('billingProcCd', Validators.REQUIRED);
+
+    FormManager.setValue('invoiceSplitCd', '');
+    FormManager.readOnly('invoiceSplitCd');
+    FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
+
+    FormManager.setValue('csBo', '');
+    FormManager.readOnly('csBo');
+    FormManager.removeValidator('csBo', Validators.REQUIRED);
   }
 }
 
@@ -6600,25 +6617,35 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
         setAddrFieldMandatory('divn', 'Division');
       }
       setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
-      setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
       setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
-      setAddrFieldOptional('bldg', 'Building');
-      setAddrFieldMandatory('locationCode', 'LocationCode');
       setAddrFieldMandatory('custPhone', 'custPhone');
-      setAddrFieldHide('custFax', 'CustFax');
-    } else {
-      setAddrFieldOptional('city2', 'City2');
-      setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
+
       setAddrFieldOptional('custNm2', 'CustomerName2');
+      setAddrFieldOptional('bldg', 'Building');
+
+      setAddrFieldHide('locationCode', 'LocationCode');
+      setAddrFieldHide('custFax', 'CustFax');
+      setAddrFieldHide('city2', 'City2');
+
+    } else {
+      setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-      setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('addrTxt', 'AddressTxt', 'Address');
-      setAddrFieldOptional('bldg', 'Building');
       setAddrFieldMandatory('custPhone', 'CustPhone');
+
+      setAddrFieldOptional('custNm2', 'CustomerName2');
+      setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
+      setAddrFieldOptional('bldg', 'Building');
+      setAddrFieldOptional('office', 'Office');
+      setAddrFieldOptional('dept', 'Department');
+      setAddrFieldOptional('custFax', 'CustFax');
+      setAddrFieldOptional('contact', 'Contact');
+
+      setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
       setAddrFieldHide('office', 'Office');
       setAddrFieldHide('custFax', 'CustFax');
@@ -6628,12 +6655,6 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('locationCode', 'LocationCode');
       setAddrFieldHide('rol', 'ROL');
-
-      setAddrFieldOptional('bldg', 'Building');
-      setAddrFieldOptional('office', 'Office');
-      setAddrFieldOptional('dept', 'Department');
-      setAddrFieldOptional('custFax', 'CustFax');
-      setAddrFieldOptional('contact', 'Contact');
     }
   } else {
     setAddrFieldHide('custNm1', 'CustomerName1');
@@ -6678,15 +6699,14 @@ function setTelNoForBFKSCScenario(addrType) {
 function setCSBOForBFKScenario(custType) {
 
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-    FormManager.enable('csBo');
     FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
-    FormManager.setValue('csBo', '0000');
   } else {
     FormManager.setValue('csBo', '');
   }
 }
 
 function setJSICForBFKSCScanario(custType) {
+
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
     FormManager.addValidator('jsicCd', Validators.REQUIRED, [ 'JSIC' ], 'MAIN_CUST_TAB');
   } else {
