@@ -6501,7 +6501,7 @@ function setFieldsForBFKSCScenario(custType) {
   FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
 
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-    FormManager.addValidator('csBo', Validators.REQUIRED, ['CS BO Code'], 'MAIN_IBM_TAB');
+    FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
 
     FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
     FormManager.removeValidator('crsCd', Validators.REQUIRED);
@@ -6549,7 +6549,7 @@ function setFieldsForBFKSCScenario(custType) {
     FormManager.setValue('creditCd', '');
     FormManager.readOnly('creditCd');
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
-    
+
     FormManager.setValue('govType', '');
     FormManager.readOnly('govType');
     FormManager.removeValidator('govType', Validators.REQUIRED);
@@ -6699,7 +6699,7 @@ function setTelNoForBFKSCScenario(addrType) {
 function setCSBOForBFKScenario(custType) {
 
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-    FormManager.addValidator('csBo', Validators.REQUIRED, ['CS BO Code'], 'MAIN_IBM_TAB');
+    FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.setValue('csBo', '');
   }
