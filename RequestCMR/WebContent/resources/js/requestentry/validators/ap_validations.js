@@ -7637,7 +7637,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
   
   // CREATCMR-7883
-  GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA,SysLoc.SRI_LANKA, SysLoc.BANGLADESH], null, true);
+  GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA,SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.SINGAPORE], null, true);
   GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND,SysLoc.SINGAPORE, SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.MALASIA, SysLoc.INDONESIA] );  
   // CREATCMR-7883
   GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE], null, true);
