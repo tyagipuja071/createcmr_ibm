@@ -196,7 +196,9 @@ function addAfterConfigAP() {
       FormManager.setValue('mrcCd', '3');
       FormManager.readOnly('apCustClusterId');
       FormManager.readOnly('clientTier');
-      FormManager.readOnly('apCustClusterId');   
+      FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('mrcCd');
+      FormManager.readOnly('inacType');
       if (cntry == '616') {
         FormManager.setValue('apCustClusterId', "09057");
         FormManager.setValue('isuCd', '5K');
@@ -7326,7 +7328,7 @@ function setInacCdTypeStatus(){
                          (cluster=='00000' && ['XBLUM','BLUMX','XMKTP','MKTPC','SPOFF','CROSS'].includes(custSubGrp)) || 
                          (cluster=='08038' && ['ECSYS','ASLOM','CROSS'].includes(custSubGrp));
   
-  var isInacRequired = (cluster=='09052' && ['KYNDR','ASLOM','CROSS'].includes(custSubGrp)) || 
+  var isInacRequired = (cluster=='09052' && ['KYND','ASLOM','CROSS'].includes(custSubGrp)) || 
                        (['10144','10145','10146','10147','10148','10149','10150','10151','10152','10153','10154','10155','10156','10157'].includes(cluster) && ['NRML','ASLOM','CROSS'].includes(custSubGrp));
 
   
