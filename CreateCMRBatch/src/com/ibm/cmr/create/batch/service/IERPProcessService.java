@@ -374,7 +374,8 @@ public class IERPProcessService extends BaseBatchService {
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
 
-        if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+        if ((SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) || SystemLocation.CHINA.equals(data.getCmrIssuingCntry()))
+            && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
           enableTempReact = true;
         }
 
@@ -549,21 +550,30 @@ public class IERPProcessService extends BaseBatchService {
           List<ProcessResponse> responses = null;
           String rdcProcessingMessage = "";
           String wfHistCmt = "";
-          String rdcOrderBlk = IERPRequestUtils.getOrderBlockFromDataRdc(em, admin);
           DataRdc dataRdc = getDataRdcRecords(em, data);
+          String rdcOrderBlk = dataRdc.getCustAcctType();
           String dataOrderBlk = data.getCustAcctType();
           StringBuilder comment = new StringBuilder();
           HashMap<String, Object> overallResponse = null;
           boolean firstRun = false;
-          if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
+          
+          // For temporary reactivate
+          if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
             rdcOrderBlk = dataRdc.getOrdBlk();
+            data.setOrdBlk("");
+            dataOrderBlk = data.getOrdBlk();
           }
+          
           if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
               && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && (rdcOrderBlk != null && !StringUtils.isBlank(rdcOrderBlk))
               && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
             if (admin.getProcessedTs() == null || IERPRequestUtils.isTimeStampEquals(admin.getProcessedTs())) {
               firstRun = true;
-              overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+              if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+                overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+              } else {
+                overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+              }
             } else {
               int noOFWorkingDays = 0;
               if (admin.getReqStatus() != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())
@@ -575,14 +585,20 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
                 noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
                 LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
+
               }
-              int tempReactThres = SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) ? 2 : 3;
+              int tempReactThres = 4;
               if (noOFWorkingDays >= tempReactThres) {
                 LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setCustAcctType(rdcOrderBlk);
+                data.setOrdBlk(rdcOrderBlk);
                 updateEntity(data, em);
-                overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+                if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+                  overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+                } else {
+                  overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+                }
               }
             }
           }
@@ -710,8 +726,10 @@ public class IERPProcessService extends BaseBatchService {
                   "COM".equals(admin.getReqStatus()));
             }
 
+            WfHist history = null;
+
             if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && firstRun) {
-              IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
+              history = IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
                   "CPR".equals(admin.getReqStatus()));
             }
 
@@ -720,7 +738,11 @@ public class IERPProcessService extends BaseBatchService {
             // send email notif regardless of abort or complete
             LOG.debug("*** IERP Site IDs on EMAIL >> " + siteIds.toString());
             try {
-              sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              if ("CPR".equals(admin.getReqStatus())) {
+                RequestUtils.sendEmailNotifications(em, admin, history, false, false);
+              } else {
+                sendEmailNotifications(em, admin, siteIds.toString(), statusMessage.toString());
+              }
             } catch (Exception e) {
               LOG.error("ERROR: " + e.getMessage());
             }
