@@ -4153,22 +4153,49 @@ function addChangeNameAttachmentValidator() {
           return;
         }
         var reqType = FormManager.getActualValue('reqType');
-        var mainCustNm1 = FormManager.getActualValue("custNm1");
-        var oldCustNm1 = FormManager.getActualValue("oldCustNm1");
-        var mainCustNm2 = FormManager.getActualValue("custNm2");
-        var oldCustNm2 = FormManager.getActualValue("oldCustNm2");
-        var custNm3 = FormManager.getActualValue("custNm3");
-        var oldCustNm3 = FormManager.getActualValue("oldCustNm3");
-        var cnCustName1 = FormManager.getActualValue("cnCustName1");
-        var oldCnCustName1= FormManager.getActualValue("oldcnCustName1");
-        var cnCustName2 = FormManager.getActualValue("cnCustName2");
-        var oldCnCustName2= FormManager.getActualValue("oldCnCustName2");
-        var cnCustName3= FormManager.getActualValue("cnCustName3");
-        var oldCnCustName3= FormManager.getActualValue("oldCnCustName3");
         
+        // RDC Data of Chinese Name retrieval
+        var reqId = FormManager.getActualValue('reqId');
+        var qParams = {
+            _qall : 'Y',
+            REQ_ID : reqId ,
+            ADDR_TYPE : 'ZS01'
+           };
+        var result = cmr.query('GET.INTL_CUSTNM_RDC_BY_ID', qParams);
+        
+        if(result != null && result != undefined && result != ''){
+          var oldCnCustName1= result[0].ret1 != null ? result[0].ret1 : '';
+          var oldCnCustName2= result[0].ret2 != null ? result[0].ret2 : '';
+          var oldCnCustName3= result[0].ret3 != null ? result[0].ret3 : '';
+        }
+        
+        var resultCnCustNm = cmr.query('GET.INTL_CUSTNM_BY_ID', qParams);
+        
+        if(resultCnCustNm != null && resultCnCustNm != undefined && resultCnCustNm != ''){
+          var cnCustName1= resultCnCustNm[0].ret1 != null ? resultCnCustNm[0].ret1 : '';
+          var cnCustName2= resultCnCustNm[0].ret2 != null ? resultCnCustNm[0].ret2 : '';
+          var cnCustName3= resultCnCustNm[0].ret3 != null ? resultCnCustNm[0].ret3 : '';
+        }
+        
+        var resultCustNmRdc = cmr.query('GET.CUSTNM_BY_ID', qParams);
+        
+        if(resultCustNmRdc != null && resultCustNmRdc != undefined && resultCustNmRdc != ''){
+          var custName1= resultCustNmRdc[0].ret1 != null ? resultCustNmRdc[0].ret1 : '';
+          var custName2= resultCustNmRdc[0].ret2 != null ? resultCustNmRdc[0].ret2 : '';
+          var custName3= resultCustNmRdc[0].ret3 != null ? resultCustNmRdc[0].ret3 : '';
+        }
+        
+        var resultCustNm = cmr.query('GET.CUSTNM_RDC_BY_ID', qParams);
+        
+        if(resultCustNm != null && resultCustNm != undefined && resultCustNm != ''){
+          var oldCustNm1= resultCustNm[0].ret1 != null ? resultCustNm[0].ret1 : '';
+          var oldCustNm2= resultCustNm[0].ret2 != null ? resultCustNm[0].ret2 : '';
+          var oldCustNm3= resultCustNm[0].ret3 != null ? resultCustNm[0].ret3 : '';
+        }
+
         if (typeof (_pagemodel) != 'undefined') {
-          if (reqType == 'U' && (mainCustNm1 != oldCustNm1 || mainCustNm2 != oldCustNm2 
-              || custNm3 != oldCustNm3 || cnCustName1 != oldCnCustName1 || cnCustName2 != oldCnCustName2)
+          if (reqType == 'U' && (custName1 != oldCustNm1 || custName2 != oldCustNm2 
+              || custName3 != oldCustNm3 || cnCustName1 != oldCnCustName1 || cnCustName2 != oldCnCustName2)
               || cnCustName3 != oldCnCustName3) {
             if (checkForCompanyProofAttachment()) {
               return new ValidationResult(null, false, 'Company proof is mandatory since customer name has been updated or added.');
@@ -4295,5 +4322,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
-  GEOHandler.registerValidator(addChangeNameAttachmentValidator, GEOHandler.CN, null, true);
+  GEOHandler.registerValidator(addChangeNameAttachmentValidator, GEOHandler.CN, null,true);
 });
