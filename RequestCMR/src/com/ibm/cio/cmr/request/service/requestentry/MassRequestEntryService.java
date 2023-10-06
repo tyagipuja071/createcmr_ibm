@@ -5996,7 +5996,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             }
 
             // Set CTC
-            muModel.setClientTier(ctc);
+            muModel.setClientTier(StringUtils.isBlank(ctc) ? "@" : ctc);
 
             // Set SORTL
             if (StringUtils.isNotBlank(sortl)) {
