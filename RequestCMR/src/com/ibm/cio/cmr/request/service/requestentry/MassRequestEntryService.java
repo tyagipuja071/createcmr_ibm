@@ -723,18 +723,17 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           addr.setCity1(cmrsMods.getCmrCity());
           addr.setParCmrNo(muAddr.getCmrNo());
 
-          if (!StringUtils.isEmpty(muAddr.getCustNm1())) {
+          if (!StringUtils.isEmpty(muAddr.getCustNm1()) && !model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
             addr.setCustNm1(muAddr.getCustNm1());
           }
 
-          if (!StringUtils.isEmpty(muAddr.getCustNm2())) {
+          if (!StringUtils.isEmpty(muAddr.getCustNm2()) && !model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
             addr.setCustNm2(muAddr.getCustNm2());
           }
 
           if (model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
             if (!StringUtils.isEmpty(muAddr.getCustNm3())) {
-              addr.setCustNm1(muAddr.getCustNm3());
-              addr.setCustNm2("");
+              addr.setCustNm3(muAddr.getCustNm3());
             }
           }
 
