@@ -333,7 +333,13 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
         // Duplicate CMR checks Based on Name and Addresses
-        valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
+        if ("DC".equals(data.getCustSubGrp()) || "XDC".equals(data.getCustSubGrp())) {
+          valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
+        } else if ("3PA".equals(data.getCustSubGrp()) || "X3PA".equals(data.getCustSubGrp())) {
+          valid = true;
+          LOG.debug("Skip Duplicate CMR check for Third Party Scenario.");
+          details.append("Skipping Duplicate CMR check for Third Party Scenario. Request will require CMDE review before proceeding.").append("\n");
+        }
         // Sold-To and Install-At cannot be same for these scenarios
         if (zs01 != null && zi01 != null && addressEquals(zs01, zi01)) {
           engineData.addRejectionComment("OTH", "For this scenario, Sold-to and Install-at need to be different", "", "");

@@ -253,7 +253,8 @@ public class GBGMatchingElement extends MatchingElement {
                   LOG.debug("Skip processing of element as no Inac, Nacs or Compay Number found attached with the matching GBG.");
                 } else if ((StringUtils.isNotBlank(data.getInacType()) && "N".equals(data.getInacType()) && StringUtils.isNotBlank(data.getInacCd()))
                     || StringUtils.isNotBlank(data.getCompany())) {
-                  engineData.addNegativeCheckStatus("_noInacOnGbg", " request need to be send to CMDE queue for further review. ");
+                  engineData.addNegativeCheckStatus("_noInacOnGbg",
+                      "No INAC found on matching gbg. The request need to be send to CMDE queue for further review. ");
                   details.append("No INAC found on matching gbg. The request need to be send to CMDE queue for further review.\n");
                 } else {
                   LOG.debug("Matches found via D&B matching..");
