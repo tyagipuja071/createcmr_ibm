@@ -644,8 +644,8 @@ function onCustSubGrpChange() {
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     console.log('custSubGrp CHANGED here >>>>');
     FormManager.readOnly('subIndustryCd');
-//    if (FormManager.getActualValue('viewOnlyPage') != 'true')
-//      FormManager.enable('isicCd');
+// if (FormManager.getActualValue('viewOnlyPage') != 'true')
+// FormManager.enable('isicCd');
        
     if (FormManager.getActualValue('reqType') == 'C') {  
       
@@ -1184,15 +1184,16 @@ function filterInacCd(cmrIssuCntry, clusters,inacType,inacCd) {
   }
 }
 
-//var _isicHandler = null;
-//function onIsicChangeHandler() {
-//  console.log('>>>> onIsicChangeHandler >>>>');
-//  if (_isicHandler == null) {
-//    _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-//      onIsicChange();
-//    });
-//  }
-//}
+// var _isicHandler = null;
+// function onIsicChangeHandler() {
+// console.log('>>>> onIsicChangeHandler >>>>');
+// if (_isicHandler == null) {
+// _isicHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange',
+// function(value) {
+// onIsicChange();
+// });
+// }
+// }
 
 function onIsicChange() {
   console.log('>>>> onIsicChange >>>>');
@@ -1265,7 +1266,7 @@ function setIsicCdIfCmrResultAccepted(value) {
 
 function setIsicCdIfDnbResultAccepted(value){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC']);
+  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC','KYNDR']);
   var cond3 = new Set(['INTER', 'PRIV', 'XPRIV', 'DUMMY','IGF']);
   if (cond2.has(custSubGrp)) {
     var oldISIC = getIsicDataRDCValue();
@@ -1275,7 +1276,6 @@ function setIsicCdIfDnbResultAccepted(value){
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
   } 
-  FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
 
 function setIsicCdIfDnbAndCmrResultOther(value){
@@ -3085,9 +3085,9 @@ function setLockIsicfromDNB() {
   if (isDnbRecord =='Accepted' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
   } 
-//  else {
-//    FormManager.enable('isicCd');
-//  }
+// else {
+// FormManager.enable('isicCd');
+// }
 }
 
 function addressQuotationValidatorGCG() {
@@ -3288,7 +3288,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
   SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
   // CREATCMR-7589
-//  GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+// GEOHandler.addAfterConfig(onIsicChangeHandler, [SysLoc.INDIA,
+// SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
 
