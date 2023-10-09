@@ -359,6 +359,13 @@ function addAfterConfigAP() {
     setDefaultValueForNZCreate();
     setLockIsicNZfromDNB();
   }
+  
+  // CREATCMR-10215
+  var isDnbRecord = FormManager.getActualValue('findDnbResult');
+  if (cntry == '834' && isDnbRecord == 'Accepted') {
+    console.log(">>> SG-834 >>> Lock ISIC For D&B Import.");
+    FormManager.readOnly('isicCd');
+  }
 }
 
 function saveClusterVal() {
@@ -2180,7 +2187,7 @@ function getIsicDataRDCValue(){
 
 function setIsicCdIfDnbResultAccepted(value) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC']);
+  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC','KYNDR']);
   var cond3 = new Set(['INTER', 'PRIV', 'XPRIV', 'DUMMY','IGF']);
   if (cond2.has(custSubGrp)) {
     var oldISIC = getIsicDataRDCValue();
@@ -7561,7 +7568,7 @@ dojo.addOnLoad(function() {
   // SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
