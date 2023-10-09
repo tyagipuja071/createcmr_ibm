@@ -4056,7 +4056,7 @@ function performDPLCheck4JP() {
   var reqType = FormManager.getActualValue('reqType');
   var dplChkResult = FormManager.getActualValue('dplChkResult');
   if (reqType == 'C') {
-    if (custSubGrp == 'INTER' || custSubGrp == 'BPWPQ') {
+    if (custSubGrp == 'INTER') {
       FormManager.setValue('dplChkResult', 'NR');
     } else if (dplChkResult == 'NR') {
       FormManager.setValue('dplChkResult', 'Not Done');
@@ -4852,7 +4852,7 @@ function addDPLCheckValidatorJP() {
       validate : function() {
         var result = FormManager.getActualValue('dplChkResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
+        if (custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
           return new ValidationResult(null, true);
         } else {
           if (result == '' || result.toUpperCase() == 'NOT DONE') {
@@ -4873,7 +4873,7 @@ function addFailedDPLValidatorJP() {
       validate : function() {
         if (typeof (_pagemodel) != 'undefined') {
           var custSubGrp = FormManager.getActualValue('custSubGrp');
-          if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL') {
+          if (custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL') {
             return new ValidationResult(null, true);
           } else {
             if (_pagemodel.dplChkResult.trim() == 'SF' || _pagemodel.dplChkResult.trim() == 'AF') {
