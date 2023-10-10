@@ -73,7 +73,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
           if (foundCloseMatch) {
             admin.setReqReason("DUPD");
             output.setSuccess(false);
-            output.setMessage("DUNS closely matched with Private Household");
+            output.setMessage("Resend request for Company or Private Individual");
             result.setDetails("Request should be re-submitted as a company or private Individuals");
             result.setOnError(true);
             result.setResults(output.getMessage());
