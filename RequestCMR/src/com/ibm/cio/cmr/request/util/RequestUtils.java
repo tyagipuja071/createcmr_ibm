@@ -1884,6 +1884,8 @@ public class RequestUtils {
       if (cmrNo.startsWith("P")) {
         // prospect imported
         admin.setProspLegalInd("Y");
+        // CREATCMR - 10267
+        data.setCapInd("Y");
       } else {
         admin.setProspLegalInd(null);
       }
@@ -2018,7 +2020,7 @@ public class RequestUtils {
     }
     return 0;
   }
-  
+
   public static boolean fromBPPortal(long reqId) {
     EntityManager entityManager = JpaManager.getEntityManager();
     try {

@@ -228,6 +228,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
           if ("Y".equals(admin.getProspLegalInd())) {
             data.setInacCd(null);
+            // CREATCMR-10267
+            data.setCapInd("Y");
           }
           admin.setDelInd(null);
           admin.setModelCmrNo(null);
@@ -605,9 +607,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     // Resolve Data issue (length of field ISIC_CD is 4 in db
     // data.setIsicCd(record.getCmrIsic());
     data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic())
-        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
+        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim())
+        : "");
     data.setUsSicmen(!StringUtils.isEmpty(record.getCmrIsic())
-        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
+        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim())
+        : "");
     data.setIsuCd(record.getCmrIsu());
     data.setSearchTerm(record.getCmrSortl());
     data.setSitePartyId(record.getCmrSitePartyID());
