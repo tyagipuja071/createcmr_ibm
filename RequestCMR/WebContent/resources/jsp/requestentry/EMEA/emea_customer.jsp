@@ -334,59 +334,20 @@
 
 						<cmr:gridCol width="100px" field="action"
 							header="${ui.grid.action}">
-							<cmr:formatter functionName="removeLicenseFormatter" />
+							<cmr:formatter functionName="removeUpdateLicenseFormatter" />
 						</cmr:gridCol>
 
 					</cmr:grid>
 				</cmr:column>
 			</cmr:row>
 			<div id="licenseAddNewDiv">
-
-				<cmr:row topPad="15">
-					<cmr:column span="5">
-						<p>
-							<cmr:label fieldId="licenseInfo">
-								<strong>${ui.addNewLicense}</strong>
-								<cmr:info text="${ui.info.addNewLicenseInfo}" />
-							</cmr:label>
-						</p>
-					</cmr:column>
-				</cmr:row>
-				<cmr:row>
-					<cmr:column span="1" containerForField="LicenseNumber" width="150">
-						<p>
-							<cmr:label fieldId="LicenseNumber">
-								<cmr:fieldLabel fieldId="LicenseNumber" />:
-				                <cmr:info text="${ui.info.licenseNumFormat}" />
-              </cmr:label>
-							<cmr:field fieldId="LicenseNumber" id="licenseNumber"
-								path="licenseNumber" size='130' />
-						</p>
-					</cmr:column>
-					<cmr:column span="1" containerForField="LicenseValidFrom"
-						width="190">
-						<p>
-							<cmr:label fieldId="LicenseValidFrom">
-								<cmr:fieldLabel fieldId="LicenseValidFrom" />:
-      </cmr:label>
-							<cmr:date path="licenseValidFrom" format="yyyyMMdd" />
-						</p>
-					</cmr:column>
-					<cmr:column span="1" containerForField="LicenseValidTo" width="190">
-						<p>
-							<cmr:label fieldId="LicenseValidTo">
-								<cmr:fieldLabel fieldId="LicenseValidTo" />:
-      </cmr:label>
-							<cmr:date path="licenseValidTo" format="yyyyMMdd" />
-						</p>
-					</cmr:column>
-					<cmr:column span="2">
-						<div style="padding-top: 15px">
-							<cmr:button label="${ui.btn.addLicense}" onClick="doAddLicense()"
-								id="addLicenseButton" />
-						</div>
-					</cmr:column>
-				</cmr:row>
+			<cmr:row>
+				<cmr:column span="2">
+					<div style="padding-top: 15px">
+						<cmr:button label="${ui.btn.addLicense}" onClick="showModalForAdd()" id="addLicenseButton" />
+					</div>
+				</cmr:column>
+			</cmr:row>
 			</div>
 			<cmr:row topPad="15" />
 		</div>

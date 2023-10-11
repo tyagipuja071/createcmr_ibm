@@ -56,6 +56,7 @@ import com.ibm.cio.cmr.request.model.requestentry.CheckListModel;
 import com.ibm.cio.cmr.request.model.requestentry.DataModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.requestentry.LicenseModel;
 import com.ibm.cio.cmr.request.model.requestentry.NotifyListModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.requestentry.SubindustryIsicSearchModel;
@@ -625,7 +626,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
       }
     }
-    
+
     if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry()) && "ISOCU".equals(data.getCustSubGrp())
         && (CmrConstants.Processing_Validation_Complete().equals(model.getAction())
             || CmrConstants.All_Processing_Complete().equals(model.getAction()) || "PCC".equals(model.getAction()))) {
@@ -634,7 +635,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null, null, null,
           null);
     }
-    
+
     RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
     updateEntity(admin, entityManager);
     updateEntity(data, entityManager);
@@ -649,33 +650,33 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
     if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && (CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())
         || SystemLocation.SPAIN.equals(model.getCmrIssuingCntry()))) {
-      
-      String oldVat = getOldVatValue(entityManager, reqId);      
+
+      String oldVat = getOldVatValue(entityManager, reqId);
       String oldVatInd = getOldVatIndValue(entityManager, reqId);
-      
+
       String oldVatValue = (oldVat != null ? oldVat : "");
       String oldVatIndValue = (oldVatInd != null ? oldVatInd : "");
-      
+
       if (admin.getReqType().equals("C")) {
         if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
         } else
           scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
       }
-            
+
       if (admin.getReqType().equals("U")) {
-        if (!oldVatIndValue.isEmpty()){
+        if (!oldVatIndValue.isEmpty()) {
           if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty()) && oldVatIndValue.equals("N")) {
             scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_NA);
           } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue != null) && (oldVatIndValue.equals("T"))) {
-            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);        
-          } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null)  && (oldVatIndValue.equals("E"))) {
+            scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
+          } else if ("N".equals(data.getVatInd()) && (iscrossBorder) && (oldVatValue != null) && (oldVatIndValue.equals("E"))) {
             scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
           } else if ("N".equals(data.getVatInd()) && (!iscrossBorder) && (oldVatValue.isEmpty()) && (oldVatIndValue.equals("E"))) {
             scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
           }
-        
-        } else if (oldVatIndValue.isEmpty()){
+
+        } else if (oldVatIndValue.isEmpty()) {
           if ("N".equals(data.getVatInd()) && (!iscrossBorder)) {
             scorecard.setVatAcknowledge(CmrConstants.VAT_ACKNOWLEDGE_YES);
           } else {
@@ -683,14 +684,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           }
         }
       }
-      
-    
+
     }
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
     }
-    
+
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())
         && "RACMR".equals(data.getCustSubGrp())) {
       String comment = JPHandler.addJpRALogicOnSendForProcessing(entityManager, admin, data, model);
@@ -758,7 +758,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     String vatVal = query.getSingleResult(String.class);
     return vatVal;
   }
-  
+
   private String getOldVatIndValue(EntityManager entityManager, long reqId) {
     String sql = ExternalizedQuery.getSql("QUERY.GET.OLD.VATIND.VALUE");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1283,6 +1283,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     mv.addObject("approval", new ApprovalResponseModel());
     mv.addObject("fiscalDataModal", new ValidateFiscalDataModel());
     mv.addObject("autoDnbModel", new AutoDNBDataModel());
+    mv.addObject("licenseModel", new LicenseModel());
 
     EntityManager entityManager = JpaManager.getEntityManager();
 

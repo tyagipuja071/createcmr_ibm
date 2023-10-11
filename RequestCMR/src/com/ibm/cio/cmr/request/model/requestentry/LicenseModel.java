@@ -13,6 +13,7 @@ public class LicenseModel extends BaseModel {
   private String currentIndc;
   private String validFrom;
   private String validTo;
+  private String oldLicenseNumber;
 
   public long getReqId() {
     return reqId;
@@ -76,6 +77,14 @@ public class LicenseModel extends BaseModel {
 
   public void setLicenseNum(String licenseNum) {
     this.licenseNum = licenseNum;
+  }
+
+  public String getOldLicenseNumber() {
+    return oldLicenseNumber;
+  }
+
+  public void setOldLicenseNumber(String oldLicenseNumber) {
+    this.oldLicenseNumber = oldLicenseNumber;
   }
 
 }

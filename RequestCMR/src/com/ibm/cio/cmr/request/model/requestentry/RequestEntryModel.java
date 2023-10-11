@@ -508,6 +508,7 @@ public class RequestEntryModel extends BaseModel {
   private String licenseNumber;
   private String licenseValidFrom;
   private String licenseValidTo;
+  private String oldLicenseNumber;
 
   public String getMexicoBillingName() {
     return mexicoBillingName;
@@ -3257,7 +3258,7 @@ public class RequestEntryModel extends BaseModel {
   public void setVatAcknowledge(String vatAcknowledge) {
     this.vatAcknowledge = vatAcknowledge;
   }
-  
+
   public String getLicenseNumber() {
     return licenseNumber;
   }
@@ -3281,7 +3282,7 @@ public class RequestEntryModel extends BaseModel {
   public void setLicenseValidTo(String licenseValidTo) {
     this.licenseValidTo = licenseValidTo;
   }
-  
+
   public String getJpCloseDays() {
     return jpCloseDays;
   }
@@ -3505,4 +3506,5 @@ public class RequestEntryModel extends BaseModel {
   public void setJpPayDays8(String jpPayDays8) {
     this.jpPayDays8 = jpPayDays8;
   }
+
 }
