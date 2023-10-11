@@ -153,7 +153,9 @@ public class BeLuxUtil extends AutomationUtil {
       }
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
+      break;
     case SCENARIO_PRIVATE_CUSTOMER_LU:
+      break;
     case SCENARIO_THIRD_PARTY:
     case SCENARIO_THIRD_PARTY_LU:
     case SCENARIO_DATA_CENTER:
