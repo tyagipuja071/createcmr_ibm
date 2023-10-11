@@ -1,6 +1,6 @@
 /* Register NETHERLANDS Javascripts */
 var _addrTypesForNL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZP02' ];
-var _prolifCountries = [ 'AE', 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', 'GE', 'HK', 'IR', 'IQ', 'IL', 'JO', 'KZ', 'KP', 'KW', 'KG', 'LA', 'LB', 'LY', 'MO', 'MD', 'MN', 'MM', 'OM', 'PK',
+var _prolifCountries = [ 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', 'GE', 'HK', 'IR', 'IQ', 'IL', 'JO', 'KZ', 'KP', 'KW', 'KG', 'LA', 'LB', 'LY', 'MO', 'MD', 'MN', 'MM', 'OM', 'PK',
     'PS', 'QA', 'RU', 'SA', 'SD', 'SY', 'TW', 'TJ', 'TM', 'UA', 'AE', 'UZ', 'VE', 'VN', 'YE' ];
 var _prolifCountriesP2 = [ 'HK', 'CN', 'MO' ];
 var _poBOXHandler = [];
