@@ -1,3 +1,4 @@
+
 package com.ibm.cio.cmr.request.controller.requestentry;
 
 import java.util.List;
@@ -43,6 +44,8 @@ public class LicenseController extends BaseController {
     String action = model.getAction();
     if ("ADD_LICENSE".equals(action)) {
       result.setMessage(MessageUtil.getMessage(MessageUtil.INFO_LICENSE_ADD_LIST));
+    } else if ("UPDATE_LICENSE".equals(action)) {
+      result.setMessage(MessageUtil.getMessage(MessageUtil.INFO_LICENSE_UPDATE_LIST));
     } else if ("REMOVE_LICENSE".equals(action)) {
       result.setMessage(MessageUtil.getMessage(MessageUtil.INFO_LICENSE_REMOVE_LIST));
     }

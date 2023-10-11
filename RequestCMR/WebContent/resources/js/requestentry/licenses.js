@@ -3,9 +3,9 @@
  */
 function doAddLicense() {
   
-  var licenseNumber = FormManager.getActualValue('licenseNumber');
-  var licenseValidFrom = FormManager.getActualValue('licenseValidFrom');
-  var licenseValidTo = FormManager.getActualValue('licenseValidTo');
+  var licenseNumber = FormManager.getActualValue('licenseNum');
+  var licenseValidFrom = FormManager.getActualValue('validFrom');
+  var licenseValidTo = FormManager.getActualValue('validTo');
   
   if (licenseNumber == '' || licenseValidFrom == '' || licenseValidTo == '') {
     cmr.showAlert('Please input License Number, Date Valid From and Valid To Date.');
@@ -46,10 +46,90 @@ function doAddLicense() {
   var licenseDtls = `License Number: ${licenseNumber}, Date Valid From: ${licenseValidFrom} and Valid To Date: ${licenseValidTo}`;
   var addLicFunc = `actualAddLicense(${licenseValidFrom}, ${licenseValidTo})`;
   cmr.showConfirm(addLicFunc, 'Add <strong>' + licenseDtls + '</strong> to the License List?');
+
+}
+
+function doUpdateLicense() {
+  
+  var licenseNumber = FormManager.getActualValue('licenseNum');
+  var licenseValidFrom = FormManager.getActualValue('validFrom');
+  var licenseValidTo = FormManager.getActualValue('validTo');
+  
+  if (licenseNumber == '' || licenseValidFrom == '' || licenseValidTo == '') {
+    cmr.showAlert('Please input License Number, Date Valid From and Valid To Date.');
+    return;
+  }
+  
+  var licenseNumRegex = /^\d{2}\/\d{5}\/\d{6}$/;
+  if (!licenseNumRegex.test(licenseNumber)) {
+    cmr.showAlert('Invalid license number format. The license number format should be NN/NNNNN/NNNNNN.');
+    return;
+  }
+  
+  if(hasDuplicateLicenseNumber()) {
+    cmr.showAlert('The license number entered is a duplicate. Please provide a unique license number.');
+    return;
+  }
+  
+  var fromDateIsValidFormat = isValidDate(licenseValidFrom);
+  var toDateIsValidFormat = isValidDate(licenseValidTo);
+  if(!fromDateIsValidFormat || !toDateIsValidFormat) {
+    var invalidDateStr = '';
+    if(!fromDateIsValidFormat && !toDateIsValidFormat) {
+      invalidDateStr = `Invalid dates for 'Date Valid From' and 'Valid To Date'`
+    } else if(!fromDateIsValidFormat) {
+      invalidDateStr = `Invalid date for 'Date Valid From'`
+    } else if (!toDateIsValidFormat) {
+      invalidDateStr = `Invalid date for 'Valid To Date'`
+    }
+    cmr.showAlert(`${invalidDateStr}. Please enter a valid date in the format 'YYYYMMDD'.`);
+    return;
+  }
+  
+  if(licenseValidFrom > licenseValidTo) {
+    cmr.showAlert(`'Date Valid From' must be on or before 'Valid To Date'.`);
+    return;
+  }
+  
+  var licenseDtls = `License Number: ${licenseNumber}, Date Valid From: ${licenseValidFrom} and Valid To Date: ${licenseValidTo}`;
+  var addLicFunc = `actualUpdateLicense(${licenseValidFrom}, ${licenseValidTo})`;
+  cmr.showConfirm(addLicFunc, 'The following are the new license details: ' + licenseDtls + '</strong>. Proceed?');
+
+}
+
+function showModalForAdd() {
+  cmr.showModal('addUpdateLicenseModal');
+  FormManager.setValue('licenseNum', '');
+  FormManager.setValue('validTo', '');
+  FormManager.setValue('validFrom', '');  
+}
+
+function showModalForUpdate(licenseNumber, validFrom, validTo) {
+  cmr.showModal('addUpdateLicenseModal');
+  FormManager.setValue('oldLicenseNumber', licenseNumber);
+  FormManager.setValue('licenseNum', licenseNumber);
+  FormManager.setValue('validFrom', validFrom);
+  FormManager.setValue('validTo', validTo);
+}
+
+function performAddUpdate() {
+  var oldLicense = FormManager.getActualValue('oldLicenseNumber');
+  if (oldLicense != '' && oldLicense != undefined) {
+    doUpdateLicense();
+  } else {
+    doAddLicense();
+  }
+}
+
+function showAddLicenseModal() {
+  cmr.showModal('addUpdateLicenseModal');
+  FormManager.setValue('licenseNum', '');
+  FormManager.setValue('validTo', '');
+  FormManager.setValue('validFrom', '');  
 }
 
 function hasDuplicateLicenseNumber() {
-  var licenseNumber = FormManager.getActualValue('licenseNumber');
+  var licenseNumber = FormManager.getActualValue('licenseNum');
 
   if(CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID .rowCount > 0) {
     for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
@@ -68,14 +148,28 @@ function hasDuplicateLicenseNumber() {
  */
 function actualAddLicense(licenseValidFrom, licenseValidTo) {
   var reqId = FormManager.getActualValue('reqId');
-  var licenseNumber = FormManager.getActualValue('licenseNumber');
+  var licenseNumber = FormManager.getActualValue('licenseNum');
 
-  var queryString = `?reqId=${reqId}&licenseNum=${encodeURIComponent(licenseNumber)}&validFrom=${licenseValidFrom}&validTo=${licenseValidTo}`
+  var queryString = `?reqId=${reqId}&licenseNum=${encodeURIComponent(licenseNumber)}&validFrom=${licenseValidFrom}&validTo=${licenseValidTo}`;
   FormManager.doHiddenAction('frmCMR_addressModal', 'ADD_LICENSE', cmr.CONTEXT_ROOT + '/request/license/process.json' + queryString, true, refreshLicenseAfterResult, false);
+  closeLicenseModal();
 }
 
 function refreshLicenseAfterResult(result) {
   CmrGrid.refresh('LICENSES_GRID');
+}
+
+/**
+ * Called after the confirm
+ */
+function actualUpdateLicense(licenseValidFrom, licenseValidTo) {
+  var reqId = FormManager.getActualValue('reqId');
+  var licenseNumber = FormManager.getActualValue('licenseNum');
+  var oldLicenseNumber = FormManager.getActualValue('oldLicenseNumber');
+
+  var queryString = `?reqId=${reqId}&licenseNum=${encodeURIComponent(licenseNumber)}&validFrom=${licenseValidFrom}&validTo=${licenseValidTo}&oldLicenseNumber=${oldLicenseNumber}&&currentIndc=N`;
+  FormManager.doHiddenAction('frmCMR_addressModal', 'UPDATE_LICENSE', cmr.CONTEXT_ROOT + '/request/license/process.json' + queryString, true, refreshLicenseAfterResult, false);
+  closeLicenseModal();
 }
 
 /**
@@ -85,7 +179,7 @@ function refreshLicenseAfterResult(result) {
  * @param rowIndex
  * @returns {String}
  */
-function removeLicenseFormatter(value, rowIndex) {
+function removeUpdateLicenseFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(0);
   if (rowData == null || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return ''; // not more than 1 record
@@ -97,8 +191,24 @@ function removeLicenseFormatter(value, rowIndex) {
   }
 
   var licenseNumber = rowData.licenseNum[0];
+  var validFrom = rowData.validFrom[0];
+  var validTo = rowData.validTo[0];
+  
   var imgloc = cmr.CONTEXT_ROOT + '/resources/images/';
-  return '<img src="' + imgloc + 'addr-remove-icon.png"  class="addr-icon" title = "Remove Entry" onclick = "doRemoveFromLicenseList(\'' + licenseNumber + '\')">';
+  var action = '';
+  action += '<img src="' + imgloc + 'addr-remove-icon.png"  class="addr-icon" title = "Remove Entry" onclick = "doRemoveFromLicenseList(\'' + licenseNumber + '\')">' + 
+  '<img src="' + imgloc + 'addr-edit-icon.png"  class="addr-icon" title = "Update Entry" onclick = "showModalForUpdate(\'' + licenseNumber + '\', \'' + validFrom + '\', \'' + validTo + '\')">';
+
+  return action;
+}
+
+function doUpdateLicenseRecord(licenseNumber, validFrom, validTo) {
+  FormManager.setValue('oldLicenseNumber', licenseNumber);
+  FormManager.setValue('licenseNum', licenseNumber);
+  FormManager.setValue('validFrom', validFrom);
+  FormManager.setValue('validTo', validTo);
+  licenseToUpdate = licenseNumber;
+  cmr.showModal('addUpdateLicenseModal');
 }
 
 var licenseToRemove = '';
@@ -115,9 +225,13 @@ function actualRemoveFromLicenseList() {
   var reqId = FormManager.getActualValue('reqId');
   var queryString = `?reqId=${reqId}&licenseNum=${encodeURIComponent(licenseToRemove)}&currentIndc=N`
   FormManager.doHiddenAction('frmCMR_addressModal', 'REMOVE_LICENSE', cmr.CONTEXT_ROOT + '/request/license/process.json' + queryString, true,
-      refreshLicenseAfterResult, false);
-  
+      refreshLicenseAfterResult, false);  
   licenseToRemove = '';
+}
+
+function closeLicenseModal() {
+  FormManager.setValue('oldLicenseNumber', '');
+  cmr.hideModal('addUpdateLicenseModal');
 }
 
 function licenseImportIndFormatter(value, rowIndex) {
