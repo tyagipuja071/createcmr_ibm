@@ -159,7 +159,7 @@ public class JPHandler extends GEOHandler {
     }
   }
 
-  private static final Map<String, String> INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP;
+  private static final Map<String, String> ADDR_TYPE_TO_KNA1_SEQ_MAP;
   static {
     Map<String, String> map = new HashMap<>();
     map.put("ZS01", "3");
@@ -176,8 +176,9 @@ public class JPHandler extends GEOHandler {
     map.put("ZC01", "0");
     map.put("ZE01", "3");
     map.put("ZS02", "1");
+    map.put("ZP09", "4");
 
-    INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP = Collections.unmodifiableMap(map);
+    ADDR_TYPE_TO_KNA1_SEQ_MAP = Collections.unmodifiableMap(map);
   }
 
   /**
@@ -2499,6 +2500,59 @@ public class JPHandler extends GEOHandler {
     // updateBillToCustomerNoAfterImport(data);
 
     setEnglishAddrFieldsFromRDC(entityManager, admin, data);
+    setSapNoOnImport(entityManager, admin, data);
+  }
+
+  private void setSapNoOnImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    if ("U".equalsIgnoreCase(admin.getReqType())) {
+      String cmrNo = data.getCmrNo();
+      List<Kna1> kna1List = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), cmrNo);
+      Map<String, String> seqNoToKunnrMap = mapZzkvSeqNoToKunnr(entityManager, kna1List);
+      List<Addr> addrs = getAddresses(entityManager, admin.getId().getReqId());
+
+      for (Addr addr : addrs) {
+        if ("ZE01".equals(addr.getId().getAddrType()) || StringUtils.isNotEmpty(addr.getSapNo())) {
+          continue;
+        }
+
+        String seqNoEquiv = ADDR_TYPE_TO_KNA1_SEQ_MAP.get(addr.getId().getAddrType());
+        if (StringUtils.isNotEmpty(seqNoEquiv)) {
+          addr.setSapNo(seqNoToKunnrMap.get(seqNoEquiv));
+        }
+
+        if (addr != null && addr.getId() != null && "ZC01".equals(addr.getId().getAddrType())
+            && StringUtils.isEmpty(seqNoToKunnrMap.get(seqNoEquiv))) {
+          String companySap = getCompanyNoKunnrFromAcctsList(entityManager, kna1List);
+          addr.setSapNo(companySap);
+        }
+
+        entityManager.merge(addr);
+      }
+      entityManager.flush();
+    }
+  }
+
+  private String getCompanyNoKunnrFromAcctsList(EntityManager entityManager, List<Kna1> kna1List) throws Exception {
+    String soldToSeqNo = "3";
+    String kunnrVal = "";
+    Kna1 kna1 = kna1List.stream().filter(k -> k.getZzkvSeqno().equals(soldToSeqNo)).findAny().orElse(null);
+    String soldToCompanyNo = kna1.getZzkvNode1();
+    if (StringUtils.isNotBlank(soldToCompanyNo)) {
+      List<Kna1> kna1ListForCompany = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), soldToCompanyNo);
+      kna1 = kna1ListForCompany.stream().filter(k -> "ZORG".equals(k.getKtokd())).findFirst().orElse(null);
+      if (kna1 != null && kna1.getId() != null) {
+        kunnrVal = kna1.getId().getKunnr();
+      }
+    }
+    return kunnrVal;
+  }
+
+  private Map<String, String> mapZzkvSeqNoToKunnr(EntityManager entityManager, List<Kna1> kna1List) {
+    Map<String, String> zzkvSeqNoToKunnrMap = new HashMap<>();
+    for (Kna1 kna1 : kna1List) {
+      zzkvSeqNoToKunnrMap.put(kna1.getZzkvSeqno(), kna1.getId().getKunnr());
+    }
+    return zzkvSeqNoToKunnrMap;
   }
 
   private void setEnglishAddrFieldsFromRDC(EntityManager entityManager, Admin admin, Data data) throws Exception {
@@ -2520,7 +2574,7 @@ public class JPHandler extends GEOHandler {
   }
 
   private void processIntlAddr(IntlAddr intlAddr, List<Kna1> kna1List, EntityManager entityManager) throws Exception {
-    String kna1SeqNum = INTL_ADDR_TYPE_TO_KNA1_SEQ_MAP.get(intlAddr.getId().getAddrType());
+    String kna1SeqNum = ADDR_TYPE_TO_KNA1_SEQ_MAP.get(intlAddr.getId().getAddrType());
     Kna1 kna1 = kna1List.stream().filter(k -> k.getZzkvSeqno().equals(kna1SeqNum)).findAny().orElse(null);
 
     // Special handling for company type
@@ -5290,6 +5344,15 @@ public class JPHandler extends GEOHandler {
 
   public static void handleWfHist(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     // super
+  }
+
+  private List<Addr> getAddresses(EntityManager entityManager, Long reqId) {
+    List<Addr> addresses = null;
+    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    addresses = query.getResults(Addr.class);
+    return addresses;
   }
 
 }
