@@ -681,6 +681,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
   <jsp:include page="dpldetails.jsp" />
   <jsp:include page="validationurl.jsp" />
   <jsp:include page="modals.jsp">
+  <jsp:include page="editlicense.jsp" />
     <jsp:param value="E" name="isExisting"/>
   </jsp:include>
   <jsp:include page="dnbcheck.jsp" />

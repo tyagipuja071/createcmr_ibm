@@ -40,9 +40,10 @@ public class LicenseService extends BaseService<LicenseModel, Licenses> {
 
     if ("ADD_LICENSE".equalsIgnoreCase(action)) {
       createLicenseFromModel(entityManager, model, requesterId);
+    } else if ("UPDATE_LICENSE".equalsIgnoreCase(action)) {
+      updateLicenseFromModel(entityManager, model, requesterId);
     } else if ("REMOVE_LICENSE".equalsIgnoreCase(action)) {
       String licenseNumberToRemove = StringUtils.isNotBlank(model.getLicenseNum()) ? model.getLicenseNum() : "";
-
       // We are only allowed to remove newly added license CURRENT_INDC = "N"
       if (StringUtils.isNotBlank(licenseNumberToRemove) && NEW_LICENSE_INDC.equals(model.getCurrentIndc())) {
         Licenses currentRec = getCurrentRecord(model, entityManager, request);
@@ -149,6 +150,25 @@ public class LicenseService extends BaseService<LicenseModel, Licenses> {
     createEntity(license, entityManager);
   }
 
+  public void updateLicenseFromModel(EntityManager entityManager, LicenseModel model, String requesterId) {
+    Licenses license = getLicenseByLicenseNum(entityManager, model.getReqId(), model.getOldLicenseNumber());
+    if (license == null) {
+      return;
+    }
+    Licenses updatedLicense = license;
+
+    deleteEntity(license, entityManager);
+
+    updatedLicense.setValidFrom(model.getValidFrom());
+    updatedLicense.setValidTo(model.getValidTo());
+    updatedLicense.setCurrentIndc(NEW_LICENSE_INDC);
+    updatedLicense.setLastUpdtBy(requesterId);
+    updatedLicense.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+    updatedLicense.getId().setLicenseNum(model.getLicenseNum());
+
+    updateEntity(license, entityManager);
+  }
+
   public List<Knvl> getKnvlByKunnr(EntityManager entityManager, String kunnr) {
     String sql = ExternalizedQuery.getSql("GET.KNVL.RECORD");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -179,6 +199,14 @@ public class LicenseService extends BaseService<LicenseModel, Licenses> {
     licensesQuery.setParameter("LICENSE_NUM", licenseNumber);
     List<Licenses> licensesList = licensesQuery.getResults(Licenses.class);
     return licensesList;
+  }
+
+  public Licenses getLicenseByLicenseNum(EntityManager entityManager, Long reqId, String licenseNumber) {
+    PreparedQuery licensesQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.LICENSES_BY_LIC_NUM_REQ_ID"));
+    licensesQuery.setParameter("REQ_ID", reqId);
+    licensesQuery.setParameter("LIC_NUM", licenseNumber);
+    Licenses license = licensesQuery.getSingleResult(Licenses.class);
+    return license;
   }
 
 }
