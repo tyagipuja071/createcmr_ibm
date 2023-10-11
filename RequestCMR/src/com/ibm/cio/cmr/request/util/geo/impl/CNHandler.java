@@ -867,8 +867,9 @@ public class CNHandler extends GEOHandler {
           String enDesc = getCnCityEngDescById(entityManager, cdOfUpperDesc);
           // 3. save desc as addr.city1
           cmtMsg += "\n\nFrom: " + addr.getCity1() + "    To: " + enDesc;
-          addr.setCity1(enDesc);
-
+          if (!enDesc.equals(addr.getCity1())) {
+            addr.setCity1(enDesc);
+          }
           if (StringUtils.isEmpty(enDesc)) {
             cmtMsg += "\n\nPlease note that you will not be able to submit the request for processing if you do not supply a value for your address city field.";
           }
@@ -881,16 +882,18 @@ public class CNHandler extends GEOHandler {
           // 2. save desc as addr.city1
           if (StringUtils.isEmpty(enDesc) || StringUtils.isBlank(enDesc)) {
             cmtMsg += "\n\nFrom: " + addr.getCity1() + "    To: " + enDesc;
-            addr.setCity1(enDesc);
-
+            if (!enDesc.equals(addr.getCity1())) {
+              addr.setCity1(enDesc);
+            }
             if (StringUtils.isEmpty(enDesc)) {
               cmtMsg += "\n\nPlease note that you will not be able to submit the request for processing if you do not supply a value for your address city field.";
             }
             createCommentLog(entityManager, admin, cmtMsg);
           } else {
             String newCity = getCnCityEngDescById(entityManager, enDesc);
-            addr.setCity1(newCity);
-
+            if (!newCity.equals(addr.getCity1())) {
+              addr.setCity1(newCity);
+            }
             if (!addr.getCity1().equals(newCity)) {
               cmtMsg += "\n\nFrom: " + addr.getCity1() + "    To: " + enDesc;
               createCommentLog(entityManager, admin, cmtMsg);

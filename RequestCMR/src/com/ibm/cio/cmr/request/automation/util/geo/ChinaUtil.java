@@ -423,12 +423,21 @@ public class ChinaUtil extends AutomationUtil {
     return true;
   }
 
-  public boolean isUpdated(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+  public boolean isUpdatedOrNewAdded(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
 
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
+    List<Addr> addresses = requestData.getAddresses();
 
+    // check if new addr added
+    boolean newAddradded = false;
+    for (Addr addr : addresses) {
+      if ("N".equals(addr.getImportInd())) {
+        newAddradded = true;
+        break;
+      }
+    }
     // check if ZS01 name and address have been updated
     boolean zs01EnName1 = changes.isAddressFieldChanged("ZS01", "Customer Name English");
     boolean zs01CnName1 = changes.isAddressFieldChanged("ZS01", "Customer Name Chinese");
@@ -486,6 +495,8 @@ public class ChinaUtil extends AutomationUtil {
 
       return true;
     } else if (checkExtraUpdateFields(requestData, changes)) {
+      return true;
+    } else if (newAddradded) {
       return true;
     }
     return false;
