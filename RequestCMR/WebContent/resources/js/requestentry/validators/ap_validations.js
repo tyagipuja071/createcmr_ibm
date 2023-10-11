@@ -2196,6 +2196,8 @@ function setIsicCdIfDnbResultAccepted(value) {
   } else if (cond3.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
+  } else {
+    FormManager.readOnly('isicCd');
   }
 }
 
