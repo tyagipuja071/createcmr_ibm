@@ -544,14 +544,8 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
         validate : function() {
           var reqType = FormManager.getActualValue('reqType');
           var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-
-          // if Chile, Colombia, Venezuela are the CMR issuing country
-          // proxy's the taxCd1 value to vat to proceed with the validation
-          if (cmrIssuingCntry == '655' || cmrIssuingCntry == '661' || cmrIssuingCntry == '871') {
-            var vat = FormManager.getActualValue('taxCd1');
-          } else {
-            var vat = FormManager.getActualValue('vat');
-          }
+                  
+          var vat = FormManager.getActualValue('vat');
 
           if (!vat || vat == '' || vat.trim() == '') {
             return new ValidationResult(null, true);
@@ -569,7 +563,12 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZS01 VAT Country: ' + zs01Cntry);          
+          console.log('ZS01 VAT Country: ' + zs01Cntry);    
+          if (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL') {
+            // skip validation for Chile, Colombia, Venezuela landed country
+            // handled sperately under CREATCMR-10034
+            return new ValidationResult(null, true);
+          }
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -1310,6 +1309,108 @@ var forceLockUnlock = function() {
   FormManager.readOnly('cmrIssuingCntry');
 }
 
+// CREATCMR-10034
+function addLAVatValidator() {
+  FormManager.addFormValidator((function() {
+
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        console.log(">>>> addLAVatValidator");
+        var zs01Cntry = null;
+
+        var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+          REQID : FormManager.getActualValue('reqId'),
+          TYPE : 'ZS01'
+        });
+        if (ret && ret.ret1 && ret.ret1 != '') {
+          zs01Cntry = ret.ret1;
+        }
+        console.log('ZS01 VAT Country: ' + zs01Cntry);
+        if (zs01Cntry != undefined && zs01Cntry != null && (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL')) {
+          // CREATCMR-10034
+
+          // if Chile, Colombia, Venezuela are the CMR issuing country
+          // proxy's the taxCd1 value to vat to proceed with the validation
+
+          var vat = FormManager.getActualValue('taxCd1');
+          if (!vat || vat == '' || vat.trim() == '') {
+            // if taxcd1 is empty check for vat field
+            var vat = FormManager.getActualValue('vat');
+          }
+
+          if (!vat || vat == '' || vat.trim() == '') {
+            return new ValidationResult(null, true);
+          } else if (reqType == 'U' && vat == '@') {
+            // vat deletion for updates
+            return new ValidationResult(null, true);
+          }
+
+          if (reqType == 'C' && zs01Cntry == 'CO') {
+            if (custSubGrp == 'PRIPE') {
+              if (vat.length != '10') {
+                return new ValidationResult({
+                  id : 'vat',
+                  type : 'text',
+                  name : 'vat'
+                }, false, ('Invalid VAT length for CO. Length should be 10 characters long for Private Person.'));
+              } else if (vat.length == '10') {
+                var coPattern1 = /^[0-9]{8}[-][0-9]{1}$/;
+                if (!vat.match(coPattern1)) {
+                  return new ValidationResult({
+                    id : 'vat',
+                    type : 'text',
+                    name : 'vat'
+                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnn-n for Private Person.'));
+                }
+              }
+            } else if (custSubGrp != 'PRIPE') {
+              if (vat.length != '11') {
+                return new ValidationResult({
+                  id : 'vat',
+                  type : 'text',
+                  name : 'vat'
+                }, false, ('Invalid VAT length for CO. Length should be 11 characters long for all Scenario Sub-types other than Private Person. '));
+              } else if (vat.length == '11') {
+                var coPattern2 = /^[0-9]{9}[-][0-9]{1}$/;
+                if (!vat.match(coPattern2)) {
+                  return new ValidationResult({
+                    id : 'vat',
+                    type : 'text',
+                    name : 'vat'
+                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnnn-n for all Scenario Sub-types other than Private Person.'));
+                }
+              }
+            }
+            return;
+          }
+          var result = cmr.validateVAT(zs01Cntry, vat);
+          if (result && !result.success) {
+            if (result.errorPattern == null) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, result.errorMessage + '.');
+            } else {
+              var msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, msg);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -1365,7 +1466,8 @@ dojo.addOnLoad(function() {
   // exclude for JP
   // GEOHandler.registerWWValidator(addDPLCheckValidator,GEOHandler.ROLE_PROCESSOR);
 
-//  GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ], GEOHandler.ROLE_PROCESSOR, true, true);
+// GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ],
+// GEOHandler.ROLE_PROCESSOR, true, true);
 
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
@@ -1410,5 +1512,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(forceLockUnlock);
   GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
   GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries)
+  GEOHandler.registerWWValidator(addLAVatValidator)
 
 });
