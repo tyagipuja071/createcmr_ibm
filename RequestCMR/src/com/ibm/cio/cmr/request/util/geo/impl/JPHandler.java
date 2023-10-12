@@ -626,7 +626,10 @@ public class JPHandler extends GEOHandler {
 
     List<Kna1> l = getKna1List(entityManager, mandt, mainRecord.getCmrNum());
     Kna1 kna1 = l.stream().filter(k -> "ZORG".equals(k.getKtokd())).findFirst().orElse(null);
-    String rol = kna1.getInspbydebi();
+    String rol ="";
+    if(kna1!=null) {
+      rol = kna1.getInspbydebi();;
+    }
     mainRecord.setInspbydebi(rol);
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
       mainRecord.setCmrDuns(company.getDunsNo());
