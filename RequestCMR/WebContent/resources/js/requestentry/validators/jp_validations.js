@@ -4431,7 +4431,7 @@ function setCSBORequired() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
-    if (role == 'REQUESTER') {
+    if (role == 'REQUESTER' && custSubGrp != 'BFKSC') {
       FormManager.removeValidator('csBo', Validators.REQUIRED);
     } else if (role == 'PROCESSOR') {
       if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == 'BCEXA') {
@@ -4455,7 +4455,7 @@ function setCSBORequired() {
       if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'WHCMR' || custSubGrp == 'OUTSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == 'STOSB'
           || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER') {
         FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
-      } else if (custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC') {
+      } else if (custSubGrp == 'BCEXA') {
         FormManager.readOnly('csBo');
       } else if (custSubGrp == 'ABIJS' || custSubGrp == 'AHIJE' || custSubGrp == 'AUITS' || custSubGrp == 'AWIGS' || custSubGrp == 'BDRBS' || custSubGrp == 'BVMDS' || custSubGrp == 'BGICS'
           || custSubGrp == 'BHISO' || custSubGrp == 'BIJSC' || custSubGrp == 'BKRBS' || custSubGrp == 'BLNIS' || custSubGrp == 'BMISI' || custSubGrp == 'BPIJB' || custSubGrp == 'BQICL'
@@ -6495,91 +6495,94 @@ function disableBpBqiImport() {
 }
 
 function setFieldsForBFKSCScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
 
-  FormManager.disable('outsourcingService');
-  FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
+  if (custSubGrp == 'BFKSC') {
+    FormManager.disable('outsourcingService');
+    FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
 
-  if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-    FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+    if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+      FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
 
-    FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
-    FormManager.removeValidator('crsCd', Validators.REQUIRED);
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-  } else {
-    FormManager.readOnly('email2');
-    FormManager.removeValidator('email2', Validators.REQUIRED);
+      FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
+      FormManager.removeValidator('crsCd', Validators.REQUIRED);
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    } else {
+      FormManager.readOnly('email2');
+      FormManager.removeValidator('email2', Validators.REQUIRED);
 
-    FormManager.readOnly('oemInd');
-    FormManager.removeValidator('oemInd', Validators.REQUIRED);
-    FormManager.setValue('oemInd', '');
+      FormManager.readOnly('oemInd');
+      FormManager.removeValidator('oemInd', Validators.REQUIRED);
+      FormManager.setValue('oemInd', '');
 
-    FormManager.setValue('leasingCompanyIndc', '');
-    FormManager.readOnly('leasingCompanyIndc');
-    FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
+      FormManager.setValue('leasingCompanyIndc', '');
+      FormManager.readOnly('leasingCompanyIndc');
+      FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
 
-    FormManager.readOnly('educAllowCd');
-    FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
+      FormManager.readOnly('educAllowCd');
+      FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
 
-    FormManager.setValue('custClass', '');
-    FormManager.readOnly('custClass');
-    FormManager.removeValidator('custClass', Validators.REQUIRED);
+      FormManager.setValue('custClass', '');
+      FormManager.readOnly('custClass');
+      FormManager.removeValidator('custClass', Validators.REQUIRED);
 
-    FormManager.setValue('iinInd', '');
-    FormManager.readOnly('iinInd');
-    FormManager.removeValidator('iinInd', Validators.REQUIRED);
+      FormManager.setValue('iinInd', '');
+      FormManager.readOnly('iinInd');
+      FormManager.removeValidator('iinInd', Validators.REQUIRED);
 
-    FormManager.setValue('valueAddRem', '');
-    FormManager.readOnly('valueAddRem');
-    FormManager.removeValidator('valueAddRem', Validators.REQUIRED);
+      FormManager.setValue('valueAddRem', '');
+      FormManager.readOnly('valueAddRem');
+      FormManager.removeValidator('valueAddRem', Validators.REQUIRED);
 
-    FormManager.setValue('channelCd', '');
-    FormManager.readOnly('channelCd');
-    FormManager.removeValidator('channelCd', Validators.REQUIRED);
+      FormManager.setValue('channelCd', '');
+      FormManager.readOnly('channelCd');
+      FormManager.removeValidator('channelCd', Validators.REQUIRED);
 
-    FormManager.setValue('siInd', '');
-    FormManager.readOnly('siInd');
-    FormManager.removeValidator('siInd', Validators.REQUIRED);
+      FormManager.setValue('siInd', '');
+      FormManager.readOnly('siInd');
+      FormManager.removeValidator('siInd', Validators.REQUIRED);
 
-    FormManager.setValue('crsCd', '');
-    FormManager.readOnly('crsCd');
-    FormManager.removeValidator('crsCd', Validators.REQUIRED);
+      FormManager.setValue('crsCd', '');
+      FormManager.readOnly('crsCd');
+      FormManager.removeValidator('crsCd', Validators.REQUIRED);
 
-    FormManager.setValue('creditCd', '');
-    FormManager.readOnly('creditCd');
-    FormManager.removeValidator('creditCd', Validators.REQUIRED);
+      FormManager.setValue('creditCd', '');
+      FormManager.readOnly('creditCd');
+      FormManager.removeValidator('creditCd', Validators.REQUIRED);
 
-    FormManager.setValue('govType', '');
-    FormManager.readOnly('govType');
-    FormManager.removeValidator('govType', Validators.REQUIRED);
+      FormManager.setValue('govType', '');
+      FormManager.readOnly('govType');
+      FormManager.removeValidator('govType', Validators.REQUIRED);
 
-    FormManager.readOnly('inacCd');
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.readOnly('inacCd');
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
 
-    FormManager.readOnly('repTeamMemberNo');
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+      FormManager.readOnly('repTeamMemberNo');
+      FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
 
-    FormManager.readOnly('salesTeamCd');
-    FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+      FormManager.readOnly('salesTeamCd');
+      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
 
-    FormManager.readOnly('salesBusOffCd');
-    FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+      FormManager.readOnly('salesBusOffCd');
+      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
 
-    FormManager.setValue('csDiv', '');
-    FormManager.readOnly('csDiv');
-    FormManager.removeValidator('csDiv', Validators.REQUIRED);
+      FormManager.setValue('csDiv', '');
+      FormManager.readOnly('csDiv');
+      FormManager.removeValidator('csDiv', Validators.REQUIRED);
 
-    FormManager.readOnly('billingProcCd');
-    FormManager.removeValidator('billingProcCd', Validators.REQUIRED);
+      FormManager.readOnly('billingProcCd');
+      FormManager.removeValidator('billingProcCd', Validators.REQUIRED);
 
-    FormManager.setValue('invoiceSplitCd', '');
-    FormManager.readOnly('invoiceSplitCd');
-    FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
+      FormManager.setValue('invoiceSplitCd', '');
+      FormManager.readOnly('invoiceSplitCd');
+      FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
 
-    FormManager.setValue('csBo', '');
-    FormManager.readOnly('csBo');
-    FormManager.removeValidator('csBo', Validators.REQUIRED);
+      FormManager.setValue('csBo', '');
+      FormManager.readOnly('csBo');
+      FormManager.removeValidator('csBo', Validators.REQUIRED);
+    }
   }
 }
 
@@ -6703,22 +6706,28 @@ function setTelNoForBFKSCScenario(addrType) {
 }
 
 function setCSBOForBFKScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
 
-  if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-    FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
-  } else {
-    FormManager.setValue('csBo', '');
+  if (custSubGrp == 'BFKSC') {
+    if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+      FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.setValue('csBo', '');
+    }
   }
 }
 
 function setJSICForBFKSCScanario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
 
-  if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-    FormManager.addValidator('jsicCd', Validators.REQUIRED, [ 'JSIC' ], 'MAIN_CUST_TAB');
-  } else {
-    FormManager.removeValidator('jsicCd', Validators.REQUIRED);
+  if (custSubGrp == 'BFKSC') {
+    if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+      FormManager.addValidator('jsicCd', Validators.REQUIRED, [ 'JSIC' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('jsicCd', Validators.REQUIRED);
+    }
   }
 }
 
