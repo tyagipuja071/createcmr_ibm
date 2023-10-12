@@ -4430,9 +4430,19 @@ function setCSBORequired() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
+
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
   if (reqType == 'C') {
-    if (role == 'REQUESTER' && custSubGrp != 'BFKSC') {
-      FormManager.removeValidator('csBo', Validators.REQUIRED);
+    if (role == 'REQUESTER') {
+      if (custSubGrp == 'BFKSC') {
+        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+      } else {
+        FormManager.removeValidator('csBo', Validators.REQUIRED);
+      }
     } else if (role == 'PROCESSOR') {
       if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == 'BCEXA') {
         FormManager.removeValidator('csBo', Validators.REQUIRED);
@@ -4447,6 +4457,10 @@ function setCSBORequired() {
           || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER') {
         FormManager.enable('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
+      } else if (custSubGrp == 'BFKSC') {
+        FormManager.enable('csBo');
+        FormManager.setValue('csBo', '0000');
+        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.readOnly('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
@@ -4461,6 +4475,10 @@ function setCSBORequired() {
           || custSubGrp == 'BHISO' || custSubGrp == 'BIJSC' || custSubGrp == 'BKRBS' || custSubGrp == 'BLNIS' || custSubGrp == 'BMISI' || custSubGrp == 'BPIJB' || custSubGrp == 'BQICL'
           || custSubGrp == 'BRMSI') {
         FormManager.enable('csBo');
+      } else if (custSubGrp == 'BFKSC') {
+        FormManager.enable('csBo');
+        FormManager.setValue('csBo', '0000');
+        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
       }
     }
   }
