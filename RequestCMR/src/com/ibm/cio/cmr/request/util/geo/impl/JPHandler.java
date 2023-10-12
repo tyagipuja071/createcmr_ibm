@@ -207,6 +207,7 @@ public class JPHandler extends GEOHandler {
       if (company == null) {
         throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
       }
+      company.setTaigaCode(JPHandler.getTaiga(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
 
     } else if ("ZE01".equals(addrType)) {
       establishment = findEstablishmentFromCRIS(searchModel.getCmrNum());
@@ -401,6 +402,7 @@ public class JPHandler extends GEOHandler {
         addr.setLocationCode(company.getLocCode() == null ? company.getLocCode() : company.getLocCode().trim());
         addr.setPostCd(company.getPostCode() == null ? company.getPostCode() : company.getPostCode().trim());
         addr.setCompanySize(company.getEmployeeSize());
+        addr.setPoBoxPostCd(company.getTaigaCode());
         entityManager.persist(addr);
 
         rdc = new AddrRdc();
@@ -623,7 +625,8 @@ public class JPHandler extends GEOHandler {
     }
 
     List<Kna1> l = getKna1List(entityManager, mandt, mainRecord.getCmrNum());
-    String rol = l.get(0).getInspbydebi();
+    Kna1 kna1 = l.stream().filter(k -> "ZORG".equals(k.getKtokd())).findFirst().orElse(null);
+    String rol = kna1.getInspbydebi();
     mainRecord.setInspbydebi(rol);
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
       mainRecord.setCmrDuns(company.getDunsNo());
@@ -4924,6 +4927,22 @@ public class JPHandler extends GEOHandler {
     query.setParameter("ZZKV_CUSNO", cmrNo);
     query.setParameter("KATR6", SystemLocation.JAPAN);
     return query.getResults(Knb1.class);
+  }
+  
+  private static String getTaiga(EntityManager entityManager, String mandt, String cmrNo) throws Exception{
+	String taiga = "";
+	if (StringUtils.isEmpty(cmrNo)) {
+	    return null;
+	}
+    String sql = ExternalizedQuery.getSql("JP.GET.COMAPNY_TAIGA.BY_COMPANY_CMRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    taiga = query.getSingleResult(String.class);
+	
+    return taiga;
   }
 
   private static List<Kna1> getKna1List(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
