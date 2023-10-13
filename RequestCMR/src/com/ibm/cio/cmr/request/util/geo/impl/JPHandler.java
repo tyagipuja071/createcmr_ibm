@@ -712,12 +712,13 @@ public class JPHandler extends GEOHandler {
         sourceRecord.setSbo(this.currentAccount.getSBO());
         sourceRecord.setLocationNo(this.currentAccount.getLocCode());
         sourceRecord.setCmrPOBoxPostCode(JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
-        sourceRecord.setInspbydebi(JPHandler.getRolByKtokd(entityManager,crisAddr.getAccountNo(),crisAddr.getAddrType()));
         for (String adu : crisAddr.getAddrType().split("")) {
           String cmrAddrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
           if (!StringUtils.isEmpty(adu) && !StringUtils.isEmpty(cmrAddrType) && !addedRecords.contains(cmrAddrType + "/" + crisAddr.getAddrSeq())) {
 
             FindCMRRecordModel copy = new FindCMRRecordModel();
+            sourceRecord.setInspbydebi(JPHandler.getRolByKtokd(entityManager,crisAddr.getAccountNo(),cmrAddrType));
+
             PropertyUtils.copyProperties(copy, sourceRecord);
 
             copy.setCmrAddrTypeCode(cmrAddrType);
