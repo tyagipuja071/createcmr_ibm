@@ -861,7 +861,7 @@ function addHandlersForGR() {
   lockUnlockField();
   if (_custSubTypeHandlerGr == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     _custSubTypeHandlerGr = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-     // FormManager.setValue('salesTeamCd', '');
+      // FormManager.setValue('salesTeamCd', '');
       resetSubIndustryCdGR();
     });
   }
@@ -1036,32 +1036,29 @@ function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    
-    if (scenarioChanged)
-  {
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS'
-    	|| FormManager.getActualValue('custSubGrp') == 'PRICU') {
-    	FormManager.resetValidations('vat');
-    	FormManager.setValue('vatExempt', 'Y');
-    }else
-	{
-		  checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
-	      FormManager.setValue('vatExempt', false);
-	}
-  }
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
-        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+
+    if (scenarioChanged) {
+      if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == 'SPAS' || FormManager.getActualValue('custSubGrp') == 'PRICU') {
+        FormManager.resetValidations('vat');
+        FormManager.setValue('vatExempt', 'Y');
+      } else {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         FormManager.setValue('vatExempt', false);
       }
-    
+    }
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.setValue('vatExempt', false);
+    }
+
     if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
-        FormManager.clearValue('vat');
-        FormManager.readOnly('vat');
-      }
-      if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
-        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-        FormManager.enable('vat');
-      }
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
+    }
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
+    }
   }
 }
 
@@ -2431,7 +2428,7 @@ function lockUnlockFieldForGR() {
   console.log(">>>> lockUnlockFieldForGR");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ,'CROSS']);
+  var _custGrpSet = new Set([ 'COMME', 'GOVRN', 'CROSS' ]);
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('isuCd');
@@ -2501,7 +2498,7 @@ function setEntepriseGR() {
   var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'BUSPR', 'CRBUS', 'CRINT', 'IBMEM', 'INTER' ]);
-  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP','CROSS' ]);
+  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP', 'CROSS' ]);
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN' ]);
 
   var isuCtc = isuCd + clientTier;
@@ -2665,7 +2662,7 @@ function StcOrderBlockValidation() {
             return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
           }
         } else if (ordBlk != '' && stcOrdBlk != '') {
-          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Embargo Code field');
         }
         return new ValidationResult(null, true);
       }

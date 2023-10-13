@@ -903,9 +903,9 @@ function setVatValidator() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-//    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
-//      FormManager.setValue('vatExempt', 'Y');
-//    }
+// if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+// FormManager.setValue('vatExempt', 'Y');
+// }
     if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
       FormManager.clearValue('vat');
       FormManager.readOnly('vat');
@@ -3248,7 +3248,7 @@ function StcOrderBlockValidation() {
             return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
           }
         } else if (ordBlk != '' && stcOrdBlk != '') {
-          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Embargo Code field');
         }
         return new ValidationResult(null, true);
       }

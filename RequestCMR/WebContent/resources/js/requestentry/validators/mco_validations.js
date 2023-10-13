@@ -3571,13 +3571,18 @@ function StcOrderBlockValidation() {
         // var role = FormManager.getActualValue('userRole').toUpperCase();
         var ordBlk = FormManager.getActualValue('embargoCd');
         var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (ordBlk == null || ordBlk == '') {
           if (stcOrdBlk == 'ST' || stcOrdBlk == '') {
           } else {
             return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
           }
         } else if (ordBlk != '' && stcOrdBlk != '') {
-          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+          if (cntry == SysLoc.PORTUGAL) {
+            return new ValidationResult(null, false, 'Please fill either STC order block code or Embargo Code field');
+          } else {
+            return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+          }
         }
         return new ValidationResult(null, true);
       }
