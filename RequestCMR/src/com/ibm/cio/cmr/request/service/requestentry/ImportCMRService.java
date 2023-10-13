@@ -816,6 +816,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setPoBox(cmr.getCmrPOBox());
       addr.setPoBoxCity(cmr.getCmrPOBoxCity());
       addr.setPoBoxPostCd(cmr.getCmrPOBoxPostCode());
+      addr.setRol(cmr.getInspbydebi());
       addr.setBldg(cmr.getCmrBldg());
       addr.setFloor(cmr.getCmrFloor());
       addr.setOffice(cmr.getCmrOffice());
