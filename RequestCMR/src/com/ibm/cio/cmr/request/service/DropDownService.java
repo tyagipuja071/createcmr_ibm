@@ -226,7 +226,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       }
 
       if (!StringUtils.isEmpty(bds.getOrderByField())) {
-        if (!"897".equals(params.getParam("cmrIssuingCntry"))) {
+        if (!"897".equals((String) params.getParam("cmrIssuingCntry"))) {
           if ("CMRIssuingCountry".equalsIgnoreCase(fieldId) && "Y".equals(params.getParam("newRequest"))) {
             // special handling
             bdsQuery.append(" order by CD asc");
