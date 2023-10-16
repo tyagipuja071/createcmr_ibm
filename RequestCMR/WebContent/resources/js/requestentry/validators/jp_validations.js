@@ -126,6 +126,8 @@ function afterConfigForJP() {
 var _officeCdHandler = null;
 var _mrcCdHandler = null;
 var _subIndCdHandler = null;
+var _gtcAddrTypeHandlerJp = [];
+var _gtcAddrTypesJp = [ 'ZC01', 'ZE01', 'ZI01', 'ZI02', 'ZI03', 'ZP01', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08', 'ZP09', 'ZS01', 'ZS02' ];
 
 function addHandlersForJP() {
 
@@ -139,6 +141,18 @@ function addHandlersForJP() {
     _subIndCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       setISUByMrcSubInd();
     });
+  }
+
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    for (var i = 0; i < _gtcAddrTypesJp.length; i++) {
+      _gtcAddrTypeHandlerJp[i] = null;
+      if (_gtcAddrTypeHandlerJp[i] == null) {
+        _gtcAddrTypeHandlerJp[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypesJp[i]), 'onClick', function(value) {
+          setAddrFieldsBehavior();
+        });
+      }
+    }
   }
 
 }
@@ -6808,6 +6822,23 @@ function setJSICForBFKSCScanario() {
   }
 }
 
+function setAddrFieldsBehavior() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    console.log(">>>>  setAddrFieldsBehavior");
+    var addrType = FormManager.getActualValue('addrType');
+    if (addrType == 'ZC01' || addrType == 'ZE01') {
+      FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
+      FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+    } else {
+      FormManager.resetValidations('cnAddrTxt');
+      FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
+      FormManager.resetValidations('cnDistrict');
+      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -6937,5 +6968,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCSBOForBFKScenario, GEOHandler.JP);
   GEOHandler.addAfterConfig(setJSICForBFKSCScanario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setJSICForBFKSCScanario, GEOHandler.JP);
+  GEOHandler.addAddrFunction(setAddrFieldsBehavior, GEOHandler.JP);
 
 });
