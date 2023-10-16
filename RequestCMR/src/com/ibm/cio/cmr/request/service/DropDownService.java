@@ -226,7 +226,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       }
 
       if (!StringUtils.isEmpty(bds.getOrderByField())) {
-        if (!"897".equals((String) params.getParam("cmrIssuingCntry"))) {
+        if (!"897".equals(params.getParam("cmrIssuingCntry"))) {
           if ("CMRIssuingCountry".equalsIgnoreCase(fieldId) && "Y".equals(params.getParam("newRequest"))) {
             // special handling
             bdsQuery.append(" order by CD asc");
@@ -345,7 +345,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
 
     if ("County".equalsIgnoreCase(fieldId)) {
       // support only US for now
-      if (params.getParam("landCntry").equals("US")) {
+      if ("US".equals(params.getParam("landCntry"))) {
         query.append(" and 'US' = :LAND1 ");
         query.append(
             " and REFT_STATE_PROV_KEY = (select REFT_STATE_PROV_KEY from CMMA.REFT_STATE_PROV_W where STATE_PROV_CD = :REGIO and REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1)) ");
