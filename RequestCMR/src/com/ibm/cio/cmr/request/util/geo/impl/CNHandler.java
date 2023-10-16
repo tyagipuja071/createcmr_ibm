@@ -853,6 +853,7 @@ public class CNHandler extends GEOHandler {
         // that we know that are whole words, that means we need to convert it
         // to the value on our list.
         String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
+        city1Upper = city1Upper.split(",")[0];
         city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
         String state = addr.getStateProv() != null ? addr.getStateProv().toUpperCase() : "";
         String cmtMsg = "Your address city value on address type " + addr.getId().getAddrType() + ", sequence number " + addr.getId().getAddrSeq()

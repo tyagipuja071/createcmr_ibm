@@ -1573,7 +1573,7 @@ function addCityRequiredOnUpdateValidatorAddrList() {
               validate : function() {
                 var reqType = FormManager.getActualValue('reqType');
                 var reqReason = FormManager.getActualValue('reqReason');
-                if (reqReason == 'DIV' && _pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+                if ((reqReason == 'DIV' || reqReason == 'TREC') && _pagemodel.userRole.toUpperCase() == 'REQUESTER') {
                   return new ValidationResult(null, true);
                 }
                 if (typeof (CmrGrid.GRIDS.ADDRESS_GRID_GRID) != undefined && CmrGrid.GRIDS.ADDRESS_GRID_GRID != null) {
