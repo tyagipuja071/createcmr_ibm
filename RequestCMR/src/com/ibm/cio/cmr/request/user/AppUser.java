@@ -21,311 +21,321 @@ import com.ibm.cmr.services.client.auth.Authorization;
  */
 public class AppUser implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	private String userCnum;
-	private String empName;
-	private String bluePagesName;
-	private String intranetId;
-	private String notesEmailId;
-	private String countryCode;
-	private String companyCode;
-	private String processingCenter;
-	private String cmrIssuingCntry;
-	private boolean admin;
-	private boolean preferencesSet;
-	private boolean processor;
-	private boolean cmde;
-	private boolean approver;
-	private String authCode;
-	private boolean requestor;
-	private boolean hasApprovals;
-	private String defaultLineOfBusn;
-	private String defaultRequestRsn;
-	private String defaultReqType;
-	private int defaultNoOfRecords;
-	private boolean hasCountries;
-	private boolean showPendingOnly;
-	private boolean showLatestFirst;
+  private static final long serialVersionUID = 1L;
+  private String userCnum;
+  private String empName;
+  private String bluePagesName;
+  private String intranetId;
+  private String notesEmailId;
+  private String countryCode;
+  private String companyCode;
+  private String processingCenter;
+  private String cmrIssuingCntry;
+  private boolean admin;
+  private boolean preferencesSet;
+  private boolean processor;
+  private boolean cmde;
+  private boolean approver;
+  private String authCode;
+  private boolean requestor;
+  private boolean hasApprovals;
+  private String defaultLineOfBusn;
+  private String defaultRequestRsn;
+  private String defaultReqType;
+  private int defaultNoOfRecords;
+  private boolean hasCountries;
+  private boolean showPendingOnly;
+  private boolean showLatestFirst;
 
-	private Authorization auth = null;
-	private List<String> roles = new ArrayList<>();
-	private Map<String, List<String>> subRoles = new HashMap<>();
+  private boolean isKSCMember;
 
-	/**
-	 * Gets the current user from the session
-	 * 
-	 * @param request
-	 * @return
-	 */
-	public static AppUser getUser(HttpServletRequest request) {
-		AppUser user = (AppUser) request.getSession().getAttribute(CmrConstants.SESSION_APPUSER_KEY);
-		return user;
-	}
+  private Authorization auth = null;
+  private List<String> roles = new ArrayList<>();
+  private Map<String, List<String>> subRoles = new HashMap<>();
 
-	public static boolean isLoggedOn(HttpServletRequest request) {
-		return getUser(request) != null;
-	}
+  /**
+   * Gets the current user from the session
+   * 
+   * @param request
+   * @return
+   */
+  public static AppUser getUser(HttpServletRequest request) {
+    AppUser user = (AppUser) request.getSession().getAttribute(CmrConstants.SESSION_APPUSER_KEY);
+    return user;
+  }
 
-	/**
-	 * Removes the Appuser from the session
-	 * 
-	 * @param request
-	 */
-	public static void remove(HttpServletRequest request) {
-		request.getSession().removeAttribute(CmrConstants.SESSION_APPUSER_KEY);
-	}
+  public static boolean isLoggedOn(HttpServletRequest request) {
+    return getUser(request) != null;
+  }
 
-	public void addRole(String roleId, String subRoleId) {
-		this.roles.add(roleId);
-		this.subRoles.put(roleId, new ArrayList<String>());
-		if (!StringUtils.isEmpty(subRoleId)) {
-			this.subRoles.get(roleId).add(subRoleId);
-		}
-	}
+  /**
+   * Removes the Appuser from the session
+   * 
+   * @param request
+   */
+  public static void remove(HttpServletRequest request) {
+    request.getSession().removeAttribute(CmrConstants.SESSION_APPUSER_KEY);
+  }
 
-	public boolean hasRole(String roleId) {
-		return this.roles.contains(roleId);
-	}
+  public void addRole(String roleId, String subRoleId) {
+    this.roles.add(roleId);
+    this.subRoles.put(roleId, new ArrayList<String>());
+    if (!StringUtils.isEmpty(subRoleId)) {
+      this.subRoles.get(roleId).add(subRoleId);
+    }
+  }
 
-	public List<String> getSubRoles(String roleId) {
-		return this.subRoles.get(roleId);
-	}
+  public boolean hasRole(String roleId) {
+    return this.roles.contains(roleId);
+  }
 
-	public boolean hasRole(String roleId, String subRoleId) {
-		return this.roles.contains(roleId) && this.subRoles.get(roleId).size() > 0;
-	}
+  public List<String> getSubRoles(String roleId) {
+    return this.subRoles.get(roleId);
+  }
 
-	/**
-	 * Gets the IBM serial number of the user
-	 * 
-	 * @return
-	 */
-	public String getUserCnum() {
-		return this.userCnum;
-	}
+  public boolean hasRole(String roleId, String subRoleId) {
+    return this.roles.contains(roleId) && this.subRoles.get(roleId).size() > 0;
+  }
 
-	public void setUserCnum(String userCnum) {
-		this.userCnum = userCnum;
-	}
+  /**
+   * Gets the IBM serial number of the user
+   * 
+   * @return
+   */
+  public String getUserCnum() {
+    return this.userCnum;
+  }
 
-	/**
-	 * Gets the Employee's name
-	 * 
-	 * @return
-	 */
-	public String getEmpName() {
-		return this.empName;
-	}
+  public void setUserCnum(String userCnum) {
+    this.userCnum = userCnum;
+  }
 
-	public void setEmpName(String empName) {
-		this.empName = empName;
-	}
+  /**
+   * Gets the Employee's name
+   * 
+   * @return
+   */
+  public String getEmpName() {
+    return this.empName;
+  }
 
-	/**
-	 * Gets the intranet ID of the user
-	 * 
-	 * @return
-	 */
-	public String getIntranetId() {
-		return this.intranetId;
-	}
+  public void setEmpName(String empName) {
+    this.empName = empName;
+  }
 
-	public void setIntranetId(String intranetId) {
-		this.intranetId = intranetId;
-	}
+  /**
+   * Gets the intranet ID of the user
+   * 
+   * @return
+   */
+  public String getIntranetId() {
+    return this.intranetId;
+  }
 
-	/**
-	 * Gets the notes email address of the user
-	 * 
-	 * @return
-	 */
-	public String getNotesEmailId() {
-		return this.notesEmailId;
-	}
+  public void setIntranetId(String intranetId) {
+    this.intranetId = intranetId;
+  }
 
-	public void setNotesEmailId(String notesEmailId) {
-		this.notesEmailId = notesEmailId;
-	}
+  /**
+   * Gets the notes email address of the user
+   * 
+   * @return
+   */
+  public String getNotesEmailId() {
+    return this.notesEmailId;
+  }
 
-	/**
-	 * Gets the country code of the user from Blue Pages
-	 * 
-	 * @return
-	 */
-	public String getCountryCode() {
-		return countryCode;
-	}
+  public void setNotesEmailId(String notesEmailId) {
+    this.notesEmailId = notesEmailId;
+  }
 
-	public void setCountryCode(String countryCode) {
-		this.countryCode = countryCode;
-	}
+  /**
+   * Gets the country code of the user from Blue Pages
+   * 
+   * @return
+   */
+  public String getCountryCode() {
+    return countryCode;
+  }
 
-	public String getCompanyCode() {
-		return companyCode;
-	}
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
 
-	public void setCompanyCode(String companyCode) {
-		this.companyCode = companyCode;
-	}
+  public String getCompanyCode() {
+    return companyCode;
+  }
 
-	public boolean isAdmin() {
-		return admin;
-	}
+  public void setCompanyCode(String companyCode) {
+    this.companyCode = companyCode;
+  }
 
-	public void setAdmin(boolean admin) {
-		this.admin = admin;
-	}
+  public boolean isAdmin() {
+    return admin;
+  }
 
-	public boolean isPreferencesSet() {
-		return preferencesSet;
-	}
+  public void setAdmin(boolean admin) {
+    this.admin = admin;
+  }
 
-	public void setPreferencesSet(boolean preferencesSet) {
-		this.preferencesSet = preferencesSet;
-	}
+  public boolean isPreferencesSet() {
+    return preferencesSet;
+  }
 
-	public String getBluePagesName() {
-		return bluePagesName;
-	}
+  public void setPreferencesSet(boolean preferencesSet) {
+    this.preferencesSet = preferencesSet;
+  }
 
-	public void setBluePagesName(String bluePagesName) {
-		this.bluePagesName = bluePagesName;
-	}
+  public String getBluePagesName() {
+    return bluePagesName;
+  }
 
-	public String getProcessingCenter() {
-		return processingCenter;
-	}
+  public void setBluePagesName(String bluePagesName) {
+    this.bluePagesName = bluePagesName;
+  }
 
-	public void setProcessingCenter(String processingCenter) {
-		this.processingCenter = processingCenter;
-	}
+  public String getProcessingCenter() {
+    return processingCenter;
+  }
 
-	public String getCmrIssuingCntry() {
-		return cmrIssuingCntry;
-	}
+  public void setProcessingCenter(String processingCenter) {
+    this.processingCenter = processingCenter;
+  }
 
-	public void setCmrIssuingCntry(String cmrIssuingCntry) {
-		this.cmrIssuingCntry = cmrIssuingCntry;
-	}
+  public String getCmrIssuingCntry() {
+    return cmrIssuingCntry;
+  }
 
-	public boolean isProcessor() {
-		return processor;
-	}
+  public void setCmrIssuingCntry(String cmrIssuingCntry) {
+    this.cmrIssuingCntry = cmrIssuingCntry;
+  }
 
-	public void setProcessor(boolean processor) {
-		this.processor = processor;
-	}
+  public boolean isProcessor() {
+    return processor;
+  }
 
-	public String getAuthCode() {
-		return authCode;
-	}
+  public void setProcessor(boolean processor) {
+    this.processor = processor;
+  }
 
-	public void setAuthCode(String authCode) {
-		this.authCode = authCode;
-	}
+  public String getAuthCode() {
+    return authCode;
+  }
 
-	public List<String> getRoles() {
-		return roles;
-	}
+  public void setAuthCode(String authCode) {
+    this.authCode = authCode;
+  }
 
-	public void setRoles(List<String> roles) {
-		this.roles = roles;
-	}
+  public List<String> getRoles() {
+    return roles;
+  }
 
-	public boolean isRequestor() {
-		return requestor;
-	}
+  public void setRoles(List<String> roles) {
+    this.roles = roles;
+  }
 
-	public void setRequestor(boolean requestor) {
-		this.requestor = requestor;
-	}
+  public boolean isRequestor() {
+    return requestor;
+  }
 
-	public String getDefaultLineOfBusn() {
-		return defaultLineOfBusn;
-	}
+  public void setRequestor(boolean requestor) {
+    this.requestor = requestor;
+  }
 
-	public void setDefaultLineOfBusn(String defaultLineOfBusn) {
-		this.defaultLineOfBusn = defaultLineOfBusn;
-	}
+  public String getDefaultLineOfBusn() {
+    return defaultLineOfBusn;
+  }
 
-	public String getDefaultRequestRsn() {
-		return defaultRequestRsn;
-	}
+  public void setDefaultLineOfBusn(String defaultLineOfBusn) {
+    this.defaultLineOfBusn = defaultLineOfBusn;
+  }
 
-	public void setDefaultRequestRsn(String defaultRequestRsn) {
-		this.defaultRequestRsn = defaultRequestRsn;
-	}
+  public String getDefaultRequestRsn() {
+    return defaultRequestRsn;
+  }
 
-	public boolean isCmde() {
-		return cmde;
-	}
+  public void setDefaultRequestRsn(String defaultRequestRsn) {
+    this.defaultRequestRsn = defaultRequestRsn;
+  }
 
-	public void setCmde(boolean cmde) {
-		this.cmde = cmde;
-	}
+  public boolean isCmde() {
+    return cmde;
+  }
 
-	public String getDefaultReqType() {
-		return defaultReqType;
-	}
+  public void setCmde(boolean cmde) {
+    this.cmde = cmde;
+  }
 
-	public void setDefaultReqType(String defaultReqType) {
-		this.defaultReqType = defaultReqType;
-	}
+  public String getDefaultReqType() {
+    return defaultReqType;
+  }
 
-	public int getDefaultNoOfRecords() {
-		return defaultNoOfRecords;
-	}
+  public void setDefaultReqType(String defaultReqType) {
+    this.defaultReqType = defaultReqType;
+  }
 
-	public void setDefaultNoOfRecords(int defaultNoOfRecords) {
-		this.defaultNoOfRecords = defaultNoOfRecords;
-	}
+  public int getDefaultNoOfRecords() {
+    return defaultNoOfRecords;
+  }
 
-	public boolean isHasCountries() {
-		return hasCountries;
-	}
+  public void setDefaultNoOfRecords(int defaultNoOfRecords) {
+    this.defaultNoOfRecords = defaultNoOfRecords;
+  }
 
-	public void setHasCountries(boolean hasCountries) {
-		this.hasCountries = hasCountries;
-	}
+  public boolean isHasCountries() {
+    return hasCountries;
+  }
 
-	public boolean isShowPendingOnly() {
-		return showPendingOnly;
-	}
+  public void setHasCountries(boolean hasCountries) {
+    this.hasCountries = hasCountries;
+  }
 
-	public void setShowPendingOnly(boolean showPendingOnly) {
-		this.showPendingOnly = showPendingOnly;
-	}
+  public boolean isShowPendingOnly() {
+    return showPendingOnly;
+  }
 
-	public Authorization getAuth() {
-		return auth;
-	}
+  public void setShowPendingOnly(boolean showPendingOnly) {
+    this.showPendingOnly = showPendingOnly;
+  }
 
-	public void setAuth(Authorization auth) {
-		this.auth = auth;
-	}
+  public Authorization getAuth() {
+    return auth;
+  }
 
-	public boolean isShowLatestFirst() {
-		return showLatestFirst;
-	}
+  public void setAuth(Authorization auth) {
+    this.auth = auth;
+  }
 
-	public void setShowLatestFirst(boolean showLatestFirst) {
-		this.showLatestFirst = showLatestFirst;
-	}
+  public boolean isShowLatestFirst() {
+    return showLatestFirst;
+  }
 
-	public boolean isApprover() {
-		return approver;
-	}
+  public void setShowLatestFirst(boolean showLatestFirst) {
+    this.showLatestFirst = showLatestFirst;
+  }
 
-	public void setApprover(boolean approver) {
-		this.approver = approver;
-	}
+  public boolean isApprover() {
+    return approver;
+  }
 
-	public boolean isHasApprovals() {
-		return hasApprovals;
-	}
+  public void setApprover(boolean approver) {
+    this.approver = approver;
+  }
 
-	public void setHasApprovals(boolean hasApprovals) {
-		this.hasApprovals = hasApprovals;
-	}
+  public boolean isHasApprovals() {
+    return hasApprovals;
+  }
+
+  public void setHasApprovals(boolean hasApprovals) {
+    this.hasApprovals = hasApprovals;
+  }
+
+  public boolean isKSCMember() {
+    return isKSCMember;
+  }
+
+  public void setKSCMember(boolean isKSCMember) {
+    this.isKSCMember = isKSCMember;
+  }
 
 }

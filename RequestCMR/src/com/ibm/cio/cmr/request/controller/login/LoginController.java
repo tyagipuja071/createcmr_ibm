@@ -90,7 +90,8 @@ public class LoginController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/login")
+  @RequestMapping(
+      value = "/login")
   public ModelAndView showLoginPage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     long reqId = 0;
     try {
@@ -126,7 +127,9 @@ public class LoginController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/home", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/home",
+      method = RequestMethod.GET)
   public ModelAndView showHomePage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     AppUser user = AppUser.getUser(request);
 
@@ -142,7 +145,8 @@ public class LoginController extends BaseController {
    *          model map object
    * @return {@link ModelAndView} "login"
    */
-  @RequestMapping(value = "/timeout")
+  @RequestMapping(
+      value = "/timeout")
   public ModelAndView showTimeoutPage(HttpServletRequest request, ModelMap model) {
     LogInUserModel newModel = new LogInUserModel();
     MessageUtil.setErrorMessage(model, MessageUtil.ERROR_TIMEOUT);
@@ -221,7 +225,9 @@ public class LoginController extends BaseController {
    * @param response
    * @return
    */
-  @RequestMapping(value = "/performLogin", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/performLogin",
+      method = RequestMethod.POST)
   public ModelAndView performLogin(@ModelAttribute("loginUser") LogInUserModel loginUser, HttpServletRequest request, HttpServletResponse response) {
 
     LOG.info("Logon Attempt (" + CmrConstants.DATE_TIME_FORMAT().format(SystemUtil.getCurrentTimestamp()) + ") by " + loginUser.getUsername());
@@ -357,10 +363,22 @@ public class LoginController extends BaseController {
             appUser.setShowPendingOnly("Y".equals(result[10]));
             appUser.setShowLatestFirst("Y".equals(result[11]));
           }
+
+          Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
+
+          String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
+          String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
+          String skipKSCMemberCheck = SystemParameters.getString("JP.KSC.SKIP_CHECK");
+
+          if (jpKscCnum.equalsIgnoreCase("JPU") || skipKSCMemberCheck.equalsIgnoreCase("Y")) {
+            appUser.setKSCMember(true);
+          } else {
+            appUser.setKSCMember(false);
+          }
+
           if (hasDelegate) {
             appUser.setPreferencesSet(true);
             if (appUser.getBluePagesName() == null) {
-              Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
               if (p != null) {
                 appUser.setBluePagesName(p.getName());
               }
@@ -538,12 +556,16 @@ public class LoginController extends BaseController {
 
   }
 
-  @RequestMapping(value = "/log", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/log",
+      method = RequestMethod.GET)
   public ModelAndView showLog(HttpServletRequest request) {
     return new ModelAndView("log", "login", new LogInUserModel());
   }
 
-  @RequestMapping(value = "/checkLoginStatus", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/checkLoginStatus",
+      method = RequestMethod.POST)
   public ModelMap checkLoginStatus(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     ModelMap map = new ModelMap();
