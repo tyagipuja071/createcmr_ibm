@@ -6400,6 +6400,21 @@ function jpBlueGroupValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function isKSCMemberValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isKSCMemberFlg = FormManager.getActualValue('isKSCMemberFlg');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (isKSCMemberFlg == 'false' && custSubGrp == 'BFKSC') {
+          return new ValidationResult(null, false, 'Only KSC Member can choose BF - Kobelco Systems Corporation scenario.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 /**
  * Override WW validator Validator to check whether D&B search has been
  * performed
@@ -6885,6 +6900,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
+  GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
 
   // CREATCMR-9709
   GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
