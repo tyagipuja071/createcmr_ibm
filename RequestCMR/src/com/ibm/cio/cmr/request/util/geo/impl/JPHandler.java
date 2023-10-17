@@ -4853,6 +4853,37 @@ public class JPHandler extends GEOHandler {
     return "RA Maintenance process completed for request " + data.getId().getReqId();
   }
 
+  public static String addJpKSCLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    String custSubGroup = data.getCustSubGrp();
+    if ("BFKSC".equals(custSubGroup)) {
+      try {
+        boolean successFlag = true;
+        if (successFlag) {
+          admin.setReqStatus("PCP");
+          admin.setLockBy(null);
+          admin.setLockByNm(null);
+          admin.setLockInd("N");
+          admin.setLockTs(null);
+        } else {
+          // TODO
+          return "KSC Process failed for request  " + data.getId().getReqId();
+        }
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        LOG.error("ERROR in addJpKSCLogicOnSendForProcessing. CmrNo " + data.getCmrNo() + ", reqId " + admin.getId().getReqId() + ". Message: " + e);
+        e.printStackTrace();
+        admin.setReqStatus("DRA");
+        admin.setLockBy(admin.getRequesterId());
+        admin.setLockByNm(admin.getRequesterNm());
+        admin.setLockInd("Y");
+        admin.setLockTs(SystemUtil.getCurrentTimestamp());
+        admin.setProcessedFlag("N");
+        return "KSC process error for request " + data.getId().getReqId() + ". Message: " + e;
+      }
+    }
+    return "KSC process completed for request " + data.getId().getReqId();
+  }
+
   private static void handleRACMRs(EntityManager entityManager, Admin admin, Data data) throws Exception {
     // 1, get kna1 list
     // 2, for each kan1 record, check current SALES_PAYMENT
