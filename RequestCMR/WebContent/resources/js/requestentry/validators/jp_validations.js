@@ -6408,8 +6408,6 @@ function isKSCMemberValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         if (isKSCMemberFlg == 'false' && custSubGrp == 'BFKSC') {
           return new ValidationResult(null, false, 'Only KSC Member can choose BF - Kobelco Systems Corporation scenario.');
-        } else if (isKSCMemberFlg == 'true' && custSubGrp != 'BFKSC') {
-          return new ValidationResult(null, false, 'KSC Member can only choose BF - Kobelco Systems Corporation scenario.');
         }
         return new ValidationResult(null, true);
       }
