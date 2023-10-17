@@ -303,7 +303,13 @@ public class GermanyUtil extends AutomationUtil {
       case "DC":
       case "XDC":
         // Duplicate CMR checks Based on Name and Addresses
-        valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
+        if ("DC".equals(data.getCustSubGrp()) || "XDC".equals(data.getCustSubGrp())) {
+          valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
+        } else if ("3PA".equals(data.getCustSubGrp()) || "X3PA".equals(data.getCustSubGrp())) {
+          valid = true;
+          LOG.debug("Skip Duplicate CMR check for Third Party Scenario.");
+          details.append("Skipping Duplicate CMR check for Third Party Scenario. Request will require CMDE review before proceeding.").append("\n");
+        }
         break;
       }
 
