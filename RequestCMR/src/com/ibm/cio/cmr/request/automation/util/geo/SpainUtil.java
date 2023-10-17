@@ -547,9 +547,8 @@ public class SpainUtil extends AutomationUtil {
               checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
               resultCodes.add("D");
             } else {
-              LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-              resultCodes.add("R");
-              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
