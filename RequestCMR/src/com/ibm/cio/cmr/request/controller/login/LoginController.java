@@ -321,12 +321,14 @@ public class LoginController extends BaseController {
 
           Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
 
-          String jpKscCnum = p.getEmployeeId().substring(p.getEmployeeId().length() - 3);
+          String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
+          String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
           String skipKSCMemberCheck = SystemParameters.getString("JP.KSC.SKIP_CHECK");
-          if (jpKscCnum.equalsIgnoreCase("JPU")) {
+
+          if (jpKscCnum.equalsIgnoreCase("JPU") || skipKSCMemberCheck.equalsIgnoreCase("Y")) {
             appUser.setKSCMember(true);
-          } else if (skipKSCMemberCheck.equalsIgnoreCase("Y")) {
-            appUser.setKSCMember(true);
+          } else {
+            appUser.setKSCMember(false);
           }
 
           if (hasDelegate) {

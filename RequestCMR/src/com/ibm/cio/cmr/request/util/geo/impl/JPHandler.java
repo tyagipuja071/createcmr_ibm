@@ -4865,11 +4865,9 @@ public class JPHandler extends GEOHandler {
           admin.setLockInd("N");
           admin.setLockTs(null);
         } else {
-          // TODO
           return "KSC Process failed for request  " + data.getId().getReqId();
         }
       } catch (Exception e) {
-        // TODO Auto-generated catch block
         LOG.error("ERROR in addJpKSCLogicOnSendForProcessing. CmrNo " + data.getCmrNo() + ", reqId " + admin.getId().getReqId() + ". Message: " + e);
         e.printStackTrace();
         admin.setReqStatus("DRA");
