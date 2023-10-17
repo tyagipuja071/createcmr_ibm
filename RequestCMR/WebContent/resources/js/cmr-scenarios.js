@@ -737,9 +737,15 @@ var TemplateService = (function() {
           var driver = template.driver;
           var driverFieldName = driver.fieldName;
           scenario = FormManager.getActualValue(driverFieldName);
-          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario)) {
+          var cmrCountries = [ '666', '862', '726'];
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) &&  !cmrCountries.includes(cmrIssuingCntry)) {
             scenarioChanged = true;
           }
+          else
+      	  {
+      	  scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
+      	  }
           scenarioChanged = scenarioChanged || (currentChosenScenario != '' && currentChosenScenario != scenario);
           currentChosenScenario = scenario;
 
@@ -920,9 +926,14 @@ var TemplateService = (function() {
             }
           }
         }
+        var cmrCountries = [ '666', '862', '726'];
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var scenarioChanged = false;
-        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
+        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario  &&  !cmrCountries.includes(cmrIssuingCntry)) {
           scenarioChanged = true;
+        }
+        else
+    	{ scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
         }
 
         if ((typeof GEOHandler) != 'undefined') {
