@@ -32,6 +32,8 @@
   AppUser user = AppUser.getUser(request);
   isJPBlueGroupFlg = BluePagesHelper.isUserInJPBlueGroup(user.getIntranetId());
   
+  boolean isKSCMemberFlg = true;
+  isKSCMemberFlg = user.isKSCMember();
 %>
 <style>
   .jp-chk {
@@ -372,6 +374,7 @@
         </p>
       </cmr:column>
       <input type="hidden" id="isJPBlueGroupFlg" name="isJPBlueGroupFlg" value="<%= isJPBlueGroupFlg %>" />
+      <input type="hidden" id="isKSCMemberFlg" name="isKSCMemberFlg" value="<%= isKSCMemberFlg %>" />
     </cmr:row>
     <cmr:row addBackground="true"> 
       <cmr:column span="2" containerForField="JpCloseDays4">
