@@ -1038,6 +1038,9 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
 }
 
 function addTaxCode1ValidatorForOtherLACntries() {
+  var landedCntry=getZS01LandedCountry();
+  var excludeCntry=['VE','CL','CO'];
+  if(!excludeCntry.includes(landedCntry)){
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
@@ -1054,6 +1057,7 @@ function addTaxCode1ValidatorForOtherLACntries() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+ }
 }
 
 /**
@@ -3184,6 +3188,19 @@ function toggleTaxRegimeForCrossMx() {
       FormManager.limitDropdownValues(FormManager.getField('taxCd3'), '616');
     }
   }
+}
+
+function getZS01LandedCountry(){
+  var zs01Cntry = null;
+  var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+    REQID : FormManager.getActualValue('reqId'),
+    TYPE : 'ZS01'
+  });
+  if (ret && ret.ret1 && ret.ret1 != '') {
+    zs01Cntry = ret.ret1;
+  }
+  console.log('ZS01 VAT Country: ' + zs01Cntry);
+  return zs01Cntry;
 }
 
 /* Register LA Validators */
