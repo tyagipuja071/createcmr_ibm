@@ -106,6 +106,8 @@ function afterConfigForJP() {
 
     disableFieldsForRolUpdate();
     disableAddrFieldsForRolUpdate();
+
+    setAbbrevNmReqForBFKSCScenario();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -1358,10 +1360,12 @@ function setAccountAbbNmRequired() {
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     break;
   case 'BCEXA':
-  case 'BFKSC':
     FormManager.clearValue('abbrevNm');
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    break;
+  case 'BFKSC':
+    setAbbrevNmReqForBFKSCScenario();
     break;
   case '':
   default:
@@ -6578,46 +6582,46 @@ function setFieldsForBFKSCScenario() {
       FormManager.readOnly('email2');
       FormManager.removeValidator('email2', Validators.REQUIRED);
 
+      FormManager.clearValue('oemInd');
       FormManager.readOnly('oemInd');
       FormManager.removeValidator('oemInd', Validators.REQUIRED);
-      FormManager.setValue('oemInd', '');
 
-      FormManager.setValue('leasingCompanyIndc', '');
+      FormManager.clearValue('leasingCompanyIndc');
       FormManager.readOnly('leasingCompanyIndc');
       FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
 
       FormManager.readOnly('educAllowCd');
       FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
 
-      FormManager.setValue('custClass', '');
+      FormManager.clearValue('custClass');
       FormManager.readOnly('custClass');
       FormManager.removeValidator('custClass', Validators.REQUIRED);
 
-      FormManager.setValue('iinInd', '');
+      FormManager.clearValue('iinInd');
       FormManager.readOnly('iinInd');
       FormManager.removeValidator('iinInd', Validators.REQUIRED);
 
-      FormManager.setValue('valueAddRem', '');
+      FormManager.clearValue('valueAddRem');
       FormManager.readOnly('valueAddRem');
       FormManager.removeValidator('valueAddRem', Validators.REQUIRED);
 
-      FormManager.setValue('channelCd', '');
+      FormManager.clearValue('channelCd');
       FormManager.readOnly('channelCd');
       FormManager.removeValidator('channelCd', Validators.REQUIRED);
 
-      FormManager.setValue('siInd', '');
+      FormManager.clearValue('siInd');
       FormManager.readOnly('siInd');
       FormManager.removeValidator('siInd', Validators.REQUIRED);
 
-      FormManager.setValue('crsCd', '');
+      FormManager.clearValue('crsCd');
       FormManager.readOnly('crsCd');
       FormManager.removeValidator('crsCd', Validators.REQUIRED);
 
-      FormManager.setValue('creditCd', '');
+      FormManager.clearValue('creditCd');
       FormManager.readOnly('creditCd');
       FormManager.removeValidator('creditCd', Validators.REQUIRED);
 
-      FormManager.setValue('govType', '');
+      FormManager.clearValue('govType');
       FormManager.readOnly('govType');
       FormManager.removeValidator('govType', Validators.REQUIRED);
 
@@ -6633,18 +6637,18 @@ function setFieldsForBFKSCScenario() {
       FormManager.readOnly('salesBusOffCd');
       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
 
-      FormManager.setValue('csDiv', '');
+      FormManager.clearValue('csDiv');
       FormManager.readOnly('csDiv');
       FormManager.removeValidator('csDiv', Validators.REQUIRED);
 
       FormManager.readOnly('billingProcCd');
       FormManager.removeValidator('billingProcCd', Validators.REQUIRED);
 
-      FormManager.setValue('invoiceSplitCd', '');
+      FormManager.clearValue('invoiceSplitCd');
       FormManager.readOnly('invoiceSplitCd');
       FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
 
-      FormManager.setValue('csBo', '');
+      FormManager.clearValue('csBo');
       FormManager.readOnly('csBo');
       FormManager.removeValidator('csBo', Validators.REQUIRED);
     }
@@ -6773,6 +6777,11 @@ function setTelNoForBFKSCScenario(addrType) {
 function setCSBOForBFKScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
 
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
@@ -6786,12 +6795,38 @@ function setCSBOForBFKScenario() {
 function setJSICForBFKSCScanario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
 
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
       FormManager.addValidator('jsicCd', Validators.REQUIRED, [ 'JSIC' ], 'MAIN_CUST_TAB');
     } else {
       FormManager.removeValidator('jsicCd', Validators.REQUIRED);
+    }
+  }
+}
+
+function setAbbrevNmReqForBFKSCScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custType = FormManager.getActualValue('custType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  if (custSubGrp == 'BFKSC') {
+    if (custType == 'CEA' || custType == 'EA') {
+      FormManager.enable('abbrevNm');
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.clearValue('abbrevNm');
+      FormManager.readOnly('abbrevNm');
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     }
   }
 }
@@ -6943,6 +6978,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCSBOForBFKScenario, GEOHandler.JP);
   GEOHandler.addAfterConfig(setJSICForBFKSCScanario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setJSICForBFKSCScanario, GEOHandler.JP);
+  GEOHandler.addAfterConfig(setAbbrevNmReqForBFKSCScenario, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setAbbrevNmReqForBFKSCScenario, GEOHandler.JP);
+
   GEOHandler.addAddrFunction(setAddrFieldsBehavior, GEOHandler.JP);
 
 });
