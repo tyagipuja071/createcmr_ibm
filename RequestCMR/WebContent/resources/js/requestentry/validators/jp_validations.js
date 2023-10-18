@@ -6465,6 +6465,25 @@ function isKSCMemberValidator() {
       validate : function() {
         var isKSCMemberFlg = FormManager.getActualValue('isKSCMemberFlg');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var paramCode = 'JP.KSC.SKIP_CHECK';
+
+        if (paramCode != null) {
+          var qParams = {
+            PARAMETER_CD : paramCode
+          };
+        }
+        var result = cmr.query('GET.VALUE.BY_PARAM_CD', qParams);
+        if (result != null && result.ret1 != '' && result.ret1 != undefined) {
+          var skipCheckFlg = result.ret1;
+          if (skipCheckFlg == 'Y') {
+            return new ValidationResult(null, true);
+          }
+        }
+
+        if (role == 'PROCESSOR') {
+          return new ValidationResult(null, true);
+        }
+
         if (isKSCMemberFlg == 'false' && custSubGrp == 'BFKSC') {
           return new ValidationResult(null, false, 'Only KSC Member can choose BF - Kobelco Systems Corporation scenario.');
         }
