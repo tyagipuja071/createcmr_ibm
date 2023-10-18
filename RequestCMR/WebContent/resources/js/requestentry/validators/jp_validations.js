@@ -6800,7 +6800,7 @@ function setJSICForBFKSCScanario() {
   }
 }
 
-function setAbbrevNmReqForBFKSCScenario () {
+function setAbbrevNmReqForBFKSCScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
