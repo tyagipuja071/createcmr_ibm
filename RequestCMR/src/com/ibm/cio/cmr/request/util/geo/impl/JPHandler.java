@@ -4855,6 +4855,7 @@ public class JPHandler extends GEOHandler {
 
   public static String addJpKSCLogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     String custSubGroup = data.getCustSubGrp();
+
     if ("BFKSC".equals(custSubGroup)) {
       try {
         boolean successFlag = true;

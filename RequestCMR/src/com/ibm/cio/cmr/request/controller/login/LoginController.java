@@ -325,10 +325,8 @@ public class LoginController extends BaseController {
           LOG.debug("Employee ID: " + jpCnum);
           String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
           LOG.debug("KSC Member CNUM: " + jpKscCnum);
-          String skipKSCMemberCheck = SystemParameters.getString("JP.KSC.SKIP_CHECK") != null ? SystemParameters.getString("JP.KSC.SKIP_CHECK") : "";
-          LOG.debug("Skip JP KSC Member check: " + skipKSCMemberCheck);
 
-          if (jpKscCnum.equalsIgnoreCase("JPU") || skipKSCMemberCheck.equalsIgnoreCase("Y")) {
+          if (jpKscCnum.equalsIgnoreCase("JPU")) {
             appUser.setKSCMember(true);
           } else {
             appUser.setKSCMember(false);
