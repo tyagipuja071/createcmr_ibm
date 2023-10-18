@@ -1569,6 +1569,93 @@ function custClassIsicValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function validateCoverageData() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('reqType') != 'U') {
+          return new ValidationResult(null, true);
+        }
+        for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+          if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+            record = _allAddressData[i];
+          }
+          type = record.addrType;
+          if (typeof (type) == 'object') {
+            type = type[0];
+          }
+          if (type == 'ZI01' && record.updateInd[0] != 'U') {
+            console.log('>>> Install At address not updated - not performing coverage change validations.');
+            return new ValidationResult(null, true);
+          }
+        }
+
+        var data = CmrServices.getAll('reqentry');
+        cmr.hideProgress();
+        if (data) {
+          if (data.error && data.error == 'Y') {
+            console.log('An error was occurred while trying to verify coverage changes.');
+            return new ValidationResult(null, true);
+          } else {
+            var showError = false;
+            var covError = false;
+            var errorMsg = 'The following values cannot be verified at the moment for coverage changes: ';
+            if (data.coverageError || data.buyingGroupError || data.glcError) {
+              covError = true;
+            }
+            if (data.coverageError) {
+              errorMsg += 'Coverage Type/ID';
+              showError = true;
+            }
+            if (data.buyingGroupError) {
+              errorMsg += (showError ? ', ' : '') + 'Buying Group ID';
+              showError = true;
+            }
+            if (data.glcError) {
+              errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+              showError = true;
+            }
+            if (showError) {
+              if (covError) {
+                errorMsg += '<br>Coverage data changes cannot be verified at this point.';
+                return new ValidationResult(null, true);
+              }
+            }
+          }
+          var retrievedCovId = data.coverageType + data.coverageID;
+          var retrievedBgId = data.buyingGroupID;
+          var retrievedGbgId = data.globalBuyingGroupID;
+//          var retrievedBgRuleId = data.odmRuleID;
+          
+          var importedData = getImportedCovData();
+          if (importedData == undefined || importedData == null) {
+            console.log('An error was occurred while trying to verify coverage changes.');
+            return new ValidationResult(null, true);
+          }
+          var importedBgId = importedData.ret1;
+          var importedCovId = importedData.ret3;
+          var importedGbgId = importedData.ret5;
+//          var importedBgRuleId = importedData.ret2;
+          
+          if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
+            return new ValidationResult(null, false, 'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t ' + 
+                'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure.');
+          }
+        }
+      }
+    }
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function getImportedCovData() {
+  var id = FormManager.getActualValue('reqId');
+  var result = cmr.query('GET_COV_DETAILS_REQID', {
+    REQ_ID : id
+  });
+  return result;
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -1630,4 +1717,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(custClassIsicValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  
+  GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  
 });
