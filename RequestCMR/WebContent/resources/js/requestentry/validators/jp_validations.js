@@ -6413,7 +6413,7 @@ function isKSCMemberValidator() {
             PARAMETER_CD : paramCode
           };
         }
-        var result = cmr.query('GET_KSCMEM_SKIPCHECK_FLG', qParams);
+        var result = cmr.query('GET.VALUE.BY_PARAM_CD', qParams);
         if (result != null && result.ret1 != '' && result.ret1 != undefined) {
           var skipCheckFlg = result.ret1;
           if (skipCheckFlg == 'Y') {
