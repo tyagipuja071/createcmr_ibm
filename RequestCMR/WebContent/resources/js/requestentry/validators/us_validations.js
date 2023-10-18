@@ -1569,7 +1569,7 @@ function custClassIsicValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function connectToCmrServices() {
+function validateCoverageData() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -1718,6 +1718,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(custClassIsicValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   
-  GEOHandler.registerValidator(connectToCmrServices, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   
 });
