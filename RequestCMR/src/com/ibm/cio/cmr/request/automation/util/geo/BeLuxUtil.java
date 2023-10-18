@@ -140,10 +140,11 @@ public class BeLuxUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       break;
-    case SCENARIO_PRIVATE_CUSTOMER_LU:
+    case SCENARIO_PRIVATE_CUSTOMER_LU: 
       String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
-      break;
+      
+    
     case SCENARIO_THIRD_PARTY:
     case SCENARIO_THIRD_PARTY_LU:
     case SCENARIO_DATA_CENTER:
