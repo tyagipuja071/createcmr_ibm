@@ -5408,7 +5408,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.CEMEA);
   // CMR-801:comment out to unlock embargo code
-  GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
+  //GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
 
   // CMR-2096-Austria - "Central order block code"
   GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
