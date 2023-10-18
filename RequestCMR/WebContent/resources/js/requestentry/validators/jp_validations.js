@@ -6777,6 +6777,11 @@ function setTelNoForBFKSCScenario(addrType) {
 function setCSBOForBFKScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
 
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
@@ -6790,6 +6795,11 @@ function setCSBOForBFKScenario() {
 function setJSICForBFKSCScanario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
 
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
