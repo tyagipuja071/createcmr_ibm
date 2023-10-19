@@ -74,7 +74,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
             admin.setReqReason("DUPD");
             output.setSuccess(false);
             output.setMessage("Resend request for Company or Private Individual");
-            result.setDetails("Request should be re-submitted as a company or private Individuals");
+            result.setDetails("Request should be re-submitted as a company or private individual.");
             result.setOnError(true);
             result.setResults(output.getMessage());
             engineData.addRejectionComment("DUPD", "DUNS closely matching name and address in 'Private Household leads to automatic rejection", "",
