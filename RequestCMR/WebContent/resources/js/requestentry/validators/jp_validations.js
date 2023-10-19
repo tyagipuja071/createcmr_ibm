@@ -101,11 +101,12 @@ function afterConfigForJP() {
     setAdminDeptOptional();
     addScenarioDriven();
     setSortlOnOfcdChange();
-    addRAFieldLogic();
-    disableAddrFieldsForRA();
 
     disableFieldsForRolUpdate();
     disableAddrFieldsForRolUpdate();
+    
+    addRAFieldLogic();
+    disableAddrFieldsForRA();
 
     setAbbrevNmReqForBFKSCScenario();
   });
@@ -114,6 +115,7 @@ function afterConfigForJP() {
   }
   // CREATCMR-788
   addressQuotationValidator();
+  addROLFieldLogic();
 
   var _custGrpHandler = dojo.connect(FormManager.getField('custGrp'), 'onChange', function(value) {
     setRolForCustGrp();
@@ -158,12 +160,41 @@ function addHandlersForJP() {
 
 }
 
+function addROLFieldLogic() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+
+    var addrType = FormManager.getActualValue('addrType');
+    var companyRolFlag = '';
+    enableRolFlag(addrType);
+
+    if (addrType != 'ZC01' && addrType != 'ZE01') {
+
+      var qParams = {
+        _qall : 'Y',
+        REQ_ID : FormManager.getActualValue('reqId'),
+        ADDR_TYPE : 'ZC01',
+      };
+      var results = cmr.query('GET.ROL_BY_REQID', qParams);
+      if (results != null && results.length > 0) {
+        companyRolFlag = results[0].ret1.trim();
+      }
+      FormManager.setValue('rol', companyRolFlag);
+    }
+  }
+}
+
 function setRolForCustGrp() {
   var custGrp = FormManager.getField('custGrp');
   if (custGrp == 'SUBSI') {
     FormManager.setValue('identClient', '');
     FormManager.readOnly('identClient');
   }
+}
+
+function enableRolFlag() {
+  FormManager.enable('rol');
+  // FormManager.addValidator('rol', Validators.REQUIRED, [ 'ROL Flag' ]);
 }
 
 function disableFieldsForRolUpdate() {
@@ -6468,9 +6499,10 @@ function addDnBSearchValidator() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var result = FormManager.getActualValue('findDnbResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'RACMR') {
-          return new ValidationResult(null, true);
-        }
+        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC'
+         || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
+		  return new ValidationResult(null, true);
+		}
         if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
           return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
         }
@@ -6881,6 +6913,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(convertCustNmDetail2DBCS, GEOHandler.JP);
   GEOHandler.addAfterConfig(addScenarioDriven, GEOHandler.JP);
   GEOHandler.addAfterConfig(addHandlersForJP, GEOHandler.JP);
+  GEOHandler.addAfterConfig(enableRolFlag, GEOHandler.JP);
+  GEOHandler.addAfterConfig(disableFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(setRAValuesOnCmrNoChange, GEOHandler.JP);
 
   GEOHandler.addAfterTemplateLoad(setCSBORequired, GEOHandler.JP);
@@ -6928,6 +6962,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(addSpaceForCustNm1, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addTelFaxValidator, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(replaceBanGaoForAddrTxt, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(enableRolFlag, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRA, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
