@@ -1304,7 +1304,7 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if ("@".equals(muData.getMiscBillCd())) {
+      if ("@".equals(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
         cust.setEmbargoCd(muData.getMiscBillCd());

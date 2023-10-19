@@ -655,7 +655,7 @@ public class GreeceTransformer extends EMEATransformer {
       if (billingAddr != null && mailingAddrIndex != -1) {
         LOG.info("GREECE -- UPDATING - update mailing");
         CmrtAddr oldMailingAddr = legacyObjects.getAddresses().get(mailingAddrIndex);
-        CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+        CmrtAddr newMailingAddr = SerializationUtils.clone(billingAddr);
         newMailingAddr.getId().setAddrNo(oldMailingAddr.getId().getAddrNo());
         newMailingAddr.setForUpdate(true);
         modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
@@ -672,7 +672,7 @@ public class GreeceTransformer extends EMEATransformer {
   }
 
   private CmrtAddr createNewMailingData(CmrtAddr billingAddr, String addrSeq) {
-    CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+    CmrtAddr newMailingAddr = SerializationUtils.clone(billingAddr);
     newMailingAddr.getId().setAddrNo(addrSeq);
     newMailingAddr.setForCreate(true);
     modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
@@ -717,7 +717,7 @@ public class GreeceTransformer extends EMEATransformer {
   }
 
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
-    CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+    CmrtAddr mailingAddr = SerializationUtils.clone(billingAddr);
     mailingAddr.getId().setAddrNo(String.format("%05d", 1)); // should be 00001
     modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(mailingAddr);
@@ -977,7 +977,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
         cust.setEmbargoCd(muData.getMiscBillCd());
@@ -1077,7 +1077,7 @@ public class GreeceTransformer extends EMEATransformer {
     legacyObjects.addAddress(legacyAddr);
 
     if ("Y".equals(legacyAddr.getIsAddrUseBilling())) {
-      CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(legacyAddr);
+      CmrtAddr newMailingAddr = SerializationUtils.clone(legacyAddr);
       if (!mailingAddr.equals(billingAddr)) {
         newMailingAddr.getId().setAddrNo(mailingAddr.getId().getAddrNo());
       } else {
@@ -1089,7 +1089,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if ("N".equals(legacyAddr.getIsAddrUseBilling()) && "Y".equals(legacyAddr.getIsAddrUseMailing())) {
-      CmrtAddr newBillingAddr = (CmrtAddr) SerializationUtils.clone(legacyAddr);
+      CmrtAddr newBillingAddr = SerializationUtils.clone(legacyAddr);
       newBillingAddr.getId().setAddrNo(billingAddr.getId().getAddrNo());
       modifyAddrUseFieldsforMassUpdt(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newBillingAddr, billingAddr, "bill");
       newBillingAddr.setForUpdate(true);
