@@ -5956,12 +5956,27 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             String ctc = result[3] != null ? (String) result[3] : "";
             String sortl = result[5] != null ? (String) result[5] : "";
 
+            // Set MRC
+            if (StringUtils.isNotBlank(mrc)) {
+              muModel.setRestrictInd(mrc);
+            }
+
+            // Set CTC
+            muModel.setClientTier(StringUtils.isBlank(ctc) ? "@" : ctc);
+
+            // Set SORTL
+            if (StringUtils.isNotBlank(sortl)) {
+              muModel.setSearchTerm(sortl);
+            }
+
             // if isic not found in bo_codes_map search via
             // jsic in isic_to_jsic_map
             if (StringUtils.isBlank(isic)) {
               String jsic = muModel.getAffiliate() != null ? muModel.getAffiliate() : "";
               if (StringUtils.isNotBlank(jsic)) {
                 isic = IERPRequestUtils.getIsicByJsic(entityManager, jsic);
+              } else {
+                break;
               }
             }
             // if isic is blank default to 0000
@@ -5989,19 +6004,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   muModel.setIsuCd(isuCd);
                 }
               }
-            }
-
-            // Set MRC
-            if (StringUtils.isNotBlank(mrc)) {
-              muModel.setRestrictInd(mrc);
-            }
-
-            // Set CTC
-            muModel.setClientTier(StringUtils.isBlank(ctc) ? "@" : ctc);
-
-            // Set SORTL
-            if (StringUtils.isNotBlank(sortl)) {
-              muModel.setSearchTerm(sortl);
             }
           } else {
             // office code not found
