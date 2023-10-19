@@ -207,7 +207,8 @@ public class JPHandler extends GEOHandler {
       if (company == null) {
         throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
       }
-      company.setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
+      company
+          .setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
     } else if ("ZE01".equals(addrType)) {
       establishment = findEstablishmentFromCRIS(searchModel.getCmrNum());
       if (establishment != null) {
@@ -402,7 +403,7 @@ public class JPHandler extends GEOHandler {
         addr.setPostCd(company.getPostCode() == null ? company.getPostCode() : company.getPostCode().trim());
         addr.setCompanySize(company.getEmployeeSize());
         addr.setPoBoxPostCd(company.getTaigaCode());
-        addr.setRol(JPHandler.getRolByKtokd(entityManager, company.getId().getCompanyNo(),"ZORG"));
+        addr.setRol(JPHandler.getRolByKtokd(entityManager, company.getId().getCompanyNo(), "ZORG"));
         entityManager.persist(addr);
 
         rdc = new AddrRdc();
@@ -626,7 +627,6 @@ public class JPHandler extends GEOHandler {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_ESTABLISHMENT_DATA);
     }
 
-    
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
       mainRecord.setCmrDuns(company.getDunsNo());
     }
@@ -711,7 +711,8 @@ public class JPHandler extends GEOHandler {
         sourceRecord.setCmrCountryLanded("JP");
         sourceRecord.setSbo(this.currentAccount.getSBO());
         sourceRecord.setLocationNo(this.currentAccount.getLocCode());
-        sourceRecord.setCmrPOBoxPostCode(JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
+        sourceRecord.setCmrPOBoxPostCode(
+            JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
         for (String adu : crisAddr.getAddrType().split("")) {
           String cmrAddrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
           if (!StringUtils.isEmpty(adu) && !StringUtils.isEmpty(cmrAddrType) && !addedRecords.contains(cmrAddrType + "/" + crisAddr.getAddrSeq())) {
@@ -1903,7 +1904,7 @@ public class JPHandler extends GEOHandler {
       rol = getRolByCreditToCustNo(data.getCreditToCustNo() == null ? "" : data.getCreditToCustNo());
     }
     if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
-      data.setIdentClient(rol);
+      // data.setIdentClient(rol);
     } else if ("SUBSI".equals(data.getCustGrp())) {
       data.setIdentClient("");
     }
@@ -1912,9 +1913,7 @@ public class JPHandler extends GEOHandler {
     if (addrList != null && addrList.size() > 0) {
       for (Addr address : addrList) {
         if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
-          if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
-            address.setRol(rol);
-          } else if ("SUBSI".equals(data.getCustGrp())) {
+          if ("SUBSI".equals(data.getCustGrp())) {
             address.setRol("");
           } else {
             address.setRol(rolData);
