@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -627,7 +628,8 @@ public class SWISSService extends BaseBatchService {
             if (red.getSeqNo() != null && red.getSeqNo() != "") {
               addrSeqs = red.getSeqNo().split(",");
             }
-            if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())
+                && !"C".equals(admin.getReqType())) {
               updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(), addrSeqs[0]);
             }
           }
@@ -1157,9 +1159,26 @@ public class SWISSService extends BaseBatchService {
       // handling simple update requests
       try {
         lockRecordUpdt(entityManager, admin);
-        // 1. Get first the ones that are new -- BATCH.GET_NEW_ADDR_FOR_UPDATE
-        String sql = ExternalizedQuery.getSql("BATCH.GET_NEW_ADDR_FOR_UPDATE");
+
+        // update the format of existing address sequence
+        String sql = ExternalizedQuery.getSql("SWISS.GET_EXISTING_ADDR");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", admin.getId().getReqId());
+        List<Addr> addressesExisting = query.getResults(Addr.class);
+
+        if (addressesExisting != null && addressesExisting.size() > 0) {
+          for (Addr addr : addressesExisting) {
+            String oldSeq = addr.getId().getAddrSeq();
+            String newSeq = "000" + data.getCmrNo() + "L" + oldSeq;
+            if (oldSeq.length() == 5) {
+              updateExistingAddrSeq(entityManager, admin.getId().getReqId(), newSeq, oldSeq, addr.getId().getAddrType(), data.getCmrNo());
+            }
+          }
+        }
+
+        // 1. Get first the ones that are new -- BATCH.GET_NEW_ADDR_FOR_UPDATE
+        sql = ExternalizedQuery.getSql("BATCH.GET_NEW_ADDR_FOR_UPDATE");
+        query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
         List<Addr> addresses = query.getResults(Addr.class);
 
@@ -2230,5 +2249,40 @@ public class SWISSService extends BaseBatchService {
     q.setParameter("OLD_SEQ", oldSeq);
     LOG.debug("Assigning address sequence " + newSeq + " to " + addrType + " address.");
     q.executeSql();
+  }
+
+  public void updateExistingAddrSeq(EntityManager entityManager, long reqId, String newSeq, String oldSeq, String addressType, String cmrNo) {
+
+    EntityTransaction transaction = entityManager.getTransaction();
+    try {
+      // update the format of existing address sequence in CREQCMR.ADDR_RDC and
+      // SAPR3.KNA1
+      String updateSeq = ExternalizedQuery.getSql("SWISS.UPDATE_EXISTING_ADDR_SEQ");
+      PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
+      q.setParameter("NEW_SEQ", newSeq);
+      q.setParameter("REQ_ID", reqId);
+      q.setParameter("OLD_SEQ", oldSeq);
+      LOG.debug("Assigning address sequence " + newSeq + " to " + addressType + " address.");
+      q.executeSql();
+
+      updateSeq = ExternalizedQuery.getSql("SWISS.UPDATE_EXISTING_ADDR_SEQ_RDC");
+      q = new PreparedQuery(entityManager, updateSeq);
+      q.setParameter("NEW_SEQ", newSeq);
+      q.setParameter("CUSNO", cmrNo);
+      q.setParameter("OLD_SEQ", oldSeq);
+      LOG.debug("Assigning address sequence " + newSeq + " to " + addressType + " address.");
+      q.executeSql();
+
+      transaction.commit();
+
+      if (!transaction.isActive()) {
+        transaction.begin();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      if (transaction.isActive()) {
+        transaction.rollback();
+      }
+    }
   }
 }
