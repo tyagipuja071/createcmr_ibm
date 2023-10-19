@@ -436,8 +436,8 @@ public class SpainUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-  		cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
-  	    break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
