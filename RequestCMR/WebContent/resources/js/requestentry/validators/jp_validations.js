@@ -1285,9 +1285,11 @@ function setAccountAbbNmForCreate() {
     accountAbbNm = 'I' + chargeCd + ' ' + oldAccountAbbNm;
   break;
   case 'BCEXA':
-  case 'BFKSC':
     accountAbbNm = '';
-  break;
+    break;
+  case 'BFKSC':
+    setAbbrevNmReqForBFKSCScenario();
+    break;
   default:
     if (_pagemodel.custSubGrp != null && custSubGrp == _pagemodel.custSubGrp) {
       return;
@@ -3530,8 +3532,8 @@ function setCSBOOnAddrSave() {
       FormManager.setValue('csBo', '');
     break;
     case 'BFKSC':
-      setCSBOForBFKScenario();
-    break;
+      setCSBOForBFKSCScenario();
+      break;
     case 'ABIJS':
     case 'AHIJE':
     case 'AUITS':
@@ -3709,9 +3711,11 @@ function setAccountAbbNmOnAddrSaveCreate() {
     accountAbbNm = 'I' + chargeCd + ' ' + fullEngNm;
   break;
   case 'BCEXA':
-  case 'BFKSC':
     accountAbbNm = '';
-  break;
+    break;
+  case 'BFKSC':
+    setAbbrevNmReqForBFKSCScenario();
+    break;
   case '':
   default:
     accountAbbNm = fullEngNm;
@@ -3727,9 +3731,11 @@ function setAccountAbbNmOnAddrSaveUpdate() {
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'BCEXA':
-  case 'BFKSC':
     accountAbbNm = '';
-  break;
+    break;
+  case 'BFKSC':
+    setAbbrevNmReqForBFKSCScenario();
+    break;
   case '':
   default:
     accountAbbNm = fullEngNm;
@@ -4503,7 +4509,7 @@ function setCSBORequired() {
   if (reqType == 'C') {
     if (role == 'REQUESTER') {
       if (custSubGrp == 'BFKSC') {
-        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+        setCSBOForBFKSCScenario();
       } else {
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       }
@@ -4522,9 +4528,7 @@ function setCSBORequired() {
         FormManager.enable('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       } else if (custSubGrp == 'BFKSC') {
-        FormManager.enable('csBo');
-        FormManager.setValue('csBo', '0000');
-        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+        setCSBOForBFKSCScenario();
       } else {
         FormManager.readOnly('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
@@ -4540,9 +4544,7 @@ function setCSBORequired() {
           || custSubGrp == 'BLNIS' || custSubGrp == 'BMISI' || custSubGrp == 'BPIJB' || custSubGrp == 'BQICL' || custSubGrp == 'BRMSI') {
         FormManager.enable('csBo');
       } else if (custSubGrp == 'BFKSC') {
-        FormManager.enable('csBo');
-        FormManager.setValue('csBo', '0000');
-        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+        setCSBOForBFKSCScenario();
       }
     }
   }
@@ -4577,8 +4579,8 @@ function setCSBOOnScenarioChange() {
       FormManager.setValue('csBo', '');
     break;
     case 'BFKSC':
-      setCSBOForBFKScenario();
-    break;
+      setCSBOForBFKSCScenario();
+      break;
     case 'ABIJS':
     case 'AHIJE':
     case 'AUITS':
@@ -6631,12 +6633,11 @@ function setFieldsForBFKSCScenario() {
     FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
 
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-      FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
-
       FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
       FormManager.removeValidator('crsCd', Validators.REQUIRED);
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+
     } else {
       FormManager.readOnly('email2');
       FormManager.removeValidator('email2', Validators.REQUIRED);
@@ -6833,7 +6834,7 @@ function setTelNoForBFKSCScenario(addrType) {
   }
 }
 
-function setCSBOForBFKScenario() {
+function setCSBOForBFKSCScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
@@ -6844,9 +6845,12 @@ function setCSBOForBFKScenario() {
 
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+      FormManager.enable('csBo');
+      FormManager.setValue('csBo', '0000');
       FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
     } else {
-      FormManager.setValue('csBo', '');
+      FormManager.clearvalue('csBo');
+      FormManager.removeValidator('csBo', Validators.REQUIRED);
     }
   }
 }
@@ -7033,8 +7037,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(setFieldsForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setFieldsForBFKSCScenario, GEOHandler.JP);
-  GEOHandler.addAfterConfig(setCSBOForBFKScenario, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(setCSBOForBFKScenario, GEOHandler.JP);
+  GEOHandler.addAfterConfig(setCSBOForBFKSCScenario, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setCSBOForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterConfig(setJSICForBFKSCScanario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setJSICForBFKSCScanario, GEOHandler.JP);
   GEOHandler.addAfterConfig(setAbbrevNmReqForBFKSCScenario, GEOHandler.JP);
