@@ -6849,7 +6849,7 @@ function setCSBOForBFKSCScenario() {
       FormManager.setValue('csBo', '0000');
       FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
     } else {
-      FormManager.clearvalue('csBo');
+      FormManager.clearValue('csBo');
       FormManager.removeValidator('csBo', Validators.REQUIRED);
     }
   }
