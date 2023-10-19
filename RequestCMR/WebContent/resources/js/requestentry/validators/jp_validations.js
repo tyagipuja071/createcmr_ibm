@@ -1254,8 +1254,10 @@ function setAccountAbbNmForCreate() {
     accountAbbNm = 'I' + chargeCd + ' ' + oldAccountAbbNm;
     break;
   case 'BCEXA':
-  case 'BFKSC':
     accountAbbNm = '';
+    break;
+  case 'BFKSC':
+    setAbbrevNmReqForBFKSCScenario();
     break;
   default:
     if (_pagemodel.custSubGrp != null && custSubGrp == _pagemodel.custSubGrp) {
@@ -3665,8 +3667,10 @@ function setAccountAbbNmOnAddrSaveCreate() {
     accountAbbNm = 'I' + chargeCd + ' ' + fullEngNm;
     break;
   case 'BCEXA':
-  case 'BFKSC':
     accountAbbNm = '';
+    break;
+  case 'BFKSC':
+    setAbbrevNmReqForBFKSCScenario();
     break;
   case '':
   default:
@@ -3683,8 +3687,10 @@ function setAccountAbbNmOnAddrSaveUpdate() {
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'BCEXA':
-  case 'BFKSC':
     accountAbbNm = '';
+    break;
+  case 'BFKSC':
+    setAbbrevNmReqForBFKSCScenario();
     break;
   case '':
   default:
@@ -4456,7 +4462,7 @@ function setCSBORequired() {
   if (reqType == 'C') {
     if (role == 'REQUESTER') {
       if (custSubGrp == 'BFKSC') {
-        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+        setCSBOForBFKScenario();
       } else {
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       }
@@ -4475,9 +4481,7 @@ function setCSBORequired() {
         FormManager.enable('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       } else if (custSubGrp == 'BFKSC') {
-        FormManager.enable('csBo');
-        FormManager.setValue('csBo', '0000');
-        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+        setCSBOForBFKScenario();
       } else {
         FormManager.readOnly('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
@@ -4493,9 +4497,7 @@ function setCSBORequired() {
           || custSubGrp == 'BRMSI') {
         FormManager.enable('csBo');
       } else if (custSubGrp == 'BFKSC') {
-        FormManager.enable('csBo');
-        FormManager.setValue('csBo', '0000');
-        FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
+        setCSBOForBFKScenario();
       }
     }
   }
@@ -6785,9 +6787,12 @@ function setCSBOForBFKScenario() {
 
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+      FormManager.enable('csBo');
+      FormManager.setValue('csBo', '0000');
       FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
     } else {
-      FormManager.setValue('csBo', '');
+      FormManager.clearvalue('csBo');
+      FormManager.removeValidator('csBo', Validators.REQUIRED);
     }
   }
 }
