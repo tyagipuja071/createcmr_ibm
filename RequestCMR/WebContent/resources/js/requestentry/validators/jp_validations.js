@@ -6574,12 +6574,11 @@ function setFieldsForBFKSCScenario() {
     FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
 
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-      FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
-
       FormManager.removeValidator('educAllowCd', Validators.REQUIRED);
       FormManager.removeValidator('crsCd', Validators.REQUIRED);
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+
     } else {
       FormManager.readOnly('email2');
       FormManager.removeValidator('email2', Validators.REQUIRED);
