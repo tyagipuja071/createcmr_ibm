@@ -314,6 +314,20 @@ public class LoginController extends BaseController {
           appUser.setAuth(auth);
           LOG.debug("User " + loginUser.getUsername() + ": Roles = " + auth.getRdcRoles().size() + " Auth Groups: " + auth.getAuthGroups().size());
 
+          Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
+
+          String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
+          LOG.info("Employee ID: " + jpCnum);
+          String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
+          LOG.info("KSC Member CNUM: " + jpKscCnum);
+
+          if (jpKscCnum.equalsIgnoreCase("JPU")) {
+            appUser.setKSCMember(true);
+          } else {
+            appUser.setKSCMember(false);
+          }
+          LOG.info("is KSC Member: " + appUser.isKSCMember());
+
           // set CMR Owner via blue pages' notes email
           appUser.setNotesEmailId(notesEmail);
           if (notesEmail.toUpperCase().contains("LENOVO")) {
@@ -363,20 +377,6 @@ public class LoginController extends BaseController {
             appUser.setShowPendingOnly("Y".equals(result[10]));
             appUser.setShowLatestFirst("Y".equals(result[11]));
           }
-
-          Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
-
-          String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
-          LOG.debug("Employee ID: " + jpCnum);
-          String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
-          LOG.debug("KSC Member CNUM: " + jpKscCnum);
-
-          if (jpKscCnum.equalsIgnoreCase("JPU")) {
-            appUser.setKSCMember(true);
-          } else {
-            appUser.setKSCMember(false);
-          }
-          LOG.debug("is KSC Member: " + appUser.isKSCMember());
 
           if (hasDelegate) {
             appUser.setPreferencesSet(true);
