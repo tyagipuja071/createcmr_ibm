@@ -436,8 +436,8 @@ public class SpainUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-  		cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
-  	    break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -534,9 +534,8 @@ public class SpainUtil extends AutomationUtil {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else {
-              LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-              resultCodes.add("R");
-              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
