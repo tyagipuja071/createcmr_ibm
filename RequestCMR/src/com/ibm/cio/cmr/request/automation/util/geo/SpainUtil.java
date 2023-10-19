@@ -534,8 +534,9 @@ public class SpainUtil extends AutomationUtil {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else {
-              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
+              LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+              resultCodes.add("R");
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
