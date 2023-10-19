@@ -3519,7 +3519,7 @@ function setCSBOOnAddrSave() {
       FormManager.setValue('csBo', '');
       break;
     case 'BFKSC':
-      setCSBOForBFKScenario();
+      setCSBOForBFKSCScenario();
       break;
     case 'ABIJS':
     case 'AHIJE':
@@ -4493,7 +4493,7 @@ function setCSBORequired() {
   if (reqType == 'C') {
     if (role == 'REQUESTER') {
       if (custSubGrp == 'BFKSC') {
-        setCSBOForBFKScenario();
+        setCSBOForBFKSCScenario();
       } else {
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       }
@@ -4512,7 +4512,7 @@ function setCSBORequired() {
         FormManager.enable('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       } else if (custSubGrp == 'BFKSC') {
-        setCSBOForBFKScenario();
+        setCSBOForBFKSCScenario();
       } else {
         FormManager.readOnly('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
@@ -4528,7 +4528,7 @@ function setCSBORequired() {
           || custSubGrp == 'BRMSI') {
         FormManager.enable('csBo');
       } else if (custSubGrp == 'BFKSC') {
-        setCSBOForBFKScenario();
+        setCSBOForBFKSCScenario();
       }
     }
   }
@@ -4563,7 +4563,7 @@ function setCSBOOnScenarioChange() {
       FormManager.setValue('csBo', '');
       break;
     case 'BFKSC':
-      setCSBOForBFKScenario();
+      setCSBOForBFKSCScenario();
       break;
     case 'ABIJS':
     case 'AHIJE':
@@ -6807,7 +6807,7 @@ function setTelNoForBFKSCScenario(addrType) {
   }
 }
 
-function setCSBOForBFKScenario() {
+function setCSBOForBFKSCScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custType = FormManager.getActualValue('custType');
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
@@ -7014,8 +7014,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(setFieldsForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setFieldsForBFKSCScenario, GEOHandler.JP);
-  GEOHandler.addAfterConfig(setCSBOForBFKScenario, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(setCSBOForBFKScenario, GEOHandler.JP);
+  GEOHandler.addAfterConfig(setCSBOForBFKSCScenario, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setCSBOForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterConfig(setJSICForBFKSCScanario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setJSICForBFKSCScanario, GEOHandler.JP);
   GEOHandler.addAfterConfig(setAbbrevNmReqForBFKSCScenario, GEOHandler.JP);
