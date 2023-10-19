@@ -176,7 +176,9 @@ public class LoginController extends BaseController {
    * @param request
    * @return
    */
-  @RequestMapping(value = "/logout", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/logout",
+      method = RequestMethod.GET)
   public ModelAndView performLogout(ModelMap model, HttpServletRequest request, HttpServletResponse response) {
 
     if (OAuthUtils.isSSOActivated()) {
@@ -614,7 +616,9 @@ public class LoginController extends BaseController {
     return query.exists();
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/oidc")
+  @RequestMapping(
+      method = RequestMethod.GET,
+      value = "/oidc")
   public void getAccessToken(HttpServletRequest request, HttpServletResponse response) {
     try {
 
@@ -647,7 +651,9 @@ public class LoginController extends BaseController {
     return;
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/setUserRolesAndPermissions")
+  @RequestMapping(
+      method = RequestMethod.GET,
+      value = "/setUserRolesAndPermissions")
   public ModelAndView handleOIDCRedirect(HttpServletRequest request, HttpServletResponse response) {
 
     ModelAndView mv = null;
@@ -780,10 +786,24 @@ public class LoginController extends BaseController {
           appUser.setShowPendingOnly("Y".equals(result[10]));
           appUser.setShowLatestFirst("Y".equals(result[11]));
         }
+
+        Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
+
+        String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
+        LOG.debug("Employee ID: " + jpCnum);
+        String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
+        LOG.debug("KSC Member CNUM: " + jpKscCnum);
+
+        if (jpKscCnum.equalsIgnoreCase("JPU")) {
+          appUser.setKSCMember(true);
+        } else {
+          appUser.setKSCMember(false);
+        }
+        LOG.debug("is KSC Member: " + appUser.isKSCMember());
+
         if (hasDelegate) {
           appUser.setPreferencesSet(true);
           if (appUser.getBluePagesName() == null) {
-            Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
             if (p != null) {
               appUser.setBluePagesName(p.getName());
             }
