@@ -54,6 +54,9 @@ import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.IntlAddrPK;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.Knb1;
+import com.ibm.cio.cmr.request.entity.Knb1PK;
+import com.ibm.cio.cmr.request.entity.NotifList;
+import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.entity.SalesPayment;
 import com.ibm.cio.cmr.request.entity.SalesPaymentPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
@@ -70,6 +73,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AdminService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -203,7 +207,7 @@ public class JPHandler extends GEOHandler {
       if (company == null) {
         throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
       }
-
+      company.setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
     } else if ("ZE01".equals(addrType)) {
       establishment = findEstablishmentFromCRIS(searchModel.getCmrNum());
       if (establishment != null) {
@@ -397,6 +401,8 @@ public class JPHandler extends GEOHandler {
         addr.setLocationCode(company.getLocCode() == null ? company.getLocCode() : company.getLocCode().trim());
         addr.setPostCd(company.getPostCode() == null ? company.getPostCode() : company.getPostCode().trim());
         addr.setCompanySize(company.getEmployeeSize());
+        addr.setPoBoxPostCd(company.getTaigaCode());
+        addr.setRol(JPHandler.getRolByKtokd(entityManager, company.getId().getCompanyNo(),"ZORG"));
         entityManager.persist(addr);
 
         rdc = new AddrRdc();
@@ -593,6 +599,7 @@ public class JPHandler extends GEOHandler {
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
     FindCMRRecordModel mainRecord = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
+    String mandt = SystemConfiguration.getValue("MANDT");
     boolean onlyCrisAddrFlag = false;
     if (mainRecord == null) {
       mainRecord = new FindCMRRecordModel();
@@ -612,10 +619,14 @@ public class JPHandler extends GEOHandler {
     if (company == null) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
     }
+    company.setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
+
     CRISEstablishment establishment = this.currentAccount.getParentEstablishment();
     if (establishment == null) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_ESTABLISHMENT_DATA);
     }
+
+    
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
       mainRecord.setCmrDuns(company.getDunsNo());
     }
@@ -700,11 +711,14 @@ public class JPHandler extends GEOHandler {
         sourceRecord.setCmrCountryLanded("JP");
         sourceRecord.setSbo(this.currentAccount.getSBO());
         sourceRecord.setLocationNo(this.currentAccount.getLocCode());
+        sourceRecord.setCmrPOBoxPostCode(JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
         for (String adu : crisAddr.getAddrType().split("")) {
           String cmrAddrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
           if (!StringUtils.isEmpty(adu) && !StringUtils.isEmpty(cmrAddrType) && !addedRecords.contains(cmrAddrType + "/" + crisAddr.getAddrSeq())) {
 
             FindCMRRecordModel copy = new FindCMRRecordModel();
+            sourceRecord.setInspbydebi(JPHandler.getRolByKtokd(entityManager,crisAddr.getAccountNo(),cmrAddrType));
+
             PropertyUtils.copyProperties(copy, sourceRecord);
 
             copy.setCmrAddrTypeCode(cmrAddrType);
@@ -831,6 +845,8 @@ public class JPHandler extends GEOHandler {
     record.setCmrCustPhone(sbPhone.toString());
     record.setCmrCountryLanded("JP");
     record.setCmrPostalCode(company.getPostCode());
+    record.setCmrPOBoxPostCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, mandt, company.getCompanyNo()));
+    record.setInspbydebi(JPHandler.getRolByKtokd(entityManager, company.getCompanyNo(), "ZORG"));
     converted.add(record);
 
     // add here establishment fields
@@ -921,6 +937,7 @@ public class JPHandler extends GEOHandler {
         && !"".equals(data.getBillToCustNo())) {
       data.setTier2("");
     }
+    data.setIdentClient(mainRecord.getInspbydebi());
     handleData4RAOnImport(data);
   }
 
@@ -1000,6 +1017,9 @@ public class JPHandler extends GEOHandler {
 
     if ("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType())) {
       address.setContact(null);
+      if ("ZC01".equals(address.getId().getAddrType())) {
+        address.setRol(currentRecord.getInspbydebi());
+      }
     } else {
       address.setContact(currentRecord.getCmrName4() == null ? currentRecord.getCmrName4()
           : currentRecord.getCmrName4().trim().length() > 15 ? currentRecord.getCmrName4().trim().substring(0, 15)
@@ -4914,6 +4934,7 @@ public class JPHandler extends GEOHandler {
         entityManager.merge(salesPayment);
         entityManager.flush();
       }
+      handleCmrNo2(entityManager, mandt, kna1.getId().getKunnr(), data.getCmrNo2(), kna1);
     }
 
     List<Knb1> knb1List = getKnb1Records(entityManager, data.getCmrNo());
@@ -4939,6 +4960,39 @@ public class JPHandler extends GEOHandler {
     query.setParameter("ZZKV_CUSNO", cmrNo);
     query.setParameter("KATR6", SystemLocation.JAPAN);
     return query.getResults(Knb1.class);
+  }
+  
+  private static String getCompanyTaigaByCompanyNo(EntityManager entityManager, String mandt, String cmrNo) throws Exception{
+	String taiga = "";
+	if (StringUtils.isEmpty(cmrNo)) {
+	    return null;
+	}
+    String sql = ExternalizedQuery.getSql("JP.GET.COMAPNY_TAIGA.BY_COMPANY_CMRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    taiga = query.getSingleResult(String.class);
+	
+    return taiga;
+  }
+  
+  private static String getAccountTaigaByAccountNo(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception{
+	String addrTaiga = "";
+	if (StringUtils.isEmpty(cmrNo)) {
+	    return null;
+	}
+    String sql = ExternalizedQuery.getSql("JP.GET.ADDR_TAIGA.BY_ACCOUNT_CMRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KTOKD", addrType);
+    query.setForReadOnly(true);
+    addrTaiga = query.getSingleResult(String.class);
+	
+    return addrTaiga;
   }
 
   private static List<Kna1> getKna1List(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
@@ -5214,6 +5268,172 @@ public class JPHandler extends GEOHandler {
     query.setParameter("REQ_ID", reqId);
     addresses = query.getResults(Addr.class);
     return addresses;
+  }
+  
+  private static void handleCmrNo2(EntityManager entityManager, String mandt, String kunnr, String cmrNo2, Kna1 kna1) throws Exception {
+    if (mandt == null || kunnr == null || cmrNo2 == null || "".equals(cmrNo2)) {
+      return;
+    }
+    boolean knb1ExistIndc = checkCurrentKnb1(entityManager, mandt, kunnr);
+    if (!knb1ExistIndc) {
+      Knb1 knb1 = new Knb1();
+      Knb1PK knb1PK = new Knb1PK();
+
+      knb1PK.setBukrs("7600");
+      knb1PK.setKunnr(kunnr);
+      knb1PK.setMandt(mandt);
+
+      knb1.setId(knb1PK);
+      knb1.setAkont("1070110000");
+      knb1.setAltkn("");
+      knb1.setBegru(kna1.getBegru());
+      knb1.setBlnkz("");
+      knb1.setBusab("");
+      knb1.setDatlz("00000000");
+      knb1.setEikto("");
+      knb1.setEkvbd("");
+      knb1.setErdat(kna1.getErdat());
+      knb1.setErnam(kna1.getErnam());
+      knb1.setFdgrv("");
+      knb1.setFrgrp("");
+      knb1.setHbkid("");
+      knb1.setIntad("");
+      knb1.setKnrzb(cmrNo2);
+      knb1.setKnrze("");
+      knb1.setKultg(0);
+      knb1.setKverm("");
+      knb1.setLockb("");
+      knb1.setLoevm(kna1.getLoevm());
+      knb1.setMgrup("");
+      knb1.setPerkz(" ");
+      knb1.setPernr("00000000");
+      knb1.setRemit("");
+      knb1.setSapTs(kna1.getSapTs());
+      knb1.setShadUpdateInd(kna1.getShadUpdateInd());
+      knb1.setShadUpdateTs(kna1.getShadUpdateTs());
+      knb1.setSperr(kna1.getSperr());
+      knb1.setSregl("");
+      knb1.setTlfxs("");
+      knb1.setTogru("");
+      knb1.setUrlid("");
+      knb1.setUzawe("");
+      knb1.setVerdt("00000000");
+      knb1.setVlibb(0);
+      knb1.setVrbkz("");
+      knb1.setVrsdg("");
+      knb1.setVrsnr("");
+      knb1.setVrspr(0);
+      knb1.setVrszl(0);
+      knb1.setVzskz("0");
+      knb1.setWakon("");
+      knb1.setWebtr(0);
+      knb1.setXausz(" ");
+      knb1.setXdezv(" ");
+      knb1.setXedip(" ");
+      knb1.setXpore(" ");
+      knb1.setXverr(" ");
+      knb1.setXzver(" ");
+      knb1.setZahls(" ");
+      knb1.setZamib(" ");
+      knb1.setZamim(" ");
+      knb1.setZamio(" ");
+      knb1.setZamir(" ");
+      knb1.setZamiv(" ");
+      knb1.setZgrup("");
+      knb1.setZindt("00000000");
+      knb1.setZinrt("00");
+      knb1.setZsabe("");
+      knb1.setZterm(" ");
+      knb1.setZuawa("");
+      knb1.setZwels("");
+
+      entityManager.persist(knb1);
+    } else {
+      Knb1 knb1 = getCurrentKnb1(entityManager, mandt, kunnr);
+      knb1.setKnrzb(cmrNo2);
+
+      entityManager.merge(knb1);
+    }
+    entityManager.flush();
+  }
+  
+  private static Boolean checkCurrentKnb1(EntityManager entityManager, String mandt, String kunnr) throws Exception {
+    String sql = ExternalizedQuery.getSql("JP.CHECK.KNB1");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KUNNR", kunnr);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      return true;
+    }
+    return false;
+  }
+
+  private static Knb1 getCurrentKnb1(EntityManager entityManager, String mandt, String kunnr) throws Exception {
+    String sql = ExternalizedQuery.getSql("JP.GET.KNB1.BY_MANDT_KUNNR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Knb1.class);
+  }
+  
+  public static void addJpSrwzLogicOnPRC(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    // in order to skip TC -
+    // 1, set req status COM
+    // 2, handle notify list
+    // 3, handle wf history
+    String custSubGroup = data.getCustSubGrp();
+    String action = model.getAction();
+    LOG.debug("skipping TC in addJpSrwzLogicOnPRC. reqId " + admin.getId().getReqId());
+    if ("ISOCU".equals(custSubGroup) && (CmrConstants.Processing_Validation_Complete().equals(model.getAction())
+        || CmrConstants.All_Processing_Complete().equals(model.getAction()) || "PCC".equals(model.getAction()))) {
+      try {
+        admin.setReqStatus("COM");
+        handleNotifyList(entityManager, admin, data, model);
+        handleWfHist(entityManager, admin, data, model);
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        LOG.error("ERROR in addJpSrwzLogicOnPRC. reqId " + admin.getId().getReqId() + ". Message: " + e);
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public static void handleNotifyList(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    // 1, check if there is notify list record
+    // 2, update latest record
+    AdminService adminService = new AdminService();
+
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.CHECKNOTIFLIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setParameter("USER_ID", admin.getRequesterId());
+    if (!query.exists()) {
+      NotifList notif = new NotifList();
+      NotifListPK pk = new NotifListPK();
+      pk.setReqId(admin.getId().getReqId());
+      pk.setNotifId(admin.getRequesterId());
+      notif.setId(pk);
+      notif.setNotifNm(admin.getRequesterNm());
+
+      adminService.createEntity(notif, entityManager);
+    }
+  }
+
+  public static void handleWfHist(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    // super
+  }
+  private static String getRolByKtokd(EntityManager entityManager, String companyOrAccountCMRNO, String ktokd) throws Exception {
+    if(ktokd==null)
+	  return "";
+	String rol = "";
+	List<Kna1> l = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), companyOrAccountCMRNO);
+	Kna1 kna1 = l.stream().filter(k -> ktokd.equals(k.getKtokd())).findFirst().orElse(null);
+	if(kna1!=null) {
+	  rol = kna1.getInspbydebi();;
+	}
+	return rol;
   }
 
 }

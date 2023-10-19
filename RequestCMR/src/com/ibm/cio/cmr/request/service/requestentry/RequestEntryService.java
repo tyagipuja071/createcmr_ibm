@@ -625,6 +625,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
       }
     }
+    
+    if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry()) && "ISOCU".equals(data.getCustSubGrp())
+        && (CmrConstants.Processing_Validation_Complete().equals(model.getAction())
+            || CmrConstants.All_Processing_Complete().equals(model.getAction()) || "PCC".equals(model.getAction()))) {
+      JPHandler.addJpSrwzLogicOnPRC(entityManager, admin, data, model);
+      String wfComment = "Skip TC for Japan ISOC use SR/WZ scenario.";
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null, null, null,
+          null);
+    }
+    
     RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
     updateEntity(admin, entityManager);
     updateEntity(data, entityManager);
