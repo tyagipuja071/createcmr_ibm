@@ -207,7 +207,8 @@ public class JPHandler extends GEOHandler {
       if (company == null) {
         throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
       }
-      company.setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
+      company
+          .setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
     } else if ("ZE01".equals(addrType)) {
       establishment = findEstablishmentFromCRIS(searchModel.getCmrNum());
       if (establishment != null) {
@@ -402,7 +403,7 @@ public class JPHandler extends GEOHandler {
         addr.setPostCd(company.getPostCode() == null ? company.getPostCode() : company.getPostCode().trim());
         addr.setCompanySize(company.getEmployeeSize());
         addr.setPoBoxPostCd(company.getTaigaCode());
-        addr.setRol(JPHandler.getRolByKtokd(entityManager, company.getId().getCompanyNo(),"ZORG"));
+        addr.setRol(JPHandler.getRolByKtokd(entityManager, company.getId().getCompanyNo(), "ZORG"));
         entityManager.persist(addr);
 
         rdc = new AddrRdc();
@@ -626,7 +627,6 @@ public class JPHandler extends GEOHandler {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_ESTABLISHMENT_DATA);
     }
 
-    
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
       mainRecord.setCmrDuns(company.getDunsNo());
     }
@@ -711,13 +711,14 @@ public class JPHandler extends GEOHandler {
         sourceRecord.setCmrCountryLanded("JP");
         sourceRecord.setSbo(this.currentAccount.getSBO());
         sourceRecord.setLocationNo(this.currentAccount.getLocCode());
-        sourceRecord.setCmrPOBoxPostCode(JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
+        sourceRecord.setCmrPOBoxPostCode(
+            JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
         for (String adu : crisAddr.getAddrType().split("")) {
           String cmrAddrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
           if (!StringUtils.isEmpty(adu) && !StringUtils.isEmpty(cmrAddrType) && !addedRecords.contains(cmrAddrType + "/" + crisAddr.getAddrSeq())) {
 
             FindCMRRecordModel copy = new FindCMRRecordModel();
-            sourceRecord.setInspbydebi(JPHandler.getRolByKtokd(entityManager,crisAddr.getAccountNo(),cmrAddrType));
+            sourceRecord.setInspbydebi(JPHandler.getRolByKtokd(entityManager, crisAddr.getAccountNo(), cmrAddrType));
 
             PropertyUtils.copyProperties(copy, sourceRecord);
 
@@ -1903,7 +1904,7 @@ public class JPHandler extends GEOHandler {
       rol = getRolByCreditToCustNo(data.getCreditToCustNo() == null ? "" : data.getCreditToCustNo());
     }
     if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
-      data.setIdentClient(rol);
+      // data.setIdentClient(rol);
     } else if ("SUBSI".equals(data.getCustGrp())) {
       data.setIdentClient("");
     }
@@ -1912,9 +1913,7 @@ public class JPHandler extends GEOHandler {
     if (addrList != null && addrList.size() > 0) {
       for (Addr address : addrList) {
         if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
-          if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
-            address.setRol(rol);
-          } else if ("SUBSI".equals(data.getCustGrp())) {
+          if ("SUBSI".equals(data.getCustGrp())) {
             address.setRol("");
           } else {
             address.setRol(rolData);
@@ -4961,12 +4960,12 @@ public class JPHandler extends GEOHandler {
     query.setParameter("KATR6", SystemLocation.JAPAN);
     return query.getResults(Knb1.class);
   }
-  
-  private static String getCompanyTaigaByCompanyNo(EntityManager entityManager, String mandt, String cmrNo) throws Exception{
-	String taiga = "";
-	if (StringUtils.isEmpty(cmrNo)) {
-	    return null;
-	}
+
+  private static String getCompanyTaigaByCompanyNo(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
+    String taiga = "";
+    if (StringUtils.isEmpty(cmrNo)) {
+      return null;
+    }
     String sql = ExternalizedQuery.getSql("JP.GET.COMAPNY_TAIGA.BY_COMPANY_CMRNO");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CMR", cmrNo);
@@ -4974,15 +4973,15 @@ public class JPHandler extends GEOHandler {
     query.setParameter("MANDT", mandt);
     query.setForReadOnly(true);
     taiga = query.getSingleResult(String.class);
-	
+
     return taiga;
   }
-  
-  private static String getAccountTaigaByAccountNo(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception{
-	String addrTaiga = "";
-	if (StringUtils.isEmpty(cmrNo)) {
-	    return null;
-	}
+
+  private static String getAccountTaigaByAccountNo(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception {
+    String addrTaiga = "";
+    if (StringUtils.isEmpty(cmrNo)) {
+      return null;
+    }
     String sql = ExternalizedQuery.getSql("JP.GET.ADDR_TAIGA.BY_ACCOUNT_CMRNO");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CMR", cmrNo);
@@ -4991,7 +4990,7 @@ public class JPHandler extends GEOHandler {
     query.setParameter("KTOKD", addrType);
     query.setForReadOnly(true);
     addrTaiga = query.getSingleResult(String.class);
-	
+
     return addrTaiga;
   }
 
@@ -5269,7 +5268,7 @@ public class JPHandler extends GEOHandler {
     addresses = query.getResults(Addr.class);
     return addresses;
   }
-  
+
   private static void handleCmrNo2(EntityManager entityManager, String mandt, String kunnr, String cmrNo2, Kna1 kna1) throws Exception {
     if (mandt == null || kunnr == null || cmrNo2 == null || "".equals(cmrNo2)) {
       return;
@@ -5356,7 +5355,7 @@ public class JPHandler extends GEOHandler {
     }
     entityManager.flush();
   }
-  
+
   private static Boolean checkCurrentKnb1(EntityManager entityManager, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("JP.CHECK.KNB1");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -5377,7 +5376,7 @@ public class JPHandler extends GEOHandler {
     query.setForReadOnly(true);
     return query.getSingleResult(Knb1.class);
   }
-  
+
   public static void addJpSrwzLogicOnPRC(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     // in order to skip TC -
     // 1, set req status COM
@@ -5424,16 +5423,18 @@ public class JPHandler extends GEOHandler {
   public static void handleWfHist(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     // super
   }
+
   private static String getRolByKtokd(EntityManager entityManager, String companyOrAccountCMRNO, String ktokd) throws Exception {
-    if(ktokd==null)
-	  return "";
-	String rol = "";
-	List<Kna1> l = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), companyOrAccountCMRNO);
-	Kna1 kna1 = l.stream().filter(k -> ktokd.equals(k.getKtokd())).findFirst().orElse(null);
-	if(kna1!=null) {
-	  rol = kna1.getInspbydebi();;
-	}
-	return rol;
+    if (ktokd == null)
+      return "";
+    String rol = "";
+    List<Kna1> l = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), companyOrAccountCMRNO);
+    Kna1 kna1 = l.stream().filter(k -> ktokd.equals(k.getKtokd())).findFirst().orElse(null);
+    if (kna1 != null) {
+      rol = kna1.getInspbydebi();
+      ;
+    }
+    return rol;
   }
 
 }
