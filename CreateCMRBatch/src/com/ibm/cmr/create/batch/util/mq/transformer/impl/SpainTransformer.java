@@ -797,7 +797,7 @@ public class SpainTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if ("@".equals(muData.getMiscBillCd().trim())) {
+      if ("@".equals(muData.getMiscBillCd().trim()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
         cust.setEmbargoCd(muData.getMiscBillCd());
