@@ -6875,8 +6875,10 @@ function setAbbrevNmReqForBFKSCScenario() {
 }
 
 function setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC) {
+  var abbrevNm = '';
+
   if (abbrevNmBFKSC != null && abbrevNmBFKSC.length > 22) {
-    abbrevNm = bfkscAbbrevNm.substring(0, 22);
+    abbrevNm = abbrevNmBFKSC.substring(0, 22);
     FormManager.setValue('abbrevNm', abbrevNm);
   } else {
     FormManager.setValue('abbrevNm', abbrevNmBFKSC);
