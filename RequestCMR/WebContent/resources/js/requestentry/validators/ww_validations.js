@@ -1309,7 +1309,7 @@ var forceLockUnlock = function() {
   FormManager.readOnly('cmrIssuingCntry');
 }
 
-// CREATCMR-10034
+//CREATCMR-10034
 function addLAVatValidator() {
   FormManager.addFormValidator((function() {
 
@@ -1328,7 +1328,6 @@ function addLAVatValidator() {
            vat = FormManager.getActualValue('taxCd1');
         }
         
-        
         if (reqType=='U' && ((dojo.byId('taxCd1') != null && dojo.byId('taxCd1').readOnly) || (dojo.byId('vat') != null && dojo.byId('vat').readOnly))){
           return new ValidationResult(null, true);
         } else if (!vat || vat == '' || vat.trim() == '') {
@@ -1337,8 +1336,7 @@ function addLAVatValidator() {
           // vat deletion for updates
             return new ValidationResult(null, true);
         } 
-              
-
+          
         var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
           REQID : FormManager.getActualValue('reqId'),
           TYPE : 'ZS01'
@@ -1349,13 +1347,10 @@ function addLAVatValidator() {
         console.log('ZS01 VAT Country: ' + zs01Cntry);
         if (zs01Cntry != undefined && zs01Cntry != null && (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL')) {
           // CREATCMR-10034
-
-          // if Chile, Colombia, Venezuela are the CMR issuing country
-          // proxy's the taxCd1 value to vat to proceed with the validation
           var custClass= FormManager.getActualValue('custClass');
 
           if (zs01Cntry == 'CO') {
-            if ((reqType == 'C' && custSubGrp == 'PRIPE')|| (reqType == 'U' && (custClass=='60' || custClass=='71' ))) {
+            if ((reqType == 'C' && custSubGrp == 'PRIPE')|| (reqType == 'U' && (custClass == '60' || custClass == '71' ))) {
               if (vat.length != '10') {
                 return new ValidationResult({
                   id : 'vat',
@@ -1372,7 +1367,7 @@ function addLAVatValidator() {
                   }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnn-n for Private Person.'));
                 }
               }
-            } else if ((reqType == 'C' && custSubGrp != 'PRIPE') || (reqType == 'U' && (custClass!='60' || custClass!='71' ))) {
+            } else if ((reqType == 'C' && custSubGrp != 'PRIPE') || (reqType == 'U' && (custClass != '60' || custClass != '71' ))) {
               if (vat.length != '11') {
                 return new ValidationResult({
                   id : 'vat',
@@ -1392,6 +1387,7 @@ function addLAVatValidator() {
             }
             return;
           }
+          
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
