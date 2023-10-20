@@ -1776,7 +1776,7 @@ function freeTxtFieldShowHide(buttonNo) {
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
 
-  if (buttonNo%2 == 0) {
+  if (buttonNo % 2 == 0) {
     shouldDisplay = true;
   } else {
     shouldDisplay = false;
@@ -1790,11 +1790,11 @@ function freeTxtFieldShowHide(buttonNo) {
 }
 
 function getCheckListFieldNo(buttonNo) {
-  return ((buttonNo - (buttonNo % 2))/2) + 5;
+  return ((buttonNo - (buttonNo % 2)) / 2) + 5;
 }
 
 function checkChecklistButtons() {
-  for (var i = 2; i<=14; i=i+2) {
+  for (var i = 2; i <= 14; i = i + 2) {
     if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
       document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
     }
@@ -1814,8 +1814,9 @@ function setChecklistStatus() {
       var noOfQuestions = questions.length / 2;
       var noOfTextBoxes = textBoxes.length;
 
-      for (var i=0; i < noOfTextBoxes; i++) {
-        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+      for (var i = 0; i < noOfTextBoxes; i++) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
+            && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
         }
       }
@@ -1862,8 +1863,9 @@ function addChecklistValidator() {
           var noOfQuestions = questions.length / 2;
           var noOfTextBoxes = textBoxes.length;
 
-          for (var i=0; i < noOfTextBoxes; i++) {
-            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+          for (var i = 0; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
+                && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
@@ -2517,6 +2519,27 @@ function setIsuClientTierBehaviour() {
   }
 }
 
+function StcOrderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // var role = FormManager.getActualValue('userRole').toUpperCase();
+        var ordBlk = FormManager.getActualValue('embargoCd');
+        var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
+        if (ordBlk == null || ordBlk == '') {
+          if (stcOrdBlk == 'ST' || stcOrdBlk == '') {
+          } else {
+            return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
+          }
+        } else if (ordBlk != '' && stcOrdBlk != '') {
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
       '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
@@ -2622,10 +2645,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(enableTinNumber, SysLoc.KENYA);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.MCO2, null, true);
   GEOHandler.addAfterTemplateLoad(setIsuClientTierBehaviour, GEOHandler.MCO2);
-  
+
   GEOHandler.addAfterConfig(setChecklistStatus, [ '842' ]);
   GEOHandler.registerValidator(addChecklistValidator, [ '842' ]);
   GEOHandler.addAfterConfig(addChecklistBtnHandler, [ '842' ]);
   GEOHandler.addAfterConfig(checkChecklistButtons, [ '842' ]);
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO2, null, true);
 
 });
