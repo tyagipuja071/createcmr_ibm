@@ -3665,6 +3665,7 @@ function setAccountAbbNmOnAddrSave() {
 function setAccountAbbNmOnAddrSaveCreate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var fullEngNm = FormManager.getActualValue('custNm3');
+  var abbrevNmBFKSC = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'OUTSC':
@@ -3702,36 +3703,41 @@ function setAccountAbbNmOnAddrSaveCreate() {
     accountAbbNm = '';
     break;
   case 'BFKSC':
-    setAbbrevNmReqForBFKSCScenario();
+    setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC);
     break;
   case '':
   default:
     accountAbbNm = fullEngNm;
   }
-  if (accountAbbNm && accountAbbNm.length > 22) {
-    accountAbbNm = accountAbbNm.substring(0, 22);
+  if (custSubGrp != 'BFKSC') {
+    if (accountAbbNm && accountAbbNm.length > 22) {
+      accountAbbNm = accountAbbNm.substring(0, 22);
+    }
+    FormManager.setValue('abbrevNm', accountAbbNm);
   }
-  FormManager.setValue('abbrevNm', accountAbbNm);
 }
 function setAccountAbbNmOnAddrSaveUpdate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var fullEngNm = FormManager.getActualValue('custNm3');
+  var abbrevNmBFKSC = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'BCEXA':
     accountAbbNm = '';
     break;
   case 'BFKSC':
-    setAbbrevNmReqForBFKSCScenario();
+    setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC);
     break;
   case '':
   default:
     accountAbbNm = fullEngNm;
   }
-  if (accountAbbNm && accountAbbNm.length > 22) {
-    accountAbbNm = accountAbbNm.substring(0, 22);
+  if (custSubGrp != 'BFKSC') {
+    if (accountAbbNm && accountAbbNm.length > 22) {
+      accountAbbNm = accountAbbNm.substring(0, 22);
+    }
+    FormManager.setValue('abbrevNm', accountAbbNm);
   }
-  FormManager.setValue('abbrevNm', accountAbbNm);
 }
 
 function addLogicOnOfficeCdChange() {
@@ -6865,6 +6871,17 @@ function setAbbrevNmReqForBFKSCScenario() {
       FormManager.readOnly('abbrevNm');
       FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     }
+  }
+}
+
+function setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC) {
+  var abbrevNm = '';
+
+  if (abbrevNmBFKSC != null && abbrevNmBFKSC.length > 22) {
+    abbrevNm = abbrevNmBFKSC.substring(0, 22);
+    FormManager.setValue('abbrevNm', abbrevNm);
+  } else {
+    FormManager.setValue('abbrevNm', abbrevNmBFKSC);
   }
 }
 
