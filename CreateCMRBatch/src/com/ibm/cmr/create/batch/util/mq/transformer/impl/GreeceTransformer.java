@@ -977,7 +977,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
         cust.setEmbargoCd(muData.getMiscBillCd());

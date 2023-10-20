@@ -682,8 +682,8 @@ public class CEETransformer extends EMEATransformer {
       addrLineT = "";
     }
 
-    legacyAddr.setItCompanyProvCd((!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ?
-        addrData.getStateProv() : "");
+    legacyAddr
+        .setItCompanyProvCd((!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ? addrData.getStateProv() : "");
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
@@ -1363,7 +1363,7 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if ("@".equals(muData.getMiscBillCd())) {
+      if ("@".equals(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
         cust.setEmbargoCd(muData.getMiscBillCd());
