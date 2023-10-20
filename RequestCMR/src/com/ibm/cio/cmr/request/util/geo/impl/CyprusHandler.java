@@ -3648,8 +3648,8 @@ public class CyprusHandler extends BaseSOFHandler {
                 }
               }
               if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+                LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br> ");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");

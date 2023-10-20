@@ -1207,8 +1207,8 @@ public class NORDXHandler extends BaseSOFHandler {
                     ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.<br>");
               }
               if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(embargo)) {
-                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br>");
+                LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br>");
               }
               currCell = (XSSFCell) row.getCell(12);
               ctc = validateColValFromCell(currCell);
