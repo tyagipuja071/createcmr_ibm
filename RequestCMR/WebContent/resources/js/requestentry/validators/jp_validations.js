@@ -3664,7 +3664,8 @@ function setAccountAbbNmOnAddrSave() {
 }
 function setAccountAbbNmOnAddrSaveCreate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var fullEngNm = FormManager.getActualValue('cnCustName1');
+  var fullEngNm = FormManager.getActualValue('custNm3');
+  var abbrevNmBFKSC = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'OUTSC':
@@ -3702,7 +3703,7 @@ function setAccountAbbNmOnAddrSaveCreate() {
     accountAbbNm = '';
     break;
   case 'BFKSC':
-    setAbbrevNmForBFKSCScenarioOnAddrSave(fullEngNm);
+    setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC);
     break;
   case '':
   default:
@@ -3717,14 +3718,15 @@ function setAccountAbbNmOnAddrSaveCreate() {
 }
 function setAccountAbbNmOnAddrSaveUpdate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var fullEngNm = FormManager.getActualValue('cnCustName1');
+  var fullEngNm = FormManager.getActualValue('custNm3');
+  var abbrevNmBFKSC = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'BCEXA':
     accountAbbNm = '';
     break;
   case 'BFKSC':
-    setAbbrevNmForBFKSCScenarioOnAddrSave(fullEngNm);
+    setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC);
     break;
   case '':
   default:
@@ -6872,12 +6874,12 @@ function setAbbrevNmReqForBFKSCScenario() {
   }
 }
 
-function setAbbrevNmForBFKSCScenarioOnAddrSave(fullEngNm) {
-  if (fullEngNm != null && fullEngNm.length > 22) {
-    abbrevNm = fullEngNm.substring(0, 22);
+function setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC) {
+  if (abbrevNmBFKSC != null && abbrevNmBFKSC.length > 22) {
+    abbrevNm = bfkscAbbrevNm.substring(0, 22);
     FormManager.setValue('abbrevNm', abbrevNm);
   } else {
-    FormManager.setValue('abbrevNm', fullEngNm);
+    FormManager.setValue('abbrevNm', abbrevNmBFKSC);
   }
 }
 
