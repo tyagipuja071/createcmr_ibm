@@ -368,17 +368,24 @@ public class LoginController extends BaseController {
 
           Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
 
+          // logging lines are for debugging purposes in UAT envi
+          LOG.debug("performLogin method been executed.");
           String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
-          LOG.info("Employee ID: " + jpCnum);
+          LOG.debug("Employee ID: " + jpCnum);
           String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
-          LOG.info("KSC Member CNUM: " + jpKscCnum);
+          LOG.debug("KSC Member CNUM: " + jpKscCnum);
+
+          String testEmail = p.getEmail() != null ? p.getEmail() : "";
+          LOG.debug("Test Email: " + testEmail);
 
           if (jpKscCnum.equalsIgnoreCase("JPU")) {
+            appUser.setKSCMember(true);
+          } else if (testEmail.equalsIgnoreCase("joseph.malonda@ibm.com")) {
             appUser.setKSCMember(true);
           } else {
             appUser.setKSCMember(false);
           }
-          LOG.info("is KSC Member: " + appUser.isKSCMember());
+          LOG.debug("is KSC Member: " + appUser.isKSCMember());
 
           if (hasDelegate) {
             appUser.setPreferencesSet(true);
@@ -789,12 +796,19 @@ public class LoginController extends BaseController {
 
         Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
 
+        // logging lines are for debugging purposes in UAT envi
+        LOG.debug("handleOIDCRedirect method been executed.");
         String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
         LOG.debug("Employee ID: " + jpCnum);
         String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
         LOG.debug("KSC Member CNUM: " + jpKscCnum);
 
+        String testEmail = p.getEmail() != null ? p.getEmail() : "";
+        LOG.debug("Test Email: " + testEmail);
+
         if (jpKscCnum.equalsIgnoreCase("JPU")) {
+          appUser.setKSCMember(true);
+        } else if (testEmail.equalsIgnoreCase("joseph.malonda@ibm.com")) {
           appUser.setKSCMember(true);
         } else {
           appUser.setKSCMember(false);
