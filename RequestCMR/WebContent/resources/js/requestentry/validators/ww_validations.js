@@ -1309,18 +1309,34 @@ var forceLockUnlock = function() {
   FormManager.readOnly('cmrIssuingCntry');
 }
 
-// CREATCMR-10034
+//CREATCMR-10034
 function addLAVatValidator() {
   FormManager.addFormValidator((function() {
 
     return {
       validate : function() {
+
         var reqType = FormManager.getActualValue('reqType');
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         console.log(">>>> addLAVatValidator");
         var zs01Cntry = null;
-
+        //get vat Field 
+        var vat = FormManager.getActualValue('vat');
+        if (!vat || vat == '' || vat.trim() == '') {
+          // if taxcd1 is empty check for vat field
+           vat = FormManager.getActualValue('taxCd1');
+        }
+        
+        if (reqType=='U' && ((dojo.byId('taxCd1') != null && dojo.byId('taxCd1').readOnly) || (dojo.byId('vat') != null && dojo.byId('vat').readOnly))){
+          return new ValidationResult(null, true);
+        } else if (!vat || vat == '' || vat.trim() == '') {
+            return new ValidationResult(null, true);
+        } else if (reqType == 'U' && vat == '@') {
+          // vat deletion for updates
+            return new ValidationResult(null, true);
+        } 
+          
         var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
           REQID : FormManager.getActualValue('reqId'),
           TYPE : 'ZS01'
@@ -1331,25 +1347,10 @@ function addLAVatValidator() {
         console.log('ZS01 VAT Country: ' + zs01Cntry);
         if (zs01Cntry != undefined && zs01Cntry != null && (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL')) {
           // CREATCMR-10034
+          var custClass= FormManager.getActualValue('custClass');
 
-          // if Chile, Colombia, Venezuela are the CMR issuing country
-          // proxy's the taxCd1 value to vat to proceed with the validation
-
-          var vat = FormManager.getActualValue('taxCd1');
-          if (!vat || vat == '' || vat.trim() == '') {
-            // if taxcd1 is empty check for vat field
-            var vat = FormManager.getActualValue('vat');
-          }
-
-          if (!vat || vat == '' || vat.trim() == '') {
-            return new ValidationResult(null, true);
-          } else if (reqType == 'U' && vat == '@') {
-            // vat deletion for updates
-            return new ValidationResult(null, true);
-          }
-
-          if (reqType == 'C' && zs01Cntry == 'CO') {
-            if (custSubGrp == 'PRIPE') {
+          if (zs01Cntry == 'CO') {
+            if ((reqType == 'C' && custSubGrp == 'PRIPE')|| (reqType == 'U' && (custClass == '60' || custClass == '71' ))) {
               if (vat.length != '10') {
                 return new ValidationResult({
                   id : 'vat',
@@ -1366,7 +1367,7 @@ function addLAVatValidator() {
                   }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnn-n for Private Person.'));
                 }
               }
-            } else if (custSubGrp != 'PRIPE') {
+            } else if ((reqType == 'C' && custSubGrp != 'PRIPE') || (reqType == 'U' && (custClass != '60' || custClass != '71' ))) {
               if (vat.length != '11') {
                 return new ValidationResult({
                   id : 'vat',
@@ -1386,6 +1387,7 @@ function addLAVatValidator() {
             }
             return;
           }
+          
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
