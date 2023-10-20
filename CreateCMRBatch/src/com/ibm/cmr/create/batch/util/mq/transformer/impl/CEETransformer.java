@@ -1362,7 +1362,7 @@ public class CEETransformer extends EMEATransformer {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
 
-    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+    if (!StringUtils.isBlank(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
       if ("@".equals(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {

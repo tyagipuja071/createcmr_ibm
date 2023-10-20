@@ -1121,7 +1121,7 @@ public class NLTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getOrdBlk())) {
+    if (!StringUtils.isBlank(muData.getOrdBlk()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
       if ("@".equals(muData.getOrdBlk()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {

@@ -944,7 +944,7 @@ public class IsraelTransformer extends EMEATransformer {
       cust.setDeptCd(muData.getEntpUpdtTyp());
     }
     // Embargo Code
-    if (StringUtils.isNotBlank(muData.getMiscBillCd())) {
+    if (StringUtils.isNotBlank(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
       if ("@".equals(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
