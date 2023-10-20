@@ -1296,11 +1296,12 @@ function setAccountAbbNmForCreate() {
     }
     accountAbbNm = oldAccountAbbNm;
   }
-  if (accountAbbNm && accountAbbNm.length > 22) {
-    accountAbbNm = accountAbbNm.substring(0, 22);
+  if (custSubGrp != 'BFKSC') {
+    if (accountAbbNm && accountAbbNm.length > 22) {
+      accountAbbNm = accountAbbNm.substring(0, 22);
+    }
+    FormManager.setValue('abbrevNm', accountAbbNm);
   }
-  FormManager.setValue('abbrevNm', accountAbbNm);
-
 }
 function setAccountAbbNmForUpdate() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
