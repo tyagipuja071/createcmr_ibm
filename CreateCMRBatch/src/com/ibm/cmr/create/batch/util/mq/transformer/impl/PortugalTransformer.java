@@ -703,7 +703,7 @@ public class PortugalTransformer extends MessageTransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+    if (!StringUtils.isBlank(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd().trim()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         legacyCust.setEmbargoCd("");
       } else {

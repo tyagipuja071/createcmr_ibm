@@ -2532,7 +2532,7 @@ function StcOrderBlockValidation() {
             return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
           }
         } else if (ordBlk != '' && stcOrdBlk != '') {
-          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Embargo Code field');
         }
         return new ValidationResult(null, true);
       }
