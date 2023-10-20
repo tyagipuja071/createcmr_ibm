@@ -85,7 +85,7 @@ public class LegacyCommonUtil {
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd().trim()) || || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd().trim()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
         cust.setEmbargoCd(muData.getMiscBillCd());
