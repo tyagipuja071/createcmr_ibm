@@ -3749,22 +3749,36 @@ function addPOBoxValidatorGR() {
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
 }
 
-function setVatValidatorGRCYTR() {
+function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    if (scenarioChanged) {
+      if (FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'XPC'
+          || FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+        FormManager.resetValidations('vat');
+        FormManager.setValue('vatExempt', 'Y');
+      } else {
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.setValue('vatExempt', false);
+      }
+    }
+
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.setValue('vatExempt', false);
+    }
+
+    if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
       FormManager.readOnly('vat');
     }
-    // For CREATCMR-7984
-    /*
-     * if (dijit.byId('vatExempt').get('checked')) {
-     * FormManager.clearValue('vat'); } if (undefined != dijit.byId('vatExempt') &&
-     * !dijit.byId('vatExempt').get('checked')) { checkAndAddValidator('vat',
-     * Validators.REQUIRED, [ 'VAT' ]); FormManager.enable('vat'); }
-     */
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
+    }
   }
 }
 
@@ -9105,7 +9119,14 @@ function vatValidatorTR() {
           if (vat.match(/^[0-9]{10}$/) || vat.match(/^[0-9]{11}$/)) {
             return new ValidationResult(null, true);
           }
-          if (vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict)) {
+          if ((vat != '') && reqType == 'U') {
+            return new ValidationResult({
+              id : 'vat',
+              type : 'text',
+              name : 'vat'
+            }, false, 'Invalid VAT for TR. Length should be 10, or 11 characters long.');
+          }
+          if ((vat != '' || oldVAT != '' || (oldVAT != '' && oldZS01DEPT != soldToDistrict)) && reqType == 'C') {
             return new ValidationResult({
               id : 'vat',
               type : 'text',
@@ -9270,7 +9291,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addEmbargoCdValidatorForTR, [ SysLoc.TURKEY ], null, true);
 
   // Greece
