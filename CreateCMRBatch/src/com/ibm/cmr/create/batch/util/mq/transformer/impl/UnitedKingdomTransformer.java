@@ -1646,7 +1646,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+    if (!StringUtils.isBlank(muData.getMiscBillCd()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd().trim()) || "ST".equalsIgnoreCase(muData.getTaxExemptStatus3())) {
         cust.setEmbargoCd("");
       } else {
