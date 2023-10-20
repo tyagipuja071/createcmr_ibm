@@ -1441,8 +1441,8 @@ public class MCOPtEsHandler extends MCOHandler {
               }
 
               if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-                LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+                LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+                error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br> ");
               }
 
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
@@ -1527,8 +1527,8 @@ public class MCOPtEsHandler extends MCOHandler {
                 }
 
                 if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-                  LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                  error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+                  LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+                  error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br> ");
                 }
 
                 if ((!("@").equals(enterprise)) && (!StringUtils.isEmpty(enterprise))) {
