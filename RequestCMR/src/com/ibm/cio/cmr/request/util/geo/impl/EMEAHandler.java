@@ -4102,8 +4102,8 @@ public class EMEAHandler extends BaseSOFHandler {
         currCell = row.getCell(ordBlkIndex);
         String ordBlk = validateColValFromCell(currCell);
         if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+          LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br> ");
         }
 
         validations.add(error);
@@ -4220,8 +4220,8 @@ public class EMEAHandler extends BaseSOFHandler {
                 ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
           }
           if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-            LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+            LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br> ");
           }
           if (error.hasErrors()) {
             validations.add(error);
@@ -4568,8 +4568,8 @@ public class EMEAHandler extends BaseSOFHandler {
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
         if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+          LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br> ");
         }
 
         validations.add(error);
