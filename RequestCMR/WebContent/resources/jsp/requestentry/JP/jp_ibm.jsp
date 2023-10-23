@@ -41,10 +41,6 @@
     display: inline-block;
   }
 </style>
-<script>
-	var KSCFlgCheck = '<%= isKSCMemberFlg %>';
-	console.log('Variable from Java: ', KSCFlgCheck);
-</script>
 <cmr:view forGEO="JP">
   <cmr:row addBackground="true">
   	
