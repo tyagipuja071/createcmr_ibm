@@ -301,6 +301,9 @@ var DB_DATA_FIELDS = [ {
 }, {
   id : 'TaxPayerCustCd',
   name : 'TAX_PAYER_CUST_CD'
+}, {
+  id : 'CustomerType',
+  name : 'ADMIN.CUST_TYPE'
 } ];
 DB_DATA_FIELDS.sort(function(a, b) {
   if (a.id > b.id) {
