@@ -625,7 +625,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
       }
     }
-    
+
     if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry()) && "ISOCU".equals(data.getCustSubGrp())
         && (CmrConstants.Processing_Validation_Complete().equals(model.getAction())
             || CmrConstants.All_Processing_Complete().equals(model.getAction()) || "PCC".equals(model.getAction()))) {
@@ -634,7 +634,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null, null, null,
           null);
     }
-    
+
     RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
     updateEntity(admin, entityManager);
     updateEntity(data, entityManager);
@@ -695,7 +695,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       if ("RACMR".equals(data.getCustSubGrp())) {
         String comment = JPHandler.addJpRALogicOnSendForProcessing(entityManager, admin, data, model);
         RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
-      } else if ("BFKSC".equals(data.getCustSubGrp()) && !"C".equalsIgnoreCase(admin.getCustType())) {
+      } else if ("BFKSC".equals(data.getCustSubGrp()) && !"C".equalsIgnoreCase(admin.getCustType()) && !"CR".equalsIgnoreCase(admin.getCustType())) {
         String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
         RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
       }
