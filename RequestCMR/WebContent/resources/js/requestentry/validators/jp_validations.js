@@ -4678,7 +4678,7 @@ function setTier2Required() {
       'D0883', 'D0884', 'D0885', 'D0886', 'D0887', 'D0919', 'D0920', 'D0921', 'D0922', 'D0923', 'D0924', 'D0925', 'D0926', 'D0939' ];
   var matched = false;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
+  if (custSubGrp == 'BPWPQ') {
     for (var i = 0; i < requiredDealerNoList.length; i++) {
       if (dealerNo == requiredDealerNoList[i]) {
         matched = true;
