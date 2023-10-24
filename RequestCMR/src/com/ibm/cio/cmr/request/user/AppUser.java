@@ -47,8 +47,6 @@ public class AppUser implements Serializable {
   private boolean showPendingOnly;
   private boolean showLatestFirst;
 
-  private boolean isKSCMember;
-
   private Authorization auth = null;
   private List<String> roles = new ArrayList<>();
   private Map<String, List<String>> subRoles = new HashMap<>();
@@ -328,14 +326,6 @@ public class AppUser implements Serializable {
 
   public void setHasApprovals(boolean hasApprovals) {
     this.hasApprovals = hasApprovals;
-  }
-
-  public boolean isKSCMember() {
-    return isKSCMember;
-  }
-
-  public void setKSCMember(boolean isKSCMember) {
-    this.isKSCMember = isKSCMember;
   }
 
 }

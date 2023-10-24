@@ -6477,6 +6477,7 @@ function isKSCMemberValidator() {
       validate : function() {
         var isKSCMemberFlg = FormManager.getActualValue('isKSCMemberFlg');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var custType = FormManager.getActualValue('custType');
         var paramCode = 'JP.KSC.SKIP_CHECK';
 
         if (paramCode != null) {
@@ -6492,12 +6493,17 @@ function isKSCMemberValidator() {
           }
         }
 
-        if (role == 'PROCESSOR') {
-          return new ValidationResult(null, true);
-        }
-
-        if (isKSCMemberFlg == 'false' && custSubGrp == 'BFKSC') {
-          return new ValidationResult(null, false, 'Only KSC Member can choose BF - Kobelco Systems Corporation scenario.');
+        if (custSubGrp == 'BFKSC') {
+          if (role == 'PROCESSOR') {
+            return new ValidationResult(null, true);
+          }
+          // skip validation for Subsidiary Company requests
+          if (custType == 'C') {
+            return new ValidationResult(null, true);
+          }
+          if (isKSCMemberFlg == 'false') {
+            return new ValidationResult(null, false, 'Only KSC Member can choose BF - Kobelco Systems Corporation scenario.');
+          }
         }
         return new ValidationResult(null, true);
       }
