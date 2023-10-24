@@ -2,6 +2,7 @@
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
+<%@page import="com.ibm.cio.cmr.request.util.Person"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -32,8 +33,20 @@
   AppUser user = AppUser.getUser(request);
   isJPBlueGroupFlg = BluePagesHelper.isUserInJPBlueGroup(user.getIntranetId());
   
-  boolean isKSCMemberFlg = true;
-  isKSCMemberFlg = user.isKSCMember();
+  Person p = BluePagesHelper.getPerson(user.getIntranetId());
+
+  String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
+  String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
+  String testEmail = p.getEmail() != null ? p.getEmail() : "";
+
+  boolean isKSCMemberFlg;
+  if (jpKscCnum.equalsIgnoreCase("JPU")) {
+    isKSCMemberFlg = true;
+  } else if (testEmail.equalsIgnoreCase("joseph.malonda@ibm.com")) {
+    isKSCMemberFlg = true;
+  } else {
+    isKSCMemberFlg = false;
+  }
 %>
 <style>
   .jp-chk {
@@ -41,6 +54,15 @@
     display: inline-block;
   }
 </style>
+<script>
+  // for debugging purposes in UAT
+  var debugCnum = '<%= jpKscCnum %>';
+  console.log('debugJPCNUM: ', debugCnum);
+  var debugEmail = '<%= testEmail %>';
+  console.log('debugJPEMAIL: ', debugEmail);
+  var debugFlgChck = '<%= isKSCMemberFlg %>';
+  console.log('debugJPFlagChck: ', debugFlgChck);
+</script>
 <cmr:view forGEO="JP">
   <cmr:row addBackground="true">
   	
