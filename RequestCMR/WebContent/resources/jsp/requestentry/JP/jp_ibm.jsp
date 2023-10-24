@@ -37,12 +37,9 @@
 
   String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
   String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
-  String testEmail = p.getEmail() != null ? p.getEmail() : "";
 
   boolean isKSCMemberFlg;
   if (jpKscCnum.equalsIgnoreCase("JPU")) {
-    isKSCMemberFlg = true;
-  } else if (testEmail.equalsIgnoreCase("joseph.malonda@ibm.com")) {
     isKSCMemberFlg = true;
   } else {
     isKSCMemberFlg = false;
@@ -54,15 +51,6 @@
     display: inline-block;
   }
 </style>
-<script>
-  // for debugging purposes in UAT
-  var debugCnum = '<%= jpKscCnum %>';
-  console.log('debugJPCNUM: ', debugCnum);
-  var debugEmail = '<%= testEmail %>';
-  console.log('debugJPEMAIL: ', debugEmail);
-  var debugFlgChck = '<%= isKSCMemberFlg %>';
-  console.log('debugJPFlagChck: ', debugFlgChck);
-</script>
 <cmr:view forGEO="JP">
   <cmr:row addBackground="true">
   	

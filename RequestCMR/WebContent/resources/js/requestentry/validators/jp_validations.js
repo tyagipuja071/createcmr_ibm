@@ -6497,8 +6497,8 @@ function isKSCMemberValidator() {
           if (role == 'PROCESSOR') {
             return new ValidationResult(null, true);
           }
-          // skip validation for Subsidiary Company requests
-          if (custType == 'C') {
+          // skip validation for Subsidiary Company, ROL Flag Change on Company No requests
+          if (custType == 'C' || custType == 'CR') {
             return new ValidationResult(null, true);
           }
           if (isKSCMemberFlg == 'false') {
