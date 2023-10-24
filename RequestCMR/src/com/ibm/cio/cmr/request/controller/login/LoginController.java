@@ -319,23 +319,10 @@ public class LoginController extends BaseController {
             appUser.setShowLatestFirst("Y".equals(result[11]));
           }
 
-          Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
-
-          String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
-          LOG.info("Employee ID: " + jpCnum);
-          String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
-          LOG.info("KSC Member CNUM: " + jpKscCnum);
-
-          if (jpKscCnum.equalsIgnoreCase("JPU")) {
-            appUser.setKSCMember(true);
-          } else {
-            appUser.setKSCMember(false);
-          }
-          LOG.info("is KSC Member: " + appUser.isKSCMember());
-
           if (hasDelegate) {
             appUser.setPreferencesSet(true);
             if (appUser.getBluePagesName() == null) {
+              Person p = BluePagesHelper.getPerson(appUser.getIntranetId());
               if (p != null) {
                 appUser.setBluePagesName(p.getName());
               }
