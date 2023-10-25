@@ -4339,16 +4339,6 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Abbreviated Name", "@ value for Abbreviated Name is not allowed.");
               }
 
-              // INAC/NAC
-              if (isDataFilled && "@@@@".equals(inac)) {
-                error.addError((row.getRowNum() + 1), "<br>INAC/NAC", "@@@@ value for INAC/NAC is not allowed.");
-              }
-
-              // Company
-              if (isDataFilled && "@".equals(company)) {
-                error.addError((row.getRowNum() + 1), "<br>Company", "@ value for Company is not allowed.");
-              }
-
               // SBO
               if (isDataFilled && "@".equals(sbo)) {
                 error.addError((row.getRowNum() + 1), "<br>SBO", "@ value for SBO is not allowed.");
@@ -4482,26 +4472,27 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Tax Number", "@ value for Tax Number is not allowed.");
               }
 
-              // Tax Separation Indicator
-              if (isTaxInfoFilled && "@".equals(taxSepIndc)) {
-                error.addError((row.getRowNum() + 1), "<br>Tax Separation Indicator", "@ value for Tax Separation Indicator is not allowed.");
-              }
+              if (!"613".equals(country)) {
+                // Tax Separation Indicator
+                if (isTaxInfoFilled && "@".equals(taxSepIndc)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tax Separation Indicator", "@ value for Tax Separation Indicator is not allowed.");
+                }
 
-              // Billing Print Indicator
-              if (isTaxInfoFilled && "@".equals(billPrintIndc)) {
-                error.addError((row.getRowNum() + 1), "<br>Billing Print Indicator", "@ value for Billing Print Indicator is not allowed.");
-              }
+                // Billing Print Indicator
+                if (isTaxInfoFilled && "@".equals(billPrintIndc)) {
+                  error.addError((row.getRowNum() + 1), "<br>Billing Print Indicator", "@ value for Billing Print Indicator is not allowed.");
+                }
 
-              // Contract Print Indicator
-              if (isTaxInfoFilled && "@".equals(contractPrintIndc)) {
-                error.addError((row.getRowNum() + 1), "<br>Contract Print Indicator", "@ value for Contract Print Indicator is not allowed.");
-              }
+                // Contract Print Indicator
+                if (isTaxInfoFilled && "@".equals(contractPrintIndc)) {
+                  error.addError((row.getRowNum() + 1), "<br>Contract Print Indicator", "@ value for Contract Print Indicator is not allowed.");
+                }
 
-              // Country Use
-              if (isTaxInfoFilled && "@@@@".equals(countryUse)) {
-                error.addError((row.getRowNum() + 1), "<br>Country Use", "@ value for Country Use is not allowed.");
+                // Country Use
+                if (isTaxInfoFilled && "@@@@".equals(countryUse)) {
+                  error.addError((row.getRowNum() + 1), "<br>Country Use", "@ value for Country Use is not allowed.");
+                }
               }
-
             }
 
             if ("Install-At".equalsIgnoreCase(sheet.getSheetName())) {
