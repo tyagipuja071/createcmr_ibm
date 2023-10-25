@@ -104,7 +104,7 @@ function afterConfigForJP() {
 
     disableFieldsForRolUpdate();
     disableAddrFieldsForRolUpdate();
-    
+
     addRAFieldLogic();
     disableAddrFieldsForRA();
 
@@ -5355,6 +5355,7 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('outsourcingService');
     FormManager.hide('DirectBp', 'creditBp');
     FormManager.show('zSeriesSw', 'zseriesSw');
+    FormManager.removeValidator('siInd', Validators.REQUIRED);
     break;
   case 'ISOCU':
     FormManager.enable('icmsInd');
@@ -6470,7 +6471,8 @@ function isKSCMemberValidator() {
           if (role == 'PROCESSOR') {
             return new ValidationResult(null, true);
           }
-          // skip validation for Subsidiary Company, ROL Flag Change on Company No requests
+          // skip validation for Subsidiary Company, ROL Flag Change on Company
+          // No requests
           if (custType == 'C' || custType == 'CR') {
             return new ValidationResult(null, true);
           }
@@ -6514,10 +6516,9 @@ function addDnBSearchValidator() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var result = FormManager.getActualValue('findDnbResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC'
-         || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
-		  return new ValidationResult(null, true);
-		}
+        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
+          return new ValidationResult(null, true);
+        }
         if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
           return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
         }
