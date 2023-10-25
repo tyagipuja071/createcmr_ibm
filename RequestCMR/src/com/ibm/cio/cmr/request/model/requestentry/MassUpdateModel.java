@@ -197,6 +197,16 @@ public class MassUpdateModel extends BaseModel {
 
   private String mexicoFiscalRegime;
 
+  private String custInvoiceCopies;
+
+  public String getCustInvoiceCopies() {
+    return custInvoiceCopies;
+  }
+
+  public void setCustInvoiceCopies(String custInvoiceCopies) {
+    this.custInvoiceCopies = custInvoiceCopies;
+  }
+
   public String getMexicoFiscalRegime() {
     return mexicoFiscalRegime;
   }

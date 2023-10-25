@@ -27,6 +27,12 @@
 					<lovId>CustClass</lovId>
 				</column>
 				<column>
+					<label>Customer Group</label>
+					<dbColumn>CUST_INVOICE_COPIES</dbColumn>
+					<width>20</width>
+					<length>2</length>
+				</column>
+				<column>
 					<label>Office Code</label>
 					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>20</width>
@@ -105,6 +111,24 @@
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
 					<width>35</width>
 					<length>35</length>
 				</column>
@@ -209,6 +233,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -220,7 +262,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -304,6 +345,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -315,7 +374,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -399,6 +457,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -410,7 +486,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -494,6 +569,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -505,7 +598,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -590,6 +682,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -601,7 +711,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -685,6 +794,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -696,7 +823,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -780,6 +906,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -791,7 +935,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -875,6 +1018,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -886,7 +1047,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -970,6 +1130,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -981,7 +1159,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -1065,6 +1242,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -1076,7 +1271,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -1160,6 +1354,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -1171,7 +1383,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -1255,6 +1466,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -1266,7 +1495,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
@@ -1350,6 +1578,24 @@
 					<length>35</length>
 				</column>
 				<column>
+					<label>English Street Address</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English City Name</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
+					<label>English District</label>
+					<dbColumn>FLOOR</dbColumn>
+					<width>35</width>
+					<length>35</length>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>20</width>
@@ -1361,7 +1607,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>

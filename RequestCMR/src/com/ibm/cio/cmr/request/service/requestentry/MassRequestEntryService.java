@@ -5813,6 +5813,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "ADDR_TXT":
         muaModel.setAddrTxt(tempVal);
         break;
+      case "ADDR_TXT2":
+        muaModel.setAddrTxt2(tempVal);
+        break;
+      case "CITY1":
+        muaModel.setCity1(tempVal);
+        break;
+      case "FLOOR":
+        muaModel.setFloor(tempVal);
+        break;
       case "POST_CD":
         if (StringUtils.isNotBlank(tempVal)) {
           String postal = tempVal.replace("-", "");
@@ -5940,6 +5949,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CUST_CLASS":
         muModel.setCustClass(tempVal);
+        break;
+      case "CUST_INVOICE_COPIES":
+        muModel.setCustInvoiceCopies(tempVal);
         break;
       case "SALES_BO_CD":
         if (StringUtils.isNotBlank(tempVal)) {
