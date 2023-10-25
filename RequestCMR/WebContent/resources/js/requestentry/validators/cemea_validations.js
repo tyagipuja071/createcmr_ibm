@@ -5686,7 +5686,7 @@ dojo.addOnLoad(function () {
 
   GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.CEMEA_CHECKLIST);
   GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.CEMEA_CHECKLIST);
-
+  GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEMEA_COPY, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.registerValidator(addProvinceCityValidator, [SysLoc.ROMANIA], null, true);

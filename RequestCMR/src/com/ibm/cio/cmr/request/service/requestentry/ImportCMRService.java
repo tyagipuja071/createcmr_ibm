@@ -368,7 +368,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
           // STC OB for emea DB2 countries
           Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
-          if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+          if (isEmeaDB2Cntry && !StringUtils.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
             rdc.setTaxExempt3(data.getTaxExemptStatus3());
           }
           reqEntryService.updateEntity(rdc, entityManager);
@@ -382,7 +382,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
           // STC OB for emea DB2 countries
           Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
-          if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+          if (isEmeaDB2Cntry && !StringUtils.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
             rdc.setTaxExempt3(data.getTaxExemptStatus3());
           }
           reqEntryService.createEntity(rdc, entityManager);
@@ -416,7 +416,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         rdc.setCmrNo(cmrNo); // retain CMR no in old file
         // STC OB for emea DB2 countries
         Boolean isEmeaDB2Cntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) && EMEA_DB2_COUNTRIES.contains(data.getCmrIssuingCntry());
-        if (isEmeaDB2Cntry && !StringUtil.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
+        if (isEmeaDB2Cntry && !StringUtils.isBlank(data.getTaxExemptStatus3()) && "ST".equalsIgnoreCase(data.getTaxExemptStatus3())) {
           rdc.setTaxExempt3(data.getTaxExemptStatus3());
         }
         reqEntryService.createEntity(rdc, entityManager);

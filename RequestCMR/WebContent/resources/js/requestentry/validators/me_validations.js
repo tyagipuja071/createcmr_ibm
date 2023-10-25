@@ -4870,7 +4870,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.ME);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.ME, null, true);
-
   GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.ME);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.ME, null, true);
 

@@ -245,7 +245,7 @@
 		<editable>true</editable>
 		<required>true</required>
 		<editType>text</editType>
-		<value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices</value>
+		<value>https://localhost:9446/CMRServices</value>
 	</item>
 	<item>
 		<id>ADDRESS_VERIFICATION_RULES_LINK</id>

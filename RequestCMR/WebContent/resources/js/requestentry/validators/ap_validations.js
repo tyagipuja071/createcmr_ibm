@@ -183,6 +183,8 @@ function addAfterConfigAP() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
+  var inacCd = FormManager.getActualValue('inacCd');
+  var inacType = FormManager.getActualValue('inacType');
   _clusterHandlerINDONESIA = 0;
   // CREATCMR-7883-7884
   _inacHandlerANZSG = 0;
@@ -2578,6 +2580,8 @@ function onInacTypeChange() {
   var reqType = null;
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   reqType = FormManager.getActualValue('reqType');
+  custSubGrp = FormManager.getActualValue('custSubGrp');
+
   if (reqType == 'C') {
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function (value) {
@@ -3074,6 +3078,7 @@ function setCtcOnIsuCdChangeANZ(isuCd) {
     return;
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (isuCd == null) {
     isuCd = FormManager.getActualValue('isuCd');
   }
@@ -8318,7 +8323,6 @@ function setInacCdTypeStatus() {
       FormManager.setValue('inacCd', '');
       FormManager.setValue('inacType', '');
     }
-
     if (isInacRequired) {
       console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
       FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
@@ -8752,7 +8756,6 @@ dojo.addOnLoad(function () {
 
   // CREATCMR-7884
   GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
-
   GEOHandler.addAfterTemplateLoad(setClusterOnScenarioChgGCG, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
 
