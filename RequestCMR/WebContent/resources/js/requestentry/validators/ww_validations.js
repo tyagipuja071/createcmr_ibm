@@ -1258,6 +1258,7 @@ function setVatIndFieldsForGrp1AndNordx() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
   // CREATCMR-7944
+  // CREATCMR-9935
   if (!(cmrIssuingCntry == '706' && vatInd.trim() !== '')) {
 	  if (isPrivateScenario()) {
 	    FormManager.setValue('vatInd', 'N');
