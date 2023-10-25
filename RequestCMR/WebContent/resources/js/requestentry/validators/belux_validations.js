@@ -2334,7 +2334,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.BELUX);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.BELUX, null, true);
-
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.BELUX);

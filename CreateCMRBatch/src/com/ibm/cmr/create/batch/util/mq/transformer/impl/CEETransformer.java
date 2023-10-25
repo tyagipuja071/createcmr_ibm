@@ -701,6 +701,9 @@ public class CEETransformer extends EMEATransformer {
       addrLineT = "";
     }
 
+    legacyAddr
+        .setItCompanyProvCd((!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ? addrData.getStateProv() : "");
+
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);

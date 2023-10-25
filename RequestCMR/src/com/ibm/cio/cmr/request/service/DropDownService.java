@@ -339,14 +339,6 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     }
 
-    // CREATCMR-8323
-    if ("StateProvUS".equalsIgnoreCase(fieldId)) {
-      query.append(" and LAND1 = :LAND1 ");
-      query.append(" and MANDT = :MANDT ");
-      query.setParameter("LAND1", params.getParam("landCntry"));
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    }
-
     if ("TransportZone".equalsIgnoreCase(fieldId)) {
       // no dependency for now
       // query.append(" and SPRAS = 'E' ");
@@ -355,7 +347,8 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
     }
 
     if ("County".equalsIgnoreCase(fieldId)) {
-      if (params.getParam("landCntry").equals("US")) {
+      // support only US for now
+      if ("US".equals(params.getParam("landCntry"))) {
         query.append(" and 'US' = :LAND1 ");
         query.append(
             " and REFT_STATE_PROV_KEY = (select REFT_STATE_PROV_KEY from CMMA.REFT_STATE_PROV_W where STATE_PROV_CD = :REGIO and REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1)) ");
@@ -368,7 +361,6 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         query.setParameter("LAND1", params.getParam("landCntry"));
         query.setParameter("N_ST", params.getParam("stateProv"));
       }
-
     }
 
     if ("Subindustry".equalsIgnoreCase(fieldId)) {

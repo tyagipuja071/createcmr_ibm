@@ -1013,7 +1013,6 @@ public class CEMEAHandler extends BaseSOFHandler {
         data.setTaxExemptStatus3(embargoCode);
         LOG.trace(" STC Order Block Code : " + embargoCode);
       }
-
       data.setAgreementSignDate(this.currentImportValues.get("AECISUBDate"));
       LOG.trace("AECISubDate: " + data.getAgreementSignDate());
       data.setBpSalesRepNo(this.currentImportValues.get("TeleCovRep"));

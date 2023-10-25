@@ -423,7 +423,7 @@ public class ChinaUtil extends AutomationUtil {
     return true;
   }
 
-  public boolean isUpdatedOrNewAdded(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+  public boolean isUpdatedOrNewAddressAdded(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
 
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
