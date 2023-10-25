@@ -81,7 +81,7 @@ function afterConfigForJP() {
     setFieldsRequired();
     setCmrNoCmrNo2Required();
     // setAccntAbbNmOnScrnarioChange();
-    // setAccountAbbNmRequired();
+    setAccountAbbNmRequired();
     performDPLCheck4JP();
     setDefaultValueForChargeCode();
     setTier2Required();
@@ -1182,17 +1182,17 @@ function setAccountAbbNmRequired() {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
     }
     break;
-  case 'ISOCU':
-    FormManager.readOnly('abbrevNm');
-    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-    break;
-  case 'BCEXA':
-  case 'BFKSC':
-    FormManager.clearValue('abbrevNm');
-    FormManager.readOnly('abbrevNm');
-    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-    break;
-  case '':
+    case 'ISOCU':
+      FormManager.readOnly('abbrevNm');
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+      break;
+//  case 'BCEXA':
+//  case 'BFKSC':
+//    FormManager.clearValue('abbrevNm');
+//    FormManager.readOnly('abbrevNm');
+//    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+//    break;
+//  case '':
   default:
     FormManager.enable('abbrevNm');
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
