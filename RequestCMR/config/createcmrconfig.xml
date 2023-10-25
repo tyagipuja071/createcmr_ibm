@@ -61,7 +61,9 @@
 			&lt;li&gt;This tool also accesses the FindCMR Search
 			tool.&lt;/li&gt;
 			&lt;/ul&gt;
+
 			&lt;/p&gt;
+
 			&lt;h2 style="border-top: 0px
 			!important;"&gt;Help and Support&lt;/h2&gt;
 			&lt;p style="font-size:
@@ -101,16 +103,6 @@
 		<required>false</required>
 		<editType>textarea</editType>
 		<value></value>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -108,7 +110,8 @@
-  
 	</item>
 	<item>
 		<id>MANDT</id>
@@ -120,21 +112,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-          
-            
-    
-
-          
-          
-            
-    
-
-          
-    
-    @@ -141,7 +144,8 @@
-  
 		<editType>text</editType>
 		<value>230</value>
 	</item>
@@ -168,21 +145,6 @@
 		<type>dateformat</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-          
-            
-    
-
-          
-          
-            
-    
-
-          
-    
-    @@ -179,13 +183,15 @@
-  
 		<editType>text</editType>
 		<value>yyyy-MM-dd HH:mm:ss</value>
 	</item>
@@ -227,16 +189,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -196,7 +202,8 @@
-  
 		<editType>text</editType>
 		<value>Request {0} - Status Changed to {1}</value>
 	</item>
@@ -248,16 +200,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -218,7 +225,8 @@
-  
 		<editType>text</editType>
 		<value>/ci/shared/file/attachments/2020</value>
 	</item>
@@ -280,16 +222,6 @@
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -229,7 +237,8 @@
-  
 		<editType>text</editType>
 		<value>30</value>
 	</item>
@@ -301,16 +233,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -240,18 +249,21 @@
-  
 		<editType>text</editType>
 		<value>Notes://D01DB004/852565520073AB30/</value>
 	</item>
@@ -333,16 +255,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -273,18 +285,21 @@
-  
 		<editType>text</editType>
 		<value>about:blank</value>
 	</item>
@@ -376,16 +288,6 @@
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -295,7 +310,8 @@
-  
 		<editType>text</editType>
 		<value>500</value>
 	</item>
@@ -397,16 +299,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -306,7 +322,8 @@
-  
 		<editType>text</editType>
 		<value>/ci/shared/file/attachments/2020/masschange</value>
 	</item>
@@ -418,16 +310,6 @@
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -317,7 +334,8 @@
-  
 		<editType>text</editType>
 		<value>50</value>
 	</item>
@@ -439,21 +321,6 @@
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-          
-            
-    
-
-          
-          
-            
-    
-
-          
-    
-    @@ -350,7 +368,8 @@
-  
 		<editType>text</editType>
 		<value>50</value>
 	</item>
@@ -487,16 +354,6 @@
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -372,7 +391,8 @@
-  
 		<editType>text</editType>
 		<value>500</value>
 	</item>
@@ -519,16 +376,6 @@
 		<type>string</type>
 		<editable>false</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -399,7 +419,8 @@
-  
 		<editType>text</editType>
 		<value>DEV</value>
 	</item>
@@ -556,16 +403,6 @@
 	</item>
 	<item>
 		<id>CREATECMR_BP_URL</id>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -410,13 +431,15 @@
-  
 		<order>37</order>
 		<name>Create CMR BP URL</name>
 		<description>URL of the external CreateCMR BP Portal</description>
@@ -583,16 +420,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -427,7 +450,8 @@
-  
 		<editType>text</editType>
 		<value>897</value>
 	</item>
@@ -604,16 +431,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -438,7 +462,8 @@
-  
 		<editType>text</editType>
 		<value>TC</value>
 	</item>
@@ -625,21 +442,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-          
-            
-    
-
-          
-          
-            
-    
-
-          
-    
-    @@ -482,7 +507,8 @@
-  
 		<editType>text</editType>
 		<value>MARKETPLACE*POOL</value>
 	</item>
@@ -684,16 +486,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -493,7 +519,8 @@
-  
 		<editType>text</editType>
 		<value>06488-2685</value>
 	</item>
@@ -705,16 +497,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -504,7 +531,8 @@
-  
 		<editType>text</editType>
 		<value>US</value>
 	</item>
@@ -726,16 +508,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -515,7 +543,8 @@
-  
 		<editType>text</editType>
 		<value>/ci/shared/data/gcars/</value>
 	</item>
@@ -747,16 +519,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -526,7 +555,8 @@
-  
 		<editType>text</editType>
 		<value>/ci/shared/data/gcarserror/</value>
 	</item>
@@ -768,16 +530,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -537,7 +567,8 @@
-  
 		<editType>text</editType>
 		<value>/ci/shared/data/gcarsarchive/</value>
 	</item>
@@ -789,16 +541,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -548,7 +579,8 @@
-  
 		<editType>text</editType>
 		<value>/is/isdata/cmr_partners/gcarsBR/IBMgcars/</value>
 	</item>
@@ -810,16 +552,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-        
-          
-    
-
-        
-    
-    @@ -559,7 +591,8 @@
-  
 		<editType>text</editType>
 		<value>/is/isdata/cmr_partners/gcarsBR/IBMgcarsarchive/</value>
 	</item>
@@ -831,16 +563,6 @@
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
-
-    
-          
-            
-    
-
-          
-    
-    
-  
 		<editType>text</editType>
 		<value>TEST</value>
 	</item>
@@ -904,4 +626,5 @@
 		<editType>text</editType>
 		<value>ZTI0ZmE4MDYtMzE2NC00</value>
 	</item>
+
 </config>
