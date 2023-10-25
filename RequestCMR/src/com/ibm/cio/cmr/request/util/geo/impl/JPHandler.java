@@ -895,7 +895,9 @@ public class JPHandler extends GEOHandler {
     data.setBillingProcCd(mainRecord.getBillingProcessCode());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode());
 
-    if ("C".equals(admin.getReqType()) && !"BPWPQ".equals(data.getCustSubGrp())) {
+    if ("C".equals(admin.getReqType()) && "BPWPQ".equals(data.getCustSubGrp())) {
+      LOG.debug("skip imports on creates for bpwpq");
+    } else {
       data.setCreditToCustNo(mainRecord.getCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
     }
