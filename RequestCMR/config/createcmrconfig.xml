@@ -96,10 +96,12 @@
 		<id>ALERT</id>
 		<order>6</order>
 		<name>System Alert</name>
-		<description>The System Alert displayed on the home page.</description>
+		<description>The System Alert displayed on the home page.
+		</description>
 		<type>string</type>
 		<editable>true</editable>
-		<hint>The value accepts HTML formatting. You can use [strong] tags for bold, [em] tags for italics.</hint>
+		<hint>The value accepts HTML formatting. You can use [strong] tags for
+			bold, [em] tags for italics.</hint>
 		<required>false</required>
 		<editType>textarea</editType>
 		<value></value>
@@ -108,7 +110,8 @@
 		<id>MANDT</id>
 		<order>10</order>
 		<name>Client (MANDT)</name>
-		<description>The Client (MANDT) value to be used by the system</description>
+		<description>The Client (MANDT) value to be used by the system
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -141,7 +144,8 @@
 		<id>DATE_TIME_FORMAT</id>
 		<order>13</order>
 		<name>Date/Time Format</name>
-		<description>General date/time format to use for timestamp display</description>
+		<description>General date/time format to use for timestamp display
+		</description>
 		<type>dateformat</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -179,13 +183,15 @@
 		<editable>true</editable>
 		<required>true</required>
 		<editType>text</editType>
-		<value>https://findcmr.c360-dev-cluster.us-south.containers.appdomain.cloud/FindCMR</value>
+		<value>https://findcmr.c360-dev-cluster.us-south.containers.appdomain.cloud/FindCMR
+		</value>
 	</item>
 	<item>
 		<id>MAIL_SUBJECT</id>
 		<order>15</order>
 		<name>E-mail Subject</name>
-		<description>The Subject to be used by system emails (change status)</description>
+		<description>The Subject to be used by system emails (change status)
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -196,7 +202,8 @@
 		<id>ATTACHMENT_DIR</id>
 		<order>17</order>
 		<name>Attachments Root Directory</name>
-		<description>Root directory where attachments are placed (GSA Directory)</description>
+		<description>Root directory where attachments are placed (GSA
+			Directory)</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -218,7 +225,8 @@
 		<id>DPL_CHECK_VALIDITY</id>
 		<order>20</order>
 		<name>DPL Check Validity (days)</name>
-		<description>The number of days until the DPL Check status is invalid</description>
+		<description>The number of days until the DPL Check status is invalid
+		</description>
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -229,7 +237,8 @@
 		<id>DPL_CHECK_DB</id>
 		<order>21</order>
 		<name>DPL Database Location</name>
-		<description>The location of the DPL database, on Notes format.</description>
+		<description>The location of the DPL database, on Notes format.
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -240,18 +249,21 @@
 		<id>CMR_SERVICES_URL</id>
 		<order>22</order>
 		<name>CMR Services URL</name>
-		<description>Base URL of the CMR Services layer containing the WODM services</description>
+		<description>Base URL of the CMR Services layer containing the WODM
+			services</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
 		<editType>text</editType>
-		<value>https://localhost:9446/CMRServices</value>
+		<value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices
+		</value>
 	</item>
 	<item>
 		<id>ADDRESS_VERIFICATION_RULES_LINK</id>
 		<order>23</order>
 		<name>Address Verification Rules Link</name>
-		<description>Link to open the Address Verification Rules site</description>
+		<description>Link to open the Address Verification Rules site
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -273,18 +285,21 @@
 		<id>BATCH_SERVICES_URL</id>
 		<order>25</order>
 		<name>Batch Services URL</name>
-		<description>Base URL of the Create CMR Services layer containing</description>
+		<description>Base URL of the Create CMR Services layer containing
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
 		<editType>text</editType>
-		<value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices</value>
+		<value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices
+		</value>
 	</item>
 	<item>
 		<id>MASS_UPDATE_MAX_ROWS</id>
 		<order>26</order>
 		<name>Mass Update Maximum Rows</name>
-		<description>Maximum number of rows allowed in the update file</description>
+		<description>Maximum number of rows allowed in the update file
+		</description>
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -295,7 +310,8 @@
 		<id>MASS_UPDATE_FILES_DIR</id>
 		<order>27</order>
 		<name>Mass Update Files Directory</name>
-		<description>Absolute location on the file system where Mass Update XLS files are stored</description>
+		<description>Absolute location on the file system where Mass Update
+			XLS files are stored</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -306,7 +322,8 @@
 		<id>REACTIVE_MAX_ROWS</id>
 		<order>28</order>
 		<name>Reactivate Maximum CMRs</name>
-		<description>Maximum number of CMR Nos allowed to be reactivated</description>
+		<description>Maximum number of CMR Nos allowed to be reactivated
+		</description>
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -317,7 +334,8 @@
 		<id>DELETE_MAX_ROWS</id>
 		<order>29</order>
 		<name>Delete Maximum CMRs</name>
-		<description>Maximum number of CMR Nos allowed to be deleted</description>
+		<description>Maximum number of CMR Nos allowed to be deleted
+		</description>
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -350,7 +368,8 @@
 		<id>MASS_CREATE_MAX_ROWS</id>
 		<order>32</order>
 		<name>Mass Create Maximum Rows</name>
-		<description>Maximum number of rows allowed in the create file</description>
+		<description>Maximum number of rows allowed in the create file
+		</description>
 		<type>integer</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -372,7 +391,8 @@
 		<id>SERVER_ALIAS</id>
 		<order>34</order>
 		<name>Server Alias</name>
-		<description>Alias of the server where this applicatoin is deployed</description>
+		<description>Alias of the server where this applicatoin is deployed
+		</description>
 		<type>string</type>
 		<editable>false</editable>
 		<required>true</required>
@@ -399,7 +419,8 @@
 		<editable>true</editable>
 		<required>true</required>
 		<editType>text</editType>
-		<value>https://ciservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CISearchServices</value>
+		<value>https://ciservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CISearchServices
+		</value>
 	</item>
 	<item>
 		<id>CREATECMR_BP_URL</id>
@@ -410,13 +431,15 @@
 		<editable>true</editable>
 		<required>true</required>
 		<editType>text</editType>
-		<value>https://ibmbp.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRBPPortal/home</value>
+		<value>https://ibmbp.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRBPPortal/home
+		</value>
 	</item>
 	<item>
 		<id>BATCH_CMR_POOL_ISSUING_CNTRY</id>
 		<order>38</order>
 		<name>Batch CMR Pool Issuing Country</name>
-		<description>Issuing country used when picking up requests for automated CMR pool assignment</description>
+		<description>Issuing country used when picking up requests for
+			automated CMR pool assignment</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -427,7 +450,8 @@
 		<id>BATCH_CMR_POOL_PROCESSING_TYPE</id>
 		<order>39</order>
 		<name>Batch CMR Pool Processing Type</name>
-		<description>Processing type used when picking up requests for automated CMR pool assignment</description>
+		<description>Processing type used when picking up requests for
+			automated CMR pool assignment</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -438,7 +462,8 @@
 		<id>BATCH_CMR_POOL_CUST_NAME</id>
 		<order>40</order>
 		<name>Batch CMR Pool Customer name</name>
-		<description>Customer name used when searching for Pool record</description>
+		<description>Customer name used when searching for Pool record
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -482,7 +507,8 @@
 		<id>BATCH_CMR_POOL_POSTAL</id>
 		<order>44</order>
 		<name>Batch CMR Pool Postal Code</name>
-		<description>Postal code used when searching for Pool record</description>
+		<description>Postal code used when searching for Pool record
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -493,7 +519,8 @@
 		<id>BATCH_CMR_POOL_LANDED_CNTRY_CD</id>
 		<order>45</order>
 		<name>Batch CMR Pool Country Code</name>
-		<description>Country code used when searching for Pool record</description>
+		<description>Country code used when searching for Pool record
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -504,7 +531,8 @@
 		<id>GCARS_LOCAL_DIR</id>
 		<order>50</order>
 		<name>GCARS Files Local Directory</name>
-		<description>Local directory where copied flat files are placed</description>
+		<description>Local directory where copied flat files are placed
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -515,7 +543,8 @@
 		<id>GCARS_ERROR_DIR</id>
 		<order>51</order>
 		<name>GCARS Files Error Directory</name>
-		<description>Error directory where flat files with error are placed</description>
+		<description>Error directory where flat files with error are placed
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -526,7 +555,8 @@
 		<id>GCARS_ARCHIVE_DIR</id>
 		<order>52</order>
 		<name>GCARS Files Archive Directory</name>
-		<description>GCARS Archive directory where flat files will be archived</description>
+		<description>GCARS Archive directory where flat files will be archived
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -537,7 +567,8 @@
 		<id>GCARS_REMOTE_DIR</id>
 		<order>53</order>
 		<name>GCARS Files Remote Directory</name>
-		<description>Remote directory where flat files will be copied</description>
+		<description>Remote directory where flat files will be copied
+		</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -548,7 +579,8 @@
 		<id>GCARS_REMOTE_ARCHIVE_DIR</id>
 		<order>54</order>
 		<name>GCARS Files Remote Archive Directory</name>
-		<description>Remote Archive directory where flat files will be archived</description>
+		<description>Remote Archive directory where flat files will be
+			archived</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>
@@ -559,7 +591,8 @@
 		<id>SYSTEM_TYPE</id>
 		<order>99</order>
 		<name>System Type</name>
-		<description>Identifier whether the system is on TEST or PROD environment</description>
+		<description>Identifier whether the system is on TEST or PROD
+			environment</description>
 		<type>string</type>
 		<editable>true</editable>
 		<required>true</required>

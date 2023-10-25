@@ -27,8 +27,8 @@ public class ConfigUtil {
     System.out.println("Initializing Config Util...");
     File configDirFile = null;
 
-    String ciwebconfig = System.getenv("config_createcmr");
-    System.out.println(" - config_createcmr: " + ciwebconfig);
+    String ciwebconfig = System.getenv("ciwebconfig");
+    System.out.println(" - ciwebconfig: " + ciwebconfig);
     if (!StringUtils.isBlank(ciwebconfig)) {
       System.out.println(" - checking file : " + ciwebconfig);
       configDirFile = new File(ciwebconfig);
@@ -60,8 +60,8 @@ public class ConfigUtil {
       }
     }
     if (configDir == null) {
-      String ciwebconfig = System.getenv("config_createcmr");
-      System.out.println(" - config_createcmr: " + ciwebconfig);
+      String ciwebconfig = System.getenv("ciwebconfig");
+      System.out.println(" - ciwebconfig: " + ciwebconfig);
       if (!StringUtils.isBlank(ciwebconfig)) {
         System.out.println(" - checking file : " + ciwebconfig);
         configDirFile = new File(ciwebconfig);
