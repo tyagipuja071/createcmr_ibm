@@ -4,7 +4,9 @@
 package com.ibm.cmr.create.batch.entry;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cmr.create.batch.service.KscReportsService;
@@ -29,7 +31,13 @@ public class KscReportsEntryPoint extends BatchEntryPoint {
         if (refDate.length() == 8) {
           SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
           Date parsed = format.parse(refDate);
-          service.setReferenceDate(parsed);
+          Calendar cal = new GregorianCalendar();
+          cal.setTime(parsed);
+          cal.set(Calendar.HOUR, 0);
+          cal.set(Calendar.MINUTE, 0);
+          cal.set(Calendar.SECOND, 0);
+          cal.set(Calendar.MILLISECOND, 0);
+          service.setReferenceDate(cal.getTime());
         }
       } catch (Exception e) {
         // noop, skip ref date setting

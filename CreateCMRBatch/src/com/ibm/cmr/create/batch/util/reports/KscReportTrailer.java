@@ -24,7 +24,7 @@ public class KscReportTrailer implements Trailer {
   public String generateTrailer(EntityManager entityManager, List<Object[]> results, DateRangeContainer dateRange) {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
     DecimalFormat countFormat = new DecimalFormat("000000");
-    String formattedDate = dateFormat.format(dateRange.getFromDate());
+    String formattedDate = dateFormat.format(dateRange.getToDate());
     return "TRL ASOF DATE=" + formattedDate + " " + countFormat.format(results.size()) + " RUN DATE=" + formattedDate + "    ";
   }
 
