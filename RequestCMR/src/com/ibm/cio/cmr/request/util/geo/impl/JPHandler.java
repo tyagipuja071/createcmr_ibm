@@ -776,8 +776,19 @@ public class JPHandler extends GEOHandler {
     // data.setIcmsInd(mainRecord.getSR());
     data.setBillingProcCd(mainRecord.getBillingProcessCode());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode());
-    data.setCreditToCustNo(mainRecord.getCreditToCustNo());
-    data.setBillToCustNo(mainRecord.getBillingCustNo());
+
+    if ("C".equals(admin.getReqType()) && "BPWPQ".equals(data.getCustSubGrp())) {
+      LOG.debug("skip imports on creates for bpwpq");
+    } else {
+      data.setCreditToCustNo(mainRecord.getCreditToCustNo());
+      data.setBillToCustNo(mainRecord.getBillingCustNo());
+    }
+
+    if ("U".equals(admin.getReqType())) {
+      data.setCreditToCustNo(mainRecord.getCreditToCustNo());
+      data.setBillToCustNo(mainRecord.getBillingCustNo());
+    }
+
     data.setTier2(mainRecord.getTier2());
     // data.setAbbrevNm(mainRecord.getCmrName3() == null ?
     // mainRecord.getCmrName3() : mainRecord.getCmrName3().trim());
