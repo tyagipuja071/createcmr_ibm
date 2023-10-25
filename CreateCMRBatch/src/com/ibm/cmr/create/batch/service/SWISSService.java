@@ -2141,7 +2141,6 @@ public class SWISSService extends BaseBatchService {
   }
 
   private ProcessResponse sendAddrForProcessing(Addr addr, ProcessRequest request, List<ProcessResponse> responses, boolean isIndexNotUpdated,
-
       String siteIds, EntityManager em, boolean isTempReactivate) {
     String applicationId = BatchUtil.getAppId("848");
     ProcessResponse response = null;
