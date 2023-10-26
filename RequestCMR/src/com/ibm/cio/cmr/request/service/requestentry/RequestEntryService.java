@@ -695,9 +695,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       if ("RACMR".equals(data.getCustSubGrp())) {
         String comment = JPHandler.addJpRALogicOnSendForProcessing(entityManager, admin, data, model);
         RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
-      } else if ("BFKSC".equals(data.getCustSubGrp()) && !"C".equalsIgnoreCase(admin.getCustType()) && !"CR".equalsIgnoreCase(admin.getCustType())) {
-        String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
-        RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+      } else if ("BFKSC".equals(data.getCustSubGrp())) {
+        if (!"C".equalsIgnoreCase(admin.getCustType()) && !"CR".equalsIgnoreCase(admin.getCustType())
+            && (!"U".equalsIgnoreCase(admin.getReqType()) && (!"CEA".equalsIgnoreCase(admin.getCustType())
+                || !"CE".equalsIgnoreCase(admin.getCustType()) || !"C".equalsIgnoreCase(admin.getCustType())))) {
+          String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
+          RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+        }
       }
     }
 
