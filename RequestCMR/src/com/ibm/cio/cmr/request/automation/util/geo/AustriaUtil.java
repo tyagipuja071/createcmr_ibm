@@ -113,7 +113,7 @@ public class AustriaUtil extends AutomationUtil {
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
-          SCENARIO_PRIVATE_CUSTOMER.equals(scenario), requestData);
+          false, requestData);
     case SCENARIO_IBM_EMPLOYEE:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario), requestData);
