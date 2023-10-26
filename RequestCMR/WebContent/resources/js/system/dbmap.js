@@ -378,6 +378,9 @@ var DB_ADDR_FIELDS = [ {
 }, {
   id : 'AddrType',
   name : 'ADDR_TYPE'
+}, {
+  id : 'ROL',
+  name : 'ROL'
 } ];
 
 DB_ADDR_FIELDS.sort(function(a, b) {
