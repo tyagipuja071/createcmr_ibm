@@ -622,7 +622,7 @@ public class IERPRequestUtils extends RequestUtils {
     return locn;
   }
 
-  public static String getIsicByJsic(EntityManager entityMgr, String jsic) {
+  public static Object[] getIsicByJsic(EntityManager entityMgr, String jsic) {
     String isic = "";
 
     String sql = ExternalizedQuery.getSql("JP.MASS.GET.ISIC.BY.JSIC");
@@ -632,12 +632,12 @@ public class IERPRequestUtils extends RequestUtils {
     query.setForReadOnly(true);
 
     List<Object[]> results = query.getResults();
+    Object[] result = null;
     if (results != null && results.size() > 0) {
-      Object[] result = results.get(0);
-      isic = result[1] != null ? (String) result[1] : "";
+      result = results.get(0);
     }
     LOG.debug("getIsicByJsic() --> jsic (" + jsic + ") isic (" + isic + ")");
-    return isic;
+    return result;
   }
 
   public static Object[] getSubindustryISUByIsic(EntityManager entityMgr, String isic) {
