@@ -5481,10 +5481,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForLA(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
+                  } else if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
+                    // JAPAN
+                    setMassUpdateListForJP(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
-                    if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
-                      // JAPAN
-                      setMassUpdateListForJP(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
+                    if (!PageManager.fromGeo("JP", cmrIssuingCntry)) {
+                      setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
                     }
                   }
 
@@ -5880,6 +5882,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     DataFormatter df = new DataFormatter();
     Data data = getCurrentDataRecordById(entityManager, reqId);
 
+    boolean isOfcdFilled = false;
+    boolean isJsicFilled = false;
+
     for (int i = 0; i < columns.size(); i++) {
       TemplateColumn col = columns.get(i);
       String tempVal = "";
@@ -5943,7 +5948,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "JSIC_CD":
         if (StringUtils.isNotBlank(tempVal)) {
+          // Set JSIC
           muModel.setAffiliate(tempVal);
+          isJsicFilled = true;
         }
         break;
       case "SECONDARY_LOCN_NO":
@@ -5959,69 +5966,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         if (StringUtils.isNotBlank(tempVal)) {
           // Set Office Code
           muModel.setModeOfPayment(tempVal);
-
-          // pull isic by office code
-          Object[] result = IERPRequestUtils.getIsicMrcCtcIsuSortlJP(entityManager, tempVal);
-          if (result != null) {
-            String isic = result[1] != null ? (String) result[1] : "";
-            String mrc = result[2] != null ? (String) result[2] : "";
-            String ctc = result[3] != null ? (String) result[3] : "";
-            String sortl = result[5] != null ? (String) result[5] : "";
-
-            // Set MRC
-            if (StringUtils.isNotBlank(mrc)) {
-              muModel.setRestrictInd(mrc);
-            }
-
-            // Set CTC
-            muModel.setClientTier(StringUtils.isBlank(ctc) ? "@" : ctc);
-
-            // Set SORTL
-            if (StringUtils.isNotBlank(sortl)) {
-              muModel.setSearchTerm(sortl);
-            }
-
-            // if isic not found in bo_codes_map search via
-            // jsic in isic_to_jsic_map
-            if (StringUtils.isBlank(isic)) {
-              String jsic = muModel.getAffiliate() != null ? muModel.getAffiliate() : "";
-              if (StringUtils.isNotBlank(jsic)) {
-                isic = IERPRequestUtils.getIsicByJsic(entityManager, jsic);
-              } else {
-                break;
-              }
-            }
-            // if isic is blank default to 0000
-            if (StringUtils.isBlank(isic)) {
-              isic = "0000";
-              muModel.setIsicCd(isic);
-            } else {
-              muModel.setIsicCd(isic);
-            }
-
-            // Set Subindustry, ISU
-            String cmrNoSubstr = muModel.getCmrNo() != null ? muModel.getCmrNo().substring(0, 2) : "";
-            if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
-              muModel.setSubIndustryCd("ZF");
-            } else {
-              // pull subindustry thru isic
-              Object[] subindIsu = IERPRequestUtils.getSubindustryISUByIsic(entityManager, isic);
-              if (subindIsu != null) {
-                String subind = subindIsu[1] != null ? (String) subindIsu[1] : "";
-                String isuCd = subindIsu[2] != null ? (String) subindIsu[2] : "";
-                if (StringUtils.isNotBlank(subind)) {
-                  muModel.setSubIndustryCd(subind);
-                }
-                if (StringUtils.isNotBlank(isuCd)) {
-                  muModel.setIsuCd(isuCd);
-                }
-              }
-            }
-          } else {
-            // office code not found
-            // set client tier to Z
-            muModel.setClientTier("Z");
-          }
+          isOfcdFilled = true;
         }
         break;
       case "INAC_CD":
@@ -6058,6 +6003,127 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;
+      }
+    }
+
+    if (isOfcdFilled && StringUtils.isNotBlank(muModel.getModeOfPayment())) {
+      // pull isic by office code
+      Object[] result = IERPRequestUtils.getIsicMrcCtcIsuSortlJP(entityManager, muModel.getModeOfPayment());
+      if (result != null) {
+        String isic = result[1] != null ? (String) result[1] : "";
+        String mrc = result[2] != null ? (String) result[2] : "";
+        String ctc = result[3] != null ? (String) result[3] : "";
+        String sortl = result[5] != null ? (String) result[5] : "";
+
+        // Set MRC
+        if (StringUtils.isNotBlank(mrc)) {
+          muModel.setRestrictInd(mrc);
+        }
+
+        // Set CTC
+        muModel.setClientTier(StringUtils.isBlank(ctc) ? "@" : ctc);
+
+        // Set SORTL
+        if (StringUtils.isNotBlank(sortl)) {
+          muModel.setSearchTerm(sortl);
+        }
+
+        // if isic not found in bo_codes_map search via
+        // jsic in isic_to_jsic_map
+        if (StringUtils.isBlank(isic)) {
+          String jsic = muModel.getAffiliate() != null ? muModel.getAffiliate() : "";
+          if (StringUtils.isNotBlank(jsic)) {
+            Object[] isicResult = IERPRequestUtils.getIsicByJsic(entityManager, jsic);
+
+            if (isicResult != null) {
+              isic = isicResult[1] != null ? (String) isicResult[1] : "";
+            } else {
+              isic = "0000";
+            }
+            muModel.setIsicCd(isic);
+
+            // Set Subindustry, ISU
+            String cmrNoSubstr = muModel.getCmrNo() != null ? muModel.getCmrNo().substring(0, 2) : "";
+            if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+              muModel.setSubIndustryCd("ZF");
+            } else {
+              if (StringUtils.isNotBlank(isic)) {
+                // pull subindustry thru isic
+                Object[] subindIsu = IERPRequestUtils.getSubindustryISUByIsic(entityManager, isic);
+                if (subindIsu != null) {
+                  String subind = subindIsu[1] != null ? (String) subindIsu[1] : "";
+                  String isuCd = subindIsu[2] != null ? (String) subindIsu[2] : "";
+                  if (StringUtils.isNotBlank(subind)) {
+                    muModel.setSubIndustryCd(subind);
+                  }
+                  if (StringUtils.isNotBlank(isuCd)) {
+                    muModel.setIsuCd(isuCd);
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // Set Subindustry, ISU
+          String cmrNoSubstr = muModel.getCmrNo() != null ? muModel.getCmrNo().substring(0, 2) : "";
+          if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+            muModel.setSubIndustryCd("ZF");
+          } else {
+            if (StringUtils.isNotBlank(isic)) {
+              // pull subindustry thru isic
+              Object[] subindIsu = IERPRequestUtils.getSubindustryISUByIsic(entityManager, isic);
+              if (subindIsu != null) {
+                String subind = subindIsu[1] != null ? (String) subindIsu[1] : "";
+                String isuCd = subindIsu[2] != null ? (String) subindIsu[2] : "";
+                if (StringUtils.isNotBlank(subind)) {
+                  muModel.setSubIndustryCd(subind);
+                }
+                if (StringUtils.isNotBlank(isuCd)) {
+                  muModel.setIsuCd(isuCd);
+                }
+              }
+            }
+          }
+        }
+
+      } else {
+        // office code not found
+        // set client tier to Z
+        muModel.setClientTier("Z");
+      }
+    } else if (isJsicFilled && StringUtils.isNotBlank(muModel.getAffiliate())) {
+      String jsic = muModel.getAffiliate() != null ? muModel.getAffiliate() : "";
+      String isic = "";
+      if (StringUtils.isNotBlank(jsic)) {
+        Object[] isicResult = IERPRequestUtils.getIsicByJsic(entityManager, jsic);
+
+        if (isicResult != null) {
+          isic = isicResult[1] != null ? (String) isicResult[1] : "";
+        } else {
+          isic = "0000";
+        }
+        muModel.setIsicCd(isic);
+
+        // Set Subindustry, ISU
+        String cmrNoSubstr = muModel.getCmrNo() != null ? muModel.getCmrNo().substring(0, 2) : "";
+        if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+          muModel.setSubIndustryCd("ZF");
+        } else {
+          if (StringUtils.isNotBlank(isic)) {
+            // pull subindustry thru isic
+            Object[] subindIsu = IERPRequestUtils.getSubindustryISUByIsic(entityManager, isic);
+            if (subindIsu != null) {
+              String subind = subindIsu[1] != null ? (String) subindIsu[1] : "";
+              String isuCd = subindIsu[2] != null ? (String) subindIsu[2] : "";
+              if (StringUtils.isNotBlank(subind)) {
+                muModel.setSubIndustryCd(subind);
+              }
+              if (StringUtils.isNotBlank(isuCd)) {
+                muModel.setIsuCd(isuCd);
+              }
+            }
+          }
+        }
       }
     }
     return muModel;
