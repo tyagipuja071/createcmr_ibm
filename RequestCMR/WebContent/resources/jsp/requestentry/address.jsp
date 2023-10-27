@@ -414,7 +414,7 @@ visibility: hidden !IMPORTANT;
 
         
         <!-- State Province -->
-		<cmr:view forGEO="LA,US,SWISS,NORDX,CEMEA">
+		<cmr:view forGEO="LA,US">
           <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}" >
             <cmr:formatter functionName="stateProvFormatter" />
           </cmr:gridCol>
@@ -427,7 +427,7 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
-         <cmr:view forCountry="618,726,755,822,838,666,758,706,724,848,624,788">
+		 <cmr:view 	forCountry="624,788,603,607,358,626,699,644,704,668,651,740,694,695,705,787,820,826,821,707,693,708,363,359,889,741,680,610,620,840,636,841,645,692,669,810,881,667,662,865,383,745,698,656,753,725,691,879,675,750,752,637,762,764,767,768,770,772,700,769,382,717,373,642,782,880,804,805,808,823,670,831,827,832,635,876,833,835,864,842,850,851,718,729,862,857,677,849,883,825,678,702,806,846,726,755,822,838,666,618,848,706,780,758" >
           <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}" >
             <cmr:formatter functionName="stateProvFormatter" />
           </cmr:gridCol>
@@ -521,7 +521,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
 
   		<!-- County for UKI IT -->
-        <cmr:view forCountry="866,754,758">
+        <cmr:view forCountry="866,754,724">
           <cmr:gridCol width="90px" field="stateProv" header="County" />
           <cmr:formatter functionName="stateProvFormatter" />
         </cmr:view>
