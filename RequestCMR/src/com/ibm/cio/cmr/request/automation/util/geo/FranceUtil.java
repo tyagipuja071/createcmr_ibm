@@ -257,12 +257,13 @@ public class FranceUtil extends AutomationUtil {
       String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBIEM", "XBLUM" };
       if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
         doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
-            Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+            false, requestData);
       }
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
       case SCENARIO_PRIVATE_PERSON:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        break;
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);

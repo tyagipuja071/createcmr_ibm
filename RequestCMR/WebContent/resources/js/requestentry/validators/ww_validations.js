@@ -739,64 +739,29 @@ function addGenericZIPValidator() {
         }
 
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
-        if(cntry == 'LV') {
-          if(postCd == ''){
+        var result = cmr.validateZIP(cntry, postCd, loc);
+        if (result && !result.success) {
+          if (result.errorPattern == null) {
             return new ValidationResult({
               id : 'postCd',
               type : 'text',
               name : 'postCd'
-            }, false, ('Postal Code for LV is required.'));
-          }
-          
-          if(!postCd.startsWith("LV-")){
-            return new ValidationResult({
-              id : 'postCd',
-              type : 'text',
-              name : 'postCd'
-            }, false, ('Postal Code format should be LV-nnnn.'));
-          } else if(postCd.length != '7') {
-            return new ValidationResult({
-              id : 'postCd',
-              type : 'text',
-              name : 'postCd'
-            }, false, ('Postal Code format should be LV-nnnn.'));
-          } else if(postCd.length == '7'){
-            var numPattern = /^[0-9]+$/;
-            if (!postCd.substr(3,7).match(numPattern)){
-              return new ValidationResult({
-                id : 'postCd',
-                type : 'text',
-                name : 'postCd'
-              }, false, ('Postal Code format should be LV-nnnn.'));
+            }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
+          } else {
+            var msg;
+            if (loc == '754' || loc == '866') {
+              msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+            } else {
+              msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
             }
+            return new ValidationResult({
+              id : 'postCd',
+              type : 'text',
+              name : 'postCd'
+            }, false, msg);
           }
         } else {
-          var result = cmr.validateZIP(cntry, postCd, loc);
-          if (result && !result.success) {
-            if (result.errorPattern == null) {
-              return new ValidationResult({
-                id : 'postCd',
-                type : 'text',
-                name : 'postCd'
-              }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
-            } else {
-              var msg;
-  
-              if (loc == '754' || loc == '866') {
-                msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
-              } else {
-                msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
-              }
-  
-              return new ValidationResult({
-                id : 'postCd',
-                type : 'text',
-                name : 'postCd'
-              }, false, msg);
-            }
-          } else {
-            return new ValidationResult(null, true);
-          }
+          return new ValidationResult(null, true);
         }
       }
     };
