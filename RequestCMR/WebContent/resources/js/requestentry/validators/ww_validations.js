@@ -72,7 +72,7 @@ function addStateProvValidator() {
               if (stateProv != null && landCntry!= null) {
               }
             if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && landCountryList.includes(landCntry)) {
-              if (stateProv == undefined && stateProv == null && stateProv!= '') {
+              if (stateProv == undefined || stateProv == null || stateProv == '') {
                 return new ValidationResult(null, false, 'State Province is mandatory for address with landCntry: ' + landCntry + ' addrType: ' + addrType);
               } 
             } 
