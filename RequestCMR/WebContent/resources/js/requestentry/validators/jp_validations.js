@@ -153,6 +153,7 @@ function addHandlersForJP() {
       if (_gtcAddrTypeHandlerJp[i] == null) {
         _gtcAddrTypeHandlerJp[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypesJp[i]), 'onClick', function(value) {
           setAddrFieldsBehavior();
+          setAddrFieldsUpdateBehavior();
         });
       }
     }
@@ -6894,17 +6895,52 @@ function setAbbrevNmForBFKSCScenarioOnAddrSave(abbrevNmBFKSC) {
 
 function setAddrFieldsBehavior() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER') {
-    console.log(">>>>  setAddrFieldsBehavior");
-    var addrType = FormManager.getActualValue('addrType');
-    if (addrType == 'ZC01' || addrType == 'ZE01') {
-      FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
-      FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
-    } else {
-      FormManager.resetValidations('cnAddrTxt');
-      FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
-      FormManager.resetValidations('cnDistrict');
-      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (reqType == 'C') {
+    if (role == 'REQUESTER') {
+      console.log(">>>>  setAddrFieldsBehavior");
+      var addrType = FormManager.getActualValue('addrType');
+      if (addrType == 'ZC01' || addrType == 'ZE01') {
+        FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
+        FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+      } else {
+        FormManager.resetValidations('cnAddrTxt');
+        FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
+        FormManager.resetValidations('cnDistrict');
+        FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      }
+    }
+  }
+}
+
+function setAddrFieldsUpdateBehavior() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  var addrType = FormManager.getActualValue('addrType');
+  var result = cmr.addrdetails;
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (reqType == 'U') {
+    if (role == 'REQUESTER') {
+      console.log(">>>>  setAddrFieldsUpdateBehavior");
+      if (result && (cmr.addressMode == 'updateAddress' || cmr.addressMode == 'newAddress')) {
+        addrType = result.ret2;
+      }
+      if (addrType == 'ZC01' || addrType == 'ZE01') {
+        FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
+        FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+      } else {
+        FormManager.resetValidations('cnAddrTxt');
+        FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
+        FormManager.resetValidations('cnDistrict');
+        FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      }
     }
   }
 }
@@ -7045,7 +7081,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setJSICForBFKSCScanario, GEOHandler.JP);
   GEOHandler.addAfterConfig(setAbbrevNmReqForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setAbbrevNmReqForBFKSCScenario, GEOHandler.JP);
-
   GEOHandler.addAddrFunction(setAddrFieldsBehavior, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(setAddrFieldsUpdateBehavior, GEOHandler.JP);
 
 });
