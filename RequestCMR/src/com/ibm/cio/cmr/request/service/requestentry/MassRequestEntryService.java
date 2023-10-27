@@ -5959,8 +5959,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_CLASS":
         muModel.setCustClass(tempVal);
         break;
-      case "CUST_INVOICE_COPIES":
-        muModel.setCustInvoiceCopies(tempVal);
+      case "COLLECTION_CD":
+        muModel.setCollectionCd(tempVal);
         break;
       case "SALES_BO_CD":
         if (StringUtils.isNotBlank(tempVal)) {

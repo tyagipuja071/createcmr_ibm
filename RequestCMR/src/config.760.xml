@@ -28,7 +28,7 @@
 				</column>
 				<column>
 					<label>Customer Group</label>
-					<dbColumn>CUST_INVOICE_COPIES</dbColumn>
+					<dbColumn>COLLECTION_CD</dbColumn>
 					<width>20</width>
 					<length>2</length>
 				</column>
