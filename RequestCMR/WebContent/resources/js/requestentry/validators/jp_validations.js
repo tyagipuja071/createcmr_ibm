@@ -5150,6 +5150,7 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('privIndc_3');
 
     FormManager.enable('creditToCustNo');
+    FormManager.removeValidator('creditToCustNo', Validators.REQUIRED);
     FormManager.enable('tier2');
     // FormManager.disable('outsourcingService');
     FormManager.enable('oemInd');
@@ -6260,6 +6261,18 @@ function addDnBSearchValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setCreditToCustNoOptional4ISOCU() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly == 'true') {
+	return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' && custSubGrp == 'ISOCU') {
+    FormManager.removeValidator('creditToCustNo', Validators.REQUIRED);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -6310,7 +6323,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
-  
+  GEOHandler.addAfterTemplateLoad(setCreditToCustNoOptional4ISOCU, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
