@@ -4046,7 +4046,7 @@ function removeStateValidatorForHkMoNZ() {
         // ], null);
         FormManager.removeValidator('stateProv', Validators.REQUIRED);
         if (landCntry == '' || FormManager.GETFIELD_VALIDATIONS['landCntry'].indexOf(Validators.REQUIRED) < 0)
-          FormManager.addValidator('postCd', Validators.REQUIRED, ['Postal Code'], null);
+          //FormManager.addValidator('postCd', Validators.REQUIRED, ['Postal Code'], null);
         FormManager.addValidator('city1', Validators.REQUIRED, ['Suburb'], null);
       }
     }
