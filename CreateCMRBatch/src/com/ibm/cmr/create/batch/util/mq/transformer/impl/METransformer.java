@@ -696,7 +696,8 @@ public class METransformer extends EMEATransformer {
       addrLineT = "";
     }
 
-    legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
+    // legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv())
+    // ? addrData.getStateProv() : "");
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);

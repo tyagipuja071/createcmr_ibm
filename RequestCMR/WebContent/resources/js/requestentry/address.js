@@ -331,6 +331,8 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #stateProv_view', details.ret11 + '-' + details.ret36);
   if (FormManager.getActualValue('cmrIssuingCntry') == '897') {
     _assignDetailsValue('#AddressDetailsModal #county_view', details.ret45);
+  } else  if (FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754' || FormManager.getActualValue('cmrIssuingCntry') == '724') {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret11 + '-' + details.ret36);
   } else {
     _assignDetailsValue('#AddressDetailsModal #county_view', details.ret37);
   }
