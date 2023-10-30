@@ -2315,11 +2315,23 @@ public class MEHandler extends BaseSOFHandler {
           }
           String name3 = ""; // 4
           String pobox = ""; // 8
+          String stateProv = ""; // 10
 
           currCell = row.getCell(4);
           name3 = validateColValFromCell(currCell);
           currCell = row.getCell(8);
           pobox = validateColValFromCell(currCell);
+          currCell = row.getCell(10);
+          stateProv = validateColValFromCell(currCell);
+
+          String pattern = "^[a-zA-Z0-9]*$";
+          if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+            TemplateValidation errorAddr = new TemplateValidation(name);
+            LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+            errorAddr.addError(row.getRowNum(), "State/Province",
+                "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+            validations.add(errorAddr);
+          }
 
           if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
             TemplateValidation errorAddr = new TemplateValidation(name);

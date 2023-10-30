@@ -3462,14 +3462,15 @@ public class GreeceHandler extends BaseSOFHandler {
 
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
 
-        String cbCity = ""; // 8
+        String cbCity = ""; // 9
         String localCity = ""; // 7
-        String cbPostal = ""; // 10
-        String localPostal = ""; // 9
+        String stateProv = ""; // 8
+        String localPostal = ""; // 10
+        String cbPostal = ""; // 11
 
         String streetCont = ""; // 5
-        String poBox = ""; // 12
-        String attPerson = ""; // 13
+        String poBox = ""; // 13
+        String attPerson = ""; // 14
         row = sheet.getRow(rowIndex);
         if (row == null) {
           return; // stop immediately when row is blank
@@ -3480,15 +3481,16 @@ public class GreeceHandler extends BaseSOFHandler {
         currCell = row.getCell(7);
         cbCity = validateColValFromCell(currCell);
         currCell = row.getCell(8);
-        localPostal = validateColValFromCell(currCell);
+        stateProv = validateColValFromCell(currCell);
         currCell = row.getCell(9);
+        localPostal = validateColValFromCell(currCell);
+        currCell = row.getCell(10);
         cbPostal = validateColValFromCell(currCell);
-
         currCell = row.getCell(5);
         streetCont = validateColValFromCell(currCell);
-        currCell = row.getCell(11);
-        poBox = validateColValFromCell(currCell);
         currCell = row.getCell(12);
+        poBox = validateColValFromCell(currCell);
+        currCell = row.getCell(13);
         attPerson = validateColValFromCell(currCell);
 
         TemplateValidation error = new TemplateValidation(name);
@@ -3497,6 +3499,14 @@ public class GreeceHandler extends BaseSOFHandler {
           LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
           error.addError(rowIndex, "Local City",
               "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+          validations.add(error);
+        }
+
+        String pattern = "^[a-zA-Z0-9]*$";
+        if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+          LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+          error.addError(row.getRowNum(), "State/Province",
+              "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
           validations.add(error);
         }
 
@@ -3643,14 +3653,15 @@ public class GreeceHandler extends BaseSOFHandler {
             String addressCont = ""; // 5
             String localCity = ""; // 6
             String crossCity = ""; // 7
-            String localPostal = ""; // 8
-            String cbPostal = ""; // 9
-            String landed = ""; // 10
-            String attPerson = ""; // 11
-            String poBox = ""; // 12
-            String poBox1 = ""; // 12
-            String phoneNo = ""; // 12
-            String taxOffice = ""; // 13
+            String stateProv = ""; // 8
+            String localPostal = ""; // 9
+            String cbPostal = ""; // 10
+            String landed = ""; // 11
+            String attPerson = ""; // 12
+            String poBox = ""; // 13
+            String poBox1 = ""; // 13
+            String phoneNo = ""; // 13
+            String taxOffice = ""; // 14
 
             if (row.getRowNum() == 2001) {
               continue;
@@ -3712,36 +3723,38 @@ public class GreeceHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(7);
               crossCity = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
-              localPostal = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
-              cbPostal = validateColValFromCell(currCell);
+              localPostal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
+              cbPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
               landed = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(4);
               street = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(5);
               addressCont = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(11);
-              attPerson = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(12);
-              poBox = validateColValFromCell(currCell);
+              attPerson = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
+              poBox = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(14);
               taxOffice = validateColValFromCell(currCell);
             }
 
             if ("Sold To Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                poBox1 = df.formatCellValue(row.getCell(12));
+                poBox1 = df.formatCellValue(row.getCell(13));
               }
             }
 
             if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(12);
+              currCell = (XSSFCell) row.getCell(13);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNo = df.formatCellValue(row.getCell(12));
+                phoneNo = df.formatCellValue(row.getCell(13));
               }
             }
 
@@ -3749,7 +3762,7 @@ public class GreeceHandler extends BaseSOFHandler {
                 || StringUtils.isNotBlank(crossCity) || StringUtils.isNotBlank(localPostal) || StringUtils.isNotBlank(cbPostal)
                 || StringUtils.isNotBlank(landed) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(addressCont)
                 || StringUtils.isNotBlank(attPerson) || StringUtils.isNotBlank(poBox) || StringUtils.isNotBlank(phoneNo)
-                || StringUtils.isNotBlank(taxOffice)) {
+                || StringUtils.isNotBlank(taxOffice) || StringUtils.isNotBlank(stateProv)) {
               isAddrFilled = true;
             }
 
