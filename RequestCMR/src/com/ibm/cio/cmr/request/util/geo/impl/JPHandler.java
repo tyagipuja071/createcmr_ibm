@@ -779,7 +779,11 @@ public class JPHandler extends GEOHandler {
             cmrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
             if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
                 && StringUtils.isNotBlank(reqEntry.getBillToCustNo())) {
-              continue;
+              if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq()) && "ZS02".equals(cmrType)) {
+                LOG.debug("Adding ADU2 for bp request.");
+              } else {
+                continue;
+              }
             }
             if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq())) {
               record = new FindCMRRecordModel();
