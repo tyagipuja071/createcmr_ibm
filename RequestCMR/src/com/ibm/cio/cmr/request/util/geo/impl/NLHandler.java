@@ -2381,6 +2381,7 @@ public class NLHandler extends BaseSOFHandler {
           String street = ""; // 6
           String pobox = ""; // 7
           String city = ""; // 9
+          String stateProv = ""; // 10
           int addrFldCnt1 = 0;
 
           currCell = row.getCell(2);
@@ -2395,7 +2396,8 @@ public class NLHandler extends BaseSOFHandler {
           pobox = validateColValFromCell(currCell);
           currCell = row.getCell(9);
           city = validateColValFromCell(currCell);
-
+          currCell = row.getCell(10);
+          stateProv = validateColValFromCell(currCell);
           if (!StringUtils.isEmpty(name3)) {
             addrFldCnt1++;
           }
@@ -2422,6 +2424,13 @@ public class NLHandler extends BaseSOFHandler {
           if (StringUtils.isBlank(city)) {
             LOG.trace("City is required. ");
             errorAddr.addError(row.getRowNum(), "City", "City is required. ");
+          }
+
+          String pattern = "^[a-zA-Z0-9]*$";
+          if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+            LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+            errorAddr.addError(row.getRowNum(), "State/Province",
+                "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
           }
 
         }

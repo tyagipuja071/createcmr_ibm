@@ -3427,12 +3427,13 @@ public class CyprusHandler extends BaseSOFHandler {
             String addressCont = ""; // 5
             String attPerson = ""; // 6
             String localPostal = ""; // 7
-            String localCity = ""; // 8
-            String crossCity = ""; // 9
-            String cbPostal = ""; // 10
-            String phoneNo = ""; // 12
-            String poBox = ""; // 13
-            String landCountry = ""; // 11
+            String localCity = ""; // 7
+            String stateProv = ""; // 9
+            String crossCity = ""; // 8
+            String cbPostal = ""; // 11
+            String landCountry = ""; // 12
+            String phoneNo = ""; // 13
+            String poBox = ""; // 14
             String enterpriseNo = ""; // 5
             String isuCd = ""; // 7
             String ctc = ""; // 8
@@ -3462,6 +3463,9 @@ public class CyprusHandler extends BaseSOFHandler {
               attPerson = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
+              stateProv = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
               localPostal = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
@@ -3470,16 +3474,16 @@ public class CyprusHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(8);
               crossCity = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(10);
+              currCell = (XSSFCell) row.getCell(11);
               cbPostal = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(12);
+              currCell = (XSSFCell) row.getCell(13);
               phoneNo = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(13);
+              currCell = (XSSFCell) row.getCell(14);
               poBox = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(11);
+              currCell = (XSSFCell) row.getCell(12);
               landCountry = validateColValFromCell(currCell);
             }
 
@@ -3489,16 +3493,16 @@ public class CyprusHandler extends BaseSOFHandler {
             if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                poBox = df.formatCellValue(row.getCell(13));
+                poBox = df.formatCellValue(row.getCell(14));
               }
             }
 
             if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(12);
+              currCell = (XSSFCell) row.getCell(13);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNo = df.formatCellValue(row.getCell(12));
+                phoneNo = df.formatCellValue(row.getCell(13));
               }
             }
 
@@ -3541,6 +3545,13 @@ public class CyprusHandler extends BaseSOFHandler {
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 // validations.add(error);
               }
+            }
+
+            String pattern = "^[a-zA-Z0-9]*$";
+            if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+              LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+              error.addError(row.getRowNum(), "State/Province",
+                  "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
             }
             if (count > 2) {
               LOG.trace("Out of Street, Address Con't, PO BOX and Att Person only 2 can be filled at the same time .");
