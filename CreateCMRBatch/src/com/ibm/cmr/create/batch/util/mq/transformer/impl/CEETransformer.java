@@ -715,10 +715,12 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setDistrict(addrData.getDept());
     // CMR-4937
     legacyAddr.setAddrLineU("");
-    if (!crossBorder && SystemLocation.ROMANIA.equals(cmrData.getCmrIssuingCntry())) {
-      legacyAddr.setItCompanyProvCd(
-          (!StringUtils.isBlank(addrData.getStateProv()) && addrData.getStateProv().length() <= 2) ? addrData.getStateProv() : "");
-    }
+    // if (!crossBorder &&
+    // SystemLocation.ROMANIA.equals(cmrData.getCmrIssuingCntry())) {
+    // legacyAddr.setItCompanyProvCd(
+    // (!StringUtils.isBlank(addrData.getStateProv()) &&
+    // addrData.getStateProv().length() <= 2) ? addrData.getStateProv() : "");
+    // }
   }
 
   @Override
