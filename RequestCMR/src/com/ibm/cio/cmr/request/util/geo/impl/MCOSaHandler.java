@@ -1058,8 +1058,9 @@ public class MCOSaHandler extends MCOHandler {
             String att = ""; // 6
             String city = "";// 7
             String postalCode = ""; // 8
-            String landCountry = ""; // 09
-            String poBox = ""; // 10
+            String stateProv = ""; // 9
+            String landCountry = ""; // 10
+            String poBox = ""; // 11
 
             // Data Sheet
             String cof = ""; // 6
@@ -1111,9 +1112,12 @@ public class MCOSaHandler extends MCOHandler {
               city = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              landCountry = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
+              landCountry = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
               poBox = validateColValFromCell(currCell);
 
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1239,7 +1243,7 @@ public class MCOSaHandler extends MCOHandler {
 
             if (!StringUtils.isBlank(custName1) || !StringUtils.isBlank(nameCont) || !StringUtils.isBlank(street) || !StringUtils.isBlank(streetCont)
                 || !StringUtils.isBlank(att) || !StringUtils.isBlank(city) || !StringUtils.isBlank(postalCode) || !StringUtils.isBlank(landCountry)
-                || !StringUtils.isBlank(poBox)) {
+                || !StringUtils.isBlank(poBox) || !StringUtils.isBlank(stateProv)) {
               isDummyUpdate = false;
             }
 
@@ -1292,6 +1296,13 @@ public class MCOSaHandler extends MCOHandler {
               if (StringUtils.isBlank(landCountry)) {
                 LOG.trace("Landed Country is required.");
                 error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country is required.<br>");
+              }
+
+              String pattern = "^[a-zA-Z0-9]*$";
+              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
               }
               // validations.add(error);
             }

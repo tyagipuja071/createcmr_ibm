@@ -1892,6 +1892,15 @@ public class IsraelHandler extends EMEAHandler {
             error.addError(rowIndex + 1, "<br>City", sheetName + " City should be in Latin characters.");
           }
         }
+
+        // validate State Prov
+        String stateProv = row.getCell(9).getRichStringCellValue().getString();
+        String pattern = "^[a-zA-Z0-9]*$";
+        if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+          LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @ <br>");
+          error.addError(row.getRowNum(), "State/Province",
+              "State Province should be limited to up to 3 characters and should be alphanumeric or @. <br>");
+        }
         // end validate Mailing Billing Shipping hebrew fields
 
         // Validate Postal Code
