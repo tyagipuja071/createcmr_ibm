@@ -687,7 +687,6 @@ function onCustSubGrpChange() {
   console.log('>>>> onCustSubGrpChange >>>>');
   if (FormManager.getActualValue('reqType') == 'U') {
     return
-
   }
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
@@ -705,7 +704,21 @@ function onCustSubGrpChange() {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
+    var apCustClusterId = FormManager.getActualValue('apCustClusterId');
     var abbrevNm = null;
+ 
+    if (cntry=='744' && custSubGrp=='ECSYS') {
+      FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
+      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+      FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+      FormManager.enable('apCustClusterId');
+      FormManager.setValue('clientTier', 'Y'); 
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('isuCd', '36');
+      FormManager.readOnly('isuCd');
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),['10654','10655', '10656', '10657']);
+    }
+    
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB) {
       FormManager.setValue('abbrevNm', _pagemodel.abbrevNm);
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
