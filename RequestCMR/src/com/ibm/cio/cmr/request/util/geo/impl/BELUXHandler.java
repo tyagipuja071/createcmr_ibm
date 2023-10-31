@@ -2383,9 +2383,11 @@ public class BELUXHandler extends BaseSOFHandler {
         if (row == null) {
           break; // stop immediately when row is blank
         }
+        TemplateValidation errorAddr = new TemplateValidation(name);
         String name3 = ""; // 4
         String attPerson = ""; // 5
         String pobox = ""; // 7
+        String stateProv = ""; // 10
         int addrFldCnt1 = 0;
 
         currCell = row.getCell(4);
@@ -2394,6 +2396,8 @@ public class BELUXHandler extends BaseSOFHandler {
         attPerson = validateColValFromCell(currCell);
         currCell = row.getCell(7);
         pobox = validateColValFromCell(currCell);
+        currCell = row.getCell(10);
+        stateProv = validateColValFromCell(currCell);
 
         if (!StringUtils.isEmpty(name3)) {
           addrFldCnt1++;
@@ -2405,12 +2409,19 @@ public class BELUXHandler extends BaseSOFHandler {
           addrFldCnt1++;
         }
 
+        String pattern = "^[a-zA-Z0-9]*$";
+        if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+          LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+          errorAddr.addError(row.getRowNum(), "State/Province",
+              "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+        }
+
         if (addrFldCnt1 > 1) {
-          TemplateValidation errorAddr = new TemplateValidation(name);
           LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
           errorAddr.addError((rowIndex + 1), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
-          validations.add(errorAddr);
         }
+        validations.add(errorAddr);
+
       }
     }
   }

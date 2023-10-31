@@ -2287,6 +2287,13 @@ public class CEMEAHandler extends BaseSOFHandler {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 }
 
+                String pattern = "^[a-zA-Z0-9]*$";
+                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                  LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+                }
+
                 if (!StringUtils.isBlank(city) && Pattern.compile("[0,7,8,9]").matcher(city.substring(city.length() - 1)).find()
                     && "BUCHAREST SECTOR".equals(city.substring(0, 16))) {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");

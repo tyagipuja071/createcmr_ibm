@@ -796,9 +796,10 @@ public class DEHandler extends GEOHandler {
             String street = ""; // 8
             String poBox = ""; // 9
             String city = "";// 10
-            String postalCode = ""; // 11
-            String landCntry = ""; // 12
-            String phone = "";// 13
+            String stateProv = ""; // 11
+            String postalCode = ""; // 12
+            String landCntry = ""; // 13
+            String phone = "";// 14
 
             // Data Sheet
             String cmrNodata = "";
@@ -853,12 +854,15 @@ public class DEHandler extends GEOHandler {
               city = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              postalCode = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              landCntry = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
+              landCntry = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
               phone = validateColValFromCell(currCell);
 
               if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo)) {
@@ -886,6 +890,13 @@ public class DEHandler extends GEOHandler {
                   LOG.trace("Postal code is mandatory.");
                   error.addError((row.getRowNum() + 1), "Postal Code", "Postal code is mandatory.");
                 }
+              }
+
+              String pattern = "^[a-zA-Z0-9]*$";
+              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
               }
 
               if ((!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName()))

@@ -1340,8 +1340,9 @@ public class NORDXHandler extends BaseSOFHandler {
               String streetCon = "";// 7
               String postCd = "";// 8
               String city = "";// 9
-              String landedCntry = "";// 10
-              String poBox = "";// 11
+              String stateProv = ""; // 10
+              String landedCntry = "";// 11
+              String poBox = "";// 12
 
               currCell = (XSSFCell) row.getCell(2);
               custNm = validateColValFromCell(currCell);
@@ -1360,8 +1361,10 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(9);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
-              landedCntry = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
+              landedCntry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
               poBox = validateColValFromCell(currCell);
 
               if ("Installing,Shipping,EPL".contains(name)) {
@@ -1475,6 +1478,13 @@ public class NORDXHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "PO BOX",
                     ":Note that PO Box only accept digits. Please fix and upload the template again.<br>");
 
+              }
+
+              String pattern = "^[a-zA-Z0-9]*$";
+              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
               }
 
               if (StringUtils.isBlank(poBox)) {
