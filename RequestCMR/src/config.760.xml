@@ -100,7 +100,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -218,7 +218,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -330,7 +330,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -442,7 +442,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -554,7 +554,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -667,7 +667,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -779,7 +779,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -891,7 +891,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -1003,7 +1003,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -1115,7 +1115,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -1227,7 +1227,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -1339,7 +1339,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -1451,7 +1451,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
@@ -1563,7 +1563,7 @@
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
