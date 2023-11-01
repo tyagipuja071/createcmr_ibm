@@ -337,6 +337,18 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
       }
 
+      if (SystemLocation.JAPAN.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if ("BPWPQ".equals(data.getCustSubGrp()) && StringUtils.isNotBlank(data.getCreditToCustNo())
+            && StringUtils.isNotBlank(data.getBillToCustNo())) {
+          if (CmrConstants.RESULT_ACCEPTED.equals(scorecard.getFindCmrResult())) {
+            scorecard.setFindCmrUsrNm("");
+            scorecard.setFindCmrUsrId("");
+            scorecard.setFindCmrTs(null);
+            scorecard.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
+          }
+        }
+      }
+
       if (!newRequest) {
         // clear cmt field in admin table
         if (StringUtils.isEmpty(admin.getLockInd())) {
