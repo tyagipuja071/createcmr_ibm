@@ -706,7 +706,8 @@ function onCustSubGrpChange() {
     var custSubGrpInDB = _pagemodel.custSubGrp;
     var apCustClusterId = FormManager.getActualValue('apCustClusterId');
     var abbrevNm = null;
- 
+    var apCustClusterId = FormManager.getActualValue('apCustClusterId');
+    
     if (cntry=='744' && custSubGrp=='ECSYS') {
       FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));

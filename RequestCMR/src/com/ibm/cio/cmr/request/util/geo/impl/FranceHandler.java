@@ -1385,6 +1385,7 @@ public class FranceHandler extends GEOHandler {
             String poBox = ""; // billTo :8
             String phone = ""; // 11, BillTo:10
             String stateProv = ""; // BillTo 10 , others :9
+            String landCntry = ""; // BillTo 11 , others :10
 
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
@@ -1568,12 +1569,16 @@ public class FranceHandler extends GEOHandler {
 
               currCell = (XSSFCell) row.getCell(9);
               stateProv = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              landCntry = validateColValFromCell(currCell);
 
               int loopFlag = 10;
               String phoneTxt = "";
               if ("Bill To".equals(name)) {
                 currCell = (XSSFCell) row.getCell(10);
                 stateProv = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(11);
+                landCntry = validateColValFromCell(currCell);
 
                 loopFlag = 11;
                 currCell = (XSSFCell) row.getCell(9);
@@ -1597,9 +1602,14 @@ public class FranceHandler extends GEOHandler {
               String pattern = "^[a-zA-Z0-9]*$";
               if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
                 TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+                LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
                 error.addError(row.getRowNum(), "State/Province",
-                    "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+                    "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                validations.add(error);
+              } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("State/Province and Landed country both should be filled");
+                error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
                 validations.add(error);
               }
 

@@ -4242,6 +4242,7 @@ public class EMEAHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
         String stateProv = ""; // 8
+        String landCntry = ""; // 11
         String cbCity = ""; // 9
         String localCity = ""; // 7
         String cbPostal = ""; // 11
@@ -4266,6 +4267,8 @@ public class EMEAHandler extends BaseSOFHandler {
         cbCity = validateColValFromCell(currCell);
         currCell = row.getCell(8);
         stateProv = validateColValFromCell(currCell);
+        currCell = row.getCell(11);
+        landCntry = validateColValFromCell(currCell);
         currCell = row.getCell(9);
         localPostal = validateColValFromCell(currCell);
         currCell = row.getCell(10);
@@ -4285,12 +4288,19 @@ public class EMEAHandler extends BaseSOFHandler {
           name4 = validateColValFromCell(currCell);
           currCell = row.getCell(8);
           stateProv = validateColValFromCell(currCell);
+          currCell = row.getCell(12);
+          landCntry = validateColValFromCell(currCell);
 
           String pattern = "^[a-zA-Z0-9]*$";
           if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
-            LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+            LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
             error.addError(row.getRowNum(), "State/Province",
-                "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+                "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+            validations.add(error);
+          } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+            LOG.trace("State/Province and Landed country both should be filled");
+            error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+            validations.add(error);
           }
 
           if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
@@ -4351,9 +4361,13 @@ public class EMEAHandler extends BaseSOFHandler {
 
           String pattern = "^[a-zA-Z0-9]*$";
           if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
-            LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+            LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
             error.addError(row.getRowNum(), "State/Province",
-                "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+                "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+            validations.add(error);
+          } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+            LOG.trace("State/Province and Landed country both should be filled");
+            error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
             validations.add(error);
           }
 
@@ -4604,6 +4618,7 @@ public class EMEAHandler extends BaseSOFHandler {
             String seqNo = "";// 1
             String localCity = ""; // 7
             String stateProv = ""; // 8
+            String landCntry = ""; // 11
             String crossCity = ""; // 9
             String localPostal = ""; // 10
             String cbPostal = ""; // 11
@@ -4632,6 +4647,8 @@ public class EMEAHandler extends BaseSOFHandler {
             localPostal = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(10);
             cbPostal = validateColValFromCell(currCell);
+            currCell = (XSSFCell) row.getCell(11);
+            landCntry = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(4);
             street = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(5);
@@ -4661,9 +4678,13 @@ public class EMEAHandler extends BaseSOFHandler {
             }
             String pattern = "^[a-zA-Z0-9]*$";
             if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
-              LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+              LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
               error.addError(row.getRowNum(), "State/Province",
-                  "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+                  "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+              validations.add(error);
+            } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+              LOG.trace("State/Province and Landed country both should be filled");
+              error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
               validations.add(error);
             }
 
