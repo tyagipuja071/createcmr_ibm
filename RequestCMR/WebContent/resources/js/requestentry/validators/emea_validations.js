@@ -1877,12 +1877,12 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
       FormManager.readOnly('taxCd1');
       FormManager.enable('collectionCd');
       FormManager.readOnly('enterprise');
-//      FormManager.resetValidations('vat');
-//      FormManager.readOnly('identClient');
+      // FormManager.resetValidations('vat');
+      // FormManager.readOnly('identClient');
       FormManager.resetValidations('taxCd1');
       FormManager.resetValidations('enterprise');
-//      FormManager.resetValidations('identClient');
-//      FormManager.readOnly('vat');
+      // FormManager.resetValidations('identClient');
+      // FormManager.readOnly('vat');
     }
 
   } else if (reqType == 'C' && role == 'PROCESSOR') {
@@ -4912,7 +4912,8 @@ function showHideCityStateProvIT() {
     FormManager.addValidator('city1', Validators.REQUIRED, [ 'City' ], null);
     FormManager.setValue('crossbCntryStateProvMapIT', '');
     FormManager.setValue('crossbCntryStateProvMapIT', landCntryVal);
-    FormManager.setValue('stateProvItaly', getDescription('crossbCntryStateProvMapIT'));
+    // FormManager.setValue('stateProvItaly',
+    // getDescription('crossbCntryStateProvMapIT'));
 
     var stateProvIT = FormManager.getActualValue('stateProvItaly');
     FormManager.setValue('crossbStateProvPostalMapIT', stateProvIT);
@@ -5493,8 +5494,8 @@ function autoPopulateIdentClientIT() {
   }
 
   if (scenario == 'CROSS') {
-//    FormManager.resetValidations('vat');
-//    FormManager.enable('vat');
+    // FormManager.resetValidations('vat');
+    // FormManager.enable('vat');
     FormManager.resetValidations('taxCd1');
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesCross);
 
@@ -6233,7 +6234,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
       if (checkImportIndc == 'Y') {
         console
             .log(">getOldValuesIT> importIndc is Y -Non editable fields- are ('clientTier', 'isuCd', 'repTeamMemberNo', 'salesBusOffCd', 'inacCd','affiliate', 'specialTaxCd' , 'collectionCd','vat', 'taxCd1')");
-//        FormManager.readOnly('identClient');
+        // FormManager.readOnly('identClient');
         if (custSubType != undefined && custSubType != '' && (custSubType != '3PAIT' && custSubType != '3PASM' && custSubType != '3PAVA')) {
           // FormManager.readOnly('isuCd');
           // FormManager.readOnly('inacCd');
@@ -8918,7 +8919,7 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
 
   if (checkImportIndc != 'Y') {
     var ident = FormManager.getActualValue('identClient');
-//    FormManager.enable('identClient');
+    // FormManager.enable('identClient');
     if (FormManager.getActualValue('reqType') == 'C' && 'CROSS' == FormManager.getActualValue('custGrp')) {
       var checkImportIndc = getImportedIndcForItaly();
       if (ident == 'N') {
@@ -10683,7 +10684,7 @@ function StcOrderBlockValidation() {
             return new ValidationResult(null, false, 'Only ST and blank STC order block code allowed.');
           }
         } else if (ordBlk != '' && stcOrdBlk != '') {
-                    return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
+          return new ValidationResult(null, false, 'Please fill either STC order block code or Order Block field');
         }
         return new ValidationResult(null, true);
       }

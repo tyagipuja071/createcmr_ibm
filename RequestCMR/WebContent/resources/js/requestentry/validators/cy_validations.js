@@ -477,7 +477,8 @@ function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
   && zs01Data.addrTxt2[0] == zp01Data.addrTxt2[0] 
   && zs01Data.poBox[0]    == zp01Data.poBox[0]
   && zs01Data.postCd[0]   == zp01Data.postCd[0]
-  && zs01Data.city1[0]    == zp01Data.city1[0]) {
+  && zs01Data.city1[0]    == zp01Data.city1[0]
+  && zs01Data.stateProv[0]    == zp01Data.stateProv[0]) {
     return true;
   }
   
@@ -524,6 +525,10 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
         if(!hasMatchingFieldsFilled(zs01Data.city1[0], zp01Data.city1[0], isCrossborder)) {
           mismatchFields += mismatchFields != '' ? ', ' : '';
           mismatchFields += 'City';
+        }
+        if(!hasMatchingFieldsFilled(zs01Data.stateProv[0], zp01Data.stateProv[0], isCrossborder)) {
+          mismatchFields += mismatchFields != '' ? ', ' : '';
+          mismatchFields += 'State/Province';
         }
       }
       
