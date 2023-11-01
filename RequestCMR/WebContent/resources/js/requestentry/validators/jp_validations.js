@@ -147,15 +147,13 @@ function addHandlersForJP() {
   }
 
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER') {
-    for (var i = 0; i < _gtcAddrTypesJp.length; i++) {
-      _gtcAddrTypeHandlerJp[i] = null;
-      if (_gtcAddrTypeHandlerJp[i] == null) {
-        _gtcAddrTypeHandlerJp[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypesJp[i]), 'onClick', function(value) {
-          setAddrFieldsBehavior();
-          setAddrFieldsUpdateBehavior();
-        });
-      }
+  for (var i = 0; i < _gtcAddrTypesJp.length; i++) {
+    _gtcAddrTypeHandlerJp[i] = null;
+    if (_gtcAddrTypeHandlerJp[i] == null) {
+      _gtcAddrTypeHandlerJp[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypesJp[i]), 'onClick', function(value) {
+        setAddrFieldsBehavior();
+        setAddrFieldsUpdateBehavior();
+      });
     }
   }
 
@@ -6901,18 +6899,16 @@ function setAddrFieldsBehavior() {
     return;
   }
   if (reqType == 'C') {
-    if (role == 'REQUESTER') {
-      console.log(">>>>  setAddrFieldsBehavior");
-      var addrType = FormManager.getActualValue('addrType');
-      if (addrType == 'ZC01' || addrType == 'ZE01') {
-        FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
-        FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
-      } else {
-        FormManager.resetValidations('cnAddrTxt');
-        FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
-        FormManager.resetValidations('cnDistrict');
-        FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
-      }
+    console.log(">>>>  setAddrFieldsBehavior");
+    var addrType = FormManager.getActualValue('addrType');
+    if (addrType == 'ZC01' || addrType == 'ZE01') {
+      FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
+      FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+    } else {
+      FormManager.resetValidations('cnAddrTxt');
+      FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
+      FormManager.resetValidations('cnDistrict');
+      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
     }
   }
 }
@@ -6927,20 +6923,18 @@ function setAddrFieldsUpdateBehavior() {
     return;
   }
   if (reqType == 'U') {
-    if (role == 'REQUESTER') {
-      console.log(">>>>  setAddrFieldsUpdateBehavior");
-      if (result && (cmr.addressMode == 'updateAddress' || cmr.addressMode == 'newAddress')) {
-        addrType = result.ret2;
-      }
-      if (addrType == 'ZC01' || addrType == 'ZE01') {
-        FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
-        FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
-      } else {
-        FormManager.resetValidations('cnAddrTxt');
-        FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
-        FormManager.resetValidations('cnDistrict');
-        FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
-      }
+    console.log(">>>>  setAddrFieldsUpdateBehavior");
+    if (result && (cmr.addressMode == 'updateAddress' || cmr.addressMode == 'newAddress')) {
+      addrType = result.ret2;
+    }
+    if (addrType == 'ZC01' || addrType == 'ZE01') {
+      FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
+      FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+    } else {
+      FormManager.resetValidations('cnAddrTxt');
+      FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
+      FormManager.resetValidations('cnDistrict');
+      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
     }
   }
 }
