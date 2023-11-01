@@ -1893,19 +1893,23 @@ public class IsraelHandler extends EMEAHandler {
           }
         }
 
-        // validate State Prov
-        String stateProv = row.getCell(9).getRichStringCellValue().getString();
-        String pattern = "^[a-zA-Z0-9]*$";
-        if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
-          LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @ <br>");
-          error.addError(row.getRowNum(), "State/Province",
-              "State Province should be limited to up to 3 characters and should be alphanumeric or @. <br>");
-        }
         // end validate Mailing Billing Shipping hebrew fields
 
         // Validate Postal Code
         String postalCd = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, row, sheetName));
         String landedCntry = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName));
+
+        // validate State Prov
+        String stateProv = row.getCell(9).getRichStringCellValue().getString();
+        String pattern = "^[a-zA-Z0-9]*$";
+        if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+          LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+          error.addError(row.getRowNum(), "State/Province",
+              "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+        } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedCntry)) {
+          LOG.trace("State/Province and Landed country both should be filled");
+          error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+        }
 
         if (validateHebrewField || (sheetName.equals("Installing") || sheetName.equals("EPL"))) {
           String errKna1 = validateMassKna1AddrSeqExist(cmrNo, addrSeqNo, sheetName);

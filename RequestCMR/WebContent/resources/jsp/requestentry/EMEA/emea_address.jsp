@@ -200,7 +200,7 @@
     </p>
   </cmr:column>
   </cmr:view>
-  <cmr:column span="2" exceptForCountry="758,862,755">
+  <cmr:column span="2" exceptForCountry="758">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
@@ -258,16 +258,7 @@
     </p>
     </cmr:column>
   </cmr:view>
-  <cmr:column span="2" containerForField="POBox" forCountry="755">
-    <p>
-      <cmr:label fieldId="poBox">
-        <cmr:fieldLabel fieldId="POBox" />:
-             <cmr:delta text="-" id="delta-poBox" />
-      </cmr:label>
-      <cmr:field fieldId="POBox" id="poBox" path="poBox" />
-    </p>
-  </cmr:column>
-
+ 
 </cmr:row>
 
 <cmr:row>
@@ -327,6 +318,15 @@
 <cmr:view exceptForCountry="758">
 <cmr:row>
   <cmr:column span="2" containerForField="POBox" exceptForCountry="755,862">
+    <p>
+      <cmr:label fieldId="poBox">
+        <cmr:fieldLabel fieldId="POBox" />:
+             <cmr:delta text="-" id="delta-poBox" />
+      </cmr:label>
+      <cmr:field fieldId="POBox" id="poBox" path="poBox" />
+    </p>
+  </cmr:column>
+   <cmr:column span="2" containerForField="POBox" forCountry="755">
     <p>
       <cmr:label fieldId="poBox">
         <cmr:fieldLabel fieldId="POBox" />:

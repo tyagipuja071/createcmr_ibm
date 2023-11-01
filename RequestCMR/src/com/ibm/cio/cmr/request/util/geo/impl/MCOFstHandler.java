@@ -774,9 +774,12 @@ public class MCOFstHandler extends MCOHandler {
 
                 String pattern = "^[a-zA-Z0-9]*$";
                 if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
-                  LOG.trace("State Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
                   error.addError(row.getRowNum(), "State/Province",
-                      "State Province should be limited to up to 3 characters and should be alphanumeric or @.");
+                      "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedcountry)) {
+                  LOG.trace("State/Province and Landed country both should be filled");
+                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
                 }
 
                 if (StringUtils.isBlank(landedcountry)) {
