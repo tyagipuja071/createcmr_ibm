@@ -1665,6 +1665,10 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
       mismatchFields += mismatchFields != '' ? ', ' : '';
       mismatchFields += 'City';
     }
+    if (!hasMatchingFieldsFilled(zs01Data.stateProv[0], zp01Data.stateProv[0], isCrossborder)) {
+      mismatchFields += mismatchFields != '' ? ', ' : '';
+      mismatchFields += 'State/Province';
+    }
   }
 
   return mismatchFields;

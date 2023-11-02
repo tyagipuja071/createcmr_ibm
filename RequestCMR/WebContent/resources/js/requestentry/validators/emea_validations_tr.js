@@ -884,6 +884,10 @@ function autoSetVAT(_custType, custTypeinDB) {
 
     
 
+        
+
+    
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -3228,6 +3232,10 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
     if (!hasMatchingFieldsFilled(zs01Data.city1[0], zp01Data.city1[0], isCrossborder)) {
       mismatchFields += mismatchFields != '' ? ', ' : '';
       mismatchFields += 'City';
+    }
+    if (!hasMatchingFieldsFilled(zs01Data.stateProv[0], zp01Data.stateProv[0], isCrossborder)) {
+      mismatchFields += mismatchFields != '' ? ', ' : '';
+      mismatchFields += 'State/Province';
     }
   }
 

@@ -2129,6 +2129,10 @@ function getMismatchFields(localLangData, translatedData) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'City';
   }
+  if(!hasMatchingFieldsFilled(zs01Data.stateProv[0], zp01Data.stateProv[0], isCrossborder)) {
+    mismatchFields += mismatchFields != '' ? ', ' : '';
+    mismatchFields += 'State/Province';
+  }
   return mismatchFields;
 }
 
