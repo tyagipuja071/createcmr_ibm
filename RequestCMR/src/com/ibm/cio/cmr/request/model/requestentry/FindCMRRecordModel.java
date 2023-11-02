@@ -320,6 +320,8 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrFiscalCd;
   private String cmrStxlTxtVal;
 
+  private String cmrCreditToCustNo;
+
   public String getCmrStxlTxtVal() {
     return cmrStxlTxtVal;
   }
@@ -2510,5 +2512,13 @@ public String getTaigaCd() {
 public void setTaigaCd(String taigaCd) {
 	this.taigaCd = taigaCd;
 }
+
+  public String getCmrCreditToCustNo() {
+    return cmrCreditToCustNo;
+  }
+
+  public void setCmrCreditToCustNo(String cmrCreditToCustNo) {
+    this.cmrCreditToCustNo = cmrCreditToCustNo;
+  }
 
 }
