@@ -1167,6 +1167,7 @@ function setAccountAbbNmRequired() {
     return;
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -1182,10 +1183,16 @@ function setAccountAbbNmRequired() {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
     }
     break;
-//    case 'ISOCU':
-//      FormManager.readOnly('abbrevNm');
-//      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-//      break;
+    case 'ISOCU':
+      if (reqType == 'C') {
+    	FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+	    FormManager.readOnly('abbrevNm');
+        FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+	  } else if (reqType == 'U') {
+	  	FormManager.enable('abbrevNm');
+	  	FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
+	  }
+      break;
 //  case 'BCEXA':
 //  case 'BFKSC':
 //    FormManager.clearValue('abbrevNm');
@@ -1446,8 +1453,9 @@ function setISUByMrcSubInd() {
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var geoInd = subIndustryCd ? subIndustryCd.substr(0, 1) : '';
+  var reqType = FormManager.getActualValue('reqType');
 
-  if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU')) {
+  if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || (reqType == 'C' && custSubGrp == 'ISOCU'))) {
     return;
   }
 
@@ -3548,7 +3556,8 @@ function setINACCodeMandatory() {
     return;
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp != 'NORML' && custSubGrp != 'EUCMR' && custSubGrp != 'WHCMR' && custSubGrp != 'OUTSC' && custSubGrp != 'BQICL') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (custSubGrp != 'NORML' && custSubGrp != 'EUCMR' && custSubGrp != 'WHCMR' && custSubGrp != 'OUTSC' && custSubGrp != 'BQICL' && !(reqType == 'U' && custSubGrp == 'ISOCU')) {
     return;
   }
 
@@ -4704,7 +4713,8 @@ function addDPLCheckValidatorJP() {
       validate : function() {
         var result = FormManager.getActualValue('dplChkResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
+        var reqType = FormManager.getActualValue('reqType');
+        if ((custSubGrp == 'ISOCU' && reqType == 'C') || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
           return new ValidationResult(null, true);
         } else {
           if (result == '' || result.toUpperCase() == 'NOT DONE') {
@@ -5179,6 +5189,7 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('outsourcingService');
     FormManager.hide('DirectBp', 'creditBp');
     FormManager.show('zSeriesSw', 'zseriesSw');
+    FormManager.enable('abbrevNm');
     break;
   case 'STOSI':
     FormManager.setValue('custAcctType', 'OU');
