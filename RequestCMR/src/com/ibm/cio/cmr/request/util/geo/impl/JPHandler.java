@@ -785,7 +785,7 @@ public class JPHandler extends GEOHandler {
     }
 
     if ("U".equals(admin.getReqType())) {
-      data.setCreditToCustNo(mainRecord.getCreditToCustNo());
+      data.setCreditToCustNo(mainRecord.getCmrCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
     }
 
