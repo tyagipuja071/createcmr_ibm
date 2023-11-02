@@ -1640,6 +1640,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);  
-  GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+// GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   
 });
