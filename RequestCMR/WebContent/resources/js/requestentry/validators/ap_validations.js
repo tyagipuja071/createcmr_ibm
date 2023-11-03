@@ -13,7 +13,6 @@ var _importIndIN = null;
 var _vatRegisterHandlerSG = null;
 var _clusterHandlerINDONESIA = 0;
 var _inacHandlerANZSG = 0;
-var _custSubGrpHandler = null;
 var oldClusterCd = null;
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -449,7 +448,7 @@ function prospectFilter() {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
   if (ifProspect == 'Y') {
-    custSubGrpHandler();
+    custSubGrpHandlerINAUSG();
   }
 }
 
@@ -2677,15 +2676,6 @@ function filterInacCd(cmrIssuCntry, clusters, inacType, inacCd) {
   }
 }
 
-
-function custSubGrpHandler() {
-  console.log('>>>> custSubGrpHandler >>>>');
-  if (_custSubGrpHandler == null) {
-    _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
-      onIsicChange();
-    });
-  }
-}
 
 function setIsicCdIfCmrResultAccepted(value) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -5727,6 +5717,16 @@ function addCtcObsoleteValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var _custSubGrpHandler = null;
+function custSubGrpHandlerINAUSG() {
+  console.log('>>>> custSubGrpHandler >>>>');
+  if (_custSubGrpHandler == null) {
+    _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+      onIsicChange();
+    });
+  }
+}
+
 
 function clusterCdValidatorAU() {
   FormManager.addFormValidator((function () {
@@ -8668,14 +8668,14 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(validateStreetAddrCont2, [SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
   SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA], null, true);
   // CREATCMR-7589
-  GEOHandler.addAfterConfig(custSubGrpHandler, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
+  GEOHandler.addAfterConfig(custSubGrpHandlerINAUSG, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
   // GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA,
   // SysLoc.SINGAPORE ]);
   // GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA,
   // SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(onIsicChange, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterTemplateLoad(custSubGrpHandler, [SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
+  GEOHandler.addAfterTemplateLoad(custSubGrpHandlerINAUSG, [SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
