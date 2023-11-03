@@ -1322,14 +1322,18 @@ function setCTCByOfficeCd() {
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
+  var reqType = FormManager.getActualValue('reqType');
   if (isJPBlueGroupFlg == 'true') {
 	return;
   }
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
-  if (custSubGrp == 'ISOCU' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC' || custSubGrp == 'RACMR') {
+  if (custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC' || custSubGrp == 'RACMR') {
     return;
+  }
+  if (reqType == 'C' && custSubGrp == 'ISOCU') {
+	return;
   }
 
   if (inTs38Ofcd()) {
