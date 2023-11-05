@@ -442,8 +442,7 @@ public class AutomationEngine {
         }
         
         if(isPaygoUpgrade){
-          data.setOrdBlk(null); 
-          data.setIsicCd(null);
+          data.setIsicCd("");
           }
 
         if ("U".equals(admin.getReqType())) {
