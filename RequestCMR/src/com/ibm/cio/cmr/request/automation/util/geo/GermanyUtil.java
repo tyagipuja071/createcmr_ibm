@@ -492,8 +492,11 @@ public class GermanyUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-
-    if ("3PA".contains(data.getCustSubGrp()) || "X3PA".contains(data.getCustSubGrp())) {
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
+    if (!isPaygoUpgrade && ("3PA".contains(data.getCustSubGrp()) || "X3PA".contains(data.getCustSubGrp()))) {
       Addr zi01 = requestData.getAddress("ZI01");
       boolean highQualityMatchExists = false;
       List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
