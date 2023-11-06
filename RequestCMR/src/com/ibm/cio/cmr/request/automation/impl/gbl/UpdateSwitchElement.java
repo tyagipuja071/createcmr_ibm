@@ -168,7 +168,7 @@ public class UpdateSwitchElement extends ValidatingElement {
               paygoToBill = false;
             }
             if ("PG01".equals(addrTypeCode)) {
-              if (!"P".equals(addr.getDplChkResult())) {
+              if (StringUtils.isNotEmpty(addr.getDplChkResult()) && !"P".equals(addr.getDplChkResult())) {
                 isDPLpassed = false;
                 log.debug("DPL failed: " + reqId);
               }

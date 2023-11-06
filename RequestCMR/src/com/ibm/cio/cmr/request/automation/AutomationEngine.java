@@ -186,7 +186,10 @@ public class AutomationEngine {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
-
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
@@ -246,8 +249,10 @@ public class AutomationEngine {
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
       }
+      
+    
       // handle the special ALL types (approvals)
-      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)) {
+      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType) || isPaygoUpgrade) {
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
 
@@ -435,17 +440,24 @@ public class AutomationEngine {
      //   admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
+        
+        if(isPaygoUpgrade){
+          data.setIsicCd("");
+          }
 
         if ("U".equals(admin.getReqType())) {
-          if ("PG".equals(data.getOrdBlk())) {
+          if ("PG".equals(data.getOrdBlk()) && !"PAYG".equals(admin.getReqReason())) {
       //      admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
-          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
+          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited &&  !"PAYG".equals(admin.getReqReason())) {
         //    admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
 
+        //paygo upgrade
+      //  if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason()) && "PG".equals(data.getOrdBlk()))
+        
         if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");
