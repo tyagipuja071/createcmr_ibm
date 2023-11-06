@@ -82,7 +82,7 @@ function afterConfigForJP() {
     setCmrNoCmrNo2Required();
     setAccntAbbNmOnScrnarioChange();
     setAccountAbbNmRequired();
-    performDPLCheck4JP();
+    // performDPLCheck4JP();
     setDefaultValueForChargeCode();
     setTier2Required();
     disableRequestFor();
