@@ -3310,10 +3310,12 @@ public class JPHandler extends GEOHandler {
             String accountAbbrevName = "";
             String jsic = "";
             String custClass = "";
+            String custGrp = "";
             String officeCd = "";
             String inacCd = "";
             String billingProcessCd = "";
             String postalForCsbo = "";
+            String csbo = "";
 
             // ADDRESS SHEET
             String addrSeq = "";
@@ -3322,6 +3324,9 @@ public class JPHandler extends GEOHandler {
             String katakana = "";
             String fullEnglishName = "";
             String address = "";
+            String englishStreet = "";
+            String englishCity = "";
+            String englishDistrict = "";
             String postalCode = "";
             String branchOffice = "";
             String department = "";
@@ -3349,21 +3354,27 @@ public class JPHandler extends GEOHandler {
               custClass = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(4);
-              officeCd = validateColValFromCell(currCell);
+              custGrp = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(5);
-              inacCd = validateColValFromCell(currCell);
+              officeCd = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(6);
-              billingProcessCd = validateColValFromCell(currCell);
+              inacCd = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
+              billingProcessCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
               postalForCsbo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              csbo = validateColValFromCell(currCell);
 
               // Data Sheet
               if (StringUtils.isNotBlank(accountAbbrevName) || StringUtils.isNotBlank(jsic) || StringUtils.isNotBlank(custClass)
-                  || StringUtils.isNotBlank(officeCd) || StringUtils.isNotBlank(inacCd) || StringUtils.isNotBlank(billingProcessCd)
-                  || StringUtils.isNotBlank(postalForCsbo)) {
+                  || StringUtils.isNotBlank(custGrp) || StringUtils.isNotBlank(officeCd) || StringUtils.isNotBlank(inacCd)
+                  || StringUtils.isNotBlank(billingProcessCd) || StringUtils.isNotBlank(postalForCsbo) || StringUtils.isNotBlank(csbo)) {
                 isDataFilled = true;
               }
 
@@ -3420,32 +3431,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // Company Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -3530,32 +3551,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-3 Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -3633,32 +3664,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-1 Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -3736,32 +3777,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-2 Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -3839,32 +3890,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-7 Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -3942,32 +4003,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-A Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4045,32 +4116,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-B Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4148,32 +4229,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-C Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4251,32 +4342,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-D Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4354,32 +4455,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-E Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4457,32 +4568,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-F Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4560,32 +4681,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-G Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4663,32 +4794,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-H Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
@@ -4766,32 +4907,42 @@ public class JPHandler extends GEOHandler {
               address = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
-              postalCode = validateColValFromCell(currCell);
+              englishStreet = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              branchOffice = validateColValFromCell(currCell);
+              englishCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              department = validateColValFromCell(currCell);
+              englishDistrict = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
-              building = validateColValFromCell(currCell);
+              postalCode = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
-              location = validateColValFromCell(currCell);
+              branchOffice = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(12);
-              telNo = validateColValFromCell(currCell);
+              department = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(13);
-              fax = validateColValFromCell(currCell);
+              building = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
               contact = validateColValFromCell(currCell);
 
               // ADU-4 Sheet
               if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
                   || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
                   || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
                   || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
                   || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
