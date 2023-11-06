@@ -3291,6 +3291,15 @@ function setFieldValueOnAddrSave(cntry, addressMode, saving, finalSave, force) {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
+  if (addressMode == 'newAddress' && (saving == false || finalSave != true)) {
+	return;
+  } else if (addressMode == 'COPY' && finalSave == undefined) {
+	return;
+  } else if (addressMode == 'copyAddress' && finalSave != true) {
+	return;
+  } else if (addressMode == 'updateAddress' && (saving == false || finalSave != true)) {
+	return;
+  }
   var addrType = FormManager.getActualValue('addrType');
   if (finalSave || force || addrType == 'ZS01') {
     var copyTypes = document.getElementsByName('copyTypes');
@@ -3425,7 +3434,7 @@ function setCSBOSubsidiaryValue() {
 }
 
 function setCustNmDetailOnAddrSave() {
-  if (FormManager.getActualValue('reqType') != 'C') {
+  if (cmr.currentRequestType != 'C') {
     return;
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -3477,7 +3486,7 @@ function setAccountAbbNmOnAddrSave() {
 }
 function setAccountAbbNmOnAddrSaveCreate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var fullEngNm = FormManager.getActualValue('custNm3');
+  var fullEngNm = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'OUTSC':
@@ -3526,7 +3535,7 @@ function setAccountAbbNmOnAddrSaveCreate() {
 }
 function setAccountAbbNmOnAddrSaveUpdate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var fullEngNm = FormManager.getActualValue('custNm3');
+  var fullEngNm = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'BCEXA':
