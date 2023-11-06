@@ -1200,13 +1200,17 @@ function setVatIndFieldsForGrp1AndNordx() {
   }
   var vat = FormManager.getActualValue('vat');
   var vatInd = FormManager.getActualValue('vatInd');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
   // CREATCMR-7944
-  if (isPrivateScenario()) {
-    FormManager.setValue('vatInd', 'N');
-    FormManager.enable('vatInd');
-    FormManager.setValue('vat', '');
-    FormManager.readOnly('vat');
+  // CREATCMR-9935
+  if (!(cmrIssuingCntry == '706' && vatInd.trim() !== '')) {
+	  if (isPrivateScenario()) {
+	    FormManager.setValue('vatInd', 'N');
+	    FormManager.enable('vatInd');
+	    FormManager.setValue('vat', '');
+	    FormManager.readOnly('vat');
+	  }
   }
   // CREATCMR-7165
   else if (isImportingFromQuickSearch()) {
