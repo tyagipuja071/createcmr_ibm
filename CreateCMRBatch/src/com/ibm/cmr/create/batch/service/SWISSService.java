@@ -1135,6 +1135,7 @@ public class SWISSService extends BaseBatchService {
       // handling simple update requests
       try {
         lockRecordUpdt(entityManager, admin);
+
         // update the format of existing address sequence
         String sql = ExternalizedQuery.getSql("SWISS.GET_EXISTING_ADDR");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
