@@ -79,6 +79,7 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -624,6 +625,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         model.setStatusChgCmt(model.getStatusChgCmt().substring(20));
       }
     }
+    
+    if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry()) && "ISOCU".equals(data.getCustSubGrp())
+        && (CmrConstants.Processing_Validation_Complete().equals(model.getAction())
+            || CmrConstants.All_Processing_Complete().equals(model.getAction()) || "PCC".equals(model.getAction()))) {
+      JPHandler.addJpSrwzLogicOnPRC(entityManager, admin, data, model);
+      String wfComment = "Skip TC for Japan ISOC use SR/WZ scenario.";
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null, null, null,
+          null);
+    }
+    
     RequestUtils.setProspLegalConversionFlag(entityManager, admin, data);
     updateEntity(admin, entityManager);
     updateEntity(data, entityManager);
@@ -679,6 +690,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     // CREATCMR-3144 - CN 2.0 special
     if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
       CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
+    }
+    
+    if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())
+        && "RACMR".equals(data.getCustSubGrp())) {
+      String comment = JPHandler.addJpRALogicOnSendForProcessing(entityManager, admin, data, model);
+      RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
     }
 
     // check if there's a status change

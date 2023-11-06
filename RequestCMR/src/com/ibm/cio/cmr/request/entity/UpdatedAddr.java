@@ -300,6 +300,14 @@ public class UpdatedAddr implements Serializable {
       name = "EXT_WALLET_ID_OLD")
   private String extWalletIdOld;
 
+  @Column(
+      name = "ROL")
+  private String rol;
+
+  @Column(
+      name = "ROL_OLD")
+  private String rolOld;
+
   public String getSapNo() {
     return sapNo;
   }
@@ -874,6 +882,22 @@ public class UpdatedAddr implements Serializable {
 
   public void setExtWalletIdOld(String extWalletIdOld) {
     this.extWalletIdOld = extWalletIdOld;
+  }
+
+  public String getRol() {
+    return rol;
+  }
+
+  public void setRol(String rol) {
+    this.rol = rol;
+  }
+
+  public String getRolOld() {
+    return rolOld;
+  }
+
+  public void setRolOld(String rolOld) {
+    this.rolOld = rolOld;
   }
 
 }

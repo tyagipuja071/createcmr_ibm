@@ -26,31 +26,18 @@ public class JpJsicCodeMap extends BaseEntity<JpJsicCodeMapPK> implements Serial
   @EmbeddedId
   private JpJsicCodeMapPK id;
 
+  @Override
   public JpJsicCodeMapPK getId() {
     return id;
   }
 
+  @Override
   public void setId(JpJsicCodeMapPK id) {
     this.id = id;
   }
-  
-  @Column(name = "ISSUING_CNTRY")
-  private String issuingCntry;
 
   @Column(name = "SECTOR_CD")
   private String sectorCd;
-
-  @Column(name = "SUB_INDUSTRY_CD")
-  private String subIndustryCd;
-
-  @Column(name = "JSIC_CD")
-  private String jsicCd;
-
-  @Column(name = "ISIC_CD")
-  private String isicCd;
-
-  @Column(name = "ISU_CD")
-  private String isuCd;
 
   @Column(name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
@@ -61,101 +48,49 @@ public class JpJsicCodeMap extends BaseEntity<JpJsicCodeMapPK> implements Serial
 
   @Column(name = "UPDT_TS")
   @Temporal(TemporalType.TIMESTAMP)
-  private Date updtTs;
+  private Date updateTs;
 
   @Column(name = "UPDT_BY")
-  private String updtBy;
+  private String updateBy;
 
-  public String getIssuingCntry(){
-    return this.issuingCntry;
-  }
-
-  public void setIssuingCntry(String issuingCntry){
-    this.issuingCntry = issuingCntry;
-  }
-
-
-  public String getSectorCd(){
+  public String getSectorCd() {
     return this.sectorCd;
   }
 
-  public void setSectorCd(String sectorCd){
+  public void setSectorCd(String sectorCd) {
     this.sectorCd = sectorCd;
   }
 
-
-  public String getSubIndustryCd(){
-    return this.subIndustryCd;
-  }
-
-  public void setSubIndustryCd(String subIndustryCd){
-    this.subIndustryCd = subIndustryCd;
-  }
-
-
-  public String getJsicCd(){
-    return this.jsicCd;
-  }
-
-  public void setJsicCd(String jsicCd){
-    this.jsicCd = jsicCd;
-  }
-
-
-  public String getIsicCd(){
-    return this.isicCd;
-  }
-
-  public void setIsicCd(String isicCd){
-    this.isicCd = isicCd;
-  }
-
-
-  public String getIsuCd(){
-    return this.isuCd;
-  }
-
-  public void setIsuCd(String isuCd){
-    this.isuCd = isuCd;
-  }
-
-
-  public Date getCreateTs(){
+  public Date getCreateTs() {
     return this.createTs;
   }
 
-  public void setCreateTs(Date createTs){
+  public void setCreateTs(Date createTs) {
     this.createTs = createTs;
   }
 
-
-  public String getCreateBy(){
+  public String getCreateBy() {
     return this.createBy;
   }
 
-  public void setCreateBy(String createBy){
+  public void setCreateBy(String createBy) {
     this.createBy = createBy;
   }
 
-
-  public Date getUpdtTs(){
-    return this.updtTs;
+  public Date getUpdateTs() {
+    return this.updateTs;
   }
 
-  public void setUpdtTs(Date updtTs){
-    this.updtTs = updtTs;
+  public void setUpdateTs(Date updateTs) {
+    this.updateTs = updateTs;
   }
 
-
-  public String getUpdtBy(){
-    return this.updtBy;
+  public String getUpdateBy() {
+    return this.updateBy;
   }
 
-  public void setUpdtBy(String updtBy){
-    this.updtBy = updtBy;
+  public void setUpdateBy(String updateBy) {
+    this.updateBy = updateBy;
   }
-
-
-
 
 }
