@@ -2212,7 +2212,8 @@ public class SWISSService extends BaseBatchService {
 
     EntityTransaction transaction = entityManager.getTransaction();
     try {
-      // update the format of existing address sequence in CREQCMR.ADDR_RDC and
+      // update the format of existing addresses sequence in CREQCMR.ADDR_RDC
+      // and
       // SAPR3.KNA1
       String updateSeq = ExternalizedQuery.getSql("SWISS.UPDATE_EXISTING_ADDR_SEQ");
       PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
