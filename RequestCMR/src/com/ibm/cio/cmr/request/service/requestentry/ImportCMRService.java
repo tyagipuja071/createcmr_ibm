@@ -304,8 +304,12 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           geoHandler.setAdminValuesOnImport(admin, mainRecord);
         }
       }
+      if (SystemLocation.JAPAN.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        saveScorecardJp(user, mainRecord, scorecard, system, admin, data);
+      } else {
+        saveScorecard(user, mainRecord, scorecard, system);
+      }
 
-      saveScorecard(user, mainRecord, scorecard, system);
       // Ed|1043386| Only require DPL check for Create requests
       if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
         scorecard.setDplChkResult(CmrConstants.Scorecard_Not_Done);
@@ -321,18 +325,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           scorecard.setDplChkTs(null);
         }
 
-      }
-
-      if (SystemLocation.JAPAN.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-        if ("BPWPQ".equals(data.getCustSubGrp()) && StringUtils.isNotBlank(data.getCreditToCustNo())
-            && StringUtils.isNotBlank(data.getBillToCustNo())) {
-          if (CmrConstants.RESULT_ACCEPTED.equals(scorecard.getFindCmrResult())) {
-            scorecard.setFindCmrUsrNm("");
-            scorecard.setFindCmrUsrId("");
-            scorecard.setFindCmrTs(null);
-            scorecard.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
-          }
-        }
       }
 
       if (!newRequest) {
@@ -551,6 +543,33 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       scorecard.setFindCmrUsrId(user.getIntranetId());
       scorecard.setFindCmrTs(SystemUtil.getCurrentTimestamp());
       scorecard.setFindCmrResult(mainRecord != null ? CmrConstants.RESULT_ACCEPTED : CmrConstants.RESULT_NO_RESULT);
+    }
+  }
+
+  private void saveScorecardJp(AppUser user, FindCMRRecordModel mainRecord, Scorecard scorecard, String system, Admin admin, Data data) {
+    // update scorecard
+    if ("dnb".equals(system)) {
+      scorecard.setFindDnbUsrNm(user.getBluePagesName());
+      scorecard.setFindDnbUsrId(user.getIntranetId());
+      scorecard.setFindDnbTs(SystemUtil.getCurrentTimestamp());
+      scorecard.setFindDnbResult(mainRecord != null ? CmrConstants.RESULT_ACCEPTED : CmrConstants.RESULT_NO_RESULT);
+    } else {
+      if ("BPWPQ".equals(data.getCustSubGrp()) && StringUtils.isNotBlank(data.getCreditToCustNo())
+          && StringUtils.isNotBlank(data.getBillToCustNo())) {
+        String score = StringUtils.isNotBlank(scorecard.getFindCmrResult()) ? scorecard.getFindCmrResult() : "";
+        if (CmrConstants.RESULT_ACCEPTED.equals(scorecard.getFindCmrResult())
+            && (CmrConstants.RESULT_NO_RESULT.equals(score) && CmrConstants.RESULT_REJECTED.equals(score))) {
+          scorecard.setFindCmrUsrNm("");
+          scorecard.setFindCmrUsrId("");
+          scorecard.setFindCmrTs(null);
+          scorecard.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
+        }
+      } else {
+        scorecard.setFindCmrUsrNm(user.getBluePagesName());
+        scorecard.setFindCmrUsrId(user.getIntranetId());
+        scorecard.setFindCmrTs(SystemUtil.getCurrentTimestamp());
+        scorecard.setFindCmrResult(mainRecord != null ? CmrConstants.RESULT_ACCEPTED : CmrConstants.RESULT_NO_RESULT);
+      }
     }
   }
 
