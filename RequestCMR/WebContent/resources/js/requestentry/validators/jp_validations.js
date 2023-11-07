@@ -4926,7 +4926,7 @@ function addDPLCheckValidatorJP() {
       validate : function() {
         var result = FormManager.getActualValue('dplChkResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
+        if (custSubGrp == 'ISOCU' || custSubGrp == '' || custSubGrp == 'RACMR') {
           return new ValidationResult(null, true);
         } else {
           if (result == '' || result.toUpperCase() == 'NOT DONE') {
