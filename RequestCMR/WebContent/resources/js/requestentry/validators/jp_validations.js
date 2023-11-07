@@ -6818,7 +6818,8 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('custFax', 'CustFax');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
-
+      setAddrFieldHide('dept', 'Department');
+      setAddrFieldHide('office', 'Office');
     } else {
       setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
@@ -6844,6 +6845,13 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('locationCode', 'LocationCode');
       setAddrFieldHide('rol', 'ROL');
+
+      // ADU 3, 4, 6, 7
+      if (addrType == 'ZS01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+        setAddrFieldOptional('dept', 'Department');
+        setAddrFieldOptional('office', 'Office');
+        setAddrFieldOptional('custFax', 'CustFax');
+      }
 
       if (custType == 'A' && addrType == 'ZE01') {
         setAddrFieldMandatory('divn', 'Division');
@@ -6873,6 +6881,21 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
   }
   if (role == 'PROCESSOR' && (cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U')) {
     setAddrFieldOptional('bldg', 'Building');
+  }
+}
+
+function setAddrFieldsBFKSCScenarioAtoH() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custType = FormManager.getActualValue('custType');
+  var addrType = FormManager.getActualValue('addrType');
+
+  if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+    // ADU A, B, C, D, E, F, G, H
+    if (addrType == 'ZI03' || addrType == 'ZP02' || addrType == 'ZP03' || addrType == 'ZP04' || addrType == 'ZP05' || addrType == 'ZP06' || addrType == 'ZP07' || addrType == 'ZP08') {
+      setAddrFieldOptional('dept', 'Department');
+      setAddrFieldOptional('office', 'Office');
+      setAddrFieldOptional('custFax', 'CustFax');
+    }
   }
 }
 
@@ -6963,9 +6986,12 @@ function setAddrFieldsBehavior() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
+
   if (reqType == 'C') {
     console.log(">>>>  setAddrFieldsBehavior");
     var addrType = FormManager.getActualValue('addrType');
@@ -6978,6 +7004,10 @@ function setAddrFieldsBehavior() {
       FormManager.resetValidations('cnDistrict');
       FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
     }
+
+    if (custSubGrp == 'BFKSC') {
+      setAddrFieldsBFKSCScenarioAtoH();
+    }
   }
 }
 
@@ -6986,15 +7016,19 @@ function setAddrFieldsUpdateBehavior() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   var reqType = FormManager.getActualValue('reqType');
   var addrType = FormManager.getActualValue('addrType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var result = cmr.addrdetails;
+
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
+
   if (reqType == 'U') {
     console.log(">>>>  setAddrFieldsUpdateBehavior");
     if (result && (cmr.addressMode == 'updateAddress' || cmr.addressMode == 'newAddress')) {
       addrType = result.ret2;
     }
+
     if (addrType == 'ZC01' || addrType == 'ZE01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
@@ -7003,6 +7037,10 @@ function setAddrFieldsUpdateBehavior() {
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
       FormManager.resetValidations('cnDistrict');
       FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+    }
+
+    if (custSubGrp == 'BFKSC') {
+      setAddrFieldsBFKSCScenarioAtoH();
     }
   }
 }
