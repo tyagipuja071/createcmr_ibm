@@ -416,6 +416,7 @@ public class JPHandler extends GEOHandler {
         entityManager.flush();
 
         createIntlAddrFromCompanyNo(entityManager, addr, company.getCompanyNo());
+        copyCompanyTaigaAndROLToData(entityManager, addr);
       }
 
       if ("C".equals(custType)) {
@@ -525,6 +526,23 @@ public class JPHandler extends GEOHandler {
     }
 
     return searchModel;
+  }
+
+  private void copyCompanyTaigaAndROLToData(EntityManager entityManager, Addr addr) {
+    if ("ZC01".equals(addr.getId().getAddrType())) {
+      DataPK pk = new DataPK();
+      pk.setReqId(addr.getId().getReqId());
+      Data data = entityManager.find(Data.class, pk);
+
+      String rol = addr.getRol() == null ? "" : addr.getRol();
+      String taigaCd = addr.getPoBoxPostCd() == null ? "" : addr.getPoBoxPostCd();
+
+      data.setIdentClient(rol);
+      data.setTerritoryCd(taigaCd);
+
+      entityManager.merge(data);
+      entityManager.flush();
+    }
   }
 
   private void createIntlAddrFromCompanyNo(EntityManager entityManager, Addr addr, String companyNo) throws Exception {
