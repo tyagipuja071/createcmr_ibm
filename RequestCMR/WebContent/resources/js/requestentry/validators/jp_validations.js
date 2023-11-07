@@ -5836,6 +5836,19 @@ function disableFieldsForUpdateOnScenarios() {
     break;
   }
 
+  overwriteUpdateScenarioBehavior(custSubGrp);
+
+}
+
+function overwriteUpdateScenarioBehavior(custSubGrp) {
+  switch (custSubGrp) {
+  case 'BVMDS':
+  case 'OUTSC':
+    FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
+    break;
+  default:
+    break;
+  }
 }
 
 function addINACValidator() {
