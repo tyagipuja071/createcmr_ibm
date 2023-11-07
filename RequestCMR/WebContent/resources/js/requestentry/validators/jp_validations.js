@@ -84,7 +84,7 @@ function afterConfigForJP() {
     setAccountAbbNmRequired();
     // performDPLCheck4JP();
     setDefaultValueForChargeCode();
-    setTier2Required();
+    // setTier2Required();
     disableRequestFor();
     disableProductType();
     showHideJSIC();
@@ -1354,7 +1354,7 @@ function resetAccountAbbNmOnFieldChange() {
     if (value != _pagemodel.salesTeamCd) {
       setAccountAbbNm();
     }
-    setTier2Required();
+    // setTier2Required();
   });
   dojo.connect(FormManager.getField('tier2'), 'onChange', function(value) {
     if (value != _pagemodel.tier2) {
@@ -4975,7 +4975,7 @@ function addDPLCheckValidatorJP() {
         var result = FormManager.getActualValue('dplChkResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var reqType = FormManager.getActualValue('reqType');
-        if ((custSubGrp == 'ISOCU' && reqType == 'C') || custSubGrp == '' || custSubGrp == 'BQICL' || custSubGrp == 'RACMR') {
+        if ((custSubGrp == 'ISOCU' && reqType == 'C') || custSubGrp == '' || custSubGrp == 'RACMR') {
           return new ValidationResult(null, true);
         } else {
           if (result == '' || result.toUpperCase() == 'NOT DONE') {
@@ -7042,7 +7042,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(accountAbbNmUpperCase, GEOHandler.JP);
   GEOHandler.addAfterConfig(disableFieldsForUpdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(setEnterCMRNoForupdate, GEOHandler.JP);
-  GEOHandler.addAfterConfig(setTier2Required, GEOHandler.JP);
+  // GEOHandler.addAfterConfig(setTier2Required, GEOHandler.JP);
   GEOHandler.addAfterConfig(showOrHideDirectBpZSeriesSw, GEOHandler.JP);
   GEOHandler.addAfterConfig(setJSICSubIndustryCdOptional, GEOHandler.JP);
   GEOHandler.addAfterConfig(setOutsourcingServiceRequired, GEOHandler.JP);
