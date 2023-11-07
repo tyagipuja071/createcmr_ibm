@@ -3542,6 +3542,8 @@ function setAccountAbbNmOnAddrSaveUpdate() {
   case 'BFKSC':
     accountAbbNm = '';
     break;
+  case 'ISOCU':
+    return;
   case '':
   default:
     accountAbbNm = fullEngNm;
