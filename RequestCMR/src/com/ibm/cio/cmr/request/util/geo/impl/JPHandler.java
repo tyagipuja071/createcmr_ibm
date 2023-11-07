@@ -3244,11 +3244,12 @@ public class JPHandler extends GEOHandler {
 
   public static boolean isClearDPL(AddressModel model, Addr addr, EntityManager entityManager) {
     String aCustEnName = addr.getCustNm3() != null ? addr.getCustNm3().trim().toLowerCase() : "";
-    String mCustEnName = model.getCustNm3() != null ? model.getCustNm3().trim().toLowerCase() : "";
-    if (!StringUtils.equals(aCustEnName, mCustEnName))
+    String mCustEnName = model.getCnCustName1() != null ? model.getCnCustName1().trim().toLowerCase() : "";
+    if (!StringUtils.equals(aCustEnName, mCustEnName)) {
       return true;
-    return false;
-
+    } else {
+      return false;
+    }
   }
 
   @Override
