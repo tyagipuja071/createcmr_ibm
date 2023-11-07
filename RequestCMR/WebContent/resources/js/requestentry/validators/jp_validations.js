@@ -84,7 +84,7 @@ function afterConfigForJP() {
     // setAccountAbbNmRequired();
     // performDPLCheck4JP();
     setDefaultValueForChargeCode();
-    setTier2Required();
+    // setTier2Required();
     disableRequestFor();
     disableProductType();
     showHideJSIC();
@@ -1354,7 +1354,7 @@ function resetAccountAbbNmOnFieldChange() {
     if (value != _pagemodel.salesTeamCd) {
       // setAccountAbbNm();
     }
-    setTier2Required();
+    // setTier2Required();
   });
   dojo.connect(FormManager.getField('tier2'), 'onChange', function(value) {
     if (value != _pagemodel.tier2) {
@@ -4661,7 +4661,7 @@ function setTier2Required() {
       'D0919', 'D0920', 'D0921', 'D0922', 'D0923', 'D0924', 'D0925', 'D0926', 'D0939' ];
   var matched = false;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'ISOCU') {
+  if (custSubGrp == 'BPWPQ') {
     for (var i = 0; i < requiredDealerNoList.length; i++) {
       if (dealerNo == requiredDealerNoList[i]) {
         matched = true;
@@ -6975,7 +6975,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(accountAbbNmUpperCase, GEOHandler.JP);
   GEOHandler.addAfterConfig(disableFieldsForUpdate, GEOHandler.JP);
   GEOHandler.addAfterConfig(setEnterCMRNoForupdate, GEOHandler.JP);
-  GEOHandler.addAfterConfig(setTier2Required, GEOHandler.JP);
+  // GEOHandler.addAfterConfig(setTier2Required, GEOHandler.JP);
   GEOHandler.addAfterConfig(showOrHideDirectBpZSeriesSw, GEOHandler.JP);
   GEOHandler.addAfterConfig(setJSICSubIndustryCdOptional, GEOHandler.JP);
   GEOHandler.addAfterConfig(setOutsourcingServiceRequired, GEOHandler.JP);
