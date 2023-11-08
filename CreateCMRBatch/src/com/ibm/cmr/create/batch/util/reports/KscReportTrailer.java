@@ -21,11 +21,12 @@ import com.ibm.cio.cmr.request.util.reports.Trailer;
 public class KscReportTrailer implements Trailer {
 
   @Override
-  public String generateTrailer(EntityManager entityManager, List<Object[]> results, DateRangeContainer dateRange) {
+  public String generateTrailer(EntityManager entityManager, List<Object[]> results, DateRangeContainer dateRange, String sequence) {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
     DecimalFormat countFormat = new DecimalFormat("000000");
     String formattedDate = dateFormat.format(dateRange.getToDate());
-    return "TRL ASOF DATE=" + formattedDate + " " + countFormat.format(results.size()) + " RUN DATE=" + formattedDate + "    ";
+    return "TRL ASOF DATE=" + formattedDate + " " + countFormat.format(results.size()) + " RUN DATE=" + formattedDate
+        + (sequence != null ? sequence : "");
   }
 
 }

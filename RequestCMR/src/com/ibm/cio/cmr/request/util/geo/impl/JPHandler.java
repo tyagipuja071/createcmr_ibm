@@ -417,6 +417,8 @@ public class JPHandler extends GEOHandler {
 
         createIntlAddrFromCompanyNo(entityManager, addr, company.getCompanyNo());
         copyCompanyTaigaAndROLToData(entityManager, addr);
+        setSapNoOnImport(entityManager, admin, data);
+        copyIntlAddrValuesToAddr(entityManager, admin);
       }
 
       if ("C".equals(custType)) {
@@ -490,6 +492,8 @@ public class JPHandler extends GEOHandler {
           entityManager.flush();
 
           createIntlAddrFromEstabAndCompanyNo(entityManager, addr, company.getCompanyNo(), establishment.getEstablishmentNo());
+          setSapNoOnImport(entityManager, admin, data);
+          copyIntlAddrValuesToAddr(entityManager, admin);
 
         }
       }
@@ -921,6 +925,11 @@ public class JPHandler extends GEOHandler {
       LOG.debug("skip imports on creates for bpwpq");
     } else {
       data.setCreditToCustNo(mainRecord.getCreditToCustNo());
+      data.setBillToCustNo(mainRecord.getBillingCustNo());
+    }
+    
+    if ("U".equals(admin.getReqType())) {
+      data.setCreditToCustNo(mainRecord.getCmrCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
     }
 
