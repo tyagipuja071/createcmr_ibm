@@ -2532,6 +2532,38 @@ public class JPHandler extends GEOHandler {
 
     setEnglishAddrFieldsFromRDC(entityManager, admin, data);
     setSapNoOnImport(entityManager, admin, data);
+    copyIntlAddrValuesToAddr(entityManager, admin);
+  }
+
+  private void copyIntlAddrValuesToAddr(EntityManager entityManager, Admin admin) {
+    List<Addr> addrs = getAddresses(entityManager, admin.getId().getReqId());
+    List<IntlAddr> intlAddrs = getAllIntlAddrByReqId(admin.getId().getReqId(), entityManager);
+    Map<String, String> intlAddrTypeToEngNameMap = mapIntlAddrTypeToEngName(intlAddrs);
+    for (Addr addr : addrs) {
+      String intlAddrFullEng = intlAddrTypeToEngNameMap.get(addr.getId().getAddrType());
+      addr.setCustNm3(intlAddrFullEng);
+      entityManager.merge(addr);
+
+      AddrPK arPk = new AddrPK();
+      arPk.setAddrSeq(addr.getId().getAddrSeq());
+      arPk.setAddrType(addr.getId().getAddrType());
+      arPk.setReqId(addr.getId().getReqId());
+      AddrRdc addrRdc = entityManager.find(AddrRdc.class, arPk);
+      if (addrRdc != null) {
+        addrRdc.setCustNm3(addr.getCustNm3());
+        entityManager.merge(addrRdc);
+      }
+    }
+    entityManager.flush();
+  }
+
+  private Map<String, String> mapIntlAddrTypeToEngName(List<IntlAddr> intlAddrs) {
+    Map<String, String> intlAddrTypeToEngNameMap = new HashMap<>();
+    for (IntlAddr intlAddr : intlAddrs) {
+      intlAddrTypeToEngNameMap.put(intlAddr.getId().getAddrType(), intlAddr.getIntlCustNm1());
+    }
+
+    return intlAddrTypeToEngNameMap;
   }
 
   private void setSapNoOnImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
@@ -2558,6 +2590,17 @@ public class JPHandler extends GEOHandler {
         }
 
         entityManager.merge(addr);
+
+        AddrPK arPk = new AddrPK();
+        arPk.setAddrSeq(addr.getId().getAddrSeq());
+        arPk.setAddrType(addr.getId().getAddrType());
+        arPk.setReqId(addr.getId().getReqId());
+        AddrRdc addrRdc = entityManager.find(AddrRdc.class, arPk);
+
+        if (addrRdc != null) {
+          addrRdc.setSapNo(addr.getSapNo());
+          entityManager.merge(addrRdc);
+        }
       }
       entityManager.flush();
     }
