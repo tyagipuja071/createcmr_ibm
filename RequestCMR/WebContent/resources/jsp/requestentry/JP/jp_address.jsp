@@ -68,15 +68,6 @@
 </cmr:row>
 <cmr:row addBackground="true">
   <cmr:column span="4">
-    <cmr:label fieldId="cnCustName2">
-      <cmr:fieldLabel fieldId="JpCustomerName2" />: 
-    </cmr:label>
-    <cmr:delta text="-" id="delta-cnCustName2" />
-    <cmr:field fieldId="JpCustomerName2" id="cnCustName2" path="cnCustName2" size="400" />
-  </cmr:column>
-</cmr:row>
-<cmr:row addBackground="true">
-  <cmr:column span="4">
     <cmr:label fieldId="addrTxt">
       <cmr:fieldLabel fieldId="AddressTxt" />: 
     </cmr:label>

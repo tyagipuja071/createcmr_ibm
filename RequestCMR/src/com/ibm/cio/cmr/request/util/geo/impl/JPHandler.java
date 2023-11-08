@@ -923,6 +923,11 @@ public class JPHandler extends GEOHandler {
       data.setCreditToCustNo(mainRecord.getCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
     }
+    
+    if ("U".equals(admin.getReqType())) {
+      data.setCreditToCustNo(mainRecord.getCmrCreditToCustNo());
+      data.setBillToCustNo(mainRecord.getBillingCustNo());
+    }
 
     data.setTier2(mainRecord.getTier2());
     // data.setAbbrevNm(mainRecord.getCmrName3() == null ?
