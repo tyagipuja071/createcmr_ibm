@@ -4226,7 +4226,7 @@ function afterConfigTemplateLoadForME() {
   togglePPSCeidME();
   // disableSBO();
   setEngineeringBO();
-  addLandCntryHandler();
+//  addLandCntryHandler();
 }
 
 function afterConfigForME() {
@@ -4748,7 +4748,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null, true);
   GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
-  GEOHandler.registerValidator(postCdFormatValidator, GEOHandler.ME, null, true);
+//  GEOHandler.registerValidator(postCdFormatValidator, GEOHandler.ME, null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
   GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
