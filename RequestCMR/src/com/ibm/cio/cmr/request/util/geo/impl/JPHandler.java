@@ -412,7 +412,6 @@ public class JPHandler extends GEOHandler {
 
         createIntlAddrFromCompanyNo(entityManager, addr, company.getCompanyNo());
         copyCompanyTaigaAndROLToData(entityManager, addr);
-        setSapNoOnImport(entityManager, admin, data);
         copyIntlAddrValuesToAddr(entityManager, admin);
       }
 
@@ -487,7 +486,6 @@ public class JPHandler extends GEOHandler {
           entityManager.flush();
 
           createIntlAddrFromEstabAndCompanyNo(entityManager, addr, company.getCompanyNo(), establishment.getEstablishmentNo());
-          setSapNoOnImport(entityManager, admin, data);
           copyIntlAddrValuesToAddr(entityManager, admin);
 
         }
@@ -2627,8 +2625,10 @@ public class JPHandler extends GEOHandler {
 
   private Map<String, String> mapZzkvSeqNoToKunnr(EntityManager entityManager, List<Kna1> kna1List) {
     Map<String, String> zzkvSeqNoToKunnrMap = new HashMap<>();
-    for (Kna1 kna1 : kna1List) {
-      zzkvSeqNoToKunnrMap.put(kna1.getZzkvSeqno(), kna1.getId().getKunnr());
+    if (kna1List != null && !kna1List.isEmpty()) {
+      for (Kna1 kna1 : kna1List) {
+        zzkvSeqNoToKunnrMap.put(kna1.getZzkvSeqno(), kna1.getId().getKunnr());
+      }
     }
     return zzkvSeqNoToKunnrMap;
   }
