@@ -274,6 +274,11 @@ public class RequestEntryController extends BaseController {
     } else {
       // this is a new request, set default values
       setDefaultValues(model, request);
+      // Overriding FOR China for blank request CREATCMR-10466
+      if ("641".equals(model.getCmrIssuingCntry())) {
+        model.setFindCmrResult(CmrConstants.RESULT_NO_RESULT);
+      }
+
       mv = new ModelAndView("requestentry", "reqentry", model);
     }
     setPageKeys("REQUEST", "REQUEST", mv);
