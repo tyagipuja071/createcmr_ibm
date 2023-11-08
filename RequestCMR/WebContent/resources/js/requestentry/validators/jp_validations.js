@@ -1542,7 +1542,7 @@ function setCTCByOfficeCd() {
     return;
   }
   if (reqType == 'C' && custSubGrp == 'ISOCU') {
-	return;
+    return;
   }
   if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
@@ -3505,13 +3505,13 @@ function setFieldValueOnAddrSave(cntry, addressMode, saving, finalSave, force) {
     role = _pagemodel.userRole;
   }
   if (addressMode == 'newAddress' && (saving == false || finalSave != true)) {
-	return;
+    return;
   } else if (addressMode == 'COPY' && finalSave == undefined) {
-	return;
+    return;
   } else if (addressMode == 'copyAddress' && finalSave != true) {
-	return;
+    return;
   } else if (addressMode == 'updateAddress' && (saving == false || finalSave != true)) {
-	return;
+    return;
   }
   var addrType = FormManager.getActualValue('addrType');
   if (finalSave || force || addrType == 'ZS01') {
