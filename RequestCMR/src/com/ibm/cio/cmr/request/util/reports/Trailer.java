@@ -23,5 +23,5 @@ public interface Trailer {
    * @param dateRange
    * @return
    */
-  public String generateTrailer(EntityManager entityManager, List<Object[]> results, DateRangeContainer dateRange);
+  public String generateTrailer(EntityManager entityManager, List<Object[]> results, DateRangeContainer dateRange, String sequence);
 }

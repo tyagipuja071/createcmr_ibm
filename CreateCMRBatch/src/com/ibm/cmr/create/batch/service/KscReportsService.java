@@ -19,6 +19,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.entity.SystParameters;
+import com.ibm.cio.cmr.request.entity.SystParametersPK;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -102,16 +104,20 @@ public class KscReportsService extends BaseBatchService {
     for (File file : outputDir.listFiles()) {
       String fileDate = file.getName().substring(file.getName().lastIndexOf(".") + 1);
       try {
-        Date dt = format.parse(fileDate);
-        Calendar jpTime = new GregorianCalendar();
-        jpTime.setTime(this.currTimestamp);
-        // add 1 hour for processing time
-        jpTime.add(Calendar.HOUR, 1);
-        // add the days adjustment
-        jpTime.add(Calendar.DATE, daysAdjust);
-
-        if (dt.before(jpTime.getTime())) {
+        if (fileDate.toLowerCase().contains("receive")) {
           toDelete.add(file);
+        } else {
+          Date dt = format.parse(fileDate);
+          Calendar jpTime = new GregorianCalendar();
+          jpTime.setTime(this.currTimestamp);
+          // add 1 hour for processing time
+          jpTime.add(Calendar.HOUR, 1);
+          // add the days adjustment
+          jpTime.add(Calendar.DATE, daysAdjust);
+
+          if (dt.before(jpTime.getTime())) {
+            toDelete.add(file);
+          }
         }
       } catch (Exception e) {
         // unparseable
@@ -136,22 +142,32 @@ public class KscReportsService extends BaseBatchService {
    */
   private void generateReports(EntityManager entityManager, DateRangeContainer dateRange, boolean daily)
       throws UnsupportedEncodingException, IOException {
+
+    int currentCycle = 1;
+    String currentCyleString = SystemParameters.getString("KSC.CYCLE");
+    if (!StringUtils.isBlank(currentCyleString) && StringUtils.isNumeric(currentCyleString)) {
+      currentCycle = Integer.parseInt(currentCyleString);
+    }
+    LOG.info("Last Cycle: " + currentCycle);
+    currentCycle++;
+
     ReportSpec spec = configureAccountsReport(daily);
     LOG.debug("Generating " + (daily ? "daily" : "monthly") + " accounts report..");
-    spec.generate(entityManager, dateRange, this.outputDir);
+    spec.generate(entityManager, dateRange, this.outputDir, currentCycle + "");
 
     spec = configureAddressReport(daily);
     LOG.debug("Generating " + (daily ? "daily" : "monthly") + " address report..");
-    spec.generate(entityManager, dateRange, this.outputDir);
+    spec.generate(entityManager, dateRange, this.outputDir, currentCycle + "");
 
     spec = configureCompanyReport(daily);
     LOG.debug("Generating " + (daily ? "daily" : "monthly") + " company report..");
-    spec.generate(entityManager, dateRange, this.outputDir);
+    spec.generate(entityManager, dateRange, this.outputDir, currentCycle + "");
 
     spec = configureEstablishmentReport(daily);
     LOG.debug("Generating " + (daily ? "daily" : "monthly") + " establishment report..");
-    spec.generate(entityManager, dateRange, this.outputDir);
+    spec.generate(entityManager, dateRange, this.outputDir, currentCycle + "");
 
+    incrementCycle(entityManager, currentCycle);
   }
 
   /**
@@ -298,6 +314,20 @@ public class KscReportsService extends BaseBatchService {
     this.currTimestamp = SystemUtil.getActualTimestamp();
     this.currTimestamp = adjustTime(this.currTimestamp, +9);
     this.timestampString = format.format(this.currTimestamp);
+  }
+
+  private void incrementCycle(EntityManager entityManager, int newCycle) {
+    SystParametersPK pk = new SystParametersPK();
+    pk.setParameterCd("KSC.CYCLE");
+    SystParameters param = entityManager.find(SystParameters.class, pk);
+    if (param == null) {
+      param = new SystParameters();
+      param.setId(pk);
+    }
+    LOG.info("Incrementing KSC Cycle to " + newCycle);
+    param.setParameterValue(newCycle + "");
+    entityManager.merge(param);
+    entityManager.flush();
   }
 
   @Override
