@@ -64,7 +64,8 @@ public class ReportSpec {
    * @throws IOException
    * @throws UnsupportedEncodingException
    */
-  public void generate(EntityManager entityManager, DateRangeContainer dateRange, File outputDir) throws UnsupportedEncodingException, IOException {
+  public void generate(EntityManager entityManager, DateRangeContainer dateRange, File outputDir, String sequence)
+      throws UnsupportedEncodingException, IOException {
     LOG.debug("Executing report extraction for query " + this.sqlKey);
     PreparedQuery query = prepareQuery(entityManager, dateRange);
     List<Object[]> results = query.getResults();
@@ -84,7 +85,7 @@ public class ReportSpec {
             pw.println();
           }
           if (this.trailer != null) {
-            pw.println(this.trailer.generateTrailer(entityManager, results, dateRange));
+            pw.println(this.trailer.generateTrailer(entityManager, results, dateRange, sequence));
           }
         }
       }
