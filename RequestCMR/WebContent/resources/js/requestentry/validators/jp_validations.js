@@ -1600,12 +1600,12 @@ function setMrcByOfficeCd() {
   var ofcd = FormManager.getActualValue('salesBusOffCd');
   var mrc = '';
   var repTeamCd = '';
-  if ('IBMTP' == custGrp) {
-	repTeamCd = 'AA';
+  if ('IBMTP' == custGrp || 'BUSPR' == custGrp) {
+    repTeamCd = 'AA';
   } else if ('SUBSI' == custGrp && custSubGrp != null) {
-	repTeamCd = custSubGrp.substring(0,2) + '0XT';
+    repTeamCd = custSubGrp.substring(0, 2) + '0XT';
   } else {
-	return;
+    return;
   }
   var qParams = {
     _qall : 'Y',
