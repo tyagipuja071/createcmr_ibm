@@ -1531,6 +1531,7 @@ function setCTCByOfficeCd() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if (isJPBlueGroupFlg == 'true') {
     return;
   }
@@ -1542,6 +1543,9 @@ function setCTCByOfficeCd() {
   }
   if (reqType == 'C' && custSubGrp == 'ISOCU') {
 	return;
+  }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
   }
 
   if (inTs38Ofcd()) {
@@ -3793,7 +3797,11 @@ function setINACCodeMandatory() {
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if (custSubGrp != 'NORML' && custSubGrp != 'EUCMR' && custSubGrp != 'WHCMR' && custSubGrp != 'OUTSC' && custSubGrp != 'BQICL' && !(reqType == 'U' && custSubGrp == 'ISOCU')) {
+    return;
+  }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -3931,9 +3939,15 @@ function setISICOnJSIC() {
 }
 function setIsicValueLogic() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
+  }
+  
   if (inJpts37Ofcd()) {
     var isicCd = getTs37IsicByOfcd();
     if (isicCd != '') {
@@ -4010,8 +4024,13 @@ function setSortlOnOfcdChange() {
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
 
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp || 'RACMR' == custSubGrp) {
+    return;
+  }
+  
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
