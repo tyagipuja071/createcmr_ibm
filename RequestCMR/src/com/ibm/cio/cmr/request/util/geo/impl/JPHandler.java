@@ -417,6 +417,8 @@ public class JPHandler extends GEOHandler {
 
         createIntlAddrFromCompanyNo(entityManager, addr, company.getCompanyNo());
         copyCompanyTaigaAndROLToData(entityManager, addr);
+        setSapNoOnImport(entityManager, admin, data);
+        copyIntlAddrValuesToAddr(entityManager, admin);
       }
 
       if ("C".equals(custType)) {
@@ -490,6 +492,8 @@ public class JPHandler extends GEOHandler {
           entityManager.flush();
 
           createIntlAddrFromEstabAndCompanyNo(entityManager, addr, company.getCompanyNo(), establishment.getEstablishmentNo());
+          setSapNoOnImport(entityManager, admin, data);
+          copyIntlAddrValuesToAddr(entityManager, admin);
 
         }
       }
