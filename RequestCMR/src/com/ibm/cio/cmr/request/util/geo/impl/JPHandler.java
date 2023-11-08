@@ -2543,6 +2543,16 @@ public class JPHandler extends GEOHandler {
       String intlAddrFullEng = intlAddrTypeToEngNameMap.get(addr.getId().getAddrType());
       addr.setCustNm3(intlAddrFullEng);
       entityManager.merge(addr);
+
+      AddrPK arPk = new AddrPK();
+      arPk.setAddrSeq(addr.getId().getAddrSeq());
+      arPk.setAddrType(addr.getId().getAddrType());
+      arPk.setReqId(addr.getId().getReqId());
+      AddrRdc addrRdc = entityManager.find(AddrRdc.class, arPk);
+      if (addrRdc != null) {
+        addrRdc.setCustNm3(addr.getCustNm3());
+        entityManager.merge(addrRdc);
+      }
     }
     entityManager.flush();
   }
@@ -2580,6 +2590,17 @@ public class JPHandler extends GEOHandler {
         }
 
         entityManager.merge(addr);
+
+        AddrPK arPk = new AddrPK();
+        arPk.setAddrSeq(addr.getId().getAddrSeq());
+        arPk.setAddrType(addr.getId().getAddrType());
+        arPk.setReqId(addr.getId().getReqId());
+        AddrRdc addrRdc = entityManager.find(AddrRdc.class, arPk);
+
+        if (addrRdc != null) {
+          addrRdc.setSapNo(addr.getSapNo());
+          entityManager.merge(addrRdc);
+        }
       }
       entityManager.flush();
     }
