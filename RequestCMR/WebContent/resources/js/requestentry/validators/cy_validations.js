@@ -249,7 +249,7 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.LATIN, [ 'Phone #' ]);
   } else {
@@ -258,7 +258,7 @@ function addLatinCharValidator() {
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('addrTxt2', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
-    FormManager.removeValidator('postCd', Validators.LATIN);
+//    FormManager.removeValidator('postCd', Validators.LATIN);
     FormManager.removeValidator('dept', Validators.LATIN);
     FormManager.removeValidator('poBox', Validators.LATIN);
     // FormManager.removeValidator('custPhone', Validators.LATIN);
@@ -288,7 +288,7 @@ function addNonLatinCharValidator() {
   if (validateLatin) {
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.NON_LATIN, [ 'PO Box' ]);
   } else {
     FormManager.removeValidator('custNm1', Validators.NON_LATIN);
@@ -296,7 +296,7 @@ function addNonLatinCharValidator() {
     FormManager.removeValidator('addrTxt', Validators.NON_LATIN);
     FormManager.removeValidator('addrTxt2', Validators.NON_LATIN);
     FormManager.removeValidator('city1', Validators.NON_LATIN);
-    FormManager.removeValidator('postCd', Validators.NON_LATIN);
+//    FormManager.removeValidator('postCd', Validators.NON_LATIN);
     FormManager.removeValidator('dept', Validators.NON_LATIN);
     FormManager.removeValidator('poBox', Validators.NON_LATIN);
     }
@@ -3300,7 +3300,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
  // GEOHandler.addAfterConfig(setEnterprise, [ SysLoc.CYPRUS ]);
 
-  GEOHandler.addAddrFunction(setPostalCodeTurGreCypValidator, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+//  GEOHandler.addAddrFunction(setPostalCodeTurGreCypValidator, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(abbrvLocMandatory, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(abbrvLocMandatoryOnChange, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GREECE, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GREECE ], null, true);

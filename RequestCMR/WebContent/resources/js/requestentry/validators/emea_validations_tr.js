@@ -512,7 +512,7 @@ function afterConfigForUKI() {
 
   if (_landCntryHandlerUK == null && issuingCntry == SysLoc.UK) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
-      optionalRulePostalCodeUK();
+//      optionalRulePostalCodeUK();
     });
   }
   if (_landCntryHandlerUK && _landCntryHandlerUK[0]) {
@@ -1929,7 +1929,7 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.LATIN, [ 'Phone #' ]);
   } else {
@@ -1986,7 +1986,7 @@ function addNonLatinCharValidator() {
     }
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.NON_LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.NON_LATIN, [ 'Phone #' ]);
 
@@ -2051,7 +2051,7 @@ function addTurkishCharValidator() {
     checkAndAddValidator('addrTxt2', turkish, [ 'Street Con\'t' ]);
     checkAndAddValidator('city1', turkish, [ 'City' ]);
     checkAndAddValidator('dept', turkish, [ 'District' ]);
-    checkAndAddValidator('postCd', turkish, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', turkish, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', turkish, [ 'PO Box' ]);
     checkAndAddValidator('taxOffice', turkish, [ 'Tax Office' ]);
   } else {
@@ -9172,7 +9172,7 @@ function addressQuotationValidatorTR() {
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'District' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('taxOffice', Validators.NO_QUOTATION, [ 'Tax Office' ]);
@@ -9401,7 +9401,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAddrFunction(autoPopulateISUClientTierUK, [ SysLoc.UK ]);
   GEOHandler.addAddrFunction(disableAddrFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAddrFunction(optionalRulePostalCodeUK, [ SysLoc.UK ]);
+//  GEOHandler.addAddrFunction(optionalRulePostalCodeUK, [ SysLoc.UK ]);
   GEOHandler.addAddrFunction(setTaxCdBasedOnlandCntryUK, [ SysLoc.UK ]);
   GEOHandler.addAfterConfig(unlockINACForINTERUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(unlockINACForINTERUKI, [ SysLoc.IRELAND, SysLoc.UK ]);

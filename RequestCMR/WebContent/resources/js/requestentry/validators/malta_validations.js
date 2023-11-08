@@ -1338,7 +1338,7 @@ function addressQuotationValidatorMalta() {
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Name 4' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 

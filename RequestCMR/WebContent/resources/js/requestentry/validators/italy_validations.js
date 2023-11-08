@@ -363,13 +363,13 @@ function addNonLatinCharValidator() {
     }
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.NON_LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.NON_LATIN, [ 'Phone #' ]);
 
-    if (cntry == SysLoc.ISRAEL && custType == 'CROSS') {
-      FormManager.removeValidator('postCd', Validators.NON_LATIN);
-    }
+//    if (cntry == SysLoc.ISRAEL && custType == 'CROSS') {
+//      FormManager.removeValidator('postCd', Validators.NON_LATIN);
+//    }
   } else {
     FormManager.removeValidator('custNm1', Validators.NON_LATIN);
     FormManager.removeValidator('custNm2', Validators.NON_LATIN);

@@ -1367,14 +1367,14 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm3', Validators.LATIN, ['Customer Name (3)']);
     checkAndAddValidator('addrTxt', Validators.LATIN, ['Street Address']);
     checkAndAddValidator('city1', Validators.LATIN, ['City']);
-    checkAndAddValidator('postCd', Validators.LATIN, ['Postal Code']);
+//    checkAndAddValidator('postCd', Validators.LATIN, ['Postal Code']);
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
     FormManager.removeValidator('custNm2', Validators.LATIN);
     FormManager.removeValidator('custNm3', Validators.LATIN);
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
-    FormManager.removeValidator('postCd', Validators.LATIN);
+//    FormManager.removeValidator('postCd', Validators.LATIN);
   }
 }
 function addGaddrValidatorForCEE() {
