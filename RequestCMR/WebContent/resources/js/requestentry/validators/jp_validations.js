@@ -1391,13 +1391,13 @@ function setAccountAbbNmRequired() {
     break;
   case 'ISOCU':
     if (reqType == 'C') {
-    	FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-	    FormManager.readOnly('abbrevNm');
-        FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-	  } else if (reqType == 'U') {
-	  	FormManager.enable('abbrevNm');
-	  	FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
-	  }
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+      FormManager.readOnly('abbrevNm');
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    } else if (reqType == 'U') {
+      FormManager.enable('abbrevNm');
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
+    }
     break;
   case 'BCEXA':
     FormManager.clearValue('abbrevNm');
@@ -1541,7 +1541,7 @@ function setCTCByOfficeCd() {
     return;
   }
   if (reqType == 'C' && custSubGrp == 'ISOCU') {
-	return;
+    return;
   }
 
   if (inTs38Ofcd()) {
@@ -1596,12 +1596,12 @@ function setMrcByOfficeCd() {
   var ofcd = FormManager.getActualValue('salesBusOffCd');
   var mrc = '';
   var repTeamCd = '';
-  if ('IBMTP' == custGrp) {
-	repTeamCd = 'AA';
+  if ('IBMTP' == custGrp || 'BUSPR' == custGrp) {
+    repTeamCd = 'AA';
   } else if ('SUBSI' == custGrp && custSubGrp != null) {
-	repTeamCd = custSubGrp.substring(0,2) + '0XT';
+    repTeamCd = custSubGrp.substring(0, 2) + '0XT';
   } else {
-	return;
+    return;
   }
   var qParams = {
     _qall : 'Y',
@@ -3498,13 +3498,13 @@ function setFieldValueOnAddrSave(cntry, addressMode, saving, finalSave, force) {
     role = _pagemodel.userRole;
   }
   if (addressMode == 'newAddress' && (saving == false || finalSave != true)) {
-	return;
+    return;
   } else if (addressMode == 'COPY' && finalSave == undefined) {
-	return;
+    return;
   } else if (addressMode == 'copyAddress' && finalSave != true) {
-	return;
+    return;
   } else if (addressMode == 'updateAddress' && (saving == false || finalSave != true)) {
-	return;
+    return;
   }
   var addrType = FormManager.getActualValue('addrType');
   if (finalSave || force || addrType == 'ZS01') {
@@ -7075,7 +7075,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
-	GEOHandler.addAfterTemplateLoad(setCreditToCustNoOptional4ISOCU, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setCreditToCustNoOptional4ISOCU, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
