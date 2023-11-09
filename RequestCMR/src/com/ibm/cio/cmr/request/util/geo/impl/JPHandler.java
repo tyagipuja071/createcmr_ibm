@@ -212,9 +212,12 @@ public class JPHandler extends GEOHandler {
       establishment = findEstablishmentFromCRIS(searchModel.getCmrNum());
       if (establishment != null) {
         company = findCompanyFromCRIS(establishment.getCompanyNo());
+
         if (company == null) {
           throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
         }
+        company
+            .setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
       }
     }
 
@@ -924,7 +927,7 @@ public class JPHandler extends GEOHandler {
       data.setCreditToCustNo(mainRecord.getCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
     }
-    
+
     if ("U".equals(admin.getReqType())) {
       data.setCreditToCustNo(mainRecord.getCmrCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
