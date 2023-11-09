@@ -268,7 +268,6 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
     } else {
       FilteringDropdown['val_landCntry'] = null;
-      postCdMandatoryByLandCntry();
     }
   } else if (saving) {
     var landCntry = FormManager.getActualValue('landCntry');
@@ -1089,7 +1088,7 @@ function addLatinCharValidator() {
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
     // checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
-    checkAndAddValidator('postCd', LATINForME, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', LATINForME, [ 'Postal Code' ]);
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
     FormManager.removeValidator('custNm2', Validators.LATIN);
@@ -4261,19 +4260,11 @@ function afterConfigTemplateForCroatia() {
 function addLandCntryHandler() {
   if (_landCntryHandler == null) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
-      postCdMandatoryByLandCntry();
+//      postCdMandatoryByLandCntry();
     });
   }
 }
 
-function postCdMandatoryByLandCntry() {
-  var postCdMandatoryCntryList = [ 'EG', 'IQ', 'JO', 'LB', 'MA', 'OM', 'PK', 'SA', 'TN' ];
-  if (postCdMandatoryCntryList.indexOf(FormManager.getActualValue('landCntry')) > -1) {
-    FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ], 'MAIN_NAME_TAB');
-  } else {
-    FormManager.removeValidator('postCd', Validators.REQUIRED);
-  }
-}
 function validatorsDIGIT() {
   // FormManager.addValidator('EngineeringBo', Validators.DIGIT, [
   // 'EngineeringBo' ]);
@@ -4589,7 +4580,7 @@ function addressQuotationValidatorCEMEA() {
   FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Attention Person' ]);
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Country Name (Local Language)' ]);
 
