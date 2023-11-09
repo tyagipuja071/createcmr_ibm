@@ -6776,6 +6776,13 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
     if (cmr.currentRequestType == 'C') {
       setAddrFieldHide('bldg', 'Building');
     }
+    if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+      setAddrFieldOptional('contact', 'Contact');
+      setAddrFieldOptional('dept', 'Department');
+      setAddrFieldOptional('office', 'Office');
+      setAddrFieldOptional('custFax', 'CustFax');
+      setAddrFieldOptional('contact', 'Contact');
+    }
   } else if ((custType == 'CEA' || custType == 'EA' || custType == 'A')
       && (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZE01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09')) {
 
@@ -6793,13 +6800,14 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
 
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldOptional('bldg', 'Building');
+      setAddrFieldOptional('dept', 'Department');
+      setAddrFieldOptional('office', 'Office');
+      setAddrFieldOptional('custFax', 'CustFax');
+      setAddrFieldOptional('contact', 'Contact');
 
       setAddrFieldHide('locationCode', 'LocationCode');
-      setAddrFieldHide('custFax', 'CustFax');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
-      setAddrFieldHide('dept', 'Department');
-      setAddrFieldHide('office', 'Office');
     } else {
       setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
@@ -6810,27 +6818,24 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldOptional('bldg', 'Building');
-      setAddrFieldOptional('office', 'Office');
       setAddrFieldOptional('dept', 'Department');
+      setAddrFieldOptional('office', 'Office');
       setAddrFieldOptional('custFax', 'CustFax');
       setAddrFieldOptional('contact', 'Contact');
 
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
-      setAddrFieldHide('office', 'Office');
-      setAddrFieldHide('custFax', 'CustFax');
-      setAddrFieldHide('dept', 'Department');
-      setAddrFieldHide('contact', 'Contact');
       setAddrFieldHide('divn', 'Division');
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('locationCode', 'LocationCode');
       setAddrFieldHide('rol', 'ROL');
 
-      // ADU 3, 4, 6, 7
-      if (addrType == 'ZS01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+      // ADU 1, 2, 3, 4, 6, 7
+      if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
         setAddrFieldOptional('dept', 'Department');
         setAddrFieldOptional('office', 'Office');
         setAddrFieldOptional('custFax', 'CustFax');
+        setAddrFieldOptional('contact', 'Contact');
       }
 
       if (custType == 'A' && addrType == 'ZE01') {
@@ -6875,6 +6880,7 @@ function setAddrFieldsBFKSCScenarioAtoH() {
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
       setAddrFieldOptional('custFax', 'CustFax');
+      setAddrFieldOptional('contact', 'Contact');
     }
   }
 }
