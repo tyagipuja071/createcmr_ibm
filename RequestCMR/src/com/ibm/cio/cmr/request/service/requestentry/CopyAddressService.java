@@ -94,6 +94,9 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
     Addr sourceAddr = query.getSingleResult(Addr.class);
     entityManager.detach(sourceAddr);
 
+    Addr origSourceAddr = new Addr();
+    PropertyUtils.copyProperties(origSourceAddr, sourceAddr);
+
     sql = ExternalizedQuery.getSql("ADDRESS.COPY.GETADDRESSES");
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", model.getReqId());
@@ -116,6 +119,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       String sapNo = null;
       String importInd = null;
       String createDt = null;
+      String parCmrNo = null;
       int seq = 0;
       for (Addr copyAddr : results) {
 
@@ -135,6 +139,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
         sapNo = copyAddr.getSapNo();
         importInd = copyAddr.getImportInd();
         createDt = copyAddr.getRdcCreateDt();
+        parCmrNo = copyAddr.getParCmrNo();
         if (typesToCopy.contains(copyAddr.getId().getAddrType()) && !createOnlyTypes.contains(copyAddr.getId().getAddrType())) {
           sourceAddr.setId(copyAddr.getId());
           PropertyUtils.copyProperties(copyAddr, sourceAddr);
@@ -153,6 +158,11 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
           } else {
             copyAddr.setChangedIndc(null);
           }
+
+          if (JPHandler.isJPCountry(model.getCmrIssuingCntry())) {
+            processCopyJPAddress(entityManager, origSourceAddr, copyAddr, parCmrNo);
+          }
+
           updateEntity(copyAddr, entityManager);
           if (!copiedTypes.contains(copyAddr.getId().getAddrType())) {
             copiedTypes.add(copyAddr.getId().getAddrType());
@@ -502,4 +512,17 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
     return zi01count;
   }
 
+  private void processCopyJPAddress(EntityManager entityManager, Addr origSourceAddr, Addr copyAddr, String parCmrNo) throws Exception {
+    AddressService addressService = new AddressService();
+    IntlAddr sourceIntlAddr = addressService.getIntlAddrById(origSourceAddr, entityManager);
+    if (sourceIntlAddr != null) {
+      IntlAddr copyIntlAddr = addressService.getIntlAddrById(copyAddr, entityManager);
+      sourceIntlAddr.setId(copyIntlAddr.getId());
+      PropertyUtils.copyProperties(copyIntlAddr, sourceIntlAddr);
+      updateEntity(copyIntlAddr, entityManager);
+
+      copyAddr.setParCmrNo(parCmrNo);
+      copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1());
+    }
+  }
 }
