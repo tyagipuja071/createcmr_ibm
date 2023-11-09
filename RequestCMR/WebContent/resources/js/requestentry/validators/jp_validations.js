@@ -1670,12 +1670,17 @@ function setISUByMrcSubInd() {
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var geoInd = subIndustryCd ? subIndustryCd.substr(0, 1) : '';
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
 
   if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || (reqType == 'C' && custSubGrp == 'ISOCU'))) {
     return;
   }
 
   if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC')) {
+    return;
+  }
+  
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -4025,6 +4030,7 @@ function setSortlOnOfcdChange() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
   var officeCd = FormManager.getActualValue('salesBusOffCd');
+  var reqType = FormManager.getActualValue('reqType');
 
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp || 'RACMR' == custSubGrp) {
     return;
