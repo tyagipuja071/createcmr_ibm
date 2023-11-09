@@ -28,7 +28,7 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (_landCntryHandler == null && FormManager.getField('landCntry')) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       disablePOBox();
-      postalCodeRequired();
+//      postalCodeRequired();
     });
   }
 }
@@ -2137,7 +2137,7 @@ function addressQuotationValidatorZA() {
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
@@ -2252,7 +2252,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO1);
 
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.MCO1, null, true);
-  GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO1, null, true);
+//  GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForZA, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SOUTH_AFRICA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.SOUTH_AFRICA ], null, true);

@@ -723,14 +723,6 @@ function validatePairedAddrFieldNumericValue() {
                   }
                 }
               }
-              // postal code
-              if (!isNumericValueEqual(localAddress.postCd[0], translatedAddress.postCd[0])) {
-                if (arrErrorMsg.length > 0) {
-                  arrErrorMsg.push(indentSpace + errorMsg + ' Postal Code numeric values.<br>');
-                } else {
-                  arrErrorMsg.push(errorMsg + ' Postal Code numeric values.<br>');
-                }
-              }
             }
           } // for
           if (arrErrorMsg.length > 0) {
@@ -2994,7 +2986,7 @@ function addressQuotationValidatorIsrael() {
     FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
     FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
     FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
     FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Att. Person' ]);
     FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
     FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
@@ -3006,7 +2998,7 @@ function addressQuotationValidatorIsrael() {
     FormManager.removeValidator('addrTxt', Validators.NO_QUOTATION);
     FormManager.removeValidator('addrTxt2', Validators.NO_QUOTATION);
     FormManager.removeValidator('city1', Validators.NO_QUOTATION);
-    FormManager.removeValidator('postCd', Validators.NO_QUOTATION);
+//    FormManager.removeValidator('postCd', Validators.NO_QUOTATION);
     FormManager.removeValidator('dept', Validators.NO_QUOTATION);
     FormManager.removeValidator('poBox', Validators.NO_QUOTATION);
     FormManager.removeValidator('custPhone', Validators.NO_QUOTATION);
