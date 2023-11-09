@@ -1223,7 +1223,7 @@ function setAccountAbbNm() {
   if (FormManager.getActualValue('reqType') == 'C') {
     setAccountAbbNmForCreate();
   } else if (FormManager.getActualValue('reqType') == 'U') {
-    setAccountAbbNmForUpdate();
+    // setAccountAbbNmForUpdate();
   }
 }
 function setAccountAbbNmForCreate() {
@@ -3766,7 +3766,7 @@ function setAccountAbbNmOnAddrSaveUpdate() {
     if (accountAbbNm && accountAbbNm.length > 22) {
       accountAbbNm = accountAbbNm.substring(0, 22);
     }
-    FormManager.setValue('abbrevNm', accountAbbNm);
+    // FormManager.setValue('abbrevNm', accountAbbNm);
   }
 }
 
