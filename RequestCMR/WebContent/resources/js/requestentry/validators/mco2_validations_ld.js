@@ -590,7 +590,7 @@ function addAddrValidatorMCO2() {
   FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Street' ]);
   FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
   FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
 
   FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO BOX' ]);
@@ -2502,7 +2502,7 @@ function addressQuotationValidatorMCO2() {
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Continuation' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
