@@ -196,6 +196,7 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
   };
   var result = cmr.query('ADDRDETAIL', qParams);
   cmr.addrdetails = result;
+  cmr.currentAddrSeq = addrSeq;
   cmr.showModal('AddressDetailsModal');
   openAddressDetails.addrType = addrType;
   if (nordx_cntries.indexOf(cntry) > -1 && (addrType == 'ZP02' || addrType == 'ZI01') && (reqType == 'U' || reqType == 'X')) {
@@ -407,13 +408,14 @@ function AddressDetailsModal_onLoad() {
   // FormManager.setValue('cnCustContJobTitle', details.ret66);
   // FormManager.setValue('cnCustContPhone2', details.ret67);
 
+// China related 
   if (FormManager.getActualValue('cmrIssuingCntry') == '641') {
-	 var qParams = {
-            REQ_ID : FormManager.getActualValue('reqId'),
-            ADDR_TYPE : FormManager.getActualValue('addrType'),
-            ADDR_SEQ : cmr.addrdetails.ret3.replace(/^0+/, ''),
-          };
-          var record = cmr.query('INTL_ADDR_DETAILS', qParams);
+		var qParams = {
+			REQ_ID: FormManager.getActualValue('reqId'),
+			ADDR_TYPE: cmr.addrdetails.ret2,
+			ADDR_SEQ: cmr.currentAddrSeq .replace(/^0+/, ''),
+		};
+		var record = cmr.query('INTL_ADDR_DETAILS', qParams);
     _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', record.ret1);
     _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', record.ret2);
     _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', (record.ret3 != undefined ? record.ret3 : '' )+ (record.ret4 != undefined ? record.ret4 : '' ));
