@@ -6881,6 +6881,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
         setAddrFieldMandatory('locationCode', 'LocationCode');
 
+        setAddrFieldOptional('bldg', 'Building');
         setAddrFieldOptional('dept', 'Department');
         setAddrFieldOptional('office', 'Office');
         setAddrFieldOptional('custFax', 'CustFax');
@@ -6918,16 +6919,27 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
   }
 }
 
-function setAddrFieldsBFKSCScenarioAtoH() {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
+function setAddrFieldsBFKSCScenario(addrType) {
   var custType = FormManager.getActualValue('custType');
-  var addrType = FormManager.getActualValue('addrType');
 
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
     // ADU A, B, C, D, E, F, G, H
     if (addrType == 'ZI03' || addrType == 'ZP02' || addrType == 'ZP03' || addrType == 'ZP04' || addrType == 'ZP05' || addrType == 'ZP06' || addrType == 'ZP07' || addrType == 'ZP08') {
+      setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('locationCode', 'LocationCode');
 
+      setAddrFieldOptional('bldg', 'Building');
+      setAddrFieldOptional('dept', 'Department');
+      setAddrFieldOptional('office', 'Office');
+      setAddrFieldOptional('custFax', 'CustFax');
+      setAddrFieldOptional('contact', 'Contact');
+    }
+
+    // ADU 1, 2, 3, 4, 6, 7
+    if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+      setAddrFieldMandatory('locationCode', 'LocationCode');
+
+      setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
       setAddrFieldOptional('custFax', 'CustFax');
@@ -7043,7 +7055,7 @@ function setAddrFieldsBehavior() {
     }
 
     if (custSubGrp == 'BFKSC') {
-      setAddrFieldsBFKSCScenarioAtoH();
+      setAddrFieldsBFKSCScenario(addrType);
     }
   }
 }
@@ -7077,7 +7089,7 @@ function setAddrFieldsUpdateBehavior() {
     }
 
     if (custSubGrp == 'BFKSC') {
-      setAddrFieldsBFKSCScenarioAtoH();
+      setAddrFieldsBFKSCScenario(addrType);
     }
   }
 }
