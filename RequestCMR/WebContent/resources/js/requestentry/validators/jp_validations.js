@@ -6881,6 +6881,8 @@ function setAddrFieldsBFKSCScenarioAtoH() {
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
     // ADU A, B, C, D, E, F, G, H
     if (addrType == 'ZI03' || addrType == 'ZP02' || addrType == 'ZP03' || addrType == 'ZP04' || addrType == 'ZP05' || addrType == 'ZP06' || addrType == 'ZP07' || addrType == 'ZP08') {
+      setAddrFieldMandatory('locationCode', 'LocationCode');
+
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
       setAddrFieldOptional('custFax', 'CustFax');
