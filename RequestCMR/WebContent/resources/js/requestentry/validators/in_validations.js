@@ -658,7 +658,22 @@ function onCustSubGrpChange() {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custSubGrpInDB = _pagemodel.custSubGrp;
+    var apCustClusterId = FormManager.getActualValue('apCustClusterId');
     var abbrevNm = null;
+    var apCustClusterId = FormManager.getActualValue('apCustClusterId');
+    
+    if (cntry=='744' && custSubGrp=='ECSYS') {
+      FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
+      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+      FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+      FormManager.enable('apCustClusterId');
+      FormManager.setValue('clientTier', 'Y'); 
+      FormManager.readOnly('clientTier');
+      FormManager.setValue('isuCd', '36');
+      FormManager.readOnly('isuCd');
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),['10654','10655', '10656', '10657']);
+    }
+    
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB ) {
       FormManager.setValue('abbrevNm', _pagemodel.abbrevNm); 
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
@@ -1390,6 +1405,7 @@ function updateIsbuCd() {
   var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
   var _industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _isbuCd = null;
   if (_sectorCd == null) {
     console.log(">>>> Error, _sectorCd is null");
@@ -1401,7 +1417,7 @@ function updateIsbuCd() {
     console.log(">>>> Error, _mrcCd is null");
   }
   // FormManager.setValue('isbuCd', '');
-  if (_mrcCd == '3' && _industryClass != '') {
+  if ((custSubGrp ='ECSYS' || _mrcCd == '3') && _industryClass != '') {
     _isbuCd = 'GMB' + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
   } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
