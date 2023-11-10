@@ -6777,6 +6777,8 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('bldg', 'Building');
     }
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+      setAddrFieldMandatory('locationCode', 'LocationCode');
+
       setAddrFieldOptional('contact', 'Contact');
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
@@ -6797,6 +6799,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('custPhone', 'custPhone');
+      setAddrFieldMandatory('locationCode', 'LocationCode');
 
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldOptional('bldg', 'Building');
@@ -6805,7 +6808,6 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldOptional('custFax', 'CustFax');
       setAddrFieldOptional('contact', 'Contact');
 
-      setAddrFieldHide('locationCode', 'LocationCode');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
     } else {
@@ -6814,6 +6816,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('addrTxt', 'AddressTxt', 'Address');
       setAddrFieldMandatory('custPhone', 'CustPhone');
+      setAddrFieldMandatory('locationCode', 'LocationCode');
 
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
@@ -6827,11 +6830,12 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('companySize', 'CompanySize');
       setAddrFieldHide('divn', 'Division');
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
-      setAddrFieldHide('locationCode', 'LocationCode');
       setAddrFieldHide('rol', 'ROL');
 
       // ADU 1, 2, 3, 4, 6, 7
       if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+        setAddrFieldMandatory('locationCode', 'LocationCode');
+
         setAddrFieldOptional('dept', 'Department');
         setAddrFieldOptional('office', 'Office');
         setAddrFieldOptional('custFax', 'CustFax');
