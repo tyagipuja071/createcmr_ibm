@@ -244,8 +244,6 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
 // PayGo Upgrade Implementation
   
   $scope.checkPayGo = function(crit) {
-	  var mandt = FormManager.getActualValue('mandt');
-      var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
       var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
           MANDT : cmr.MANDT,
           ZZKV_CUSNO : crit.cmrNo,
