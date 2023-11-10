@@ -119,7 +119,7 @@ function setSearchTermList(){
       '10567','10568','10569','10570','10571','10572','10573','10574','10575','10576','10577','10578','10579','10580','10581','10582',
       '10583','10584','10585','10586','10587','10588','10589' ]);
     $("#cnsearchterminfoSpan").show();
-    FormManager.readOnly('searchTerm');
+    FormManager.enable('searchTerm');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
   } else if (custSubType == 'MRKT') {
