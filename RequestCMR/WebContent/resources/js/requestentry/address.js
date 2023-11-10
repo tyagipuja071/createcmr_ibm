@@ -413,7 +413,7 @@ function AddressDetailsModal_onLoad() {
 		var qParams = {
 			REQ_ID: FormManager.getActualValue('reqId'),
 			ADDR_TYPE: cmr.addrdetails.ret2,
-			ADDR_SEQ: cmr.addrdetails.ret3.replace(/^0+/, ''),
+			ADDR_SEQ: cmr.currentAddrSeq .replace(/^0+/, ''),
 		};
 		var record = cmr.query('INTL_ADDR_DETAILS', qParams);
     _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', record.ret1);
