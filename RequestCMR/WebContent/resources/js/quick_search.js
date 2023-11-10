@@ -76,6 +76,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   };
 
   $scope.findCompanies = function() {
+	$scope.payGo = false;
     console.log(issuingCntry.value);
     $scope.issuingCntryText = issuingCntry.value;
     if (!FormManager.validate('frmCMR')) {
@@ -83,6 +84,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     }
     $scope.orgIdSearch = false;
     var crit = buildSearchCriteria();
+    $scope.checkPayGo(crit);
     if (!crit.name || !crit.streetAddress1 || !crit.city) {
       $scope.orgIdSearch = true;
     }
@@ -239,6 +241,35 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     $scope.importRecord(rec, update);
   };
 
+// PayGo Upgrade Implementation
+  
+  $scope.checkPayGo = function(crit) {
+      var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
+          MANDT : cmr.MANDT,
+          ZZKV_CUSNO : crit.cmrNo,
+          KATR6 : crit.issuingCntry
+          
+        });
+      
+      if (isPayGo && isPayGo.ret1 != 'PG') {
+    	  $scope.payGo = false;
+        }
+      else
+    	  {
+    	  $scope.payGo = true;
+    	  }
+    	  
+	  };
+	  
+	  $scope.payGoUpgradeConfirmImport = function(rec, update) {
+		    var msg = 'A new Update request will be started using this CMR. You will be redirected to the request screen after processing. Proceed?';
+		    
+		    if (!confirm(msg)) {
+		      return;
+		    }
+		    $scope.importRecord(rec, update);
+		  };
+  
   $scope.importRecord = function(rec, update) {
     var temp = JSON.stringify($scope.frozen);
     var model = JSON.parse(temp);

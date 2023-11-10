@@ -1278,6 +1278,46 @@ var forceLockUnlock = function() {
   FormManager.readOnly('cmrIssuingCntry');
 }
 
+// payGo upgrade implementation
+
+function payGoErroMsg()
+{
+  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	    	  var cmrNo = FormManager.getActualValue('cmrNo');
+	        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	        var reqRsn=FormManager.getField('reqReason')
+	    	  var payGo=checkPayGo(cmrNo,cntry);
+	    	  var reqReason = FormManager.getActualValue('reqReason');
+	    	  if(reqType=='U' && payGo==false && reqReason=='PAYG')
+	    		  {
+	    	  return new ValidationResult(reqRsn, false, "CMR provided to upgrade to Regular CMR is not a PayGo CMR");
+	    		  }
+	      }
+	    };
+  
+	  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function payGoCreateErroMsg()
+{
+  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	    	  var reqReason = FormManager.getActualValue('reqReason');
+	    	  var reqRsn=FormManager.getField('reqReason')
+	    	  if(reqType!='U' &&  reqReason=='PAYG')
+	    		  {
+	    	  return new ValidationResult(reqRsn, false, "Upgrade of PayGo CMR is only applicable for update request.");
+	    		  }
+	      }
+	    };
+  
+	  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+//
+
 //CREATCMR-10034
 function addLAVatValidator() {
   FormManager.addFormValidator((function() {
@@ -1482,7 +1522,9 @@ dojo.addOnLoad(function() {
   
   GEOHandler.registerWWValidator(forceLockUnlock);
   GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
-  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries)
-  GEOHandler.registerWWValidator(addLAVatValidator)
+  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries);
+  GEOHandler.registerWWValidator(addLAVatValidator);
+  GEOHandler.registerValidator(payGoCreateErroMsg,GEOHandler.AllCountries);
+  GEOHandler.registerValidator(payGoErroMsg,GEOHandler.AllCountries);
 
 });
