@@ -1426,7 +1426,7 @@ function addressQuotationValidator() {
   FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'District' ]);
   FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Building' ]);
   FormManager.addValidator('floor', Validators.NO_QUOTATION, [ 'Floor' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('custFax', Validators.NO_QUOTATION, [ 'FAX' ]);
   FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
@@ -1552,9 +1552,9 @@ function validateCoverageData() {
               }
             }
           }
-          var retrievedCovId = data.coverageType + data.coverageID;
-          var retrievedBgId = data.buyingGroupID;
-          var retrievedGbgId = data.globalBuyingGroupID;
+          var retrievedCovId = (data.coverageType + data.coverageID) || "";
+          var retrievedBgId = data.buyingGroupID || "";
+          var retrievedGbgId = data.globalBuyingGroupID || "";
           
           var importedData = getImportedCovData();
           if (importedData == undefined || importedData == null) {
