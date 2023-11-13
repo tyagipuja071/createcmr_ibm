@@ -1316,6 +1316,26 @@ function payGoCreateErroMsg()
   
 	  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+
+function checkPayGo(cmrNo,cntry) {
+	var payGo=false;
+	    var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
+        MANDT : cmr.MANDT,
+        ZZKV_CUSNO : cmrNo,
+        KATR6 : cntry
+        
+      });
+    
+    if (isPayGo && isPayGo.ret1 != 'PG') {
+  	  payGo = false;
+      }
+    else
+  	  {
+  	  payGo = true;
+  	  }
+  	  return payGo;
+	  };
+	  
 //
 
 //CREATCMR-10034
