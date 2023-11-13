@@ -901,7 +901,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     scorecard.setFindDnbResult(CmrConstants.Scorecard_Not_Done);
   }
 
-  private void updateDnbValues(EntityManager entityManager, FindCMRRecordModel record) {
+  protected void updateDnbValues(EntityManager entityManager, FindCMRRecordModel record) {
     String land1 = record.getCmrCountryLanded();
     String mandt = SystemConfiguration.getValue("MANDT");
     String state = record.getCmrState();

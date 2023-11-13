@@ -26,12 +26,15 @@
         <cmr:field fieldId="AbbrevLocation" id="email2" path="email2" size="570" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="1" containerForField="IBMRelatedCMR">
+    <cmr:column span="2" containerForField="IBMRelatedCMR">
       <p>
-        <label for="proxiLocnNo" style="width:300px"> 
+        <label for="proxiLocnNo" > 
           <cmr:fieldLabel fieldId="IBMRelatedCMR" />: 
         </label>
         <cmr:field fieldId="IBMRelatedCMR" id="proxiLocnNo" path="proxiLocnNo" tabId="MAIN_CUST_TAB" />
+        <%if (!readOnly){%>
+        	<img title="Import the CMR" id="btnIbmRelateCmr" class="cmr-proceed2-icon" src="${resourcesPath}/images/search2.png" onclick="findImportCMR()" />
+        <%}%>
       </p>
     </cmr:column>
   </cmr:row>

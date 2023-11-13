@@ -301,6 +301,9 @@ var DB_DATA_FIELDS = [ {
 }, {
   id : 'TaxPayerCustCd',
   name : 'TAX_PAYER_CUST_CD'
+}, {
+  id : 'CustomerType',
+  name : 'ADMIN.CUST_TYPE'
 } ];
 DB_DATA_FIELDS.sort(function(a, b) {
   if (a.id > b.id) {
@@ -375,6 +378,9 @@ var DB_ADDR_FIELDS = [ {
 }, {
   id : 'AddrType',
   name : 'ADDR_TYPE'
+}, {
+  id : 'ROL',
+  name : 'ROL'
 } ];
 
 DB_ADDR_FIELDS.sort(function(a, b) {
@@ -664,6 +670,9 @@ var DB_MASS_UPDT_DATA_FIELDS = [ {
 }, {
   id : 'RequesterID',
   name : 'ADMIN.REQUESTER_ID'
+}, {
+  id : 'Rol-Account',
+  name : 'OUT_CITY_LIMIT'
 } ];
 
 var DB_MASS_UPDT_ADDR_FIELDS = [ {
@@ -690,6 +699,9 @@ var DB_MASS_UPDT_ADDR_FIELDS = [ {
 }, {
   id : 'County',
   name : 'COUNTY'
+}, {
+  id : 'Rol-Company',
+  name : 'HW_INSTL_MSTR_FLG'
 } ];
 
 var DB_UPDT_BY_ENT_DATA_FIELDS = [ {

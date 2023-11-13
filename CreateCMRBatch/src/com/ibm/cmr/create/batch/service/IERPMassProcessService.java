@@ -164,7 +164,6 @@ public class IERPMassProcessService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
-
     return true;
   }
 

@@ -717,7 +717,12 @@
     <put-attribute name="body" value="/resources/jsp/legacy/attachlist.jsp" />
   </definition>
 
-  
+  <definition name="crisreport" extends="base">
+    <put-attribute name="title" value="CreateCMR | CRIS Report" />
+    <put-attribute name="body" value="/resources/jsp/legacy/crisreport.jsp" />
+  </definition>
+
+
   <definition name="usbpmaster" extends="base">
     <put-attribute name="title" value="CreateCMR | List of US Business Partner Master Data" />
     <put-attribute name="body" value="/resources/jsp/code/usbpmasterlist.jsp" />

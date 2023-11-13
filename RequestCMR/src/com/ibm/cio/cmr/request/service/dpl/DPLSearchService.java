@@ -115,67 +115,67 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     String companyName = extractMainCompanyName(reqData, params);
     boolean success = true;
     try {
-    List<DPLSearchResults> results = getPlainDPLSearchResults(entityManager, params);
+      List<DPLSearchResults> results = getPlainDPLSearchResults(entityManager, params);
 
-    int resultCount = 0;
-    for (DPLSearchResults result : results) {
-      if (result.getDeniedPartyRecords() != null) {
-        resultCount += result.getDeniedPartyRecords().size();
-      }
-    }
-    ScorecardPK scorecardPk = new ScorecardPK();
-    scorecardPk.setReqId(reqId);
-    Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
-    if (scorecard != null && resultCount == 0) {
-      LOG.debug("Auto assessinging DPL check results.");
-      scorecard.setDplAssessmentBy("CreateCMR");
-      scorecard.setDplAssessmentCmt("No actual results found during the search.");
-      scorecard.setDplAssessmentResult("N");
-      scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
-      entityManager.merge(scorecard);
-      entityManager.flush();
-    }
-
-    AttachmentService attachmentService = new AttachmentService();
-    Timestamp ts = SystemUtil.getActualTimestamp();
-    DPLSearchPDFConverter pdf = new DPLSearchPDFConverter(user.getIntranetId(), ts.getTime(), companyName, results);
-    pdf.setScorecard(scorecard);
-
-    String type = "";
-    try {
-      type = MIME_TYPES.getContentType("temp.pdf");
-    } catch (Exception e) {
-    }
-    if (StringUtils.isEmpty(type)) {
-      type = "application/octet-stream";
-    }
-
-    String prefix = (String) params.getParam("filePrefix");
-    if (prefix == null) {
-      prefix = "DPLSearch_";
-    }
-
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
-    String fileName = prefix + formatter.format(ts) + ".pdf";
-
-    LOG.debug("Attaching " + fileName + " to Request " + reqId);
-
-    try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-      pdf.exportToPdf(null, null, null, bos, null);
-
-      byte[] pdfBytes = bos.toByteArray();
-
-      try (ByteArrayInputStream bis = new ByteArrayInputStream(pdfBytes)) {
-        try {
-          attachmentService.removeAttachmentsOfType(entityManager, reqId, "DPL", prefix);
-          attachmentService.addExternalAttachment(entityManager, user, reqId, "DPL", fileName, "DPL Search Results", bis);
-        } catch (Exception e) {
-          LOG.warn("Unable to save DPL attachment.", e);
-          success = false;
+      int resultCount = 0;
+      for (DPLSearchResults result : results) {
+        if (result.getDeniedPartyRecords() != null) {
+          resultCount += result.getDeniedPartyRecords().size();
         }
       }
-    }
-    } catch (Exception e){
+      ScorecardPK scorecardPk = new ScorecardPK();
+      scorecardPk.setReqId(reqId);
+      Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
+      if (scorecard != null && resultCount == 0) {
+        LOG.debug("Auto assessinging DPL check results.");
+        scorecard.setDplAssessmentBy("CreateCMR");
+        scorecard.setDplAssessmentCmt("No actual results found during the search.");
+        scorecard.setDplAssessmentResult("N");
+        scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+        entityManager.merge(scorecard);
+        entityManager.flush();
+      }
+
+      AttachmentService attachmentService = new AttachmentService();
+      Timestamp ts = SystemUtil.getActualTimestamp();
+      DPLSearchPDFConverter pdf = new DPLSearchPDFConverter(user.getIntranetId(), ts.getTime(), companyName, results);
+      pdf.setScorecard(scorecard);
+
+      String type = "";
+      try {
+        type = MIME_TYPES.getContentType("temp.pdf");
+      } catch (Exception e) {
+      }
+      if (StringUtils.isEmpty(type)) {
+        type = "application/octet-stream";
+      }
+
+      String prefix = (String) params.getParam("filePrefix");
+      if (prefix == null) {
+        prefix = "DPLSearch_";
+      }
+
+      SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
+      String fileName = prefix + formatter.format(ts) + ".pdf";
+
+      LOG.debug("Attaching " + fileName + " to Request " + reqId);
+
+      try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+        pdf.exportToPdf(null, null, null, bos, null);
+
+        byte[] pdfBytes = bos.toByteArray();
+
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(pdfBytes)) {
+          try {
+            attachmentService.removeAttachmentsOfType(entityManager, reqId, "DPL", prefix);
+            attachmentService.addExternalAttachment(entityManager, user, reqId, "DPL", fileName, "DPL Search Results", bis);
+          } catch (Exception e) {
+            LOG.warn("Unable to save DPL attachment.", e);
+            success = false;
+          }
+        }
+      }
+    } catch (Exception e) {
       success = false;
     }
     return success;
