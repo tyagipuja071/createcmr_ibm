@@ -1531,6 +1531,7 @@ function setCTCByOfficeCd() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if (isJPBlueGroupFlg == 'true') {
     return;
   }
@@ -1541,6 +1542,9 @@ function setCTCByOfficeCd() {
     return;
   }
   if (reqType == 'C' && custSubGrp == 'ISOCU') {
+    return;
+  }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -1666,12 +1670,17 @@ function setISUByMrcSubInd() {
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var geoInd = subIndustryCd ? subIndustryCd.substr(0, 1) : '';
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
 
   if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || (reqType == 'C' && custSubGrp == 'ISOCU'))) {
     return;
   }
 
   if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC')) {
+    return;
+  }
+
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -3788,7 +3797,11 @@ function setINACCodeMandatory() {
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if (custSubGrp != 'NORML' && custSubGrp != 'EUCMR' && custSubGrp != 'WHCMR' && custSubGrp != 'OUTSC' && custSubGrp != 'BQICL' && !(reqType == 'U' && custSubGrp == 'ISOCU')) {
+    return;
+  }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -3925,9 +3938,15 @@ function setISICOnJSIC() {
 }
 function setIsicValueLogic() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
+  }
+
   if (inJpts37Ofcd()) {
     var isicCd = getTs37IsicByOfcd();
     if (isicCd != '') {
@@ -4004,8 +4023,14 @@ function setSortlOnOfcdChange() {
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
+  var reqType = FormManager.getActualValue('reqType');
 
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp || 'RACMR' == custSubGrp) {
+    return;
+  }
+
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -7046,6 +7071,18 @@ function setAddrFieldsUpdateBehavior() {
     if (custSubGrp == 'BFKSC') {
       setAddrFieldsBFKSCScenario(addrType);
     }
+  }
+}
+
+function setCreditToCustNoOptional4ISOCU() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' && custSubGrp == 'ISOCU') {
+    FormManager.removeValidator('creditToCustNo', Validators.REQUIRED);
   }
 }
 
