@@ -48,8 +48,6 @@ public class IERPMassProcessService extends TransConnService {
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCP = "PCP";
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZD02", "ZP02" };
-  private static final String[] JP_ADDRESS_ORDER = { "ZC01", "ZS01", "ZS02", "ZP01", "ZI01", "ZP02", "ZP03", "ZP04", "ZP05", "ZI03", "ZP06", "ZP07",
-      "ZP08", "ZP09" };
 
   public boolean isDevMode() {
     return devMode;
@@ -61,10 +59,6 @@ public class IERPMassProcessService extends TransConnService {
 
   public String[] getIerpAddressOrder() {
     return ADDRESS_ORDER;
-  }
-
-  public String[] getJPAddressOrder() {
-    return JP_ADDRESS_ORDER;
   }
 
   @Override
@@ -909,12 +903,6 @@ public class IERPMassProcessService extends TransConnService {
 
   private List<Admin> getPendingRecordsRDCLA(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("LA.GET_MASS_PROCESS_PENDING.RDC");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    return query.getResults(Admin.class);
-  }
-
-  private List<Admin> getPendingRecordsRDCJP(EntityManager entityManager) {
-    String sql = ExternalizedQuery.getSql("JP.MASS.PROCESS.PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
   }
