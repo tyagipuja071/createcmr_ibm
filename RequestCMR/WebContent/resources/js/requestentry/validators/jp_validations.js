@@ -1679,7 +1679,7 @@ function setISUByMrcSubInd() {
   if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC')) {
     return;
   }
-  
+
   if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
@@ -7071,6 +7071,18 @@ function setAddrFieldsUpdateBehavior() {
     if (custSubGrp == 'BFKSC') {
       setAddrFieldsBFKSCScenario(addrType);
     }
+  }
+}
+
+function setCreditToCustNoOptional4ISOCU() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U' && custSubGrp == 'ISOCU') {
+    FormManager.removeValidator('creditToCustNo', Validators.REQUIRED);
   }
 }
 
