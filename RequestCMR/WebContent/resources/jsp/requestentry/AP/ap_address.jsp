@@ -28,25 +28,47 @@
   <br>
 </cmr:row>
 
+
+
 <cmr:row addBackground="true">
-  <cmr:column span="4">
+  <cmr:column span="4" exceptForCountry="616,796">`
     <cmr:label fieldId="custNm1">
       <cmr:fieldLabel fieldId="CustomerName1" />: 
       <cmr:info text="${ui.info.custNm1AP}" />
     </cmr:label>
     <cmr:delta text="-" id="delta-custNm1" />
-    <cmr:field fieldId="CustomerName1" id="custNm1" path="custNm1" size="400" />
+    <cmr:field fieldId="CustomerName1" id="custNm1" path="custNm1" size="400"  />
+  </cmr:column>
+  <cmr:column span="4" forCountry="616,796">
+    <cmr:label fieldId="custNm1">
+      <cmr:fieldLabel fieldId="CustomerName1" />: 
+      <cmr:info text="${ui.info.custNm1AP}" />
+    </cmr:label>
+    <cmr:delta text="-" id="delta-custNm1" />
+    <cmr:column span="1" width="400">
+      <form:input path="custNm1" maxlength="35" dojoType="dijit.form.TextBox" cssStyle="width:400px;" />
+	</cmr:column>
   </cmr:column>
 </cmr:row>
 
 <cmr:row addBackground="true">
-  <cmr:column span="4">
+  <cmr:column span="4" exceptForCountry="616,796">
     <cmr:label fieldId="custNm2">
       <cmr:fieldLabel fieldId="CustomerName2" />: 
       <cmr:info text="${ui.info.custNm1AP}" />
     </cmr:label>
     <cmr:delta text="-" id="delta-custNm2" />
     <cmr:field fieldId="CustomerName2" id="custNm2" path="custNm2" size="400" />
+  </cmr:column>
+  <cmr:column span="4" forCountry="616,796">
+    <cmr:label fieldId="custNm2">
+      <cmr:fieldLabel fieldId="CustomerName2" />: 
+      <cmr:info text="${ui.info.custNm1AP}" />
+    </cmr:label>
+    <cmr:delta text="-" id="delta-custNm2" />
+    <cmr:column span="1" width="400">
+      <form:input path="custNm2" maxlength="35" dojoType="dijit.form.TextBox" cssStyle="width:400px;" />
+    </cmr:column>
   </cmr:column>
 </cmr:row>
 
@@ -80,13 +102,16 @@
         <cmr:fieldLabel fieldId="Department" />:
              <cmr:delta text="-" id="delta-dept" />
       </cmr:label>
-      <cmr:field fieldId="Department" id="dept" path="dept" />
+      
+      <cmr:column span="1" width="180">
+        <form:input path="dept" maxlength="35" dojoType="dijit.form.TextBox" cssStyle="width:180px;" />
+      </cmr:column>
     </p>
   </cmr:column>
 </cmr:row>
 
 <cmr:row>
-  <cmr:column span="2" exceptForCountry="796">
+  <cmr:column span="2" exceptForCountry="616,796">
     <p>
       <cmr:label fieldId="addrTxt">
         <cmr:fieldLabel fieldId="StreetAddress1" />: 
@@ -95,17 +120,19 @@
       <cmr:field fieldId="StreetAddress1" id="addrTxt" path="addrTxt" />
     </p>
   </cmr:column>
-  <cmr:column span="2" forCountry="796">
+  <cmr:column span="2" forCountry="616,796">
     <p>
       <cmr:label fieldId="addrTxt">
         <cmr:fieldLabel fieldId="StreetAddress1" />: 
              <cmr:delta text="-" id="delta-addrTxt" />
         <cmr:info text="${ui.info.addrStAddr}" />
       </cmr:label>
-      <cmr:field fieldId="StreetAddress1" id="addrTxt" path="addrTxt" />
+      <cmr:column span="1" width="180">
+        <form:input path="addrTxt" maxlength="35" dojoType="dijit.form.TextBox" cssStyle="width:180px;" />
+      </cmr:column>   
     </p>
   </cmr:column>
-  <cmr:column span="2">
+  <cmr:column span="2" exceptForCountry="616,796">
     <p>
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
@@ -113,10 +140,20 @@
       <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
     </p>
   </cmr:column>
+    <cmr:column span="2" forCountry="616,796">
+    <p>
+      <cmr:label fieldId="addrTxt2">
+        <cmr:fieldLabel fieldId="StreetAddress2" />: 
+      </cmr:label>
+      <cmr:column span="1" width="180">
+        <form:input path="addrTxt2" maxlength="35" dojoType="dijit.form.TextBox" cssStyle="width:180px;" />
+      </cmr:column>   
+    </p>
+  </cmr:column>
 </cmr:row>
 
 <cmr:row>
-  <cmr:column span="2" forCountry="616,796,736,738">
+  <cmr:column span="2" forCountry="736,738">
     <p>
       <cmr:label fieldId="city1">
         <cmr:fieldLabel fieldId="City1" />:
@@ -125,6 +162,19 @@
       <cmr:field fieldId="City1" id="city1" path="city1" />
     </p>
   </cmr:column>
+    <cmr:column span="2" forCountry="616,796">
+    <p>
+      <cmr:label fieldId="city1">
+        <cmr:fieldLabel fieldId="City1" />:
+             <cmr:delta text="-" id="delta-city1" />
+      </cmr:label>
+      <cmr:column span="1" width="180">
+        <form:input path="city1" maxlength="35" dojoType="dijit.form.TextBox" cssStyle="width:180px;" />
+      </cmr:column>   
+      
+    </p>
+  </cmr:column>
+  
   <cmr:column span="2" containerForField="Department" forCountry="856,714,720,749,778,643,646,818,834,852,652,744,790,615">
     <p>
       <cmr:label fieldId="dept">
