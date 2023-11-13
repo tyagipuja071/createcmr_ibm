@@ -1323,6 +1323,7 @@ function setCTCByOfficeCd() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if (isJPBlueGroupFlg == 'true') {
 	return;
   }
@@ -1334,6 +1335,9 @@ function setCTCByOfficeCd() {
   }
   if (reqType == 'C' && custSubGrp == 'ISOCU') {
 	return;
+  }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
   }
 
   if (inTs38Ofcd()) {
@@ -1458,12 +1462,17 @@ function setISUByMrcSubInd() {
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
   var geoInd = subIndustryCd ? subIndustryCd.substr(0, 1) : '';
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
 
   if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || (reqType == 'C' && custSubGrp == 'ISOCU'))) {
     return;
   }
 
   if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL' || custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC')) {
+    return;
+  }
+  
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -3291,6 +3300,15 @@ function setFieldValueOnAddrSave(cntry, addressMode, saving, finalSave, force) {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
+  if (addressMode == 'newAddress' && (saving == false || finalSave != true)) {
+	return;
+  } else if (addressMode == 'COPY' && finalSave == undefined) {
+	return;
+  } else if (addressMode == 'copyAddress' && finalSave != true) {
+	return;
+  } else if (addressMode == 'updateAddress' && (saving == false || finalSave != true)) {
+	return;
+  }
   var addrType = FormManager.getActualValue('addrType');
   if (finalSave || force || addrType == 'ZS01') {
     var copyTypes = document.getElementsByName('copyTypes');
@@ -3425,7 +3443,7 @@ function setCSBOSubsidiaryValue() {
 }
 
 function setCustNmDetailOnAddrSave() {
-  if (FormManager.getActualValue('reqType') != 'C') {
+  if (cmr.currentRequestType != 'C') {
     return;
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -3477,7 +3495,7 @@ function setAccountAbbNmOnAddrSave() {
 }
 function setAccountAbbNmOnAddrSaveCreate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var fullEngNm = FormManager.getActualValue('custNm3');
+  var fullEngNm = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'OUTSC':
@@ -3526,13 +3544,15 @@ function setAccountAbbNmOnAddrSaveCreate() {
 }
 function setAccountAbbNmOnAddrSaveUpdate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var fullEngNm = FormManager.getActualValue('custNm3');
+  var fullEngNm = FormManager.getActualValue('cnCustName1');
   var accountAbbNm = '';
   switch (custSubGrp) {
   case 'BCEXA':
   case 'BFKSC':
     accountAbbNm = '';
     break;
+  case 'ISOCU':
+    return;
   case '':
   default:
     accountAbbNm = fullEngNm;
@@ -3561,7 +3581,11 @@ function setINACCodeMandatory() {
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if (custSubGrp != 'NORML' && custSubGrp != 'EUCMR' && custSubGrp != 'WHCMR' && custSubGrp != 'OUTSC' && custSubGrp != 'BQICL' && !(reqType == 'U' && custSubGrp == 'ISOCU')) {
+    return;
+  }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
 
@@ -3699,9 +3723,15 @@ function setISICOnJSIC() {
 }
 function setIsicValueLogic() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp) {
     return;
   }
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
+  }
+
   if (inJpts37Ofcd()) {
     var isicCd = getTs37IsicByOfcd();
     if (isicCd != '') {
@@ -3778,11 +3808,17 @@ function setSortlOnOfcdChange() {
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
+  var officeCd = FormManager.getActualValue('salesBusOffCd');
+  var reqType = FormManager.getActualValue('reqType');
 
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp || 'RACMR' == custSubGrp) {
     return;
   }
   
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
+  }
+
   if (isJPBlueGroupFlg == 'true') {
 	return;
   }
