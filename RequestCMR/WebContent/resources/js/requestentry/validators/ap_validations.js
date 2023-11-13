@@ -4373,9 +4373,9 @@ function addContactInfoValidator() {
             custName = record.custNm1;
             streetAddr = record.addrTxt;
             streetAddrCont = record.addrTxt2;
-            postCd = record.postCd;
             city = record.city1;
             state = record.stateProv;
+            
             if (typeof (type) == 'object') {
               type = type[0];
             }
@@ -4388,9 +4388,6 @@ function addContactInfoValidator() {
             if (typeof (streetAddrCont) == 'object') {
               streetAddrCont = streetAddrCont[0];
             }
-            if (typeof (postCd) == 'object') {
-              postCd = postCd[0];
-            }
             if (typeof (city) == 'object') {
               city = city[0];
             }
@@ -4401,7 +4398,7 @@ function addContactInfoValidator() {
             switch (cntry) {
               case '643':
               case '834':
-                if ((custName == null || streetAddr == null || postCd == null)) {
+                if ((custName == null || streetAddr == null )) {
                   mandtDetails++;
                 }
                 break;
@@ -4413,20 +4410,20 @@ function addContactInfoValidator() {
               case '615':
               case '744':
               case '752':
-                if ((custName == null || streetAddr == null || postCd == null || city == null)) {
+                if ((custName == null || streetAddr == null  || city == null)) {
                   mandtDetails_1++;
                 }
                 break;
               case '796':
-                if ((custName == null || streetAddr == null || postCd == null || city == null)) {
+                if ((custName == null || streetAddr == null  || city == null)) {
                   mandtDetails_1++;
                 }
                 break;
               case '616':
                 var custGrp = FormManager.getActualValue('custGrp');
-                if (custGrp != 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
+                if (custGrp != 'CROSS' && (custName == null || streetAddr == null  || city == null || state == null)) {
                   mandtDetails_2++;
-                } else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
+                } else if (custGrp == 'CROSS' && (custName == null || streetAddr == null  || city == null)) {
                   mandtDetails_2++;
                 }
                 break;
@@ -4439,11 +4436,11 @@ function addContactInfoValidator() {
             }
           }
           if (mandtDetails > 0) {
-            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required.");
+            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required");
           } else if (mandtDetails_1 > 0) {
-            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required and City is required.");
+            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, City is required.");
           } else if (mandtDetails_2 > 0) {
-            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required, City is required and State is required.");
+            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, , City is required and State is required.");
           } else if (mandtDetails_3 > 0) {
             return new ValidationResult(null, false, "Customer Name  is required, Street Address is required.");
           }
