@@ -623,6 +623,7 @@ function doAddToAddressList() {
   cmr.currentModalId = 'addEditAddressModal';
   cmr.addressReqId = FormManager.getActualValue('reqId');
   cmr.addressSequence = FormManager.getActualValue('addrSeq');
+
   cmr.addressType = FormManager.getActualValue('addrType');
   if(cmr.addressSequence=='undefined' && (cntry=='796') ) {
     if(cmr.addressType=='G'){
@@ -3181,7 +3182,6 @@ function resetSccInfo() {
 // CREATCMR-5447
 
 function parseXLS() {
-
 	
   var contactCon = '';
   const input = document.getElementById('xlsFile');
