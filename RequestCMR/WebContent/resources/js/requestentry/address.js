@@ -624,6 +624,15 @@ function doAddToAddressList() {
   cmr.addressReqId = FormManager.getActualValue('reqId');
   cmr.addressSequence = FormManager.getActualValue('addrSeq');
   cmr.addressType = FormManager.getActualValue('addrType');
+  if(cmr.addressSequence=='undefined' && (cntry=='796') ) {
+    if(cmr.addressType=='G'){
+      cmr.addressType = 'CTYG'      
+    }
+    if(cmr.addressType=='H'){
+      cmr.addressType = 'CTYH'
+    }
+    FormManager.setValue('addrType' , cmr.addressType);
+  }
   var dummyseq = "xx";
   var qParams;
 
