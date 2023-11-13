@@ -1287,7 +1287,8 @@ function payGoErroMsg()
 	      validate : function() {
 	    	  var cmrNo = FormManager.getActualValue('cmrNo');
 	        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	        var reqRsn=FormManager.getField('reqReason')
+	        var reqType = FormManager.getActualValue('reqType');
+	        var reqRsn=FormManager.getField('reqReason');
 	    	  var payGo=checkPayGo(cmrNo,cntry);
 	    	  var reqReason = FormManager.getActualValue('reqReason');
 	    	  if(reqType=='U' && payGo==false && reqReason=='PAYG')
@@ -1306,7 +1307,8 @@ function payGoCreateErroMsg()
 	    return {
 	      validate : function() {
 	    	  var reqReason = FormManager.getActualValue('reqReason');
-	    	  var reqRsn=FormManager.getField('reqReason')
+	    	  var reqType = FormManager.getActualValue('reqType');
+	    	  var reqRsn=FormManager.getField('reqReason');
 	    	  if(reqType!='U' &&  reqReason=='PAYG')
 	    		  {
 	    	  return new ValidationResult(reqRsn, false, "Upgrade of PayGo CMR is only applicable for update request.");
