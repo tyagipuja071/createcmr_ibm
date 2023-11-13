@@ -626,7 +626,7 @@ span.mail {
                     <span ng-switch-when="$">is blank</span>
                     <span ng-switch-when="IN">with value of either one of</span>
                     <span ng-switch-when="NIN">with value not in the list</span>
-                    <span ng-switch-when="CON">that contains</span>
+                    <span ng-switch-when="CON">that contains</span>                    
                     <span ng-switch-when="NCO">that doesn't contain</span>
                     <span ng-switch-when="STA">that start with</span>
                     <span ng-switch-when="CHG">that has been updated</span>

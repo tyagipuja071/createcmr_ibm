@@ -412,6 +412,18 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', details.ret59);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', details.ret60);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', details.ret61);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', details.ret62);
+    _assignDetailsValue('#AddressDetailsModal #cnCity_view', details.ret63);
+    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
+    _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
+  }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
     _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
@@ -485,6 +497,19 @@ function displayHwMstInstallFlagNew() {
           cmr.hideNode('hwFlag');
         }
       });
+    }
+  }
+}
+
+function displayEndUserFileFlag() {
+  console.log(">>> Executing displayEndUserFileFlag <<<");
+  
+  if (cmr.addressMode == 'newAddress'
+      && (FormManager.getActualValue('cmrIssuingCntry') == '760' )) {
+    if (FormManager.getActualValue('custGrp') == 'BUSPR') {
+      cmr.showNode('endUserFile');
+    } else {
+      cmr.hideNode('endUserFile');
     }
   }
 }
@@ -682,6 +707,10 @@ function doAddToAddressList() {
           // existing Sold-To. This address can not be added.');
           // return;
         }
+      }
+      if (FormManager.getActualValue('cmrIssuingCntry') == '760' && cmr.addressType == 'ZC01') {
+        var rol = FormManager.getActualValue('rol');
+        FormManager.setValue('identClient', rol);
       }
       if (asean_isa_cntries.indexOf(cntry) >= 0) {
         // do
@@ -883,6 +912,12 @@ function doAddAddress() {
    */
   cmr.addressMode = 'newAddress';
   cmr.showModal('addEditAddressModal');
+  var reqType = FormManager.getActualValue('reqType');
+  if ( reqType == 'C' && FormManager.getActualValue('custGrp') == 'BUSPR' && FormManager.getActualValue('cmrIssuingCntry') == '760') {
+    cmr.showNode('endUserFileFlag');
+  } else {
+    cmr.hideNode('endUserFileFlag');
+  }
 }
 cmr.noCreatePop = 'N';
 
@@ -1588,6 +1623,28 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   } else {
     cmr.showModal('addEditAddressModal');
   }
+  if(FormManager.getActualValue('cmrIssuingCntry') == '760'){
+    disableRolTaigaCode();
+    if (FormManager.getActualValue('custGrp') == 'BUSPR') {
+      cmr.showNode('endUserFile');
+    } else {
+      cmr.hideNode('endUserFile');
+    }
+  }
+}
+
+function disableRolTaigaCode() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == 'ZC01') {
+    FormManager.show('TaigaCode', 'poBoxPostCd');
+    FormManager.show('ROL', 'rol');
+    FormManager.enable('rol');
+  } else {
+    FormManager.hide('TaigaCode', 'poBoxPostCd');
+    FormManager.hide('ROL', 'rol');
+  }
+
+  FormManager.readOnly('territoryCd');
 }
 
 function continueEditDnbAddress() {
