@@ -190,6 +190,7 @@ public class AutomationEngine {
     if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
       isPaygoUpgrade=true;
     }
+  
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
@@ -367,7 +368,10 @@ public class AutomationEngine {
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
     }
-
+    if(isPaygoUpgrade){
+      data.setIsicCd("");
+      data.setOrdBlk(null);  
+    }
     // check company verified info
     if (compInfoSrc != null && StringUtils.isNotBlank(compInfoSrc)) {
       if (!"N".equals(admin.getCompVerifiedIndc())) {
@@ -441,10 +445,7 @@ public class AutomationEngine {
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
         
-        if(isPaygoUpgrade){
-          data.setIsicCd("");
-          data.setOrdBlk(null);  
-        }
+  
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk()) && !"PAYG".equals(admin.getReqReason())) {
@@ -456,7 +457,7 @@ public class AutomationEngine {
           }
         }
 
-     
+
         if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");
