@@ -438,8 +438,10 @@ public class ANZHandler extends GEOHandler {
   
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    // TODO Auto-generated method stub
-    
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "796".equals(data.getCmrIssuingCntry())) {
+      admin.setOldCustNm1(mainRecord.getCmrName1Plain());
+      admin.setOldCustNm2(mainRecord.getCmrName2Plain());
+    }
   }
 
   @Override
