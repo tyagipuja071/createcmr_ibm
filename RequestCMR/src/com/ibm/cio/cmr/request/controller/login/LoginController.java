@@ -81,7 +81,8 @@ public class LoginController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/login")
+  @RequestMapping(
+      value = "/login")
   public ModelAndView showLoginPage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     long reqId = 0;
     try {
@@ -117,7 +118,9 @@ public class LoginController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(value = "/home", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/home",
+      method = RequestMethod.GET)
   public ModelAndView showHomePage(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     ModelAndView mv = new ModelAndView("landingPage", "loginUser", new LogInUserModel());
     setPageKeys("HOME", "OVERVIEW", mv);
@@ -131,7 +134,8 @@ public class LoginController extends BaseController {
    *          model map object
    * @return {@link ModelAndView} "login"
    */
-  @RequestMapping(value = "/timeout")
+  @RequestMapping(
+      value = "/timeout")
   public ModelAndView showTimeoutPage(HttpServletRequest request, ModelMap model) {
     LogInUserModel newModel = new LogInUserModel();
     MessageUtil.setErrorMessage(model, MessageUtil.ERROR_TIMEOUT);
@@ -155,7 +159,9 @@ public class LoginController extends BaseController {
    * @param request
    * @return
    */
-  @RequestMapping(value = "/logout", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/logout",
+      method = RequestMethod.GET)
   public ModelAndView performLogout(ModelMap model, HttpServletRequest request) {
 
     AppUser.remove(request);
@@ -175,7 +181,9 @@ public class LoginController extends BaseController {
    * @param response
    * @return
    */
-  @RequestMapping(value = "/performLogin", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/performLogin",
+      method = RequestMethod.POST)
   public ModelAndView performLogin(@ModelAttribute("loginUser") LogInUserModel loginUser, HttpServletRequest request, HttpServletResponse response) {
 
     LOG.info("Logon Attempt (" + CmrConstants.DATE_TIME_FORMAT().format(SystemUtil.getCurrentTimestamp()) + ") by " + loginUser.getUsername());
@@ -310,6 +318,7 @@ public class LoginController extends BaseController {
             appUser.setShowPendingOnly("Y".equals(result[10]));
             appUser.setShowLatestFirst("Y".equals(result[11]));
           }
+
           if (hasDelegate) {
             appUser.setPreferencesSet(true);
             if (appUser.getBluePagesName() == null) {
@@ -490,12 +499,16 @@ public class LoginController extends BaseController {
 
   }
 
-  @RequestMapping(value = "/log", method = RequestMethod.GET)
+  @RequestMapping(
+      value = "/log",
+      method = RequestMethod.GET)
   public ModelAndView showLog(HttpServletRequest request) {
     return new ModelAndView("log", "login", new LogInUserModel());
   }
 
-  @RequestMapping(value = "/checkLoginStatus", method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/checkLoginStatus",
+      method = RequestMethod.POST)
   public ModelMap checkLoginStatus(HttpServletRequest request, HttpServletResponse response, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     ModelMap map = new ModelMap();

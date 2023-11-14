@@ -2,6 +2,7 @@
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
+<%@page import="com.ibm.cio.cmr.request.util.Person"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -32,6 +33,17 @@
   AppUser user = AppUser.getUser(request);
   isJPBlueGroupFlg = BluePagesHelper.isUserInJPBlueGroup(user.getIntranetId());
   
+  Person p = BluePagesHelper.getPerson(user.getIntranetId());
+
+  String jpCnum = p.getEmployeeId() != null ? p.getEmployeeId() : "";
+  String jpKscCnum = jpCnum.length() >= 3 ? jpCnum.substring(jpCnum.length() - 3) : "";
+
+  boolean isKSCMemberFlg;
+  if (jpKscCnum.equalsIgnoreCase("JPU")) {
+    isKSCMemberFlg = true;
+  } else {
+    isKSCMemberFlg = false;
+  }
 %>
 <style>
   .jp-chk {
@@ -202,9 +214,12 @@
       <cmr:label fieldId="creditToCustNo">
             <cmr:fieldLabel fieldId="CreditToCustNo" />:
           </cmr:label>
-          <cmr:field path="creditToCustNo" id="creditToCustNo" fieldId="CreditToCustNo" tabId="MAIN_IBM_TAB" />
+          <cmr:field path="creditToCustNo" id="creditToCustNo" fieldId="CreditToCustNo" tabId="MAIN_IBM_TAB" />          
+          <%if (!readOnly){%>
+          	<img title="Import the CMR" id="btnImportBp" class="cmr-proceed2-icon" src="${resourcesPath}/images/search2.png" onclick="findImportCMR()" />
+          <%}%>
         </p>
-      </cmr:column>
+      </cmr:column>          
   </cmr:row>  
   <cmr:row addBackground="false"> 
       <cmr:column span="2" containerForField="CSBOCd">
@@ -265,6 +280,39 @@
       		</p>
      </cmr:column>
     </cmr:row> 
+     <cmr:row addBackground="true"> 
+      <cmr:column span="2" containerForField="AECISubDate">
+        <p>
+      <cmr:label fieldId="agreementSignDate">
+            <cmr:fieldLabel fieldId="AECISubDate" />:
+          </cmr:label>
+          <cmr:field path="agreementSignDate" id="agreementSignDate" fieldId="AECISubDate" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>  
+      <cmr:column span="2" containerForField="ModeOfPayment">
+        <p>
+      <cmr:label fieldId="modeOfPayment">
+            <cmr:fieldLabel fieldId="ModeOfPayment" />:
+          </cmr:label>
+          <cmr:field path="modeOfPayment" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>  
+      <cmr:column span="2">
+      		<p>
+        	  <cmr:label fieldId="marketingContCd"><cmr:fieldLabel fieldId="MarketingContCd" />: </cmr:label>
+        	  <cmr:field path="marketingContCd" id="marketingContCd" fieldId="MarketingContCd" tabId="MAIN_IBM_TAB" />
+      		</p>
+     </cmr:column>
+    </cmr:row> 
+      <cmr:row addBackground="true"> 
+	  <cmr:column span="2" containerForField="DealerNo">
+	        <p>
+	          <cmr:label fieldId="dealerNo"><cmr:fieldLabel fieldId="DealerNo" />: </cmr:label>
+	          <cmr:field path="dealerNo" id="dealerNo" fieldId="DealerNo" tabId="MAIN_IBM_TAB" />
+	        </p>
+	    </cmr:column>
+	</cmr:row>  
+    
     <cmr:row addBackground="true"> 
       <cmr:column span="2" containerForField="JpCloseDays1">
         <p>
@@ -343,6 +391,7 @@
         </p>
       </cmr:column>
       <input type="hidden" id="isJPBlueGroupFlg" name="isJPBlueGroupFlg" value="<%= isJPBlueGroupFlg %>" />
+      <input type="hidden" id="isKSCMemberFlg" name="isKSCMemberFlg" value="<%= isKSCMemberFlg %>" />
     </cmr:row>
     <cmr:row addBackground="true"> 
       <cmr:column span="2" containerForField="JpCloseDays4">
@@ -396,4 +445,91 @@
         </p>
       </cmr:column>
     </cmr:row>
+    <cmr:row addBackground="true">
+    
+  <!-- Day 6 -->
+  <cmr:column span="2" containerForField="JpCloseDays6">
+    <p>
+      <cmr:label fieldId="jpCloseDays6">
+        <cmr:fieldLabel fieldId="JpCloseDays6" />:
+      </cmr:label>
+      <cmr:field path="jpCloseDays6" id="jpCloseDays6" fieldId="JpCloseDays6" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2" containerForField="JpPayCycles6">
+    <p>
+      <cmr:label fieldId="jpPayCycles6">
+        <cmr:fieldLabel fieldId="JpPayCycles6" />:
+      </cmr:label>
+      <cmr:field path="jpPayCycles6" id="jpPayCycles6" fieldId="JpPayCycles6" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2" containerForField="JpPayDays6">
+    <p>
+      <cmr:label fieldId="jpPayDays6">
+        <cmr:fieldLabel fieldId="JpPayDays6" />:
+      </cmr:label>
+      <cmr:field path="jpPayDays6" id="jpPayDays6" fieldId="JpPayDays6" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <!-- Day 7 -->
+  <cmr:column span="2" containerForField="JpCloseDays7">
+    <p>
+      <cmr:label fieldId="jpCloseDays7">
+        <cmr:fieldLabel fieldId="JpCloseDays7" />:
+      </cmr:label>
+      <cmr:field path="jpCloseDays7" id="jpCloseDays7" fieldId="JpCloseDays7" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2" containerForField="JpPayCycles7">
+    <p>
+      <cmr:label fieldId="jpPayCycles7">
+        <cmr:fieldLabel fieldId="JpPayCycles7" />:
+      </cmr:label>
+      <cmr:field path="jpPayCycles7" id="jpPayCycles7" fieldId="JpPayCycles7" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2" containerForField="JpPayDays7">
+    <p>
+      <cmr:label fieldId="jpPayDays7">
+        <cmr:fieldLabel fieldId="JpPayDays7" />:
+      </cmr:label>
+      <cmr:field path="jpPayDays7" id="jpPayDays7" fieldId="JpPayDays7" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <!-- Day 8 -->
+  <cmr:column span="2" containerForField="JpCloseDays8">
+    <p>
+      <cmr:label fieldId="jpCloseDays8">
+        <cmr:fieldLabel fieldId="JpCloseDays8" />:
+      </cmr:label>
+      <cmr:field path="jpCloseDays8" id="jpCloseDays8" fieldId="JpCloseDays8" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2" containerForField="JpPayCycles8">
+    <p>
+      <cmr:label fieldId="jpPayCycles8">
+        <cmr:fieldLabel fieldId="JpPayCycles8" />:
+      </cmr:label>
+      <cmr:field path="jpPayCycles8" id="jpPayCycles8" fieldId="JpPayCycles8" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2" containerForField="JpPayDays8">
+    <p>
+      <cmr:label fieldId="jpPayDays8">
+        <cmr:fieldLabel fieldId="JpPayDays8" />:
+      </cmr:label>
+      <cmr:field path="jpPayDays8" id="jpPayDays8" fieldId="JpPayDays8" tabId="MAIN_IBM_TAB" />
+    </p>
+  </cmr:column>
+</cmr:row>
+    
 </cmr:view>

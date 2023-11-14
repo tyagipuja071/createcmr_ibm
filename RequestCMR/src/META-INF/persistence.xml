@@ -265,7 +265,7 @@
     
     <class>com.ibm.cio.cmr.request.entity.Knb1</class>
     <class>com.ibm.cio.cmr.request.entity.Knb1PK</class>
-
+    
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />

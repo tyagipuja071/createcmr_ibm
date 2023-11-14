@@ -34,6 +34,8 @@ public class MassUpdateAddressModel extends BaseModel {
 
   private String city1;
 
+  private String city2;
+
   private String stateProv;
 
   private String postCd;
@@ -54,21 +56,20 @@ public class MassUpdateAddressModel extends BaseModel {
 
   // CH Specific
   private String custLangCd;
-  
+
   private String floor;
-  
+
   private String bldg;
-  
+
   private String custPhone;
-  
+
   private String custFax;
-  
+
   private String hwInstlMstrFlg;
-  
+
   private String custNm3;
 
   private String custNm4;
-
 
   public long getParReqId() {
     return parReqId;
@@ -140,6 +141,14 @@ public class MassUpdateAddressModel extends BaseModel {
 
   public void setCity1(String city1) {
     this.city1 = city1;
+  }
+
+  public String getCity2() {
+    return city2;
+  }
+
+  public void setCity2(String city2) {
+    this.city2 = city2;
   }
 
   public String getStateProv() {
@@ -271,7 +280,7 @@ public class MassUpdateAddressModel extends BaseModel {
   public void setCustFax(String custFax) {
     this.custFax = custFax;
   }
-  
+
   public String getHwInstlMstrFlg() {
     return hwInstlMstrFlg;
   }
@@ -295,5 +304,5 @@ public class MassUpdateAddressModel extends BaseModel {
   public void setCustNm4(String custNm4) {
     this.custNm4 = custNm4;
   }
-  
+
 }
