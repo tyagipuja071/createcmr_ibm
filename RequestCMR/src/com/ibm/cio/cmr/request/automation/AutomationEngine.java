@@ -443,7 +443,8 @@ public class AutomationEngine {
         
         if(isPaygoUpgrade){
           data.setIsicCd("");
-          }
+          data.setOrdBlk(null);  
+        }
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk()) && !"PAYG".equals(admin.getReqReason())) {
@@ -455,9 +456,7 @@ public class AutomationEngine {
           }
         }
 
-        //paygo upgrade
-      //  if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason()) && "PG".equals(data.getOrdBlk()))
-        
+     
         if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");

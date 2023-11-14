@@ -1254,12 +1254,15 @@ public class CanadaUtil extends AutomationUtil {
         setDefaultSBO(details, overrides, coverageId, data, sbo);
       }
     }
-
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
     // ISU CTC Based on Coverage
     String scenario = data.getCustSubGrp();
     String isu = "";
     String ctc = "";
-    if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
+    if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO") && !isPaygoUpgrade ) {
 
       String firstChar = coverageId.substring(0, 1);
 
