@@ -728,6 +728,10 @@ function addGenericZIPValidator() {
         var cntry = FormManager.getActualValue('landCntry');
         var loc = FormManager.getActualValue('cmrIssuingCntry');
 
+        //handling landed cntry for Japan cmrissuingcntry
+        if (cntry == '' && loc != '' && loc=='760'){
+          cntry='JP';
+        }
         if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '')) {
           return new ValidationResult(null, true);
         }
