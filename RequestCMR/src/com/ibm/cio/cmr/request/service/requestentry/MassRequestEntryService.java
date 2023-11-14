@@ -5488,6 +5488,42 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                       setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
                     }
                   }
+                  /*
+                   * DENNIS: COMMENTED THE FOLLOWING BECAUSE DYNAMIC MASS UPDATE
+                   * IS NOT NEEDED YET FOR OTHER COUNTRIES
+                   */
+                  // if (PageManager.fromGeo("EMEA", cmrIssuingCntry)) {
+                  // setMassUpdateListEMEA(modelList, item.getInputStream(),
+                  // reqId, newIterId, filePath);
+                  // } else if (DEHandler.isIERPCountry(cmrIssuingCntry) ||
+                  // CNDHandler.isCNDCountry(cmrIssuingCntry)) {
+                  // setMassUpdateListDECND(modelList, item.getInputStream(),
+                  // reqId, newIterId, filePath);
+                  // } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
+                  // setMassUpdateListLA(modelList, item.getInputStream(),
+                  // reqId, newIterId, filePath);
+                  // } else if (PageManager.fromGeo("MCO1", cmrIssuingCntry) ||
+                  // PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
+                  // setMassUpdateListMCO(modelList, item.getInputStream(),
+                  // reqId, newIterId, filePath);
+                  // } else if (PageManager.fromGeo("CEMEA", cmrIssuingCntry)) {
+                  // setMassUpdateListCEMEA(modelList, item.getInputStream(),
+                  // reqId, newIterId, filePath);
+                  // } else if (PageManager.fromGeo("NORDX", cmrIssuingCntry)) {
+                  // setMassUpdateListNORDX(modelList, item.getInputStream(),
+                  // reqId, newIterId, filePath);
+                  // } else {
+                  // if
+                  // (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager,
+                  // data.getCmrIssuingCntry())) {
+                  // setMassUpdateListForLegacyDirect(entityManager,
+                  // legacyDirectModelCol, filePath, reqId, newIterId,
+                  // filePath);
+                  // } else {
+                  // setMassUpdateList(modelList, item.getInputStream(), reqId,
+                  // newIterId, filePath);
+                  // }
+                  // }
 
                   if (!"760".equalsIgnoreCase(cmrIssuingCntry)) {
                     RequestEntryModel model = new RequestEntryModel();

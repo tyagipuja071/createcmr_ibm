@@ -632,9 +632,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         }
         if (!"P".equals(dplChkResult) && !"X".equals(dplChkResult) && !"N".equals(dplChkResult)) {
           String name = "";
-          name = custname1 != null ? custname1.toUpperCase() : "";
-          if (!StringUtils.isBlank(custname2)) {
-            name += " " + custname2.toUpperCase();
+          // for japan, name is on cust nm3, CMR-7419
+          if (SystemLocation.JAPAN.equals(cntry)) {
+            // name = muAddr.getCustNm3();
+          } else {
+            name = custname1 != null ? custname1.toUpperCase() : "";
+            if (!StringUtils.isBlank(custname2)) {
+              name += " " + custname2.toUpperCase();
+            }
           }
           if (!StringUtils.isBlank(name) && !names.contains(name)) {
             names.add(name);
