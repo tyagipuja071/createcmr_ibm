@@ -164,51 +164,6 @@ public class IERPMassProcessService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
-
-    List<Admin> pendingJP = getPendingRecordsRDCJP(entityManager);
-
-    LOG.debug((pendingJP != null ? pendingJP.size() : 0) + " JP records to process to RDc.");
-
-    Data dataJP = null;
-    ProcessRequest requestJP = null;
-
-    for (Admin admin : pendingJP) {
-      try {
-        this.cmrObjects = prepareJPRequest(entityManager, admin);
-        dataJP = this.cmrObjects.getData();
-
-        requestJP = new ProcessRequest();
-        requestJP.setCmrNo(dataJP.getCmrNo());
-        requestJP.setMandt(SystemConfiguration.getValue("MANDT"));
-        requestJP.setReqId(admin.getId().getReqId());
-        requestJP.setReqType(admin.getReqType());
-        requestJP.setUserId(BATCH_USER_ID);
-
-        switch (admin.getReqType()) {
-        case CmrConstants.REQ_TYPE_MASS_UPDATE:
-          processMassUpdateRequest(entityManager, requestJP, admin, dataJP);
-          break;
-        }
-
-        if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
-            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
-          admin.setReqStatus("PPN");
-          admin.setProcessedFlag("E"); // set requestJP status to error.
-          createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
-        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
-            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
-            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-          admin.setReqStatus("COM");
-          admin.setProcessedFlag("Y"); // set requestJP status to processed
-          createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
-        }
-        partialCommit(entityManager);
-      } catch (Exception e) {
-        partialRollback(entityManager);
-        LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
-        processError(entityManager, admin, e.getMessage());
-      }
-    }
     return true;
   }
 
@@ -959,63 +914,4 @@ public class IERPMassProcessService extends TransConnService {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
   }
-
-	private CMRRequestContainer prepareJPRequest(EntityManager entityManager, Admin admin) throws Exception {
-    LOG.debug("Preparing Request Objects... ");
-    CMRRequestContainer container = new CMRRequestContainer();
-
-    DataPK dataPk = new DataPK();
-    dataPk.setReqId(admin.getId().getReqId());
-    Data data = entityManager.find(Data.class, dataPk);
-    if (data == null) {
-      throw new Exception("Cannot locate DATA record");
-    }
-
-    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
-    // get the address order
-    if (getJPAddressOrder() != null) {
-      String[] order = getJPAddressOrder();
-      StringBuilder types = new StringBuilder();
-      if (order != null && order.length > 0) {
-
-        for (String type : order) {
-          LOG.trace("Looking for Address Types " + type);
-          types.append(types.length() > 0 ? ", " : "");
-          types.append("'" + type + "'");
-        }
-      }
-
-      if (types.length() > 0) {
-        sql += " and ADDR_TYPE in ( " + types.toString() + ") ";
-      }
-      StringBuilder orderBy = new StringBuilder();
-      int orderIndex = 0;
-      for (String type : order) {
-        orderBy.append(" when ADDR_TYPE = '").append(type).append("' then ").append(orderIndex);
-        orderIndex++;
-      }
-      orderBy.append(" else 25 end, ADDR_TYPE, case when IMPORT_IND = 'Y' then 0 else 1 end, ADDR_SEQ ");
-      sql += " order by case " + orderBy.toString();
-    }
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    // query.setForReadOnly(true);
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    List<Addr> addresses = query.getResults(Addr.class);
-
-    container.setAdmin(admin);
-    container.setData(data);
-    if (addresses != null) {
-      for (Addr addr : addresses) {
-        container.addAddress(addr);
-      }
-    }
-    return container;
-  }
-  
-  private List<Admin> getPendingRecordsRDCJP(EntityManager entityManager) {
-    String sql = ExternalizedQuery.getSql("JP.MASS.PROCESS.PENDING");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    return query.getResults(Admin.class);
-  }
-
 }
