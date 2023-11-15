@@ -37,7 +37,8 @@ public class WWSubindustryISICHandler implements RowHandler {
 
     LOG.debug("Request ID: " + row.getData().getId().getParReqId() + " ISIC " + data.getIsicCd());
     RowResult result = new RowResult();
-    String[] combination = getSubIndustryISIC(entityManager, data.getIsicCd());
+    String trimmedIsic = StringUtils.isNotBlank(data.getIsicCd()) ? data.getIsicCd().substring(0, 4) : "";
+    String[] combination = getSubIndustryISIC(entityManager, trimmedIsic);
     if (combination == null) {
       LOG.debug("ISIC " + data.getIsicCd() + " Not found.");
       result.addError("ISIC is invalid/not found. ");
