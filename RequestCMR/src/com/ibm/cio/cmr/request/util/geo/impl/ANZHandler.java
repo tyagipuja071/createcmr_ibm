@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
@@ -438,7 +439,8 @@ public class ANZHandler extends GEOHandler {
   
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "796".equals(data.getCmrIssuingCntry())) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+        && ("796".equals(data.getCmrIssuingCntry()) || "616".equals(data.getCmrIssuingCntry()))) {
       admin.setOldCustNm1(mainRecord.getCmrName1Plain());
       admin.setOldCustNm2(mainRecord.getCmrName2Plain());
     }
