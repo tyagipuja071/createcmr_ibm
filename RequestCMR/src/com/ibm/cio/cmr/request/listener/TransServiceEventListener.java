@@ -20,6 +20,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 
 public class TransServiceEventListener {
   private static final Logger LOG = Logger.getLogger(TransServiceEventListener.class);
+  private static final ThreadLocal<EntityManager> currentEntityManager = new ThreadLocal<>();
 
   @PrePersist
   @PreUpdate
@@ -75,11 +76,10 @@ public class TransServiceEventListener {
       query.setParameter("KUNNR", kunnr);
       return query.getResults(TransService.class);
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.error("Error querying TransServices for kunnr " + kunnr, e);
       return Collections.emptyList();
     } finally {
       if (rdcMgr != null) {
-        rdcMgr.clear();
         rdcMgr.close();
       }
     }
@@ -88,31 +88,55 @@ public class TransServiceEventListener {
   private void updateTransService(List<TransService> transServicesList, Boolean activation) {
     EntityManager rdcMgr = null;
     EntityTransaction transaction = null;
-
+    Boolean ownTransaction = true;
     try {
-      rdcMgr = JpaManager.getEntityManager();
-      transaction = rdcMgr.getTransaction();
-      transaction.begin();
+      rdcMgr = loadEntityManager(ownTransaction);
+      transaction = getTransaction(ownTransaction, rdcMgr);
 
       if (transServicesList != null && !transServicesList.isEmpty()) {
         Timestamp logDelTimestamp = activation ? Timestamp.valueOf("9999-12-31 00:00:00") : SystemUtil.getActualTimestamp();
-        setTransServiceTimestamp(rdcMgr, transServicesList, logDelTimestamp);
+        updateTransServiceTimestamp(rdcMgr, transServicesList, logDelTimestamp);
       }
-      transaction.commit();
+
+      if (ownTransaction) {
+        transaction.commit();
+      }
+
     } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      if (transaction != null && transaction.isActive()) {
+      LOG.error("Could not update TransService records.", e);
+      if (ownTransaction) {
         transaction.rollback();
       }
-      if (rdcMgr != null) {
-        rdcMgr.clear();
+    } finally {
+      if (ownTransaction) {
         rdcMgr.close();
       }
     }
   }
 
-  private void setTransServiceTimestamp(EntityManager rdcMgr, List<TransService> transServicesList, Timestamp time) {
+  private EntityManager loadEntityManager(Boolean ownTransaction) {
+    EntityManager entityManager = currentEntityManager.get();
+    if (entityManager != null) {
+      ownTransaction = false;
+      LOG.trace("Using thread local entity manager..");
+    } else {
+      LOG.debug("Opening own changelog entity manager..");
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    return entityManager;
+  }
+
+  private EntityTransaction getTransaction(Boolean ownTransaction, EntityManager rdcMgr) {
+    EntityTransaction transaction = rdcMgr.getTransaction();
+    if (ownTransaction) {
+      transaction.begin();
+    }
+
+    return transaction;
+  }
+
+  private void updateTransServiceTimestamp(EntityManager rdcMgr, List<TransService> transServicesList, Timestamp time) {
     for (TransService ts : transServicesList) {
       ts.setLogDelTimestamp(time);
       rdcMgr.merge(ts);
