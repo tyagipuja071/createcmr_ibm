@@ -38,12 +38,10 @@ public class Kna1 extends BaseEntity<Kna1PK> implements Serializable {
   @EmbeddedId
   private Kna1PK id;
 
-  @Override
   public Kna1PK getId() {
     return id;
   }
 
-  @Override
   public void setId(Kna1PK id) {
     this.id = id;
   }
