@@ -1323,6 +1323,7 @@ function addLAVatValidator() {
         var reqType = FormManager.getActualValue('reqType');
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var custType = FormManager.getActualValue('custType');
         console.log(">>>> addLAVatValidator");
         var zs01Cntry = null;
         //get vat Field 
@@ -1354,13 +1355,13 @@ function addLAVatValidator() {
           var custClass= FormManager.getActualValue('custClass');
 
           if (zs01Cntry == 'CO') {
-            if ((reqType == 'C' && custSubGrp == 'PRIPE')|| (reqType == 'U' && (custClass == '60' || custClass == '71' ))) {
+            if ((reqType == 'C' && ((custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') ||(custType == 'PRIPE' || custType == 'IBMEM') ))|| (reqType == 'U' && (custClass == '60' || custClass == '71' ))) {
               if (vat.length != '10') {
                 return new ValidationResult({
                   id : 'vat',
                   type : 'text',
                   name : 'vat'
-                }, false, ('Invalid VAT length for CO. Length should be 10 characters long for Private Person.'));
+                }, false, ('Invalid VAT length for CO. Length should be 10 characters long for Private Person and IBM Employee'));
               } else if (vat.length == '10') {
                 var coPattern1 = /^[0-9]{8}[-][0-9]{1}$/;
                 if (!vat.match(coPattern1)) {
@@ -1368,16 +1369,16 @@ function addLAVatValidator() {
                     id : 'vat',
                     type : 'text',
                     name : 'vat'
-                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnn-n for Private Person.'));
+                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnn-n for Private Person and IBM Employee'));
                 }
               }
-            } else if ((reqType == 'C' && custSubGrp != 'PRIPE') || (reqType == 'U' && (custClass != '60' || custClass != '71' ))) {
+            } else if ((reqType == 'C') || (reqType == 'U' && (custClass != '60' || custClass != '71' ))) {
               if (vat.length != '11') {
                 return new ValidationResult({
                   id : 'vat',
                   type : 'text',
                   name : 'vat'
-                }, false, ('Invalid VAT length for CO. Length should be 11 characters long for all Scenario Sub-types other than Private Person. '));
+                }, false, ('Invalid VAT length for CO. Length should be 11 characters long for all Scenario Sub-types other than Private Person and  IBM Employee '));
               } else if (vat.length == '11') {
                 var coPattern2 = /^[0-9]{9}[-][0-9]{1}$/;
                 if (!vat.match(coPattern2)) {
@@ -1385,7 +1386,7 @@ function addLAVatValidator() {
                     id : 'vat',
                     type : 'text',
                     name : 'vat'
-                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnnn-n for all Scenario Sub-types other than Private Person.'));
+                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnnn-n for all Scenario Sub-types other than Private Person and and IBM Employee'));
                 }
               }
             }
