@@ -1624,6 +1624,8 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
   cmr.addrdetails = result;
   cmr.addressMode = 'updateAddress';
   if (result && result.ret31 == 'D' && !skipDnb) {
@@ -1641,9 +1643,9 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   if(FormManager.getActualValue('cmrIssuingCntry') == '760'){
     disableRolTaigaCode();
     if (FormManager.getActualValue('custGrp') == 'BUSPR') {
-      cmr.showNode('endUserFile');
+      cmr.showNode('endUserFileFlag');
     } else {
-      cmr.hideNode('endUserFile');
+      cmr.hideNode('endUserFileFlag');
     }
   }
 }
@@ -3197,6 +3199,7 @@ function resetSccInfo() {
 // CREATCMR-5447
 
 function parseXLS() {
+
 	
   var contactCon = '';
   const input = document.getElementById('xlsFile');
