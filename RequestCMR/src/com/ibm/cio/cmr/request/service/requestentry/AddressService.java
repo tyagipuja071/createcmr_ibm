@@ -143,10 +143,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && geoHandler != null) {
         newAddrSeq = generateAddrSeqLD(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry(), geoHandler);
       }
-      if (geoHandler != null && newAddrSeq == null && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {      
-        newAddrSeq = geoHandler.generateModifyAddrSeqOnCopy(entityManager, model.getAddrType(), model.getReqId(), "",  model.getCmrIssuingCntry() );
+      if (geoHandler != null && newAddrSeq == null
+          && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {
+        newAddrSeq = geoHandler.generateModifyAddrSeqOnCopy(entityManager, model.getAddrType(), model.getReqId(), "", model.getCmrIssuingCntry());
       }
-      
+
       if (geoHandler != null && newAddrSeq == null) {
         newAddrSeq = geoHandler.generateAddrSeq(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry());
       }
@@ -158,13 +159,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
       }
 
-      if (("866".equals(model.getCmrIssuingCntry()) || "754".equals(model.getCmrIssuingCntry())) && "U".equals(admin.getReqType())) {
-        int legacyMaxSeq = getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
-        if (legacyMaxSeq > Integer.parseInt(newAddrSeq)) {
-          String maxSeq = Integer.toString(legacyMaxSeq);
-          newAddrSeq = StringUtils.leftPad(maxSeq, 5, '0');
-        }
-      }
+      /*
+       * if (("866".equals(model.getCmrIssuingCntry()) ||
+       * "754".equals(model.getCmrIssuingCntry())) &&
+       * "U".equals(admin.getReqType())) { int legacyMaxSeq =
+       * getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(),
+       * data.getCmrNo()); if (legacyMaxSeq > Integer.parseInt(newAddrSeq)) {
+       * String maxSeq = Integer.toString(legacyMaxSeq); newAddrSeq =
+       * StringUtils.leftPad(maxSeq, 5, '0'); } }
+       */
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
         int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
@@ -241,7 +244,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
         // }
       }
-      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(model.getCmrIssuingCntry())) {
+      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
         if ("U".equals(admin.getReqType())) {
           String maxAddrSeq = null;
           maxAddrSeq = getMaxSequenceAddr(entityManager, model.getReqId());
