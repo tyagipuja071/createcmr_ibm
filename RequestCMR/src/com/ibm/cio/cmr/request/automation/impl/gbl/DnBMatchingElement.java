@@ -154,13 +154,19 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               engineData.addNegativeCheckStatus("DNBCheck", "Processor review is required since request has already been rejected for data quality.");
               LOG.debug("Processor review is required since request has already been rejected for data quality.");
             }
-          } else if (payGoAddredited && !hasValidMatches) {
+          } else if (payGoAddredited && !hasValidMatches && !"PAYG".equals(admin.getReqReason())) {
             LOG.debug("DnB Matches not found for PayGo.");
             admin.setPaygoProcessIndc("Y");
             result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");
           }
+          else if (payGoAddredited && !hasValidMatches && "PAYG".equals(admin.getReqReason())) {
+            LOG.debug("DnB Matches not found for PayGo.");
+            result.setOnError(true);
+            result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
+            result.setResults("No Matches");
+           }
         } else {
           // actions to be performed only when matches with high confidence are
           // found
