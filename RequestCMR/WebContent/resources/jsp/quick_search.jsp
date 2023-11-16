@@ -594,7 +594,7 @@ form.ibm-column-form .dijitTextBox INPUT {
                        <div ng-show="rec.recType == 'CMR'">
                          <input ng-show="!prospectCmr && allowByModel" type="button" class="cmr-grid-btn" value="Create new CMR based on this CMR" title="Request for a new CMR modeled after this record" ng-click="confirmImport(rec, false)">
                          <input ng-show="prospectCmr" type="button" class="cmr-grid-btn" value="Convert to Legal CMR" title="Request for conversion of this Prospect to Legal CMR" ng-click="confirmImport(rec, false)">
-                         <input ng-show="payGo" type="button" class="cmr-grid-btn" value="Upgrade PayGo CMR to Regular CMR" title="Upgrade PayGo CMR to Regular CMR" ng-click="payGoUpgradeConfirmImport(rec, true)">
+                         <input ng-show="payGo" type="button" class="cmr-grid-btn" value="Upgrade PayGo CMR to Regular CMR" title="Upgrade PayGo CMR to Regular CMR" ng-click="payGoUpgradeConfirmImport(rec, false)">
                          <input ng-show="!prospectCmr" type="button" class="cmr-grid-btn" value="Update CMR" title="Request for an Update of this CMR" ng-click="confirmImport(rec, true)">
                        </div>
                        <div ng-show="rec.recType == 'REQ'">
