@@ -3437,6 +3437,7 @@ function getAddrList() {
           addrTxt : results[i].ret6,
           addrTxt2 : results[i].ret7,
           city1 : results[i].ret8,
+          custNm3 : results[i].ret9,
       };
       addrList.push(addr);
     }
@@ -3463,6 +3464,7 @@ function getAddrRdcList() {
           addrTxt : results[i].ret6,
           addrTxt2 : results[i].ret7,
           city1 : results[i].ret8,
+          custNm3 : results[i].ret9
       };
       addrRdcList.push(addr);
     }
@@ -3489,6 +3491,7 @@ function getCnAddrList() {
           cnAddrTxt : results[i].ret6,
           cnAddrTxt2 : results[i].ret7, // custNm4
           cnCity1 : results[i].ret8,
+          cnCustNm3 : results[i].ret9
       };
       cnAddrList.push(addr);
     }
@@ -3515,6 +3518,7 @@ function getCnAddrRdcList() {
           cnAddrTxt : results[i].ret6,
           cnAddrTxt2 : results[i].ret7, // custNm4
           cnCity1 : results[i].ret8,
+          cnCustNm3 : results[i].ret9
       };
       cnAddrRdcList.push(addr);
     }
