@@ -190,7 +190,14 @@ public class AutomationEngine {
     if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
       isPaygoUpgrade=true;
     }
-  
+    
+    if (isPaygoUpgrade) {
+      if ("8888".equals(requestData.getData().getIsicCd())) {
+        requestData.getData().setIsicCd("");
+      }
+      requestData.getData().setOrdBlk(null);
+    }
+
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
@@ -367,10 +374,6 @@ public class AutomationEngine {
     String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
-    }
-    if(isPaygoUpgrade){
-      data.setIsicCd("");
-      data.setOrdBlk(null);  
     }
     // check company verified info
     if (compInfoSrc != null && StringUtils.isNotBlank(compInfoSrc)) {
