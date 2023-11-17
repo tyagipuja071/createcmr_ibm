@@ -191,11 +191,12 @@ public class AutomationEngine {
       isPaygoUpgrade=true;
     }
     
-    if(isPaygoUpgrade){
-      requestData.getData().setIsicCd("");
-      requestData.getData().setOrdBlk(null);  
+
+    if (isPaygoUpgrade) {
+      requestData.getData().setOrdBlk(null);
     }
-  
+
+
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
