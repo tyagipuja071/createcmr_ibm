@@ -192,9 +192,6 @@ public class AutomationEngine {
     }
     
     if (isPaygoUpgrade) {
-      if ("8888".equals(requestData.getData().getIsicCd())) {
-        requestData.getData().setIsicCd("");
-      }
       requestData.getData().setOrdBlk(null);
     }
 
