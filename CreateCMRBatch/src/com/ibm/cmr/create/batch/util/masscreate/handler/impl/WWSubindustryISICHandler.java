@@ -49,7 +49,8 @@ public class WWSubindustryISICHandler implements RowHandler {
   @Override
   public void transform(EntityManager entityManager, MassCreateFileRow row) throws Exception {
     MassCreateData data = row.getData();
-    String[] combination = getSubIndustryISIC(entityManager, data.getIsicCd());
+    String trimmedIsic = StringUtils.isNotBlank(data.getIsicCd()) ? data.getIsicCd().substring(0, 4) : "";
+    String[] combination = getSubIndustryISIC(entityManager, trimmedIsic);
     if (combination != null) {
       data.setSubIndustryCd(combination[1]);
     }
