@@ -872,8 +872,8 @@ public class LegacyDirectUtil {
         throw new Exception(errMsg);
       } else {
         if ("Data".equals(templateTab.getName())) {
-          if (!StringUtils.isEmpty(sheet.getRow(0).getCell(17).toString())) {
-            if (!sheet.getRow(0).getCell(17).toString().contains(cmrCountry)) {
+          if (!StringUtils.isEmpty(sheet.getRow(0).getCell(18).toString())) {
+            if (!sheet.getRow(0).getCell(18).toString().contains(cmrCountry)) {
               throw new Exception(errMsg);
             }
           }
