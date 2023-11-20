@@ -98,8 +98,7 @@ public class RequestUtils {
   public static final String STATUS_INPUT_REQUIRED = "Input Required";
   public static final String US_CMRISSUINGCOUNTRY = "897";
   private static Map<String, String> rejectionReasons = new HashMap<String, String>();
-  private static final String STATUS_CPR_24 = "CMR is now unblocked for 24 hours, you will receive completion email once it is blocked back.";
-  private static final String STATUS_CPR_48 = "CMR is now unblocked for 48 hours, you will receive completion email once it is blocked back.";
+  private static final String STATUS_CPR_72 = "CMR is now unblocked for 72 hours, you will receive completion email once it is blocked back.";
   public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
 
   public static void refresh() {
@@ -591,10 +590,8 @@ public class RequestUtils {
     }
     params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
 
-    if ("CPR".equalsIgnoreCase(admin.getReqStatus()) && EMEA_CNTRY_DACH.contains(cmrIssuingCountry)) {
-      params.add(STATUS_CPR_24); // {8}
-    } else if ("CPR".equalsIgnoreCase(admin.getReqStatus())) {
-      params.add(STATUS_CPR_48); // {8}
+    if ("CPR".equalsIgnoreCase(admin.getReqStatus())) {
+      params.add(STATUS_CPR_72); // {8}
     } else {
       params.add(histContent); // {8}
     }
@@ -2053,6 +2050,7 @@ public class RequestUtils {
 
   public static void sendEmailNotificationsTREC_CN(EntityManager em) {
 
+    LOG.debug("Checking Temporary Release request notifications...");
     String sql = ExternalizedQuery.getSql("CN.TREC.NOTIF.ADMIN");
     PreparedQuery query = new PreparedQuery(em, sql);
     List<Admin> pending = query.getResults(Admin.class);
@@ -2065,7 +2063,7 @@ public class RequestUtils {
       LocalTime localTime = LocalTime.now(ZoneId.of("GMT"));
       localTime = localTime.plusHours(8);
       int hour = localTime.getHour();
-      if (hour == 0 && day != Calendar.SATURDAY && day != Calendar.SUNDAY) {
+      if ((24-hour > 23) && day != Calendar.SATURDAY && day != Calendar.SUNDAY) {
         sendNotification = true;
       }
     }
@@ -2074,9 +2072,7 @@ public class RequestUtils {
     for (Admin admin : pending) {
       // Check if the CMR is going to be blocked back in next 1 day
       noOFWorkingDays = IERPRequestUtils.checkNoOfWorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
-      if (noOFWorkingDays >= 3) {
-        notifList.add(admin);
-      } else if ((noOFWorkingDays == 2 || noOFWorkingDays == 1) && day == Calendar.FRIDAY) {
+      if (noOFWorkingDays >= 3 || ((noOFWorkingDays >= 1) && day == Calendar.FRIDAY)) {
         notifList.add(admin);
       }
     }
@@ -2089,7 +2085,7 @@ public class RequestUtils {
       // String email = new String(template);
 
       StringBuilder sb = new StringBuilder();
-      sb.append("<table>");
+      sb.append("<table border='1'>");
       sb.append("<tr>");
       sb.append("<th style=\"text-align:left\">Country Code</th>");
       sb.append("<th style=\"text-align:left\">CMR#</th>");
@@ -2145,7 +2141,7 @@ public class RequestUtils {
       sb.append("</table>");
 
       String host = SystemConfiguration.getValue("MAIL_HOST");
-      String recipients = "xuxuedl@cn.ibm.com, yuyf@cn.ibm.com";
+      String recipients = "xuxuedl@cn.ibm.com, yuyf@cn.ibm.com, Renyadl@cn.ibm.com";
       Email mail = new Email();
       mail.setSubject(subject);
       mail.setTo(recipients);
