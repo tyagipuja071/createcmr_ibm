@@ -1342,6 +1342,43 @@ function checkPayGo(cmrNo,cntry) {
   	  return payGo;
 	  };
 	  
+	  function newAddressValForPayGo()
+	  {
+	    FormManager.addFormValidator((function() {
+	  	    return {
+	  	      validate : function() {
+	  	    	  var reqReason = FormManager.getActualValue('reqReason');
+	  	    	  var reqType = FormManager.getActualValue('reqType');
+	  	    	  var reqId = FormManager.getActualValue('reqId');
+	  	    	 
+	  	    	  var checkAddress=checkNewAddress(reqId);
+	  	    	  if(reqType=='U' &&  reqReason=='PAYG' && checkAddress==true)
+	  	    		  {
+	  	    	  return new ValidationResult(null, false, "Adding new Address is not allowed in Paygo Upgrade CMR.");
+	  	    		  }
+	  	      }
+	  	    };
+	    
+	  	  })(), 'MAIN_NAME_TAB', 'frmCMR');
+	  }
+
+	  function checkNewAddress(reqId) {
+	  	var newAddressAdded=false;
+	  	    var newAddr = cmr.query('CHECK_NEW_ADDRESS', {
+	  	    	REQ_ID : reqId
+	          
+	        });
+	      
+	      if (newAddr!=null) {
+	      	newAddressAdded = true;
+	        }
+	      else
+	    	  {
+	      	newAddressAdded = false;
+	    	  }
+	    	  return newAddressAdded;
+	  	  };  
+	  
 //
 
 //CREATCMR-10034
@@ -1553,5 +1590,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addLAVatValidator);
   GEOHandler.registerValidator(payGoCreateErroMsg,GEOHandler.AllCountries);
   GEOHandler.registerValidator(payGoErroMsg,GEOHandler.AllCountries);
+  GEOHandler.registerValidator(newAddressValForPayGo,['724', '848', '618', '624', '788', '649', '866', '754','846', '806', '702', '678' ,'897','706','616','796']);
 
 });
