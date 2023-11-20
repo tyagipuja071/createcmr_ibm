@@ -722,9 +722,9 @@ public class SpainTransformer extends MessageTransformer {
         cust.setCeBo(cebo);
       }
 
-      if (!StringUtils.isEmpty(cusLocNum)) {
-        cust.setLocNo(cusLocNum);
-      }
+      // if (!StringUtils.isEmpty(cusLocNum)) {
+      // cust.setLocNo(cusLocNum);
+      // }
     }
   }
 
