@@ -102,11 +102,9 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     RequestEntryModel reqModel = new RequestEntryModel();
     reqModel.setReqType(model.getReqType());
     reqModel.setCmrIssuingCntry(model.getIssuingCntry());
-    String aufsd= getAufsdByCmrNo(entityManager,SystemConfiguration.getValue("MANDT"), model.getIssuingCntry(),model.getCmrNo() );
-    if("PG".equalsIgnoreCase(aufsd))
+    if(model.isPaygoUpgradeChk()==true)
      {
     reqModel.setReqReason("PAYG");
-    reqModel.setReqType("U");
     reqModel.setOrdBlk(null);
      }
     controller.setDefaultValues(reqModel, request);

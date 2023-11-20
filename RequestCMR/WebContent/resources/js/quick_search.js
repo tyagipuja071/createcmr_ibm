@@ -262,12 +262,8 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
 	  };
 	  
 	  $scope.payGoUpgradeConfirmImport = function(rec, update) {
-		    var msg = 'A new Update request will be started using this CMR. You will be redirected to the request screen after processing. Proceed?';
-		    
-		    if (!confirm(msg)) {
-		      return;
-		    }
-		    $scope.importRecord(rec, update);
+		  rec.reqReason='PAYG';
+		   $scope.importRecord(rec, update);
 		  };
   
   $scope.importRecord = function(rec, update) {
@@ -280,6 +276,10 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     model.cmrNo = rec.cmrNo;
     model.dunsNo = rec.dunsNo;
     model.recType = rec.recType;
+    if(rec.reqReason=='PAYG')
+    	{
+    	model.hasPaygoUpgradeChk=true;
+    	}
     $scope.records.forEach(function(curr, i) {
       if (curr.recType == 'CMR') {
         model.hasCmr = true;
