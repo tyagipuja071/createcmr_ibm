@@ -74,7 +74,6 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
-import com.itextpdf.styledxmlparser.jsoup.internal.StringUtil;
 
 /**
  * 
@@ -715,7 +714,11 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
+      isPaygoUpgrade=true;
+    }
+    if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK")) && !isPaygoUpgrade) {
       // skip checks if requester is from USCMDE team
       admin.setScenarioVerifiedIndc("Y");
       LOG.debug("Requester is from US CMDE team, skipping update checks.");
@@ -924,12 +927,14 @@ public class USUtil extends AutomationUtil {
             return true;
           }
         }
-
+        
         boolean isPayGo = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
         if (changes.isLegalNameChanged() && !isPayGo) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
+        } else if (changes.isLegalNameChanged() && isPaygoUpgrade) {
+          hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         }
-        
+
       } finally {
         cedpManager.clear();
         cedpManager.close();
