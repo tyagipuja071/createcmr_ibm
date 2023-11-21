@@ -1262,7 +1262,7 @@ public class CanadaUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String isu = "";
     String ctc = "";
-    if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO") && !isPaygoUpgrade ) {
+    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO") ) {
 
       String firstChar = coverageId.substring(0, 1);
 
@@ -1316,7 +1316,7 @@ public class CanadaUtil extends AutomationUtil {
         }
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       }
-    } else if (scenario.equalsIgnoreCase("ECO")) {
+    } else if (!isPaygoUpgrade && scenario.equalsIgnoreCase("ECO")) {
       isu = "36";
       ctc = "Y";
       setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
