@@ -2579,12 +2579,12 @@ public class JPHandler extends GEOHandler {
       List<Addr> addrs = getAddresses(entityManager, admin.getId().getReqId());
 
       for (Addr addr : addrs) {
-        if ("ZE01".equals(addr.getId().getAddrType()) || StringUtils.isNotEmpty(addr.getSapNo())) {
+        if ("ZE01".equals(addr.getId().getAddrType())) {
           continue;
         }
 
         String seqNoEquiv = ADDR_TYPE_TO_KNA1_SEQ_MAP.get(addr.getId().getAddrType());
-        if (StringUtils.isNotEmpty(seqNoEquiv)) {
+        if (StringUtils.isNotEmpty(seqNoEquiv) && !"ZC01".equals(addr.getId().getAddrType())) {
           addr.setSapNo(seqNoToKunnrMap.get(seqNoEquiv));
         }
 
@@ -2864,7 +2864,7 @@ public class JPHandler extends GEOHandler {
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "ADDR_TXT", "DEPT", "OFFICE", "POST_CD", "BLDG", "CUST_PHONE",
-        "LOCN_CD", "CUST_FAX", "ESTAB_FUNC_CD", "COMPANY_SIZE", "CONTACT", "ROL", "PO_BOX_CITY"));
+        "LOCN_CD", "CUST_FAX", "ESTAB_FUNC_CD", "COMPANY_SIZE", "CONTACT", "ROL", "PO_BOX_CITY", "PO_BOX_POST_CD"));
     return fields;
   }
 
@@ -3928,6 +3928,20 @@ public class JPHandler extends GEOHandler {
       ;
     }
     return rol;
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CUST_PREF_LANG", "SUB_INDUSTRY_CD", "ISIC_CD", "TAX_CD1", "CMR_OWNER", "ISU_CD", "CLIENT_TIER",
+        "INAC_CD", "INAC_TYPE", "COMPANY", "PPSCEID", "COLL_BO_ID", "COLLECTOR_NO", "SALES_BO_CD", "EMAIL1", "EMAIL2", "EMAIL3", "COV_DESC", "COV_ID",
+        "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO", "JSIC_CD", "SECONDARY_LOCN_NO",
+        "OEM_IND", "LEASING_COMP_INDC", "EDUC_ALLOW_CD", "CUST_ACCT_TYP", "CUST_CLASS", "IIN_IND", "VALUE_ADD_REM", "CHANNEL_CD", "SI_IND", "CRS_CD",
+        "CREDIT_CD", "GOVERNMENT", "OUTSOURCING_SERV", "ZSERIES_SW", "CMR_NO_2", "CLIENT_TIER", "SEARCH_TERM", "MRC_CD", "REP_TEAM_MEMBER_NO",
+        "SALES_TEAM_CD", "SALES_BO_CD", "ORG_NO", "CHARGE_CD", "SO_PRJ_CD", "CS_DIV", "BILLING_PROC_CD", "INVOICE_SPLIT_CD", "CREDIT_TO_CUST_NO",
+        "CS_BO", "TIER_2", "BILL_TO_CUST_NO", "ADMIN_DEPT_LN", "IDENT_CLIENT", "TERRITORY_CD"));
+
+    return fields;
   }
 
 }
