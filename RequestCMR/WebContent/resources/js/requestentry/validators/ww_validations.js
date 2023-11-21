@@ -1322,25 +1322,6 @@ function payGoCreateErroMsg()
   
 	  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
-
-function checkPayGo(cmrNo,cntry) {
-	var payGo=false;
-	    var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
-        MANDT : cmr.MANDT,
-        ZZKV_CUSNO : cmrNo,
-        KATR6 : cntry
-        
-      });
-    
-    if (isPayGo && isPayGo.ret1 != 'PG') {
-  	  payGo = false;
-      }
-    else
-  	  {
-  	  payGo = true;
-  	  }
-  	  return payGo;
-	  };
 	  
 	  function newAddressValForPayGo()
 	  {
@@ -1350,9 +1331,11 @@ function checkPayGo(cmrNo,cntry) {
 	  	    	  var reqReason = FormManager.getActualValue('reqReason');
 	  	    	  var reqType = FormManager.getActualValue('reqType');
 	  	    	  var reqId = FormManager.getActualValue('reqId');
-	  	    	 
+	  	    	  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	  	    	  var cmrNo = FormManager.getActualValue('cmrNo');
+	  	    	  var payGo=checkPayGo(cmrNo,cntry);
 	  	    	  var checkAddress=checkNewAddress(reqId);
-	  	    	  if(reqType=='U' &&  reqReason=='PAYG' && checkAddress==true)
+	  	    	  if(reqType=='U' && payGo==true &&  reqReason=='PAYG' && checkAddress==true)
 	  	    		  {
 	  	    	  return new ValidationResult(null, false, "Adding new Address is not allowed in Paygo Upgrade CMR.");
 	  	    		  }
@@ -1364,12 +1347,13 @@ function checkPayGo(cmrNo,cntry) {
 
 	  function checkNewAddress(reqId) {
 	  	var newAddressAdded=false;
+	  	var addrCount=0;
 	  	    var newAddr = cmr.query('CHECK_NEW_ADDRESS', {
 	  	    	REQ_ID : reqId
 	          
 	        });
-	      
-	      if (newAddr!=null) {
+	  	  addrCount = newAddr.ret1;
+	      if (Number(addrCount) >0) {
 	      	newAddressAdded = true;
 	        }
 	      else
@@ -1378,6 +1362,25 @@ function checkPayGo(cmrNo,cntry) {
 	    	  }
 	    	  return newAddressAdded;
 	  	  };  
+	  	  
+	  	function checkPayGo(cmrNo,cntry) {
+	  		var payGo=false;
+	  		    var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
+	  	        MANDT : cmr.MANDT,
+	  	        ZZKV_CUSNO : cmrNo,
+	  	        KATR6 : cntry
+	  	        
+	  	      });
+	  	    
+	  	    if (isPayGo && isPayGo.ret1 != 'PG') {
+	  	  	  payGo = false;
+	  	      }
+	  	    else
+	  	  	  {
+	  	  	  payGo = true;
+	  	  	  }
+	  	  	  return payGo;
+	  		  };
 	  
 //
 
