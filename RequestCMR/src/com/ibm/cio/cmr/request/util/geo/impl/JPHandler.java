@@ -3933,7 +3933,6 @@ public class JPHandler extends GEOHandler {
   @Override
   public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    // TODO FREY add the missing fields from the UI
     fields.addAll(Arrays.asList("ABBREV_NM", "CUST_PREF_LANG", "SUB_INDUSTRY_CD", "ISIC_CD", "TAX_CD1", "CMR_OWNER", "ISU_CD", "CLIENT_TIER",
         "INAC_CD", "INAC_TYPE", "COMPANY", "PPSCEID", "COLL_BO_ID", "COLLECTOR_NO", "SALES_BO_CD", "EMAIL1", "EMAIL2", "EMAIL3", "COV_DESC", "COV_ID",
         "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO", "JSIC_CD", "SECONDARY_LOCN_NO",
