@@ -2378,6 +2378,9 @@ function validateGSTForIndia() {
         }
         var country = "";
         if (SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')) {
+          if(FormManager.getActualValue(vatExempt) !='Y' && vat =='' && reqTyp =='U'){
+            return new ValidationResult(null, false, 'GST# removal is not allowed without valid justification, please raise Jira ticket to CMDE with request details and relevant justification');
+          }
           country = "IN";
           if (country != '') {
             if (vat == '') {
