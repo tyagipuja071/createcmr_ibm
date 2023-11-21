@@ -134,6 +134,11 @@ public class SWISSService extends BaseBatchService {
     }
   }
 
+  @Override
+  protected boolean useServicesConnections() {
+    return true;
+  }
+
   protected List<Long> gatherSingleRequests(EntityManager entityManager) {
     List<Admin> list = getPendingRecords(entityManager);
     List<Long> ids = new ArrayList<Long>();
@@ -576,9 +581,9 @@ public class SWISSService extends BaseBatchService {
               + ". Number of response records and on ADDR table are inconsistent.");
           break;
         }
-        
+
         deleteEntity(addr, entityManager);
-        
+
         for (RDcRecord red : response.getRecords()) {
           String[] addrSeqs = {};
           if (red.getSeqNo() != null && red.getSeqNo() != "") {
@@ -602,7 +607,6 @@ public class SWISSService extends BaseBatchService {
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
-
 
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[0].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 LOG.debug("Address matched");
@@ -1380,7 +1384,7 @@ public class SWISSService extends BaseBatchService {
 
     }
   }
-  
+
   // CREATCMR-8052 - Item 3
   private void addVatIndToKunnrExtForCB(EntityManager entityManager, String mandt, Data data, Addr addr) {
     KunnrExtPK pk = new KunnrExtPK();
@@ -1392,7 +1396,7 @@ public class SWISSService extends BaseBatchService {
       entityManager.merge(kunnrExt);
     }
   }
-  
+
   private long checked2WorkingDays(Date processedDate, Timestamp currentTimestamp) {
     LOG.debug("processedTs=" + processedDate + " currentTimestamp=" + currentTimestamp);
     if (processedDate == null)
@@ -1411,7 +1415,7 @@ public class SWISSService extends BaseBatchService {
       LOG.debug("current.setTime(processedDate) O/P >>> " + current.getTime());
 
       hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
-      
+
       LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
       LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
       LOG.debug("hoursBetween >>> " + hoursBetween);
