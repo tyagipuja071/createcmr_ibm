@@ -1126,7 +1126,7 @@ public class GermanyUtil extends AutomationUtil {
         if (matches != null) {
           isSoldToMatchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
           if (!isSoldToMatchesDnb) {
-            // isNegativeCheckNeedeed = true;
+            isNegativeCheckNeedeed = true;
             detail.append("Updates to Sold To address need verification as it does not matches D&B");
             LOG.debug("Updates to Sold To address need verification as it does not matches D&B");
           } else {
