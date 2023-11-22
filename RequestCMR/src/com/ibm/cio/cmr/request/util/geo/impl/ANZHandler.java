@@ -521,7 +521,7 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // TODO Auto-generated method stub
-	  request.setSORTL(data.getSalesBusOffCd());
+	  request.setSORTL(data.getApCustClusterId());
 
   }
 
