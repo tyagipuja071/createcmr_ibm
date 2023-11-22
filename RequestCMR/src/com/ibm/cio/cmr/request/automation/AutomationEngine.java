@@ -558,7 +558,7 @@ public class AutomationEngine {
           }
           if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
-            if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || isFullSunsetCty) {
+            if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || (isFullSunsetCty)) {
               // move to PCP
               LOG.debug("Moving Request " + reqId + " to PCP");
               admin.setReqStatus("PCP");
