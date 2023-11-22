@@ -12,6 +12,7 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.CNAPICheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CNDupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CNDupReqCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DEDupReqCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLSearchElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DefaultApprovalsElement;
@@ -100,6 +101,10 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String CN_API_CHECK = "CN_API_CHECK";
   public static final String CN_DUP_CMR_CHECK = "CN_DUP_CMR_CHECK";
   public static final String CN_DUP_REQ_CHECK = "CN_DUP_REQ_CHECK";
+
+  // DE
+  public static final String DE_DUP_REQ_CHECK = "DE_DUP_REQ_CHECK";
+
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
   public static AutomationElementRegistry getInstance() {
@@ -150,7 +155,8 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(CN_API_CHECK, CNAPICheckElement.class);
     put(CN_DUP_CMR_CHECK, CNDupCMRCheckElement.class);
     put(CN_DUP_REQ_CHECK, CNDupReqCheckElement.class);
-
+    // DE
+    put(DE_DUP_REQ_CHECK, DEDupReqCheckElement.class);
     // CA
     put(CA_CMDE_CHECK, CACMDERequesterCheck.class);
   }
