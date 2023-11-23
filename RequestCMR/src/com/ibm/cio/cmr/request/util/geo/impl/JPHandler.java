@@ -686,6 +686,11 @@ public class JPHandler extends GEOHandler {
     }
     mainRecord.setSboSub(this.currentAccount.getSboSub());
     mainRecord.setAttach(this.currentAccount.getAttach());
+
+    if ("ZS01".equals(mainRecord.getCmrAddrTypeCode()) && StringUtils.isBlank(mainRecord.getCmrShortName())) {
+      mainRecord.setCmrShortName(this.currentAccount.getNameAbbr());
+    }
+
     if (onlyCrisAddrFlag) {
       List<FindCMRRecordModel> mainRecordList = new ArrayList<FindCMRRecordModel>();
       mainRecordList.add(mainRecord);
