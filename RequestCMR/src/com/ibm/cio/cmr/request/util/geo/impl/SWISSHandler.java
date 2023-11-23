@@ -193,7 +193,12 @@ public class SWISSHandler extends GEOHandler {
       if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
         data.setCurrencyCd(geCurrencyCode(zs01sapNo));
         data.setTaxCd1(getTaxCode(zs01sapNo));
+      } else if(CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
+        data.setOrdBlk("");
       }
+      
+      
+      
     } catch (Exception e) {
       LOG.error("Error occured on setting Currency Code/ tax code value during import.");
       e.printStackTrace();
