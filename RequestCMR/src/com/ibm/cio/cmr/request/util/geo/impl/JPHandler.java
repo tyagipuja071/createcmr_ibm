@@ -746,7 +746,7 @@ public class JPHandler extends GEOHandler {
           if (!StringUtils.isEmpty(adu) && !StringUtils.isEmpty(cmrAddrType) && !addedRecords.contains(cmrAddrType + "/" + crisAddr.getAddrSeq())) {
 
             FindCMRRecordModel copy = new FindCMRRecordModel();
-            sourceRecord.setInspbydebi(JPHandler.getRolByKtokd(entityManager,crisAddr.getAccountNo(),cmrAddrType));
+            sourceRecord.setInspbydebi(JPHandler.getRolByKtokd(entityManager, crisAddr.getAccountNo(), cmrAddrType));
 
             PropertyUtils.copyProperties(copy, sourceRecord);
 
@@ -982,7 +982,17 @@ public class JPHandler extends GEOHandler {
         && !"".equals(data.getBillToCustNo())) {
       data.setTier2("");
     }
-    data.setIdentClient(mainRecord.getInspbydebi());
+
+    if ("U".equals(admin.getReqType())) {
+      if (StringUtils.isNotBlank(data.getCmrNo())) {
+        if (data.getCmrNo().indexOf("C") == 0) {
+          data.setCreditToCustNo("");
+        }
+      }
+    }
+
+    String rolflag = mainRecord.getInspbydebi() == null ? "N" : mainRecord.getInspbydebi();
+    data.setIdentClient(rolflag);
     handleData4RAOnImport(data);
   }
 
@@ -1553,9 +1563,9 @@ public class JPHandler extends GEOHandler {
     updateCSBOBeforeDataSave(entityManager, admin, data);
     setAccountAbbNmOnSaveForBP(admin, data);
 
+    handleData4RAOnDataSave(data);
     setROLBeforeDataSave(entityManager, data, admin);
     setTAIGABeforeDataSave(entityManager, data);
-    handleData4RAOnDataSave(data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -5200,12 +5210,12 @@ public class JPHandler extends GEOHandler {
     query.setParameter("KATR6", SystemLocation.JAPAN);
     return query.getResults(Knb1.class);
   }
-  
-  private static String getCompanyTaigaByCompanyNo(EntityManager entityManager, String mandt, String cmrNo) throws Exception{
-  String taiga = "";
-  if (StringUtils.isEmpty(cmrNo)) {
+
+  private static String getCompanyTaigaByCompanyNo(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
+    String taiga = "";
+    if (StringUtils.isEmpty(cmrNo)) {
       return null;
-  }
+    }
     String sql = ExternalizedQuery.getSql("JP.GET.COMAPNY_TAIGA.BY_COMPANY_CMRNO");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CMR", cmrNo);
@@ -5213,15 +5223,15 @@ public class JPHandler extends GEOHandler {
     query.setParameter("MANDT", mandt);
     query.setForReadOnly(true);
     taiga = query.getSingleResult(String.class);
-  
+
     return taiga;
   }
-  
-  private static String getAccountTaigaByAccountNo(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception{
-  String addrTaiga = "";
-  if (StringUtils.isEmpty(cmrNo)) {
+
+  private static String getAccountTaigaByAccountNo(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception {
+    String addrTaiga = "";
+    if (StringUtils.isEmpty(cmrNo)) {
       return null;
-  }
+    }
     String sql = ExternalizedQuery.getSql("JP.GET.ADDR_TAIGA.BY_ACCOUNT_CMRNO");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CMR", cmrNo);
@@ -5230,7 +5240,7 @@ public class JPHandler extends GEOHandler {
     query.setParameter("KTOKD", addrType);
     query.setForReadOnly(true);
     addrTaiga = query.getSingleResult(String.class);
-  
+
     return addrTaiga;
   }
 
@@ -5662,17 +5672,18 @@ public class JPHandler extends GEOHandler {
     addresses = query.getResults(Addr.class);
     return addresses;
   }
-  
+
   private static String getRolByKtokd(EntityManager entityManager, String companyOrAccountCMRNO, String ktokd) throws Exception {
-    if(ktokd==null)
+    if (ktokd == null)
       return "";
-  String rol = "";
-  List<Kna1> l = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), companyOrAccountCMRNO);
+    String rol = "";
+    List<Kna1> l = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), companyOrAccountCMRNO);
     Kna1 kna1 = l.stream().filter(k -> ktokd.equals(k.getKtokd())).findFirst().orElse(null);
-    if(kna1!=null) {
-      rol = kna1.getInspbydebi();;
+    if (kna1 != null) {
+      rol = kna1.getInspbydebi();
+      ;
     }
     return rol;
   }
-  
+
 }
