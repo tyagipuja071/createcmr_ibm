@@ -2288,5 +2288,8 @@ public class SWISSService extends BaseBatchService {
         transaction.rollback();
       }
     }
+  @Override
+  protected boolean useServicesConnections() {
+    return true;
   }
 }
