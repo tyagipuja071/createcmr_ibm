@@ -946,7 +946,7 @@ public class IERPProcessService extends BaseBatchService {
       }
       
       // Check and send the notifications to the recipients for soon to be blocked back CMRs..
-      RequestUtils.sendEmailNotificationsTREC_CN(em);
+      //RequestUtils.sendEmailNotificationsTREC_CN(em);
       Thread.currentThread().setName("IERPProcess-" + Thread.currentThread().getId());
     }
 

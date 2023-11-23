@@ -234,9 +234,13 @@ function addAfterConfigAP() {
       FormManager.readOnly('apCustClusterId');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('mrcCd');
+      FormManager.readOnly('inacType');
       if (cntry == '616') {
         FormManager.setValue('apCustClusterId', "09057");
         FormManager.setValue('isuCd', '5K');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
       } else if (cntry == '834') {
         FormManager.setValue('apCustClusterId', "09052");
         FormManager.setValue('isuCd', '5K');
