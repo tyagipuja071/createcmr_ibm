@@ -102,7 +102,7 @@ public class NetherlandsUtil extends AutomationUtil {
     String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBPRI" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
       doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
-          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+          false, requestData);
     }
     switch (scenario) {
 
