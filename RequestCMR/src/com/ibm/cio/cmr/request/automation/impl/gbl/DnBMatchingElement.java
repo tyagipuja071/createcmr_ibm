@@ -296,8 +296,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           // CREATCMR-9938 (KVK Implementation)
 
 						if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
-								&& data.getCustGrp().equalsIgnoreCase("LOCAL")
-								&& data.getCustSubGrp().equalsIgnoreCase("COMME") && payGoAddredited) {
+								&& "LOCAL".equalsIgnoreCase(data.getCustGrp())
+								&& "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
 							boolean taxCd2Found = false;
 							String taxCd2Val = null;
 							long confCode = 0L;
