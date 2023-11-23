@@ -306,7 +306,7 @@ public class DEDupReqCheckElement extends DupReqCheckElement {
 
       if (matchedData != null) {
         if ((scenarioSubType.contains("DC") && matchedData.getCustGrp().equals(scenarioType) && matchedData.getCustSubGrp().equals(scenarioSubType))
-            || (!scenarioSubType.contains("DC") && matchedData.getCustGrp().equals(scenarioType)) && !matchedData.getCustSubGrp().contains("DC")) {
+            || (!scenarioSubType.contains("DC") && !matchedData.getCustSubGrp().contains("DC"))) {
           filteredMatches.add(res);
         }
       }
