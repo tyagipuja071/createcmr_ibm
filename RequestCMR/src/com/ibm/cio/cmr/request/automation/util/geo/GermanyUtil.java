@@ -321,17 +321,20 @@ public class GermanyUtil extends AutomationUtil {
       case "DC":
       case "XDC":
         // Duplicate Request checks Based on Name and Addresses for DC and XDC
-        if (scenario.equals("DC") || scenario.equals("XDC")) {
-          List<String> dupReqIds = checkDuplicateRequestForDC(entityManager, requestData);
-          if (!dupReqIds.isEmpty()) {
-            details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
-            details.append(StringUtils.join(dupReqIds, "\n"));
-            engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
-            return false;
-          } else {
-            details.append("No duplicate requests found");
-          }
-        }
+        // if (scenario.equals("DC") || scenario.equals("XDC")) {
+        // List<String> dupReqIds = checkDuplicateRequestForDC(entityManager,
+        // requestData);
+        // if (!dupReqIds.isEmpty()) {
+        // details.append("Duplicate request found with matching customer
+        // name.\nMatch found with Req id :").append("\n");
+        // details.append(StringUtils.join(dupReqIds, "\n"));
+        // engineData.addRejectionComment("DUPR", "Duplicate request found with
+        // matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+        // return false;
+        // } else {
+        // details.append("No duplicate requests found");
+        // }
+        // }
         // Duplicate CMR checks Based on Name and Addresses
         if ("DC".equals(data.getCustSubGrp()) || "XDC".equals(data.getCustSubGrp())) {
           valid = duplicateCmrCheck3PADC(requestData, engineData, details, data, zs01, zi01, valid, scenario);
@@ -1192,16 +1195,15 @@ public class GermanyUtil extends AutomationUtil {
                   isNegativeCheckNeedeed = false;
                   break;
 
-                 } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) && shipTo != null
-                    && (changes.isAddressChanged(addrType))) {
+                } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) && shipTo != null && (changes.isAddressChanged(addrType))) {
                   validation.setSuccess(true);
                   LOG.debug("Updates to relevant addresses is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
                   validation.setMessage("Validated");
                   isNegativeCheckNeedeed = false;
                   break;
-                
-                 } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
+
+                } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
                   validation.setSuccess(true);
                   LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
