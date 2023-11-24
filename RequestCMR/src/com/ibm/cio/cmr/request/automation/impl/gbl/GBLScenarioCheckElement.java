@@ -55,8 +55,6 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       isPaygoUpgrade = true;
     }
     if ("Y".equals(admin.getScenarioVerifiedIndc()) || isPaygoUpgrade) {
-      log.debug("***Skip processing of element");
-    if ("Y".equals(admin.getScenarioVerifiedIndc())) {
       log.debug("Skip processing of element");
       result.setDetails("Skip processing of element");
       result.setOnError(false);
