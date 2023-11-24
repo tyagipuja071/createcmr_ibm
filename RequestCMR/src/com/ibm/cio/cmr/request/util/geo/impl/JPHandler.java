@@ -1078,7 +1078,15 @@ public class JPHandler extends GEOHandler {
     // 1652096 - set abbNm upper case
     // // import Company and Estab abbNm, but not Account abbNm
     // if ("ZC01".equals(addrType) || "ZE01".equals(addrType)) {
-    address.setCustNm3(currentRecord.getCmrName3() == null ? currentRecord.getCmrName3() : currentRecord.getCmrName3().trim());
+    if ("ZC01".equals(addrType) || "ZE01".equals(addrType)) {
+      if (currentRecord.getCmrName3() == null) {
+        address.setCustNm3(
+            currentRecord.getCmrName3().length() > 22 ? currentRecord.getCmrName3().substring(0, 22) : currentRecord.getCmrName3().trim());
+      }
+    } else {
+      address.setCustNm3(currentRecord.getCmrName3() == null ? currentRecord.getCmrName3() : currentRecord.getCmrName3().trim());
+    }
+
     converAbbNm(address.getCustNm3(), address);
     // }
 
