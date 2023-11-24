@@ -696,11 +696,22 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         String comment = JPHandler.addJpRALogicOnSendForProcessing(entityManager, admin, data, model);
         RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
       } else if ("BFKSC".equals(data.getCustSubGrp())) {
-        if (!"C".equalsIgnoreCase(admin.getCustType()) && !"CR".equalsIgnoreCase(admin.getCustType())
-            && (!"U".equalsIgnoreCase(admin.getReqType()) && (!"CEA".equalsIgnoreCase(admin.getCustType())
-                || !"CE".equalsIgnoreCase(admin.getCustType()) || !"C".equalsIgnoreCase(admin.getCustType())))) {
-          String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
-          RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+        // check for default approvals, if none send to PCP
+        String result = null;
+        result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+        if (result == null) {
+          // do not send to PCP Subsidiary Company
+          if (("C".equalsIgnoreCase(admin.getReqType()) && !("C".equalsIgnoreCase(admin.getCustType())))) {
+            String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
+            RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+
+            // ROL Flag Change on Company No
+            // Update Establishment only/Establishment & Company
+          } else if (("U".equalsIgnoreCase(admin.getReqType()) && !("C".equalsIgnoreCase(admin.getCustType())
+              || "CE".equalsIgnoreCase(admin.getCustType()) || "CR".equalsIgnoreCase(admin.getReqType())))) {
+            String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
+            RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+          }
         }
       }
     }
