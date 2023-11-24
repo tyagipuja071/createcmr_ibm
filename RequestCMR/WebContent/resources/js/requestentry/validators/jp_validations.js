@@ -6935,13 +6935,13 @@ function contractSignDateValidator() {
       validate : function() {
         console.log('Checking requested Contract Sign Date...');
         var agreementSignDate = FormManager.getActualValue('agreementSignDate');
-        var numPattern = /^\d{2}((0|[1-9]|[10-12]){2})((0|[1-9]|[10-31]){2})$/g;
+        var datePatternYYMMDD = /^\d{2}((0|[1-9]|[10-12]){2})((0|[1-9]|[10-31]){2})$/g;
 
         if (agreementSignDate != '' && agreementSignDate != null) {
           if (agreementSignDate.length >= 1 && agreementSignDate.length != 6) {
             return new ValidationResult(null, false, 'Contract Sign Date length should be 6 characters long.');
           }
-          if (!agreementSignDate.match(numPattern)) {
+          if (!agreementSignDate.match(datePatternYYMMDD)) {
             return new ValidationResult(null, false, 'Contract Sign Date format should be YYMMDD.');
           }
         }
