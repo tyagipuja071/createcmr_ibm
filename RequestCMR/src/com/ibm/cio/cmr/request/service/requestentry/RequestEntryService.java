@@ -709,7 +709,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
             // ROL Flag Change on Company No
             // Update Establishment only/Establishment & Company
           } else if (("U".equalsIgnoreCase(admin.getReqType()) && !("C".equalsIgnoreCase(admin.getCustType())
-              || "CE".equalsIgnoreCase(admin.getCustType()) || "CR".equalsIgnoreCase(admin.getReqType())))) {
+              || "CR".equalsIgnoreCase(admin.getReqType()) || "CE".equalsIgnoreCase(admin.getCustType())))) {
             String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
             RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
           }
