@@ -266,22 +266,34 @@
           <cmr:field path="identClient" id="identClient" fieldId="ROLAccount" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
-          	  <cmr:column span="2">
-      		<p>
-        	  <cmr:label fieldId="territoryCd"><cmr:fieldLabel fieldId="TaigaCode" />: </cmr:label>
-        	  <cmr:field path="territoryCd" id="territoryCd" fieldId="TaigaCode" tabId="MAIN_IBM_TAB" />
-      		</p>
-     </cmr:column>
-    </cmr:row> 
-     <cmr:row addBackground="true"> 
+    </cmr:row>
+    <cmr:row addBackground="false">
+      <cmr:column span="2">
+        <p>
+          <cmr:label fieldId="territoryCd">
+            <cmr:fieldLabel fieldId="TaigaCode" />:
+          </cmr:label>
+          <cmr:field path="territoryCd" id="territoryCd" fieldId="TaigaCode" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
       <cmr:column span="2" containerForField="AECISubDate">
         <p>
-      <cmr:label fieldId="agreementSignDate">
+          <cmr:label fieldId="agreementSignDate">
             <cmr:fieldLabel fieldId="AECISubDate" />:
           </cmr:label>
           <cmr:field path="agreementSignDate" id="agreementSignDate" fieldId="AECISubDate" tabId="MAIN_IBM_TAB" />
         </p>
-      </cmr:column>  
+      </cmr:column>
+      <cmr:column span="2" containerForField="JITReqGroupId">
+        <p>
+          <cmr:label fieldId="svcArOffice">
+            <cmr:fieldLabel fieldId="JITReqGroupId" />:
+          </cmr:label>
+          <cmr:field path="svcArOffice" id="svcArOffice" fieldId="JITReqGroupId" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:row>
+     <cmr:row addBackground="true">
       <cmr:column span="2" containerForField="ModeOfPayment">
         <p>
       <cmr:label fieldId="modeOfPayment">
