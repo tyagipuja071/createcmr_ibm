@@ -144,13 +144,19 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
           } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          } else if (payGoAddredited && !hasValidMatches) {
+          } else if (payGoAddredited && !hasValidMatches && !"PAYG".equals(admin.getReqReason())) {
             LOG.debug("DnB Matches not found for PayGo.");
             admin.setPaygoProcessIndc("Y");
             result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");
           }
+          else if (payGoAddredited && !hasValidMatches && "PAYG".equals(admin.getReqReason())) {
+            LOG.debug("DnB Matches not found for PayGo.");
+            result.setOnError(true);
+            result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
+            result.setResults("No Matches");
+           }
         } else {
           // actions to be performed only when matches with high confidence are
           // found
@@ -280,8 +286,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
          // CREATCMR-9938 (KVK Implementation)
 
             if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
-                && data.getCustGrp().equalsIgnoreCase("LOCAL")
-                && data.getCustSubGrp().equalsIgnoreCase("COMME") && payGoAddredited) {
+                && "LOCAL".equalsIgnoreCase(data.getCustGrp())
+                && "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
               boolean taxCd2Found = false;
               String taxCd2Val = null;
               long confCode = 0L;

@@ -2629,6 +2629,11 @@ function executeRecreateCMR() {
 }
 
 function checkIfDataOrAddressFieldsUpdated(frmCMR) {
+	var reqRsn = FormManager.getActualValue('reqReason');
+  if(reqRsn == 'PAYG')
+	  {
+	  return;
+	  }
   console.log("checkIfDataOrAddressFieldsUpdated..............");
   var reqType = FormManager.getActualValue('reqType');
   var isNoDataUpdated = false;

@@ -35,8 +35,12 @@ public class FieldComputationElement extends OverridingElement {
     log.debug("Entering FieldComputationElement()");
     AutomationResult<OverrideOutput> result = null;
     AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(issuingCntry);
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
     log.debug("Automation Util for " + issuingCntry + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION)) {
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION) || isPaygoUpgrade) {
       results.setDetails("Coverage calculation skipped due to previous element execution results.");
       results.setResults("Skipped");
       results.setProcessOutput(results.getProcessOutput());
