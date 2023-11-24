@@ -1101,7 +1101,15 @@ public class JPHandler extends GEOHandler {
     // 1652096 - set abbNm upper case
     // // import Company and Estab abbNm, but not Account abbNm
     // if ("ZC01".equals(addrType) || "ZE01".equals(addrType)) {
-    address.setCustNm3(currentRecord.getCmrName3() == null ? currentRecord.getCmrName3() : currentRecord.getCmrName3().trim());
+    if ("ZC01".equals(addrType) || "ZE01".equals(addrType)) {
+      if (currentRecord.getCmrName3() == null) {
+        address.setCustNm3(
+            currentRecord.getCmrName3().length() > 22 ? currentRecord.getCmrName3().substring(0, 22) : currentRecord.getCmrName3().trim());
+      }
+    } else {
+      address.setCustNm3(currentRecord.getCmrName3() == null ? currentRecord.getCmrName3() : currentRecord.getCmrName3().trim());
+    }
+
     converAbbNm(address.getCustNm3(), address);
     // }
 
@@ -1905,7 +1913,16 @@ public class JPHandler extends GEOHandler {
         entityManager.flush();
       }
     }
-    addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
+
+    if ("ZC01".equals(addr.getId().getAddrType()) || "ZE01".equals(addr.getId().getAddrType())) {
+      if (iAddr != null && iAddr.getIntlCustNm1() != null) {
+        addr.setCustNm3(iAddr.getIntlCustNm1().length() > 22 ? iAddr.getIntlCustNm1().substring(0, 22) : iAddr.getIntlCustNm1());
+      } else {
+        addr.setCustNm3("");
+      }
+    } else {
+      addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
+    }
 
     setFieldBeforeAddrSave(entityManager, addr);
 
@@ -2701,6 +2718,14 @@ public class JPHandler extends GEOHandler {
     }
 
     if (kna1 != null) {
+      if ("ZC01".equals(intlAddr) || "ZE01".equals(intlAddr)) {
+        String fullEnglish = kna1.getName1() + kna1.getName2();
+        if (fullEnglish != null) {
+          intlAddr.setIntlCustNm1(fullEnglish.length() > 22 ? fullEnglish.substring(0, 22) : fullEnglish);
+        }
+      } else {
+        intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
+      }
       intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
       intlAddr.setAddrTxt(kna1.getStras());
       intlAddr.setCity1(kna1.getOrt01());
