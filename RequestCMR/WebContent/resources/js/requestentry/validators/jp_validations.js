@@ -7009,6 +7009,7 @@ function setContractSignDate() {
       FormManager.setValue('agreementSignDate', currentDate);
     }
   }
+}
 
 function convertEnglishFieldsToSBCS(cntry, addressMode, details) {
   convertFieldsToSBCS(['cnCustName1', 'cnAddrTxt', 'cnCity', 'cnDistrict']);
