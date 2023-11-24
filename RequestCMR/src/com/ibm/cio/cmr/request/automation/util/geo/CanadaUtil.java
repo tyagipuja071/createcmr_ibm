@@ -785,6 +785,11 @@ public class CanadaUtil extends AutomationUtil {
       LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
       boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
 
+      boolean isPaygoUpgrade=false; 
+      if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
+        isPaygoUpgrade=true;
+      }
+      
       if (changes.isLegalNameChanged() && !payGoAddredited) {
         engineData.addNegativeCheckStatus("_legalNameChanged", "Legal Name change should be validated.");
         details.append("Legal Name change should be validated.\n");
@@ -792,6 +797,13 @@ public class CanadaUtil extends AutomationUtil {
         validation.setMessage("Not Validated");
       }
 
+      if (changes.isLegalNameChanged() && isPaygoUpgrade) {
+        engineData.addNegativeCheckStatus("_legalNameChanged", "Legal Name change should be validated.");
+        details.append("Legal Name change should be validated.\n");
+        validation.setSuccess(false);
+        validation.setMessage("Not Validated");
+      }
+      
       if (cmdeReview) {
         engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
         details.append("Updates to one or more fields cannot be validated.\n");
