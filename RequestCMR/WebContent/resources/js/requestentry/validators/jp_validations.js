@@ -116,6 +116,8 @@ function afterConfigForJP() {
   // CREATCMR-788
   addressQuotationValidator();
   addROLFieldLogic();
+
+  setContractSignDate();
 }
 
 /**
@@ -210,8 +212,7 @@ function disableAddrFieldsForRolUpdate() {
 
     var custType = FormManager.getActualValue('custType');
     if (custType == 'CR' || custType == 'AR') {
-      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
-          'companySize' ];
+      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2', 'companySize' ];
       for (var i = 0; i < accountFieldList.length; i++) {
         setAddrFieldHide(accountFieldList[i]);
       }
@@ -265,8 +266,7 @@ function handleRAFields() {
   var RAFieldsList = [ 'jpCloseDays1', 'jpCloseDays2', 'jpCloseDays3', 'jpCloseDays4', 'jpCloseDays5', 'jpPayCycles1', 'jpPayCycles2', 'jpPayCycles3', 'jpPayCycles4', 'jpPayCycles5', 'jpPayDays1',
       'jpPayDays2', 'jpPayDays3', 'jpPayDays4', 'jpPayDays5',
       // Adding fields for Day 6 to 8
-      'jpCloseDays6', 'jpCloseDays7', 'jpCloseDays8', 'jpPayCycles6', 'jpPayCycles7', 'jpPayCycles8', 'jpPayDays6', 'jpPayDays7', 'jpPayDays8', 'agreementSignDate', 'modeOfPayment',
-      'marketingContCd', 'dealerNo' ];
+      'jpCloseDays6', 'jpCloseDays7', 'jpCloseDays8', 'jpPayCycles6', 'jpPayCycles7', 'jpPayCycles8', 'jpPayDays6', 'jpPayDays7', 'jpPayDays8', 'modeOfPayment', 'marketingContCd', 'dealerNo' ];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'RACMR') {
     setRAFieldsMandatory();
@@ -6929,6 +6929,67 @@ function setCreditToCustNoOptional4ISOCU() {
   }
 }
 
+function contractSignDateValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('Checking requested Contract Sign Date...');
+        var agreementSignDate = FormManager.getActualValue('agreementSignDate');
+        var numPattern = /^\d{2}((0|[1-9]|[10-12]){2})((0|[1-9]|[10-31]){2})$/g;
+
+        if (agreementSignDate != '' && agreementSignDate != null) {
+          if (agreementSignDate.length >= 1 && agreementSignDate.length != 6) {
+            return new ValidationResult(null, false, 'Contract Sign Date length should be 6 characters long.');
+          }
+          if (!agreementSignDate.match(numPattern)) {
+            return new ValidationResult(null, false, 'Contract Sign Date format should be YYMMDD.');
+          }
+        }
+
+        return new ValidationResult({
+          id : 'agreementSignDate',
+          type : 'text',
+          name : 'agreementSignDate'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function setContractSignDate() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  var agreementSignDate = FormManager.getActualValue('agreementSignDate');
+  const
+  date = new Date();
+
+  if (viewOnly == 'true') {
+    return;
+  }
+
+  var dd = date.getDate().toString();
+  // get the month (adding 1 because months are zero-based)
+  var mm = date.getMonth() + 1;
+  var yy = date.getFullYear().toString().substring(2, 4);
+
+  // add leading zero if the day is less than 10
+  if (dd < 10) {
+    dd = '0' + dd;
+  }
+  // add leading zero if the month is less than 10
+  if (mm < 10) {
+    mm = '0' + mm;
+  }
+
+  currentDate = yy + mm.toString() + dd;
+  if (reqType == 'C') {
+    // set contract sign date if field is empty
+    if (agreementSignDate == '' || agreementSignDate == null) {
+      FormManager.setValue('agreementSignDate', currentDate);
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -7058,5 +7119,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setAbbrevNmReqForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAddrFunction(setAddrFieldsBehavior, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(setAddrFieldsUpdateBehavior, GEOHandler.JP);
+
+  GEOHandler.registerValidator(contractSignDateValidator, [ SysLoc.JAPAN ], null, true);
 
 });
