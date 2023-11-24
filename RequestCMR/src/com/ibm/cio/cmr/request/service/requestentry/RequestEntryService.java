@@ -56,6 +56,7 @@ import com.ibm.cio.cmr.request.model.requestentry.CheckListModel;
 import com.ibm.cio.cmr.request.model.requestentry.DataModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.requestentry.LicenseModel;
 import com.ibm.cio.cmr.request.model.requestentry.NotifyListModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.requestentry.SubindustryIsicSearchModel;
@@ -647,7 +648,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     if (addr == null)
       addr = new Addr();
     boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
-
     if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && (CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())
         || SystemLocation.SPAIN.equals(model.getCmrIssuingCntry()))) {
 
@@ -696,11 +696,23 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         String comment = JPHandler.addJpRALogicOnSendForProcessing(entityManager, admin, data, model);
         RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
       } else if ("BFKSC".equals(data.getCustSubGrp())) {
-        if (!"C".equalsIgnoreCase(admin.getCustType()) && !"CR".equalsIgnoreCase(admin.getCustType())
-            && (!"U".equalsIgnoreCase(admin.getReqType()) && (!"CEA".equalsIgnoreCase(admin.getCustType())
-                || !"CE".equalsIgnoreCase(admin.getCustType()) || !"C".equalsIgnoreCase(admin.getCustType())))) {
-          String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
-          RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+        // check for default approvals, if none send to PCP
+        String result = null;
+        result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+        if (result == null) {
+          // do not send to PCP
+          // Subsidiary Company
+          if (("C".equalsIgnoreCase(admin.getReqType()) && !("C".equalsIgnoreCase(admin.getCustType())))) {
+            String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
+            RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+            // Company
+            // ROL Flag Change on Company No
+            // Update Establishment only/Establishment & Company
+          } else if (("U".equalsIgnoreCase(admin.getReqType()) && !("C".equalsIgnoreCase(admin.getCustType())
+              || "CR".equalsIgnoreCase(admin.getReqType()) || "CE".equalsIgnoreCase(admin.getCustType())))) {
+            String comment = JPHandler.addJpKSCLogicOnSendForProcessing(entityManager, admin, data, model);
+            RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+          }
         }
       }
     }
@@ -1022,7 +1034,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         to.setLocationNo(data.getLocationNumber());
       }
 
-      if (PageManager.fromGeo("EMEA", "758")) {
+      if (PageManager.fromGeo("EMEA", data.getCmrIssuingCntry())) {
         this.log.debug("Getting payment mode and location no...");
         to.setPaymentMode(data.getModeOfPayment());
       }
@@ -1291,6 +1303,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     mv.addObject("approval", new ApprovalResponseModel());
     mv.addObject("fiscalDataModal", new ValidateFiscalDataModel());
     mv.addObject("autoDnbModel", new AutoDNBDataModel());
+    mv.addObject("licenseModel", new LicenseModel());
 
     EntityManager entityManager = JpaManager.getEntityManager();
 

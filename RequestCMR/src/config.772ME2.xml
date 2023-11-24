@@ -94,7 +94,7 @@
 					<width>10</width>
 					<length>1</length>
 				</column>
-				<column>
+                <column>
                     <label>STC order block code</label>
                     <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
                     <width>15</width>
@@ -196,6 +196,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -273,6 +279,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -350,6 +362,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -427,6 +445,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -504,6 +528,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -582,6 +612,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>

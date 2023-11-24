@@ -645,6 +645,7 @@ public class MCOFstHandler extends MCOHandler {
             String vat = ""; // 12
             String deptNo = ""; // 14
             String city = "";
+            String stateProv = ""; // 7
             String postalcd = "";
             String phoneNo = ""; // 10
             String phoneNoData = ""; // 13
@@ -705,29 +706,31 @@ public class MCOFstHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(6);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
-              postalcd = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
-              landedcountry = validateColValFromCell(currCell);
+              postalcd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
+              landedcountry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
               addnameinfo = validateColValFromCell(currCell);
 
               if ("Mail-to Address".equalsIgnoreCase(sheet.getSheetName()) || "Bill-to Address".equalsIgnoreCase(sheet.getSheetName())
                   || "Sold-to Address".equalsIgnoreCase(sheet.getSheetName())) {
-                currCell = (XSSFCell) row.getCell(10);
+                currCell = (XSSFCell) row.getCell(11);
                 poBox = validateColValFromCell(currCell);
                 if (currCell != null) {
                   DataFormatter df = new DataFormatter();
-                  poBox = df.formatCellValue(row.getCell(10));
+                  poBox = df.formatCellValue(row.getCell(11));
                 }
               }
             }
 
             if ("Ship-to Address".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(10);
+              currCell = (XSSFCell) row.getCell(11);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNo = df.formatCellValue(row.getCell(10));
+                phoneNo = df.formatCellValue(row.getCell(11));
               }
             }
 
@@ -767,6 +770,16 @@ public class MCOFstHandler extends MCOHandler {
                 if (StringUtils.isBlank(city)) {
                   LOG.trace("City is required. ");
                   error.addError(row.getRowNum(), "City", "City is required. ");
+                }
+
+                String pattern = "^[a-zA-Z0-9]*$";
+                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                  LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedcountry)) {
+                  LOG.trace("State/Province and Landed country both should be filled");
+                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
                 }
 
                 if (StringUtils.isBlank(landedcountry)) {

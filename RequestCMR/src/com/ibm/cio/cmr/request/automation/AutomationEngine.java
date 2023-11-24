@@ -186,11 +186,22 @@ public class AutomationEngine {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
+    
+
+    if (isPaygoUpgrade) {
+      requestData.getData().setOrdBlk(null);
+    }
+
 
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
     boolean isUsTaxSkipToPpn = false;
+    boolean isEroSkipToPpn = false;
     boolean usProliferationCntrySkip = false;
     boolean requesterFromTaxTeam = false;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
@@ -221,6 +232,12 @@ public class AutomationEngine {
       }
     }
 
+    // Skip Automation elements for HK, MO, CN for TREC
+    if (Arrays.asList("641").contains(requestData.getData().getCmrIssuingCntry())
+        && "TREC".equals(requestData.getAdmin().getReqReason())) {
+      isEroSkipToPpn = true;
+    }
+
     for (AutomationElement<?> element : this.elements) {
       // determine if element is to be skipped
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
@@ -232,15 +249,17 @@ public class AutomationEngine {
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
       // CREATCMR-4872
-      if (isUsTaxSkipToPcp) {
+      if (isUsTaxSkipToPcp || isEroSkipToPpn) {
         break;
       }
 
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
       }
+      
+    
       // handle the special ALL types (approvals)
-      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)) {
+      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType) || isPaygoUpgrade) {
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
 
@@ -288,6 +307,7 @@ public class AutomationEngine {
             actionsOnError.add(element.getActionOnError());
             if (element.isStopOnError()) {
               if ((element instanceof CompanyVerifier) && payGoAddredited) {
+                // if (element instanceof CompanyVerifier) {
                 // don't stop for paygo accredited and verifier element
                 LOG.debug("Error in " + element.getProcessDesc() + " but continuing process for PayGo.");
               } else {
@@ -331,6 +351,16 @@ public class AutomationEngine {
       lastElementIndex++;
     }
 
+    boolean sccIsValid = false;
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+      String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
+      if ("N".equals(setPPNFlag)) {
+        sccIsValid = true;
+      }
+    } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
+      checkNZBNAPI(stopExecution, actionsOnError);
+    }
+
     if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
       checkNZBNAPI(stopExecution, actionsOnError);
     }
@@ -344,7 +374,6 @@ public class AutomationEngine {
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
     }
-
     // check company verified info
     if (compInfoSrc != null && StringUtils.isNotBlank(compInfoSrc)) {
       if (!"N".equals(admin.getCompVerifiedIndc())) {
@@ -391,6 +420,10 @@ public class AutomationEngine {
           createHistory(entityManager, admin, "System failed to complete processing during the retry. Please wait a while then reprocess the record.",
               AutomationConst.STATUS_AWAITING_PROCESSING, "Automated Processing", reqId, appUser, null, null, false, null);
         }
+      } else if (isEroSkipToPpn) {
+        createComment(entityManager, "Automation Elements skipped for Temporary Reactive Embargo request. Sending the request for CMDE validation.",
+            reqId, appUser);
+        admin.setReqStatus("PPN");
       } else {
         boolean moveToNextStep = true;
         // get rejection comments
@@ -409,20 +442,23 @@ public class AutomationEngine {
           moveForPayGo = true;
         }
 
-        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI").contains(data.getCustSubGrp())) {
-       // admin.setPaygoProcessIndc("Y");
+        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI","CBPRI").contains(data.getCustSubGrp())) {
+     //   admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
+        
+  
 
         if ("U".equals(admin.getReqType())) {
-          if ("PG".equals(data.getOrdBlk())) {
+          if ("PG".equals(data.getOrdBlk()) && !"PAYG".equals(admin.getReqReason())) {
       //      admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
-          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
+          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited &&  !"PAYG".equals(admin.getReqReason())) {
         //    admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
+
 
         if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
@@ -431,7 +467,6 @@ public class AutomationEngine {
           // data.setUsSicmen("8888");
           // data.setSubIndustryCd("ZZ");
         } else {
-
           if (!actionsOnError.isEmpty()) {
             // an error has occurred
             if (actionsOnError.contains(ActionOnError.Reject)) {
@@ -504,7 +539,7 @@ public class AutomationEngine {
           }
         }
         if (moveToNextStep) {
-
+          LOG.debug("Moving to next step for " + reqId + ", Cntry is " + data.getCmrIssuingCntry());
           // if there is anything that changed on the request via automated
           // import of overrides /match /standard output, do a save
           if (hasOverrideOrMatchingApplied) {

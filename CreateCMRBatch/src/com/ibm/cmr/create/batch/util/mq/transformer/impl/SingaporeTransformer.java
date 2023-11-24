@@ -38,7 +38,7 @@ public class SingaporeTransformer extends ASEANTransformer {
     String cluster = !StringUtils.isEmpty(handler.cmrData.getApCustClusterId()) ? handler.cmrData.getApCustClusterId() : "";
     String gbSegCode = !StringUtils.isEmpty(handler.cmrData.getClientTier()) ? handler.cmrData.getClientTier() : "";
     String countryZS01 = getLandedCntryInZS01(handler);
-    String CtryText = !StringUtils.isEmpty(handler.cmrData.getVat()) ? handler.cmrData.getVat() : "";
+    String CtryText = !StringUtils.isEmpty(handler.cmrData.getVat()) ? handler.cmrData.getVat() : "";    
     if (!StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId()) && handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.BANGLADESH)) {
       handler.messageHash.put("CntryNo", SystemLocation.SINGAPORE);
       handler.messageHash.put("CustNo", handler.mqIntfReqQueue.getCmrNo());
@@ -133,10 +133,10 @@ public class SingaporeTransformer extends ASEANTransformer {
 
     // set CtryText blank for SG - CMR-4985
     // handler.messageHash.put("CtryText", "");
-
+    
     // Connect UEN# to COUNTRY USE - CREATCMR-5258
     handler.messageHash.put("CtryText", CtryText);
-
+    
   }
 
   @Override

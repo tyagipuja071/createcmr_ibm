@@ -37,7 +37,7 @@ public class KunnrExt extends BaseEntity<KunnrExtPK> implements Serializable {
   }
 
   @Column(name = "VAT_IND")
-  private String vatInd;
+  private String vatInd; 
 
   @Column(name = "GOE_IND")
   private String goeInd;
@@ -510,5 +510,4 @@ public class KunnrExt extends BaseEntity<KunnrExtPK> implements Serializable {
   public void setVatInd(String vatInd) {
     this.vatInd = vatInd;
   }
-  
 }

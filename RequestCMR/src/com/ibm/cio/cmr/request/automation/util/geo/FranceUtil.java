@@ -103,6 +103,7 @@ public class FranceUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/postalCdStarts", "postalCdStarts");
       digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
       digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
+      digester.addBeanPropertySetter("mappings/mapping/isicCds", "isicCds");
       digester.addBeanPropertySetter("mappings/mapping/sbo", "sbo");
       digester.addBeanPropertySetter("mappings/mapping/isicCds", "isicCds");
       digester.addBeanPropertySetter("mappings/mapping/countryLanded", "countryLanded");
@@ -216,11 +217,20 @@ public class FranceUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
+    LOG.debug("***FranceUtil.performScenarioValidation");
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
     Addr zi01 = requestData.getAddress("ZI01");
-
+    String custGrp = data.getCustGrp();
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
       String scenarioDesc = getScenarioDescription(entityManager, data);
@@ -244,16 +254,19 @@ public class FranceUtil extends AutomationUtil {
         // remove duplicate address
         removeDuplicateAddresses(entityManager, requestData, details);
       }
+      String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBIEM", "XBLUM" };
+      if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+            false, requestData);
+      }
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
       case SCENARIO_PRIVATE_PERSON:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
+        break;
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, true, requestData);
-
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -380,11 +393,14 @@ public class FranceUtil extends AutomationUtil {
           List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
               data.getCmrIssuingCntry());
           if (coverages != null && !coverages.isEmpty()) {
+
             CoverageContainer coverage = coverages.get(0);
             LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
                 + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-            covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
-                CalculateCoverageElement.COV_REQ, true);
+            // covElement.logCoverage(entityManager, engineData, requestData,
+            // null, details, overrides, null, coverage,
+            // CalculateCoverageElement.FINAL,
+            // CalculateCoverageElement.COV_REQ, true);
             FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
             String sboValue = "";
             if (overrides.getData().containsKey(sboKey)) {
@@ -1009,9 +1025,15 @@ public class FranceUtil extends AutomationUtil {
         details.append("Updates to one or more fields cannot be validated.\n");
         details.append("-" + change.getDataField() + " needs to be verified.\n");
         break;
+      case "VAT #":
+        if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData) && soldTo.getLandCntry().equals("GB")) {
+          engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+          details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+        }
+        break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -1123,6 +1145,9 @@ public class FranceUtil extends AutomationUtil {
                 engineData.addNegativeCheckStatus("_frSIRETCheckFailed", "Updated Bill-To address could not be validated in DnB.");
                 checkDetails.append("Updated Bill-To address could not be validated in DnB.\n");
               }
+            } else {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
             }
 
           } else if ("Y".equals(addr.getChangedIndc())) {
@@ -1330,6 +1355,7 @@ public class FranceUtil extends AutomationUtil {
   @Override
   protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
       boolean checkBluepages, RequestData reqData) {
+    LOG.debug("***FranceUtil.doPrivatePersonChecks");
     EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
     Data data = reqData.getData();
@@ -1369,7 +1395,9 @@ public class FranceUtil extends AutomationUtil {
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+
     String scenario = data.getCustSubGrp();
+
     switch (checkStatus) {
     case BluepagesError:
       engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
@@ -1396,7 +1424,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   private PrivatePersonCheckResult chkPrivatePersonRecordFR(String country, String landCntry, String name, boolean checkBluePages, Data data) {
-    LOG.debug("Validating Private Person record for " + name);
+    LOG.debug("***Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = chkDupPrivatePersonRecordFR(name, country, landCntry, data);
       String cmrNo = "";
@@ -1446,6 +1474,7 @@ public class FranceUtil extends AutomationUtil {
 
   private DuplicateCMRCheckResponse chkDupPrivatePersonRecordFR(String name, String issuingCountry, String landedCountry, Data data)
       throws Exception {
+    LOG.debug("***FranceUtil.chkDupPrivatePersonRecordFR");
     MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         MatchingServiceClient.class);
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();

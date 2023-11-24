@@ -7,10 +7,10 @@
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usTaxcd1Handler = null;
-var _usSicm = "";
-var _kukla = "";
 var _usIsicHandler = null;
 var _usCustClassHandler = null;
+var _usSicm = "";
+var _kukla = "";
 var _enterpriseHandler = null;
 var _usRestrictToHandler = null;
 var affiliateArray = {
@@ -457,6 +457,21 @@ function addCtcObsoleteValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addCustName1Validator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custName1 = FormManager.getActualValue('mainCustNm1');
+        if (custName1.length > 25) {
+          return new ValidationResult(null, false, 'Customer Name has exceeded the maximum characters allowed(the Length is 25). Please check and valid value.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 /**
  * After configuration for US
  */
@@ -464,7 +479,6 @@ function addCtcObsoleteValidator() {
 var resetIsicFlag = -1;
 
 function afterConfigForUS() {
-
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -506,8 +520,8 @@ function afterConfigForUS() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
-    FormManager.setValue('isuCd', '28');
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'IBMEM') {
+    FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
@@ -574,6 +588,10 @@ function afterConfigForUS() {
       var _custType = FormManager.getActualValue('custSubGrp');
       if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
         FormManager.setValue('isicCd', '357X');
+      } else if (_custType == 'IBMEM') {
+        FormManager.setValue('isicCd', '9500');
+        FormManager.setValue('subIndustryCd', 'WQ');
+        FormManager.readOnly('subIndustryCd');
       } else {
         var currIsic = FormManager.getActualValue('isicCd');
         if (currIsic != '357X') {
@@ -610,18 +628,6 @@ function afterConfigForUS() {
   if (_usTaxcd1Handler == null && FormManager.getField('taxCd1')) {
     _usTaxcd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
       setTaxcd1Status();
-    });
-  }
-
-  if (_usCustClassHandler == null && FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
-    _usCustClassHandler = dojo.connect(FormManager.getField('custClass'), 'onChange', function(value) {
-      onChangeCustClassOrKuklaAndIsic();
-    });
-  }
-
-  if (_usIsicHandler == null && FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
-    _usIsicHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
-      onChangeCustClassOrKuklaAndIsic();
     });
   }
 
@@ -702,7 +708,7 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
-  } else if (scenario != 'FSP POOL') {
+  } else if (scenario != 'FSP POOL' && scenario != 'IBMEM') {
     FormManager.enable('isuCd');
   }
 }
@@ -1124,6 +1130,7 @@ function orderBlockValidation() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 // CREATCMR-5447
 function TaxTeamUpdateAddrValidation() {
   FormManager.addFormValidator((function() {
@@ -1383,31 +1390,6 @@ function setPreviousIsicValue(newval) {
   oldIsic = newval;
 }
 
-function onChangeCustClassOrKuklaAndIsic() {
-  var onChangedKukla = FormManager.getActualValue('custClass');
-  var onChangedIsic = FormManager.getActualValue('usSicmen');
-  var previousKukla = oldKukla;
-  setPreviousKuklaValue(onChangedKukla);
-  var previousIsic = oldIsic;
-  setPreviousIsicValue(onChangedIsic);
-
-  if (onChangedKukla == '11' && onChangedIsic == '9500') {
-    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are changed.');
-  } else if ((onChangedKukla != '60' && onChangedIsic == '9500') || (onChangedKukla == '60' && onChangedIsic != '9500')) {
-    cmr.showAlert('Customer Classification Code/SICMEN of Consumer record has changed, please ensure Customer Classification Code 60 and SICMEN 9500 are selected.');
-  }
-}
-
-function getIsicAndKuklaFromDataRdc(value) {
-  var result = null;
-  result = cmr.query('DATA_RDC.ISIC', {
-    REQ_ID : FormManager.getActualValue('reqId')
-  });
-  if (result != null && result != '' && result.ret1 != undefined) {
-    return value == 'custClass' ? result.ret1 : result.ret2;
-  }
-  return null;
-}
 
 // CREATCMR-6987
 function setMainName1ForKYN() {
@@ -1444,12 +1426,35 @@ function addressQuotationValidator() {
   FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'District' ]);
   FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Building' ]);
   FormManager.addValidator('floor', Validators.NO_QUOTATION, [ 'Floor' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('custFax', Validators.NO_QUOTATION, [ 'FAX' ]);
   FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
   FormManager.addValidator('mainCustNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name 2' ]);
+}
+
+// CREATCMR-7213
+function federalIsicCheck() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custGrp = FormManager.getActualValue('custGrp');
+        var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+        var fedIsic = [ '9', '10', '11', '14' ];
+        if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '15' && custGrp != '5' && subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Federal ISIC cannot be used with Non-Federal scenarios.';
+          return new ValidationResult(null, false, genericMsg);
+        }
+        if (reqType == 'C' && custGrp == '15' && !subIndustryCd.startsWith('Y')) {
+          genericMsg = 'Only Federal ISIC can be used with Federal Strategic Partner scenarios.';
+          return new ValidationResult(null, false, genericMsg);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function custClassIsicValidator() {
@@ -1488,27 +1493,98 @@ function custClassIsicValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-// CREATCMR-7213
-function federalIsicCheck() {
+function validateCoverageData() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        var custGrp = FormManager.getActualValue('custGrp');
-        var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-        var fedIsic = [ '9', '10', '11', '14' ];
-        if (reqType == 'C' && !fedIsic.includes(custGrp) && custGrp != '15' && custGrp != '5' && subIndustryCd.startsWith('Y')) {
-          genericMsg = 'Federal ISIC cannot be used with Non-Federal scenarios.';
-          return new ValidationResult(null, false, genericMsg);
+        if (FormManager.getActualValue('reqType') != 'U') {
+          return new ValidationResult(null, true);
         }
-        if (reqType == 'C' && custGrp == '15' && !subIndustryCd.startsWith('Y')) {
-          genericMsg = 'Only Federal ISIC can be used with Federal Strategic Partner scenarios.';
-          return new ValidationResult(null, false, genericMsg);
+        var installAtUpdated = false;
+        for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+          if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+            record = _allAddressData[i];
+          }
+          type = record.addrType;
+          if (typeof (type) == 'object') {
+            type = type[0];
+          }
+          if (type == 'ZS01' && record.updateInd[0] == 'U') {
+            installAtUpdated = true;
+            break;
+          }
         }
-        return new ValidationResult(null, true);
+        if (!installAtUpdated) {
+          console.log('>>> Install At address not updated - not performing coverage change validations.');
+          return new ValidationResult(null, true);
+        }
+
+        var data = CmrServices.getAll('reqentry');
+        cmr.hideProgress();
+        if (data) {
+          if (data.error && data.error == 'Y') {
+            console.log('An error was occurred while trying to verify coverage changes.');
+            return new ValidationResult(null, true);
+          } else {
+            var showError = false;
+            var covError = false;
+            var errorMsg = 'The following values cannot be verified at the moment for coverage changes: ';
+            if (data.coverageError || data.buyingGroupError || data.glcError) {
+              covError = true;
+            }
+            if (data.coverageError) {
+              errorMsg += 'Coverage Type/ID';
+              showError = true;
+            }
+            if (data.buyingGroupError) {
+              errorMsg += (showError ? ', ' : '') + 'Buying Group ID';
+              showError = true;
+            }
+            if (data.glcError) {
+              errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+              showError = true;
+            }
+            if (showError) {
+              if (covError) {
+                errorMsg += '<br>Coverage data changes cannot be verified at this point.';
+                return new ValidationResult(null, true);
+              }
+            }
+          }
+          var retrievedCovId = (data.coverageType + data.coverageID) || "";
+          var retrievedBgId = data.buyingGroupID || "";
+          var retrievedGbgId = data.globalBuyingGroupID || "";
+          
+          var importedData = getImportedCovData();
+          if (importedData == undefined || importedData == null) {
+            console.log('An error was occurred while trying to verify coverage changes.');
+            return new ValidationResult(null, true);
+          }
+          var importedBgId = importedData.ret1;
+          var importedCovId = importedData.ret3;
+          var importedGbgId = importedData.ret5;
+          
+          if (importedBgId == undefined) {
+            return new ValidationResult(null, true);
+          }
+          
+          if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
+            return new ValidationResult(null, false, 'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t ' + 
+                'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure.');
+          }
+        }
       }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
+    }
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function getImportedCovData() {
+  var id = FormManager.getActualValue('reqId');
+  var result = cmr.query('GET_COV_DETAILS_REQID', {
+    REQ_ID : id
+  });
+  return result;
 }
 
 /* Register US Javascripts */
@@ -1521,6 +1597,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addInstallAtPOBoxValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCustName1Validator, [ SysLoc.USA ], null,
+  // true);
+  // GEOHandler.registerValidator(clientTierValidator, [ SysLoc.USA ], null,
+  // true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
@@ -1536,7 +1616,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
   // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
-  // ], null, true);
   // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
@@ -1567,6 +1646,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addressQuotationValidator, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
-  GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
-  GEOHandler.registerValidator(custClassIsicValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);  
+ GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  
 });

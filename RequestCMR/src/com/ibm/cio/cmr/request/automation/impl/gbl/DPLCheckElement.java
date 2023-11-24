@@ -185,7 +185,6 @@ public class DPLCheckElement extends ValidatingElement {
             entityManager.merge(addr);
           } else {
             Boolean isPrivate = isPrivate(data);
-
             Boolean errorStatus = false;
             try {
               dplResult = addrService.dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
@@ -402,7 +401,7 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("mainCustNam2", requestData.getAdmin().getMainCustNm2());
 
       try {
-        dplService.process(null, params);
+        dplService.doProcess(entityManager, null, params);
       } catch (Exception e) {
         log.warn("DPL results not attached to the request", e);
       }

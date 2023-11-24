@@ -41,6 +41,8 @@ import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -59,9 +61,9 @@ public class SingaporeUtil extends AutomationUtil {
   public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
   public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
-  private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
-  private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_DUMMY = "DUMMY";
+  private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
   private static final String SCENARIO_ECOSYS = "ECSYS";
   private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
@@ -71,6 +73,8 @@ public class SingaporeUtil extends AutomationUtil {
     long reqId = requestData.getAdmin().getId().getReqId();
     LOG.debug("Executing doCountryFieldComputations() for reqId=" + reqId);
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+
     boolean ifDefaultCluster = false;
     String cluster = data.getApCustClusterId();
     String govType = data.getGovType();
@@ -131,6 +135,13 @@ public class SingaporeUtil extends AutomationUtil {
       details.append("Customer is a non government organization" + "\n");
     }
 
+    // CREATCMR-6844
+    Addr landAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+    if ("TH".equalsIgnoreCase(landAddr.getLandCntry()) && "C".equalsIgnoreCase(admin.getReqType())) {
+      details.append("Processor review is needed as customer is from Thailand" + "\n");
+      engineData.addNegativeCheckStatus("ISTHA", "Customer is from Thailand");
+    }
+
     // CMR-2034 fix
     if ("34".equals(data.getIsuCd()) || "04".equals(data.getIsuCd())) {
       GBGResponse computedGbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
@@ -174,6 +185,12 @@ public class SingaporeUtil extends AutomationUtil {
       eleResults.append("Error On Field Calculation.");
     }
 
+    // for P2L Conversions , checking mandatory fields
+    // first identity if P2L
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isBlank(data.getVat())) {
+      details.append("UEN is a mandatory field. Processor Review will be required.\n");
+      engineData.addNegativeCheckStatus("_uenMissing", "UEN is a mandatory field.");
+    }
     results.setDetails(details.toString());
     results.setResults(eleResults.toString());
     results.setProcessOutput(overrides);
@@ -191,8 +208,8 @@ public class SingaporeUtil extends AutomationUtil {
      * Arrays.asList(scnarioList), false);
      */
     Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
     Admin admin = requestData.getAdmin();
+    String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
     Addr soldTo = requestData.getAddress("ZS01");
     String custNm1 = soldTo.getCustNm1();
@@ -267,6 +284,11 @@ public class SingaporeUtil extends AutomationUtil {
         LOG.debug("Error on searching for CMR in FIND CMR." + e.getMessage());
       }
     }
+    String[] scenariosToBeChecked = { "PRIV", "XPRIV" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
     switch (scenario) {
     // CREATCMR - 2031
     // case SCENARIO_BLUEMIX:
@@ -290,7 +312,6 @@ public class SingaporeUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_CROSS_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details, false, requestData);
     }
     result.setDetails(details.toString());
     return true;
@@ -502,6 +523,7 @@ public class SingaporeUtil extends AutomationUtil {
     // List<DnBMatchingResponse> matches = new ArrayList<DnBMatchingResponse>();
     // boolean matchesDnb = false;
     boolean cmdeReview = false;
+    // boolean cmdeReviewCustNme = false;
     for (String addrType : RELEVANT_ADDRESSES) {
       // if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
       // Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
@@ -817,6 +839,34 @@ public class SingaporeUtil extends AutomationUtil {
     data.setInacCd("");
     LOG.debug("INAC type value " + data.getInacType());
     data.setInacType("");
+  }
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+
+    String[] scenariosToBeChecked = { "PRIV" };
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRIV".equals(scenario))) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
   }
 
 }

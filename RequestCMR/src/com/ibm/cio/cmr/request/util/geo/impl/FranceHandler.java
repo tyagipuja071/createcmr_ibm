@@ -939,9 +939,9 @@ public class FranceHandler extends GEOHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(
-        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
-            "VAT", "VAT_IND","COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
+        "GEO_LOCATION_CD", "DUNS_NO"));
     return fields;
   }
 
@@ -1378,12 +1378,14 @@ public class FranceHandler extends GEOHandler {
             String cmrNo = ""; // 0
             String seqNo = "";// 1
             String postCd = "";// 7
-            String countryAddr = ""; // BillTo:10, other:9
+            String countryAddr = ""; // BillTo:11, other:10
             String legalName = ""; // 2
             String street = "";// 6
             String city = ""; // 8, billTo:9
             String poBox = ""; // billTo :8
-            String phone = ""; // 10, BillTo:11
+            String phone = ""; // 11, BillTo:10
+            String stateProv = ""; // BillTo 10 , others :9
+            String landCntry = ""; // BillTo 11 , others :10
 
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
@@ -1565,14 +1567,24 @@ public class FranceHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(7);
               postCd = validateColValFromCell(currCell);
 
-              int loopFlag = 9;
+              currCell = (XSSFCell) row.getCell(9);
+              stateProv = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              landCntry = validateColValFromCell(currCell);
+
+              int loopFlag = 10;
               String phoneTxt = "";
               if ("Bill To".equals(name)) {
-                loopFlag = 10;
+                currCell = (XSSFCell) row.getCell(10);
+                stateProv = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(11);
+                landCntry = validateColValFromCell(currCell);
+
+                loopFlag = 11;
                 currCell = (XSSFCell) row.getCell(9);
                 city = validateColValFromCell(currCell);
 
-                currCell = (XSSFCell) row.getCell(11);
+                currCell = (XSSFCell) row.getCell(12);
                 phone = validateColValFromCell(currCell);
                 phoneTxt = df.formatCellValue(currCell);
 
@@ -1582,9 +1594,23 @@ public class FranceHandler extends GEOHandler {
                 currCell = (XSSFCell) row.getCell(8);
                 city = validateColValFromCell(currCell);
 
-                currCell = (XSSFCell) row.getCell(10);
+                currCell = (XSSFCell) row.getCell(11);
                 phone = validateColValFromCell(currCell);
                 phoneTxt = df.formatCellValue(currCell);
+              }
+
+              String pattern = "^[a-zA-Z0-9]*$";
+              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                validations.add(error);
+              } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("State/Province and Landed country both should be filled");
+                error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+                validations.add(error);
               }
 
               if (!StringUtils.isBlank(phone) && !phoneTxt.matches("^[0-9]*$")) {

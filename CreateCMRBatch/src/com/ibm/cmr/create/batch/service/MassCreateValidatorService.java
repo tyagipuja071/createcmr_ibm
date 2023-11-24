@@ -154,6 +154,8 @@ public class MassCreateValidatorService extends BaseBatchService {
     refresh(entityManager, request);
     LOG.debug("Request Status: " + request.getReqStatus() + " Locked By: " + request.getLockBy());
 
+    sendToId = processingCenter;
+
     if ((!"SVA".equals(request.getReqStatus()) && !"SV2".equals(request.getReqStatus()))) {
       LOG.debug("Request " + request.getId().getReqId() + " already locked by another process or has invalid status. Skipping.");
       return;

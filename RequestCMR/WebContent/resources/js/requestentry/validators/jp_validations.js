@@ -6870,11 +6870,22 @@ function setAddrFieldsBehavior() {
     if (addrType == 'ZC01' || addrType == 'ZE01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+      $('#cnCustName1').attr('maxlength', '22');
+
+      var custFullEng = FormManager.getActualValue('cnCustName1');
+      if (custFullEng != null && custFullEng != '' && custFullEng != undefined) {
+        if (custFullEng.length > 22) {
+          fullEnglish = custFullEng.substring(0, 22);
+          FormManager.setValue('cnCustName1', fullEnglish);
+        }
+      }
+
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
       FormManager.resetValidations('cnDistrict');
       FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      $('#cnCustName1').attr('maxlength', '70');
     }
 
     if (custSubGrp == 'BFKSC') {
@@ -6904,11 +6915,21 @@ function setAddrFieldsUpdateBehavior() {
     if (addrType == 'ZC01' || addrType == 'ZE01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+      $('#cnCustName1').attr('maxlength', '22');
+
+      var custFullEng = FormManager.getActualValue('cnCustName1');
+      if (custFullEng != null && custFullEng != '' && custFullEng != undefined) {
+        if (custFullEng.length > 22) {
+          fullEnglish = custFullEng.substring(0, 22);
+          FormManager.setValue('cnCustName1', fullEnglish);
+        }
+      }
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
       FormManager.resetValidations('cnDistrict');
       FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      $('#cnCustName1').attr('maxlength', '70');
     }
 
     if (custSubGrp == 'BFKSC') {
@@ -6988,6 +7009,39 @@ function setContractSignDate() {
       FormManager.setValue('agreementSignDate', currentDate);
     }
   }
+
+function convertEnglishFieldsToSBCS(cntry, addressMode, details) {
+  convertFieldsToSBCS(['cnCustName1', 'cnAddrTxt', 'cnCity', 'cnDistrict']);
+}
+
+function convertFieldsToSBCS(fields) {
+  fields.forEach(field => {
+    dojo.connect(FormManager.getField(field), 'onChange', () => {
+      convertFieldToEnglish(field);
+    });
+  });
+}
+
+function convertFieldToEnglish(fieldName) {
+  const fieldValue = FormManager.getActualValue(fieldName);
+  const convertedValue = convert2SBCS(fieldValue);
+  FormManager.setValue(fieldName, convertedValue);
+}
+
+function convert2SBCS(input) {
+  var modifiedVal = '';
+  if (input != null && input.length > 0) {
+    // Convert input to uppercase before replacing characters
+    input = input.toUpperCase();
+
+    // Replace double-byte numbers and letters with their single-byte
+    // counterparts
+    modifiedVal = input.replace(/１/g, '1').replace(/２/g, '2').replace(/３/g, '3').replace(/４/g, '4').replace(/５/g, '5').replace(/６/g, '6').replace(/７/g, '7').replace(/８/g, '8').replace(/９/g, '9')
+        .replace(/０/g, '0').replace(/Ａ/g, 'A').replace(/Ｂ/g, 'B').replace(/Ｃ/g, 'C').replace(/Ｄ/g, 'D').replace(/Ｅ/g, 'E').replace(/Ｆ/g, 'F').replace(/Ｇ/g, 'G').replace(/Ｈ/g, 'H').replace(/Ｉ/g, 'I')
+        .replace(/Ｊ/g, 'J').replace(/Ｋ/g, 'K').replace(/Ｌ/g, 'L').replace(/Ｍ/g, 'M').replace(/Ｎ/g, 'N').replace(/Ｏ/g, 'O').replace(/Ｐ/g, 'P').replace(/Ｑ/g, 'Q').replace(/Ｒ/g, 'R').replace(/Ｓ/g, 'S')
+        .replace(/Ｔ/g, 'T').replace(/Ｕ/g, 'U').replace(/Ｖ/g, 'V').replace(/Ｗ/g, 'W').replace(/Ｘ/g, 'X').replace(/Ｙ/g, 'Y').replace(/Ｚ/g, 'Z').replace(/　/g, ' ').replace(/－/g, '-').replace(/―/g, '-').replace(/−/g, '-');
+  }
+  return modifiedVal;
 }
 
 dojo.addOnLoad(function() {
@@ -7076,6 +7130,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(enableRolFlag, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRA, GEOHandler.JP);
+  GEOHandler.addToggleAddrTypeFunction(convertEnglishFieldsToSBCS, GEOHandler.JP);
+
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);

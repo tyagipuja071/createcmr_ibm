@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
@@ -109,6 +110,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       AdminPK pk = new AdminPK();
       pk.setReqId(model.getReqId());
       Admin admin = entityManager.find(Admin.class, pk);
+
+      DataPK dataPk = new DataPK();
+      dataPk.setReqId(model.getReqId());
+      Data data = entityManager.find(Data.class, dataPk);
       /*
        * if (SystemLocation.NETHERLANDS.equals(model.getCmrIssuingCntry()) &&
        * (model.getAddrType().equals("ZD01"))) { newAddrSeq =
@@ -138,10 +143,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && geoHandler != null) {
         newAddrSeq = generateAddrSeqLD(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry(), geoHandler);
       }
-      if (geoHandler != null && newAddrSeq == null && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {      
-        newAddrSeq = geoHandler.generateModifyAddrSeqOnCopy(entityManager, model.getAddrType(), model.getReqId(), "",  model.getCmrIssuingCntry() );
+      if (geoHandler != null && newAddrSeq == null
+          && (SystemLocation.NEW_ZEALAND.equals(model.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(model.getCmrIssuingCntry()))) {
+        newAddrSeq = geoHandler.generateModifyAddrSeqOnCopy(entityManager, model.getAddrType(), model.getReqId(), "", model.getCmrIssuingCntry());
       }
-      
+
       if (geoHandler != null && newAddrSeq == null) {
         newAddrSeq = geoHandler.generateAddrSeq(entityManager, model.getAddrType(), model.getReqId(), model.getCmrIssuingCntry());
       }
@@ -150,10 +156,18 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-
         newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
-
       }
+
+      /*
+       * if (("866".equals(model.getCmrIssuingCntry()) ||
+       * "754".equals(model.getCmrIssuingCntry())) &&
+       * "U".equals(admin.getReqType())) { int legacyMaxSeq =
+       * getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(),
+       * data.getCmrNo()); if (legacyMaxSeq > Integer.parseInt(newAddrSeq)) {
+       * String maxSeq = Integer.toString(legacyMaxSeq); newAddrSeq =
+       * StringUtils.leftPad(maxSeq, 5, '0'); } }
+       */
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
         int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
@@ -230,7 +244,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
         // }
       }
-      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(model.getCmrIssuingCntry())) {
+      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
         if ("U".equals(admin.getReqType())) {
           String maxAddrSeq = null;
           maxAddrSeq = getMaxSequenceAddr(entityManager, model.getReqId());
@@ -239,6 +253,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           }
         }
       }
+
       model.setAddrSeq(newAddrSeq);
       if (addrExists(entityManager, model.getAddrType(), model.getAddrSeq(), model.getReqId())) {
         throw new CmrException(MessageUtil.ERROR_ALREADY_ADDRESS, uniqAddr.toString());
@@ -1380,7 +1395,6 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     request.setAddr2(addr.getAddrTxt2());
     request.setId(id);
     request.setPrivate(isPrivate);
-
     if (JPHandler.isJPIssuingCountry(issuingCountry))
       request.setCompanyName(addr.getCustNm3());
     else
@@ -2135,6 +2149,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
 
     iAddr = query.getSingleResult(IntlAddr.class);
+
+    // try with removed padded zeros in addr seq
+    if (iAddr == null) {
+      query.setParameter("ADDR_SEQ", StringUtils.stripStart(addr.getId().getAddrSeq(), "0"));
+      iAddr = query.getSingleResult(IntlAddr.class);
+    }
 
     return iAddr;
   }

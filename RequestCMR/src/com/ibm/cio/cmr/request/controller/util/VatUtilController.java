@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.controller.util;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -202,7 +203,7 @@ public class VatUtilController {
       };
       AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
       if (gstResponse != null && gstResponse.isSuccess()) {
-        if (gstResponse.getMessage().equals("GST provided is verified with the company details.")) {
+        if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")) {
           validation = ValidationResult.success();
         } else {
           validation = ValidationResult.error("GST# provided on the request is not valid as per GST Validation. Please verify the GST# provided.");
@@ -395,24 +396,24 @@ public class VatUtilController {
             }
           }
           if (!(success && custNmMatch && formerCustNmMatch)) {
-          if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
-              || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
+                || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
               success = true;
               custNmMatch = true;
               formerCustNmMatch = true;
-          } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
-              && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
+                && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
               success = true;
               custNmMatch = true;
               formerCustNmMatch = false;
-          } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
-              && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
+                && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
               success = true;
               custNmMatch = false;
               formerCustNmMatch = true;
-          } else {
+            } else {
               success = true;
               custNmMatch = false;
               formerCustNmMatch = false;

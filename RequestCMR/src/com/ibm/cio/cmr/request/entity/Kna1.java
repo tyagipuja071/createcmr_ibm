@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
+import com.ibm.cio.cmr.request.listener.TransServiceEventListener;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 
 /**
@@ -29,10 +30,8 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
  * @author Dhananjay Yadav
  */
 @Entity
-@Table(
-    name = "KNA1",
-    schema = "SAPR3")
-@EntityListeners({ TrimListener.class, ChangeLogListener.class })
+@Table(name = "KNA1", schema = "SAPR3")
+@EntityListeners({ TrimListener.class, ChangeLogListener.class, TransServiceEventListener.class })
 public class Kna1 extends BaseEntity<Kna1PK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -273,102 +272,78 @@ public class Kna1 extends BaseEntity<Kna1PK> implements Serializable {
 
   private String kdkg5;
 
-  @Column(
-      name = "ZZKV_LOTID")
+  @Column(name = "ZZKV_LOTID")
   private String zzkvLotid;
 
-  @Column(
-      name = "ZZKV_SIC")
+  @Column(name = "ZZKV_SIC")
   private String zzkvSic;
 
-  @Column(
-      name = "ZZKV_LIC")
+  @Column(name = "ZZKV_LIC")
   private String zzkvLic;
 
-  @Column(
-      name = "ZZKV_CUSNO")
+  @Column(name = "ZZKV_CUSNO")
   private String zzkvCusno;
 
-  @Column(
-      name = "ZZKV_SEQNO")
+  @Column(name = "ZZKV_SEQNO")
   private String zzkvSeqno;
 
-  @Column(
-      name = "ZZKV_DEPT")
+  @Column(name = "ZZKV_DEPT")
   private String zzkvDept;
 
-  @Column(
-      name = "ZZKV_INAC")
+  @Column(name = "ZZKV_INAC")
   private String zzkvInac;
 
-  @Column(
-      name = "ZZKV_INACT")
+  @Column(name = "ZZKV_INACT")
   private String zzkvInact;
 
-  @Column(
-      name = "ZZKV_DUNS")
+  @Column(name = "ZZKV_DUNS")
   private String zzkvDuns;
 
-  @Column(
-      name = "ZZKV_NODE1")
+  @Column(name = "ZZKV_NODE1")
   private String zzkvNode1;
 
-  @Column(
-      name = "ZZKV_NODE2")
+  @Column(name = "ZZKV_NODE2")
   private String zzkvNode2;
 
-  @Column(
-      name = "SHAD_UPDATE_TS")
+  @Column(name = "SHAD_UPDATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date shadUpdateTs;
 
-  @Column(
-      name = "SHAD_UPDATE_IND")
+  @Column(name = "SHAD_UPDATE_IND")
   private String shadUpdateInd;
 
-  @Column(
-      name = "SAP_TS")
+  @Column(name = "SAP_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date sapTs;
 
-  @Column(
-      name = "ZZKV_ESTAB")
+  @Column(name = "ZZKV_ESTAB")
   private String zzkvEstab;
 
-  @Column(
-      name = "ZZKV_INTLOC")
+  @Column(name = "ZZKV_INTLOC")
   private String zzkvIntloc;
 
-  @Column(
-      name = "ZZKV_INTUSER")
+  @Column(name = "ZZKV_INTUSER")
   private String zzkvIntuser;
 
-  @Column(
-      name = "ZZKV_INTFUNC")
+  @Column(name = "ZZKV_INTFUNC")
   private String zzkvIntfunc;
 
-  @Column(
-      name = "ZZKV_UC_STRT_ADDR")
+  @Column(name = "ZZKV_UC_STRT_ADDR")
   private String zzkvUcStrtAddr;
 
-  @Column(
-      name = "ZZKV_SNDX_NAME1")
+  @Column(name = "ZZKV_SNDX_NAME1")
   private String zzkvSndxName1;
 
-  @Column(
-      name = "ZZKV_ORG_FLG")
+  @Column(name = "ZZKV_ORG_FLG")
   private String zzkvOrgFlg;
 
-  @Column(
-      name = "RESTRICT_CD")
+  @Column(name = "RESTRICT_CD")
   private String restrictCd;
 
-  @Column(
-      name = "CREATE_OPT_NUM")
+  @Column(name = "CREATE_OPT_NUM")
   private String createOptNum;
 
-  @Column(
-      name = "ZZKV_PARTYID")
+  @Column(name = "ZZKV_PARTYID")
   private String zzkvPartyid;
 
   @Transient

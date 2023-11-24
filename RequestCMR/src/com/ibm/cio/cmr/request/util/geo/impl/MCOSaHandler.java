@@ -1058,8 +1058,9 @@ public class MCOSaHandler extends MCOHandler {
             String att = ""; // 6
             String city = "";// 7
             String postalCode = ""; // 8
-            String landCountry = ""; // 09
-            String poBox = ""; // 10
+            String stateProv = ""; // 9
+            String landCountry = ""; // 10
+            String poBox = ""; // 11
 
             // Data Sheet
             String cof = ""; // 6
@@ -1111,9 +1112,12 @@ public class MCOSaHandler extends MCOHandler {
               city = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
-              landCountry = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
+              landCountry = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
               poBox = validateColValFromCell(currCell);
 
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1159,20 +1163,29 @@ public class MCOSaHandler extends MCOHandler {
             if (StringUtils.isNotBlank(cof) && ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) && "Y".equals(codFlag)) {
               LOG.trace("if COF is R/S/T, then COD will be N only >> ");
               error.addError((row.getRowNum() + 1), "COD and COF", "if COF is R/S/T, then COD will be N only <br>");
+              // validations.add(error);
             } else if (StringUtils.isBlank(cof) && "N".equals(codFlag)) {
               LOG.trace("If COF is Blank, then COD will be Y only >> ");
               error.addError((row.getRowNum() + 1), "COD and COF", "If COF is Blank, then COD will be Y only. <br>");
+              // validations.add(error);
             }
 
             if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(intDeptNum)) {
               LOG.trace("Internal Department Number can be filled only when cmrNo Start with 99.");
               error.addError((row.getRowNum() + 1), "Internal Dept Number.",
                   "Internal Department Number can be filled only when cmrNo Start with 99.<br>");
+              // validations.add(error);
             }
 
             if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !zs01Phone.matches("\\d+.\\d*")) {
               LOG.trace("Phone Number should contain only digits.");
               error.addError((row.getRowNum() + 1), "Phone #", "Phone Number should contain only digits. <br>");
+              // validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
+              LOG.trace("Enterprise Number should contain only digits.");
+              error.addError((row.getRowNum() + 1), "Enterprise #", "Enterprise Number should contain only digits. <br>");
             }
 
             if (!StringUtils.isBlank(enterprise) && !enterprise.contains("@") && !enterprise.matches("\\d+.\\d*")) {
@@ -1230,18 +1243,20 @@ public class MCOSaHandler extends MCOHandler {
 
             if (!StringUtils.isBlank(custName1) || !StringUtils.isBlank(nameCont) || !StringUtils.isBlank(street) || !StringUtils.isBlank(streetCont)
                 || !StringUtils.isBlank(att) || !StringUtils.isBlank(city) || !StringUtils.isBlank(postalCode) || !StringUtils.isBlank(landCountry)
-                || !StringUtils.isBlank(poBox)) {
+                || !StringUtils.isBlank(poBox) || !StringUtils.isBlank(stateProv)) {
               isDummyUpdate = false;
             }
 
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+              // validations.add(error);
             }
             if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again. <br>");
+              // validations.add(error);
             }
 
             if (!isDummyUpdate) {
@@ -1282,6 +1297,17 @@ public class MCOSaHandler extends MCOHandler {
                 LOG.trace("Landed Country is required.");
                 error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country is required.<br>");
               }
+
+              String pattern = "^[a-zA-Z0-9]*$";
+              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+              } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCountry)) {
+                LOG.trace("State/Province and Landed country both should be filled");
+                error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+              }
+              // validations.add(error);
             }
             if (error.hasErrors()) {
               validations.add(error);

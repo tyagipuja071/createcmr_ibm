@@ -29,6 +29,7 @@ import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
  */
 
 public abstract class ISATransformer extends APTransformer {
+
   private static final String[] clusterIndiaMrc2 = { "05224", "04477", "04490", "04467", "05225" };
   private static final String[] clusterIndiaMrc3 = { "09062", "10193", "10194", "10195", "10196", "10197", "10198", "10199", "10200", "10201",
       "10202", "10203", "10204", "10205", "10206", "10207", "10208", "10209", "10210", "10211", "10212", "10213", "10214", "10215", "10590", "10591",
@@ -57,7 +58,6 @@ public abstract class ISATransformer extends APTransformer {
     }
 
     String isu = handler.cmrData.getIsuCd();
-
     if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {
       handler.messageHash.put("GB_SegCode", "");
     }

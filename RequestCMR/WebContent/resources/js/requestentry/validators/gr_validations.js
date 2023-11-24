@@ -320,7 +320,7 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.LATIN, [ 'PO Box' ]);
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
@@ -329,7 +329,7 @@ function addLatinCharValidator() {
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('addrTxt2', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
-    FormManager.removeValidator('postCd', Validators.LATIN);
+//    FormManager.removeValidator('postCd', Validators.LATIN);
     FormManager.removeValidator('dept', Validators.LATIN);
     FormManager.removeValidator('poBox', Validators.LATIN);
   }
@@ -564,7 +564,6 @@ function addGRAddressTypeValidator() {
               return new ValidationResult(null, false, 'Sold-to and Local Translation, mismatched fields: ' + mismatchFields);
             }
           }
-
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
             return new ValidationResult(null, false, 'All addresses are mandatory');
           } else if (zs01Cnt > 1) {
@@ -672,6 +671,10 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
     if (!hasMatchingFieldsFilled(zs01Data.city1[0], zp01Data.city1[0], isCrossborder)) {
       mismatchFields += mismatchFields != '' ? ', ' : '';
       mismatchFields += 'City';
+    }
+    if (!hasMatchingFieldsFilled(zs01Data.stateProv[0], zp01Data.stateProv[0], isCrossborder)) {
+      mismatchFields += mismatchFields != '' ? ', ' : '';
+      mismatchFields += 'State/Province';
     }
   }
 
@@ -862,7 +865,7 @@ function addHandlersForGR() {
   lockUnlockField();
   if (_custSubTypeHandlerGr == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     _custSubTypeHandlerGr = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      FormManager.setValue('salesTeamCd', '');
+      // FormManager.setValue('salesTeamCd', '');
       resetSubIndustryCdGR();
     });
   }
@@ -1763,15 +1766,14 @@ function setCustSubTypeBpGRTRCY() {
     FormManager.enable('clientTier');
     FormManager.enable('isuCd');
   }
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE
-      && (FormManager.getActualValue('custSubGrp') != 'COMME' || FormManager.getActualValue('custSubGrp') != 'CROSS' || FormManager.getActualValue('custSubGrp') != 'GOVRN' || FormManager
-          .getActualValue('custSubGrp') != 'PRICU')) {
-    setISRValuesGR();
-  } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-    console.log("skip set ISR.");
+  // Control Classification Code
+  if (custType == 'BUSPR' || custType == 'XBP') {
+    FormManager.show('CustClass', 'custClass');
+    FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
   } else {
-    setISRValues();
+    FormManager.hide('CustClass', 'custClass');
+    FormManager.setValue('custClass', '');
+    FormManager.resetValidations('custClass');
   }
 }
 
@@ -2362,7 +2364,7 @@ function addressQuotationValidatorGR() {
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t/Occupation' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
@@ -2430,7 +2432,7 @@ function lockUnlockFieldForGR() {
   console.log(">>>> lockUnlockFieldForGR");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _custGrpSet = new Set([ 'COMME', 'GOVRN' ]);
+  var _custGrpSet = new Set([ 'COMME', 'GOVRN', 'CROSS' ]);
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('isuCd');
@@ -2500,7 +2502,7 @@ function setEntepriseGR() {
   var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpSet21 = new Set([ 'BUSPR', 'CRBUS', 'CRINT', 'IBMEM', 'INTER' ]);
-  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP' ]);
+  var custSubGrpSet34 = new Set([ 'COMME', 'GOVRN', 'PRICU', 'SAASP', 'CROSS' ]);
   var custSubGrpSet = new Set([ 'COMME', 'GOVRN' ]);
 
   var isuCtc = isuCd + clientTier;
@@ -2709,7 +2711,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(retainImportValues, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(addPpsCeidValidator, [ SysLoc.GREECE ]);
 
-  GEOHandler.addAddrFunction(setPostalCodeTurGreCypValidator, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+//  GEOHandler.addAddrFunction(setPostalCodeTurGreCypValidator, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(abbrvLocMandatory, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(abbrvLocMandatoryOnChange, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GREECE, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GREECE ], null, true);
@@ -2752,5 +2754,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
   GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.GREECE ], null, true);
+
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.GREECE ], null, true);
+  GEOHandler.addAfterTemplateLoad(addVATDisabler, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
 
 });

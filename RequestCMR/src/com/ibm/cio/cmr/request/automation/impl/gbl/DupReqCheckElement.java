@@ -64,7 +64,11 @@ public class DupReqCheckElement extends DuplicateCheckElement {
 
     MatchingOutput output = new MatchingOutput();
     Addr soldTo = requestData.getAddress("ZS01");
-    if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
+    if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks() && !isPaygoUpgrade) {
 
       // check if eligible for vat matching
       if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
@@ -119,7 +123,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
         result.setResults("Duplicate Request Check Encountered an error.");
       }
 
-    } else if (scenarioExceptions.isSkipDuplicateChecks()) {
+    } else if (scenarioExceptions.isSkipDuplicateChecks() || isPaygoUpgrade) {
       result.setDetails("The request's scenario is configured to skip duplicate checks.");
       result.setResults("Skipped Duplicate Check");
       result.setOnError(false);

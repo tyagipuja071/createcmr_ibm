@@ -577,6 +577,18 @@ public class SWISSService extends BaseBatchService {
           break;
         }
 
+        deleteEntity(addr, entityManager);
+
+        for (RDcRecord red : response.getRecords()) {
+          String[] addrSeqs = {};
+          if (red.getSeqNo() != null && red.getSeqNo() != "") {
+            addrSeqs = red.getSeqNo().split(",");
+          }
+          if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+            addr.getId().setAddrSeq(addrSeqs[0]);
+          }
+        }
+
         if (response.getRecords() != null && response.getRecords().size() != 0) {
 
           if (CmrConstants.ADDR_TYPE.ZS01.equals(response.getRecords().get(index).getAddressType())) {
@@ -587,12 +599,11 @@ public class SWISSService extends BaseBatchService {
           } else {
             for (RDcRecord red : response.getRecords()) {
               String[] addrSeqs = { "", "" };
-
               if (red.getSeqNo() != null && red.getSeqNo() != "") {
                 addrSeqs = red.getSeqNo().split(",");
               }
 
-              if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+              if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[0].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 LOG.debug("Address matched");
                 addr.setPairedAddrSeq(addrSeqs[0]);
                 addr.setSapNo(red.getSapNo());
@@ -607,8 +618,20 @@ public class SWISSService extends BaseBatchService {
 
             }
           }
-
           updateEntity(addr, entityManager);
+        }
+        if (response.getRecords() != null && response.getRecords().size() != 0) {
+          for (RDcRecord red : response.getRecords()) {
+            String[] addrSeqs = { "", "" };
+
+            if (red.getSeqNo() != null && red.getSeqNo() != "") {
+              addrSeqs = red.getSeqNo().split(",");
+            }
+            if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())
+                && !"C".equals(admin.getReqType())) {
+              updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(), addrSeqs[0]);
+            }
+          }
         }
         index++;
       }
@@ -1368,7 +1391,7 @@ public class SWISSService extends BaseBatchService {
       entityManager.merge(kunnrExt);
     }
   }
-  
+
   private long checked2WorkingDays(Date processedDate, Timestamp currentTimestamp) {
     LOG.debug("processedTs=" + processedDate + " currentTimestamp=" + currentTimestamp);
     if (processedDate == null)
@@ -1387,7 +1410,7 @@ public class SWISSService extends BaseBatchService {
       LOG.debug("current.setTime(processedDate) O/P >>> " + current.getTime());
 
       hoursBetween = (current.getTimeInMillis() - processed.getTimeInMillis()) / (60 * 60 * 1000);
-      
+
       LOG.debug("current.get(Calendar.DAY_OF_YEAR) >>> " + current.getTime());
       LOG.debug("processed.get(Calendar.DAY_OF_YEAR) >>> " + processed.getTime());
       LOG.debug("hoursBetween >>> " + hoursBetween);
@@ -1851,9 +1874,17 @@ public class SWISSService extends BaseBatchService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
               }
             } else {
@@ -2208,6 +2239,17 @@ public class SWISSService extends BaseBatchService {
     return response;
   }
 
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq) {
+    String updateSeq = ExternalizedQuery.getSql("SWISS.UPDATE_ADDR_SEQ");
+    PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
+    q.setParameter("NEW_SEQ", newSeq);
+    q.setParameter("REQ_ID", reqId);
+    q.setParameter("TYPE", addrType);
+    q.setParameter("OLD_SEQ", oldSeq);
+    LOG.debug("Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    q.executeSql();
+  }
+
   public void updateExistingAddrSeq(EntityManager entityManager, long reqId, String newSeq, String oldSeq, String addressType, String cmrNo) {
 
     EntityTransaction transaction = entityManager.getTransaction();
@@ -2241,5 +2283,10 @@ public class SWISSService extends BaseBatchService {
         transaction.rollback();
       }
     }
+  }
+
+  @Override
+  protected boolean useServicesConnections() {
+    return true;
   }
 }

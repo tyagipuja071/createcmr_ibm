@@ -967,10 +967,11 @@ public class MaltaHandler extends BaseSOFHandler {
             String name4 = ""; // 5
             String street = ""; // 6
             String city = "";// 7
-            String postalCode = ""; // 8
-            String poBox = ""; // 09
-            String landCntry = ""; // 10
-            String phone = "";// 11
+            String stateProv = ""; // 8
+            String postalCode = ""; // 9
+            String poBox = ""; // 10
+            String landCntry = ""; // 11
+            String phone = "";// 12
 
             // Data Sheet
             String isic = ""; // 3
@@ -1014,15 +1015,18 @@ public class MaltaHandler extends BaseSOFHandler {
               city = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(8);
-              postalCode = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
               poBox = validateColValFromCell(currCell);
 
               if ("Sold-To".equalsIgnoreCase(sheet.getSheetName()) || "Bill-To".equalsIgnoreCase(sheet.getSheetName())) {
-                currCell = (XSSFCell) row.getCell(10);
+                currCell = (XSSFCell) row.getCell(11);
               } else {
-                currCell = (XSSFCell) row.getCell(9);
+                currCell = (XSSFCell) row.getCell(10);
               }
               landCntry = validateColValFromCell(currCell);
 
@@ -1046,6 +1050,15 @@ public class MaltaHandler extends BaseSOFHandler {
                   LOG.trace("Landed Country is mandatory");
                   error.addError(row.getRowNum(), "Landed Country", "Landed Country is mandatory.");
                 }
+                String pattern = "^[a-zA-Z0-9]*$";
+                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                  LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+                  LOG.trace("State/Province and Landed country both should be filled");
+                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+                }
 
                 if (StringUtils.isBlank(postalCode)) {
                   LOG.trace("Postal code is mandatory.");
@@ -1054,7 +1067,7 @@ public class MaltaHandler extends BaseSOFHandler {
               }
 
               if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
-                currCell = (XSSFCell) row.getCell(10);
+                currCell = (XSSFCell) row.getCell(11);
                 phone = validateColValFromCell(currCell);
 
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {

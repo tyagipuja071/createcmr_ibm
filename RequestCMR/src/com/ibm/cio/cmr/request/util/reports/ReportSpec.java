@@ -49,6 +49,10 @@ public class ReportSpec {
   private String orderByKey;
   private int dateAdjust;
 
+  private List<String> trackedKeys = new ArrayList<String>();
+  private String keyField;
+  private boolean limitDuplicateKeys;
+
   public ReportSpec(String sqlKey, String reportFilename) {
     this.sqlKey = sqlKey;
     this.reportFilename = reportFilename;
@@ -75,14 +79,33 @@ public class ReportSpec {
       try (OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8")) {
         try (PrintWriter pw = new PrintWriter(osw)) {
           for (Object[] record : results) {
-            for (int index = 0; index < record.length; index++) {
-              ReportField field = this.fields.get(index);
-              pw.print(field.getFixedWidthValue(record[index]));
-              if (LOG.isTraceEnabled()) {
-                LOG.trace("Field: " + field.getName() + " = " + field.getFixedWidthValue(record[index]));
+            boolean addRecord = true;
+            if (this.limitDuplicateKeys) {
+              for (int index = 0; index < record.length; index++) {
+                ReportField field = this.fields.get(index);
+                if (this.keyField != null && this.keyField.equals(field.getName())) {
+                  String fixedWidthValue = field.getFixedWidthValue(record[index]);
+                  if (!trackedKeys.contains(fixedWidthValue)) {
+                    trackedKeys.add(fixedWidthValue);
+                  } else {
+                    addRecord = false;
+                    LOG.trace("Skipping record with key " + fixedWidthValue);
+                  }
+                }
               }
+
             }
-            pw.println();
+            if (addRecord) {
+              for (int index = 0; index < record.length; index++) {
+                ReportField field = this.fields.get(index);
+                String fixedWidthValue = field.getFixedWidthValue(record[index]);
+                pw.print(fixedWidthValue);
+                if (LOG.isTraceEnabled()) {
+                  LOG.trace("Field: " + field.getName() + " = " + fixedWidthValue);
+                }
+              }
+              pw.println();
+            }
           }
           if (this.trailer != null) {
             pw.println(this.trailer.generateTrailer(entityManager, results, dateRange, sequence));
@@ -194,6 +217,22 @@ public class ReportSpec {
    */
   public void setDateAdjust(int dateAdjust) {
     this.dateAdjust = dateAdjust;
+  }
+
+  public String getKeyField() {
+    return keyField;
+  }
+
+  public void setKeyField(String keyField) {
+    this.keyField = keyField;
+  }
+
+  public boolean isLimitDuplicateKeys() {
+    return limitDuplicateKeys;
+  }
+
+  public void setLimitDuplicateKeys(boolean limitDuplicateKeys) {
+    this.limitDuplicateKeys = limitDuplicateKeys;
   }
 
 }

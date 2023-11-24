@@ -648,6 +648,18 @@ public abstract class AutomationUtil {
         return false;
       }
     }
+
+    // Duplicate Request check with customer name and Addr
+    List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
+    if (!dupReqIds.isEmpty()) {
+      details.append("Duplicate request found with matching customer name and address.\nMatch found with Req id :").append("\n");
+      details.append(StringUtils.join(dupReqIds, "\n"));
+      engineData.addRejectionComment("DUPR", "Duplicate request found with matching customer name and address.", StringUtils.join(dupReqIds, ", "),
+          "");
+      return false;
+    } else {
+      details.append("No duplicate requests found");
+    }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
@@ -683,7 +695,7 @@ public abstract class AutomationUtil {
    * @return
    */
   protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages) {
-    LOG.debug("Validating Private Person record for " + name);
+    LOG.debug("***Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
       String cmrNo = "";
@@ -940,6 +952,7 @@ public abstract class AutomationUtil {
    * @param details
    */
   protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
+    LOG.debug("***AutomationUtil.removeDuplicateAddresses");
     Addr zs01 = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -953,6 +966,7 @@ public abstract class AutomationUtil {
     boolean removed = false;
     details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
+      LOG.debug("***AutomationUtil.removeDuplicateAddresses found more than one address");
       Addr addr = it.next();
       if (!payGoAddredited) {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
@@ -1340,6 +1354,7 @@ public abstract class AutomationUtil {
    */
 
   public static boolean compareCustomerNames(Addr addr1, Addr addr2) {
+    LOG.debug("***AutomationUtil.compareCustomerNames");
     String customerName1 = addr1.getCustNm1() + (StringUtils.isNotBlank(addr1.getCustNm2()) ? " " + addr1.getCustNm2() : "");
     String customerName2 = addr2.getCustNm1() + (StringUtils.isNotBlank(addr2.getCustNm2()) ? " " + addr2.getCustNm2() : "");
 
@@ -1485,6 +1500,33 @@ public abstract class AutomationUtil {
     return query.exists();
   }
 
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param return
+   * @throws Exception
+   */
+  public static boolean isTaxManagerEmeaUpdateCheck(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData)
+      throws Exception {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    String cmrIssuingCntry = data.getCmrIssuingCntry();
+    if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(admin.getReqType())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.TAX_MANAGER.BY_ISSUING_CNTRY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+      List<String> taxManagers = query.getResults(String.class);
+      if (taxManagers != null) {
+        return taxManagers.stream().anyMatch(res -> res.equalsIgnoreCase(admin.getRequesterId()));
+      }
+    }
+    return false;
+  }
+
   public static boolean validateLOVVal(EntityManager em, String issuingCntry, String fieldId, String code) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECKLOV");
     PreparedQuery query = new PreparedQuery(em, sql);
@@ -1557,41 +1599,40 @@ public abstract class AutomationUtil {
    * @param reject
    * @return cmdeReview = true, for Update / Delete.
    */
-  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, 
-		  Set<String> resultCodes, UpdatedDataModel change, String reject) {
-	  String newppsceid = change.getNewData();
-	  String oldppsceid = change.getOldData();
-	  String kukla = data.getCustClass();
-	  List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
-	  boolean cmdeReview = false;
+  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, Set<String> resultCodes,
+      UpdatedDataModel change, String reject) {
+    String newppsceid = change.getNewData();
+    String oldppsceid = change.getOldData();
+    String kukla = data.getCustClass();
+    List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
+    boolean cmdeReview = false;
 
-	  // ADD
-	  if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
-		  if (kuklaValuesStartingWith4.contains(kukla)) {
-			  if (checkPPSCEID(data.getPpsceid())) {
-				  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-			  } else {
-				  resultCodes.add(reject);
-				  details.append("PPS ceid on the request is invalid").append("\n");
-			  }
-		  } else {
-			  resultCodes.add(reject);
-			  details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
-		  }
-	  } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
-		  // DELETE
-		  cmdeReview = true;
-		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
-		  details.append("Deletion of ppsceid needs cmde review.\n");
-	  } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
-		  // UPDATE
-		  cmdeReview = true;
-		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
-		  details.append("Update of ppsceid needs cmde review.\n");
-	  }
+    // ADD
+    if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+      if (kuklaValuesStartingWith4.contains(kukla)) {
+        if (checkPPSCEID(data.getPpsceid())) {
+          details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+        } else {
+          resultCodes.add(reject);
+          details.append("PPS ceid on the request is invalid").append("\n");
+        }
+      } else {
+        resultCodes.add(reject);
+        details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
+      }
+    } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+      // DELETE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+      details.append("Deletion of ppsceid needs cmde review.\n");
+    } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
+      // UPDATE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+      details.append("Update of ppsceid needs cmde review.\n");
+    }
 
-	  return cmdeReview;
+    return cmdeReview;
   }
-  
 
 }

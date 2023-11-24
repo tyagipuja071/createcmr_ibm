@@ -70,7 +70,13 @@ public class EUVatValidationElement extends ValidatingElement implements Company
         landCntry = zs01.getLandCntry();
       }
       String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), landCntry, data.getCountryUse());
-      if (landCntryForVies == null) {
+      if(landCntry.equals("GB") && !StringUtils.isBlank(data.getVat())){
+    	  validation.setSuccess(true);
+          validation.setMessage("Skipped.");
+          output.setDetails("VAT has been marked verified through previous process executions. Skipping VIES verification.");
+          LOG.debug("VAT has been marked verified through previous process executions. Skipping VIES verification.");
+      }
+      else if (landCntryForVies == null) {
         validation.setSuccess(true);
         validation.setMessage("No Landed Country");
         String msg = "Cannot verify VAT because no Landed Country was found on the main address. Further validation is needed.";
@@ -215,6 +221,8 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     VatLayerRequest request = new VatLayerRequest();
     request.setVat(data.getVat());
     request.setCountry(landCntryForVies);
+    LOG.debug("=== data.getVat(): " + data.getVat());
+    LOG.debug("=== landCntryForVies: " + landCntryForVies);
 
     LOG.debug("Connecting to the EU VAT Layer Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.EU_VAT_SERVICE_ID, request, AutomationResponse.class);

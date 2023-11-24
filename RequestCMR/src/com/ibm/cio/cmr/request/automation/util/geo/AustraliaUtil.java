@@ -61,6 +61,8 @@ public class AustraliaUtil extends AutomationUtil {
   public static final String SCENARIO_BLUEMIX = "BLUMX";
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
+  private static final String SCENARIO_PRIVATE_CUSOMER_CROSS = "XPRIV";
+
   private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_ECOSYS = "ECSYS";
@@ -155,7 +157,7 @@ public class AustraliaUtil extends AutomationUtil {
     results.setResults(eleResults.toString());
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
-    
+
     return results;
   }
 
@@ -409,14 +411,14 @@ public class AustraliaUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
-    
+
     if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
-        Addr pg01 = requestData.getAddress("PG01");
-        if(pg01 != null){
-        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
-        }
+      Addr pg01 = requestData.getAddress("PG01");
+      if (pg01 != null) {
+        // checkANZPaygoAddr(entityManager, data.getId().getReqId());
       }
-    
+    }
+
     return true;
   }
 
@@ -476,6 +478,8 @@ public class AustraliaUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
+    case SCENARIO_PRIVATE_CUSOMER_CROSS:
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
@@ -716,12 +720,12 @@ public class AustraliaUtil extends AutomationUtil {
     anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
     return anzEcoNotifyList;
   }
-  
+
   public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.executeSql();
-	  }
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
 
   @Override
   protected List<String> getCountryLegalEndings() {

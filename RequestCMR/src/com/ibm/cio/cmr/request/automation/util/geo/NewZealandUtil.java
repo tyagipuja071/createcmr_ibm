@@ -41,13 +41,15 @@ import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationRequest;
 import com.ibm.cmr.services.client.automation.ap.nz.NZBNValidationResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class NewZealandUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(NewZealandUtil.class);
 
-  // CREATCMR-8430: do DNB check for all address types for NZ update (ignore mailing address)
+  // CREATCMR-8430: do DNB check for all address types for NZ update (ignore
+  // mailing address)
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, "MAIL", "ZP01", "ZI01", "ZF01", "CTYG", "CTYH");
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Customer Name", "Customer Name Con't", "State");
 
@@ -69,6 +71,13 @@ public class NewZealandUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String customerName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+    String[] scenariosToBeChecked = { "PRIV" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
 
     processSkipCompanyChecks(engineData, requestData, details);
     switch (scenario) {
@@ -159,7 +168,7 @@ public class NewZealandUtil extends AutomationUtil {
             custNmMatch = true;
           }
         }
-        
+
         if (!custNmMatch) {
           details.append("\nThe Customer Name doesn't match NZBN API");
           cmdeReview = true;
@@ -176,7 +185,7 @@ public class NewZealandUtil extends AutomationUtil {
           details.append(matchedAddr);
         }
       }
-      
+
       if (!matchesAddAPI) {
         details.append("\nThe address ZS01 doesn't match NZBN API");
         cmdeReview = true;
@@ -241,8 +250,7 @@ public class NewZealandUtil extends AutomationUtil {
             }
           } else {
             // CREATCMR-8430: add NZBN API check for new addresses
-            LOG.debug(
-                "New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B. Now Checking Addr with NZBN API... ");
+            LOG.debug("New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B. Now Checking Addr with NZBN API... ");
             if (response != null && response.isSuccess() && response.getRecord() != null) {
               ModelMap apiMatchMap = addrNZBNAPIMatch(addr, addrType, response.getRecord());
               matchesAddAPI = (boolean) apiMatchMap.get("matchesAddAPI");
@@ -299,7 +307,7 @@ public class NewZealandUtil extends AutomationUtil {
       entityManager.merge(data);
       entityManager.flush();
     }
-    
+
     return results;
   }
 
@@ -314,7 +322,7 @@ public class NewZealandUtil extends AutomationUtil {
         + (addr.getCity1() == null ? "" : addr.getCity1()) + (addr.getPostCd() == null ? "" : addr.getPostCd());
     addressAll = addressAll.toUpperCase();
     LOG.debug("\n Checking address " + addrType + "(" + addr.getId().getAddrSeq() + ") : " + addressAll);
-    
+
     if (StringUtils.isNotEmpty(nzbnResp.getAddress())
         && addressAll.replaceAll(regexForAddr, "").contains(nzbnResp.getAddress().replaceAll(regexForAddr, "").toUpperCase())
         && StringUtils.isNotEmpty(nzbnResp.getCity())
@@ -356,7 +364,7 @@ public class NewZealandUtil extends AutomationUtil {
       }
       LOG.debug("SERVICE Address matched ?  " + serviceFlag);
     }
-    
+
     map.put("matchesAddAPI", matchesAddAPI);
     map.put("detail", details);
 
@@ -516,14 +524,14 @@ public class NewZealandUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
-    
+
     if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
-        Addr pg01 = requestData.getAddress("PG01");
-        if(pg01 != null){
-        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
-        }
+      Addr pg01 = requestData.getAddress("PG01");
+      if (pg01 != null) {
+        // checkANZPaygoAddr(entityManager, data.getId().getReqId());
       }
-    
+    }
+
     return true;
   }
 
@@ -667,8 +675,8 @@ public class NewZealandUtil extends AutomationUtil {
 
                   LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B & NZBN API.");
                   cmdeReview = true;
-                  checkDetails.append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B"
-                      + "  & NZBN API records.\n");
+                  checkDetails
+                      .append("\nUpdate address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B" + "  & NZBN API records.\n");
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                     checkDetails.append("\nSupporting documentation is provided by the requester as attachment for " + addrType).append("\n");
@@ -768,7 +776,7 @@ public class NewZealandUtil extends AutomationUtil {
                 LOG.debug("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match NZBN API records.\n");
 
                 checkDetails.append("\nNew address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match NZBN API records.\n");
-                 // company proof
+                // company proof
                 if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                   checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
                 } else {
@@ -803,12 +811,12 @@ public class NewZealandUtil extends AutomationUtil {
     output.setProcessOutput(validation);
     return true;
   }
-  
+
   public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.executeSql();
-	  }
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
 
   @Override
   protected List<String> getCountryLegalEndings() {
@@ -823,6 +831,33 @@ public class NewZealandUtil extends AutomationUtil {
     data.setInacCd("");
     LOG.debug("INAC type value " + data.getInacType());
     data.setInacType("");
+  }
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    String[] scenariosToBeChecked = { "PRIV" };
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaPriv = { "60" };
+
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (match.getCmrNo() != null && match.getCmrNo().startsWith("P") && "75".equals(match.getOrderBlk())) {
+          filteredMatches.add(match);
+        }
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaPriv).contains(kukla) && ("PRIV".equals(scenario))) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
   }
 
 }

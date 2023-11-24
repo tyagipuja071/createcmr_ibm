@@ -193,7 +193,12 @@ public class SWISSHandler extends GEOHandler {
       if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
         data.setCurrencyCd(geCurrencyCode(zs01sapNo));
         data.setTaxCd1(getTaxCode(zs01sapNo));
+      } else if(CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
+        data.setOrdBlk("");
       }
+      
+      
+      
     } catch (Exception e) {
       LOG.error("Error occured on setting Currency Code/ tax code value during import.");
       e.printStackTrace();
@@ -477,6 +482,7 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+    List<String> custSubGrps = Arrays.asList("COM", "IBM", "PRI");
     if ("C".equals(admin.getReqType())) {
       data.setCurrencyCd("CHF");
     }
@@ -494,17 +500,26 @@ public class SWISSHandler extends GEOHandler {
     // postCd = 0;
     // LOG.debug("Cannot parse postal code since it's alphanumeric.");
     // }
+    // if ("C".equals(admin.getReqType())) {
     // String landCntry = (String) results.get(0)[1];
-    // if ("CH".equals(landCntry) || "LI".equals(landCntry)) {
-    // if (StringUtils.isBlank(landCntry) && postCd != 0) {
-    // if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <=
+    // String custSubGrp = "";
+    // if (StringUtils.isNotBlank(cmrIssuingCntry) &&
+    // StringUtils.isNotBlank(data.getCustSubGrp())) {
+    // custSubGrp = data.getCustSubGrp().substring(2);
+    // }
+    // if ("CH".equals(landCntry) || "LI".equals(landCntry) &&
+    // custSubGrps.contains(custSubGrp)) {
+    // if ((postCd >= 3000 && postCd <= 6499) || (postCd > 6999 && postCd <=
     // 9999)) {
     // data.setCustPrefLang("D");
     // } else if (postCd >= 6500 && postCd <= 6999) {
     // data.setCustPrefLang("I");
-    // } else if (postCd >= 0000 && postCd <= 3000) {
+    // } else if (postCd >= 0000 && postCd < 3000) {
     // data.setCustPrefLang("F");
+    // } else {
+    // data.setCustPrefLang("E");
     // }
+    //
     // } else {
     // data.setCustPrefLang("E");
     // }
@@ -1276,6 +1291,28 @@ public class SWISSHandler extends GEOHandler {
 
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
+  }
+
+  @Override
+  public boolean isAddressChanged(EntityManager entityManager, Addr addr, String cmrIssuingCntry, boolean computedChangeInd) {
+    boolean city2Updated = false;
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDRRDC.SEARCH_BY_REQID_TYPE_SEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
+    Addr addrRdc = query.getSingleResult(Addr.class);
+
+    if (addrRdc != null) {
+      String addrRdcCity2 = !StringUtils.isBlank(addrRdc.getCity2()) ? addrRdc.getCity2() : "";
+      String addrCity2 = !StringUtils.isBlank(addr.getCity2()) ? addr.getCity2() : "";
+
+      if (!addrRdcCity2.equals(addrCity2)) {
+        city2Updated = true;
+      }
+      return (city2Updated || computedChangeInd);
+    }
     return true;
   }
 

@@ -84,7 +84,7 @@
     </p>
   </cmr:column>
   
-  <cmr:column span="2">
+   <cmr:column span="2">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:

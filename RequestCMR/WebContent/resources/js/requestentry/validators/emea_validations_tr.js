@@ -512,7 +512,7 @@ function afterConfigForUKI() {
 
   if (_landCntryHandlerUK == null && issuingCntry == SysLoc.UK) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
-      optionalRulePostalCodeUK();
+//      optionalRulePostalCodeUK();
     });
   }
   if (_landCntryHandlerUK && _landCntryHandlerUK[0]) {
@@ -880,7 +880,14 @@ function autoSetVAT(_custType, custTypeinDB) {
   }
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
-    return;
+    return
+
+    
+
+        
+
+    
+
   }
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
@@ -1926,7 +1933,7 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.LATIN, [ 'Phone #' ]);
   } else {
@@ -1983,7 +1990,7 @@ function addNonLatinCharValidator() {
     }
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.NON_LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.NON_LATIN, [ 'Phone #' ]);
 
@@ -2048,7 +2055,7 @@ function addTurkishCharValidator() {
     checkAndAddValidator('addrTxt2', turkish, [ 'Street Con\'t' ]);
     checkAndAddValidator('city1', turkish, [ 'City' ]);
     checkAndAddValidator('dept', turkish, [ 'District' ]);
-    checkAndAddValidator('postCd', turkish, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', turkish, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', turkish, [ 'PO Box' ]);
     checkAndAddValidator('taxOffice', turkish, [ 'Tax Office' ]);
   } else {
@@ -2073,7 +2080,6 @@ function setEconomicCode() {
   var result = cmr.query('GET.ECONOMIC_CD_BY_REQID', qParams);
   var economicCdResult = result.ret1;
   var economicCd = FormManager.getActualValue('economicCd');
-
   if (economicCdResult == '') {
     FormManager.setValue('economicCd', '');
   } else {
@@ -3226,6 +3232,10 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
     if (!hasMatchingFieldsFilled(zs01Data.city1[0], zp01Data.city1[0], isCrossborder)) {
       mismatchFields += mismatchFields != '' ? ', ' : '';
       mismatchFields += 'City';
+    }
+    if (!hasMatchingFieldsFilled(zs01Data.stateProv[0], zp01Data.stateProv[0], isCrossborder)) {
+      mismatchFields += mismatchFields != '' ? ', ' : '';
+      mismatchFields += 'State/Province';
     }
   }
 
@@ -8472,6 +8482,7 @@ function setISUCTCBasedScenarios() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -9169,7 +9180,7 @@ function addressQuotationValidatorTR() {
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'District' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('taxOffice', Validators.NO_QUOTATION, [ 'Tax Office' ]);
@@ -9258,7 +9269,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addTurkishCharValidator, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(vatValidatorTR, [ SysLoc.TURKEY ], null, true);
+  // GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY,
+  // 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForTypeOfCustomer, [ SysLoc.TURKEY ], null, true);
@@ -9396,7 +9409,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAddrFunction(autoPopulateISUClientTierUK, [ SysLoc.UK ]);
   GEOHandler.addAddrFunction(disableAddrFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAddrFunction(optionalRulePostalCodeUK, [ SysLoc.UK ]);
+//  GEOHandler.addAddrFunction(optionalRulePostalCodeUK, [ SysLoc.UK ]);
   GEOHandler.addAddrFunction(setTaxCdBasedOnlandCntryUK, [ SysLoc.UK ]);
   GEOHandler.addAfterConfig(unlockINACForINTERUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(unlockINACForINTERUKI, [ SysLoc.IRELAND, SysLoc.UK ]);

@@ -21,8 +21,8 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
@@ -1013,7 +1013,6 @@ public class CEMEAHandler extends BaseSOFHandler {
         data.setTaxExemptStatus3(embargoCode);
         LOG.trace(" STC Order Block Code : " + embargoCode);
       }
-     
       data.setAgreementSignDate(this.currentImportValues.get("AECISUBDate"));
       LOG.trace("AECISubDate: " + data.getAgreementSignDate());
       data.setBpSalesRepNo(this.currentImportValues.get("TeleCovRep"));
@@ -1276,6 +1275,12 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.setCustNm3(currentRecord.getCmrName3());
     }
 
+    if ("826".equals(country)) {
+      address.setCity1(StringUtils.isNotBlank(address.getCity1()) ? address.getCity1().toUpperCase() : "");
+      address.setCustNm1(StringUtils.isNotBlank(address.getCustNm1()) ? address.getCustNm1().toUpperCase() : "");
+      address.setAddrTxt(StringUtils.isNotBlank(address.getAddrTxt()) ? address.getAddrTxt().toUpperCase() : "");
+    }
+
     // FINAL TRIM
     if (address.getCustNm1() != null && address.getCustNm1().trim().length() > 35) {
       address.setCustNm1(address.getCustNm1().trim().substring(0, 35));
@@ -1430,7 +1435,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
 
-    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && !"707".equals(data.getCmrIssuingCntry())) {
       String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       // check if share seq address
       String isShareZP01 = isShareZP01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), soldtoseq);
@@ -2204,124 +2209,220 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    XSSFRow row = null;
+    // super.validateMassUpdateTemplateDupFills(validations, book, maxRows,
+    // country);
     XSSFCell currCell = null;
+    for (String name : CEE_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
 
-    String[] countryAddrss = null;
-    if (CEE_COUNTRIES_LIST.contains(country)) {
-      countryAddrss = CEE_MASS_UPDATE_SHEET_NAMES;
+            String cmrNo = ""; // 0
 
-      XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
-      row = sheet.getRow(0);// data field name row
-      int ordBlkIndex = 12;// default index
-      int stcOrdBlkIndex = 13;
+            // Address Sheet
 
-      int isuCdIndex = 6; //
-      int ctcIndex = 7; //
-      int fiscalCdIndex = 15; // default index
-      for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
-        currCell = row.getCell(cellIndex);
-        String cellVal = validateColValFromCell(currCell);
-        if ("Order block code".equals(cellVal)) {
-          ordBlkIndex = cellIndex;
-          // break;
-        }
-        if ("STC order block code".equals(cellVal)) {
+            String seqNo = ""; // 1
+            String custName1 = ""; // 2
+            String name2 = ""; // 3
+            String name3 = ""; // 4
+            String AttnPerson = ""; // 5
+            String street = ""; // 6
+            String postalCode = ""; // 7
+            String city = "";// 8
+            String stateProv = ""; // 09
+            String landCntry = ""; // 10
+            String hardWareMaster = "";// 11
+
+            // Data Sheet
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            String rowNumber = "Row" + row.getRowNum() + ": ";
+
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              // iterate all the rows and check each column value
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              seqNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custName1 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              name2 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              name3 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              AttnPerson = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              street = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              city = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              stateProv = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              landCntry = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              hardWareMaster = validateColValFromCell(currCell);
+
+              if (!StringUtils.isBlank(cmrNo) && "RO".equals(landCntry) && ("B".equals(stateProv) || "@".equals(stateProv))) {
+                if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
+                    || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
+                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                }
+
+                String pattern = "^[a-zA-Z0-9]*$";
+                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                  LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+                  LOG.trace("State/Province and Landed country both should be filled");
+                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+                }
+
+                if (!StringUtils.isBlank(city) && Pattern.compile("[0,7,8,9]").matcher(city.substring(city.length() - 1)).find()
+                    && "BUCHAREST SECTOR".equals(city.substring(0, 16))) {
+                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                }
+
+                if (!StringUtils.isBlank(custName1) && !custName1.equals(custName1.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Customer Name 1", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(name2) && !name2.equals(name2.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Customer Name 2", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(name3) && !name3.equals(name3.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Customer Name 3", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(AttnPerson) && !AttnPerson.equals(AttnPerson.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Att. Person", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(street) && !street.equals(street.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Street", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(postalCode) && !postalCode.equals(postalCode.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Postal Code", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(city) && !city.equals(city.toUpperCase())) {
+                  error.addError(row.getRowNum(), "City", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(stateProv) && !stateProv.equals(stateProv.toUpperCase())) {
+                  error.addError(row.getRowNum(), "State/Province", "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(hardWareMaster) && !hardWareMaster.equals(hardWareMaster.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Hardware Master", "The address data must be entered in capital letters'. <br>");
+                }
+              }
+            } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              row = sheet.getRow(0);// data field name row
+              int ordBlkIndex = 12;// default index
+              int stcOrdBlkIndex = 13;
+              int isuCdIndex = 6; //
+              int ctcIndex = 7; //
+              int fiscalCdIndex = 15; // default index
+
+              for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+                currCell = (XSSFCell) row.getCell(cellIndex);
+
+                String cellVal = validateColValFromCell(currCell);
+                if ("Order block code".equals(cellVal)) {
+                  ordBlkIndex = cellIndex;
+                  // break;
+                }
+                if ("STC order block code".equals(cellVal)) {
                   stcOrdBlkIndex = cellIndex;
                   break;
                 }
-        if ("ISU Code".equals(cellVal)) {
-          isuCdIndex = cellIndex;
-          // break;
-        }
-        if ("Client Tier".equals(cellVal)) {
-          ctcIndex = cellIndex;
-          // break;
-        }
-        if ("Fiscal Code".equals(cellVal)) {
-          fiscalCdIndex = cellIndex;
-          break;
-        }
-      }
+                if ("ISU Code".equals(cellVal)) {
+                  isuCdIndex = cellIndex;
+                  // break;
+                }
+                if ("Client Tier".equals(cellVal)) {
+                  ctcIndex = cellIndex;
+                  // break;
+                }
+                if ("Fiscal Code".equals(cellVal)) {
+                  fiscalCdIndex = cellIndex;
+                  break;
+                }
+              }
 
-      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-        TemplateValidation error = new TemplateValidation("Data");
-        row = sheet.getRow(rowIndex);
-        if (row == null) {
-          return; // stop immediately when row is blank
-        }
-        currCell = row.getCell(ordBlkIndex);
-        String ordBlk = validateColValFromCell(currCell);
-        currCell = row.getCell(stcOrdBlkIndex);
-        String stcOrdBlk = validateColValFromCell(currCell);
-              
-        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
-          LOG.trace("Order Block Code should only @, E, R, J. >> ");
-          error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");
-        }
-        if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
+              for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+                row = sheet.getRow(rowIndex);
+                if (row == null) {
+                  return; // stop immediately when row is blank
+                }
+                currCell = (XSSFCell) row.getCell(ordBlkIndex);
+                String ordBlk = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(stcOrdBlkIndex);
+                String stcOrdBlk = validateColValFromCell(currCell);
+                if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
+                  LOG.trace("Order Block Code should only @, E, R, J. >> ");
+                  error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");
+                }
+                if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
                   LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
                   error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
                 }
-        currCell = row.getCell(fiscalCdIndex);
-        String fiscalCd = validateColValFromCell(currCell);
-        if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {
-          LOG.trace("fiscal code should consist only of digits");
-          error.addError((rowIndex + 1), "Fiscal Code", " fiscal code should consist only of digits.");
-        }
-        currCell = row.getCell(isuCdIndex);
-        String isuCd = validateColValFromCell(currCell);
-        currCell = row.getCell(ctcIndex);
-        String ctc = validateColValFromCell(currCell);
-        if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
-          LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
-          error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
-            LOG.trace("The row " + (rowIndex + 1)
-                + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
-            error.addError((rowIndex + 1), "Client Tier",
-                ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                currCell = (XSSFCell) row.getCell(fiscalCdIndex);
+                String fiscalCd = validateColValFromCell(currCell);
+                if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {
+                  LOG.trace("fiscal code should consist only of digits");
+                  error.addError((rowIndex + 1), "Fiscal Code", " fiscal code should consist only of digits.");
+                }
+                currCell = (XSSFCell) row.getCell(isuCdIndex);
+                String isuCd = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(ctcIndex);
+                String ctc = validateColValFromCell(currCell);
+                if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+                  LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                  error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
+                } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+                  if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
+                    LOG.trace("The row " + (rowIndex + 1)
+                        + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+                    error.addError((rowIndex + 1), "Client Tier",
+                        ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                  }
+                } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+                  if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+                    LOG.trace("The row " + (rowIndex + 1)
+                        + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                    error.addError((rowIndex + 1), "Client Tier",
+                        ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                  }
+                } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+                  if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+                    LOG.trace("The row " + (rowIndex + 1)
+                        + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                    error.addError((rowIndex + 1), "Client Tier",
+                        ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                  }
+                } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                    && !"@".equalsIgnoreCase(ctc)) {
+                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                  error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+                }
+                if (error.hasErrors()) {
+                  validations.add(error);
+                }
+              }
+            }
+          } // end row loop
+          if (error.hasErrors()) {
+            validations.add(error);
           }
-        } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
-            LOG.trace("The row " + (rowIndex + 1)
-                + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
-            error.addError((rowIndex + 1), "Client Tier",
-                ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
-          }
-        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
-            LOG.trace("The row " + (rowIndex + 1)
-                + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
-            error.addError((rowIndex + 1), "Client Tier",
-                ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
-          }
-        } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd))) && !"@".equalsIgnoreCase(ctc)) {
-          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-          error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
-        }
-        if (error.hasErrors()) {
-          validations.add(error);
         }
       }
-
-      // for (String name : countryAddrss) {
-      // sheet = book.getSheet(name);
-      // for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-      // String cbCity = ""; // 8
-      // String localCity = ""; // 7
-      //
-      // row = sheet.getRow(rowIndex);
-      // if (row == null) {
-      // return; // stop immediately when row is blank
-      // }
-      // currCell = row.getCell(6);
-      // localCity = validateColValFromCell(currCell);
-      //
-      // TemplateValidation error = new TemplateValidation(name);
-      // }
-      // }
     }
   }
 

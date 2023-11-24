@@ -44,6 +44,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
@@ -280,7 +281,8 @@ public class MassChangeTemplate {
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validateSwiss(entityManager, book, country, maxRows, hwFlagMap));
         }
-      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
+      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)
+          || JPHandler.isJPIssuingCountry(country)) {
         if (SystemLocation.GERMANY.equals(country)) {
           XSSFSheet dataSheet = book.getSheet("Data");
           int cmrRecords = 0;
@@ -697,7 +699,7 @@ public class MassChangeTemplate {
     XSSFWorkbook book = new XSSFWorkbook(is);
     try {
       List<TemplateValidation> validations = new ArrayList<TemplateValidation>();
-      if (LAHandler.isLACountry(country)) {
+      if (LAHandler.isLACountry(country) || JPHandler.isJPIssuingCountry(country)) {
         IERPRequestUtils.validateMassUpdateTemplateDupFills(validations, book, maxRows, country, admin);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));

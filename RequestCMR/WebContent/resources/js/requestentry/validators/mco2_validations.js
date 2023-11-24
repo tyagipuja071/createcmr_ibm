@@ -1,8 +1,6 @@
 /* Register MCO Javascripts */
-var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876",
-    "879", "880", "881" ];
-var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851",
-    "857", "883", "780" ];
+var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876", "879", "880", "881" ];
+var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883", "780" ];
 
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
@@ -182,20 +180,6 @@ function addAddressFieldValidators() {
           if (val.length > 28) {
             return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 28 characters.');
           }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  // CEWA - postal code should accept alphanumeric and spaces
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var postCd = FormManager.getActualValue('postCd');
-        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$")) {
-          return new ValidationResult(null, false, postCd
-              + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
         }
         return new ValidationResult(null, true);
       }
@@ -874,8 +858,7 @@ function diplayTinNumberforTZ() {
           // setTinNumber();
         });
       } else {
-        if (FormManager.getField('addrType_ZP01').checked
-            && ((cmr.currentRequestType == 'C' && scenario == 'LOCAL') || cmr.currentRequestType == 'U'))
+        if (FormManager.getField('addrType_ZP01').checked && ((cmr.currentRequestType == 'C' && scenario == 'LOCAL') || cmr.currentRequestType == 'U'))
           cmr.showNode('tin');
       }
     }
@@ -1080,15 +1063,14 @@ function addressQuotationValidatorMCO2() {
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Continuation' ]);
   FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 
 }
 dojo.addOnLoad(function() {
-  GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
-      '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851',
-      '857', '876', '879', '880', '881', '883' ];
+  GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
+      '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
   console.log('adding MCO2 functions...');
   GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
   GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);

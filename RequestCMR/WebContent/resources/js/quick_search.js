@@ -1,6 +1,7 @@
 var app = angular.module('QuickSearchApp', [ 'ngSanitize' ]);
 var _inscp = null;
 var _currQuickDet = null;
+
 app.filter('recFilter', function() {
   return function(items, search) {
     if (!search) {
@@ -75,6 +76,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   };
 
   $scope.findCompanies = function() {
+	$scope.payGo = false;
     console.log(issuingCntry.value);
     $scope.issuingCntryText = issuingCntry.value;
     if (!FormManager.validate('frmCMR')) {
@@ -82,6 +84,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     }
     $scope.orgIdSearch = false;
     var crit = buildSearchCriteria();
+    $scope.checkPayGo(crit);
     if (!crit.name || !crit.streetAddress1 || !crit.city) {
       $scope.orgIdSearch = true;
     }
@@ -238,6 +241,31 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     $scope.importRecord(rec, update);
   };
 
+// PayGo Upgrade Implementation
+  
+  $scope.checkPayGo = function(crit) {
+      var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
+          MANDT : cmr.MANDT,
+          ZZKV_CUSNO : crit.cmrNo,
+          KATR6 : crit.issuingCntry
+          
+        });
+      
+      if (isPayGo && isPayGo.ret1 != 'PG') {
+    	  $scope.payGo = false;
+        }
+      else
+    	  {
+    	  $scope.payGo = true;
+    	  }
+    	  
+	  };
+	  
+	  $scope.payGoUpgradeConfirmImport = function(rec, update) {
+		  rec.reqReason='PAYG';
+		   $scope.importRecord(rec, update);
+		  };
+  
   $scope.importRecord = function(rec, update) {
     var temp = JSON.stringify($scope.frozen);
     var model = JSON.parse(temp);
@@ -248,6 +276,10 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     model.cmrNo = rec.cmrNo;
     model.dunsNo = rec.dunsNo;
     model.recType = rec.recType;
+    if(rec.reqReason=='PAYG')
+    	{
+    	model.hasPaygoUpgradeChk=true;
+    	}
     $scope.records.forEach(function(curr, i) {
       if (curr.recType == 'CMR') {
         model.hasCmr = true;

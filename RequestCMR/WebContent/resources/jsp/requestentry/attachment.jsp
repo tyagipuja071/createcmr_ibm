@@ -67,8 +67,9 @@ String procCenter = reqentry.getProcCenter() != null ? reqentry.getProcCenter() 
       && user.getProcessingCenter().equalsIgnoreCase(reqentry.getProcCenter()))) {%>
             <cmr:button label="${ui.btn.attachment}" onClick="doAddAttachment()" />
             <%if (!readOnly) {%>
-            <cmr:button label="${ui.btn.addscreenshot}" onClick="doAddScreenshot()" pad="true"/>
+            	<cmr:button label="${ui.btn.addscreenshot}" onClick="doAddScreenshot()" pad="true"/>
             <%}%>
+            
 <%}%>
           </div>
         <br><br>

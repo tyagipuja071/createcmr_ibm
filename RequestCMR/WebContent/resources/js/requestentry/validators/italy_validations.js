@@ -363,13 +363,13 @@ function addNonLatinCharValidator() {
     }
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
+//    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
     checkAndAddValidator('poBox', Validators.NON_LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.NON_LATIN, [ 'Phone #' ]);
 
-    if (cntry == SysLoc.ISRAEL && custType == 'CROSS') {
-      FormManager.removeValidator('postCd', Validators.NON_LATIN);
-    }
+//    if (cntry == SysLoc.ISRAEL && custType == 'CROSS') {
+//      FormManager.removeValidator('postCd', Validators.NON_LATIN);
+//    }
   } else {
     FormManager.removeValidator('custNm1', Validators.NON_LATIN);
     FormManager.removeValidator('custNm2', Validators.NON_LATIN);
@@ -597,6 +597,10 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
     if (!hasMatchingFieldsFilled(zs01Data.city1[0], zp01Data.city1[0], isCrossborder)) {
       mismatchFields += mismatchFields != '' ? ', ' : '';
       mismatchFields += 'City';
+    }
+    if (!hasMatchingFieldsFilled(zs01Data.stateProv[0], zp01Data.stateProv[0], isCrossborder)) {
+      mismatchFields += mismatchFields != '' ? ', ' : '';
+      mismatchFields += 'State/Province';
     }
   }
 
@@ -1555,17 +1559,18 @@ function addBillingAddrValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-/*function addCMRValidator(){
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
-   if (FormManager.getActualValue('reqType') == 'C'){
-	if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
-      if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-       return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search');
-        }
-      }
-    } 
-}*/
+/*
+ * function addCMRValidator(){ var role =
+ * FormManager.getActualValue('userRole').toUpperCase(); var custSubType =
+ * FormManager.getActualValue('custSubGrp'); if
+ * (FormManager.getActualValue('reqType') == 'C'){
+ * if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' ||
+ * FormManager.getActualValue('findCmrResult') == 'REJECTED')) { if (role ==
+ * "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' ||
+ * custSubType == '3PAVA' || custSubType == 'CRO3P')) { return new
+ * ValidationResult(null, false,'For 3rd party scenario please import a CMR via
+ * CMR search'); } } } }
+ */
 
 function setVATForItaly() {
   var reqType = FormManager.getActualValue('reqType');
@@ -3648,7 +3653,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
-//GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
+  // GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateCodiceDesIT, [ SysLoc.ITALY ], null, true);

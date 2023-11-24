@@ -699,7 +699,8 @@ public class TurkeyTransformer extends EMEATransformer {
     // }
 
     if (addrData.getLandCntry().equals("TR")) {
-      legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
+      // legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv())
+      // ? addrData.getStateProv() : "");
     } else {
       legacyAddr.setItCompanyProvCd("");
     }
