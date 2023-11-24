@@ -968,6 +968,14 @@ public class JPHandler extends GEOHandler {
       data.setTier2("");
     }
 
+    if ("U".equals(admin.getReqType())) {
+      if (StringUtils.isNotBlank(data.getCmrNo())) {
+        if (data.getCmrNo().indexOf("C") == 0) {
+          data.setCreditToCustNo("");
+        }
+      }
+    }
+
     String rolflag = mainRecord.getInspbydebi() == null ? "N" : mainRecord.getInspbydebi();
     data.setIdentClient(rolflag);
     handleData4RAOnImport(data);
