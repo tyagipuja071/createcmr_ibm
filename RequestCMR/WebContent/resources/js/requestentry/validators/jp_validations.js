@@ -210,8 +210,7 @@ function disableAddrFieldsForRolUpdate() {
 
     var custType = FormManager.getActualValue('custType');
     if (custType == 'CR' || custType == 'AR') {
-      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2',
-          'companySize' ];
+      var accountFieldList = [ 'custNm1', 'custNm2', 'custNm4', 'custNm3', 'addrTxt', 'postCd', 'bldg', 'custPhone', 'locationCode', 'city2', 'companySize' ];
       for (var i = 0; i < accountFieldList.length; i++) {
         setAddrFieldHide(accountFieldList[i]);
       }
@@ -6870,11 +6869,22 @@ function setAddrFieldsBehavior() {
     if (addrType == 'ZC01' || addrType == 'ZE01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+      $('#cnCustName1').attr('maxlength', '22');
+
+      var custFullEng = FormManager.getActualValue('cnCustName1');
+      if (custFullEng != null && custFullEng != '' && custFullEng != undefined) {
+        if (custFullEng.length > 22) {
+          fullEnglish = custFullEng.substring(0, 22);
+          FormManager.setValue('cnCustName1', fullEnglish);
+        }
+      }
+
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
       FormManager.resetValidations('cnDistrict');
       FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      $('#cnCustName1').attr('maxlength', '70');
     }
 
     if (custSubGrp == 'BFKSC') {
@@ -6904,11 +6914,21 @@ function setAddrFieldsUpdateBehavior() {
     if (addrType == 'ZC01' || addrType == 'ZE01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
+      $('#cnCustName1').attr('maxlength', '22');
+
+      var custFullEng = FormManager.getActualValue('cnCustName1');
+      if (custFullEng != null && custFullEng != '' && custFullEng != undefined) {
+        if (custFullEng.length > 22) {
+          fullEnglish = custFullEng.substring(0, 22);
+          FormManager.setValue('cnCustName1', fullEnglish);
+        }
+      }
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
       FormManager.resetValidations('cnDistrict');
       FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      $('#cnCustName1').attr('maxlength', '70');
     }
 
     if (custSubGrp == 'BFKSC') {

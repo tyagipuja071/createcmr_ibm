@@ -522,7 +522,15 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       updateEntity(copyIntlAddr, entityManager);
 
       copyAddr.setParCmrNo(parCmrNo);
-      copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1());
+
+      if ("ZC01".equals(copyAddr.getId().getAddrType()) || "ZE01".equals(copyAddr.getId().getAddrType())) {
+        if (copyIntlAddr.getIntlCustNm1() != null) {
+          copyAddr.setCustNm3(
+              copyIntlAddr.getIntlCustNm1().length() > 22 ? copyIntlAddr.getIntlCustNm1().substring(0, 22) : copyIntlAddr.getIntlCustNm1());
+        }
+      } else {
+        copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1());
+      }
     }
   }
 }
