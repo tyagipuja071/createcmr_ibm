@@ -574,4 +574,178 @@ public class IERPRequestUtils extends RequestUtils {
     handler.validateMassUpdateTemplateDupFills(validations, book, maxRows, country, admin);
   }
 
+  public static String getCsboByPostal(EntityManager entityMgr, String postCd) {
+    String csbo = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.CSBO.BY.POSTAL");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("POST_CD", postCd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      csbo = result[1] != null ? (String) result[1] : "";
+    }
+    LOG.debug("getCsboByPostal() --> postCd (" + postCd + ") csbo (" + csbo + ")");
+    return csbo;
+  }
+
+  public static boolean isCsboValid(EntityManager entityMgr, String csbo) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.CSBO.EXIST");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("CS_BO", csbo);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      LOG.debug("isCsboValid() --> csbo (" + csbo + ") --> true");
+      return true;
+    } else {
+      LOG.debug("isCsboValid() --> csbo (" + csbo + ") --> false");
+      return false;
+    }
+  }
+
+  public static String getLocationByPostal(EntityManager entityMgr, String postCd) {
+    String locn = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.LOCN.BY.POSTAL");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("POST_CD", postCd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      locn = result[1] != null ? (String) result[1] : "";
+    }
+    LOG.debug("getLocationByPostal() --> postCd (" + postCd + ") locn (" + locn + ")");
+    return locn;
+  }
+
+  public static Object[] getIsicByJsic(EntityManager entityMgr, String jsic) {
+    String isic = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.ISIC.BY.JSIC");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("JSIC_CD", jsic);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getIsicByJsic() --> jsic (" + jsic + ") isic (" + isic + ")");
+    return result;
+  }
+
+  public static Object[] getSubindustryISUByIsic(EntityManager entityMgr, String isic) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.SUBIND.ISU");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("ZZKV_SIC", isic);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getSubindustryISUByIsic() --> isic (" + isic + ") subind (" + result[1] + ") isu (" + result[2] + ")");
+    return result;
+  }
+
+  public static Object[] getIsicMrcCtcIsuSortlJP(EntityManager entityMgr, String ofcd) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.MAPPED.FIELDS.BY.OFCD");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("OFFICE_CD", StringUtils.leftPad(ofcd, 3, "0"));
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getIsicMrcCtcIsuSortlJP() --> ofcd (" + ofcd + ") isic (" + result[1] + ") mrc (" + result[2] + ") ctc (" + result[3] + ") isu ("
+        + result[4] + ") sortl (" + result[5] + ")");
+    return result;
+
+  }
+
+  public static String[] limitName1Name2(String name1, String name2) {
+    String[] nameArray = new String[2];
+    if (name1 != null && name1.length() > 17 || name1 != null && name2 != null && (name1.length() + name2.length()) > 30
+        || name2 != null && name2.length() > 17) {
+      String nameTotal = name1 + (name2 == null ? "" : name2);
+      nameArray[0] = nameTotal.substring(0, 17);
+      nameArray[1] = nameTotal.substring(17).length() > 17 ? nameTotal.substring(17, 30) : nameTotal.substring(17);
+    } else {
+      nameArray[0] = name1;
+      nameArray[1] = name2;
+    }
+    return nameArray;
+  }
+
+  public static String dbcsConversionForJP(String strToConvert) {
+    String convertedStr = null;
+    if (StringUtils.isNotBlank(strToConvert)) {
+      convertedStr = strToConvert;
+      convertedStr = convertedStr.replaceAll("ィ", "イ");
+      convertedStr = convertedStr.replaceAll("ョ", "ヨ");
+      convertedStr = convertedStr.replaceAll("ュ", "ユ");
+      convertedStr = convertedStr.replaceAll("ヵ", "カ");
+      convertedStr = convertedStr.replaceAll("ャ", "ヤ");
+      convertedStr = convertedStr.replaceAll("ッ", "ツ");
+      convertedStr = convertedStr.replaceAll("ァ", "ア");
+      convertedStr = convertedStr.replaceAll("1", "１");
+      convertedStr = convertedStr.replaceAll("2", "２");
+      convertedStr = convertedStr.replaceAll("3", "３");
+      convertedStr = convertedStr.replaceAll("4", "４");
+      convertedStr = convertedStr.replaceAll("5", "５");
+      convertedStr = convertedStr.replaceAll("6", "６");
+      convertedStr = convertedStr.replaceAll("7", "７");
+      convertedStr = convertedStr.replaceAll("8", "８");
+      convertedStr = convertedStr.replaceAll("9", "９");
+      convertedStr = convertedStr.replaceAll("0", "０");
+      convertedStr = convertedStr.replaceAll("A", "Ａ");
+      convertedStr = convertedStr.replaceAll("B", "Ｂ");
+      convertedStr = convertedStr.replaceAll("C", "Ｃ");
+      convertedStr = convertedStr.replaceAll("D", "Ｄ");
+      convertedStr = convertedStr.replaceAll("E", "Ｅ");
+      convertedStr = convertedStr.replaceAll("F", "Ｆ");
+      convertedStr = convertedStr.replaceAll("G", "Ｇ");
+      convertedStr = convertedStr.replaceAll("H", "Ｈ");
+      convertedStr = convertedStr.replaceAll("I", "Ｉ");
+      convertedStr = convertedStr.replaceAll("J", "Ｊ");
+      convertedStr = convertedStr.replaceAll("K", "Ｋ");
+      convertedStr = convertedStr.replaceAll("L", "Ｌ");
+      convertedStr = convertedStr.replaceAll("M", "Ｍ");
+      convertedStr = convertedStr.replaceAll("N", "Ｎ");
+      convertedStr = convertedStr.replaceAll("O", "Ｏ");
+      convertedStr = convertedStr.replaceAll("P", "Ｐ");
+      convertedStr = convertedStr.replaceAll("Q", "Ｑ");
+      convertedStr = convertedStr.replaceAll("R", "Ｒ");
+      convertedStr = convertedStr.replaceAll("S", "Ｓ");
+      convertedStr = convertedStr.replaceAll("T", "Ｔ");
+      convertedStr = convertedStr.replaceAll("U", "Ｕ");
+      convertedStr = convertedStr.replaceAll("V", "Ｖ");
+      convertedStr = convertedStr.replaceAll("W", "Ｗ");
+      convertedStr = convertedStr.replaceAll("X", "Ｘ");
+      convertedStr = convertedStr.replaceAll("Y", "Ｙ");
+      convertedStr = convertedStr.replaceAll("Z", "Ｚ");
+      convertedStr = convertedStr.replaceAll(" ", "　");
+      convertedStr = convertedStr.replaceAll("-", "－");
+      convertedStr = convertedStr.replaceAll("−", "－");
+    }
+    return convertedStr;
+  }
 }
