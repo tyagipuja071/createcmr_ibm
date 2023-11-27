@@ -7603,4 +7603,65 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     return muModel;
   }
+
+  public boolean validateJPMassUpdateFile(String path, Data data, Admin admin, String cmrIssuingCntry) throws Exception {
+    List<Boolean> isErr = new ArrayList<Boolean>();
+    try (FileInputStream fis = new FileInputStream(path)) {
+      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
+      EntityManager em = JpaManager.getEntityManager();
+      try {
+        String country = data.getCmrIssuingCntry();
+        LOG.debug("Validating " + path);
+        byte[] bookBytes = template.cloneStream(fis);
+
+        List<TemplateValidation> validations = null;
+        StringBuilder errTxt = new StringBuilder();
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+
+          validations = template.validate(em, is, admin, country, 2000);
+          LOG.debug(new ObjectMapper().writeValueAsString(validations));
+
+          for (TemplateValidation validation : validations) {
+            if (validation.hasErrors()) {
+              if (StringUtils.isEmpty(errTxt.toString())) {
+                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+              } else {
+                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+              }
+            }
+          }
+
+        }
+        if (!StringUtils.isEmpty(errTxt.toString())) {
+          throw new Exception(errTxt.toString());
+        }
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          try (FileOutputStream fos = new FileOutputStream(path)) {
+            LOG.debug("Merging..");
+            template.merge(validations, is, fos, 2000);
+          }
+        }
+        // modify the country for testing
+      } catch (Exception e) {
+
+        LOG.error(e.getMessage());
+        LOG.error("An error occurred in validating DR Mass Update File.");
+        // return false;
+
+        throw new Exception(e.getMessage());
+
+      } finally {
+        em.close();
+      }
+    }
+
+    if (isErr.contains(false)) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
