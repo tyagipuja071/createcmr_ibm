@@ -1034,23 +1034,28 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
     FormManager.enable('landCntry');
   }
 }
+
 function addTaxCode1ValidatorForOtherLACntries() {
-  FormManager.addFormValidator((function() {
+  var landedCntry=getZS01LandedCountry();
+  var excludeCntry=['VE','CL','CO'];
+  if(!excludeCntry.includes(landedCntry)){
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var taxCd1 = FormManager.getActualValue('taxCd1');
         var lbl1 = FormManager.getLabel('LocalTax1');
         if (taxCd1 && taxCd1.length > 0 && !taxCd1.match("^[0-9a-zA-Z-]+$")) {
           return new ValidationResult({
-            id : 'taxCd1',
-            type : 'text',
-            name : 'taxCd1'
-          }, false, 'The value for ' + lbl1 + ' is invalid. Only digits, alphabets and dashes combination is allowed');
+            id: 'taxCd1',
+            type: 'text',
+            name: 'taxCd1'
+          }, false, 'The value for ' + lbl1 + ' is invalid. Only digits, alphabets and dashes combination is allowed.');
         }
         return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+ }
 }
 
 /**
@@ -3236,6 +3241,19 @@ function toggleTaxRegimeForCrossMx() {
   }
 }
 
+function getZS01LandedCountry(){
+  var zs01Cntry = null;
+  var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+    REQID : FormManager.getActualValue('reqId'),
+    TYPE : 'ZS01'
+  });
+  if (ret && ret.ret1 && ret.ret1 != '') {
+    zs01Cntry = ret.ret1;
+  }
+  console.log('ZS01 VAT Country: ' + zs01Cntry);
+  return zs01Cntry;
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -3299,7 +3317,6 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateVATChile, [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateAddlContactEmailFieldForReactivate, [ SysLoc.BRAZIL ], GEOHandler.ROLE_PROCESSOR, true);
     
