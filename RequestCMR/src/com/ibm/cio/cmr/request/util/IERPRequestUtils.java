@@ -748,4 +748,126 @@ public class IERPRequestUtils extends RequestUtils {
     }
     return convertedStr;
   }
+
+  public static String[] getJPCoverageFieldsValue(EntityManager entityMgr, String ofcd, String jsic, String cmrNo) {
+    // check if template has office code or jsic otherwise pull from RDC
+    List<Object[]> results = null;
+    Object[] result = null;
+
+    String[] coverageFields = new String[8];
+
+    Object[] resultByOfcd = null;
+    Object[] resultByJsic = null;
+
+    String officeCode = ofcd;
+    String jsicCode = jsic;
+
+    String mrc = null;
+    String ctc = null;
+    String sortl = null;
+
+    String isic = null;
+    String subIndustry = null;
+    String isuOverride = null;
+    String isuCd = null;
+
+    if ((StringUtils.isBlank(officeCode) || StringUtils.isBlank(jsicCode)) && StringUtils.isNotBlank(cmrNo)) {
+      String sql = ExternalizedQuery.getSql("JP.MASS.GET.RDC.OFCD.JSIC");
+      PreparedQuery query = new PreparedQuery(entityMgr, sql);
+
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("KATR6", SystemLocation.JAPAN);
+      query.setParameter("ZZKV_CUSNO", cmrNo);
+      query.setForReadOnly(true);
+
+      results = query.getResults();
+
+      if (results != null && results.size() > 0) {
+        result = results.get(0);
+
+        // if officeCode blank hence not populated from template,
+        // use officeCode from rdc
+        if (StringUtils.isBlank(officeCode)) {
+          officeCode = result[0] != null ? (String) result[0] : (String) result[1];
+        }
+        // if jsicCode blank hence not populated from template,
+        // use jsicCode from rdc
+        if (StringUtils.isBlank(jsicCode)) {
+          jsicCode = result[2] != null ? (String) result[2] : "";
+        }
+      }
+    }
+
+    resultByOfcd = getIsicMrcCtcIsuSortlJP(entityMgr, officeCode);
+
+    if (resultByOfcd != null) {
+      isic = resultByOfcd[1] != null ? (String) resultByOfcd[1] : "";
+      mrc = resultByOfcd[2] != null ? (String) resultByOfcd[2] : "";
+      ctc = resultByOfcd[3] != null ? (String) resultByOfcd[3] : "";
+      isuOverride = resultByOfcd[4] != null ? (String) resultByOfcd[4] : "";
+      sortl = resultByOfcd[5] != null ? (String) resultByOfcd[5] : "";
+
+      if (StringUtils.isBlank(isic) && StringUtils.isNotBlank(jsicCode)) {
+        resultByJsic = getIsicByJsic(entityMgr, jsicCode);
+        if (resultByJsic != null) {
+          isic = resultByJsic[1] != null ? (String) resultByJsic[1] : "";
+        } else {
+          isic = "0000";
+        }
+        String cmrNoSubstr = cmrNo != null ? cmrNo.substring(0, 2) : "";
+        if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+          subIndustry = "ZF";
+        } else {
+          if (StringUtils.isNotBlank(isic)) {
+
+            Object[] subindIsu = getSubindustryISUByIsic(entityMgr, isic);
+            if (subindIsu != null) {
+              subIndustry = subindIsu[1] != null ? (String) subindIsu[1] : "";
+              isuCd = StringUtils.isBlank(isuOverride) && subindIsu[2] != null ? (String) subindIsu[2] : isuOverride;
+
+            }
+          }
+        }
+      } else {
+        String cmrNoSubstr = cmrNo != null ? cmrNo.substring(0, 2) : "";
+        if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+          subIndustry = "ZF";
+        } else {
+          if (StringUtils.isNotBlank(isic)) {
+
+            Object[] subindIsu = getSubindustryISUByIsic(entityMgr, isic);
+            if (subindIsu != null) {
+              subIndustry = subindIsu[1] != null ? (String) subindIsu[1] : "";
+              isuCd = StringUtils.isBlank(isuOverride) && subindIsu[2] != null ? (String) subindIsu[2] : isuOverride;
+
+            }
+          }
+        }
+      }
+    }
+
+    coverageFields[0] = officeCode;
+    coverageFields[1] = jsicCode;
+
+    coverageFields[2] = mrc;
+    coverageFields[3] = ctc;
+    coverageFields[4] = sortl;
+
+    coverageFields[5] = isic;
+    coverageFields[6] = subIndustry;
+    coverageFields[7] = isuCd;
+
+    LOG.debug("OFFICE CODE VALUE --> " + officeCode);
+    LOG.debug("JSIC CODE VALUE --> " + jsicCode);
+
+    LOG.debug("MRC VALUE --> " + mrc);
+    LOG.debug("CLIENT TIER VALUE --> " + ctc);
+    LOG.debug("SORTL VALUE --> " + sortl);
+
+    LOG.debug("ISIC VALUE --> " + isic);
+    LOG.debug("SUBINDUSTRY VALUE --> " + subIndustry);
+    LOG.debug("ISU --> " + isuCd);
+
+    return coverageFields;
+  }
 }
