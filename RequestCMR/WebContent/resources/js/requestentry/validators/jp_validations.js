@@ -6367,6 +6367,7 @@ function isKSCMemberValidator() {
         var isKSCMemberFlg = FormManager.getActualValue('isKSCMemberFlg');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var custType = FormManager.getActualValue('custType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
         var paramCode = 'JP.KSC.SKIP_CHECK';
 
         if (paramCode != null) {
