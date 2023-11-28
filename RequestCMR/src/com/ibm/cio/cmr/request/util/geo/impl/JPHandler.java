@@ -1092,7 +1092,7 @@ public class JPHandler extends GEOHandler {
     // // import Company and Estab abbNm, but not Account abbNm
     // if ("ZC01".equals(addrType) || "ZE01".equals(addrType)) {
     if ("ZC01".equals(addrType) || "ZE01".equals(addrType)) {
-      if (currentRecord.getCmrName3() == null) {
+      if (currentRecord.getCmrName3() != null) {
         address.setCustNm3(
             currentRecord.getCmrName3().length() > 22 ? currentRecord.getCmrName3().substring(0, 22) : currentRecord.getCmrName3().trim());
       }
@@ -2708,7 +2708,8 @@ public class JPHandler extends GEOHandler {
     }
 
     if (kna1 != null) {
-      if ("ZC01".equals(intlAddr) || "ZE01".equals(intlAddr)) {
+      if (intlAddr != null && intlAddr.getId() != null
+          && ("ZC01".equals(intlAddr.getId().getAddrType()) || "ZE01".equals(intlAddr.getId().getAddrType()))) {
         String fullEnglish = kna1.getName1() + kna1.getName2();
         if (fullEnglish != null) {
           intlAddr.setIntlCustNm1(fullEnglish.length() > 22 ? fullEnglish.substring(0, 22) : fullEnglish);
@@ -2716,7 +2717,6 @@ public class JPHandler extends GEOHandler {
       } else {
         intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
       }
-      intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
       intlAddr.setAddrTxt(kna1.getStras());
       intlAddr.setCity1(kna1.getOrt01());
       intlAddr.setCity2(kna1.getOrt02());
