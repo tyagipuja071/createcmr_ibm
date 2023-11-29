@@ -586,7 +586,15 @@ public class JPHandler extends GEOHandler {
       intlAddrPK.setReqId(addr.getId().getReqId());
 
       intlAddr.setId(intlAddrPK);
-      intlAddr.setIntlCustNm1(resultKna1.getName1() + resultKna1.getName2());
+      if (intlAddr != null && intlAddr.getId() != null
+          && ("ZC01".equals(intlAddr.getId().getAddrType()) || "ZE01".equals(intlAddr.getId().getAddrType()))) {
+        String fullEnglish = resultKna1.getName1() + resultKna1.getName2();
+        if (fullEnglish != null) {
+          intlAddr.setIntlCustNm1(fullEnglish.length() > 22 ? fullEnglish.substring(0, 22) : fullEnglish);
+        }
+      } else {
+        intlAddr.setIntlCustNm1(resultKna1.getName1() + resultKna1.getName2());
+      }
       intlAddr.setAddrTxt(resultKna1.getStras());
       intlAddr.setCity1(resultKna1.getOrt01());
       intlAddr.setCity2(resultKna1.getOrt02());
