@@ -6496,7 +6496,7 @@ function doImportCmrs(addressOnly) {
   }
   if (custSubGrp == 'BQICL') {
     addrType = 'EAIR';
-    message = 'Importing records with IBM Relate CMR ';
+    message = 'Importing records with IBM Related CMR ';
   }
   cmr.showProgress(message + cmrNo + '.  This process might take a while. Please wait..');
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
