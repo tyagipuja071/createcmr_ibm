@@ -2582,6 +2582,35 @@ public class JPHandler extends GEOHandler {
     setEnglishAddrFieldsFromRDC(entityManager, admin, data);
     setSapNoOnImport(entityManager, admin, data);
     copyIntlAddrValuesToAddr(entityManager, admin);
+    copyROLValueOfCompanyToADUs(entityManager, admin, data);
+  }
+
+  private void copyROLValueOfCompanyToADUs(EntityManager entityManager, Admin admin, Data data) {
+    if ("U".equalsIgnoreCase(admin.getReqType())) {
+      List<Addr> addrs = getAddresses(entityManager, admin.getId().getReqId());
+      Addr companyAddr = addrs.stream().filter(a -> a != null && "ZC01".equals(a.getId().getAddrType())).findAny().orElse(null);
+      if (companyAddr != null) {
+        for (Addr addr : addrs) {
+          if ("ZE01".equals(addr.getId().getAddrType())) {
+            continue;
+          }
+
+          addr.setRol(companyAddr.getRol());
+          entityManager.merge(addr);
+
+          AddrPK arPk = new AddrPK();
+          arPk.setAddrSeq(addr.getId().getAddrSeq());
+          arPk.setAddrType(addr.getId().getAddrType());
+          arPk.setReqId(addr.getId().getReqId());
+          AddrRdc addrRdc = entityManager.find(AddrRdc.class, arPk);
+          if (addrRdc != null) {
+            addrRdc.setRol(addr.getRol());
+            entityManager.merge(addrRdc);
+          }
+        }
+      }
+      entityManager.flush();
+    }
   }
 
   private void copyIntlAddrValuesToAddr(EntityManager entityManager, Admin admin) {
