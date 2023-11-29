@@ -2158,6 +2158,7 @@ function setFieldsCharForScenarios() {
     FormManager.setValue('inacCd', '');
     FormManager.setValue('vat', '');
     FormManager.setValue('custClass', '60')
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
   }
   if (custSubGroup == 'INTER') {
     FormManager.setValue('inacCd', '');
@@ -2958,7 +2959,7 @@ function setEntepriseAndSalesRepES() {
   var entSalesRepBlankForIsuCtc = new Set([ '04', '1R', '28', '12' ]);
 
   var isuCtc = isuCd + clientTier;
-
+  // CREATCMR-10647
   if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && isuCtc == '21') {
     FormManager.setValue('enterprise', '985107');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
