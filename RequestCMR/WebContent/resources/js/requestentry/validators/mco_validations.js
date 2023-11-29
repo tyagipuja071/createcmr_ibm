@@ -2959,7 +2959,7 @@ function setEntepriseAndSalesRepES() {
   var entSalesRepBlankForIsuCtc = new Set([ '04', '1R', '28', '12' ]);
 
   var isuCtc = isuCd + clientTier;
-  // CREATCMR-10647
+  
   if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && isuCtc == '21') {
     FormManager.setValue('enterprise', '985107');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
