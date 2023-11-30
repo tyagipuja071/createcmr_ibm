@@ -934,7 +934,6 @@ public class USUtil extends AutomationUtil {
         } else if (changes.isLegalNameChanged() && isPaygoUpgrade) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         }
-
       } finally {
         cedpManager.clear();
         cedpManager.close();
