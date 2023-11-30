@@ -1610,7 +1610,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
 
   if (cmrIssuCntry == '744') {
 
-    dojo.connect(FormManager.getField('custSubGrp'), '', function (value) {
+    dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
       if (FormManager.getActualValue('custSubGrp') == 'CROSS' && window.loadDefaultCrossSettings == true) {
         FormManager.setValue('apCustClusterId', '012D999');
         FormManager.setValue('inacCd', '');
@@ -3523,6 +3523,9 @@ function setCTCIsuByCluster() {
       }
     }
   });
+  if (_clusterHandler && _clusterHandler[0]) {
+    _clusterHandler[0].onChange();
+  }
 }
 
 function setCTCIsuByClusterANZ() {
