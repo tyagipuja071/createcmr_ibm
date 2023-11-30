@@ -1352,6 +1352,10 @@ public class USUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
+    boolean isPaygoUpgrade=false;
+    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
     if (response.getSuccess()) {
@@ -1375,6 +1379,11 @@ public class USUtil extends AutomationUtil {
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
               validation.setSuccess(true);
+            }else if (isPaygoUpgrade){
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+              details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
+              validation.setMessage("Review needed");
+              validation.setSuccess(false);
             } else {
               validation.setMessage("Rejected");
               validation.setSuccess(false);
@@ -1396,7 +1405,12 @@ public class USUtil extends AutomationUtil {
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
             details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
             validation.setSuccess(true);
-          } else {
+          } else if (isPaygoUpgrade){
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+            details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
+            validation.setMessage("Review needed");
+            validation.setSuccess(false);
+          }else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -1417,7 +1431,12 @@ public class USUtil extends AutomationUtil {
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
           details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
           validation.setSuccess(true);
-        } else {
+        } else if (isPaygoUpgrade){
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+          details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
+          validation.setMessage("Review needed");
+          validation.setSuccess(false);
+        }else {
           validation.setMessage("Rejected");
           validation.setSuccess(false);
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
