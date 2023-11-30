@@ -195,7 +195,9 @@ public class FranceHandler extends GEOHandler {
     if (mainRecord.getCmrNum().startsWith("P") && !"88".equalsIgnoreCase(data.getOrdBlk())) {
       data.setOrdBlk("");
       data.setCmrNo("");
-    }
+    } else if(CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
+      data.setOrdBlk("");
+    } 
     // changes made as part of defect CMR - 3242
     try {
       data.setCurrencyCd(geCurrencyCode(zs01sapNo));

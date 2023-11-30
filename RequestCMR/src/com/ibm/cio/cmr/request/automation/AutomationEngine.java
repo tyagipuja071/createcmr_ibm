@@ -186,17 +186,16 @@ public class AutomationEngine {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
+    
     boolean isPaygoUpgrade=false; 
     if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
       isPaygoUpgrade=true;
-    }
-    
+    }    
 
     if (isPaygoUpgrade) {
       requestData.getData().setOrdBlk(null);
     }
-
-
+    
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
@@ -259,7 +258,9 @@ public class AutomationEngine {
       
     
       // handle the special ALL types (approvals)
-      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType) || isPaygoUpgrade) {
+
+      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)  || isPaygoUpgrade) {
+
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
 
