@@ -31,8 +31,9 @@ public class DBCSReportField extends ReportField {
    */
   @Override
   public String getFixedWidthValue(Object value) {
+    int targetLength = this.length - 1;
     String fwValue = value == null ? "" : value.toString().trim();
-    int toLength = (this.length / 2) * 3;
+    int toLength = (targetLength / 2) * 3;
     try {
       while (fwValue.getBytes("UTF-8").length < toLength) {
         fwValue += this.padCharacter;
@@ -40,6 +41,7 @@ public class DBCSReportField extends ReportField {
     } catch (UnsupportedEncodingException e) {
       // noop
     }
+    fwValue += "!";
     return fwValue;
   }
 
