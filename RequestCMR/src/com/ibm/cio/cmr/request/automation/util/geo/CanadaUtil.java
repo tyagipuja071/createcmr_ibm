@@ -531,7 +531,10 @@ public class CanadaUtil extends AutomationUtil {
       results.setDetails(details.toString());
       return true;
     }
-
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqType())){
+      isPaygoUpgrade=true;
+    }
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
@@ -547,7 +550,7 @@ public class CanadaUtil extends AutomationUtil {
       // ISU CTC Based on Coverage
       String isu = "";
       String ctc = "";
-      if (StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
+      if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
         String firstChar = coverageId.substring(0, 1);
 
         List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993", "T0007994", "T0008059");
@@ -599,7 +602,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
         }
-      } else if (scenario.equalsIgnoreCase("ECO")) {
+      } else if (!isPaygoUpgrade && scenario.equalsIgnoreCase("ECO")) {
         isu = "36";
         ctc = "Y";
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
