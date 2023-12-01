@@ -962,6 +962,10 @@ public class JPHandler extends GEOHandler {
     data.setCsDiv(mainRecord.getCsDiv());
     data.setOemInd(mainRecord.getOemInd());
     data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
+
+    data.setSvcArOffice(mainRecord.getCmrCustGrpId());
+    data.setAgreementSignDate(mainRecord.getCmrContractSignDt());
+
     if (mainRecord.getCompanyCd() != null) {
       if (mainRecord.getCompanyCd().equals("AA")) {
         data.setCustGrp("IBMTP");
