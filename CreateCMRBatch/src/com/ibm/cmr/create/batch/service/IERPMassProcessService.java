@@ -236,7 +236,7 @@ public class IERPMassProcessService extends TransConnService {
 
     String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
     // get the address order
-    if (getIerpAddressOrder() != null && !data.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+    if (getIerpAddressOrder() != null && !SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
       String[] order = getIerpAddressOrder();
       StringBuilder types = new StringBuilder();
       if (order != null && order.length > 0) {
@@ -259,7 +259,7 @@ public class IERPMassProcessService extends TransConnService {
       }
       orderBy.append(" else 25 end, ADDR_TYPE, case when IMPORT_IND = 'Y' then 0 else 1 end, ADDR_SEQ ");
       sql += " order by case " + orderBy.toString();
-    } else if (data.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+    } else if (SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
       String[] order = getIerpAddressOrder();
       StringBuilder types = new StringBuilder();
       if (order != null && order.length > 0) {
