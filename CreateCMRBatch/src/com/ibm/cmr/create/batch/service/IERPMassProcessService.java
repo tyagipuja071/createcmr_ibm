@@ -29,7 +29,6 @@ import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -49,8 +48,6 @@ public class IERPMassProcessService extends TransConnService {
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCP = "PCP";
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZD02", "ZP02" };
-  private static final String[] JP_ADDRESS_ORDER = { "ZC01", "ZS01", "ZS02", "ZP01", "ZI01", "ZP02", "ZP03", "ZP04", "ZP05", "ZI03", "ZP06", "ZP07",
-      "ZP08", "ZP09" };
 
   public boolean isDevMode() {
     return devMode;
@@ -236,30 +233,7 @@ public class IERPMassProcessService extends TransConnService {
 
     String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
     // get the address order
-    if (getIerpAddressOrder() != null && !SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
-      String[] order = getIerpAddressOrder();
-      StringBuilder types = new StringBuilder();
-      if (order != null && order.length > 0) {
-
-        for (String type : order) {
-          LOG.trace("Looking for Address Types " + type);
-          types.append(types.length() > 0 ? ", " : "");
-          types.append("'" + type + "'");
-        }
-      }
-
-      if (types.length() > 0) {
-        sql += " and ADDR_TYPE in ( " + types.toString() + ") ";
-      }
-      StringBuilder orderBy = new StringBuilder();
-      int orderIndex = 0;
-      for (String type : order) {
-        orderBy.append(" when ADDR_TYPE = '").append(type).append("' then ").append(orderIndex);
-        orderIndex++;
-      }
-      orderBy.append(" else 25 end, ADDR_TYPE, case when IMPORT_IND = 'Y' then 0 else 1 end, ADDR_SEQ ");
-      sql += " order by case " + orderBy.toString();
-    } else if (SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+    if (getIerpAddressOrder() != null) {
       String[] order = getIerpAddressOrder();
       StringBuilder types = new StringBuilder();
       if (order != null && order.length > 0) {
@@ -932,9 +906,5 @@ public class IERPMassProcessService extends TransConnService {
     String sql = ExternalizedQuery.getSql("LA.GET_MASS_PROCESS_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
-  }
-
-  public String[] getJPAddressOrder() {
-    return JP_ADDRESS_ORDER;
   }
 }
