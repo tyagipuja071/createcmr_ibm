@@ -202,8 +202,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
-      } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
-        performLegacyDirectMassUpdate(model, entityManager, request);
       } else {
         performMassUpdate(model, entityManager, request);
       }
@@ -1426,8 +1424,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     if (CmrConstants.REQ_TYPE_MASS_UPDATE.equals(model.getReqType()) && CNDHandler.isCNDCountry(cmrIssuingCntry)) {
       performMassUpdateValidationsDECND(model, entityManager, request);
-    } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
-      performMassUpdateJP(model, entityManager, request);
     }
     String result = null;
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
@@ -1442,49 +1438,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
     }
     performGenericAction(trans, model, entityManager, request, procCenterName, null, false, StringUtils.isBlank(result));
-  }
-
-  private void performMassUpdateJP(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
-    int iterationId = 0;
-    String sql = null;
-    PreparedQuery query = null;
-    model.setEmeaSeqNo(0);
-    try {
-      // get latest iteration id
-      sql = ExternalizedQuery.getSql("GET.MASS.UPDATE.ITERID.DECND");
-      query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", model.getReqId());
-      List<Integer> iterId = query.getResults(Integer.class);
-      if (iterId != null && iterId.size() > 0) {
-        iterationId = iterId.get(0);
-      }
-      String sqlUpdate = ExternalizedQuery.getSql("UPDATE.MASS.UPDATE");
-      PreparedQuery updateQuery = new PreparedQuery(entityManager, sqlUpdate);
-      updateQuery.setParameter("PAR_REQ_ID", model.getReqId());
-      updateQuery.setParameter("SEQ_NO", 0);
-      updateQuery.setParameter("ITERATION_ID", iterationId);
-
-      log.debug("Updating MassUpdate records for mass reqId = " + model.getReqId());
-      updateQuery.executeSql();
-
-      String sqlMassUpdate = ExternalizedQuery.getSql("UPDATE.MASS.UPDATE.DATA");
-      PreparedQuery updateMassQuery = new PreparedQuery(entityManager, sqlMassUpdate);
-      updateMassQuery.setParameter("PAR_REQ_ID", model.getReqId());
-      updateMassQuery.setParameter("SEQ_NO", 0);
-      updateMassQuery.setParameter("ITERATION_ID", iterationId);
-
-      log.debug("Updating MassUpdateData records for mass reqId = " + model.getReqId());
-      updateMassQuery.executeSql();
-
-    } catch (Exception e) {
-      this.log.error("Error in processing file for mass change.", e);
-      if (e instanceof CmrException) {
-        CmrException cmre = (CmrException) e;
-        throw cmre;
-      } else {
-        throw e;
-      }
-    }
   }
 
   /**
@@ -1818,12 +1771,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         cmrIssuingCntry = (data.getCmrIssuingCntry() != null && !"".equalsIgnoreCase(data.getCmrIssuingCntry())) ? data.getCmrIssuingCntry() : "";
       }
 
-      if (cmrIssuingCntry != null && JPHandler.isJPIssuingCountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType())) {
-        // JAPAN
-        processLegacyDirectMassFile(entityManager, request, reqId, token, items);
-        return;
-      }
-
       if (cmrIssuingCntry != null && LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, cmrIssuingCntry)) {
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
@@ -1837,7 +1784,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       if (cmrIssuingCntry != null && IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)
           && ((!cmrIssuingCntry.equals(SystemLocation.CANADA) && !CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType()))
               || (cmrIssuingCntry.equals(SystemLocation.CANADA) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType())))
-          || (LAHandler.isLACountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType()))) {
+          || (LAHandler.isLACountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType()))
+          || (JPHandler.isJPIssuingCountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType()))) {
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
@@ -1903,11 +1851,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileNORDX(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
-                } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
-                  if (!validateMassUpdateFileJP(filePath, data, admin, cmrIssuingCntry)) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
-                } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)) {
+                } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)
+                    || JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
                   if (!validateDRMassUpdateFile(filePath, data, admin, cmrIssuingCntry)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
@@ -5368,11 +5313,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     if (!validateLAMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) { // chie1
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
-                  } else if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
-                    fis = new FileInputStream(filePath);
-                    if (!validateJPMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) {
-                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                    }
                   } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
                     if (!validateDRMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) {
@@ -7020,63 +6960,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   }
 
-  public boolean validateMassUpdateFileJP(String path, Data data, Admin admin, String cmrIssuingCntry) throws Exception {
-    // JAPAN
-    List<Boolean> isErr = new ArrayList<Boolean>();
-    try (FileInputStream fis = new FileInputStream(path)) {
-      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
-      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
-      EntityManager em = JpaManager.getEntityManager();
-      try {
-        String country = data.getCmrIssuingCntry();
-        LOG.debug("Validating " + path);
-        byte[] bookBytes = template.cloneStream(fis);
-
-        List<TemplateValidation> validations = null;
-        StringBuilder errTxt = new StringBuilder();
-        String str;
-        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
-          validations = template.validate(em, is, country, 2000);
-          LOG.debug(new ObjectMapper().writeValueAsString(validations));
-          for (TemplateValidation validation : validations) {
-            if (validation.hasErrors()) {
-              if (StringUtils.isEmpty(errTxt.toString())) {
-                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
-              } else {
-                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
-              }
-            }
-          }
-        }
-        if (!StringUtils.isEmpty(errTxt.toString())) {
-          throw new Exception(errTxt.toString());
-        }
-
-        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
-          try (FileOutputStream fos = new FileOutputStream(path)) {
-            LOG.debug("Merging..");
-            template.merge(validations, is, fos, 2000);
-          }
-        }
-        // modify the country for testing
-      } catch (Exception e) {
-
-        LOG.error(e.getMessage());
-        LOG.error("An error occurred in validating DR Mass Update File.");
-
-        throw new Exception(e.getMessage());
-      } finally {
-        em.close();
-      }
-    }
-
-    if (isErr.contains(false)) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
   private void setMassUpdateListForJP(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
       String filePath, String cmrIssuingCntry) throws Exception {
     LOG.debug("setMassUpdateListFor JP....");
@@ -7537,66 +7420,5 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       }
     }
     return muModel;
-  }
-
-  public boolean validateJPMassUpdateFile(String path, Data data, Admin admin, String cmrIssuingCntry) throws Exception {
-    List<Boolean> isErr = new ArrayList<Boolean>();
-    try (FileInputStream fis = new FileInputStream(path)) {
-      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
-      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
-      EntityManager em = JpaManager.getEntityManager();
-      try {
-        String country = data.getCmrIssuingCntry();
-        LOG.debug("Validating " + path);
-        byte[] bookBytes = template.cloneStream(fis);
-
-        List<TemplateValidation> validations = null;
-        StringBuilder errTxt = new StringBuilder();
-
-        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
-
-          validations = template.validate(em, is, admin, country, 2000);
-          LOG.debug(new ObjectMapper().writeValueAsString(validations));
-
-          for (TemplateValidation validation : validations) {
-            if (validation.hasErrors()) {
-              if (StringUtils.isEmpty(errTxt.toString())) {
-                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
-              } else {
-                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
-              }
-            }
-          }
-
-        }
-        if (!StringUtils.isEmpty(errTxt.toString())) {
-          throw new Exception(errTxt.toString());
-        }
-
-        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
-          try (FileOutputStream fos = new FileOutputStream(path)) {
-            LOG.debug("Merging..");
-            template.merge(validations, is, fos, 2000);
-          }
-        }
-        // modify the country for testing
-      } catch (Exception e) {
-
-        LOG.error(e.getMessage());
-        LOG.error("An error occurred in validating DR Mass Update File.");
-        // return false;
-
-        throw new Exception(e.getMessage());
-
-      } finally {
-        em.close();
-      }
-    }
-
-    if (isErr.contains(false)) {
-      return false;
-    } else {
-      return true;
-    }
   }
 }
