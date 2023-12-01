@@ -505,7 +505,7 @@ public class CanadaUtil extends AutomationUtil {
       return true;
     }
     boolean isPaygoUpgrade=false; 
-    if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqType())){
       isPaygoUpgrade=true;
     }
     
