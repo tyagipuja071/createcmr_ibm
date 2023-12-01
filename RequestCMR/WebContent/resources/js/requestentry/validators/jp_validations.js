@@ -3198,6 +3198,7 @@ function showOfcdMessage() {
     }
   });
 }
+
 function showOrHideDirectBpZSeriesSw() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -6493,7 +6494,7 @@ function doImportCmrs(addressOnly) {
   }
   if (custSubGrp == 'BQICL') {
     addrType = 'EAIR';
-    message = 'Importing records with IBM Related CMR ';
+    message = 'Importing records with IBM Relate CMR ';
   }
   cmr.showProgress(message + cmrNo + '.  This process might take a while. Please wait..');
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
@@ -6983,6 +6984,35 @@ function convert2SBCS(input) {
   return modifiedVal;
 }
 
+function addBwpqCreditToValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var custType = FormManager.getActualValue('custType');
+        if (custSubGrp == 'BPWPQ' && custType.includes('A')) {
+          var qParams = {
+            REQ_ID : zs01ReqId,
+          };
+          var record = cmr.query('GETZS01VALRECORDS', qParams);
+          var zs01Reccount = record.ret1;
+          if (Number(zs01Reccount) > 1) {
+            return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
+          } else if (Number(zs01Reccount == 0)) {
+            return new ValidationResult(null, false, 'No Address are defined. Please import using Credit Customer No.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -7097,6 +7127,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
+  GEOHandler.registerValidator(addBwpqCreditToValidator, GEOHandler.JP, null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
