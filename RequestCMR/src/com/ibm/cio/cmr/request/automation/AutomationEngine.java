@@ -66,6 +66,7 @@ public class AutomationEngine {
   private final List<AutomationElement<?>> elements = new ArrayList<>();
   private static ThreadLocal<AutomationEngineData> engineData = new ThreadLocal<>();
   private static Map<String, String> rejectionReasons = new HashMap<String, String>();
+  private static final String[] FULL_SUNSET_COUNTRIES = { "616", "796" };
 
   /**
    * Creates an instance of the {@link AutomationEngine}
@@ -205,6 +206,11 @@ public class AutomationEngine {
     boolean requesterFromTaxTeam = false;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
+    boolean isFullSunsetCty = false;
+    
+    if (Arrays.asList(FULL_SUNSET_COUNTRIES).contains(requestData.getData().getCmrIssuingCntry())){
+    	isFullSunsetCty = true;
+    }
 
     // CREATCMR-6331
     boolean isUsEntCompToPpn = false;
@@ -588,7 +594,7 @@ public class AutomationEngine {
           }
           if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
-            if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
+            if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || (isFullSunsetCty)) {
               // move to PCP
               LOG.debug("Moving Request " + reqId + " to PCP");
               admin.setReqStatus("PCP");

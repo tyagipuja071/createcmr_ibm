@@ -134,6 +134,11 @@ public class SWISSService extends BaseBatchService {
     }
   }
 
+  @Override
+  protected boolean useServicesConnections() {
+    return true;
+  }
+
   protected List<Long> gatherSingleRequests(EntityManager entityManager) {
     List<Admin> list = getPendingRecords(entityManager);
     List<Long> ids = new ArrayList<Long>();
