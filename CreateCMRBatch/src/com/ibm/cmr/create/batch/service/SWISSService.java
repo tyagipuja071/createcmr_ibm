@@ -2290,8 +2290,4 @@ public class SWISSService extends BaseBatchService {
     }
   }
 
-  @Override
-  protected boolean useServicesConnections() {
-    return true;
-  }
 }
