@@ -2580,20 +2580,32 @@ public class JPHandler extends GEOHandler {
     setEnglishAddrFieldsFromRDC(entityManager, admin, data);
     setSapNoOnImport(entityManager, admin, data);
     copyIntlAddrValuesToAddr(entityManager, admin);
-    copyROLValueOfCompanyToADUs(entityManager, admin, data);
+    copyOtherValuesOfCompanyEstabToADUs(entityManager, admin, data);
   }
 
-  private void copyROLValueOfCompanyToADUs(EntityManager entityManager, Admin admin, Data data) {
+  private void copyOtherValuesOfCompanyEstabToADUs(EntityManager entityManager, Admin admin, Data data) {
     if ("U".equalsIgnoreCase(admin.getReqType())) {
       List<Addr> addrs = getAddresses(entityManager, admin.getId().getReqId());
       Addr companyAddr = addrs.stream().filter(a -> a != null && "ZC01".equals(a.getId().getAddrType())).findAny().orElse(null);
-      if (companyAddr != null) {
+      Addr estabAddr = addrs.stream().filter(a -> a != null && "ZE01".equals(a.getId().getAddrType())).findAny().orElse(null);
+
+      if (companyAddr != null || estabAddr != null) {
         for (Addr addr : addrs) {
-          if ("ZE01".equals(addr.getId().getAddrType())) {
+          if ("ZE01".equals(addr.getId().getAddrType()) || "ZC01".equals(addr.getId().getAddrType())) {
             continue;
           }
 
-          addr.setRol(companyAddr.getRol());
+          if (companyAddr != null) {
+            addr.setRol(companyAddr.getRol());
+            // Company No.
+            addr.setCity2(companyAddr.getCity2());
+          }
+
+          if (estabAddr != null) {
+            // Estab No.
+            addr.setDivn(estabAddr.getDivn());
+          }
+
           entityManager.merge(addr);
 
           AddrPK arPk = new AddrPK();
@@ -2603,6 +2615,8 @@ public class JPHandler extends GEOHandler {
           AddrRdc addrRdc = entityManager.find(AddrRdc.class, arPk);
           if (addrRdc != null) {
             addrRdc.setRol(addr.getRol());
+            addrRdc.setDivn(addr.getDivn());
+            addrRdc.setCity2(addr.getCity2());
             entityManager.merge(addrRdc);
           }
         }
