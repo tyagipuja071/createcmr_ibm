@@ -266,13 +266,16 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     // query all addresses where name1 or name2 is not empty.
     List<MassUpdtAddr> addrs = LegacyDirectUtil.getMassUpdtAddrsForDPLCheck(entityManager, String.valueOf(model.getReqId()),
         String.valueOf(admin.getIterationId()));
+    if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
+      addrs = IERPRequestUtils.getMassUpdtAddrsForJpDPLCheck(entityManager, String.valueOf(model.getReqId()), String.valueOf(admin.getIterationId()));
+    }
     GEOHandler handler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
     if (addrs != null && addrs.size() > 0) {
       for (MassUpdtAddr addr : addrs) {
         String cmrNoVal = addr.getCmrNo();
         String custName1Val = addr.getCustNm1();
         String custName2Val = addr.getCustNm2();
-        if (model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+        if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
           if (!StringUtils.isEmpty(addr.getCustNm3())) {
             addr.setCustNm1(addr.getCustNm3());
             addr.setCustNm2("");

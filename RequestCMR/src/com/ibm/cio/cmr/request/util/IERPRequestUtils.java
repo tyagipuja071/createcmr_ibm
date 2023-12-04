@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -869,5 +870,14 @@ public class IERPRequestUtils extends RequestUtils {
     LOG.debug("ISU --> " + isuCd);
 
     return coverageFields;
+  }
+
+  public static List<MassUpdtAddr> getMassUpdtAddrsForJpDPLCheck(EntityManager entityManager, String reqId, String iterId) {
+    String sql = ExternalizedQuery.getSql("GET.JP_MASS_UPDT_FOR_DPL_CHECK");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ITER_ID", iterId);
+    query.setForReadOnly(true);
+    return query.getResults(MassUpdtAddr.class);
   }
 }
