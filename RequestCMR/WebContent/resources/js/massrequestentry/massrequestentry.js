@@ -65,8 +65,7 @@ function processRequestAction() {
   // prevent from overwriting the DB REQ_STATUS
   // if another tab is open with different UI REQ_STATUS
   if (!isReqStatusEqualBetweenUIandDB()) {
-    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." +
-      "<br><br>Please reload the page.");
+    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." + "<br><br>Please reload the page.");
 
     return;
   }
@@ -86,8 +85,8 @@ function processRequestAction() {
   } else if (action == YourActions.Claim) {
     if (approvalResult == 'Cond. Approved') {
       cmr.showConfirm('doYourAction()', 'The request was conditionally approved by ERO.', 'Warning', null, {
-        OK: 'Ok',
-        CANCEL: 'Cancel'
+        OK : 'Ok',
+        CANCEL : 'Cancel'
       });
     } else {
       doYourAction();
@@ -322,6 +321,11 @@ function isDPLCheckNeeded() {
   };
 
   var result = cmr.query('COUNT.LD_MASS_UPDT_INC_DPL_CHECK', qParams);
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ('760' == cntry) {
+    result = cmr.query('COUNT.JP_MASS_UPDT_INC_DPL_CHECK', qParams);
+  }
 
   if (result != null && result.ret1 > 0) {
     return true;
@@ -937,7 +941,7 @@ function isReqStatusEqualBetweenUIandDB() {
   var dbReqStatus = "";
 
   var result = cmr.query("WW.GET_REQ_STATUS", {
-    REQ_ID: reqId
+    REQ_ID : reqId
   });
   if (result != null && result.ret1 != '' && result.ret1 != null) {
     dbReqStatus = result.ret1;
