@@ -557,13 +557,22 @@ function addressQuotationValidator() {
 function setSearchTermDropdownValues() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var searchTerm = FormManager.getField('searchTerm');
+  var clusterNRML = [ '12301', '12305', '12309', '12311', '12303', '12307', '12302', '12306', '12300', 
+    '12304', '12308', '12310', '12315', '12319', '12320', '12324', '12313', '12317', '12322', '12326', '12312', '12316', '12323', 
+    '12314', '12318', '12321', '12325' ];
+  var clusterNRST = [ '04461', '04466', '05223', '08784' ];
+  var clusterECOSY = [ '08016', '11995', '11994' ];
+  var clusterKYND = [ '09201' ];
+  var defaultCluster = [ '00003' ];
+  
   if (searchTerm) {
+    FormManager.enable('creditCd');
     switch (custSubGrp) {
       case "NRST":
-        FormManager.limitDropdownValues(searchTerm, [ '04461', '04466', '05223', '10139' ]);
+        FormManager.limitDropdownValues(searchTerm, clusterNRST);
         break;
       case "BLUMX":
-        FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
+        FormManager.limitDropdownValues(searchTerm, defaultCluster);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
         FormManager.setValue('isuCd', '34');
@@ -572,18 +581,38 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('clientTier');
         break;
       case "MKTPC":
-        FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
+        FormManager.limitDropdownValues(searchTerm, defaultCluster);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('clientTier');
         break;    
       case "VAPAR":
-        FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
+        FormManager.limitDropdownValues(searchTerm, defaultCluster);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('clientTier');
+        break;  
+      case "PRIPE":
+        FormManager.limitDropdownValues(searchTerm, defaultCluster);
+        FormManager.setValue('searchTerm', '00003');
+        FormManager.readOnly('searchTerm');
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('clientTier');
+        FormManager.setValue('isicCd', '9500');
+        FormManager.readOnly('isicCd');
+        FormManager.setValue('creditCd', 'A');
+        FormManager.readOnly('creditCd');
         break;  
       case "CROSS":
-        FormManager.limitDropdownValues(searchTerm, [ '01545' , '00003' , '09065' , '08016' , '04461' , '04466' , '05223' , '10139' ]);
-        FormManager.setValue('searchTerm', '00003');
+        FormManager.limitDropdownValues(searchTerm, [ ...clusterNRML,  ...clusterECOSY, ...clusterNRST, ...clusterKYND, ...defaultCluster ]);
         break;
       case "CBBUS":
         FormManager.limitDropdownValues(searchTerm, [ '71500' ]); 
@@ -593,25 +622,17 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('inacType');
         break;
       case "ECOSY":
-        FormManager.limitDropdownValues(searchTerm, [ '08016' ]);
-        FormManager.setValue('searchTerm', '08016');
-        FormManager.readOnly('searchTerm');
-        FormManager.setValue('isuCd', '36');
-        FormManager.readOnly('isuCd');
-        FormManager.setValue('clientTier', 'Y');
-        FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(searchTerm, clusterECOSY);
         break;
       case "ESA":
-    	  FormManager.setValue('isuCd', '36');
-          FormManager.readOnly('isuCd');
-          FormManager.setValue('clientTier', 'Y');
-          FormManager.readOnly('clientTier');
-        FormManager.limitDropdownValues(searchTerm, [ '08016', '09065', '01545','04461','04466','05223','10139' ]);
+    	  FormManager.readOnly('isuCd');
+    	  FormManager.readOnly('clientTier');
+        FormManager.limitDropdownValues(searchTerm, [ ...clusterNRML,  ...clusterECOSY, ...clusterNRST, ...clusterKYND ]);
         break;
       case "INTER":
         FormManager.setValue('isuCd', '21');
         FormManager.readOnly('isuCd');
-        FormManager.limitDropdownValues(searchTerm, [ '00003' ]);
+        FormManager.limitDropdownValues(searchTerm, defaultCluster);
         FormManager.setValue('searchTerm', '00003');
         FormManager.readOnly('searchTerm');
         FormManager.setValue('clientTier', 'Z');
@@ -625,18 +646,14 @@ function setSearchTermDropdownValues() {
         FormManager.readOnly('inacType');
         break;
       case "LKYN":  
-        FormManager.limitDropdownValues(searchTerm, [ '09065' ]);
-        FormManager.setValue('searchTerm', '09065');
+        FormManager.limitDropdownValues(searchTerm, clusterKYND);
         FormManager.readOnly('searchTerm');
         break;
       case "NRML":
-        FormManager.limitDropdownValues(searchTerm, [ '01545' ]);
-        FormManager.setValue('searchTerm', '01545');
-        FormManager.readOnly('searchTerm');
+        FormManager.limitDropdownValues(searchTerm, clusterNRML);
         break;
       case "AQSTN":       
-        FormManager.limitDropdownValues(searchTerm, [ '01545' ]);
-        FormManager.setValue('searchTerm', '01545');
+        FormManager.limitDropdownValues(searchTerm, clusterNRML);
         FormManager.readOnly('searchTerm');
         break;
     }
@@ -644,61 +661,41 @@ function setSearchTermDropdownValues() {
 }
 
 function LockDefaultISUClientTierMrcValues() {
-// FormManager.setValue('clientTier','');
-// FormManager.setValue('isuCd','');
-// FormManager.setValue('mrcCd','');
-  var searchTerm = FormManager.getActualValue('searchTerm');
+  var cluster = FormManager.getActualValue('searchTerm');
   var clientTier = FormManager.getField('clientTier');
-  if (searchTerm == "00003") {
-    FormManager.setValue('clientTier', 'Z');
-    FormManager.readOnly('clientTier');
-  } else if (searchTerm == "08016") {
-    FormManager.setValue('clientTier', 'Y');
-    FormManager.readOnly('clientTier');
-    FormManager.setValue('isuCd', '36');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == "10139") {
-    FormManager.setValue('clientTier', 'T');
-    FormManager.readOnly('clientTier');
-  } else if (searchTerm == "01545") {
-    FormManager.setValue('clientTier', 'Q');
-    FormManager.readOnly('clientTier');
-  } else if (searchTerm == '71500' || searchTerm == '09065' || searchTerm =='04461' || searchTerm == '04466' || searchTerm == '05223') {
-    FormManager.setValue('clientTier', '0');
-    FormManager.readOnly('clientTier');
-  }
+  var cluster_isu36Y = [ '08016', '11995', '11994' ];
+  var cluster_isu27E = ['12301', '12305', '12309', '12311', '12303', '12307', '12302', '12306', '12300', '12304', '12308', '12310' ];
+  var cluster_isu34Q = ['12315', '12319', '12320', '12324', '12313', '12317', '12322', '12326', '12312', '12316', '12323', '12314', '12318', '12321', '12325' ];
 
-  if (searchTerm == '71500' || searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223') {
+  // Setting default MRC values
+  if (cluster == '71500' || cluster == '04461' || cluster == '04466' || cluster == '05223' || cluster == '08784' || custSubGrp == 'INTER') {
     FormManager.setValue('mrcCd', '2');
     FormManager.readOnly('mrcCd');
-  } else if ((searchTerm == '10139' || searchTerm == '08016' || searchTerm == '09065' || searchTerm == '00003' || searchTerm == '01545') && FormManager.getField('custSubGrp') != "INTER") {  
+  } else {
     FormManager.setValue('mrcCd', '3');
     FormManager.readOnly('mrcCd');
   }
-  if (searchTerm == '00003' && FormManager.getField('custSubGrp') != "INTER") {
-    FormManager.setValue('isuCd', '34');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == '08016') {
-    FormManager.setValue('isuCd', '36');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == '10139') {
-    FormManager.setValue('isuCd', '32');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == '01545') {
-    FormManager.setValue('isuCd', '34');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == '71500') {
-    FormManager.setValue('isuCd', '5B');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == '09065') {
+  
+  // Setting default ISU - CTC values
+  if (cluster == '09201') {
     FormManager.setValue('isuCd', '5K');
-    FormManager.readOnly('isuCd');
-  } else if (searchTerm == '00003' && FormManager.getField('custSubGrp') == "INTER") {
-    FormManager.setValue('isuCd', '21');
-    FormManager.readOnly('isuCd');
+    FormManager.setValue('clientTier', '0');
+  } else if (cluster == '71500') {
+    FormManager.setValue('isuCd', '8B');
+    FormManager.setValue('clientTier', '');
+  } else if (cluster_isu36Y.includes(cluster)) {
+    FormManager.setValue('isuCd', '36');
+    FormManager.setValue('clientTier', 'Y');
+  } else if (cluster_isu27E.includes(cluster)) {
+    FormManager.setValue('isuCd', '27');
+    FormManager.setValue('clientTier', 'E');
+  }  else if (cluster_isu34Q.includes(cluster)) {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
   }
   
-  if (searchTerm == '04461' || searchTerm == '04466' || searchTerm == '05223' ) {
+  // Setting default ISU - CTC values based on ISIC
+  if (cluster == '04461' || cluster == '04466' || cluster == '05223' || cluster == '08784' ) {
     FormManager.readOnly('isuCd');
     getIsuFromIsic();
   }
