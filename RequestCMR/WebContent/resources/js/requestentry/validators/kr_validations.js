@@ -570,6 +570,7 @@ function setSearchTermDropdownValues() {
     switch (custSubGrp) {
       case "NRST":
         FormManager.limitDropdownValues(searchTerm, clusterNRST);
+        FormManager.enable('searchTerm');
         break;
       case "BLUMX":
         FormManager.limitDropdownValues(searchTerm, defaultCluster);
@@ -613,6 +614,7 @@ function setSearchTermDropdownValues() {
         break;  
       case "CROSS":
         FormManager.limitDropdownValues(searchTerm, [ ...clusterNRML,  ...clusterECOSY, ...clusterNRST, ...clusterKYND, ...defaultCluster ]);
+        FormManager.enable('searchTerm');
         break;
       case "CBBUS":
         FormManager.limitDropdownValues(searchTerm, [ '71500' ]); 
@@ -623,11 +625,13 @@ function setSearchTermDropdownValues() {
         break;
       case "ECOSY":
         FormManager.limitDropdownValues(searchTerm, clusterECOSY);
+        FormManager.enable('searchTerm');
         break;
       case "ESA":
     	  FormManager.readOnly('isuCd');
     	  FormManager.readOnly('clientTier');
         FormManager.limitDropdownValues(searchTerm, [ ...clusterNRML,  ...clusterECOSY, ...clusterNRST, ...clusterKYND ]);
+        FormManager.enable('searchTerm');
         break;
       case "INTER":
         FormManager.setValue('isuCd', '21');
@@ -647,14 +651,16 @@ function setSearchTermDropdownValues() {
         break;
       case "LKYN":  
         FormManager.limitDropdownValues(searchTerm, clusterKYND);
+        FormManager.setValue('searchTerm', '09201');
         FormManager.readOnly('searchTerm');
         break;
       case "NRML":
         FormManager.limitDropdownValues(searchTerm, clusterNRML);
+        FormManager.enable('searchTerm');
         break;
       case "AQSTN":       
         FormManager.limitDropdownValues(searchTerm, clusterNRML);
-        FormManager.readOnly('searchTerm');
+        FormManager.enable('searchTerm');
         break;
     }
   }
