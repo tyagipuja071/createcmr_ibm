@@ -1968,7 +1968,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListNORDX(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("FR", cmrIssuingCntry)) {
                     setMassUpdateListFR(modelList, item.getInputStream(), reqId, newIterId, filePath);
-                  } else if (PageManager.fromGeo("JP", cmrIssuingCntry)) {
+                  } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
                     setMassUpdateListJP(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
                     setMassUpdateListCA(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -5365,11 +5365,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
                     setMassUpdateListForLA(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
-                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
-                    setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
                     // JAPAN
                     setMassUpdateListForJP(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
+                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
                     if (!PageManager.fromGeo("JP", cmrIssuingCntry)) {
                       setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -6982,7 +6982,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         MassUpdateModel model = new MassUpdateModel();
         List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
         List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
-        List<MassUpdateModel> modelList = new ArrayList<MassUpdateModel>();
 
         try (Workbook mfWb = new XSSFWorkbook(mfStream)) {
           for (int i = 0; i < tabs.size(); i++) {
@@ -7012,7 +7011,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
                   if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
                     models.add(model);
-                    modelList.add(model);
                   }
                 }
               }
@@ -7142,24 +7140,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CUST_NM4":
         if (StringUtils.isNotBlank(tempVal)) {
-          String convertedNm4 = IERPRequestUtils.dbcsConversionForJP(tempVal);
-
-          String[] namearray = IERPRequestUtils.limitName1Name2(convertedNm4, null);
-
-          if (namearray != null && namearray.length == 2) {
-            muaModel.setCustNm4(namearray[0]);
-            muaModel.setCity2(namearray[1]);
-          } else {
-            muaModel.setCustNm4(convertedNm4);
-          }
+          muaModel.setCustNm4(tempVal);
         }
         break;
       case "ADDR_TXT":
         if (StringUtils.isNotBlank(tempVal)) {
-          String convertedAddrTxt = IERPRequestUtils.dbcsConversionForJP(tempVal);
-          if (StringUtils.isNotBlank(convertedAddrTxt)) {
-            muaModel.setAddrTxt(convertedAddrTxt);
-          }
+          muaModel.setAddrTxt(tempVal);
         }
         break;
       case "ADDR_TXT2":
@@ -7183,18 +7169,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "OFFICE":
         if (StringUtils.isNotBlank(tempVal)) {
-          String branchOfc = IERPRequestUtils.dbcsConversionForJP(tempVal);
-          if (StringUtils.isNotBlank(branchOfc)) {
-            muaModel.setDivn(branchOfc);
-          }
+          muaModel.setDivn(tempVal);
         }
         break;
       case "DEPT":
         if (StringUtils.isNotBlank(tempVal)) {
-          String dept = IERPRequestUtils.dbcsConversionForJP(tempVal);
-          if (StringUtils.isNotBlank(dept)) {
-            muaModel.setDept(dept);
-          }
+          muaModel.setDept(tempVal);
         }
         break;
       case "BLDG":
