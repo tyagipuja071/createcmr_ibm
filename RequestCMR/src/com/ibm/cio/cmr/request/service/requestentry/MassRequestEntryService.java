@@ -7140,12 +7140,23 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CUST_NM4":
         if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setCustNm4(tempVal);
+          String convertedNm4 = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          String[] namearray = IERPRequestUtils.limitName1Name2(convertedNm4, null);
+
+          if (namearray != null && namearray.length == 2) {
+            muaModel.setCustNm4(namearray[0]);
+            muaModel.setCity2(namearray[1]);
+          } else {
+            muaModel.setCustNm4(convertedNm4);
+          }
         }
         break;
       case "ADDR_TXT":
         if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setAddrTxt(tempVal);
+          String convertedAddrTxt = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          if (StringUtils.isNotBlank(convertedAddrTxt)) {
+            muaModel.setAddrTxt(convertedAddrTxt);
+          }
         }
         break;
       case "ADDR_TXT2":
@@ -7169,12 +7180,18 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "OFFICE":
         if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setDivn(tempVal);
+          String branchOfc = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          if (StringUtils.isNotBlank(branchOfc)) {
+            muaModel.setDivn(branchOfc);
+          }
         }
         break;
       case "DEPT":
         if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setDept(tempVal);
+          String dept = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          if (StringUtils.isNotBlank(dept)) {
+            muaModel.setDept(dept);
+          }
         }
         break;
       case "BLDG":
