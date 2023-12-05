@@ -1571,7 +1571,7 @@ function validateCoverageData() {
           
           if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
             return new ValidationResult(null, false, 'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t ' + 
-                'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure.');
+                'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
           }
         }
       }
