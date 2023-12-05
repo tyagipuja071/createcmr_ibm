@@ -78,7 +78,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     boolean reqChkSrvError = false;
     boolean dupCMRFound = false;
     boolean cmrChkSrvError = false;
-
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
     String matchType = "NA";
     Admin admin = requestData.getAdmin();
     String isProspectCmr = admin.getProspLegalInd();
@@ -89,7 +92,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     MatchingOutput output = new MatchingOutput();
     StringBuilder details = new StringBuilder();
     Addr soldTo = requestData.getAddress("ZS01");
-    if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
+    if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks() && !isPaygoUpgrade) {
       List<String> duplicateList = new ArrayList<String>();
       List<String> soldToKunnrsList = new ArrayList<String>();
 
@@ -258,7 +261,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           result.setResults("Error on Duplicate CMR Check");
         }
       }
-    } else if (scenarioExceptions.isSkipDuplicateChecks()) {
+    } else if (scenarioExceptions.isSkipDuplicateChecks() || isPaygoUpgrade) {
       result.setDetails("The request's scenario is configured to skip duplicate checks.");
       result.setResults("Skipped Duplicate Check");
       result.setOnError(false);
