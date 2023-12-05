@@ -58,7 +58,10 @@ public class DPLCheckElement extends ValidatingElement {
       throws Exception {
 
     AppUser user = (AppUser) engineData.get("appUser");
-
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
     long reqId = requestData.getAdmin().getId().getReqId();
 
     AutomationResult<ValidationOutput> output = buildResult(reqId);
@@ -133,7 +136,7 @@ public class DPLCheckElement extends ValidatingElement {
                 engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
                 output.setOnError(true);
               }
-            } else {
+            } else if(!isPaygoUpgrade) {
               output.setOnError(true);
               engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
             }
