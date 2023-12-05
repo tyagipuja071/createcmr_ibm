@@ -1178,7 +1178,7 @@ public class FranceUtil extends AutomationUtil {
                       }
                     }
                     if (!siretMatch) {
-                      resultCodes.add("R"); // reject
+                      resultCodes.add("D"); // reject
                       engineData.addNegativeCheckStatus("_frSIRETCheckFailed",
                           "Sold-To is validated but SIRET with Sold-To couldn't be validated in DnB.");
                       checkDetails.append("Sold-To is validated but SIRET with Sold-To couldn't be validated in DnB.\n");
@@ -1243,7 +1243,7 @@ public class FranceUtil extends AutomationUtil {
                       }
                     }
                     if (!siretMatch) {
-                      resultCodes.add("R"); // reject
+                      resultCodes.add("D"); // reject
                       engineData.addNegativeCheckStatus("_frSIRETCheckFailed",
                           "Bill-To is validated but SIRET with Sold-To couldn't be validated in DnB.");
                       checkDetails.append("Bill-To is validated but SIRET with Sold-To couldn't be validated in DnB.\n");
