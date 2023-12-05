@@ -1967,7 +1967,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListNORDX(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("FR", cmrIssuingCntry)) {
                     setMassUpdateListFR(modelList, item.getInputStream(), reqId, newIterId, filePath);
-                  } else if (PageManager.fromGeo("JP", cmrIssuingCntry)) {
+                  } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
                     setMassUpdateListJP(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
                     setMassUpdateListCA(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -5364,11 +5364,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
                     setMassUpdateListForLA(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
-                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
-                    setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
                     // JAPAN
                     setMassUpdateListForJP(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
+                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
                     if (!PageManager.fromGeo("JP", cmrIssuingCntry)) {
                       setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -6981,7 +6981,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         MassUpdateModel model = new MassUpdateModel();
         List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
         List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
-        List<MassUpdateModel> modelList = new ArrayList<MassUpdateModel>();
 
         try (Workbook mfWb = new XSSFWorkbook(mfStream)) {
           for (int i = 0; i < tabs.size(); i++) {
@@ -7011,7 +7010,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
                   if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
                     models.add(model);
-                    modelList.add(model);
                   }
                 }
               }
@@ -7142,7 +7140,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_NM4":
         if (StringUtils.isNotBlank(tempVal)) {
           String convertedNm4 = IERPRequestUtils.dbcsConversionForJP(tempVal);
-
           String[] namearray = IERPRequestUtils.limitName1Name2(convertedNm4, null);
 
           if (namearray != null && namearray.length == 2) {

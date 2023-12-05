@@ -394,12 +394,19 @@ function isCompanyProofNeeded() {
  * Validate function
  */
 function doValidateRequest() {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isDPLCheckNeeded() && _pagemodel.userRole.toUpperCase() == "PROCESSOR" && isNewMassTemplateUsed()) {
     MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
   } else if (isAttachmentNeeded() && _pagemodel.userRole.toUpperCase() == "PROCESSOR" && isNewMassTemplateUsed()) {
     MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
   } else if (isCompanyProofNeeded()) {
     MessageMgr.showErrorMessage('Proof of address is mandatory. Please attach Company Proof.');
+  } else if ('760' == cmrCntry && _pagemodel.userRole.toUpperCase() == "REQUESTER" && isNewMassTemplateUsed()) {
+    if (isDPLCheckNeeded()) {
+      MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
+    } else if (isAttachmentNeeded()) {
+      MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
+    }
   } else if (FormManager.validate('frmCMR')) {
     MessageMgr.showInfoMessage('The request has no errors.', null, true);
   } else {
