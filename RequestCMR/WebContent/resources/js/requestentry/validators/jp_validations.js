@@ -118,6 +118,7 @@ function afterConfigForJP() {
   addROLFieldLogic();
 
   setContractSignDate();
+  setFieldsBehaviorForBPEndUserAndIGFCmr();
 }
 
 /**
@@ -1485,6 +1486,10 @@ function setISUByOfficeCd() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
   var custGrp = FormManager.getActualValue('custGrp');
+  
+  if(FormManager.getActualValue('reqType') == 'U' && (isBPEndUserCMR() || isIGFCMR())) {
+    return;
+  }
 
   var qParams = {
     _qall : 'Y',
@@ -1612,7 +1617,6 @@ function canUpdateAddress(value, rowIndex, grid) {
   var addrType = rowData.addrType[0];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
-  console.log(addrType + ' - ' + custType);
   if (addrType == 'ZC01' && custType.includes('C')) {
     if (reqType == 'U' && (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER')) {
       return false;
@@ -3873,6 +3877,10 @@ function setSortlOnOfcdChange() {
   var isJPBlueGroupFlg = FormManager.getActualValue('isJPBlueGroupFlg');
   var officeCd = FormManager.getActualValue('salesBusOffCd');
   var reqType = FormManager.getActualValue('reqType');
+  
+  if(FormManager.getActualValue('reqType') == 'U' && (isBPEndUserCMR() || isIGFCMR())) {
+    return;
+  }
 
   if ('BPWPQ' == custSubGrp || 'BQICL' == custSubGrp || 'RACMR' == custSubGrp) {
     return;
@@ -3922,6 +3930,11 @@ function setClusterOnOfcdChange() {
   if (isJPBlueGroupFlg == 'true') {
     return;
   }
+  
+  if(FormManager.getActualValue('reqType') == 'U' && (isBPEndUserCMR() || isIGFCMR())) {
+    return;
+  }
+  
   if (custGrp == 'IBMTP' && custSubGrp != 'RACMR') {
     addClusterOfcdLogic();
   } else if (custGrp == 'SUBSI') {
@@ -5752,6 +5765,10 @@ function overwriteUpdateScenarioBehavior(custSubGrp) {
   default:
     break;
   }
+  
+  // this override any rules set be scenario
+  // special handling for BP End User and IGF.
+  setFieldsBehaviorForBPEndUserAndIGFCmr();
 }
 
 function addINACValidator() {
@@ -6985,6 +7002,7 @@ function convert2SBCS(input) {
   return modifiedVal;
 }
 
+
 function contractSignDateValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -7044,6 +7062,87 @@ function setContractSignDate() {
       FormManager.setValue('agreementSignDate', currentDate);
     }
   }
+}
+
+function setFieldsBehaviorForBPEndUserAndIGFCmr() {
+  if (FormManager.getActualValue('reqType') != 'U') {
+    return;
+  }
+
+  if (isIGFCMR() || isBPEndUserCMR()) { 
+    retainImportValuesFromData();
+    disableFieldForBpEndUserIGFCmr();
+  }
+
+}
+
+function retainImportValuesFromData() {
+  var reqId = FormManager.getActualValue('reqId');
+  var origSearchTerm;
+  var origIsuCd;
+  var origClientTier;
+  var origJsic;
+  var origIsic;
+  var origSubInd;
+  var origInac;
+
+  var result = cmr.query("GET.CMRINFO.IMPORTED_JP", {
+    REQ_ID : reqId
+  });
+
+  if (result != null && result != '') {
+    origSearchTerm = result.ret1;
+    origIsuCd = result.ret2;
+    origClientTier = result.ret3;
+    origJsic = result.ret4;
+    origIsic = result.ret5;
+    origSubInd = result.ret6;
+    origInac = result.ret7;
+    
+    FormManager.setValue('searchTerm', origSearchTerm);
+    FormManager.setValue('isuCd', origIsuCd);
+    FormManager.setValue('clientTier', origClientTier);
+    FormManager.setValue('jsicCd', origJsic);
+    FormManager.setValue('isicCd', origIsic);
+    FormManager.setValue('subIndustryCd', origSubInd);
+    FormManager.setValue('inacCd', origInac);
+  }
+}
+
+function disableFieldForBpEndUserIGFCmr() {
+  var fieldsToDisable = ['searchTerm', 'isuCd', 'clientTier', 'jsicCd', 'isicCd', 'subIndustryCd', 'inacCd'];
+  for (var i = 0; i < fieldsToDisable.length; i++) {
+    disableFiled(fieldsToDisable[i]);
+  }
+}
+
+function isBPEndUserCMR() {
+  var isBPEndUserCmr = false;
+  var origKukla = '';
+  var origCreditCmrNo = '';
+  var result = cmr.query('GET.CMRINFO.IMPORTED_JP', {
+    REQ_ID : FormManager.getActualValue('reqId')
+  });
+  if (result != null && result != '') {
+    origKukla = result.ret8;
+    origCreditCmrNo = result.ret9;
+  }
+  
+  if ((origKukla == 'BP' || origKukla == '42') && origCreditCmrNo != '') {
+    isBPEndUserCmr = true;
+  }
+  return isBPEndUserCmr;
+}
+
+function isIGFCMR() {
+  
+  if(FormManager.getActualValue('custSubGrp') != 'BQICL') {
+    return false;
+  }
+  
+  var cmrNo = FormManager.getActualValue('cmrNo');
+  var isIGFCmr = cmrNo ? cmrNo.startsWith('C') : false;
+  return isIGFCmr;
 }
 
 dojo.addOnLoad(function() {

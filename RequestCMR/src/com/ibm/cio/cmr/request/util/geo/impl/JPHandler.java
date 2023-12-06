@@ -991,11 +991,69 @@ public class JPHandler extends GEOHandler {
           data.setCreditToCustNo("");
         }
       }
+
+      handleBPEndUserCmrImport(data);
+      handleIGFCmrImport(data);
     }
 
     String rolflag = mainRecord.getInspbydebi() == null ? "N" : mainRecord.getInspbydebi();
     data.setIdentClient(rolflag);
     handleData4RAOnImport(data);
+  }
+
+  private void handleBPEndUserCmrImport(Data data) throws Exception {
+    if (isBPEndUserCMR(data)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      String creditCusNo = data.getCreditToCustNo();
+      String cmrNo = data.getCmrNo();
+      if (StringUtils.isNotEmpty(creditCusNo) && StringUtils.isNotEmpty(cmrNo)) {
+        Kna1 cmrNoKna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), cmrNo, "ZS01");
+        Kna1 creditCustKna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), creditCusNo, "ZS01");
+        if (creditCustKna1 != null && cmrNoKna1 != null && "42".equals(cmrNoKna1.getKukla())) {
+          mapBPEndUserOrIGFKna1ToData(data, creditCustKna1);
+        }
+      }
+    }
+  }
+
+  private boolean isBPEndUserCMR(Data data) {
+    // in CRIS sometimes it's BP but in RDC it's always kukla = 42
+    if ("42".equals(data.getCustClass()) || "BP".equals(data.getCustClass())) {
+      return true;
+    }
+    return false;
+  }
+
+  private void handleIGFCmrImport(Data data) throws Exception {
+    if (isIGFCmr(data)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      String ibmRelatedCmr = data.getProxiLocnNo();
+      if (StringUtils.isNotEmpty(ibmRelatedCmr)) {
+        Kna1 kna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), ibmRelatedCmr, "ZS01");
+        if (kna1 != null) {
+          mapBPEndUserOrIGFKna1ToData(data, kna1);
+        }
+      }
+    }
+  }
+
+  private void mapBPEndUserOrIGFKna1ToData(Data data, Kna1 kna1) {
+    data.setSearchTerm(kna1.getSortl());
+    data.setIsuCd(kna1.getBrsch());
+    data.setClientTier(kna1.getKatr3());
+    data.setJsicCd(kna1.getZzkvLic());
+    data.setIsicCd(kna1.getZzkvSic());
+    data.setSubIndustryCd(kna1.getBran1());
+    data.setInacCd(kna1.getZzkvInac());
+  }
+
+  private boolean isIGFCmr(Data data) {
+    String cmrNo = StringUtils.isNotEmpty(data.getCmrNo()) ? data.getCmrNo() : "";
+    if (cmrNo.startsWith("C")) {
+      return true;
+    }
+
+    return false;
   }
 
   private void handleData4RAOnImport(Data data) {
