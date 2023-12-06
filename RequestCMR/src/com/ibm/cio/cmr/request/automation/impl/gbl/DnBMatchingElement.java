@@ -74,6 +74,10 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }  
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
@@ -130,7 +134,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry()))) {
+          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) && !isPaygoUpgrade) {
             result.setOnError(shouldThrowError);
           } else {
             result.setOnError(false);
