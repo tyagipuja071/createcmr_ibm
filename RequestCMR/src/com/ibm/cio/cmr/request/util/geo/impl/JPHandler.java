@@ -4091,7 +4091,7 @@ public class JPHandler extends GEOHandler {
   }
 
   @Override
-  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country, Admin admin) {
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     LOG.debug("inside JP validateMassUpdateTemplateDupFills handler...");
 
     XSSFCell currCell = null;
@@ -4292,9 +4292,14 @@ public class JPHandler extends GEOHandler {
                 isCompanyFilled = true;
               }
 
-              if ((isCompanyFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isCompanyFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isCompanyFilled) && StringUtils.isBlank(addrSeq)) {
@@ -4412,9 +4417,14 @@ public class JPHandler extends GEOHandler {
                 isADU3Filled = true;
               }
 
-              if ((isADU3Filled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADU3Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADU3Filled) && StringUtils.isBlank(addrSeq)) {
@@ -4525,9 +4535,14 @@ public class JPHandler extends GEOHandler {
                 isADU1Filled = true;
               }
 
-              if ((isADU1Filled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADU1Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADU1Filled) && StringUtils.isBlank(addrSeq)) {
@@ -4638,9 +4653,14 @@ public class JPHandler extends GEOHandler {
                 isADU2Filled = true;
               }
 
-              if ((isADU2Filled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADU2Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADU2Filled) && StringUtils.isBlank(addrSeq)) {
@@ -4751,9 +4771,14 @@ public class JPHandler extends GEOHandler {
                 isADU7Filled = true;
               }
 
-              if ((isADU7Filled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADU7Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADU7Filled) && StringUtils.isBlank(addrSeq)) {
@@ -4864,9 +4889,14 @@ public class JPHandler extends GEOHandler {
                 isADUAFilled = true;
               }
 
-              if ((isADUAFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUAFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUAFilled) && StringUtils.isBlank(addrSeq)) {
@@ -4977,9 +5007,14 @@ public class JPHandler extends GEOHandler {
                 isADUBFilled = true;
               }
 
-              if ((isADUBFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUBFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUBFilled) && StringUtils.isBlank(addrSeq)) {
@@ -5090,9 +5125,14 @@ public class JPHandler extends GEOHandler {
                 isADUCFilled = true;
               }
 
-              if ((isADUCFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUCFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUCFilled) && StringUtils.isBlank(addrSeq)) {
@@ -5203,9 +5243,14 @@ public class JPHandler extends GEOHandler {
                 isADUDFilled = true;
               }
 
-              if ((isADUDFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUDFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUDFilled) && StringUtils.isBlank(addrSeq)) {
@@ -5316,9 +5361,14 @@ public class JPHandler extends GEOHandler {
                 isADUEFilled = true;
               }
 
-              if ((isADUEFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUEFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUEFilled) && StringUtils.isBlank(addrSeq)) {
@@ -5429,9 +5479,14 @@ public class JPHandler extends GEOHandler {
                 isADUFFilled = true;
               }
 
-              if ((isADUFFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUFFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUFFilled) && StringUtils.isBlank(addrSeq)) {
@@ -5542,9 +5597,14 @@ public class JPHandler extends GEOHandler {
                 isADUGFilled = true;
               }
 
-              if ((isADUGFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUGFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUGFilled) && StringUtils.isBlank(addrSeq)) {
@@ -5655,9 +5715,14 @@ public class JPHandler extends GEOHandler {
                 isADUHFilled = true;
               }
 
-              if ((isADUHFilled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADUHFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADUHFilled) && StringUtils.isBlank(addrSeq)) {
@@ -5768,9 +5833,14 @@ public class JPHandler extends GEOHandler {
                 isADU4Filled = true;
               }
 
-              if ((isADU4Filled) && StringUtils.isBlank(cmrNo)) {
-                LOG.trace("CMR No. is required.");
-                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              if (isADU4Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  }
+                }
               }
 
               if ((isADU4Filled) && StringUtils.isBlank(addrSeq)) {

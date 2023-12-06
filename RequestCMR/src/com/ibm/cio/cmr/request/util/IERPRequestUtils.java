@@ -857,16 +857,8 @@ public class IERPRequestUtils extends RequestUtils {
     coverageFields[6] = subIndustry;
     coverageFields[7] = isuCd;
 
-    LOG.debug("OFFICE CODE VALUE --> " + officeCode);
-    LOG.debug("JSIC CODE VALUE --> " + jsicCode);
-
-    LOG.debug("MRC VALUE --> " + mrc);
-    LOG.debug("CLIENT TIER VALUE --> " + ctc);
-    LOG.debug("SORTL VALUE --> " + sortl);
-
-    LOG.debug("ISIC VALUE --> " + isic);
-    LOG.debug("SUBINDUSTRY VALUE --> " + subIndustry);
-    LOG.debug("ISU --> " + isuCd);
+    LOG.debug("OFFICE CODE VALUE --> " + officeCode + " JSIC CODE VALUE --> " + jsicCode + " MRC VALUE --> " + mrc + " CLIENT TIER VALUE --> " + ctc);
+    LOG.debug("SORTL VALUE --> " + sortl + " ISIC VALUE --> " + isic + " SUBINDUSTRY VALUE --> " + subIndustry + " ISU --> " + isuCd);
 
     return coverageFields;
   }
