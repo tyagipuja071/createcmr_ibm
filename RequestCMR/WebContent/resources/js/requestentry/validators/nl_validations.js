@@ -836,8 +836,24 @@ function setAbbrvNmLoc() {
   var abbrevLocn = null;
   var abbrvNm = custNm.ret1;
   var cntryRegion = FormManager.getActualValue('countryUse');
-  var mscenario = FormManager.getActualValue('custGrp');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var mscenario =null;
   var scenario = null;
+  if(custGrp==null)
+  {  
+   var result = cmr.query('CROSSBORDER.CHK', {
+   REQ_ID : reqId
+  });
+   var landCntry=result.ret1;
+  if(cmrIssuingCntry!=landCntry)
+    {
+      mscenario='CROSS';
+    }
+  }
+  else {
+      mscenario=custGrp;
+  }
   if (mscenario == 'CROSS') {
     scenario = 'CROSS';
   } else if (mscenario == ((cntryRegion.substring(3, 5) + "CRO"))) {
