@@ -840,7 +840,7 @@ function setAbbrvNmLoc() {
   var custGrp = FormManager.getActualValue('custGrp');
   var mscenario =null;
   var scenario = null;
-  if(custGrp==null)
+  if(custGrp==null || custGrp=='')
   {  
    var result = cmr.query('CROSSBORDER.CHK', {
    REQ_ID : reqId
