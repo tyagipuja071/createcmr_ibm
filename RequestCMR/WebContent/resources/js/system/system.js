@@ -99,7 +99,11 @@ var UserService = (function() {
     addSelectedRoles : function() {
       var comments = FormManager.getActualValue('addrolecomments');
       if (comments == '') {
-        cmr.showAlert('Please input the full request details for this change.', 'Stop');
+        cmr.showAlert('Please input the JIRA ticket link for this change.', 'Stop');
+        return;
+      }
+      if (comments.trim().toLowerCase().indexOf('http') != 0) {
+        cmr.showAlert('Please input a valid JIRA ticket link (starts with https).', 'Stop');
         return;
       }
       dojo.byId('userrolecmt').value = comments;

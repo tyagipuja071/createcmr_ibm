@@ -18,6 +18,7 @@
 				user.setStatus("1");
 			} else {
 			}
+  AppUser appUser = AppUser.getUser(request);
 %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
@@ -233,7 +234,16 @@
               <cmr:gridCol width="11%" field="createTsString" header="Create Date" />
               <cmr:gridCol width="12%" field="updateBy" header="Last Updated By" />
               <cmr:gridCol width="11%" field="updateTsString" header="Last Updated" />
-              <cmr:gridCol width="*" field="comments" header="Comments" />
+              <cmr:gridCol width="*" field="comments" header="Comments" >
+                <cmr:formatter>
+               function(value) {
+                 if (value && value.toLowerCase().indexOf('http') == 0){
+                   return '<a href="'+value+'" target="_blank">'+value+'</a>';
+                 } 
+                 return value;
+               }
+             </cmr:formatter>
+              </cmr:gridCol>
 
             </cmr:grid>
           </cmr:column>
@@ -241,11 +251,17 @@
         <cmr:row>
         &nbsp;
       </cmr:row>
-        <%--<cmr:buttonsRow>
+      <%if (appUser != null && appUser.isAdmin()) {%>
+        <cmr:row>
           <cmr:button label="Add Roles" onClick="UserService.addRoles()" highlight="true" />
+          <%--
           <cmr:button label="Remove Roles" onClick="UserService.removeRoles()" pad="true" />
-        </cmr:buttonsRow>--%>
-        <br>
+          --%>
+        </cmr:row>
+        <cmr:row>
+          &nbsp;
+        </cmr:row>
+      <%}%>
       </cmr:section>
     </cmr:form>
   </cmr:boxContent>
