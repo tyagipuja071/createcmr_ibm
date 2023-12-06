@@ -92,4 +92,8 @@ public class SwissMultiService extends MultiThreadedBatchService<Long> {
     this.mode = mode;
   }
 
+  @Override
+  protected boolean useServicesConnections() {
+    return true;
+  }
 }

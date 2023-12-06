@@ -591,6 +591,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           scorecard.setFindCmrTs(null);
           scorecard.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
         }
+        scorecard.setFindDnbResult("Not Required");
       } else {
         scorecard.setFindCmrUsrNm(user.getBluePagesName());
         scorecard.setFindCmrUsrId(user.getIntranetId());
