@@ -1912,6 +1912,15 @@ function isChangedAddress(addrType, addrSeq, addrList, addrRdcList, cnAddrList, 
   return result;
 }
 
+function isChangedCustName(addrType, addrSeq, addrList, addrRdcList, cnAddrList, cnAddrRdcList) {
+  var result = false;
+  if (isChangedFieldCustNm('custNm1', addrType, addrSeq, addrList, addrRdcList) || isChangedFieldCustNm('custNm2', addrType, addrSeq, addrList, addrRdcList) || isChangedFieldCustNm('custNm3', addrType, addrSeq, addrList, addrRdcList) || 
+      isChangedFieldCustNm('cnCustName1', addrType, addrSeq, cnAddrList, cnAddrRdcList) || isChangedFieldCustNm('cnCustName2', addrType, addrSeq, cnAddrList, cnAddrRdcList) || isChangedFieldCustNm('cnCustName3', addrType, addrSeq, addrList, addrRdcList)) {
+    result = true;
+  }
+  return result;
+}
+
 function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
   var result = false;
   var fieldValue1 = null;
@@ -1946,6 +1955,59 @@ function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
           fieldValue2 = list2[j].cnAddrTxt;
         } else if (fieldName == 'cnAddrTxt2') {
           fieldValue2 = list2[j].cnAddrTxt2;
+        }
+      }
+    }
+  }
+  
+  if (convert2DBCSIgnoreCase(fieldValue1) != convert2DBCSIgnoreCase(fieldValue2)) {
+    result = true;
+  }
+  return result;
+}
+
+function isChangedFieldCustNm(fieldName, addrType, addrSeq, list1, list2) {
+  var result = false;
+  var fieldValue1 = null;
+  var fieldValue2 = null;
+  
+  // addr
+  if (list1 != null && list1.length > 0) {
+    for (var i = 0; i < list1.length; i ++) {
+      if (list1[i].addrType == addrType && list1[i].addrSeq == addrSeq) {
+        if (fieldName == 'custNm1') {
+          fieldValue1 = list1[i].custNm1;
+        } else if (fieldName == 'custNm2') {
+          fieldValue1 = list1[i].custNm2;
+        } else if (fieldName == 'custNm3') {
+          fieldValue1 = list1[i].custNm3;
+        } else if (fieldName == 'cnCustName1') {
+          fieldValue1 = list1[i].cnCustNm1;
+        } else if (fieldName == 'cnCustName2') {
+          fieldValue1 = list1[i].cnCustNm2;
+        } else if (fieldName == 'cnCustName3') {
+          fieldValue1 = list1[i].cnCustNm3;
+        }
+      }
+    }
+  }
+  
+  // addr_rdc
+  if (list2 != null && list2.length > 0) {
+    for (var j = 0; j < list2.length; j ++) {
+      if (list2[j].addrType == addrType && list2[j].addrSeq == addrSeq) {
+        if (fieldName == 'custNm1') {
+          fieldValue2 = list2[j].custNm1;
+        } else if (fieldName == 'custNm2') {
+          fieldValue2 = list2[j].custNm2;
+        } else if (fieldName == 'custNm3') {
+          fieldValue2 = list2[j].custNm3;
+        } else if (fieldName == 'cnCustName1') {
+          fieldValue2 = list2[j].cnCustNm1;
+        } else if (fieldName == 'cnCustName2') {
+          fieldValue2 = list2[j].cnCustNm2;
+        } else if (fieldName == 'cnCustName3') {
+          fieldValue2 = list2[j].cnCustNm3;
         }
       }
     }
@@ -2847,6 +2909,98 @@ function addressValidation(address2SBCS, apiCity, cnAddress, cnCity, cnDistrictZ
   return addressEqualFlag;
 }
 
+function validateCustNmsForUpdate(){
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var action = FormManager.getActualValue('yourAction');
+          if (FormManager.getActualValue('reqType') != 'U') {
+            return new ValidationResult(null, true);
+          }
+          console.log("running validateCustNmsForUpdate . . .");
+          
+          // 1, no more than 1 ZS01.
+          // 2, if ZS01 only, then check TianYanCha to ask for attached doc if
+          // not 100% match.
+          // 3, if more than 1 addr records, then need Chinese special
+          // attachment if other addr is not same with zs01.
+          // 4, if more than 1 addr records, remove Chinese special attachment
+          // if zs01 CN name and addr 100% match TianYanCha.
+          
+          var addrList = [];
+          var addrRdcList = [];
+          var cnAddrList = [];
+          var cnAddrRdcList = [];
+          
+          // 'failInd = true' means otherAddressUpdated and not sameWithZs01
+          var failInd = false;
+          var zs01AddressUpdated = false;
+          var otherAddressUpdated = false;
+          
+          var zs01Count = 0;
+          
+          var addrTxtZS01 = '';
+          var addrTxt2ZS01 = '';
+          
+          var cnCustName1ZS01 = '';
+          var cnCustName2ZS01 = '';
+          var cnCustName4ZS01 = '';
+          var cnAddrTxtZS01 = '';
+          var cnAddrTxt2ZS01 = '';
+          
+          var addrTypeOther = '';
+          var addrSeqOther = '';
+          
+          var addrTxtOther = '';
+          var addrTxt2Other = '';
+          var cnAddrTxtOther = '';
+          var cnAddrTxt2Other = '';
+          var cnCityZS01 = '';
+          var cnDistrictZS01 = '';
+          
+          var reqReason = FormManager.getActualValue('reqReason');
+          
+          if (reqReason == 'TREC') {
+            return new ValidationResult(null, true);
+          }
+          
+          addrList = getAddrList();
+          addrRdcList = getAddrRdcList();
+          cnAddrList = getCnAddrList();
+          cnAddrRdcList = getCnAddrRdcList();
+      
+          
+          for (var i=0; i< cnAddrList.length; i++) {
+            if (cnAddrList[i].addrType == 'ZS01') {
+              cnCustName1ZS01 = cnAddrList[i].cnCustNm1;
+              cnCustName2ZS01 = cnAddrList[i].cnCustNm2;
+            }
+          }
+          
+          var changeCount = 0;
+          
+          if (addrList.length > 1) {
+            for (var i=0; i< addrList.length; i++) {
+              if(isChangedCustName(addrList[i].addrType, addrList[i].addrSeq, addrList, addrRdcList, cnAddrList, cnAddrRdcList)){
+                changeCount += 1;
+              }
+            }
+          }
+
+          if(changeCount > 0){
+            if (checkForCompanyProofAttachment()) {
+              return new ValidationResult(null, false, 'Company proof is mandatory since customer name has been updated or added.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+          return new ValidationResult(null, true);
+      }
+    }
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 function validateCnNameAndAddr4Update() {
   FormManager.addFormValidator((function() {
     return {
@@ -3283,6 +3437,7 @@ function getAddrList() {
           addrTxt : results[i].ret6,
           addrTxt2 : results[i].ret7,
           city1 : results[i].ret8,
+          custNm3 : results[i].ret9,
       };
       addrList.push(addr);
     }
@@ -3309,6 +3464,7 @@ function getAddrRdcList() {
           addrTxt : results[i].ret6,
           addrTxt2 : results[i].ret7,
           city1 : results[i].ret8,
+          custNm3 : results[i].ret9
       };
       addrRdcList.push(addr);
     }
@@ -3335,6 +3491,7 @@ function getCnAddrList() {
           cnAddrTxt : results[i].ret6,
           cnAddrTxt2 : results[i].ret7, // custNm4
           cnCity1 : results[i].ret8,
+          cnCustNm3 : results[i].ret9
       };
       cnAddrList.push(addr);
     }
@@ -3361,6 +3518,7 @@ function getCnAddrRdcList() {
           cnAddrTxt : results[i].ret6,
           cnAddrTxt2 : results[i].ret7, // custNm4
           cnCity1 : results[i].ret8,
+          cnCustNm3 : results[i].ret9
       };
       cnAddrRdcList.push(addr);
     }
@@ -4142,77 +4300,6 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
-function addChangeNameAttachmentValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        // Manual Address, Name change is disabled for Temporary reactivate
-        // requests.
-        // Skipping the validation to avoid validation messages for automatic
-        // State Prov
-        // corrections for update type requests
-        if (FormManager.getActualValue('reqReason') == 'TREC') {
-          return;
-        }
-        var reqType = FormManager.getActualValue('reqType');
-        
-        // RDC Data of Chinese Name retrieval
-        var reqId = FormManager.getActualValue('reqId');
-        var qParams = {
-            _qall : 'Y',
-            REQ_ID : reqId ,
-            ADDR_TYPE : 'ZS01'
-           };
-        var result = cmr.query('GET.INTL_CUSTNM_RDC_BY_ID', qParams);
-        
-        if(result != null && result != undefined && result != ''){
-          var oldCnCustName1= result[0].ret1 != null ? result[0].ret1 : '';
-          var oldCnCustName2= result[0].ret2 != null ? result[0].ret2 : '';
-          var oldCnCustName3= result[0].ret3 != null ? result[0].ret3 : '';
-        }
-        
-        var resultCnCustNm = cmr.query('GET.INTL_CUSTNM_BY_ID', qParams);
-        
-        if(resultCnCustNm != null && resultCnCustNm != undefined && resultCnCustNm != ''){
-          var cnCustName1= resultCnCustNm[0].ret1 != null ? resultCnCustNm[0].ret1 : '';
-          var cnCustName2= resultCnCustNm[0].ret2 != null ? resultCnCustNm[0].ret2 : '';
-          var cnCustName3= resultCnCustNm[0].ret3 != null ? resultCnCustNm[0].ret3 : '';
-        }
-        
-        var resultCustNmRdc = cmr.query('GET.CUSTNM_BY_ID', qParams);
-        
-        if(resultCustNmRdc != null && resultCustNmRdc != undefined && resultCustNmRdc != ''){
-          var custName1= resultCustNmRdc[0].ret1 != null ? resultCustNmRdc[0].ret1 : '';
-          var custName2= resultCustNmRdc[0].ret2 != null ? resultCustNmRdc[0].ret2 : '';
-          var custName3= resultCustNmRdc[0].ret3 != null ? resultCustNmRdc[0].ret3 : '';
-        }
-        
-        var resultCustNm = cmr.query('GET.CUSTNM_RDC_BY_ID', qParams);
-        
-        if(resultCustNm != null && resultCustNm != undefined && resultCustNm != ''){
-          var oldCustNm1= resultCustNm[0].ret1 != null ? resultCustNm[0].ret1 : '';
-          var oldCustNm2= resultCustNm[0].ret2 != null ? resultCustNm[0].ret2 : '';
-          var oldCustNm3= resultCustNm[0].ret3 != null ? resultCustNm[0].ret3 : '';
-        }
-
-        if (typeof (_pagemodel) != 'undefined') {
-          if (reqType == 'U' && (custName1 != oldCustNm1 || custName2 != oldCustNm2 
-              || custName3 != oldCustNm3 || cnCustName1 != oldCnCustName1 || cnCustName2 != oldCnCustName2)
-              || cnCustName3 != oldCnCustName3) {
-            if (checkForCompanyProofAttachment()) {
-              return new ValidationResult(null, false, 'Company proof is mandatory since customer name has been updated or added.');
-            } else {
-              return new ValidationResult(null, true);
-            }
-          } else {
-            return new ValidationResult(null, true);
-          }
-        }
-      }
-    };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
-}
-
 function checkForCompanyProofAttachment() {
   var id = FormManager.getActualValue('reqId');
   var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
@@ -4309,6 +4396,7 @@ dojo.addOnLoad(function() {
   // false);
   GEOHandler.registerValidator(validateCnNameAndAddr4Create, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateCnNameAndAddr4Update, GEOHandler.CN, null, false);
+  GEOHandler.registerValidator(validateCustNmsForUpdate, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(addCNDnBMatchingAttachmentValidator, GEOHandler.CN, null, false);
   // GEOHandler.registerValidator(foreignValidator, GEOHandler.CN, null,
   // false,false);
@@ -4324,5 +4412,4 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
-  GEOHandler.registerValidator(addChangeNameAttachmentValidator, GEOHandler.CN, null,true);
 });

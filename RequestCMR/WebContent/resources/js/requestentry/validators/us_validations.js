@@ -1426,7 +1426,7 @@ function addressQuotationValidator() {
   FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'District' ]);
   FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Building' ]);
   FormManager.addValidator('floor', Validators.NO_QUOTATION, [ 'Floor' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('custFax', Validators.NO_QUOTATION, [ 'FAX' ]);
   FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
@@ -1500,6 +1500,7 @@ function validateCoverageData() {
         if (FormManager.getActualValue('reqType') != 'U') {
           return new ValidationResult(null, true);
         }
+        var installAtUpdated = false;
         for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
           record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
           if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -1509,10 +1510,14 @@ function validateCoverageData() {
           if (typeof (type) == 'object') {
             type = type[0];
           }
-          if (type == 'ZI01' && record.updateInd[0] != 'U') {
-            console.log('>>> Install At address not updated - not performing coverage change validations.');
-            return new ValidationResult(null, true);
+          if (type == 'ZS01' && record.updateInd[0] == 'U') {
+            installAtUpdated = true;
+            break;
           }
+        }
+        if (!installAtUpdated) {
+          console.log('>>> Install At address not updated - not performing coverage change validations.');
+          return new ValidationResult(null, true);
         }
 
         var data = CmrServices.getAll('reqentry');
@@ -1547,10 +1552,9 @@ function validateCoverageData() {
               }
             }
           }
-          var retrievedCovId = data.coverageType + data.coverageID;
-          var retrievedBgId = data.buyingGroupID;
-          var retrievedGbgId = data.globalBuyingGroupID;
-//          var retrievedBgRuleId = data.odmRuleID;
+          var retrievedCovId = (data.coverageType + data.coverageID) || "";
+          var retrievedBgId = data.buyingGroupID || "";
+          var retrievedGbgId = data.globalBuyingGroupID || "";
           
           var importedData = getImportedCovData();
           if (importedData == undefined || importedData == null) {
@@ -1560,11 +1564,14 @@ function validateCoverageData() {
           var importedBgId = importedData.ret1;
           var importedCovId = importedData.ret3;
           var importedGbgId = importedData.ret5;
-//          var importedBgRuleId = importedData.ret2;
+          
+          if (importedBgId == undefined) {
+            return new ValidationResult(null, true);
+          }
           
           if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
             return new ValidationResult(null, false, 'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t ' + 
-                'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure.');
+                'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
           }
         }
       }
@@ -1640,6 +1647,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);  
-// GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+ GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   
 });

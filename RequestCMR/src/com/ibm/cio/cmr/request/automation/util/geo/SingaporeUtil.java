@@ -287,7 +287,7 @@ public class SingaporeUtil extends AutomationUtil {
     String[] scenariosToBeChecked = { "PRIV", "XPRIV" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
       doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
-          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+          false, requestData);
     }
     switch (scenario) {
     // CREATCMR - 2031
@@ -312,6 +312,7 @@ public class SingaporeUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_CROSS_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
     }
     result.setDetails(details.toString());
     return true;
