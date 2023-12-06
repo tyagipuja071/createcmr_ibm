@@ -82,7 +82,10 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     scorecard.setDnbMatchingResult("");
     Boolean override = false;
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }  
     // CREATCMR-8553: if the address matches with mailing address in DNB, show
     // mailing address in automation details.
     Boolean matchWithDnbMailingAddr = false;
@@ -130,7 +133,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry()))) {
+          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) && !isPaygoUpgrade) {
             result.setOnError(shouldThrowError);
           } else {
             result.setOnError(false);
