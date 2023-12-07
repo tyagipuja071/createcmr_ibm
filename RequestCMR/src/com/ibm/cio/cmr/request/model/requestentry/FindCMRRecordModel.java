@@ -234,6 +234,8 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String custClass;
   private String inspbydebi;
   private String taigaCd;
+  private String cmrCustGrpId;
+  private String cmrContractSignDt;
 
   // Italy Legacy Fields
   private String hwSvcsRepTeamNo;
@@ -2505,13 +2507,13 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
     this.inspbydebi = inspbydebi;
   }
 
-public String getTaigaCd() {
-	return taigaCd;
-}
+  public String getTaigaCd() {
+    return taigaCd;
+  }
 
-public void setTaigaCd(String taigaCd) {
-	this.taigaCd = taigaCd;
-}
+  public void setTaigaCd(String taigaCd) {
+    this.taigaCd = taigaCd;
+  }
 
   public String getCmrCreditToCustNo() {
     return cmrCreditToCustNo;
@@ -2519,6 +2521,22 @@ public void setTaigaCd(String taigaCd) {
 
   public void setCmrCreditToCustNo(String cmrCreditToCustNo) {
     this.cmrCreditToCustNo = cmrCreditToCustNo;
+  }
+
+  public String getCmrCustGrpId() {
+    return cmrCustGrpId;
+  }
+
+  public void setCmrCustGrpId(String cmrCustGrpId) {
+    this.cmrCustGrpId = cmrCustGrpId;
+  }
+
+  public String getCmrContractSignDt() {
+    return cmrContractSignDt;
+  }
+
+  public void setCmrContractSignDt(String cmrContractSignDt) {
+    this.cmrContractSignDt = cmrContractSignDt;
   }
 
 }

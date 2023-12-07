@@ -202,7 +202,7 @@ public class VatUtilController {
       };
       AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
       if (gstResponse != null && gstResponse.isSuccess()) {
-        if (gstResponse.getMessage().equals("GST provided is verified with the company details.")) {
+        if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")) {
           validation = ValidationResult.success();
         } else {
           validation = ValidationResult.error("GST# provided on the request is not valid as per GST Validation. Please verify the GST# provided.");

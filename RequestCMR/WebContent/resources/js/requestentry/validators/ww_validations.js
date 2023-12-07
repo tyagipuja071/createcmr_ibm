@@ -482,6 +482,8 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
       return {
         validate : function() {
           var reqType = FormManager.getActualValue('reqType');
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+                  
           var vat = FormManager.getActualValue('vat');
 
           if (!vat || vat == '' || vat.trim() == '') {
@@ -500,7 +502,12 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZS01 VAT Country: ' + zs01Cntry);          
+          console.log('ZS01 VAT Country: ' + zs01Cntry);    
+          if (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL') {
+            // skip validation for Chile, Colombia, Venezuela landed country
+            // handled sperately under CREATCMR-10034
+            return new ValidationResult(null, true);
+          }
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -1238,6 +1245,111 @@ function setVatIndFieldsForGrp1AndNordx() {
   }
 }
 
+//CREATCMR-10034
+function addLAVatValidator() {
+  FormManager.addFormValidator((function() {
+
+    return {
+      validate : function() {
+
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var custType = FormManager.getActualValue('custType');
+        console.log(">>>> addLAVatValidator");
+        var zs01Cntry = null;
+        //get vat Field 
+        var vat = FormManager.getActualValue('vat');
+        if (!vat || vat == '' || vat.trim() == '') {
+          // if taxcd1 is empty check for vat field
+           vat = FormManager.getActualValue('taxCd1');
+        }
+        
+        if (reqType=='U' && ((dojo.byId('taxCd1') != null && dojo.byId('taxCd1').readOnly) || (dojo.byId('vat') != null && dojo.byId('vat').readOnly))){
+          return new ValidationResult(null, true);
+        } else if (!vat || vat == '' || vat.trim() == '') {
+            return new ValidationResult(null, true);
+        } else if (reqType == 'U' && vat == '@') {
+          // vat deletion for updates
+            return new ValidationResult(null, true);
+        } 
+          
+        var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+          REQID : FormManager.getActualValue('reqId'),
+          TYPE : 'ZS01'
+        });
+        if (ret && ret.ret1 && ret.ret1 != '') {
+          zs01Cntry = ret.ret1;
+        }
+        console.log('ZS01 VAT Country: ' + zs01Cntry);
+        if (zs01Cntry != undefined && zs01Cntry != null && (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL')) {
+          // CREATCMR-10034
+          var custClass= FormManager.getActualValue('custClass');
+
+          if (zs01Cntry == 'CO') {
+            if ((reqType == 'C' && ((custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM') ||(custType == 'PRIPE' || custType == 'IBMEM') ))|| (reqType == 'U' && (custClass == '60' || custClass == '71' ))) {
+              if (vat.length != '10') {
+                return new ValidationResult({
+                  id : 'vat',
+                  type : 'text',
+                  name : 'vat'
+                }, false, ('Invalid VAT length for CO. Length should be 10 characters long for Private Person and IBM Employee'));
+              } else if (vat.length == '10') {
+                var coPattern1 = /^[0-9]{8}[-][0-9]{1}$/;
+                if (!vat.match(coPattern1)) {
+                  return new ValidationResult({
+                    id : 'vat',
+                    type : 'text',
+                    name : 'vat'
+                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnn-n for Private Person and IBM Employee'));
+                }
+              }
+            } else if ((reqType == 'C') || (reqType == 'U' && (custClass != '60' || custClass != '71' ))) {
+              if (vat.length != '11') {
+                return new ValidationResult({
+                  id : 'vat',
+                  type : 'text',
+                  name : 'vat'
+                }, false, ('Invalid VAT length for CO. Length should be 11 characters long for all Scenario Sub-types other than Private Person and  IBM Employee '));
+              } else if (vat.length == '11') {
+                var coPattern2 = /^[0-9]{9}[-][0-9]{1}$/;
+                if (!vat.match(coPattern2)) {
+                  return new ValidationResult({
+                    id : 'vat',
+                    type : 'text',
+                    name : 'vat'
+                  }, false, ('Invalid format of VAT for CO. Format should be nnnnnnnnn-n for all Scenario Sub-types other than Private Person and and IBM Employee'));
+                }
+              }
+            }
+            return;
+          }
+          
+          var result = cmr.validateVAT(zs01Cntry, vat);
+          if (result && !result.success) {
+            if (result.errorPattern == null) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, result.errorMessage + '.');
+            } else {
+              var msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, msg);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -1331,4 +1443,5 @@ dojo.addOnLoad(function() {
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
   GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
   GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries)
+	GEOHandler.registerWWValidator(addLAVatValidator);
 });
