@@ -99,10 +99,15 @@ public class NetherlandsUtil extends AutomationUtil {
         && !SCENARIO_LOCAL_PUBLIC.equals(scenario)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
     }
-    String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBPRI" };
+    String[] scenariosToBeChecked = { "IBMEM"};
+    String[] privCust = {"CBPRI", "PRICU"};
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
       doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
+    else if(Arrays.asList(privCust).contains(scenario)){
+      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
+          false, requestData);
     }
     switch (scenario) {
 
