@@ -460,13 +460,17 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               }
               itemNo++;
             }
-            if (!override) {
+            if (!override && !isPaygoUpgrade) {
               engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
               result.setResults("Name/Address not matched");
-            } else {
+            } else if (isPaygoUpgrade) {
+              result.setResults("Name/Address not matched");
               result.setDetails("Matches against D&B were found but no record matched the request data.");
+            }else{
+              result.setDetails("Matches against D&B were found but no record matched the request data.");
+              
             }
-            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !isPaygoUpgrade) {
               result.setOnError(true);
             } else {
               result.setOnError(false);
