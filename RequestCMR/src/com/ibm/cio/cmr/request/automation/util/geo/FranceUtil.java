@@ -254,8 +254,13 @@ public class FranceUtil extends AutomationUtil {
         // remove duplicate address
         removeDuplicateAddresses(entityManager, requestData, details);
       }
-      String[] scenariosToBeChecked = { "PRICU", "IBMEM", "CBIEM", "XBLUM" };
+      String[] scenariosToBeChecked = { "IBMEM", "CBIEM" };
+      String[] privCust = {"XBLUM", "PRICU"};
       if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+            Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+      }
+      else if(Arrays.asList(privCust).contains(scenario)){
         doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
             false, requestData);
       }
