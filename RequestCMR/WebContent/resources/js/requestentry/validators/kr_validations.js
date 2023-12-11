@@ -2,6 +2,10 @@
  var _isicHandler = null;
  
 function afterConfigKR() {
+  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    return;
+  }
+  
   var role = null;
   var reqType = null;
   var _isuHandler = null;
@@ -555,6 +559,9 @@ function addressQuotationValidator() {
 }
 
 function setSearchTermDropdownValues() {
+  if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    return;
+  }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var searchTerm = FormManager.getField('searchTerm');
   var clusterNRML = [ '12301', '12305', '12309', '12311', '12303', '12307', '12302', '12306', '12300', 
