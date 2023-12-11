@@ -138,7 +138,6 @@ function afterConfigForIndia() {
     if (cntry == SysLoc.INDIA && custSubGrp == "CROSS" && _pagemodel.apCustClusterId == null) {
       FormManager.setValue('apCustClusterId', "012D999");
     }
-             
   });
 
   dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
@@ -3366,12 +3365,10 @@ function setCTCIsuByClusterBrunei() {
       FormManager.setValue('isuCd','21');
       FormManager.setValue('clientTier', 'Z');
     }
-    else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR'))) {
+    else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS'))) {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-      FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['8B']);
-      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00089' ]);
-      FormManager.setValue('apCustClusterId', "00089");
-      FormManager.setValue('isuCd','8B');
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+      FormManager.setValue('isuCd','34');
       FormManager.setValue('clientTier', 'Z');
     }
     else if(issuingCnt4.includes(_cmrIssuingCntry) && custSubGrp.includes('INTER')) {
@@ -3393,6 +3390,14 @@ function setCTCIsuByClusterBrunei() {
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00000' ]);
     FormManager.setValue('apCustClusterId', "00000");
     FormManager.setValue('isuCd','34');
+    FormManager.setValue('clientTier', 'Z');
+  }
+  else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR'))) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['8B']);
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00089' ]);
+    FormManager.setValue('apCustClusterId', "00089");
+    FormManager.setValue('isuCd','8B');
     FormManager.setValue('clientTier', 'Z');
   }
 
@@ -3569,8 +3574,11 @@ function removeStateValidatorForHkMoNZ() {
         // FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State'
         // ], null);
         FormManager.removeValidator('stateProv', Validators.REQUIRED);
-//        if (landCntry == '' || FormManager.GETFIELD_VALIDATIONS['landCntry'].indexOf(Validators.REQUIRED) < 0)
-//          FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ], null);
+// if (landCntry == '' ||
+// FormManager.GETFIELD_VALIDATIONS['landCntry'].indexOf(Validators.REQUIRED) <
+// 0)
+// FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ],
+// null);
         FormManager.addValidator('city1', Validators.REQUIRED, [ 'Suburb' ], null);
       }
     }
