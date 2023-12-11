@@ -455,20 +455,17 @@ function prospectFilter() {
 function setInacByCluster() {
   console.log('>>>> setInacByCluster >>>>');
   var _cluster = FormManager.getActualValue('apCustClusterId');
-//  if (oldClusterCd == null) {
-//    saveClusterVal();
-//  }
-//  if (_cluster == oldClusterCd) {
-//    return;
-//  }
+
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   // CREATCMR-7884
   var _clusterNZ = ['09056', '10114', '10115', '10116', '01147', '08037', '10662', '10663', '00002'];
-  var _clusterNZWithAllInac = ['10662', '10663', '01147', '08037', '00002'];
+  var _clusterNZWithAllInac = ['10662', '10663', '01147', '08037', '00002', '12298', '12297', '12299', '11993', '11992' ];
   var _custSubGrpNZWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
   // CREATCMR-7883
-  var _clusterAUWithAllInac = ['01150', '00001', '08039'];
+  var _clusterAUWithAllInac = ['00001','08039','12278','12280','12279','12281','12296','12290','12294','12291','12295','12293','12286','12288','12289',
+    '12287','12276','12274','12275','12277','12292','12282','12284','12285','12283','12476','12477','12478','12479','12481','08039','11989','11991',
+    '11988','11990'];
   var _custSubGrpAUWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
 
   // CREATCMR-7885
@@ -2634,7 +2631,7 @@ function onInacTypeChange() {
 
           if (qParams != undefined) {
             var results = cmr.query('GET.INAC_CD', qParams);
-            if (results != null) {
+            if (results != null && results.length > 0) {
               for (var i = 0; i < results.length; i++) {
                 inacCdValue.push(results[i].ret1);
               }
@@ -2655,6 +2652,20 @@ function onInacTypeChange() {
               if (inacCdValue.length == 1) {
                 FormManager.setValue('inacCd', inacCdValue[0]);
               }
+            } else {
+              var inacType = FormManager.getActualValue('inacType');
+              cmt = inacType + '%';
+              qParams = {
+                _qall: 'Y',
+                ISSUING_CNTRY: cntry,
+                CMT: cmt,
+              };
+              results = cmr.query('GET.INAC_CD', qParams);
+              for (var i = 0; i < results.length; i++) {
+                inacCdValue.push(results[i].ret1);
+              }
+              FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
             }
           }
         }
@@ -8163,11 +8174,11 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
     // CREATCMR-7883-7884
 
-    if (isInacRequired) {
-      console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-    }
+//    if (isInacRequired) {
+//      console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
+//      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+//      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
+//    }
     // LOCK GB Seg(QTC)/ISU
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
