@@ -1017,6 +1017,12 @@ function setCmrNoCmrNo2Required() {
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
     FormManager.resetValidations('cmrNo2');
     break;
+  case 'BPBIL':
+    FormManager.enable('cmrNo');
+    FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+    FormManager.readOnly('cmrNo2');
+    FormManager.resetValidations('cmrNo2');
+    break;
   default:
     if (_role == 'Requester') {
       FormManager.setValue('cmrNo', '');
@@ -7042,6 +7048,64 @@ function contractSignDateValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addCmrNoValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var numCmr = /^[9]{1}[3|4]{1}\d{4}$/g;
+        var alphaNumCmr = /^[9]{1}[3|4]{1}\d{1}[S]{1}\d{2}$/g;
+
+        if (custSubType != 'BPBIL') {
+          return new ValidationResult(null, true);
+        }
+
+        if (cmrNo != '' && cmrNo != null) {
+
+          var isProspect = FormManager.getActualValue('prospLegalInd');
+          if ('Y' == isProspect && cmrNo.startsWith('P') && cmrNo.length == 6) {
+            return new ValidationResult(null, true);
+          }
+
+          if (cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+          } else if (cmrNo == "000000") {
+            return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+          } else if (!(cmrNo.match(numCmr) || cmrNo.match(alphaNumCmr))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 930000-939999, 940000-94999 or 930S01-939S99, 940S01-949S99 range.');
+          } else {
+            var qParams = {
+              CMRNO : cmrNo,
+              CNTRY : cntry,
+              MANDT : cmr.MANDT
+            };
+            var results = cmr.query('GET.CMR.JP', qParams);
+            if (results.ret1 != null) {
+              return new ValidationResult(null, false, 'The CMR Number already exists.');
+            } else {
+              results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (results && results.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function setContractSignDate() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   var reqType = FormManager.getActualValue('reqType');
@@ -7191,6 +7255,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addBwpqCreditToValidator, GEOHandler.JP, null, true);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.JP, null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
