@@ -4298,6 +4298,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isADU3Filled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
@@ -4414,6 +4421,13 @@ public class JPHandler extends GEOHandler {
               // Full English Name
               if (isADU1Filled && "@".equals(fullEnglishName)) {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
               }
 
               // Address
@@ -4534,6 +4548,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isADU2Filled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
@@ -4650,6 +4671,13 @@ public class JPHandler extends GEOHandler {
               // Full English Name
               if (isADU7Filled && "@".equals(fullEnglishName)) {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
               }
 
               // Address
@@ -4770,6 +4798,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isADUAFilled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
@@ -4886,6 +4921,13 @@ public class JPHandler extends GEOHandler {
               // Full English Name
               if (isADUBFilled && "@".equals(fullEnglishName)) {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
               }
 
               // Address
@@ -5006,6 +5048,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isADUCFilled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
@@ -5122,6 +5171,13 @@ public class JPHandler extends GEOHandler {
               // Full English Name
               if (isADUDFilled && "@".equals(fullEnglishName)) {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
               }
 
               // Address
@@ -5242,6 +5298,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isADUEFilled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
@@ -5358,6 +5421,13 @@ public class JPHandler extends GEOHandler {
               // Full English Name
               if (isADUFFilled && "@".equals(fullEnglishName)) {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
               }
 
               // Address
@@ -5478,6 +5548,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isADUGFilled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
@@ -5596,6 +5673,13 @@ public class JPHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
               }
 
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
               // Address
               if (isADUHFilled && "@".equals(address)) {
                 error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
@@ -5712,6 +5796,13 @@ public class JPHandler extends GEOHandler {
               // Full English Name
               if (isADU4Filled && "@".equals(fullEnglishName)) {
                 error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
               }
 
               // Address
