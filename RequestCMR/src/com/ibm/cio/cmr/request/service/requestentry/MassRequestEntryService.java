@@ -4955,9 +4955,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           for (TemplateValidation validation : validations) {
             if (validation.hasErrors()) {
               if (StringUtils.isEmpty(errTxt.toString())) {
-                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+                errTxt.append("<br />Tab name :" + validation.getTabName() + ", " + validation.getAllError());
               } else {
-                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+                errTxt.append("<br />Tab name :" + validation.getTabName() + ", " + validation.getAllError());
               }
             }
           }
