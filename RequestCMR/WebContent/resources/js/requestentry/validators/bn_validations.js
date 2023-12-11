@@ -3377,14 +3377,7 @@ function setCTCIsuByClusterBrunei() {
       FormManager.setValue('isuCd','60');
       FormManager.setValue('clientTier', '0');
     }
-    else if(issuingCnt4.includes(_cmrIssuingCntry) && 
-    (custSubGrp.includes('NRML') || 
-    custSubGrp.includes('AQSTN') || 
-    custSubGrp.includes('ASLOM') || 
-    custSubGrp.includes('CROSS') ||
-    custSubGrp.includes('XPRIV')
-    ))
-  {
+    else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('NRML') || custSubGrp.includes('AQSTN') || custSubGrp.includes('ASLOM') || custSubGrp.includes('CROSS') ||custSubGrp.includes('XPRIV'))) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00000' ]);
@@ -3400,8 +3393,7 @@ function setCTCIsuByClusterBrunei() {
     FormManager.setValue('isuCd','8B');
     FormManager.setValue('clientTier', 'Z');
   }
-
-      FormManager.readOnly('apCustClusterId');
+    FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     }
