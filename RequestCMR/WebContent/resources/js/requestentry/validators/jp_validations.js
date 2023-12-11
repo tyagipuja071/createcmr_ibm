@@ -7098,7 +7098,6 @@ function addBwpqCreditToValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-
 function setFieldsBehaviorForBPEndUserAndIGFCmr() {
   if (FormManager.getActualValue('reqType') != 'U') {
     return;
