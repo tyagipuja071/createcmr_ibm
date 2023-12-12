@@ -800,6 +800,7 @@ function setFieldsRequired() {
     return;
     break;
   case 'NORML':
+  case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
     if (!isPageLoad && setFieldsRequiredCount > 2) {
@@ -1809,6 +1810,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
   }
   switch (custSubGrp) {
   case 'NORML':
+  case 'BPBIL':
   case 'OUTSC':
     if (custType == 'CEA') {
       if (addrType == 'ZC01') {
@@ -3398,6 +3400,7 @@ function setCSBOOnAddrSave() {
   if (!(cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U')) {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -3440,6 +3443,7 @@ function setCSBOOnAddrSave() {
   } else if (cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U') {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -4061,6 +4065,7 @@ function showHideJSIC() {
   var hasZs01 = true;
   switch (custSubGrp) {
   case 'NORML':
+  case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
   case 'OUTSC':
@@ -4465,6 +4470,7 @@ function setCSBOOnScenarioChange() {
   if (!(cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U')) {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -4507,6 +4513,7 @@ function setCSBOOnScenarioChange() {
   } else if (cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U') {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -4884,6 +4891,7 @@ function removeDefaultValueTelNo() {
   var addrType = FormManager.getActualValue('addrType');
   switch (custSubGrp) {
   case 'NORML':
+  case 'BPBIL':
   case 'OUTSC':
   case 'ABIJS':
   case 'AHIJE':
@@ -5124,6 +5132,7 @@ function disableFieldsForUpdateOnScenarios() {
   // return;
   // break;
   case 'NORML':
+  case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
     FormManager.enable('icmsInd');
@@ -5989,6 +5998,7 @@ function setOutsourcingServiceRequired() {
   case 'INTER':
   case 'ISOCU':
   case 'NORML':
+  case 'BPBIL':
     if (FormManager.getField('outsourcingService').set) {
       FormManager.getField('outsourcingService').set('checked', false);
     } else if (FormManager.getField('outsourcingService')) {
