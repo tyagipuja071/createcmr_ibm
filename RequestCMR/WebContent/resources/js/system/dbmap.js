@@ -702,6 +702,9 @@ var DB_MASS_UPDT_ADDR_FIELDS = [ {
 }, {
   id : 'Rol-Company',
   name : 'HW_INSTL_MSTR_FLG'
+}, {
+  id : 'DPLCheckResult',
+  name : 'DPL_CHK_RESULT'
 } ];
 
 var DB_UPDT_BY_ENT_DATA_FIELDS = [ {
