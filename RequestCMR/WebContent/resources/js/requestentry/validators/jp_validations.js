@@ -7175,6 +7175,65 @@ function isIGFCMR() {
   return isIGFCmr;
 }
 
+function addJPAddressGridValidator() {
+  console.log(">>>> addJPAddressGridValidator ");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.JAPAN) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          var custNm1 = '';
+          var custNm4 = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            // Customer Name-KANJI
+            var isCustNm1Filled = (record.custNm1[0] != null && record.custNm1[0] != '');
+            if (!isCustNm1Filled) {
+              if (custNm1 != '') {
+                custNm1 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm1 += record.addrTypeText[0];
+              }
+            }
+
+            // Katakana
+            var isCustNm4Filled = (record.custNm4[0] != null && record.custNm4[0] != '');
+            if (!isCustNm4Filled) {
+              if (custNm4 != '') {
+                custNm4 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm4 += record.addrTypeText[0];
+              }
+            }
+          }
+
+          if (custNm1 != '') {
+            return new ValidationResult(null, false, 'Please fill out Customer Name-KANJI for the following address: ' + custNm1);
+          } else if (custNm4 != '') {
+            return new ValidationResult(null, false, 'Please fill out Katakana for the following address: ' + custNm4);
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -7290,6 +7349,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addBwpqCreditToValidator, GEOHandler.JP, null, true);
+  GEOHandler.registerValidator(addJPAddressGridValidator, [ SysLoc.JAPAN ], null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
