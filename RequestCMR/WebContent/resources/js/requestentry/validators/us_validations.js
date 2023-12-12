@@ -1391,7 +1391,6 @@ function setPreviousIsicValue(newval) {
   oldIsic = newval;
 }
 
-
 // CREATCMR-6987
 function setMainName1ForKYN() {
   var reqType = FormManager.getActualValue('reqType');
