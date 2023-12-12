@@ -74,8 +74,8 @@ function addStateProvValidator() {
             if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && landCountryList.includes(landCntry)) {
               if (stateProv == undefined || stateProv == null || stateProv == '') {
                 return new ValidationResult(null, false, 'State Province is mandatory for address with landCntry: ' + landCntry + ' addrType: ' + addrType);
-              } 
-            } 
+              }
+            }
           }
         } else {
           return new ValidationResult(null, true);
@@ -159,7 +159,7 @@ function addDnBSearchValidator() {
         if (dijit.byId('prospLegalInd')) {
           ifProspect = dijit.byId('prospLegalInd').get('value');
         }
-       
+
         if (FormManager.getActualValue('dnbPrimary') != 'Y' && ifProspect != 'Y') {
           return new ValidationResult(null, true);
         }
@@ -214,7 +214,7 @@ function addDnBMatchingAttachmentValidator() {
             }
           }
         }
-        
+
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR CN
@@ -234,7 +234,7 @@ function addDnBMatchingAttachmentValidator() {
               return new ValidationResult(null, true);
             }
           }
-          
+
           // FOR US Temporary
           var id = FormManager.getActualValue('reqId');
           var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
@@ -466,8 +466,8 @@ function addCrossBorderValidator() {
         var scenario = FormManager.getActualValue('custSubGrp');
         var mscenario = FormManager.getActualValue('custGrp');
 
-        if (mscenario == 'CROSS') {          
-            scenario = 'CROSS';           
+        if (mscenario == 'CROSS') {
+            scenario = 'CROSS';
         }
 
         var reqId = FormManager.getActualValue('reqId');
@@ -529,14 +529,14 @@ function addClientTierDefaultLogic() {
         }
     });
   }
-  
+
   if (_clientTierHandler && _clientTierHandler[0]) {
     _clientTierHandler[0].onChange();
   }
 }
 
 function addGenericVATValidator(cntry, tabName, formName, aType) {
-  return function() {   
+  return function() {
     FormManager.addFormValidator((function() {
       var landCntry = cntry;
       var addrType = aType;
@@ -563,12 +563,7 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZS01 VAT Country: ' + zs01Cntry);    
-          if (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL') {
-            // skip validation for Chile, Colombia, Venezuela landed country
-            // handled sperately under CREATCMR-10034
-            return new ValidationResult(null, true);
-          }
+          console.log('ZS01 VAT Country: ' + zs01Cntry);
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -591,12 +586,12 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
         }
       };
     })(), tabName, formName);
-  }; 
+  };
 
 }
 
 // TODO VAT is required for some cross landCntry
-function requireVATForCrossBorder() {  
+function requireVATForCrossBorder() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -605,7 +600,7 @@ function requireVATForCrossBorder() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var vat = FormManager.getActualValue('vat');
         var vatInd = FormManager.getActualValue('vatInd');
-        
+
         if (reqType != 'C') {
           return new ValidationResult(null, true);
         }
@@ -616,11 +611,11 @@ function requireVATForCrossBorder() {
         if (custSubGrp != null && (custSubGrp.includes('XSOFT') || custSubGrp.includes('XSL') || custSubGrp.includes('XPRIC') || custSubGrp.includes('XPC') || custSubGrp.includes('XGO'))) {
           return new ValidationResult(null, true);
         }
-        
-        if (vatInd == 'N' && vat == '') { 
+
+        if (vatInd == 'N' && vat == '') {
           FormManager.resetValidations('vat');
         }
-        
+
         var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
         var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
           REQID : FormManager.getActualValue('reqId'),
@@ -643,7 +638,7 @@ function requireVATForCrossBorder() {
         return new ValidationResult(null, true);
       }
     };
-  })(), 'MAIN_CUST_TAB', 'frmCMR'); 
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 
 }
 
@@ -736,11 +731,6 @@ function addGenericZIPValidator() {
           return new ValidationResult(null, true);
         }
         var postCd = FormManager.getActualValue('postCd');
-
-        // skip input validation when Postal Code field is emtpy for CR, EC
-        if (postCd == '' && (cntry == 'CR' || cntry == 'EC')) {
-          return new ValidationResult(null, true);
-        }
 
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
         var result = cmr.validateZIP(cntry, postCd, loc);
@@ -912,9 +902,9 @@ function validateExistingCMRNo() {
           var action = FormManager.getActualValue('yourAction');
           var _custSubGrp = FormManager.getActualValue('custSubGrp');
           if (reqType == 'C' && cmrNo) {
-            if (cmrNo.startsWith('P')) { 
+            if (cmrNo.startsWith('P')) {
               return new ValidationResult(null, true);
-            }          
+            }
             var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
               COUNTRY : cntry,
               CMR_NO : cmrNo,
@@ -951,7 +941,7 @@ function validateExistingCMRNo() {
     })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
- 
+
 /**
  * Validator for the DPL Assessment
  */
@@ -1003,19 +993,19 @@ function resetVATValidationsForPayGo(){
   var vatInd = FormManager.getActualValue('vatInd');
   var results = cmr.query('GET_PARTNER_VAT_EXCEPTIONS', {
     COUNTRY : cntry,
-    SERVICE_ID : systemId   
-    
-  }); 
-  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'Y' && vat == ''){    
+    SERVICE_ID : systemId
+
+  });
+  if((results!= null || results!= undefined || results.ret1!='') && results.ret1 == 'Y' && vat == ''){
    FormManager.resetValidations('vat');
    // FormManager.getField('vatExempt').checked = true;
     console.log('VAT is non mandatory for PayGO');
-  } 
-  
-  if (vatInd == 'N' && vat == '') { 
+  }
+
+  if (vatInd == 'N' && vat == '') {
     FormManager.resetValidations('vat');
   }
-  
+
 }
 
 function addIsuCdObsoleteValidator(){
@@ -1056,7 +1046,7 @@ function vatOptionalForLandedUK() {
   var custGrp = FormManager.getActualValue('custGrp');
   var vat = FormManager.getActualValue('vat');
   var vatInd = FormManager.getActualValue('vatInd');
-  
+
   var params = {
     REQ_ID : _reqId,
     ADDR_TYPE : "ZS01"
@@ -1072,11 +1062,11 @@ function vatOptionalForLandedUK() {
         FormManager.removeValidator('vat', Validators.REQUIRED);
       }
     }
-  } 
-  if (vatInd == 'N' && vat == '') { 
+  }
+  if (vatInd == 'N' && vat == '') {
     FormManager.resetValidations('vat');
   }
-  
+
 }
 
 function afterConfigForEMEA(){
@@ -1093,13 +1083,13 @@ function addVatIndValidator(){
 
   var vat = FormManager.getActualValue('vat');
   var vatInd = FormManager.getActualValue('vatInd');
-  var reqStatus = FormManager.getActualValue('reqStatus');     
+  var reqStatus = FormManager.getActualValue('reqStatus');
   var cntry= FormManager.getActualValue('cmrIssuingCntry');
   var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
     ISSUING_CNTRY : cntry
   });
-  
-    
+
+
   if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatInd', 'N');
@@ -1118,30 +1108,30 @@ function addVatIndValidator(){
     FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatInd', 'N');
   }
-  
+
   if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
     FormManager.resetValidations('vat');
   }
-  
+
 }
 
 function setToReadOnly() {
- 
+
  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-   
- if (viewOnlyPage == 'true') {  
+
+ if (viewOnlyPage == 'true') {
    FormManager.resetValidations('vat');
    FormManager.resetValidations('vatInd');
    FormManager.readOnly('vat');
    FormManager.readOnly('vatInd');
- } 
- 
+ }
+
 }
 
 function vatIndOnChange() {
-  
+
   var _vatIndHandler = null;
-    
+
     if (_vatIndHandler == null) {
     _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function(value) {
       var vatInd = FormManager.getActualValue('vatInd');
@@ -1152,36 +1142,36 @@ function vatIndOnChange() {
       if (vatInd && dojo.string.trim(vatInd) == 'T') {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         FormManager.enable('vat');
-        FormManager.setValue('vatExempt', 'N');        
+        FormManager.setValue('vatExempt', 'N');
         FormManager.setValue('vatInd', 'T');
       } else if (vatInd && dojo.string.trim(vatInd) == 'N') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.readOnly('vat');
-        FormManager.setValue('vat', '');        
+        FormManager.setValue('vat', '');
         FormManager.setValue('vatInd', 'N');
       } else if (vatInd && dojo.string.trim(vatInd) == 'E') {
         FormManager.removeValidator('vat', Validators.REQUIRED);
         FormManager.enable('vat');
-        FormManager.setValue('vatExempt', 'Y');       
+        FormManager.setValue('vatExempt', 'Y');
         FormManager.setValue('vatInd', 'E');
       }
     });
   }
-  
+
   if (_vatIndHandler && _vatIndHandler[0]) {
     _vatIndHandler[0].onChange();
   }
-  
+
 var _vatHandler = null;
-  
-  if (_vatHandler == null){   
-    
+
+  if (_vatHandler == null){
+
     dojo.byId('vat').onkeyup = function() {
       var isReadOnly = dojo.byId('vat').readOnly;
       var vat = FormManager.getActualValue('vat');
       if (vat == '' && !isReadOnly) {
         FormManager.enable('vatInd');
-        FormManager.setValue('vatInd', ''); 
+        FormManager.setValue('vatInd', '');
       }
     }
   }
@@ -1341,7 +1331,7 @@ function setVatIndFieldsForGrp1AndNordx() {
   else if (isImportingFromQuickSearch()) {
     dojo.cookie('qs', 'N');
     FormManager.enable('vatInd');
-    
+
     if (vat != '' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
     } else if (vat == '') {
@@ -1356,9 +1346,9 @@ function setVatIndFieldsForGrp1AndNordx() {
     FormManager.setValue('vat', '');
   }
   if('T'== FormManager.getActualValue('vatInd') && vat==''){
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');    
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
   }
-  
+
   if ('E' == FormManager.getActualValue('vatInd')) {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
@@ -1624,7 +1614,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '649', '866', '754' ];
   GEOHandler.AllCountries =  ['229' ,'358' ,'359' ,'363' ,'373' ,'382' ,'383' ,'428' ,'433' ,'440' ,'443' ,'446' ,'461' ,'465' ,'479' ,'498' ,'602' ,'603' ,'607' ,'608' ,'610' ,'613' ,'614' ,'615' ,'616' ,'618' ,'619' ,'620' ,'621' ,'624' ,'626' ,'627' ,'629' ,'631' ,'635' ,'636' ,'637' ,'638' ,'640' ,'641' ,'642' ,'643' ,'644' ,'645' ,'646' ,'647' ,'649' ,'651' ,'652' ,'655' ,'656' ,'661' ,'662' ,'663' ,'666' ,'667' ,'668' ,'669' ,'670' ,'677' ,'678' ,'680' ,'681' ,'682' ,'683' ,'691' ,'692' ,'693' ,'694' ,'695' ,'698' ,'699' ,'700' ,'702' ,'704' ,'705' ,'706' ,'707' ,'708' ,'711' ,'713' ,'717' ,'718' ,'724' ,'725' ,'726' ,'729' ,'731' ,'733' ,'735' ,'736' ,'738' ,'740' ,'741' ,'742' ,'744' ,'745' ,'749' ,'750' ,'752' ,'753' ,'754' ,'755' ,'756' ,'758' ,'759' ,'760' ,'762' ,'764' ,'766' ,'767' ,'768' ,'769' ,'770' ,'772' ,'778' ,'780' ,'781' ,'782' ,'787' ,'788' ,'791' ,'796' ,'799' ,'804' ,'805' ,'806' ,'808' ,'810' ,'811' ,'813' ,'815' ,'818' ,'820' ,'821' ,'822' ,'823' ,'825' ,'826' ,'827' ,'829' ,'831' ,'832' ,'833' ,'834' ,'835' ,'838' ,'839' ,'840' ,'841' ,'842' ,'843' ,'846' ,'848' ,'849' ,'850' ,'851' ,'852' ,'853' ,'855' ,'856' ,'857' ,'858' ,'859' ,'862' ,'864' ,'865' ,'866' ,'869' ,'871' ,'876' ,'881' ,'883' ,'889' ,'897' ,'714' ,'720' ,'790' ,'675' ,'879' ,'880'];
-  
+
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
   GEOHandler.registerWWValidator(addDnBMatchingAttachmentValidator);
@@ -1664,7 +1654,7 @@ dojo.addOnLoad(function() {
       '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827',
       '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693',
       '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618',
-      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848', '729', '724','858', '649', '613', '629', '631', '655', '661', '663', '681', '683', '731', '735', '781', '799', 
+      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848', '729', '724','858', '649', '613', '629', '631', '655', '661', '663', '681', '683', '731', '735', '781', '799',
       '811', '813', '815', '829', '869', '871' ], true);
   GEOHandler.registerValidator(addCrossBorderValidator, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER, null, true);
 
@@ -1678,17 +1668,17 @@ dojo.addOnLoad(function() {
 
   // Postal Code validation for Ireland as Landed Country - CMR - 6033
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);
-  
+
   GEOHandler.registerWWValidator(addINACValidator);
   // Removing this for coverage-2023 as ISU -32 is no longer obsoleted
   // GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
   GEOHandler.addAfterConfig(updateProspectLegalInd,  GEOHandler.AllCountries);
-  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']);  
-  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']); 
+  GEOHandler.addAfterConfig(vatIndOnChange, ['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']);
+  GEOHandler.addAfterConfig(setToReadOnly,['724', '848', '618', '624', '788', '624', '866', '754','678','702','806','846','706','838']);
   GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
-  
+
   GEOHandler.registerWWValidator(forceLockUnlock);
   GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
   GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries);
