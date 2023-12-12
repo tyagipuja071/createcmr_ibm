@@ -1316,6 +1316,14 @@ public class IERPProcessService extends BaseBatchService {
         }
       }
 
+      if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) && isDataUpdated && !StringUtils.isBlank(dataRdc.getOrdBlk())
+          && !"PAYG".equals(admin.getReqReason())) {
+        PreparedQuery q = new PreparedQuery(em, ExternalizedQuery.getSql("DE.UPDATE.ORD_BLK"));
+        q.setParameter("ORD_BLK", dataRdc.getOrdBlk());
+        q.setParameter("REQ_ID", data.getId().getReqId());
+        q.executeSql();
+      }
+
       if (respStatuses.size() > 0) {
         if (respStatuses.contains(CmrConstants.RDC_STATUS_ABORTED)) {
           if (isIndexNotUpdated) {
