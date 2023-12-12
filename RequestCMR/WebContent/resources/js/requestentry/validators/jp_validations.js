@@ -1624,6 +1624,7 @@ function canUpdateAddress(value, rowIndex, grid) {
   var addrType = rowData.addrType[0];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
+  console.log(addrType + ' - ' + custType);
   if (addrType == 'ZC01' && custType.includes('C')) {
     if (reqType == 'U' && (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER')) {
       return false;
@@ -3211,6 +3212,7 @@ function showOfcdMessage() {
     }
   });
 }
+
 function showOrHideDirectBpZSeriesSw() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -6528,7 +6530,7 @@ function doImportCmrs(addressOnly) {
   }
   if (custSubGrp == 'BQICL') {
     addrType = 'EAIR';
-    message = 'Importing records with IBM Related CMR ';
+    message = 'Importing records with IBM Relate CMR ';
   }
   cmr.showProgress(message + cmrNo + '.  This process might take a while. Please wait..');
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
