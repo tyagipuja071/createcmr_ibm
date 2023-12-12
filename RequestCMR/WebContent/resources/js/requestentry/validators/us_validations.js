@@ -558,7 +558,8 @@ function afterConfigForUS() {
     // set the postal code to 0000 for non-US landed countries and disable
     usCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       if (FormManager.getActualValue('landCntry') != '' && FormManager.getActualValue('landCntry') != 'US') {
-        FormManager.setValue('postCd', '00000');
+        // No more required for corss-boarder for CREATCMR-10334
+        // FormManager.setValue('postCd', '00000');
         // CreateCMR-8143
         // FormManager.readOnly('postCd');
       } else {
@@ -1555,7 +1556,7 @@ function validateCoverageData() {
           var retrievedCovId = (data.coverageType + data.coverageID) || "";
           var retrievedBgId = data.buyingGroupID || "";
           var retrievedGbgId = data.globalBuyingGroupID || "";
-          
+
           var importedData = getImportedCovData();
           if (importedData == undefined || importedData == null) {
             console.log('An error was occurred while trying to verify coverage changes.');
@@ -1564,13 +1565,13 @@ function validateCoverageData() {
           var importedBgId = importedData.ret1;
           var importedCovId = importedData.ret3;
           var importedGbgId = importedData.ret5;
-          
+
           if (importedBgId == undefined) {
             return new ValidationResult(null, true);
           }
-          
+
           if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
-            return new ValidationResult(null, false, 'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t ' + 
+            return new ValidationResult(null, false, 'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t ' +
                 'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
           }
         }
@@ -1646,7 +1647,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addressQuotationValidator, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
-  GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);  
+  GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
  GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
-  
+
 });
