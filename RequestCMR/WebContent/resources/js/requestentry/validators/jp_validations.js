@@ -7408,7 +7408,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoldToValidatorJP, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addLengthValidatorForWorkNo, [ '760' ], null, true);
   GEOHandler.registerValidator(addLengthValidatorForPC, [ '760' ], null, true);
-  GEOHandler.registerValidator(checkEstabFuncCdMandatory, GEOHandler.JP, null, true);
+  // GEOHandler.registerValidator(checkEstabFuncCdMandatory, GEOHandler.JP,
+  // null, true);
   GEOHandler.registerValidator(addRequestForValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addProductTypeValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addDPLCheckValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
