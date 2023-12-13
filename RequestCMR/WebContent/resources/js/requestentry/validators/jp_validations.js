@@ -6919,9 +6919,8 @@ function setAddrFieldsBehavior() {
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
-      // FormManager.resetValidations('cnDistrict');
-      // FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English
-      // District" ], null);
+      FormManager.resetValidations('cnDistrict');
+      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
       $('#cnCustName1').attr('maxlength', '70');
     }
 
@@ -6964,8 +6963,9 @@ function setAddrFieldsUpdateBehavior() {
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
-      FormManager.resetValidations('cnDistrict');
-      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      // FormManager.resetValidations('cnDistrict');
+      // FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English
+      // District" ], null);
       $('#cnCustName1').attr('maxlength', '70');
     }
 
