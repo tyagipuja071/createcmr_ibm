@@ -321,9 +321,12 @@ function showRAFieldsValue() {
 }
 
 function setRAFieldsMandatory() {
-  FormManager.addValidator('jpCloseDays1', Validators.REQUIRED, [ 'Close Day01' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('jpPayCycles1', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('jpPayDays1', Validators.REQUIRED, [ 'Pay Day01' ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('jpCloseDays1', Validators.REQUIRED, [ 'Close Day01'
+// ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('jpPayCycles1', Validators.REQUIRED, [ 'Payment
+// Cycle Code01' ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('jpPayDays1', Validators.REQUIRED, [ 'Pay Day01' ],
+// 'MAIN_IBM_TAB');
   FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
 }
