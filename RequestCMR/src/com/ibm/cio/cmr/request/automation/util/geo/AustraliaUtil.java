@@ -492,9 +492,9 @@ public class AustraliaUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_PRIVATE_CUSOMER_CROSS:
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
       addToNotifyListANZ(entityManager, data.getId().getReqId());
