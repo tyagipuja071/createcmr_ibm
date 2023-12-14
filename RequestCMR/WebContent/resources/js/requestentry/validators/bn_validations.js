@@ -265,17 +265,19 @@ function addAfterConfigAP() {
   
   if (reqType == 'C' && cntry == '643' && clusterId=='00000')
 	  {
-	  if(custSubGrp=='DUMMY' || custSubGrp=='INTER' || custSubGrp=='BUSPR' )
-	  {
-      FormManager.readOnly('inacType');
-      FormManager.readOnly('inacCd');
-	  }
-	  if(custSubGrp=='AQSTN' || custSubGrp=='NRML' || custSubGrp=='ASLOM')
-	  {
+	  // if(custSubGrp=='DUMMY' || custSubGrp=='INTER' || custSubGrp=='BUSPR' )
+	  // {
+    //   FormManager.readOnly('inacType');
+    //   FormManager.readOnly('inacCd');
+	  // }
+	  // if(custSubGrp=='AQSTN' || custSubGrp=='NRML' || custSubGrp=='ASLOM')
+	  // {
+	  // FormManager.enable('inacType');
+	  // FormManager.enable('inacCd');
+    // }
 	  FormManager.enable('inacType');
 	  FormManager.enable('inacCd');
-		  
-      }
+	  FormManager.enable('isbuCd');
     }
 
   if (reqType == 'U' && cntry == '834') {
@@ -3359,7 +3361,7 @@ function setCTCIsuByClusterBrunei() {
       FormManager.setValue('isuCd','21');
       FormManager.setValue('clientTier', 'Z');
     }
-    else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR') || custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS'))) {
+    else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('NRML')||custSubGrp.includes('AQSTN')||custSubGrp.includes('ASLOM')||custSubGrp.includes('CROSS'))) {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
       FormManager.setValue('isuCd','34');
@@ -3371,7 +3373,26 @@ function setCTCIsuByClusterBrunei() {
       FormManager.setValue('isuCd','60');
       FormManager.setValue('clientTier', '0');
     }
-    
+    else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('NRML') || custSubGrp.includes('AQSTN') || custSubGrp.includes('ASLOM') || custSubGrp.includes('CROSS') ||custSubGrp.includes('XPRIV'))) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00000' ]);
+    FormManager.setValue('apCustClusterId', "00000");
+    FormManager.setValue('isuCd','34');
+    FormManager.setValue('clientTier', 'Z');
+  }
+  else if(issuingCnt4.includes(_cmrIssuingCntry) && (custSubGrp.includes('BUSPR'))) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['8B']);
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '00089' ]);
+    FormManager.setValue('apCustClusterId', "00089");
+    FormManager.setValue('isuCd','8B');
+    FormManager.setValue('clientTier', 'Z');
+    FormManager.setValue('mrcCd','3');
+  }
+    FormManager.readOnly('apCustClusterId');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
     }
 }
 
