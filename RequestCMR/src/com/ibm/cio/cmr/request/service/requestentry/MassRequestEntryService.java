@@ -277,8 +277,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         String custName2Val = addr.getCustNm2();
         if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
           if (!StringUtils.isEmpty(addr.getCustNm3())) {
-            addr.setCustNm1(addr.getCustNm3());
-            addr.setCustNm2("");
             custName1Val = addr.getCustNm3();
             custName2Val = "";
           }
@@ -7125,7 +7123,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CUST_NM1":
         if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setCustNm1(tempVal);
+          String subStrNm1 = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
+          String subStrNm2 = tempVal.length() > 17 ? tempVal.substring(17) : "";
+          muaModel.setCustNm1(subStrNm1);
+          muaModel.setCustNm2(subStrNm2);
         }
         break;
       case "CUST_NM2":
