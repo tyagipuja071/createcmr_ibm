@@ -196,69 +196,71 @@ public class USUtil extends AutomationUtil {
 
   @SuppressWarnings("unchecked")
   public USUtil() {
-    LOG.debug("Initializing US Util");
-    // initialize mapping per scenario
-    LOG.debug("US - initializing mapping per scenario");
-    if (USUtil.boMappings.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
+    synchronized (USUtil.class) {
+      LOG.debug("Initializing US Util");
+      // initialize mapping per scenario
+      LOG.debug("US - initializing mapping per scenario");
+      if (USUtil.boMappings.isEmpty()) {
+        Digester digester = new Digester();
+        digester.setValidating(false);
+        digester.addObjectCreate("mappings", ArrayList.class);
 
-      digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
+        digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
 
-      digester.addBeanPropertySetter("mappings/mapping/scenario", "scenario");
-      digester.addBeanPropertySetter("mappings/mapping/csoSite", "csoSite");
-      digester.addBeanPropertySetter("mappings/mapping/mktgDept", "mktgDept");
-      digester.addBeanPropertySetter("mappings/mapping/mtkgArDept", "mtkgArDept");
-      digester.addBeanPropertySetter("mappings/mapping/svcArOffice", "svcArOffice");
-      digester.addBeanPropertySetter("mappings/mapping/pccArDept", "pccArDept");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("us-branchoff-mapping.xml");
-        USUtil.boMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
+        digester.addBeanPropertySetter("mappings/mapping/scenario", "scenario");
+        digester.addBeanPropertySetter("mappings/mapping/csoSite", "csoSite");
+        digester.addBeanPropertySetter("mappings/mapping/mktgDept", "mktgDept");
+        digester.addBeanPropertySetter("mappings/mapping/mtkgArDept", "mtkgArDept");
+        digester.addBeanPropertySetter("mappings/mapping/svcArOffice", "svcArOffice");
+        digester.addBeanPropertySetter("mappings/mapping/pccArDept", "pccArDept");
+        digester.addSetNext("mappings/mapping", "add");
+        try {
+          InputStream is = ConfigUtil.getResourceStream("us-branchoff-mapping.xml");
+          USUtil.boMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
+        } catch (Exception e) {
+          LOG.error("Error occured while digesting xml.", e);
+        }
       }
-    }
 
-    // initialize mktg AR dept and svc AR Office mapping
-    LOG.debug("US - initializing mktg AR dept and svc AR Office mapping.");
-    if (USUtil.svcARBOMappings.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
+      // initialize mktg AR dept and svc AR Office mapping
+      LOG.debug("US - initializing mktg AR dept and svc AR Office mapping.");
+      if (USUtil.svcARBOMappings.isEmpty()) {
+        Digester digester = new Digester();
+        digester.setValidating(false);
+        digester.addObjectCreate("mappings", ArrayList.class);
 
-      digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
+        digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
 
-      digester.addBeanPropertySetter("mappings/mapping/mktgDepartmentAR", "mktgDepartmentAR");
-      digester.addBeanPropertySetter("mappings/mapping/svcOfficeAR", "svcOfficeAR");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("us-mktgsvc-mapping.xml");
-        USUtil.svcARBOMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
+        digester.addBeanPropertySetter("mappings/mapping/mktgDepartmentAR", "mktgDepartmentAR");
+        digester.addBeanPropertySetter("mappings/mapping/svcOfficeAR", "svcOfficeAR");
+        digester.addSetNext("mappings/mapping", "add");
+        try {
+          InputStream is = ConfigUtil.getResourceStream("us-mktgsvc-mapping.xml");
+          USUtil.svcARBOMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
+        } catch (Exception e) {
+          LOG.error("Error occured while digesting xml.", e);
+        }
       }
-    }
 
-    LOG.debug("US - initializing mapping for Fed Isic for DnB matches");
-    if (USUtil.usFedIsicMap.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
+      LOG.debug("US - initializing mapping for Fed Isic for DnB matches");
+      if (USUtil.usFedIsicMap.isEmpty()) {
+        Digester digester = new Digester();
+        digester.setValidating(false);
+        digester.addObjectCreate("mappings", ArrayList.class);
 
-      digester.addObjectCreate("mappings/mapping", USFedIsicMapping.class);
+        digester.addObjectCreate("mappings/mapping", USFedIsicMapping.class);
 
-      digester.addBeanPropertySetter("mappings/mapping/dnb-isic", "dnbIsic");
-      digester.addBeanPropertySetter("mappings/mapping/cmr-isic", "cmrIsic");
-      digester.addBeanPropertySetter("mappings/mapping/dnb-subInd", "dnbSubInd");
-      digester.addBeanPropertySetter("mappings/mapping/cmr-subInd", "cmrSubInd");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("us-fed-isic-mapping.xml");
-        USUtil.usFedIsicMap = (ArrayList<USFedIsicMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
+        digester.addBeanPropertySetter("mappings/mapping/dnb-isic", "dnbIsic");
+        digester.addBeanPropertySetter("mappings/mapping/cmr-isic", "cmrIsic");
+        digester.addBeanPropertySetter("mappings/mapping/dnb-subInd", "dnbSubInd");
+        digester.addBeanPropertySetter("mappings/mapping/cmr-subInd", "cmrSubInd");
+        digester.addSetNext("mappings/mapping", "add");
+        try {
+          InputStream is = ConfigUtil.getResourceStream("us-fed-isic-mapping.xml");
+          USUtil.usFedIsicMap = (ArrayList<USFedIsicMapping>) digester.parse(is);
+        } catch (Exception e) {
+          LOG.error("Error occured while digesting xml.", e);
+        }
       }
     }
   }
@@ -901,7 +903,7 @@ public class USUtil extends AutomationUtil {
         if (changes.isLegalNameChanged() && !isPayGo) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         }
-        
+
       } finally {
         cedpManager.clear();
         cedpManager.close();

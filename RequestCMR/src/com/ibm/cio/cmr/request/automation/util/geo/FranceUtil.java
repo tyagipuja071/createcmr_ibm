@@ -41,7 +41,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -248,11 +247,12 @@ public class FranceUtil extends AutomationUtil {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
       case SCENARIO_PRIVATE_PERSON:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
+        return doPrivatePersonChecks(entityManager, engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false,
+            requestData);
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, true, requestData);
+        return doPrivatePersonChecks(entityManager, engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, true, requestData);
 
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
@@ -1010,8 +1010,8 @@ public class FranceUtil extends AutomationUtil {
         details.append("-" + change.getDataField() + " needs to be verified.\n");
         break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -1328,9 +1328,8 @@ public class FranceUtil extends AutomationUtil {
    * @return
    */
   @Override
-  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages, RequestData reqData) {
-    EntityManager entityManager = JpaManager.getEntityManager();
+  protected boolean doPrivatePersonChecks(EntityManager entityManager, AutomationEngineData engineData, String country, String landCntry, String name,
+      StringBuilder details, boolean checkBluepages, RequestData reqData) {
     boolean legalEndingExists = false;
     Data data = reqData.getData();
     for (Addr addr : reqData.getAddresses()) {

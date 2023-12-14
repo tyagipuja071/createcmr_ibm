@@ -181,6 +181,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
         ChangeLogListener.clearManager();
       }
       if (isTransactional() && transaction != null && transaction.isActive()) {
+        LOG.debug("Final rollback.");
         transaction.rollback();
       }
       // empty the manager
