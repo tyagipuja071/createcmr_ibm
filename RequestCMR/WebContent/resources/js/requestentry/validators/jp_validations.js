@@ -1617,7 +1617,7 @@ function canUpdateAddress(value, rowIndex, grid) {
   var addrType = rowData.addrType[0];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
-  console.log(addrType + ' - ' + custType);
+
   if (addrType == 'ZC01' && custType.includes('C')) {
     if (reqType == 'U' && (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER')) {
       return false;
@@ -6514,7 +6514,7 @@ function doImportCmrs(addressOnly) {
   }
   if (custSubGrp == 'BQICL') {
     addrType = 'EAIR';
-    message = 'Importing records with IBM Relate CMR ';
+    message = 'Importing records with IBM Related CMR ';
   }
   cmr.showProgress(message + cmrNo + '.  This process might take a while. Please wait..');
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
@@ -6947,8 +6947,9 @@ function setAddrFieldsUpdateBehavior() {
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
-      FormManager.resetValidations('cnDistrict');
-      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      // FormManager.resetValidations('cnDistrict');
+      // FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English
+      // District" ], null);
       $('#cnCustName1').attr('maxlength', '70');
     }
 
