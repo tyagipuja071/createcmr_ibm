@@ -3334,9 +3334,6 @@ dojo.addOnLoad(function () {
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, [SysLoc.THAILAND]);
   
-  // setting collection code for ASEAN
-  GEOHandler.addAfterConfig(onISBUCdChange, [SysLoc.THAILAND]);
-
   // ERO specific
   GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.THAILAND]);
   GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.THAILAND], GEOHandler.ROLE_REQUESTER, true);
