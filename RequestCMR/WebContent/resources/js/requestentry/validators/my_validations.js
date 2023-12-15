@@ -1,4 +1,4 @@
-/* Register AP Javascripts */
+/* Register MY Javascripts */
 var _isicHandlerAP = null;
 var _clusterHandlerAP = null;
 var _isicHandlerGCG = null;
