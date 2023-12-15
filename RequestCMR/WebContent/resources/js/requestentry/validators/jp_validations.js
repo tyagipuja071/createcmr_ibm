@@ -275,7 +275,7 @@ function handleRAFields() {
       FormManager.enable(RAFieldsList[i]);
     }
     FormManager.enable('cmrNo');
-    FormManager.enable('cmrNo2');
+    FormManager.readOnly('cmrNo2');
     FormManager.readOnly('searchTerm');
   } else {
     for (var i = 0; i < RAFieldsList.length; i++) {
