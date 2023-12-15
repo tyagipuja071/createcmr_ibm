@@ -155,7 +155,7 @@ public class AustraliaUtil extends AutomationUtil {
     results.setResults(eleResults.toString());
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
-    
+
     return results;
   }
 
@@ -409,14 +409,14 @@ public class AustraliaUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
-    
+
     if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
-        Addr pg01 = requestData.getAddress("PG01");
-        if(pg01 != null){
-        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
-        }
+      Addr pg01 = requestData.getAddress("PG01");
+      if (pg01 != null) {
+        // checkANZPaygoAddr(entityManager, data.getId().getReqId());
       }
-    
+    }
+
     return true;
   }
 
@@ -476,7 +476,8 @@ public class AustraliaUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false,
+          requestData);
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
       addToNotifyListANZ(entityManager, data.getId().getReqId());
@@ -626,9 +627,9 @@ public class AustraliaUtil extends AutomationUtil {
                           + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
                           + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
                     } else {
-                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " "
-                          + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2()) + " " + dnb.getDnbCity() + " "
-                          + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
+                      checkDetails
+                          .append(" - Address:  " + dnb.getDnbStreetLine1() + " " + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2())
+                              + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
                     }
                   }
                 }
@@ -716,12 +717,12 @@ public class AustraliaUtil extends AutomationUtil {
     anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
     return anzEcoNotifyList;
   }
-  
+
   public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.executeSql();
-	  }
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
 
   @Override
   protected List<String> getCountryLegalEndings() {
