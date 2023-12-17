@@ -1330,9 +1330,9 @@ function addEditAddressModal_onLoad() {
         cmr.oldcncustname = fulleng;
       } else {
         FormManager.setValue('cnCustName1', details.ret59);
-      cmr.oldcncustname = details.ret59;
-      FormManager.setValue('cnCustName2', details.ret60);
-      cmr.oldcncustname2 = details.ret60;
+        cmr.oldcncustname = details.ret59;
+        FormManager.setValue('cnCustName2', details.ret60);
+        cmr.oldcncustname2 = details.ret60;
       }
       
       FormManager.setValue('cnAddrTxt2', details.ret61);
