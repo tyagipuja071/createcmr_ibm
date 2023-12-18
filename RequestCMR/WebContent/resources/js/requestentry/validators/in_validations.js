@@ -2165,7 +2165,6 @@ function validateStreetAddrCont2() {
 
 // API call for validating GST for India on Save Request and Send for Processing
 function validateGSTForIndia() {
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2174,66 +2173,80 @@ function validateGSTForIndia() {
         var reqTyp = FormManager.getActualValue('reqType');
         var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
-        if (dijit.byId('vatExempt').get('checked')) { 
-          return new ValidationResult(null, true); 
+        if (dijit.byId('vatExempt').get('checked')) {
+          return new ValidationResult(null, true);
         }
         if (cntry != '744' || custSubGrp == 'CROSS') {
           return new ValidationResult(null, true);
         }
         var country = "";
         if (SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')) {
-        country = "IN";
-        if (country != '') {
-          if (vat == '') {
-            return new ValidationResult(null, true);
-          } else {
-            if (reqId != null) {
-              reqParam = {
-                REQ_ID : reqId
-              };
-            }
-            var results = cmr.query('GET_ZS01_GST_VALIDATE', reqParam);
-            if (results.ret1 != undefined) {
-              
-              var custNm1 = results.ret1;
-              var custNm2 = results.ret2;
-              var addrTxt = results.ret3;
-              var postal = results.ret4;
-              var city = results.ret5;
-              var stateProv = results.ret6;
-              var landCntry = results.ret7;
-// var country = '744';
-              
-              if (stateProv != null && stateProv != '') {
-                reqParam = {
-                    STATE_PROV_CD : stateProv,
-                  };
-              var stateResult = cmr.query('GET_STATE_DESC', reqParam);
-                if (stateResult != null) {
-                  stateProv = stateResult.ret1;
-                }
-              }
-            var gstRet = cmr.validateGST(cntry, vat, custNm1, custNm2, addrTxt, postal, city, stateProv, landCntry);
-            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
-              ID : reqId
-            });
-            if (!gstRet.success && (ret == null || ret.ret1 == null)) {
-              return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
-              }, false, gstRet.errorMessage);
-            } else {
-              return new ValidationResult(null, true);
-            }
-            }else {
-              return new ValidationResult(null, true);
+          var formerVat = '';
+          var qParams = {
+            REQ_ID : reqId,
+          };
+          var result = cmr.query('GET.VAT_DATA_RDC', qParams);
+          if (result != null) {
+            formerVat = result.ret1;
+          }
+          if (reqTyp == 'U') {
+            if (FormManager.getActualValue(vatExempt) != 'Y' && vat == '' && formerVat != '') {
+              return new ValidationResult(null, false, 'GST# removal is not allowed without valid justification, please raise Jira ticket to CMDE with request details and relevant justification');
             }
           }
-        } else {
-          return new ValidationResult(null, true);
+
+          country = "IN";
+          if (country != '') {
+            if (vat == '') {
+              return new ValidationResult(null, true);
+            } else {
+              if (reqId != null) {
+                reqParam = {
+                  REQ_ID : reqId
+                };
+              }
+              var results = cmr.query('GET_ZS01_GST_VALIDATE', reqParam);
+              if (results.ret1 != undefined) {
+
+                var custNm1 = results.ret1;
+                var custNm2 = results.ret2;
+                var addrTxt = results.ret3;
+                var postal = results.ret4;
+                var city = results.ret5;
+                var stateProv = results.ret6;
+                var landCntry = results.ret7;
+                // var country = '744';
+
+                if (stateProv != null && stateProv != '') {
+                  reqParam = {
+                    STATE_PROV_CD : stateProv,
+                  };
+                  var stateResult = cmr.query('GET_STATE_DESC', reqParam);
+                  if (stateResult != null) {
+                    stateProv = stateResult.ret1;
+                  }
+                }
+                var gstRet = cmr.validateGST(cntry, vat, custNm1, custNm2, addrTxt, postal, city, stateProv, landCntry);
+                var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+                  ID : reqId
+                });
+                if (!gstRet.success && (ret == null || ret.ret1 == null)) {
+                  return new ValidationResult({
+                    id : 'vat',
+                    type : 'text',
+                    name : 'vat'
+                  }, false, gstRet.errorMessage);
+                } else {
+                  return new ValidationResult(null, true);
+                }
+              } else {
+                return new ValidationResult(null, true);
+              }
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
         }
-      }
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
