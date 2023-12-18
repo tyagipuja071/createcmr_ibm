@@ -5266,8 +5266,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(updateProvCd, [SysLoc.SINGAPORE]);
   GEOHandler.addAfterConfig(updateRegionCd, [SysLoc.SINGAPORE]);
   GEOHandler.addAfterConfig(onSubIndustryChange, [SysLoc.SINGAPORE]);
-  GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa,[SysLoc.SINGAPORE]);
- GEOHandler.enableCustomerNamesOnAddress([SysLoc.SINGAPORE]);
+  GEOHandler.enableCustomerNamesOnAddress([SysLoc.SINGAPORE]);
   GEOHandler.addAddrFunction(updateMainCustomerNames, [SysLoc.SINGAPORE]);
   GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, [SysLoc.SINGAPORE]);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, [SysLoc.SINGAPORE]);
