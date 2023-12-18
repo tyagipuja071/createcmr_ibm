@@ -918,7 +918,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       // reqEntryService.createEntity(rdc, entityManager);
       // }
       if (SystemLocation.JAPAN.equals(reqModel.getCmrIssuingCntry())) {
-        setJPIntlAddr(entityManager, addr, cmr);
+        setJPIntlAddr(entityManager, addr, cmr, converter);
       }
 
       reqEntryService.updateEntity(addr, entityManager);
@@ -941,16 +941,21 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
   }
 
-  private void setJPIntlAddr(EntityManager entityManager, Addr addr, FindCMRRecordModel cmr) {
+  private void setJPIntlAddr(EntityManager entityManager, Addr addr, FindCMRRecordModel cmr, GEOHandler converter) {
     IntlAddr iAddr = null;
     AddressService addSvc = new AddressService();
     iAddr = addSvc.getIntlAddrById(addr, entityManager);
     if (iAddr == null && (StringUtils.isNoneBlank(cmr.getCmrName()) || StringUtils.isNoneBlank(cmr.getCmrName3()))) {
       iAddr = addSvc.createIntlAddrFromModel(cmr, addr, entityManager);
     } else if ((StringUtils.isNoneBlank(cmr.getCmrName()) || StringUtils.isNoneBlank(cmr.getCmrName3()))) {
-      iAddr.setIntlCustNm1(
-          StringUtils.isNoneBlank(cmr.getCmrName()) ? cmr.getCmrName() : (StringUtils.isNoneBlank(cmr.getCmrName3()) ? cmr.getCmrName3() : ""));
-      iAddr.setIntlCustNm2(StringUtils.isNoneBlank(cmr.getCmrName2()) ? cmr.getCmrName2() : "");
+      String[] parts = null;
+      String name1 = StringUtils.isNoneBlank(cmr.getCmrName()) ? cmr.getCmrName()
+          : (StringUtils.isNoneBlank(cmr.getCmrName3()) ? cmr.getCmrName3() : "");
+      String name2 = StringUtils.isNoneBlank(cmr.getCmrName2()) ? cmr.getCmrName2() : "";
+      parts = converter.doSplitName(name1, name2, 35, 35);
+      iAddr.setIntlCustNm1(parts[0]);
+      iAddr.setIntlCustNm2(parts[1]);
+
       iAddr.setAddrTxt(cmr.getCmrStreet());
       iAddr.setIntlCustNm4("");
       iAddr.setCity1(cmr.getCmrCity());

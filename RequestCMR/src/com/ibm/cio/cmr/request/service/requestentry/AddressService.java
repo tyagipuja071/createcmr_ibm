@@ -432,7 +432,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if (JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
-        updateJPIntlAddr(model, entityManager, addr);
+        updateJPIntlAddr(model, entityManager, addr, geoHandler);
       }
 
       if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
@@ -1950,7 +1950,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           newAddr.setId(addr.getId());
           newAddr.setPostCd(addr.getPostCd());
           newAddr.setCustPhone(phone != null ? phone : "");
-          newAddr.setCustNm3(model.getCnCustName1());
+          if ("D".equals(addr.getImportInd())) {
+            String custName2 = StringUtils.isEmpty(model.getCnCustName2()) ? "" : " ".concat(model.getCnCustName2());
+            newAddr.setCustNm3(model.getCnCustName1() + custName2);
+          } else {
+            newAddr.setCustNm3(model.getCnCustName1());
+          }
           updateEntity(newAddr, entityManager);
         }
       }
@@ -2043,12 +2048,17 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
   }
 
-  public boolean updateJPIntlAddr(AddressModel model, EntityManager entityManager, Addr addr) {
+  public boolean updateJPIntlAddr(AddressModel model, EntityManager entityManager, Addr addr, GEOHandler geoHandler) {
     IntlAddr iAddr = getIntlAddrById(addr, entityManager);
 
     if (iAddr != null) {
-      iAddr.setIntlCustNm1(model.getCnCustName1());
-      iAddr.setIntlCustNm2(model.getCnCustName2());
+      String[] parts = null;
+      String name1 = model.getCnCustName1();
+      String name2 = model.getCnCustName2();
+      parts = geoHandler.doSplitName(name1, name2, 35, 35);
+      iAddr.setIntlCustNm1(parts[0]);
+      iAddr.setIntlCustNm2(parts[1]);
+
       iAddr.setIntlCustNm3(model.getCnCustName3());
       iAddr.setAddrTxt(model.getCnAddrTxt());
       iAddr.setIntlCustNm4(model.getCnAddrTxt2());

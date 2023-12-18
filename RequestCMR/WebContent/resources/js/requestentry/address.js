@@ -1347,10 +1347,17 @@ function addEditAddressModal_onLoad() {
     }
     
     if (FormManager.getActualValue('cmrIssuingCntry') == '760' && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
-      FormManager.setValue('cnCustName1', details.ret59);
-      cmr.oldcncustname = details.ret59;
-      FormManager.setValue('cnCustName2', details.ret60);
-      cmr.oldcncustname2 = details.ret60;
+      if(details.ret60 != null & details.ret60 != '') {
+        var fulleng = details.ret59 + " " + details.ret60;
+        FormManager.setValue('cnCustName1', fulleng);
+        cmr.oldcncustname = fulleng;
+      } else {
+        FormManager.setValue('cnCustName1', details.ret59);
+        cmr.oldcncustname = details.ret59;
+        FormManager.setValue('cnCustName2', details.ret60);
+        cmr.oldcncustname2 = details.ret60;
+      }
+      
       FormManager.setValue('cnAddrTxt2', details.ret61);
       cmr.oldcnaddrtxt2 = details.ret61;
       FormManager.setValue('cnAddrTxt', details.ret62);
