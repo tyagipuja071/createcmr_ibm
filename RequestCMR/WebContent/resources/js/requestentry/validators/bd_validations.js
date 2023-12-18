@@ -374,7 +374,7 @@ function setInacByCluster() {
     // CREATCMR-7885
     setInacCdTypeStatus();
     // CREATCMR-7883-7884
-    clearInacOnClusterChange(_cluster);
+    //clearInacOnClusterChange(_cluster);
     return;
   }
 }
@@ -1557,7 +1557,7 @@ function autoSetAbbrevNmLocnLogic() {
       FormManager.setValue('abbrevNm', _abbrevNm);
 
       if (FormManager.getActualValue('landCntry') == "BD") {
-        _abbrevLocn = "Banglades";
+        _abbrevLocn = "Bangladesh";
       }
       if (FormManager.getActualValue('landCntry') != "BD") {
         var cntryDesc = getLandCntryDesc(FormManager.getActualValue('landCntry'));
