@@ -168,10 +168,10 @@ function setInacByCluster() {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     
    
-    var _clusterIndiaMrc2 = ['5224', '4477', '4490', '4467', '5225','9202','08864', '08850', '08856', '08851', '08856', '08851', '08866','08863', '08857', '08868', 
+    var _clusterIndiaMrc2 = ['5224', '4477', '4490', '4467', '5225','08864', '08850', '08856', '08851', '08856', '08851', '08866','08863', '08857', '08868', 
       '08861', '08853', '08859', '08854', '08862', '08858', '08867', '08870', '08865', '08852', '08849', '08860','08848'];
     
-    var _clusterIndiaMrc3R = [''];
+    var _clusterIndiaMrc3R = ['9202'];
        
     var _clusterIndiaMrc3NR = ['10654', '10655', '10656', '10657','12006','12005','12273','12272','12268','12266','12270','12263','12261','12264','12262','12258','12259',
       '12255','12257','12271','12267','12265','12269','12260','12254','12256','12470','12471','12472','12473','12474','12475'];
@@ -766,7 +766,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.setValue('clientTier','0');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '5K');
-      FormManager.readOnly('isuCd');
+      FormManager.readOnly('isuCd');      
       FormManager.readOnly('mrcCd');
       FormManager.readOnly('inacType');
             
@@ -932,7 +932,7 @@ function autoSetAbbrevNmLocnLogic() {
   _abbrevNm = custNm1;
 
   switch (cmrIssuingCntry) {
-  case GEOHandler.IN:
+  case SysLoc.INDIA:
     if (custSubGrp != null && custSubGrp.length > 0) {
       if (custSubGrp == "IGF" || custSubGrp == "XIGF") {
         _abbrevNm = "IGF";
@@ -1383,7 +1383,7 @@ function updateProvCd() {
     if (value != null && value.length > 1) {
       var _ProvNm = FormManager.getActualValue('busnType');
       FormManager.setValue('territoryCd', _ProvNm);
-      if (FormManager.getActualValue('cmrIssuingCntry') == '744' && FormManager.getActualValue('reqType') == 'C')
+      if (FormManager.getActualValue('reqType') == 'C')
         setCollCdFrIndia();
     }
   });
@@ -1871,32 +1871,21 @@ function setFieldsForDoubleCreates() {
     return new ValidationResult(null, true);
   }
 
-  if (cntry == '615' && role == 'PROCESSOR' && (custGrp == 'LOCAL' || custGrp == 'CROSS')) {
+  if (role == 'PROCESSOR' && (custSubGrp == 'ESOSW' || custSubGrp == 'XESO')) {
     FormManager.enable('cmrNo');
     FormManager.enable('cmrNoPrefix');
   }
-  if (cntry == '652' && (role == 'PROCESSOR' || role == 'REQUESTER') && (custGrp == 'LOCAL' || custGrp == 'CROSS')) {
-    FormManager.enable('cmrNo');
-    FormManager.enable('cmrNoPrefix');
-  }
-  if (cntry == '744' && role == 'PROCESSOR' && (custSubGrp == 'ESOSW' || custSubGrp == 'XESO')) {
-    FormManager.enable('cmrNo');
-    FormManager.enable('cmrNoPrefix');
-  }
-  if (cntry == '744' && role == 'REQUESTER' && custSubGrp == 'PRIV') {
+  if (role == 'REQUESTER' && custSubGrp == 'PRIV') {
     FormManager.readOnly('apCustClusterId');
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
     FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
   }
-  if (cntry == '744' && role == 'REQUESTER' && custSubGrp == 'CROSS') {
+  if (role == 'REQUESTER' && custSubGrp == 'CROSS') {
     FormManager.setValue('collectionCd', 'I001');
     FormManager.setValue('busnType', '709');
     FormManager.setValue('territoryCd', '709');
   }
-  if (cntry == '852' && role == 'PROCESSOR' && (custSubGrp != 'BLUMX' || custSubGrp != 'MKTPC')) {
-    FormManager.enable('cmrNo');
-    FormManager.enable('cmrNoPrefix');
-  }
+  
 }
 
 
@@ -1977,7 +1966,7 @@ function addDoubleCreateValidator() {
 function setAddressDetailsForViewAP() {
   console.log('>>>> setAddressDetailsForViewAP >>>>');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var asean_isa_cntries = [ SysLoc.BRUNEI, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.VIETNAM, GEOHandler.IN, SysLoc.SRI_LANKA, SysLoc.BANGLADESH,
+  var asean_isa_cntries = [ SysLoc.BRUNEI, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.SRI_LANKA, SysLoc.BANGLADESH,
       SysLoc.HONG_KONG, SysLoc.MACAO ];
   if ((cmrIssuingCntry == SysLoc.AUSTRALIA || cmrIssuingCntry == SysLoc.NEW_ZEALAND)) {
     $('label[for="city1_view"]').text('Suburb:');
@@ -2685,8 +2674,7 @@ function executeBeforeSubmit() {
   var reqType = FormManager.getActualValue('reqType');
   var action = FormManager.getActualValue('yourAction');
 
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cntry == SysLoc.SINGAPORE || cntry == GEOHandler.IN) {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');  
     if (reqType == 'U') {
       var errMsg = checkAnyChangesOnCustNameAddrGST(cntry);
       if (errMsg != '' && action == 'SFP') {
@@ -2697,7 +2685,7 @@ function executeBeforeSubmit() {
     } else {
       showVerificationModal();
     }
-  }
+  
 }
 
 function showVerificationModal() {
@@ -2743,7 +2731,7 @@ function checkAnyChangesOnCustNameAddrGST(cntry) {
     if (cntry != '') {
       if (cntry == SysLoc.SINGAPORE) {
         errorMsg = 'You haven\'t updated anything on customer name/address or UEN#, please check and take relevant edit operation before submit this Update request.';
-      } else if (cntry == GEOHandler.IN) {
+      } else if (cntry == SysLoc.INDIA) {
         errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request.';
       }
     }
@@ -2948,98 +2936,95 @@ function lockInacType(){
     FormManager.removeValidator('inacType', Validators.REQUIRED);
   }
   
-  
-  
 }
 
-dojo.addOnLoad(function() {
-  GEOHandler.IN = ['744'] ;
+dojo.addOnLoad(function() {  
   console.log('adding AP functions...');
   console.log('the value of person full id is ' + localStorage.getItem("pID"));
   GEOHandler.setRevertIsicBehavior(false);  
-  GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.IN);
-  GEOHandler.addAfterConfig(saveClusterAfterSave, GEOHandler.IN);
-  GEOHandler.addAfterConfig(savePreviousSubScenario, GEOHandler.IN);
-  GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.IN);
-  GEOHandler.addAfterConfig(updateProvCd, GEOHandler.IN);
-  GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.IN);
-  GEOHandler.addAfterConfig(setCollectionCd, GEOHandler.IN);
-  GEOHandler.addAfterConfig(custSubGrpHandler, GEOHandler.IN);
+  GEOHandler.addAfterConfig(addAfterConfigAP, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(addAfterConfigAP, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(saveClusterAfterSave, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(savePreviousSubScenario, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(updateIndustryClass, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(updateProvCd, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(updateRegionCd, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(setCollectionCd, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(custSubGrpHandler, SysLoc.INDIA);
   
-  GEOHandler.addAfterConfig(setCollCdFrIndia, GEOHandler.IN);
-  GEOHandler.addAfterConfig(onSubIndustryChange, GEOHandler.IN);
+  GEOHandler.addAfterConfig(setCollCdFrIndia, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(onSubIndustryChange, SysLoc.INDIA);
 
-  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.IN);
-  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.IN);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, SysLoc.INDIA);
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, SysLoc.INDIA);
 
-  GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.IN);
-  GEOHandler.addAfterConfig(setCTCIsuByCluster, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, GEOHandler.IN);
+  GEOHandler.addAfterConfig(onCustSubGrpChange, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(setCTCIsuByCluster, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, SysLoc.INDIA);
   
-  GEOHandler.addAfterTemplateLoad(setISUDropDownValues, GEOHandler.IN);
+  GEOHandler.addAfterTemplateLoad(setISUDropDownValues, SysLoc.INDIA);
 
-  GEOHandler.registerValidator(addCompanyProofAttachValidation, GEOHandler.IN);
-  GEOHandler.registerValidator(addressNameSimilarValidator, GEOHandler.IN);
- 
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, GEOHandler.IN);
+  GEOHandler.registerValidator(addCompanyProofAttachValidation, SysLoc.INDIA);
+  GEOHandler.registerValidator(addressNameSimilarValidator, SysLoc.INDIA);  
+  
+  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, SysLoc.INDIA);
  
   // Address validations
-  GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.IN);
-  GEOHandler.registerValidator(addAddressInstancesValidator, GEOHandler.IN, null, true);
-  GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.IN, GEOHandler.REQUESTER, true);
-  GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.IN, null, true);
+  GEOHandler.registerValidator(addSoltToAddressValidator, SysLoc.INDIA);
+  GEOHandler.registerValidator(addAddressInstancesValidator, SysLoc.INDIA, null, true);
+  GEOHandler.registerValidator(addContactInfoValidator, SysLoc.INDIA, GEOHandler.REQUESTER, true);
+  GEOHandler.registerValidator(similarAddrCheckValidator, SysLoc.INDIA, null, true);
 
-  // GEOHandler.registerValidator(setAttachmentOnCluster, GEOHandler.IN,
+  // GEOHandler.registerValidator(setAttachmentOnCluster, SysLoc.INDIA,
   // GEOHandler.REQUESTER, false, false);
   
   // double creates
-  GEOHandler.addAfterConfig(setFieldsForDoubleCreates, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(setFieldsForDoubleCreates, GEOHandler.IN);
-  GEOHandler.registerValidator(addDoubleCreateValidator, GEOHandler.IN, null, true);
-  GEOHandler.registerValidator(addFormatFieldValidator, GEOHandler.IN, null, true);
-  GEOHandler.registerValidator(addFieldFormatValidator, GEOHandler.IN, null, true);
+  GEOHandler.addAfterConfig(setFieldsForDoubleCreates, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(setFieldsForDoubleCreates, SysLoc.INDIA);
+  GEOHandler.registerValidator(addDoubleCreateValidator, SysLoc.INDIA, null, true);
+  GEOHandler.registerValidator(addFormatFieldValidator, SysLoc.INDIA, null, true);
+  GEOHandler.registerValidator(addFieldFormatValidator, SysLoc.INDIA, null, true);
     
-  GEOHandler.addAddrFunction(lockCustMainNames, GEOHandler.IN);  
-  GEOHandler.registerValidator(validateStreetAddrCont2,GEOHandler.IN, null, true);
+  GEOHandler.addAddrFunction(lockCustMainNames, SysLoc.INDIA);  
+  GEOHandler.registerValidator(validateStreetAddrCont2,SysLoc.INDIA, null, true);
 
-  GEOHandler.addAfterConfig(onIsicChange, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(onIsicChange, GEOHandler.IN);
+  GEOHandler.addAfterConfig(onIsicChange, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(onIsicChange, SysLoc.INDIA);
 
-  GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.IN);
+  GEOHandler.addAfterConfig(addHandlersForAP, SysLoc.INDIA);
   
-  GEOHandler.registerValidator(validateGSTForIndia, GEOHandler.IN, null, true);
+  GEOHandler.registerValidator(validateGSTForIndia, SysLoc.INDIA, null, true);
   
-  GEOHandler.addAfterTemplateLoad(afterConfigForIndia, GEOHandler.IN);
-  GEOHandler.addAfterConfig(resetGstExempt,  GEOHandler.IN );
-  GEOHandler.addAfterTemplateLoad(resetGstExempt, GEOHandler.IN);
+  GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(resetGstExempt,  SysLoc.INDIA );
+  GEOHandler.addAfterTemplateLoad(resetGstExempt, SysLoc.INDIA);
 
-  GEOHandler.addAfterConfig(lockFieldsForIndia,  GEOHandler.IN );
-  GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, GEOHandler.IN);
+  GEOHandler.addAfterConfig(lockFieldsForIndia,  SysLoc.INDIA );
+  GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, SysLoc.INDIA);
 
-  GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.IN, null, true);
+  GEOHandler.registerValidator(addCtcObsoleteValidator, SysLoc.INDIA, null, true);
 
-  GEOHandler.addAfterConfig(lockInacCodeForIGF, GEOHandler.IN );
-  GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, GEOHandler.IN);
-   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  GEOHandler.IN );
-  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.IN );
+  GEOHandler.addAfterConfig(lockInacCodeForIGF, SysLoc.INDIA );
+  GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
+   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate,  SysLoc.INDIA );
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, SysLoc.INDIA );
   // India Handler
   // CREATCMR-6825
-  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.IN);
-  GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.IN);
+  GEOHandler.addAfterConfig(setRepTeamMemberNo, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(addCustGrpHandler, SysLoc.INDIA);
  
-  GEOHandler.registerValidator(addKyndrylValidator, GEOHandler.IN);
-  // GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ GEOHandler.IN
+  GEOHandler.registerValidator(addKyndrylValidator, SysLoc.INDIA);
+  // GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA
   // ]);
-  // GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ GEOHandler.IN ]);
-  GEOHandler.registerValidator(validateRetrieveValues,  GEOHandler.IN );
-  GEOHandler.addAfterTemplateLoad(applyClusterFilters,  GEOHandler.IN );
-  GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, GEOHandler.IN ); 
-  GEOHandler.addAfterTemplateLoad(lockInacNacFieldsByScenarioSubType, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, GEOHandler.IN);
-  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, GEOHandler.IN);   
-  GEOHandler.addAfterConfig(lockInacType, GEOHandler.IN);
+  // GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
+  GEOHandler.registerValidator(validateRetrieveValues,  SysLoc.INDIA );
+  GEOHandler.addAfterTemplateLoad(applyClusterFilters,  SysLoc.INDIA );
+  GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, SysLoc.INDIA ); 
+  GEOHandler.addAfterTemplateLoad(lockInacNacFieldsByScenarioSubType, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChange, SysLoc.INDIA);   
+  GEOHandler.addAfterConfig(lockInacType, SysLoc.INDIA);
  
 });
