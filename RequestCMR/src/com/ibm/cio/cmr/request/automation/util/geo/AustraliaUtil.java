@@ -152,6 +152,21 @@ public class AustraliaUtil extends AutomationUtil {
     } else {
       eleResults.append("Error On Field Calculation.");
     }
+
+    // for P2L Conversions - checking of mandatory fields
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId())) {
+      if ("NRMLC".equalsIgnoreCase(data.getCustSubGrp())) {
+        Addr soldtoAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+        if (StringUtils.isBlank(soldtoAddr.getStateProv())) {
+          details.append("\nState Prov is a mandatory field. Processor Review will be required.");
+          engineData.addNegativeCheckStatus("_stateMissing", "State Prov is a mandatory field.");
+        }
+        if (StringUtils.isBlank(soldtoAddr.getPostCd())) {
+          details.append("\nPostal Code is a mandatory field. Processor Review will be required.");
+          engineData.addNegativeCheckStatus("_postCdMissing", "State Prov is a mandatory field.");
+        }
+      }
+    }
     results.setResults(eleResults.toString());
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
