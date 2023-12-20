@@ -123,11 +123,12 @@ public abstract class APHandler extends GEOHandler {
                       record.setCmrAddrTypeCode(supportedAddrType);
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
-                  
-                  if (("616".equals(reqEntry.getCmrIssuingCntry()) || "796".equals(reqEntry.getCmrIssuingCntry())) && "MAIL".equals(record.getCmrAddrTypeCode())) {
-                      continue;
-                    }
-                  
+
+                  if (("616".equals(reqEntry.getCmrIssuingCntry()) || "796".equals(reqEntry.getCmrIssuingCntry()))
+                      && "MAIL".equals(record.getCmrAddrTypeCode())) {
+                    continue;
+                  }
+
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
                   }
@@ -361,15 +362,23 @@ public abstract class APHandler extends GEOHandler {
   public DataRdc getAPClusterDataRdc(long reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     EntityManager entityManager = JpaManager.getEntityManager();
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setForReadOnly(true);
-    List<DataRdc> records = query.getResults(DataRdc.class);
-    if (records != null && records.size() > 0) {
-      for (DataRdc oldData : records) {
-        return oldData;
+    try {
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      query.setForReadOnly(true);
+      List<DataRdc> records = query.getResults(DataRdc.class);
+      if (records != null && records.size() > 0) {
+        for (DataRdc oldData : records) {
+          return oldData;
+        }
       }
+    } catch (Exception e) {
+      LOG.warn("An error has occurred during retrieval of the values.", e);
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
+
     return null;
   }
 
