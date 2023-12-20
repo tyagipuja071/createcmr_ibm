@@ -1437,9 +1437,10 @@ public class LegacyDirectUtil {
   }
 
   public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
-
+    boolean closeEm = false;
     if (entityManager == null) {
       entityManager = JpaManager.getEntityManager();
+      closeEm = true;
     }
 
     boolean isDR = false;
@@ -1464,6 +1465,10 @@ public class LegacyDirectUtil {
       isDR = false;
     }
 
+    if (closeEm && entityManager != null) {
+      entityManager.clear();
+      entityManager.close();
+    }
     return isDR;
   }
 
@@ -1486,8 +1491,10 @@ public class LegacyDirectUtil {
 
   public static Kna1 getIsicKukla(EntityManager entityManager, String cmrNo, String cntry) {
     LOG.debug("Retrieving ISIC/KUKLA for " + cntry + " - " + cmrNo);
+    boolean closeEm = false;
     if (entityManager == null) {
       entityManager = JpaManager.getEntityManager();
+      closeEm = true;
     }
     String sql = ExternalizedQuery.getSql("IL.GET.ISIC.KUKLA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1497,13 +1504,20 @@ public class LegacyDirectUtil {
     query.setForReadOnly(true);
 
     Kna1 kna1 = query.getSingleResult(Kna1.class);
+
+    if (closeEm & entityManager != null) {
+      entityManager.clear();
+      entityManager.close();
+    }
     return kna1;
   }
 
   public static CmrtCust getRealCountryCodeBankNumber(EntityManager entityManager, String cmrNo, String cntry) {
     LOG.debug("Retrieving Real Country Code/Bank Number for " + cntry + " - " + cmrNo);
+    boolean closeEm = false;
     if (entityManager == null) {
       entityManager = JpaManager.getEntityManager();
+      closeEm = true;
     }
 
     String sql = ExternalizedQuery.getSql("IL.GET.REALCTY.RBKXA");
@@ -1513,12 +1527,18 @@ public class LegacyDirectUtil {
     query.setForReadOnly(true);
 
     CmrtCust cmrtCust = query.getSingleResult(CmrtCust.class);
+    if (closeEm & entityManager != null) {
+      entityManager.clear();
+      entityManager.close();
+    }
     return cmrtCust;
   }
 
   public static CmrtAddr getLegacyAddrBySeqNo(EntityManager entityManager, String cmrNo, String country, String seqNo) {
+    boolean closeEm = false;
     if (entityManager == null) {
       entityManager = JpaManager.getEntityManager();
+      closeEm = true;
     }
 
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR.BY_ADDRNO");
@@ -1529,7 +1549,10 @@ public class LegacyDirectUtil {
     query.setForReadOnly(true);
 
     CmrtAddr cmrtAddr = query.getSingleResult(CmrtAddr.class);
-
+    if (closeEm & entityManager != null) {
+      entityManager.clear();
+      entityManager.close();
+    }
     return cmrtAddr;
   }
 

@@ -2453,6 +2453,7 @@ public class NLHandler extends BaseSOFHandler {
         isDivestiture = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return isDivestiture;
   }
@@ -2481,6 +2482,7 @@ public class NLHandler extends BaseSOFHandler {
         is93cmr = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return is93cmr;
   }
