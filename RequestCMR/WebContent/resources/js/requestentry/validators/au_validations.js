@@ -4349,11 +4349,11 @@ function addAddressInstancesValidator() {
               }
             }
           }
-          if (duplicatesAddr.length > 0) {
+         /* if (duplicatesAddr.length > 0) {
             return new ValidationResult(null, false, 'Only one instance of each address can be added.Please remove additional ' + duplicatesAddr + ' addresses');
-          } else {
+          } else {*/
             return new ValidationResult(null, true);
-          }
+          //}
         }
       }
     };
