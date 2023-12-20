@@ -3428,6 +3428,13 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setMrcCd() {
+  if (FormManager.getActualValue('mrcCd') == '3') {
+    return;
+  }
+  FormManager.setValue('mrcCd', '3');
+}
+
 function addAfterConfigAU() {
   updateIndustryClass();
   updateProvCd();
@@ -3447,6 +3454,7 @@ function addAfterConfigAU() {
   addHandlersForAU();
   handleObseleteExpiredDataForUpdate(); 
   setRepTeamMemberNo();
+  setMrcCd();
 }
 
 function addressFunctions() {
