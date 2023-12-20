@@ -223,6 +223,8 @@ public class FranceHandler extends GEOHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setPpsceid("");
     }
+    em.clear();
+    em.close();
 
   }
 

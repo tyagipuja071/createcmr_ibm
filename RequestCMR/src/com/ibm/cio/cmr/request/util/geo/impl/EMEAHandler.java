@@ -1817,6 +1817,8 @@ public class EMEAHandler extends BaseSOFHandler {
         if (records != null && records.size() >= 0) {
           data.setSpecialTaxCd("Bl");
         }
+        entityManager.clear();
+        entityManager.close();
       }
       // Changed abbreviated location if cross border to country
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
