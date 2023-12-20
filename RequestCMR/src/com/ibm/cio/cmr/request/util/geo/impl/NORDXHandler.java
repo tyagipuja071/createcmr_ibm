@@ -2613,21 +2613,26 @@ public class NORDXHandler extends BaseSOFHandler {
     boolean isDivestiture = true;
     String mandt = SystemConfiguration.getValue("MANDT");
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
+    try {
+      String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
 
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setForReadOnly(true);
-    query.setParameter("KATR6", cntry);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR", cmrNo);
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("KATR6", cntry);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("CMR", cmrNo);
 
-    Kna1 zs01 = query.getSingleResult(Kna1.class);
-    if (zs01 != null) {
-      if (StringUtils.isBlank(zs01.getKatr10())) {
-        isDivestiture = false;
+      Kna1 zs01 = query.getSingleResult(Kna1.class);
+      if (zs01 != null) {
+        if (StringUtils.isBlank(zs01.getKatr10())) {
+          isDivestiture = false;
+        }
       }
+      return isDivestiture;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    return isDivestiture;
   }
 
   // CREATCMR-1653
@@ -2803,36 +2808,46 @@ public class NORDXHandler extends BaseSOFHandler {
     String acAdmin = "";
     String sql = ExternalizedQuery.getSql("ND.GETACADMIN");
     EntityManager em = JpaManager.getEntityManager();
-    PreparedQuery query = new PreparedQuery(em, sql);
-    query.setParameter("RCYAA", rcyaa);
-    query.setParameter("RCUXA", cmr_no);
-    List<String> results = new ArrayList<String>();
-    results = query.getResults(String.class);
-    if (results != null && !results.isEmpty()) {
-      if (results.get(0) != null) {
-        acAdmin = results.get(0);
+    try {
+      PreparedQuery query = new PreparedQuery(em, sql);
+      query.setParameter("RCYAA", rcyaa);
+      query.setParameter("RCUXA", cmr_no);
+      List<String> results = new ArrayList<String>();
+      results = query.getResults(String.class);
+      if (results != null && !results.isEmpty()) {
+        if (results.get(0) != null) {
+          acAdmin = results.get(0);
+        }
       }
+      LOG.debug("acAdmin of Legacy" + acAdmin);
+      return acAdmin;
+    } finally {
+      em.clear();
+      em.close();
     }
-    LOG.debug("acAdmin of Legacy" + acAdmin);
-    return acAdmin;
   }
 
   // CMR-1746
   private String getSRFromLegacy(String rcyaa, String cmr_no) {
     String salesRep = "";
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("ND.GETSALESREP");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("RCYAA", rcyaa);
-    query.setParameter("RCUXA", cmr_no);
-    List<String> results = query.getResults(String.class);
-    if (results != null && !results.isEmpty()) {
-      if (results.get(0) != null) {
-        salesRep = results.get(0);
+    try {
+      String sql = ExternalizedQuery.getSql("ND.GETSALESREP");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("RCYAA", rcyaa);
+      query.setParameter("RCUXA", cmr_no);
+      List<String> results = query.getResults(String.class);
+      if (results != null && !results.isEmpty()) {
+        if (results.get(0) != null) {
+          salesRep = results.get(0);
+        }
       }
+      LOG.debug("saresRep of Legacy" + salesRep);
+      return salesRep;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    LOG.debug("saresRep of Legacy" + salesRep);
-    return salesRep;
   }
 
   @Override
