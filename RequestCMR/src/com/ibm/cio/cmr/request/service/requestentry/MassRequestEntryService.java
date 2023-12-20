@@ -5651,15 +5651,20 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private String getAddSeqNoForMassUpdateUKI(String cmrIssuingCntry, String cmr) {
     String addSeqNo = "";
     EntityManager entityManager = JpaManager.getEntityManager();
-    PreparedQuery query = cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) ? getAddrSeqNosUK(cmrIssuingCntry, cmr, entityManager)
-        : getAddrSeqNosIE(cmrIssuingCntry, cmr, entityManager);
-    List<String> result = query.getResults(String.class);
-    List<String> addSeqNos = Optional.ofNullable(result).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
-        .filter(item -> !item.isEmpty()).collect(Collectors.toList());
-    if (!addSeqNos.isEmpty()) {
-      return addSeqNos.contains("00001") ? "00001" : addSeqNos.get(0);
+    try {
+      PreparedQuery query = cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) ? getAddrSeqNosUK(cmrIssuingCntry, cmr, entityManager)
+          : getAddrSeqNosIE(cmrIssuingCntry, cmr, entityManager);
+      List<String> result = query.getResults(String.class);
+      List<String> addSeqNos = Optional.ofNullable(result).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
+          .filter(item -> !item.isEmpty()).collect(Collectors.toList());
+      if (!addSeqNos.isEmpty()) {
+        return addSeqNos.contains("00001") ? "00001" : addSeqNos.get(0);
+      }
+      return addSeqNo;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    return addSeqNo;
   }
 
   private PreparedQuery getAddrSeqNosUK(String cmrIssuingCntry, String cmr, EntityManager entityManager) {
@@ -6828,6 +6833,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       } else {
         throw new CmrException(MessageUtil.ERROR_GENERAL);
       }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
   }
 
@@ -6946,17 +6954,22 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private boolean isSkipCMRno(String cmr) {
     boolean isSkip = false;
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("QUERY.US.GETMASSUPDTSKIP");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("ZZKV_CUSNO", cmr);
-    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    List<String> katr10s = query.getResults(String.class);
-    if (katr10s == null || katr10s.isEmpty()) {
-      LOG.error("The CMR No: " + cmr + " is not IBM record.");
-      isSkip = true;
-    }
+    try {
+      String sql = ExternalizedQuery.getSql("QUERY.US.GETMASSUPDTSKIP");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ZZKV_CUSNO", cmr);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      List<String> katr10s = query.getResults(String.class);
+      if (katr10s == null || katr10s.isEmpty()) {
+        LOG.error("The CMR No: " + cmr + " is not IBM record.");
+        isSkip = true;
+      }
 
-    return isSkip;
+      return isSkip;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
   }
 
   public boolean validateLAMassUpdateFile(String path, Data data, Admin admin, String cmrIssuingCntry) throws Exception {
