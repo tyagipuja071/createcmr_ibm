@@ -106,7 +106,6 @@ function afterConfigTW() {
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   }
   if (reqType == 'C' && custSubGrp == 'ECOSY') {
-    FormManager.readOnly('searchTerm');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
@@ -265,8 +264,6 @@ function setClientTierValuesTW() {
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    FormManager.enable('clientTier');
   }
   handleObseleteExpiredDataForUpdate();
 }
@@ -506,7 +503,7 @@ function addressQuotationValidator() {
 }
 
 function chineseAddrMandtValidator() {
-  // CREATCMR-10152 
+  // CREATCMR-10152
   
 
   // retrieve chinese name and addr from db
@@ -601,6 +598,8 @@ function filterISUOnChange() {
     SORTL : searchTerm,
     KATR6 : '858'
   };
+  
+  // TODO - TO BE REMOVED
   var isuCdResult = cmr.query('GET.MAPPED_ISU_BY_SORTL', searchTermParams);
 
   if (isuCdResult != null && isuCdResult.ret2 != '') {
@@ -610,10 +609,11 @@ function filterISUOnChange() {
     FormManager.enable('isuCd');
   }
   var searchTerm = FormManager.getActualValue('searchTerm');
-  if (searchTerm == '04476' || searchTerm == '71300') {
+  if (searchTerm == '04476') {
     FormManager.setValue('isuCd', '');
   }
-
+  // TODO - TO BE REMOVED END
+  
   searchTermParams['_qall'] = 'Y';
   // FormManager.readOnly('isuCd');
   // var isuCd = isuCdResult.ret2;
@@ -834,7 +834,7 @@ function updateIndustryClass() {
   }
 }
 
-// CREATCMR-8581 
+// CREATCMR-8581
 
 function checkCmrUpdateBeforeImport() {
   FormManager.addFormValidator((function() {
@@ -869,7 +869,6 @@ function checkCmrUpdateBeforeImport() {
         });
         if (results11 != null && results11 != undefined && results11.ret1 != '') {
           lastupts = results11.ret1;
-          // console.log('lastupdatets in CreateCMR = ' + lastupts);
         }
 
         if (lastupts != '' && uptsrdc != '') {
@@ -886,6 +885,39 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function afterConfigCallsTW() {
+  afterConfigTW();
+  addHandlersForTW();
+  addSingleByteValidatorTW();
+  setDupCmrIndcWarning();
+  onInacTypeChange();
+  addCoverageFieldsValidator();
+  updateIndustryClass();
+  setClientTierValuesTW();
+  setRepTeamMemberNo();
+  handleObseleteExpiredDataForUpdate();
+}
+
+function afterTemplateLoadTW() {
+  afterConfigTW();
+  addHandlersForTW();
+  setDupCmrIndcWarning();
+  addSingleByteValidatorTW();
+  setClientTierValuesTW();
+  setRepTeamMemberNo();
+  handleObseleteExpiredDataForUpdate();
+  setCluster();
+  addCoverageFieldsValidator();
+  clearDescriptionOnScenarioChange();
+}
+
+function addrFunctionsTW() {
+  updateMainCustomerNames();
+  addSingleByteValidatorTW();
+  setAbbrevNmLocnOnAddressSave();
+  handleObseleteExpiredDataForUpdate();
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -895,53 +927,28 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.TW);
   GEOHandler.setRevertIsicBehavior(false);
 
-  GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.TW);
-  GEOHandler.addAfterConfig(addHandlersForTW, GEOHandler.TW);
-  GEOHandler.addAfterConfig(addSingleByteValidatorTW, GEOHandler.TW);
-  // GEOHandler.addAfterConfig(setISUCodeValues, GEOHandler.TW);
-  GEOHandler.addAfterConfig(setDupCmrIndcWarning, GEOHandler.TW);
+  // after config
+  GEOHandler.addAfterConfig(afterConfigCallsTW, GEOHandler.TW);
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.TW_CHECKLIST);
-  GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.TW);
- GEOHandler.addAfterConfig(addCoverageFieldsValidator, GEOHandler.TW);
- GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.TW);
 
-  GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
-  // GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(setDupCmrIndcWarning, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(addSingleByteValidatorTW, GEOHandler.TW);
+  // after template
+  GEOHandler.addAfterTemplateLoad(afterTemplateLoadTW, GEOHandler.TW);
 
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
-  GEOHandler.addAddrFunction(addSingleByteValidatorTW, GEOHandler.TW);
-  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.TW);
-
+  // addr funtion
+  GEOHandler.addAddrFunction(addrFunctionsTW, GEOHandler.TW);
+  
+  // validators
   GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
-  // GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW,
-  // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.TW, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
   
-  //  CREATCMR-8581
+  // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.TW,null,true);
   
-  GEOHandler.addAfterConfig(setClientTierValuesTW, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
   // CREATCMR-6825
-  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.TW);
-  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
-  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(setCluster, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(addCoverageFieldsValidator, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(clearDescriptionOnScenarioChange, GEOHandler.TW); 
   GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
   GEOHandler.registerValidator(chineseAddrMandtValidator, GEOHandler.TW, null, true);
 
-  // skip byte checks
-  // FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4',
-  // 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
-  // 'contactName3' ]);
   FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'footnoteTxt1', 'contactName3' ]);
 
 });
