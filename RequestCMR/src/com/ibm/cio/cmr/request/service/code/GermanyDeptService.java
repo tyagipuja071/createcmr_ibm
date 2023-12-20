@@ -83,23 +83,28 @@ public class GermanyDeptService extends BaseSimpleService<ProcessResultModel> {
 
   public List<GermanyDeptModel> search(GermanyDeptModel model, HttpServletRequest request) {
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("GERMANY_DEPT.VIEW");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    String deptName = (!StringUtils.isBlank(model.getDeptName())) ? model.getDeptName() + "%" : "";
-    query.setParameter("DEPT", deptName);
-    System.out.println(query.getResults());
-    List<String> cdList = query.getResults(String.class);
-    System.out.println(cdList);
+    try {
+      String sql = ExternalizedQuery.getSql("GERMANY_DEPT.VIEW");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      String deptName = (!StringUtils.isBlank(model.getDeptName())) ? model.getDeptName() + "%" : "";
+      query.setParameter("DEPT", deptName);
+      System.out.println(query.getResults());
+      List<String> cdList = query.getResults(String.class);
+      System.out.println(cdList);
 
-    List<GermanyDeptModel> list = new ArrayList<>();
-    GermanyDeptModel gdModel = null;
-    for (String rt : cdList) {
-      gdModel = new GermanyDeptModel();
-      gdModel.setDeptName(rt);
-      list.add(gdModel);
+      List<GermanyDeptModel> list = new ArrayList<>();
+      GermanyDeptModel gdModel = null;
+      for (String rt : cdList) {
+        gdModel = new GermanyDeptModel();
+        gdModel.setDeptName(rt);
+        list.add(gdModel);
+      }
+
+      return list;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    System.out.println(list);
-    return list;
 
   }
 
