@@ -66,12 +66,12 @@ public abstract class ASEANTransformer extends APTransformer {
     List<String> clusterList = new ArrayList<String>();
     List<String> countryList = new ArrayList<String>();
     Collections.addAll(countryList, "643", "749", "778", "818", "834", "852", "856");
-    Collections.addAll(clusterList, "00000", "04462", "05219", "04483", "05220", "01211", "01241", "01231", "01222", "01251", "01277", "01273", 
+    Collections.addAll(clusterList, "00000", "04462", "05219", "04483", "05220", "01211", "01241", "01231", "01222", "01251", "01277", "01273",
         "09050", "09051", "09052", "09053", "09054", "09055", "08042", "08040", "08038", "08044", "08047", "08046");
     if (!StringUtils.isBlank(clusterCd) && clusterList.contains(clusterCd) && countryList.contains(cmrIssuingCntry)) {
       handler.messageHash.put("MrktRespCode", handler.cmrData.getMrcCd());
     }
-    
+
     if ("5K".equalsIgnoreCase(isu)) {
       handler.messageHash.put("ISU", "5K7");
     }
@@ -82,7 +82,7 @@ public abstract class ASEANTransformer extends APTransformer {
       handler.messageHash.put("ClusterNo", clusterID);
     }
     // Handling obsolete data
-    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.getEntityManager(), handler.cmrData.getId().getReqId());
     String reqType = handler.adminData.getReqType();
     if (StringUtils.equalsIgnoreCase(reqType, "U")) {
       if (StringUtils.isBlank(handler.cmrData.getApCustClusterId())) {
