@@ -3055,7 +3055,8 @@ function setISBUScenarioLogic() {
       FormManager.enable('isbuCd');
       FormManager.setValue('isbuCd', '');
       FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
-    } if (cmrResult != '' && cmrResult == 'Accepted') {
+    } 
+    if (cmrResult != '' && cmrResult == 'Accepted') {
       FormManager.enable('custGrp');
       FormManager.enable('custSubGrp');
      }
