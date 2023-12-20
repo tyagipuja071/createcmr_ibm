@@ -568,8 +568,10 @@ public class LegacyDirectUtil {
 
   public static boolean isCountryLegacyDirectEnabled(EntityManager entityManager, String cntry) {
 
+    boolean closeEm = false;
     if (entityManager == null) {
       entityManager = JpaManager.getEntityManager();
+      closeEm = true;
     }
 
     boolean isLD = false;
@@ -594,6 +596,10 @@ public class LegacyDirectUtil {
       isLD = false;
     }
 
+    if (closeEm && entityManager != null) {
+      entityManager.clear();
+      entityManager.close();
+    }
     return isLD;
   }
 
