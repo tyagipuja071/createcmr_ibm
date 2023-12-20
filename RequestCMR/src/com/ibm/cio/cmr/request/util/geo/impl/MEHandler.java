@@ -1073,6 +1073,8 @@ public class MEHandler extends BaseSOFHandler {
         data.setRepTeamMemberNo(mainRecord.getSR());
       }
 
+      em.clear();
+      em.close();
     }
     // Phone
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {

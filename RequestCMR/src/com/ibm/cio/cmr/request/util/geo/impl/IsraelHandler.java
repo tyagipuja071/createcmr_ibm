@@ -764,6 +764,8 @@ public class IsraelHandler extends EMEAHandler {
           if (record != null && !record.isEmpty()) {
             data.setDunsNo(record.get(0));
           }
+          entityManager.clear();
+          entityManager.close();
         }
 
         String codflag = !StringUtils.isEmpty(legacyObjects.getCustomer().getDeptCd()) ? legacyObjects.getCustomer().getDeptCd() : "";

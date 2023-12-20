@@ -1013,7 +1013,7 @@ public class CEMEAHandler extends BaseSOFHandler {
         data.setTaxExemptStatus3(embargoCode);
         LOG.trace(" STC Order Block Code : " + embargoCode);
       }
-     
+
       data.setAgreementSignDate(this.currentImportValues.get("AECISUBDate"));
       LOG.trace("AECISubDate: " + data.getAgreementSignDate());
       data.setBpSalesRepNo(this.currentImportValues.get("TeleCovRep"));
@@ -1062,7 +1062,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       if (!(StringUtils.isEmpty(mainRecord.getSR()))) {
         data.setRepTeamMemberNo(mainRecord.getSR());
       }
-
+      em.clear();
+      em.close();
     }
     // Phone
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
@@ -2227,9 +2228,9 @@ public class CEMEAHandler extends BaseSOFHandler {
           // break;
         }
         if ("STC order block code".equals(cellVal)) {
-                  stcOrdBlkIndex = cellIndex;
-                  break;
-                }
+          stcOrdBlkIndex = cellIndex;
+          break;
+        }
         if ("ISU Code".equals(cellVal)) {
           isuCdIndex = cellIndex;
           // break;
@@ -2254,15 +2255,15 @@ public class CEMEAHandler extends BaseSOFHandler {
         String ordBlk = validateColValFromCell(currCell);
         currCell = row.getCell(stcOrdBlkIndex);
         String stcOrdBlk = validateColValFromCell(currCell);
-              
+
         if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, R, J. >> ");
           error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");
         }
         if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-                  LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                  error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
-                }
+          LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
+          error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+        }
         currCell = row.getCell(fiscalCdIndex);
         String fiscalCd = validateColValFromCell(currCell);
         if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {
