@@ -79,7 +79,7 @@ dojo.addOnLoad(function(){
 	         <cmr:view forCountry="616,749,778,615,652">
 				<cmr:info text="${ui.info.AUForCluster}" />
 	         </cmr:view>
-	         <cmr:view forCountry="852,818">
+	         <cmr:view forCountry="856">
             	<cmr:info text="${ui.info.clusterReminderMsgTH_VN_PH}"></cmr:info>
         	 </cmr:view> 
 	        </cmr:label>
@@ -239,7 +239,7 @@ dojo.addOnLoad(function(){
       	  <cmr:column span="2" containerForField="IndustryClass">
       		<p>
       		  <Label style="">IndustryClass:</Label>
-			        <input type="text" id="IndustryClass" name ="IndustryClass" value="${fn:substring(reqentry.subIndustryCd, 0, 1)}" readonly="readonly" style="width:15px;BACKGROUND: #FFFFEE;border: 1px Solid #DDDDDD"/>
+      		 		<input type="text" id="IndustryClass" name ="IndustryClass" value="${fn:substring(reqentry.subIndustryCd, 0, 1)}" readonly="readonly" style="width:15px;BACKGROUND: #FFFFEE;border: 1px Solid #DDDDDD"/>
       		</p>
     	  </cmr:column>
     	  <cmr:column span="2" containerForField="RestrictedInd">
