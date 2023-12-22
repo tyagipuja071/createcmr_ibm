@@ -1763,6 +1763,16 @@ function setCollectionCd() {
         }
       }
     }
+    var cmrResult = FormManager.getActualValue('findCmrResult');
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (cmrResult != '' && cmrResult == 'Accepted') {
+      FormManager.enable('custGrp');
+      FormManager.enable('custSubGrp');
+     }
+    
+    if(custSubGrp =='INTER') {
+      FormManager.readOnly('clientTier'); 
+    }
   }
 }
 
@@ -2637,6 +2647,17 @@ function onInacTypeChange() {
               ISSUING_CNTRY: cntry,
               CMT: cmt,
             };
+          } 
+          
+          var inacType = FormManager.getActualValue('inacType');
+          var inacCd = FormManager.getActualValue('inacCd');
+          var clientTier = FormManager.getActualValue('clientTier');
+          var isuCd = FormManager.getActualValue('isuCd');
+          if (cluster == '09197') {
+            FormManager.readOnly('inacCd');
+            FormManager.readOnly('inacType');
+            FormManager.readOnly('clientTier');
+            FormManager.readOnly('isuCd');
           }
 
           if (qParams != undefined) {
@@ -3013,7 +3034,6 @@ function setISBUScenarioLogic() {
   console.log('>>>> setISBUScenarioLogic >>>>');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cmrResult = FormManager.getActualValue('findCmrResult');
   var isbuList = null;
   if (cmrIssuingCntry == '744' && custSubGrp == 'PRIV') {
     FormManager.readOnly('apCustClusterId');
@@ -3053,13 +3073,8 @@ function setISBUScenarioLogic() {
       isbuList = [ 'BPN1', 'BPN2' ];
       console.log("isbuList = " + isbuList);
       FormManager.enable('isbuCd');
-      FormManager.setValue('isbuCd', '');
       FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
     } 
-    if (cmrResult != '' && cmrResult == 'Accepted') {
-      FormManager.enable('custGrp');
-      FormManager.enable('custSubGrp');
-     }
   }
   
   var cluster = FormManager.getActualValue('apCustClusterId')
@@ -3286,14 +3301,8 @@ function updateMRCAseanAnzIsa() {
         _exsitFlag = 1;
       }
     }
-    if (_exsitFlag == 0) {
-      if (cntry == '744' && (custSubGrp == 'PRIV' || custSubGrp == 'ECOSY' || custGrp == 'KYNDR')) {
-        FormManager.setValue('mrcCd', '3');
-      } else {
-        FormManager.setValue('mrcCd', '2');
-      }
-      
-      if ((cntry == '852' || cntry == '818') && (custSubGrp == 'ECSYS' || custSubGrp == 'CROSS' || custSubGrp == 'ASLOM' || custSubGrp == 'BUSPR')) {
+    if (_exsitFlag == 0) {     
+      if (cntry == '818' && (custSubGrp == 'ECSYS' || custSubGrp == 'CROSS' || custSubGrp == 'ASLOM' || custSubGrp == 'BUSPR')) {
         FormManager.setValue('mrcCd', '3');
       } 
     }
@@ -8003,10 +8012,6 @@ function setDefaultOnScenarioChangeTH(fromAddress, scenario, scenarioChanged) {
     return;
   }
 
-  if (scenarioChanged && scenario == 'CROSS') {
-    FormManager.setValue('apCustClusterId', '00000');
-  }
-
   if (scenarioChanged && scenario == 'DUMMY') {
     var isInacTypeReadOnlyFromScenarios = TemplateService.isFieldReadOnly('inacType');
     if (isInacTypeReadOnlyFromScenarios) {
@@ -8192,12 +8197,15 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
         FormManager.setValue('apCustClusterId', '00002');
       }
     }
-
-    if (scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
-      FormManager.setValue('apCustClusterId', '');
-      FormManager.setValue('clientTier', '');
-      FormManager.setValue('isuCd', '');
-      FormManager.setValue('mrcCd', '');
+    
+    if (cntry == '818') {
+      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLO', 'XAQST'];
+      if (scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
+        FormManager.setValue('apCustClusterId', '');
+        FormManager.setValue('clientTier', '');
+        FormManager.setValue('isuCd', '');
+        FormManager.setValue('mrcCd', '');
+      }
     }
     // CREATCMR-7883-7884
     var _custSubGrpAUWithEmptyInac = ['INTER', 'XPRIV', 'PRIV', 'DUMMY'];
