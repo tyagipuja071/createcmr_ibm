@@ -3169,7 +3169,7 @@ function coverage2024ForTH() {
 			FormManager.setValue('isuCd','');
 			FormManager.readOnly('isuCd');
 			FormManager.setValue('clientTier','');
-			FormManager.readOnly('isuCd');
+			FormManager.readOnly('clientTier');
 			FormManager.setValue('inacCd','');
 			FormManager.readOnly('inacCd');
 			FormManager.setValue('inacType','');
