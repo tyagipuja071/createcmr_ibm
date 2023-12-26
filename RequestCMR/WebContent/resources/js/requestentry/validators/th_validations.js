@@ -3286,7 +3286,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(validateCustnameForKynd, [ SysLoc.THAILAND], null, true);
   GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [SysLoc.THAILAND]);
   
-  // CREATCMR - 10575 -> Coverage 2024 for Singapore and Thailand
+  // CREATCMR - 10575 -> Coverage 2024 for  Thailand
   GEOHandler.addAfterConfig(coverage2024ForTH, [SysLoc.THAILAND]);
   GEOHandler.addAfterTemplateLoad(coverage2024ForTH, [SysLoc.THAILAND]);
   
