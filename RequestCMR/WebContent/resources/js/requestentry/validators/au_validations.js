@@ -24,11 +24,14 @@ function addHandlersForAU() {
   }
   
   if (_clusterHandlerANZ == null && FormManager.getActualValue('reqType') != 'U') {
+    _inacHandlerANZSG = 0;
     _clusterHandlerANZ = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
       lockFieldsForAU();
       _inacHandlerANZSG = _inacHandlerANZSG + 1;
       setIsuOnIsic();
-      setInacByCluster();
+      if (_inacHandlerANZSG > 2) {        
+        setInacByCluster();
+      }
     });
   }
 
@@ -275,11 +278,12 @@ function setInacByCluster() {
     } else {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-      
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.removeValidator('inacType', Validators.REQUIRED);
+      FormManager.clearValue('inacCd');
+      FormManager.clearValue('inacType');
     }
-
-    // CREATCMR-7885
-    setInacCdTypeStatus();
+    
 }
 
 /* ASEAN ANZ GCG ISIC MAPPING */
@@ -1804,66 +1808,9 @@ function setCTCIsuByClusterANZ() {
               FormManager.readOnly('isuCd');
             }
           } else if (apClientTierValue.length > 1) {
-            if (_cmrIssuingCntry == '616' && _cluster == '00001') {
-              // CREATCMR-7883
-              if (custSubGrp.includes('BLUMX') || custSubGrp == 'CROSS' || custSubGrp == 'PRIV' || custSubGrp == 'XPRIV' || custSubGrp == 'MKTPC') {
-                FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-                FormManager.setValue('clientTier', 'Z');
-                FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-                FormManager.setValue('isuCd', '21');
-                FormManager.readOnly('clientTier');
-                FormManager.readOnly('isuCd');
-              } else if (custSubGrp == 'DUMMY' || custSubGrp == 'INTER') {
-                FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-                FormManager.setValue('clientTier', 'Z');
-                FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-                FormManager.setValue('isuCd', '21');
-                FormManager.readOnly('clientTier');
-                FormManager.readOnly('isuCd');
-              }
-            } else if ((custSubGrp.includes('BLUMX') || custSubGrp.includes('MKTPC') || custSubGrp.includes('DUMMY') || custSubGrp.includes('XDUMM')) && (_cluster == '00001' || _cluster == '00002')) {
-              // CREATCMR-7653 cluster/QTC/ISU: default as 00002/Z/21 - lock
-              // field
-              if (_cmrIssuingCntry == '796' && custSubGrp.includes('DUMMY') && _cluster == '00002') {
-                FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-                FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-                FormManager.setValue('clientTier', 'Z');
-                FormManager.setValue('isuCd', '21');
-                FormManager.readOnly('apCustClusterId');
-                FormManager.readOnly('clientTier');
-                FormManager.readOnly('isuCd');
-              } else if (_cmrIssuingCntry == '796' && _cluster == '00002' && (custSubGrp.includes('BLUMX') || custSubGrp.includes('MKTPC'))) {
-                FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-                FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-                FormManager.setValue('clientTier', 'Z');
-                FormManager.setValue('isuCd', '21');
-                FormManager.readOnly('apCustClusterId');
-                FormManager.readOnly('clientTier');
-                FormManager.readOnly('isuCd');
-              } else {
-                FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', 'Y']);
-                FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
-                FormManager.setValue('isuCd', '34');
-              }
-            } else if (custSubGrp.includes('INTER') || custSubGrp.includes('XINT')) {
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['21']);
-              FormManager.setValue('clientTier', 'Z');
-              FormManager.setValue('isuCd', '21');
-            } else if (_cmrIssuingCntry == '796' && custSubGrp.includes('CROSS') && _cluster == '00002') {
-              // CREATCMR-7884
-              console.log('>>> 796/CROSS/0002/Z/34 >>> lock QTC/ISU');
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
-              FormManager.setValue('clientTier', 'Z');
-              FormManager.setValue('isuCd', '34');
-              FormManager.readOnly('clientTier');
-              FormManager.readOnly('isuCd');
-            } else {
-              FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-              FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
-              FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
-            }
+            FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+            FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
+            FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
           }
         }
         if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
@@ -1871,18 +1818,6 @@ function setCTCIsuByClusterANZ() {
         }
       }
     }
-
-    // if (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp ==
-    // 'DUMMY'
-    // || custSubGrp == 'INTER' || custSubGrp == 'XBLUM' || custSubGrp ==
-    // 'XMKTP' ||
-    // custSubGrp == 'XDUMM' || custSubGrp == 'XINT' ||
-    // _cluster.includes('71101')
-    // || _cluster.includes('71100') || _cluster.includes('00001') ||
-    // _cluster.includes('00002')) {
-    // FormManager.setValue('isuCd', '34');
-    // FormManager.readOnly('isuCd');
-    // }
 
   });
   if (_clusterHandler && _clusterHandler[0]) {
@@ -3094,7 +3029,7 @@ function lockCMRNumberPrefixforNoINTER() {
 
 var _oldClusterSelection = '';
 
-
+/* Tentatively to be removed */
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   console.log('>>>> clearClusterFieldsOnScenarioChange >>>>');
   var cluster = FormManager.getActualValue('apCustClusterId');
@@ -3196,187 +3131,6 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     FormManager.readOnly('isuCd');
   }
 }
-// CREATCMR-7885
-// CREATCMR-7885
-function setInacCdTypeStatus() {
-  console.log('>>>> setInacCdTypeStatus() >>>>');
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var custSubGrpListSg = ['PRIV', 'XPRIV', 'BUSPR', 'DUMMY', 'INTER'];
-
-  var cluster = FormManager.getActualValue('apCustClusterId');
-  var clusterSGEmptyInac = (cluster == '00000' && custSubGrpListSg.includes(custSubGrp));
-  var clusterSGAllInac = (cluster == '01241' && ['NRMLC', 'XAQST', 'AQSTN', 'ASLOM', 'CROSS'].includes(custSubGrp)) ||
-    (cluster == '00000' && ['XBLUM', 'BLUMX', 'XMKTP', 'MKTPC', 'SPOFF', 'CROSS'].includes(custSubGrp)) ||
-    (cluster == '08038' && ['ECSYS', 'ASLOM', 'CROSS'].includes(custSubGrp));
-
-  var isInacRequired = (cluster == '09052' && ['KYND', 'ASLOM', 'CROSS'].includes(custSubGrp)) ||
-    (['10144', '10145', '10146', '10147', '10148', '10149', '10150', '10151', '10152', '10153', '10154', '10155', '10156', '10157'].includes(cluster) && ['NRML', 'ASLOM', 'CROSS'].includes(custSubGrp));
-
-
-  console.log('setInacCdTypeStatus() >>>> cmrIssuingCntry=' + cntry);
-
-  var inacCdValue = [];
-  var cmt = '';
-
-  if (cntry == '834' && reqType == 'C') {
-    if (clusterSGEmptyInac) {
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-      // LOCK GB Seg(QTC)/ISU
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('isuCd');
-      console.log('remove REQUIRED of INAC related>>>>');
-      console.log('setInacCdTypeStatus() >>>> clusterSGEmptyInac, return.');
-      return;
-    } else if (clusterSGAllInac) {
-      console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
-      cmt = '%';
-    } else if (!custSubGrpListSg.includes(custSubGrp)) {
-      cmt = '%' + cluster + '%';
-      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
-    }
-
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      CMT: cmt,
-    };
-
-    var results = cmr.query('GET.INAC_CD', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        if (!inacCdValue.includes(results[i].ret1)) {
-          inacCdValue.push(results[i].ret1);
-        }
-      }
-    }
-    console.log('inacCd.length =' + inacCdValue.length);
-    console.log('Find inacCd =' + inacCdValue);
-    if (inacCdValue.length == 1 && inacCdValue[0] != '') {
-      console.log('setInacCdTypeStatus() >>>> set INAC code/type readonly >>>');
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('inacType');
-    } else if (inacCdValue.length > 1) {
-      console.log('setInacCdTypeStatus() >>>> enable INAC related >>>>');
-      FormManager.enable('inacCd');
-      FormManager.enable('inacType');
-    }
-
-    // Add/Remove REQUIRE mark for INAC related
-    if (clusterSGAllInac) {
-      console.log('remove REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-    }
-
-    if (isInacRequired) {
-      console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-    }
-    // LOCK GB Seg(QTC)/ISU
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-  }
-}
-
-function setInacCdTypeStatus() {
-  console.log('>>>> setInacCdTypeStatus() >>>>');
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var custSubGrpListSg = ['PRIV', 'XPRIV', 'BUSPR', 'DUMMY', 'INTER'];
-
-  var cluster = FormManager.getActualValue('apCustClusterId');
-  var clusterSGEmptyInac = (cluster == '00000' && custSubGrpListSg.includes(custSubGrp));
-  var clusterSGAllInac = (cluster == '01241' && ['NRMLC', 'XAQST', 'AQSTN', 'ASLOM', 'CROSS'].includes(custSubGrp)) ||
-    (cluster == '00000' && ['XBLUM', 'BLUMX', 'XMKTP', 'MKTPC', 'SPOFF', 'CROSS'].includes(custSubGrp)) ||
-    (cluster == '08038' && ['ECSYS', 'ASLOM', 'CROSS'].includes(custSubGrp));
-
-  var isInacRequired = (cluster == '09052' && ['KYND', 'ASLOM', 'CROSS'].includes(custSubGrp)) ||
-    (['10144', '10145', '10146', '10147', '10148', '10149', '10150', '10151', '10152', '10153', '10154', '10155', '10156', '10157'].includes(cluster) && ['NRML', 'ASLOM', 'CROSS'].includes(custSubGrp));
-
-
-  console.log('setInacCdTypeStatus() >>>> cmrIssuingCntry=' + cntry);
-
-  var inacCdValue = [];
-  var cmt = '';
-
-  if (cntry == '834' && reqType == 'C') {
-    if (clusterSGEmptyInac) {
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-      // LOCK GB Seg(QTC)/ISU
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('isuCd');
-      console.log('remove REQUIRED of INAC related>>>>');
-      console.log('setInacCdTypeStatus() >>>> clusterSGEmptyInac, return.');
-      return;
-    } else if (clusterSGAllInac) {
-      console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
-      cmt = '%';
-    } else if (!custSubGrpListSg.includes(custSubGrp)) {
-      cmt = '%' + cluster + '%';
-      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
-    }
-
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      CMT: cmt,
-    };
-
-    var results = cmr.query('GET.INAC_CD', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        if (!inacCdValue.includes(results[i].ret1)) {
-          inacCdValue.push(results[i].ret1);
-        }
-      }
-    }
-    console.log('inacCd.length =' + inacCdValue.length);
-    console.log('Find inacCd =' + inacCdValue);
-    if (inacCdValue.length == 1 && inacCdValue[0] != '') {
-      console.log('setInacCdTypeStatus() >>>> set INAC code/type readonly >>>');
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('inacType');
-    } else if (inacCdValue.length > 1) {
-      console.log('setInacCdTypeStatus() >>>> enable INAC related >>>>');
-      FormManager.enable('inacCd');
-      FormManager.enable('inacType');
-    }
-
-    // Add/Remove REQUIRE mark for INAC related
-    if (clusterSGAllInac) {
-      console.log('remove REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-    }
-
-    if (isInacRequired) {
-      console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-      FormManager.enable('inacCd');
-      FormManager.enable('inacType');
-    }
-    // LOCK GB Seg(QTC)/ISU
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-  }
-}
 
 function checkCmrUpdateBeforeImport() {
   FormManager.addFormValidator((function () {
@@ -3466,7 +3220,7 @@ function addressFunctions() {
 
 function afterTemplateLoadFunctions() {
   setRepTeamMemberNo();
-  clearClusterFieldsOnScenarioChange();
+//  clearClusterFieldsOnScenarioChange();
   lockCMRNumberPrefixforNoINTER();
   prospectFilter();
   defaultCMRNumberPrefixforANZ();
