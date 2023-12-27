@@ -143,7 +143,7 @@ function addAfterConfigAP() {
  } 
  
  if (custSubGrp == "KYNDR"){
-   FormManager.setValue('apCustClusterId', "9202");
+   FormManager.setValue('apCustClusterId', "09202");
    FormManager.readOnly('inacType');
  }
  
