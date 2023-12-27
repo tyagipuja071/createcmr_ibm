@@ -8511,6 +8511,41 @@ function validateRetrieveValues() {
   })(), 'IBM_REQ_TAB', 'frmCMR');
 }
 
+function validateInacValuesID() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var errorMsg = '';
+        var reqType = FormManager.getActualValue('reqType');
+        var inacType = FormManager.getActualValue('inacType');
+        var inacCd = FormManager.getActualValue('inacCd');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (reqType != 'C' || inacType =='' || inacCd == '') {
+          return new ValidationResult(null, true);
+        }
+        var qParams = {
+            ISSUING_CNTRY: cntry,
+            CD: inacCd
+          };
+          var CMTList = cmr.query('GET.INACTYPE_BY_CLUSTER', qParams);
+          if (CMTList != null) {
+            var expectedInac =  CMTList.ret1;
+          }
+
+      if (expectedInac != '' && expectedInac == "N" && expectedInac != 'IN') {
+              return new ValidationResult(null, true);
+            } else if (expectedInac != '' && expectedInac == "I" && inacType != '' && inacType == 'N') {
+             errorMsg = inacCd + 'is not a valid value for NAC Code.';
+           if (errorMsg != '') {
+                return new ValidationResult(null, false, errorMsg);
+              }
+            } 
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'IBM_REQ_TAB', 'frmCMR');
+}
+
 // CREATCMR-8581
 
 function checkCmrUpdateBeforeImport() {
@@ -8837,4 +8872,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [SysLoc.INDIA]);
   GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
+  GEOHandler.registerValidator(validateInacValuesID, [SysLoc.INDONESIA]);
+
 });
