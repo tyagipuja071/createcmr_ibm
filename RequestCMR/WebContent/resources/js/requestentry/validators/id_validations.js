@@ -7243,7 +7243,7 @@ function setCTCIsuByClusterIndonesia() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
-  } else if (custSubGrp == 'BUSPR' || custSubGrp == 'BLUMX' || custSubGrp == 'MKPL' || custSubGrp == 'PRICU') {
+  } else if (custSubGrp == 'BLUMX' || custSubGrp == 'MKPL' || custSubGrp == 'PRICU') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['00000']);
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
