@@ -1,6 +1,5 @@
 /* Register AP Javascripts */
 var _isicHandlerAP = null;
-var _isuHandler = null;
 var _clusterHandlerAP = null;
 var _vatExemptHandler = null;
 var _bpRelTypeHandlerGCG = null;
@@ -2679,44 +2678,9 @@ function setISUCTCByCluster(){
         if(results[0].ret3 != null && results[0].ret3 != ''){
 			 FormManager.readOnly('mrcCd');
 	     FormManager.setValue('mrcCd',results[0].ret3);
-        }
-        
-       }else if(results != null && results.length > 1){	
-	    var isuList = [];
-	    for(i = 0; i < results.length; i++){
-       isuList.push(results[i].ret2);		
-	    }
-	     if(isuList.length > 0){
-		   FormManager.enable('isuCd');
-		   FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuList);
-        } 
-         if (_isuHandler == null) {
-    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
-      setCTCMRcByISUCluster(FormManager.getActualValue('apCustClusterId'),FormManager.getActualValue('isuCd'));
-    });
-  }              
+        }       
+       }
 }
-}
-
-function setCTCMRcByISUCluster(cluster,isu){
-		 var qParams = {
-        _qall: 'Y',
-        ISSUING_CNTRY: FormManager.getActualValue('cmrIssuingCntry'),
-        CLUSTER: cluster,
-        ISU_CD : isu
-      };
-
-      var result = cmr.query('GET.CTC_MRC_BY_ISU_CLUSTER_CNTRY', qParams);
-      if(result != undefined && result != null && result != '' ){
-	  	FormManager.setValue('clientTier',result.ret1);
-	    FormManager.setValue('mrcCd',result.ret2);
-	    FormManager.readOnly('clientTier');
-	    FormManager.readOnly('mrcCd');
-      }
-	
-	
-}
-
 
 function setInacByClusterSG() {
 	var qParams = {
