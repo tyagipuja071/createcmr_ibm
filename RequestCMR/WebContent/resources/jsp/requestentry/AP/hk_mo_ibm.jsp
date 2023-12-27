@@ -76,7 +76,7 @@ dojo.addOnLoad(function(){
 	         <cmr:view forCountry="796">
 				<cmr:info text="${ui.info.NZForCluster}" />
 	         </cmr:view>
-	         <cmr:view forCountry="616,749,778,615,652">
+	         <cmr:view forCountry="616,834,615,652">
 				<cmr:info text="${ui.info.AUForCluster}" />
 	         </cmr:view>
 	         <cmr:view forCountry="856">
