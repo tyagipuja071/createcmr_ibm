@@ -7603,7 +7603,8 @@ function setCTCIsuByClusterMY() {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','E']);
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['12354', '12349', '12352', '12350', '12351', '12353', '12464', '12453', '12482', '12483', '12484', '12485', '12486']);
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34','27']);
-    if(_apCustClusterId == '12464' || _apCustClusterId == '12453' ||_apCustClusterId == '12482' || _apCustClusterId == '12483' || _apCustClusterId == '12484'|| _apCustClusterId == '12485'|| _apCustClusterId == '12486') {
+    
+    if(_apCustClusterId == '12354' || _apCustClusterId == '12349' || _apCustClusterId == '12352' ||_apCustClusterId == '12350' || _apCustClusterId == '12351' || _apCustClusterId == '12353') {
       FormManager.setValue('isuCd', '27');
       FormManager.setValue('clientTier', 'E');
     } else {
@@ -7724,6 +7725,9 @@ function setCTCIsuByClusterMY() {
     if (custSubGrp == 'CROSS') {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'T', 'Z', 'E']);
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['09194', '08042', '00000',  '12354', '12349', '12352', '12350', '12351', '12353', '12464', '12453', '12482', '12483', '12484', '12485', '12486']);
+    } else if (custSubGrp == 'ASLOM' || custSubGrp == 'XASLM') {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'T', 'E']);
+      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['08042', '11979', '11978', '09194','12354' ,'12349' ,'12352' ,'12350' ,'12351' ,'12353' ,'12464' ,'12453' ,'12482' ,'12483' ,'12484' ,'12485' ,'12486']);
     } else {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'T', 'E']);
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['09194', '08042',  '12354', '12349', '12352', '12350', '12351', '12353', '12464', '12453', '12482', '12483', '12484', '12485', '12486']);
@@ -7745,10 +7749,10 @@ function setCTCIsuByClusterMY() {
     } else  if (_apCustClusterId == '12354' || _apCustClusterId == '12349' || _apCustClusterId == '12352' || _apCustClusterId == '12350' || _apCustClusterId == '12351' || _apCustClusterId == '12353' ) {
       FormManager.setValue('clientTier', 'E');
       FormManager.setValue('isuCd', '27');
-    } else if (_apCustClusterId == '08042') {
+    } else if (_apCustClusterId == '08042' || _apCustClusterId == '11979'  || _apCustClusterId == '11978') {
       FormManager.setValue('clientTier', 'Y');
-      FormManager.setValue('isuCd', '36');
-    } else if (_apCustClusterId == '09194') {
+      FormManager.setValue('isuCd', '36'); 
+    } else if (_apCustClusterId == '09194') { 
       FormManager.limitDropdownValues(FormManager.getField('inacType'), ['I']);
       FormManager.setValue('clientTier', '0');
       FormManager.setValue('isuCd', '5K');
@@ -7766,13 +7770,12 @@ function setCTCIsuByClusterMY() {
     FormManager.readOnly('mrcCd');
   } else if (custSubGrp == 'ECSYS') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Y']);
-    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['08042']);
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['08042', '11979', '11978']);
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['36']);
     FormManager.setValue('apCustClusterId', '08042');
     FormManager.setValue('clientTier', 'Y');
     FormManager.setValue('isuCd', '36');
     FormManager.setValue('mrcCd', '3');
-    FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
@@ -7788,7 +7791,6 @@ function setCTCIsuByClusterMY() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
-
   } else if (custSubGrp == 'INTER') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['00000']);
@@ -8529,12 +8531,12 @@ function validateInacValuesMY() {
           };
           var CMTList = cmr.query('GET.INACTYPE_BY_CLUSTER', qParams);
           if (CMTList != null) {
-            var CMT =  CMTList.ret1;
+            var expectedInac =  CMTList.ret1;
           }
 
-      if (CMT != '' && CMT == "I" && CMT != 'IN') {
+      if (expectedInac != '' && expectedInac == "N" && expectedInac != 'IN') {
               return new ValidationResult(null, true);
-            } else if (CMT != '' && CMT == "N" && inacType != '' && inacType == 'I') {
+            } else if (expectedInac != '' && expectedInac == "I" && inacType != '' && inacType == 'N') {
              errorMsg = inacCd + 'is not a valid value for NAC Code.';
            if (errorMsg != '') {
                 return new ValidationResult(null, false, errorMsg);
