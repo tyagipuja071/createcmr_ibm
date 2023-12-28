@@ -3,7 +3,7 @@ var _isicHandlerAP = null;
 var _clusterHandlerAP = null;
 var _vatExemptHandler = null;
 var _isuHandler = null;
-var _inacCdHandlerIN = null;
+var _inacCdHandler = null;
 var _customerTypeHandler = null;
 var oldClusterCd = null;
 var _vatRegisterHandlerTH = null;
@@ -17,6 +17,12 @@ function addHandlersForAP() {
     });
   }
 	
+	if (_inacCdHandler == null) {
+    _inacCdHandler = dojo.connect(FormManager.getField('inacCd'), 'onChange', function (value) {
+		 setInacType(value);
+    });
+  }
+  
   if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function (value) {
 	
@@ -37,6 +43,21 @@ function addHandlersForAP() {
   }
   handleObseleteExpiredDataForUpdate();
 }
+
+function setInacType(){
+	if(FormManager.getActualValue('inacCd')){
+	var qParams = {
+		ISSUING_CNTRY: FormManager.getActualValue('cmrIssuingCntry'),
+		CD: FormManager.getActualValue('inacCd'),
+	};
+	var result = cmr.query('GET.INAC_TYPE', qParams);
+	 if(result != undefined && result.ret1 != ''){
+		FormManager.setValue('inacType',result.ret1.substr(0,1));
+		FormManager.readOnly('inacType');
+	}
+	}
+}
+
 
 function clearOldCluster(){
 	var currentScenario = FormManager.getActualValue('custSubGrp');
@@ -2519,18 +2540,6 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('contactName3', Validators.REQUIRED);
     FormManager.removeValidator('busnType', Validators.REQUIRED);
   }
-  if (reqType == 'U' && cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('inacCd');
-
-    // setting all fields as not Mandt for update Req
-    FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-  }
 }
 
 function executeBeforeSubmit() {
@@ -3121,15 +3130,37 @@ function setISUCTCByCluster(){
       if(results != null && results.length == 1){
       if(results[0].ret1 != null && results[0].ret1 != ''){
 	     FormManager.setValue('clientTier',results[0].ret1);
+	     FormManager.readOnly('clientTier');
         }
 	    if(results[0].ret2 != null && results[0].ret2 != ''){
 		   FormManager.resetDropdownValues(FormManager.getField('isuCd'));
 	     FormManager.setValue('isuCd',results[0].ret2);
+	     FormManager.readOnly('isuCd');
         }
-        if(results[0].ret3 != null && results[0].ret3 != ''){
+       if(results[0].ret3 != null && results[0].ret3 != ''){
 	     FormManager.setValue('mrcCd',results[0].ret3);
         }       
-       }
+       }else if(results != null && results.length > 1){
+	    var qParams1 = {
+        ISSUING_CNTRY: FormManager.getActualValue('cmrIssuingCntry'),
+        CLUSTER: FormManager.getActualValue('apCustClusterId'),
+        SCENARIO : '%' + FormManager.getActualValue('custSubGrp') + '%'
+      };
+
+      var result = cmr.query('GET.CTC_ISU_MRC_BY_CLUSTER_CNTRY_SCENARIO', qParams1);
+       if(result.ret1 != null && result.ret1 != ''){
+	     FormManager.setValue('clientTier',result.ret1);
+	     FormManager.readOnly('clientTier');
+        }
+	    if(result.ret2 != null && result.ret2 != ''){
+		   FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+	     FormManager.setValue('isuCd',result.ret2);
+	     FormManager.readOnly('isuCd');
+        }
+        if(result.ret3 != null && result.ret3 != ''){
+	     FormManager.setValue('mrcCd',result.ret3);
+        }  
+      }
 }
 
 function setInacByClusterTH() {
@@ -3140,10 +3171,12 @@ function setInacByClusterTH() {
 	};
 	var inacList = [];
 	var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+	FormManager.resetDropdownValues(FormManager.getField('inacCd'));
 	if (results != null && results.length > 0) {
 		for (i = 0; i < results.length; i++) {
 			inacList.push(results[i].ret1);
 		}
+		FormManager.enable('inacCd');
 		FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacList);
 	}else {
 		FormManager.clearValue('inacCd');
