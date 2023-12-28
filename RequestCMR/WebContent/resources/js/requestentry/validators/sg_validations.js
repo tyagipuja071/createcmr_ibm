@@ -10,11 +10,15 @@ var  custSubGrpHandler = null;
 var oldClusterCd = null;
 
 function addHandlersForAP() {
-  if (_isicHandlerAP == null) {
+ if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function (value) {
+	
+	 var allowedClustersFrISICISUDpndncy = ['04483','08813','08810','08809'];
+	  if(allowedClustersFrISICISUDpndncy.includes(FormManager.getActualValue('apCustClusterId')))
       setIsuOnIsic();
     });
   }
+    
  
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
@@ -48,7 +52,7 @@ function clearOldCluster(){
 	var previousScenrio = window.localStorage.getItem('custSubGrp');
 	var currentCluster = FormManager.getActualValue('apCustClusterId');
 	var previousCluster = window.localStorage.getItem('cluster');
-	if((previousScenrio + previousCluster) != (currentScenario + currentCluster)){
+	if((previousScenrio + previousCluster) != (currentScenario + currentCluster) && previousCluster == currentCluster && previousCluster != '00000'){
 		FormManager.setValue('apCustClusterId', '');
 	  FormManager.setValue('isuCd', '');
 	  FormManager.setValue('inacCd', '');
@@ -2626,7 +2630,7 @@ function checkCmrUpdateBeforeImport() {
 
 
 
-// Coverage 2024 for Singapore -> CREATCMR - 10535 
+// Coverage 2024 for  SINGAPORE -> CREATCMR - 10535 
 function coverage2024ForSG() {
 	console.log("---- coverage2024ForSG ----");
 	var _clusterHandlerSG = null;
@@ -2664,22 +2668,40 @@ function setISUCTCByCluster(){
       };
 
       var results = cmr.query('GET.CTC_ISU_MRC_BY_CLUSTER_CNTRY', qParams);
-      
       if(results != null && results.length == 1){
       if(results[0].ret1 != null && results[0].ret1 != ''){
-		   FormManager.readOnly('clientTier');
 	     FormManager.setValue('clientTier',results[0].ret1);
+	     FormManager.readOnly('clientTier');
         }
 	    if(results[0].ret2 != null && results[0].ret2 != ''){
-		   FormManager.resetDropdownValues(FormManager.getField('isuCd'));	
-		   FormManager.setValue('isuCd',results[0].ret2);	
-			 FormManager.readOnly('isuCd');
+		   FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+	     FormManager.setValue('isuCd',results[0].ret2);
+	     FormManager.readOnly('isuCd');
         }
-        if(results[0].ret3 != null && results[0].ret3 != ''){
-			 FormManager.readOnly('mrcCd');
+       if(results[0].ret3 != null && results[0].ret3 != ''){
 	     FormManager.setValue('mrcCd',results[0].ret3);
         }       
-       }
+       }else if(results != null && results.length > 1){
+	    var qParams1 = {
+        ISSUING_CNTRY: FormManager.getActualValue('cmrIssuingCntry'),
+        CLUSTER: FormManager.getActualValue('apCustClusterId'),
+        SCENARIO : '%' + FormManager.getActualValue('custSubGrp') + '%'
+      };
+
+      var result = cmr.query('GET.CTC_ISU_MRC_BY_CLUSTER_CNTRY_SCENARIO', qParams1);
+       if(result.ret1 != null && result.ret1 != ''){
+	     FormManager.setValue('clientTier',result.ret1);
+	     FormManager.readOnly('clientTier');
+        }
+	    if(result.ret2 != null && result.ret2 != ''){
+		   FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+	     FormManager.setValue('isuCd',result.ret2);
+	     FormManager.readOnly('isuCd');
+        }
+        if(result.ret3 != null && result.ret3 != ''){
+	     FormManager.setValue('mrcCd',result.ret3);
+        }  
+      }
 }
 
 function setInacByClusterSG() {
@@ -2690,10 +2712,12 @@ function setInacByClusterSG() {
 	};
 	var inacList = [];
 	var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+	FormManager.resetDropdownValues(FormManager.getField('inacCd'));
 	if (results != null && results.length > 0) {
 		for (i = 0; i < results.length; i++) {
 			inacList.push(results[i].ret1);
 		}
+		FormManager.enable('inacCd');
 		FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacList);
 	}else {
 		FormManager.clearValue('inacCd');
@@ -2707,21 +2731,6 @@ function setInacByClusterSG() {
     FormManager.readOnly('inacCd');
     FormManager.readOnly('inacType');
 	}
-}
-
-function setInacType(){
-	  if (_inacHandler == null) {
-    _inacHandler = dojo.connect(FormManager.getField('inacCd'), 'onChange', function (value) {
-   var qParams = {
-		ISSUING_CNTRY: FormManager.getActualValue('cmrIssuingCntry'),
-		CD: FormManager.getActualValue('inacCd'),
-	};
-	var result = cmr.query('GET.INAC_TYPE_CD', qParams);
-	if(result != '' && result != undefined){
-		FormManager.setValue('inacType',result.ret1.substr);
-	}
-    });
-  }        
 }
 
 
