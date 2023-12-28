@@ -583,6 +583,8 @@ function setMrcCd() {
   } else {
     FormManager.setValue('mrcCd', '3');
   }
+  
+  FormManager.readOnly('mrcCd');
 }
 
 // CREATCMR-7882
