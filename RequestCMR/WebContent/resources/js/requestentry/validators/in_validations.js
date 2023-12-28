@@ -143,6 +143,7 @@ function addAfterConfigAP() {
  } 
  
  if (custSubGrp == "KYNDR"){
+   FormManager.setValue('apCustClusterId', "09202");
    FormManager.readOnly('inacType');
  }
  
@@ -644,7 +645,7 @@ function applyClusterFilters() {
 	  '12273', '12272', '12268', '12266', '12270', '12263', '12261', '12264', '12262', '12258', '12259', '12255',
 	  '12257', '12271', '12267', '12265', '12269', '12260', '12254', '12256', '12470', '12471', '12472', '12473',
 	  '12474', '12475']);
-  filterAvailableClustersByScenarioSubType('744', ['ECOSY'], [ '10654', '10655', '10656', '10657' ,'12006','12005']);  
+  filterAvailableClustersByScenarioSubType('744', ['ECSYS'], [ '10654', '10655', '10656', '10657' ,'12006','12005']);  
   filterAvailableClustersByScenarioSubType('744', ['CROSS'], ['05224', '04477', '04490', '04467', '05225', '08864', '08850', '08856', '08851', '08856', '08851', '08866',
 	  '08863', '08857', '08868', '08861', '08853', '08859', '08854', '08862', '08858', '08867', '08870',
 	  '08865', '08852', '08849', '08860', '08848', '012D999', '9202', '10654', '10655', '10656', '10657',
@@ -1197,6 +1198,14 @@ function setIsicCdIfDnbAndCmrResultOther(value){
   }
   FormManager.setValue('isicCd', _pagemodel.isicCd);
 }
+
+function getIsicDataRDCValue(){
+  var result =cmr.query('GET.ISIC_OLD_BY_REQID', {
+   REQ_ID: FormManager.getActualValue('reqId')
+  });
+  return result.ret1;
+}
+  
 
 function updateIndustryClass() {
   console.log(">>>> updateIndustryClass >>>>");
