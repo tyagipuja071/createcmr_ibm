@@ -637,6 +637,8 @@ function setInacNacValues(searchTermChange){
         FormManager.resetDropdownValues(FormManager.getField('inacCd'));
         FormManager.removeValidator('inacCd', Validators.REQUIRED);
         FormManager.removeValidator('inacType', Validators.REQUIRED);
+        FormManager.enable('inacCd');
+        FormManager.enable('inacType');
       }
       if (searchTermChange != "inacChange") {       
         FormManager.clearValue('inacType');
