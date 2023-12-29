@@ -612,8 +612,7 @@ function setInacByCluster() {
     }
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
-    FormManager.enable('inacCd');
-    FormManager.enable('inacType');
+    
     updateMRCAseanAnzIsa();
     // CREATCMR-7884 for 796
     // CREATCMR-7885 for 834
@@ -1501,6 +1500,7 @@ function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray,
 
   var actualCmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
   var actualCustSubGrp = FormManager.getActualValue('custSubGrp');
+  var cluster = FormManager.getActualValue('apCustClusterId')
 
   if (actualCmrIssuCntry == cmrIssuCntry && custSubGrpArray.includes(actualCustSubGrp)) {
     FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
@@ -1513,6 +1513,10 @@ function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray,
         FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
       }
     }
+  } 
+  if(cluster == '') {
+    FormManager.setValue('clientTier', '');
+    FormManager.setValue('isuCd', '');
   }
 }
 
@@ -1760,6 +1764,11 @@ function setCollectionCd() {
         }
       }
     }
+    var cmrResult = FormManager.getActualValue('findCmrResult');
+    if (cmrResult != '' && cmrResult == 'Accepted') {
+      FormManager.enable('custGrp');
+      FormManager.enable('custSubGrp');
+     }
   }
 }
 
@@ -2543,6 +2552,12 @@ function autoSetAbbrevNmLocnLogic() {
       FormManager.setValue('abbrevLocn', _abbrevLocn);
       break;
   }
+  
+  var cluster = FormManager.getActualValue('apCustClusterId')
+  if (cluster == '09198') {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('inacType');
+  }
 }
 
 function getLandCntryDesc(cntryCd) {
@@ -2635,7 +2650,18 @@ function onInacTypeChange() {
               CMT: cmt,
             };
           }
-
+          
+          var inacType = FormManager.getActualValue('inacType');
+          var inacCd = FormManager.getActualValue('inacCd');
+          var clientTier = FormManager.getActualValue('clientTier');
+          var isuCd = FormManager.getActualValue('isuCd');
+          if (cluster == '09198') {
+            FormManager.readOnly('inacCd');
+            FormManager.readOnly('inacType');
+            FormManager.readOnly('clientTier');
+            FormManager.readOnly('isuCd');
+          }
+          
           if (qParams != undefined) {
             var results = cmr.query('GET.INAC_CD', qParams);
             if (results != null && results.length > 0) {
@@ -2675,6 +2701,11 @@ function onInacTypeChange() {
               FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
             }
           }
+        } 
+        var cluster = FormManager.getActualValue('apCustClusterId')
+        if (cluster == '09198') {
+          FormManager.readOnly('inacCd');
+          FormManager.readOnly('inacType');
         }
 
       });
@@ -3049,16 +3080,17 @@ function setISBUScenarioLogic() {
       isbuList = [ 'BPN1', 'BPN2' ];
       console.log("isbuList = " + isbuList);
       FormManager.enable('isbuCd');
-      FormManager.setValue('isbuCd', '');
       FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
-    }
+    } 
   }
   
   var cluster = FormManager.getActualValue('apCustClusterId')
-  if ((cmrIssuingCntry == '852' || cmrIssuingCntry == '818') && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS')) {
-    if (cluster == '09198' || cluster == '09197') {
+  if (cmrIssuingCntry == '852' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS')) {
+    if (cluster == '09198') {
       FormManager.setValue('inacCd', '6272');
       FormManager.setValue('inacType', 'I');
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
     } else {
       FormManager.setValue('inacCd', '');
       FormManager.setValue('inacType', '');
@@ -3274,13 +3306,7 @@ function updateMRCAseanAnzIsa() {
       }
     }
     if (_exsitFlag == 0) {
-      if (cntry == '744' && (custSubGrp == 'PRIV' || custSubGrp == 'ECOSY' || custGrp == 'KYNDR')) {
-        FormManager.setValue('mrcCd', '3');
-      } else {
-        FormManager.setValue('mrcCd', '2');
-      }
-      
-      if ((cntry == '852' || cntry == '818') && (custSubGrp == 'ECSYS' || custSubGrp == 'CROSS' || custSubGrp == 'ASLOM' || custSubGrp == 'BUSPR')) {
+      if (cntry == '852' && (custSubGrp == 'ECSYS' || custSubGrp == 'CROSS' || custSubGrp == 'ASLOM' || custSubGrp == 'BUSPR')) {
         FormManager.setValue('mrcCd', '3');
       } 
     }
@@ -7223,10 +7249,11 @@ function setCTCIsuByClusterIndonesia() {
     FormManager.setValue('inacCd', '');
     FormManager.setValue('inacType', '');
   }
-
-  FormManager.enable('inacCd');
-  FormManager.enable('inacType');
-
+  if (custSubGrp != 'KYND') {
+    FormManager.enable('inacCd');
+    FormManager.enable('inacType');
+  }
+  
   if (custSubGrp == 'AQSTN' || custSubGrp == 'XAQST' || custSubGrp == 'NRML') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', 'E']);
     FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['12328', '12330', '12332', '12327', '12329', '12331', '12334', '12338', '12342', '12346', '12336', '12340', '12344', '12348', '12333', '12337', '12345', '12335', '12339', '12343', '12347', '12452', '12451', '12450']);
@@ -8175,6 +8202,16 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
       clearClusterFieldsScenarios = ['ESOSW', 'NRML', 'NRMLC', 'AQSTN', 'XAQST', 'XESO'];
       if (scenario == 'CROSS' && scenarioChanged) {
         FormManager.setValue('apCustClusterId', '00002');
+      }
+    }
+    
+    if (cntry == '852') {
+      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLO', 'XAQST'];
+      if (scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
+        FormManager.setValue('apCustClusterId', '');
+        FormManager.setValue('clientTier', '');
+        FormManager.setValue('isuCd', '');
+        FormManager.setValue('mrcCd', '');
       }
     }
 
