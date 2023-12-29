@@ -2,12 +2,11 @@
 var _isicHandlerAP = null;
 var _clusterHandlerAP = null;
 var _vatExemptHandler = null;
-var _bpRelTypeHandlerGCG = null;
 var _isuHandler = null;
 var _vatRegisterHandlerSG = null;
 var _inacHandler = null;
 var  custSubGrpHandler = null;
-var oldClusterCd = null;
+var  oldClusterCd = null;
 
 function addHandlersForAP() {
  if (_isicHandlerAP == null) {
@@ -2073,9 +2072,31 @@ function handleObseleteExpiredDataForUpdate() {
   }
 }
 
+
+function executeBeforeSubmit() {
+  console.log('>>>> executeBeforeSubmit >>>>');
+  var reqType = FormManager.getActualValue('reqType');
+  var action = FormManager.getActualValue('yourAction');
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == SysLoc.SINGAPORE) {
+    if (reqType == 'U') {
+      var errMsg = checkAnyChangesOnCustNameAddrGST(cntry);
+      if (errMsg != '' && action == 'SFP') {
+        cmr.showAlert(errMsg);
+      } else {
+        showVerificationModal();
+      }
+    } else {
+      showVerificationModal();
+    }
+  }
+}
+
 function showVerificationModal() {
   cmr.showModal('addressVerificationModal');
 }
+
 
 function checkAnyChangesOnCustNameAddrGST(cntry) {
   console.log('>>>> checkAnyChangesOnCustNameAddrGST >>>>');
