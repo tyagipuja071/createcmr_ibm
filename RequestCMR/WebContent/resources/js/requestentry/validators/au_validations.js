@@ -1764,7 +1764,7 @@ function setCTCIsuByClusterANZ() {
   }
   var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
     var clusterVal = FormManager.getActualValue('apCustClusterId');
-    if (!clusterVal) {
+    if (!clusterVal && clusterVal == '00003') {
       return;
     }
     var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -3249,7 +3249,6 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addAbnValidatorForAU, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.AUSTRALIA]);
-  GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.AUSTRALIA], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.AUSTRALIA], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addSoltToAddressValidator, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addAddressInstancesValidator, [SysLoc.AUSTRALIA], null, true);
