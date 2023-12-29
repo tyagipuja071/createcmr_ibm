@@ -7257,8 +7257,8 @@ function setCTCIsuByClusterIndonesia() {
     FormManager.readOnly('mrcCd');
   } else if (custSubGrp == 'BUSPR') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
-    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['00000', '00089']);
-    FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['00089']);
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['8B']);
     FormManager.setValue('mrcCd', '3');
     if (_apCustClusterId == '00089') {
       FormManager.setValue('clientTier', 'Z');
@@ -7267,13 +7267,13 @@ function setCTCIsuByClusterIndonesia() {
       FormManager.setValue('clientTier', 'Z');
       FormManager.setValue('isuCd', '34');
     }
-    // FormManager.readOnly('apCustClusterId');
+    FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
   }  else if (custSubGrp == 'ASLOM' || custSubGrp == 'XASLM') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'E']);
-    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['09193', '08040', '11977', '11976', '12328', '12330', '12332', '12327', '12329', '12331', '12334', '12338', '12342', '12346', '12336', '12340', '12344', '12348', '12333', '12337', '12345', '12335', '12339', '12343', '12347', '12452', '12451', '12450' ]);
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['09193','08040', '11977', '11976', '12328', '12330', '12332', '12327', '12329', '12331', '12334', '12338',  '12342', '12346', '12336', '12340', '12344', '12348', '12333', '12337', '12345', '12335', '12339', '12343',  '12347', '12452', '12451', '12450' ]);
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34', '5K', '36', '27']);
     FormManager.setValue('inacCd', '');
     FormManager.setValue('inacType', '');
@@ -7294,7 +7294,7 @@ function setCTCIsuByClusterIndonesia() {
       FormManager.setValue('inacType', 'I');
       FormManager.readOnly('inacCd');
       FormManager.readOnly('inacType');
-    } else if (_apCustClusterId == '08040' || _apCustClusterId == '11979' || _apCustClusterId == '11978' || _apCustClusterId =='11977' || _apCustClusterId =='11976') {
+    } else if (_apCustClusterId == '08040'  || _apCustClusterId =='11977' || _apCustClusterId =='11976') {
       FormManager.setValue('clientTier', 'Y');
       FormManager.setValue('isuCd', '36');
     } else if (_apCustClusterId == '12328' || _apCustClusterId == '12330' || _apCustClusterId == '12332' || _apCustClusterId == '12327' ||  _apCustClusterId == '12329' || _apCustClusterId == '12331' ) {
