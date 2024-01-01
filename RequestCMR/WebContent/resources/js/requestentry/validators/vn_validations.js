@@ -217,7 +217,6 @@ function addAfterConfigAP() {
     FormManager.readOnly('subIndustryCd');
   } else {
     FormManager.enable('mrcCd');
-    FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
     FormManager.enable('abbrevLocn');
@@ -1414,9 +1413,7 @@ function setISBUforBPscenario() {
     FormManager.enable('isbuCd');
   } else if (role == 'REQUESTER' || role == 'VIEWER') {
     FormManager.readOnly('isbuCd');
-  } else if (role == 'PROCESSOR') {
-    FormManager.enable('isbuCd');
-  }
+  } 
 }
 
 function onCustSubGrpChange() {
@@ -3085,7 +3082,7 @@ function setISBUScenarioLogic() {
   }
   
   var cluster = FormManager.getActualValue('apCustClusterId')
-  if (cmrIssuingCntry == '852' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS')) {
+  if (cmrIssuingCntry == '852' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'XASLM' || custSubGrp == 'CROSS')) {
     if (cluster == '09198') {
       FormManager.setValue('inacCd', '6272');
       FormManager.setValue('inacType', 'I');
