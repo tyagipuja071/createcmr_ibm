@@ -1031,6 +1031,8 @@ function afterConfigChange() {
       var value = FormManager.getActualValue('inacType');
       if ((cmrCntry != '616' && cmrCntry != '641') && (value && dojo.string.trim(value) == 'I')) {
         FormManager.addValidator('inacCd', Validators.NUMBER, [ 'INAC Code' ], 'MAIN_IBM_TAB');
+      } else if ((cmrCntry == '852' || cmrCntry == '818') && (value && dojo.string.trim(value) == 'N')) {
+        FormManager.addValidator('inacCd', Validators.ALPHANUM, [ 'INAC Code' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('inacCd', Validators.NUMBER);
       }
@@ -2636,11 +2638,10 @@ function executeRecreateCMR() {
 }
 
 function checkIfDataOrAddressFieldsUpdated(frmCMR) {
-	var reqRsn = FormManager.getActualValue('reqReason');
-  if(reqRsn == 'PAYG')
-	  {
-	  return;
-	  }
+  var reqRsn = FormManager.getActualValue('reqReason');
+  if (reqRsn == 'PAYG') {
+    return;
+  }
   console.log("checkIfDataOrAddressFieldsUpdated..............");
   var reqType = FormManager.getActualValue('reqType');
   var isNoDataUpdated = false;
