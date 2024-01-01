@@ -3078,7 +3078,7 @@ function setISBUScenarioLogic() {
   }
   
   var cluster = FormManager.getActualValue('apCustClusterId')
-  if (cmrIssuingCntry == '818' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS')) {
+  if (cmrIssuingCntry == '818' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'XASLO' || custSubGrp == 'CROSS')) {
     if (cluster == '09197') {
       FormManager.setValue('inacCd', '6272');
       FormManager.setValue('inacType', 'I');
