@@ -45,16 +45,14 @@ function addHandlersForAP() {
 }
 
 function setInacType(){
-	if(FormManager.getActualValue('inacCd')){
-	var qParams = {
-		ISSUING_CNTRY: FormManager.getActualValue('cmrIssuingCntry'),
-		CD: FormManager.getActualValue('inacCd'),
-	};
-	var result = cmr.query('GET.INAC_TYPE', qParams);
-	 if(result != undefined && result.ret1 != ''){
-		FormManager.setValue('inacType',result.ret1.substr(0,1));
-		FormManager.readOnly('inacType');
+	var inacCd = FormManager.getActualValue('inacCd');
+	if(inacCd != undefined  && inacCd != ''){
+	 if(isNaN(inacCd)){
+		FormManager.setValue('inacType','I');
+	}else{
+	  FormManager.setValue('inacType','N');	
 	}
+	 FormManager.readOnly('inacType');
 	}
 }
 
