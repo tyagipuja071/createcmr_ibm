@@ -194,6 +194,7 @@ function addAfterConfigAP() {
     FormManager.readOnly('subIndustryCd');
   } else {
     FormManager.enable('mrcCd');
+    FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
     FormManager.enable('abbrevLocn');
@@ -1210,7 +1211,7 @@ function setISBUforBPscenario() {
     FormManager.enable('isbuCd');
   } else if (role == 'REQUESTER' || role == 'VIEWER') {
     FormManager.readOnly('isbuCd');
-  } 
+  }
 }
 
 function onCustSubGrpChange() {
