@@ -429,7 +429,7 @@ public abstract class APHandler extends GEOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-    if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG) || cmrIssuingCntry.equalsIgnoreCase(SystemLocation.MACAO)) {
+    if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG)) {
       if (data.getMrcCd() != null && data.getApCustClusterId() != null && data.getCustSubGrp() != null && data.getClientTier() != null) {
         List<String> codes = Arrays.asList("03756", "03757", "03758", "03759", "04249", "05485", "05486");
         if ("3".equalsIgnoreCase(data.getMrcCd())
