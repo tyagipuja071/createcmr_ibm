@@ -1764,7 +1764,7 @@ function setCTCIsuByClusterANZ() {
   }
   var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
     var clusterVal = FormManager.getActualValue('apCustClusterId');
-    if (!clusterVal) {
+    if (!clusterVal && clusterVal == '00003') {
       return;
     }
     var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -1831,20 +1831,22 @@ function addAbnValidatorForAU() {
       validate: function () {
         var abn = FormManager.getActualValue('vat');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp == "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp == "XNRML" || custSubGrp == "SOFT"
-          || custSubGrp == "XSOFT") {
-          if (abn && abn.length != 11) {
-            return new ValidationResult({
-              id: 'vat',
-              type: 'text',
-              name: 'ABN#'
-            }, false, 'The length of ABN# should be exactly 11.');
-          } else {
-            return new ValidationResult(null, true);
-          }
+        /*if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp == "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp == "XNRML" || custSubGrp == "SOFT"
+        || custSubGrp == "XSOFT") {*/
+        if (abn && abn.length != 11) {
+          return new ValidationResult({
+            id: 'vat',
+            type: 'text',
+            name: 'ABN#'
+          }, false, 'The length of ABN# should be exactly 11.');
         } else {
           return new ValidationResult(null, true);
         }
+      //} 
+      
+     /* else {
+        return new ValidationResult(null, true);
+      }*/
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
@@ -3249,7 +3251,6 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addAbnValidatorForAU, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.AUSTRALIA]);
-  GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.AUSTRALIA], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.AUSTRALIA], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addSoltToAddressValidator, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addAddressInstancesValidator, [SysLoc.AUSTRALIA], null, true);

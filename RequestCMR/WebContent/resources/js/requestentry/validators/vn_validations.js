@@ -33,19 +33,6 @@ function addHandlersForAP() {
     });
   }
 
-  if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
-    _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
-      // CREATCMR-7883-7884
-      _inacHandlerANZSG = _inacHandlerANZSG + 1;
-// setInacByCluster();
-      setInacNacValuesIN();
-      setIsuOnIsic();
-
-      filterInacCd('744', '10215', 'N', 'I529');
-      applyClusterFilters();
-    });
-  }
-
   if (_vatRegisterHandlerSG == null) {
     _vatRegisterHandlerSG = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function (value) {
       cmr
@@ -79,13 +66,6 @@ function addHandlersForGCG() {
   if (_isicHandlerGCG == null) {
     _isicHandlerGCG = dojo.connect(FormManager.getField('isicCd'), 'onChange', function (value) {
       setIsuOnIsic();
-    });
-  }
-
-  if (_clusterHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
-    _clusterHandlerGCG = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
-      setIsuOnIsic();
-      setInacByClusterHKMO();
     });
   }
 
@@ -134,9 +114,6 @@ function afterConfigForIndia() {
   // CREATCMR-7005
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
-    setInacNacValuesIN();
-    filterInacCd('744', '10215', 'N', 'I529');
-    applyClusterFilters();
     lockInacNacFieldsByScenarioSubType();
     lockFieldsWithDefaultValuesByScenarioSubType();
 
@@ -217,7 +194,6 @@ function addAfterConfigAP() {
     FormManager.readOnly('subIndustryCd');
   } else {
     FormManager.enable('mrcCd');
-    FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
     FormManager.enable('abbrevLocn');
@@ -367,12 +343,6 @@ function addAfterConfigAP() {
   if (reqType == 'C') {
     setIsuOnIsic();
     onInacTypeChange();
-    // CREATCMR-7883-7884
-    _inacHandlerANZSG = 0;
-    // setInacByCluster();
-    setInacNacValuesIN();
-    filterInacCd('744', '10215', 'N', 'I529');
-    applyClusterFilters();
   }
   if (cntry == '834') {
     // FormManager.removeValidator('clientTier', Validators.REQUIRED);
@@ -606,10 +576,6 @@ function setInacByCluster() {
     setInacCdTypeStatus();
   } else {
     console.log('>>>> setInacByCluster ELSE scenario >>>>');
-    if (cntry != '744') {
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-    }
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     
@@ -645,91 +611,6 @@ function setInacByCluster() {
     }
     // CREATCMR-7883-7884
     clearInacOnClusterChange(_cluster);
-    return;
-  }
-}
-function setInacByClusterHKMO() {
-  console.log('>>>> setInacByClusterHKMO >>>>');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var _cluster = FormManager.getActualValue('apCustClusterId');
-  var HKClusterList = ['09059', '10175', '10176', '10177', '10178'];
-  var MOClusterList = ['09060'];
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (!_cluster) {
-    return;
-  }
-  if (HKClusterList.includes(_cluster) || MOClusterList.includes(_cluster)) {
-    FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-    FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      CMT: '%' + _cluster + '%'
-    };
-    var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
-    if (inacList != null) {
-      var inacTypeSelected = '';
-      var arr = inacList.map(inacList => inacList.ret1);
-      inacTypeSelected = inacList.map(inacList => inacList.ret2);
-      FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
-      if (inacList.length == 1) {
-        FormManager.setValue('inacCd', arr[0]);
-      }
-      if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
-        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
-        FormManager.setValue('inacType', 'I');
-      } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
-        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
-        FormManager.setValue('inacType', 'N');
-      } else if (inacType != '' && inacTypeSelected[0].includes(',IN')) {
-        FormManager.resetDropdownValues(FormManager.getField('inacType'));
-        var value = FormManager.getField('inacType');
-        var cmt = value + ',' + _cluster + '%';
-        var value = FormManager.getActualValue('inacType');
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        console.log('>>> setInacByClusterHKMO >>> value = ' + value);
-        if (value != null) {
-          var inacCdValue = [];
-          var qParams = {
-            _qall: 'Y',
-            ISSUING_CNTRY: cntry,
-            CMT: cmt,
-          };
-          var results = cmr.query('GET.INAC_CD', qParams);
-          if (results != null) {
-            for (var i = 0; i < results.length; i++) {
-              inacCdValue.push(results[i].ret1);
-            }
-            FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-            if (inacCdValue.length == 1) {
-              FormManager.setValue('inacCd', inacCdValue[0]);
-            }
-          }
-        }
-      } else {
-        FormManager.clearValue('inacCd');
-        FormManager.clearValue('inacType');
-        FormManager.resetDropdownValues(FormManager.getField('inacType'));
-      }
-    }
-  } else {
-    FormManager.clearValue('inacCd');
-    FormManager.clearValue('inacType');
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-    FormManager.resetDropdownValues(FormManager.getField('inacType'));
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'DUMMY') {
-      FormManager.setValue('mrcCd', '2');
-      if (custSubGrp == 'DUMMY') {
-        FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-      }
-    } else {
-      FormManager.setValue('mrcCd', '3');
-    }
     return;
   }
 }
@@ -791,91 +672,6 @@ function checkClusterSubScenarioChanged() {
   return true;
 }
 
-function setInacNacValuesIN() {
-  console.log('>>>> setInacNacValuesIN >>>>');
-  var _cluster = FormManager.getActualValue('apCustClusterId');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  /* Avoid INAC type/code override in page reload */
-  if (cntry = '744') {
-    if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-      return;
-    }
-
-    if (previousCluster == null) {
-      previousCluster = FormManager.getActualValue('apCustClusterId');
-    }
-    if (previousCluster == _cluster) {
-      return;
-    }
-
-    FormManager.setValue('apCustClusterId', _cluster);
-
-    var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      CMT: '%' + _cluster + '%'
-    };
-    var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
-    if (inacList != null && inacList.length > 0) {
-      var inacTypeSelected = '';
-      var arr = inacList.map(inacList => inacList.ret1);
-      inacTypeSelected = inacList.map(inacList => inacList.ret2);
-      FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
-      console.log(arr);
-      if (inacList.length == 1) {
-        FormManager.setValue('inacCd', arr[0]);
-      }
-      if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
-        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
-        FormManager.setValue('inacType', 'I');
-      } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
-        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
-        FormManager.setValue('inacType', 'N');
-      } else if (inacType != '' && inacTypeSelected[0].includes(',IN')) {
-        FormManager.resetDropdownValues(FormManager.getField('inacType'));
-        var value = FormManager.getField('inacType');
-        var cmt = value + ',' + _cluster + '%';
-        var value = FormManager.getActualValue('inacType');
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        console.log(value);
-        if (value != null) {
-          var inacCdValue = [];
-          var qParams = {
-            _qall: 'Y',
-            ISSUING_CNTRY: cntry,
-            CMT: cmt,
-          };
-          var results = cmr.query('GET.INAC_CD', qParams);
-          if (results != null) {
-            for (var i = 0; i < results.length; i++) {
-              inacCdValue.push(results[i].ret1);
-            }
-            FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-            FormManager.setValue('inacCd', inacCdValue[0]);
-            if (inacCdValue.length == 1) {
-              FormManager.setValue('inacCd', inacCdValue[0]);
-            }
-          }
-          FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-          FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-        } else {
-          FormManager.resetDropdownValues(FormManager.getField('inacType'));
-        }
-        FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-        FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-      } else {
-        FormManager.resetDropdownValues(FormManager.getField('inacType'));
-        FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-        FormManager.clearValue('inacType');
-        FormManager.clearValue('inacCd');
-        FormManager.removeValidator('inacType', Validators.REQUIRED);
-        FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      }
-    }
-  }
-}
 /* ASEAN ANZ GCG ISIC MAPPING */
 function setIsuOnIsic() {
   console.log('>>>> setIsuOnIsic >>>>');
@@ -1414,8 +1210,6 @@ function setISBUforBPscenario() {
     FormManager.enable('isbuCd');
   } else if (role == 'REQUESTER' || role == 'VIEWER') {
     FormManager.readOnly('isbuCd');
-  } else if (role == 'PROCESSOR') {
-    FormManager.enable('isbuCd');
   }
 }
 
@@ -3074,18 +2868,10 @@ function setISBUScenarioLogic() {
     if (cmrIssuingCntry == '744') {
       FormManager.setValue('isbuCd', 'GMBW');
     }
-  } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-    if (cmrIssuingCntry == '643' || cmrIssuingCntry == '646' || cmrIssuingCntry == '714' || cmrIssuingCntry == '720' || cmrIssuingCntry == '749' || cmrIssuingCntry == '778'
-        || cmrIssuingCntry == '818' || cmrIssuingCntry == '834' || cmrIssuingCntry == '852' || cmrIssuingCntry == '856') {
-      isbuList = [ 'BPN1', 'BPN2' ];
-      console.log("isbuList = " + isbuList);
-      FormManager.enable('isbuCd');
-      FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
-    } 
   }
   
   var cluster = FormManager.getActualValue('apCustClusterId')
-  if (cmrIssuingCntry == '852' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS')) {
+  if (cmrIssuingCntry == '852' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'XASLM' || custSubGrp == 'CROSS')) {
     if (cluster == '09198') {
       FormManager.setValue('inacCd', '6272');
       FormManager.setValue('inacType', 'I');
@@ -6002,18 +5788,6 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('contactName3', Validators.REQUIRED);
     FormManager.removeValidator('busnType', Validators.REQUIRED);
   }
-  if (reqType == 'U' && cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('inacCd');
-
-    // setting all fields as not Mandt for update Req
-    FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-  }
 }
 
 function executeBeforeSubmit() {
@@ -8350,71 +8124,6 @@ function setInacCdTypeStatus() {
 
   var inacCdValue = [];
   var cmt = '';
-
-  if (cntry == '834' && reqType == 'C') {
-    if (clusterSGEmptyInac) {
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-      // LOCK GB Seg(QTC)/ISU
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('isuCd');
-      console.log('remove REQUIRED of INAC related>>>>');
-      console.log('setInacCdTypeStatus() >>>> clusterSGEmptyInac, return.');
-      return;
-    } else if (clusterSGAllInac) {
-      console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
-      cmt = '%';
-    } else if (!custSubGrpListSg.includes(custSubGrp)) {
-      cmt = '%' + cluster + '%';
-      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
-    }
-
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      CMT: cmt,
-    };
-
-    var results = cmr.query('GET.INAC_CD', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        if (!inacCdValue.includes(results[i].ret1)) {
-          inacCdValue.push(results[i].ret1);
-        }
-      }
-    }
-    console.log('inacCd.length =' + inacCdValue.length);
-    console.log('Find inacCd =' + inacCdValue);
-    if (inacCdValue.length == 1 && inacCdValue[0] != '') {
-      console.log('setInacCdTypeStatus() >>>> set INAC code/type readonly >>>');
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('inacType');
-    } else if (inacCdValue.length > 1) {
-      console.log('setInacCdTypeStatus() >>>> enable INAC related >>>>');
-      FormManager.enable('inacCd');
-      FormManager.enable('inacType');
-    }
-
-    // Add/Remove REQUIRE mark for INAC related
-    if (clusterSGAllInac) {
-      console.log('remove REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-    }
-
-    if (isInacRequired) {
-      console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-    }
-    // LOCK GB Seg(QTC)/ISU
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-  }
 }
 
 function setInacCdTypeStatus() {
@@ -8439,73 +8148,6 @@ function setInacCdTypeStatus() {
 
   var inacCdValue = [];
   var cmt = '';
-
-  if (cntry == '834' && reqType == 'C') {
-    if (clusterSGEmptyInac) {
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-      // LOCK GB Seg(QTC)/ISU
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('isuCd');
-      console.log('remove REQUIRED of INAC related>>>>');
-      console.log('setInacCdTypeStatus() >>>> clusterSGEmptyInac, return.');
-      return;
-    } else if (clusterSGAllInac) {
-      console.log('setInacCdTypeStatus() >>>> clusterSGAllInac.');
-      cmt = '%';
-    } else if (!custSubGrpListSg.includes(custSubGrp)) {
-      cmt = '%' + cluster + '%';
-      console.log('setInacCdTypeStatus() >>>> cmt=' + cmt);
-    }
-
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      CMT: cmt,
-    };
-
-    var results = cmr.query('GET.INAC_CD', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        if (!inacCdValue.includes(results[i].ret1)) {
-          inacCdValue.push(results[i].ret1);
-        }
-      }
-    }
-    console.log('inacCd.length =' + inacCdValue.length);
-    console.log('Find inacCd =' + inacCdValue);
-    if (inacCdValue.length == 1 && inacCdValue[0] != '') {
-      console.log('setInacCdTypeStatus() >>>> set INAC code/type readonly >>>');
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('inacType');
-    } else if (inacCdValue.length > 1) {
-      console.log('setInacCdTypeStatus() >>>> enable INAC related >>>>');
-      FormManager.enable('inacCd');
-      FormManager.enable('inacType');
-    }
-
-    // Add/Remove REQUIRE mark for INAC related
-    if (clusterSGAllInac) {
-      console.log('remove REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.setValue('inacCd', '');
-      FormManager.setValue('inacType', '');
-    }
-
-    if (isInacRequired) {
-      console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-      FormManager.enable('inacCd');
-      FormManager.enable('inacType');
-    }
-    // LOCK GB Seg(QTC)/ISU
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-  }
 }
 
 function setClusterGlcCovIdMapNrmlc() {
@@ -8601,277 +8243,66 @@ function checkCmrUpdateBeforeImport() {
 }
 
 dojo.addOnLoad(function () {
-  GEOHandler.AP = [SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
-  SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA];
-  GEOHandler.ISA = [SysLoc.INDIA, SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.NEPAL];
-  GEOHandler.ASEAN = [SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.LAOS, SysLoc.MALASIA, SysLoc.CAMBODIA];
-  GEOHandler.ANZ = [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND];
-  GEOHandler.GCG = [SysLoc.HONG_KONG, SysLoc.MACAO];
-  GEOHandler.APAC_1 = [SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.BRUNEI, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.CHINA, SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.TAIWAN, SysLoc.KOREA];
-  // CREATCMR-6825
-  GEOHandler.APAC = [SysLoc.SINGAPORE, SysLoc.PHILIPPINES, SysLoc.THAILAND, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.BRUNEI, SysLoc.VIETNAM, SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA,
-  SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.HONG_KONG, SysLoc.MACAO];
   console.log('adding AP functions...');
   console.log('the value of person full id is ' + localStorage.getItem("pID"));
   GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.registerValidator(addSalesRepNameNoCntryValidator, [SysLoc.AUSTRALIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG,
-  SysLoc.NEW_ZEALAND, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL]);
-  GEOHandler.addAfterTemplateLoad(addSalesRepNameNoCntryValidatorBluepages, [SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.LAOS, SysLoc.CAMBODIA]);
+  GEOHandler.registerValidator(addSalesRepNameNoCntryValidator, [SysLoc.VIETNAM]);
 
   // 1558942: Update Address Details of different address types at one time
-  GEOHandler.enableCopyAddress(GEOHandler.AP);
-  GEOHandler.addAfterConfig(reqReasonHandler, [SysLoc.MACAO, SysLoc.HONG_KONG]);
-
-  GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.AP);
-  GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.AP);
-  GEOHandler.addAfterConfig(saveClusterAfterSave, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(savePreviousSubScenario, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
-  GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
-  GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setCollectionCd, GEOHandler.AP, [SysLoc.AUSTRALIA, SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(setCollCdFrAU, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterConfig(setCollCdFrIndia, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(onSubIndustryChange, GEOHandler.AP);
-  GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ASEAN);
-  GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ANZ);
-  GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ISA);
-  GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
-  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
-  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
-  // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
-
-  GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setCTCIsuByCluster, GEOHandler.AP);
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setCTCIsuByClusterGCG, GEOHandler.GCG);
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByClusterGCG, GEOHandler.GCG);
-  GEOHandler.addAfterConfig(setCTCIsuByClusterANZ, GEOHandler.ANZ);
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByClusterANZ, GEOHandler.ANZ);
-  GEOHandler.addAfterConfig(setCTCIsuByClusterASEAN, GEOHandler.ASEAN);
-  // CREATCMR-7878
-  GEOHandler.addAfterConfig(setCTCIsuByClusterISA, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH]);
-  GEOHandler.addAfterTemplateLoad(setISUDropDownValues, GEOHandler.AP);
-  // GEOHandler.addAfterConfig(setIsuByClusterCTC, GEOHandler.AP);
-  GEOHandler.registerValidator(addAbnValidatorForAU, [SysLoc.AUSTRALIA]);
-
-  // GEOHandler.registerValidator(addMandateCmrNoForSG, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(addCmrNoValidator, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(addCompanyProofAttachValidation, [SysLoc.INDIA]);
-  GEOHandler.registerValidator(addressNameSimilarValidator, [SysLoc.INDIA]);
-  GEOHandler.registerValidator(addressNameSameValidator, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(addCompanyProofForSG, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(additionalAddrNmValidator, [SysLoc.SINGAPORE]);
-
-
-  GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND]);
-  GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND]);
-
-  // GEOHandler.addAfterConfig(addValidatorForSingapore, [SysLoc.SINGAPORE]);
-  // GEOHandler.addAfterTemplateLoad(addValidatorForSingapore,
-  // [SysLoc.SINGAPORE]);
-
-  // setting collection code for ASEAN
-  GEOHandler.addAfterConfig(onISBUCdChange, GEOHandler.ASEAN);
-
-  GEOHandler.addAfterConfig(addGovIndcHanlder, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterConfig(addGovCustTypHanlder, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterConfig(onInacTypeChange, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.INDIA, SysLoc.SINGAPORE, SysLoc.THAILAND]);
-
-  // ERO specific
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.GCG);
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.ASEAN);
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.ISA);
-
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.ANZ);
-  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.ANZ, GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.GCG, GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.ISA, GEOHandler.ROLE_REQUESTER, true);
-
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, [SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, [SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforSingapore, [SysLoc.SINGAPORE]);
-  // CREATCMR-7656
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefixforANZ, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforANZ, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefixforANZ, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforANZ, [SysLoc.AUSTRALIA]);
+  GEOHandler.enableCopyAddress([SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(addAfterConfigAP, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(addAfterConfigAP, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(updateIndustryClass, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(updateProvCd, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(updateRegionCd, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(setCollectionCd, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(onSubIndustryChange, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, [SysLoc.VIETNAM]);
+  GEOHandler.enableCustomerNamesOnAddress([SysLoc.VIETNAM]);
+  GEOHandler.addAddrFunction(updateMainCustomerNames, [SysLoc.VIETNAM]);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, [SysLoc.VIETNAM]);
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(onCustSubGrpChange, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(setCTCIsuByCluster, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(setCTCIsuByClusterASEAN, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setISUDropDownValues, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(onISBUCdChange, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.VIETNAM], GEOHandler.ROLE_REQUESTER, true);
   // 2333
-  GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
-  GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
-  GEOHandler.addAfterConfig(addVatValidationforSingapore, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(addressNameSameValidator, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(additionalAddrNmValidator, [SysLoc.SINGAPORE]);
-  GEOHandler.registerValidator(additionalAddrNmValidatorNZ, [SysLoc.NEW_ZEALAND], null, true);
-  GEOHandler.registerValidator(additionalAddrNmValidatorOldNZ, [SysLoc.NEW_ZEALAND], null, true);
-
-
+  GEOHandler.addAfterConfig(setISBUforBPscenario, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, [SysLoc.VIETNAM]);
   // checklist
-  GEOHandler.registerValidator(addChecklistValidator, [SysLoc.VIETNAM, SysLoc.LAOS, SysLoc.CAMBODIA, SysLoc.HONG_KONG, SysLoc.SINGAPORE, SysLoc.MACAO, SysLoc.MYANMAR]);
-  GEOHandler.addAfterConfig(initChecklistMainAddress, [SysLoc.VIETNAM, SysLoc.LAOS, SysLoc.CAMBODIA, SysLoc.HONG_KONG, SysLoc.SINGAPORE, SysLoc.MACAO, SysLoc.MYANMAR]);
+  GEOHandler.registerValidator(addChecklistValidator, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(initChecklistMainAddress, [SysLoc.VIETNAM]);
   // Address validations
-  GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.AP);
-  GEOHandler.registerValidator(addAddressInstancesValidator, GEOHandler.AP, null, true);
-  GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.AP, GEOHandler.REQUESTER, true);
-  GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.AP, null, true);
-
-  GEOHandler.registerValidator(addAttachmentValidator, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.NEPAL, SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.NEW_ZEALAND], GEOHandler.REQUESTER, false, false);
-  GEOHandler.registerValidator(addEROAttachmentValidator, [SysLoc.MACAO, SysLoc.HONG_KONG], GEOHandler.REQUESTER, false, false);
-
-  // CREATCMR-7878
-  // GEOHandler.registerValidator(setAttachmentOnCluster, [ SysLoc.INDIA,
-  // SysLoc.SRI_LANKA, SysLoc.BANGLADESH], GEOHandler.REQUESTER, false, false);
-  GEOHandler.registerValidator(setAttachmentOnCluster, [SysLoc.INDIA], GEOHandler.REQUESTER, false, false);
-
-  // double creates
-  GEOHandler.addAfterConfig(setFieldsForDoubleCreates, [SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.VIETNAM, SysLoc.CAMBODIA]);
-  GEOHandler.addAfterTemplateLoad(setFieldsForDoubleCreates, [SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.VIETNAM, SysLoc.CAMBODIA]);
-  GEOHandler.registerValidator(addDoubleCreateValidator, [SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.VIETNAM, SysLoc.CAMBODIA], null, true);
-  GEOHandler.registerValidator(addDoubleCreateValidatorSG, [SysLoc.SINGAPORE], null, true);
-  // GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.AP);
-
-  GEOHandler.registerValidator(addFormatFieldValidator, GEOHandler.AP, null, true);
-
-  GEOHandler.registerValidator(addFieldFormatValidator, GEOHandler.AP, null, true);
-
-  GEOHandler.registerValidator(addFormatForCMRNumValidator, [SysLoc.SINGAPORE], null, true);
-
-  // CREATCMR-6398
-  GEOHandler.registerValidator(businessParterValidator, [SysLoc.SINGAPORE], null, true);
-
-  GEOHandler.addAddrFunction(lockCustMainNames, GEOHandler.AP);
-  // Story - 1781935 -> AR Code for Singapore
-  GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [SysLoc.SINGAPORE]);
-  GEOHandler.addAfterTemplateLoad(setCollCdFrSingapore, [SysLoc.SINGAPORE]);
-  // CREATCMR-9955 remove character limitation in below scenario
-  // GEOHandler.registerValidator(addAddressLengthValidators, [SysLoc.AUSTRALIA,
-  // SysLoc.NEW_ZEALAND], null, true);
-  // GEOHandler.registerValidator(addStreetValidationChkReq, [SysLoc.AUSTRALIA],
-  // null, true);
-  GEOHandler.registerValidator(validateContractAddrAU, [SysLoc.AUSTRALIA], null, true);
-  GEOHandler.registerValidator(validateCustNameForNonContractAddrs, [SysLoc.AUSTRALIA], null, true);
-  GEOHandler.registerValidator(validateStreetAddrCont2, [SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
-  SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA], null, true);
-  // CREATCMR-7589
-  GEOHandler.addAfterConfig(custSubGrpHandlerINAUSG, [SysLoc.INDIA, SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
-  // GEOHandler.addAfterConfig(onIsicChange, [SysLoc.INDIA, SysLoc.AUSTRALIA,
-  // SysLoc.SINGAPORE ]);
-  // GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.INDIA,
-  // SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
-  GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterConfig(onIsicChange, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterTemplateLoad(custSubGrpHandlerINAUSG, [SysLoc.AUSTRALIA, SysLoc.SINGAPORE]);
-  GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
-  GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
-  GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
-  GEOHandler.addAfterConfig(addHandlersForANZ, GEOHandler.ANZ);
-  GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
-  // GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null,
-  // true);
-  GEOHandler.registerValidator(validateABNForAU, [SysLoc.AUSTRALIA], null, true);
-  GEOHandler.addAfterConfig(afterConfigForIndia, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);
-  GEOHandler.addAfterConfig(resetGstExempt, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(resetGstExempt, SysLoc.INDIA);
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByClusterASEAN, GEOHandler.ASEAN);
-  // CREATCMR-7878
-  GEOHandler.addAfterTemplateLoad(setCTCIsuByClusterISA, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH]);
-  GEOHandler.addAfterTemplateLoad(setMrc4IntDumForASEAN, GEOHandler.ASEAN);
-  GEOHandler.addAfterConfig(lockFieldsForIndia, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, SysLoc.INDIA);
-  GEOHandler.addAfterConfig(lockFieldsForAU, [SysLoc.AUSTRALIA]);
-  GEOHandler.addAfterTemplateLoad(lockFieldsForAU, SysLoc.AUSTRALIA);
-  // GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ANZ,
-  // GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.addAfterTemplateLoad(lockAbbvNameOnScenarioChangeGCG, GEOHandler.GCG);
-  GEOHandler.addAfterTemplateLoad(setAbbrvNameBPScen, GEOHandler.GCG);
-  GEOHandler.addAfterConfig(handleExpiredClusterGCG, GEOHandler.GCG);
-  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
-  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
-  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
-  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
-  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeGCG, GEOHandler.GCG);
-  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeGCG, GEOHandler.GCG);
-  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeANZ, GEOHandler.ANZ);
-  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeANZ, GEOHandler.ANZ);
-  GEOHandler.addAfterConfig(lockFieldsForIndia, [SysLoc.INDIA]);
-  GEOHandler.registerValidator(validateCustNameForInternal, [SysLoc.AUSTRALIA], null, true);
-  // GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ],
-  // null, true);
-  GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
-  // after coverage update, the Cluster code options are restricted on Scenario,
-  // so remove this validator
-  // GEOHandler.registerValidator(validateClusterBaseOnScenario, [
-  // SysLoc.SINGAPORE ], null, true);
-  GEOHandler.addAfterConfig(lockInacCodeForIGF, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(lockInacCodeForIGF, SysLoc.INDIA);
-  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
-  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
-  // India Handler
-  // CREATCMR-6825
-  GEOHandler.addAfterConfig(setRepTeamMemberNo, GEOHandler.APAC);
-  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, GEOHandler.APAC);
-  GEOHandler.addAddrFunction(displayVatRegistrartionStatus, [SysLoc.SINGAPORE]);
-  GEOHandler.addAfterConfig(displayVatRegistrartionStatus, [SysLoc.SINGAPORE]);
-  GEOHandler.addAfterTemplateLoad(displayVatRegistrartionStatus, [SysLoc.SINGAPORE]);
-  GEOHandler.addAfterConfig(addCustGrpHandler, GEOHandler.APAC_1);
-
+  GEOHandler.registerValidator(addSoltToAddressValidator, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addAddressInstancesValidator, [SysLoc.VIETNAM], null, true);
+  GEOHandler.registerValidator(addContactInfoValidator, [SysLoc.VIETNAM], GEOHandler.REQUESTER, true);
+  GEOHandler.registerValidator(similarAddrCheckValidator, [SysLoc.VIETNAM], null, true);
+  GEOHandler.addAfterConfig(setFieldsForDoubleCreates, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setFieldsForDoubleCreates, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addDoubleCreateValidator, [SysLoc.VIETNAM], null, true);
+  // GEOHandler.addAfterConfig(setAddressDetailsForView, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addFormatFieldValidator, [SysLoc.VIETNAM], null, true);
+  GEOHandler.registerValidator(addFieldFormatValidator, [SysLoc.VIETNAM], null, true);
+  GEOHandler.addAddrFunction(lockCustMainNames, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(validateStreetAddrCont2, [SysLoc.VIETNAM], null, true);
+  GEOHandler.addAfterConfig(addHandlersForAP, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setCTCIsuByClusterASEAN, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setMrc4IntDumForASEAN, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addValidatorBasedOnCluster, [SysLoc.VIETNAM], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeASEAN, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeASEAN, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addCtcObsoleteValidator, [SysLoc.VIETNAM], null, true);
+  GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(setRepTeamMemberNo, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(addCustGrpHandler, [SysLoc.VIETNAM]);
   // CREATCMR-8581
-  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.APAC_1, null, true);
-
-  // CREATCMR-7655
-  GEOHandler.registerValidator(validatNZBNForNewZeaLand, [SysLoc.NEW_ZEALAND], null, true);
-  GEOHandler.addAfterConfig(afterConfigForNewZeaLand, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.addAfterTemplateLoad(afterConfigForNewZeaLand, SysLoc.NEW_ZEALAND);
-  GEOHandler.addAfterConfig(resetNZNBExempt, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.addAfterTemplateLoad(resetNZNBExempt, SysLoc.NEW_ZEALAND);
-  GEOHandler.addAfterTemplateLoad(onIsicChange, [SysLoc.AUSTRALIA]);
-  // CREATCMR-7658
-  GEOHandler.registerValidator(addValidatorforInstallingNZ, [SysLoc.NEW_ZEALAND], null, true);
-
-  // CREATCMR-7653
-  GEOHandler.registerValidator(checkNZCustomerNameTextWhenSFP, [SysLoc.NEW_ZEALAND, SysLoc.AUSTRALIA], GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.registerValidator(checkNZLandedCountryForCrossWhenSFP, [SysLoc.NEW_ZEALAND], GEOHandler.ROLE_REQUESTER, true);
-  GEOHandler.registerValidator(checkNZCustomerNameStartsForLocalInterDummy, [SysLoc.NEW_ZEALAND], GEOHandler.ROLE_REQUESTER, true);
-
-  // CREATCMR-7884
-  GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
-
-  GEOHandler.addAfterTemplateLoad(setClusterOnScenarioChgGCG, GEOHandler.GCG);
-  GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
-
-  // CREATCMR-7883
-  // CREATCMR-7885 : add SysLoc.SINGAPORE
-  // CREATCMR-7878
-  GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE, SysLoc.SRI_LANKA, SysLoc.BANGLADESH], null, true);
-
-  GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND], null, true);
-  GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [SysLoc.THAILAND, SysLoc.PHILIPPINES]);
-  GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND]);
-  // CREATCMR-7884 -- add NZ to clear cluster
-  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [SysLoc.PHILIPPINES, SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.SINGAPORE]);
-  // CREATCMR-7883
-  GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.AUSTRALIA, SysLoc.MALASIA, SysLoc.INDONESIA, SysLoc.SINGAPORE], null, true);
-  GEOHandler.registerValidator(addKyndrylValidator, [SysLoc.INDIA]);
-
-  // CREATCMR-7884 -- lock cluster for NZ
-  GEOHandler.addAfterTemplateLoad(lockClusterFieldsOnScenarioChange, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.registerValidator(addKyndrylValidator, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(lockFieldsWithDefaultValuesByScenarioSubType, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(lockFieldsWithDefaultValuesByScenarioSubType, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [SysLoc.INDIA]);
-  GEOHandler.registerValidator(validateRetrieveValues, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(applyClusterFilters, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(applyClusterFilters, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(applyClusterFilters, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(applyClusterFilters, [SysLoc.INDIA]);
-  GEOHandler.addAfterConfig(lockFieldsWithDefaultValuesByScenarioSubType, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(lockFieldsWithDefaultValuesByScenarioSubType, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [SysLoc.INDIA]);
-  GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
-  GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.VIETNAM], null, true);
+  GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [SysLoc.VIETNAM]);
 });

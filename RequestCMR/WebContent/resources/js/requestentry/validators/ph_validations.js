@@ -3067,18 +3067,10 @@ function setISBUScenarioLogic() {
     if (cmrIssuingCntry == '744') {
       FormManager.setValue('isbuCd', 'GMBW');
     }
-  } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-    if (cmrIssuingCntry == '643' || cmrIssuingCntry == '646' || cmrIssuingCntry == '714' || cmrIssuingCntry == '720' || cmrIssuingCntry == '749' || cmrIssuingCntry == '778'
-        || cmrIssuingCntry == '818' || cmrIssuingCntry == '834' || cmrIssuingCntry == '852' || cmrIssuingCntry == '856') {
-      isbuList = [ 'BPN1', 'BPN2' ];
-      console.log("isbuList = " + isbuList);
-      FormManager.enable('isbuCd');
-      FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
-    } 
   }
   
   var cluster = FormManager.getActualValue('apCustClusterId')
-  if (cmrIssuingCntry == '818' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS')) {
+  if (cmrIssuingCntry == '818' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'XASLO' || custSubGrp == 'CROSS')) {
     if (cluster == '09197') {
       FormManager.setValue('inacCd', '6272');
       FormManager.setValue('inacType', 'I');
