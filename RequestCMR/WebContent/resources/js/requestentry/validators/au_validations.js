@@ -1831,20 +1831,22 @@ function addAbnValidatorForAU() {
       validate: function () {
         var abn = FormManager.getActualValue('vat');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp == "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp == "XNRML" || custSubGrp == "SOFT"
-          || custSubGrp == "XSOFT") {
-          if (abn && abn.length != 11) {
-            return new ValidationResult({
-              id: 'vat',
-              type: 'text',
-              name: 'ABN#'
-            }, false, 'The length of ABN# should be exactly 11.');
-          } else {
-            return new ValidationResult(null, true);
-          }
+        /*if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp == "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp == "XNRML" || custSubGrp == "SOFT"
+        || custSubGrp == "XSOFT") {*/
+        if (abn && abn.length != 11) {
+          return new ValidationResult({
+            id: 'vat',
+            type: 'text',
+            name: 'ABN#'
+          }, false, 'The length of ABN# should be exactly 11.');
         } else {
           return new ValidationResult(null, true);
         }
+      //} 
+      
+     /* else {
+        return new ValidationResult(null, true);
+      }*/
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
