@@ -7215,11 +7215,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CONTACT":
         muaModel.setPoBox(tempVal);
         break;
-      case "HW_INSTL_MSTR_FLG":
-        if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setHwInstlMstrFlg(tempVal);
-        }
-        break;
       case "LAND_CNTRY":
         muaModel.setLandCntry(tempVal);
         break;
