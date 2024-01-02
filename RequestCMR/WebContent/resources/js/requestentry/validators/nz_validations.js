@@ -239,8 +239,9 @@ function setIsuOnIsic() {
   }
   var isicCd = FormManager.getActualValue('isicCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var cluster = FormManager.getActualValue('apCustClusterId');
   
-  if (custSubGrp == 'XBLUM' || custSubGrp == 'XMKTPC' || custSubGrp == 'BLUMX' || custSubGrp == 'DUMMY' || custSubGrp == 'MKTPC') {
+  if (cluster != '10114' || cluster != '10115') {
     return;
   }
 
@@ -2986,7 +2987,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(addHandlersForNZ, [SysLoc.NEW_ZEALAND]); 
   GEOHandler.addAfterConfig(addAfterConfigNZ, [SysLoc.NEW_ZEALAND]);
   GEOHandler.addAfterConfig(addAfterConfigAP, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.addAfterTemplateLoad(afterTemplateLoadFunctions, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterTemplateLoad(afterTemplateLoadFunctions, [SysLoc.NEW_ZEALAND]);
   GEOHandler.addAddrFunction(addressFunctions, [SysLoc.NEW_ZEALAND]);
   
   GEOHandler.enableCopyAddress([SysLoc.NEW_ZEALAND]);
