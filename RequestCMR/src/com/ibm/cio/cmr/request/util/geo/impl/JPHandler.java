@@ -278,6 +278,8 @@ public class JPHandler extends GEOHandler {
                     data.setCustClass(kna1.getKukla() != null ? kna1.getKukla() : "");
                     data.setInacCd(kna1.getZzkvInac() != null ? kna1.getZzkvInac() : "");
                     data.setCustPrefLang(kna1.getSpras() != null ? kna1.getSpras() : "");
+                    data.setIsuCd(kna1.getBrsch() != null ? kna1.getBrsch() : "");
+                    data.setClientTier(kna1.getKatr3() != null ? kna1.getKatr3() : "");
                   }
                 }
               }
