@@ -1,11 +1,14 @@
 /* Register NETHERLANDS Javascripts */
 var _addrTypesForNL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZP02' ];
+var _prolifCountries = [ 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', 'GE', 'HK', 'IR', 'IQ', 'IL', 'JO', 'KZ', 'KP', 'KW', 'KG', 'LA', 'LB', 'LY', 'MO', 'MD', 'MN', 'MM', 'OM', 'PK', 'PS',
+    'QA', 'RU', 'SA', 'SD', 'SY', 'TW', 'TJ', 'TM', 'UA', 'AE', 'UZ', 'VE', 'VN', 'YE' ];
+var _prolifCountriesP2 = [ 'HK', 'CN', 'MO' ];
 var _poBOXHandler = [];
 var _reqReasonHandler = null;
 
 function afterConfigForNL() {
   var reqType = FormManager.getActualValue('reqType');
-  var role = null;  
+  var role = null;
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
@@ -121,6 +124,7 @@ function afterConfigForNL() {
 
   // CREATCMR-788
   addressQuotationValidatorNL();
+
 }
 
 function lockDunsNo() {
@@ -260,15 +264,16 @@ function setVatValidatorNL() {
       return;
     }
     FormManager.resetValidations('vat');
-   /* if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-    }*/
-    
-    //FormManager.resetValidations('vat');
-    //if (!dojo.byId('vatExempt').checked) {
-      //checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-      //FormManager.enable('vat');
-    //}
+    /*
+     * if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
+     * checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]); }
+     */
+
+    // FormManager.resetValidations('vat');
+    // if (!dojo.byId('vatExempt').checked) {
+    // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    // FormManager.enable('vat');
+    // }
   }
 }
 
@@ -421,12 +426,11 @@ function addHandlersForNL() {
       setSORTL();
     });
   }
- /* if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      setVatValidatorNL();
-      setKVKValidatorNL();
-    });
-  }*/
+  /*
+   * if (_vatExemptHandler == null) { _vatExemptHandler =
+   * dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+   * setVatValidatorNL(); setKVKValidatorNL(); }); }
+   */
 
   if (_ExpediteHandler == null) {
     _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
@@ -509,18 +513,16 @@ function setClientTierValues(isuCd) {
  * 
  * var boTeam = []; var selectedBoTeam = []; if (isuCd != '') { var isuCtc =
  * isuCd + clientTier; var qParams = null; var results = null; var
- * selectedResults = null;
- *  // 32S changed to 34Q on 2021 2H coverage // BO Team will be based on IMS
- * for 32S // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) { if (ims != '' &&
- * ims.length > 1 && (isuCtc == '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY :
- * cntry, ISU : '%' + isuCd + clientTier + '%' // CLIENT_TIER : '%' +
- * ims.substring(0, 1) + '%' }; results = cmr.query('GET.BOTEAMLIST.BYISU',
- * qParams); }
- *  // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) { if (ims != '' &&
- * ims.length > 1 && (isuCtc == '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY :
- * cntry, ISU : '%' + isuCd + clientTier + '%', CLIENT_TIER : '%' +
- * ims.substring(0, 1) + '%' }; selectedResults =
- * cmr.query('GET.BOTEAMLIST.BYISUCTC', qParams); }
+ * selectedResults = null; // 32S changed to 34Q on 2021 2H coverage // BO Team
+ * will be based on IMS for 32S // if (ims != '' && ims.length > 1 && (isuCtc ==
+ * '32S')) { if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) { qParams = {
+ * _qall : 'Y', ISSUING_CNTRY : cntry, ISU : '%' + isuCd + clientTier + '%' //
+ * CLIENT_TIER : '%' + ims.substring(0, 1) + '%' }; results =
+ * cmr.query('GET.BOTEAMLIST.BYISU', qParams); } // if (ims != '' && ims.length >
+ * 1 && (isuCtc == '32S')) { if (ims != '' && ims.length > 1 && (isuCtc ==
+ * '34Q')) { qParams = { _qall : 'Y', ISSUING_CNTRY : cntry, ISU : '%' + isuCd +
+ * clientTier + '%', CLIENT_TIER : '%' + ims.substring(0, 1) + '%' };
+ * selectedResults = cmr.query('GET.BOTEAMLIST.BYISUCTC', qParams); }
  * 
  * if (results != null || selectedResults != null) {
  * 
@@ -1095,7 +1097,7 @@ function addNLVATValidator(cntry, tabName, formName, aType) {
         }
       };
     })(), tabName, formName);
-  }; 
+  };
 }
 
 function addAddressFieldValidators() {
@@ -1436,12 +1438,12 @@ function addCmrNoValidator() {
           return new ValidationResult(null, true);
         }
         if (cmrNo != '' && cmrNo != null) {
-        
+
           var isProspect = FormManager.getActualValue('prospLegalInd');
           if ('Y' == isProspect && cmrNo.startsWith('P') && cmrNo.length == 6) {
             return new ValidationResult(null, true);
           }
-        
+
           if (cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
           } else if (isNaN(cmrNo)) {
@@ -1979,25 +1981,24 @@ function setEcoCodeBasedOnSubScenario() {
   }
 }
 
-function addVatIndValidator(){
+function addVatIndValidator() {
   var _vatHandler = null;
   var _vatIndHandler = null;
   var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');  
+  var vatInd = FormManager.getActualValue('vatInd');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  
-  if (viewOnlyPage == 'true'){
-   FormManager.resetValidations('vat');
-   FormManager.readOnly('vat');
- } else {
-   
-  var cntry= FormManager.getActualValue('cmrIssuingCntry');
-  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
-    ISSUING_CNTRY : cntry
-  });
-  
 
-      if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY : cntry
+    });
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
@@ -2010,16 +2011,189 @@ function addVatIndValidator(){
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
-      //  FormManager.readOnly('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     }
-    
-  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
-    FormManager.resetValidations('vat');
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
   }
 }
+
+function setChecklistStatus() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
+
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+
+      for (var i = 0; i < noOfTextBoxes; i++) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
+            && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+      }
+
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
+}
+function addNLChecklistValidator() {
+  console.log(">>>>  addNLChecklistValidator");
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'U') {
+    return;
+  }
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var custSubScnrio = FormManager.getActualValue('custSubGrp');
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var prolif = false;
+        var qParams = {
+          REQ_ID : zs01ReqId,
+        };
+        var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', qParams);
+        landCntry = result.ret1;
+        if (_prolifCountries.includes(landCntry)) {
+          prolif = true;
+        }
+        if (custSubScnrio != 'CROSS' && !prolif) {
+          return;
+        }
+        console.log('validating checklist..');
+        var checklist = dojo.query('table.checklist');
+
+        var questions = checklist.query('input[type="radio"]');
+        var textBoxes = checklist.query('input[type="text"]');
+        if (questions.length > 0 && textBoxes.length > 0) {
+          // var noOfQuestions = questions.length / 2;
+          var noOfTextBoxes = textBoxes.length;
+          var checkCount = 0;
+          for (var i = 0; i < questions.length; i++) {
+            if (questions[i].checked) {
+              checkCount++;
+            }
+          }
+
+          for (var i = 0; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
+                && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+            }
+          }
+
+          if (!_prolifCountriesP2.includes(landCntry)) {
+            var noOfQuestionsP1 = 8;
+            if (noOfQuestionsP1 != checkCount) {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+            }
+          }
+          if (_prolifCountriesP2.includes(landCntry)) {
+            var noOfQuestionsP2 = 13;
+            if (noOfQuestionsP2 != checkCount) {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+            }
+          }
+        }
+
+        // add check for checklist on DB
+        var reqId = FormManager.getActualValue('reqId');
+        var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+          REQID : reqId
+        });
+        if (!record || !record.sectionA1) {
+          var action = FormManager.getActualValue('yourAction')
+          if (action == YourActions.Save) {
+            return new ValidationResult(null, true);
+          }
+          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
+}
+
+var _checklistBtnHandler = [];
+function addChecklistBtnHandler() {
+  for (var i = 2; i <= 15; i++) {
+    _checklistBtnHandler[i] = null;
+    if (_checklistBtnHandler[i] == null) {
+      _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
+        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+      });
+    }
+  }
+}
+
+function freeTxtFieldShowHide(buttonNo) {
+  var shouldDisplay = false;
+
+  if (buttonNo <= 1) {
+    return;
+  }
+  var fieldIdNo = getCheckListFieldNo(buttonNo);
+  var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
+  var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
+
+  if (buttonNo % 2 == 0) {
+    shouldDisplay = true;
+  } else {
+    shouldDisplay = false;
+  }
+  if (shouldDisplay) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none';
+    textFieldElement.value = '';
+  }
+}
+
+function getCheckListFieldNo(buttonNo) {
+  return ((buttonNo - (buttonNo % 2)) / 2) + 5;
+}
+
+function checkChecklistButtons() {
+  for (var i = 2; i <= 14; i = i + 2) {
+    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+      document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
+    }
+  }
 }
 
 function addressQuotationValidatorNL() {
@@ -2125,4 +2299,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.NL, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.NL);
+
+  GEOHandler.registerValidator(addNLChecklistValidator, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.NL);
+  GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.NL);
+  GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.NL);
 });
