@@ -688,6 +688,12 @@ var SCENARIO_FIELDS = [ {
   name : 'customerIdCd',
   tab : 'MAIN_IBM_TAB',
   address : false
+}, {
+  id : '##DuplicateCMR',
+  lbl : 'Duplicate CMR',
+  name : 'dupCmrIndc',
+  tab : 'MAIN_IBM_TAB',
+  address : false
 } ];
 
 function scenariofieldSort(field1, field2) {
