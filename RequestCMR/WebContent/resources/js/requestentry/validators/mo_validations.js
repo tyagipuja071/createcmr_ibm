@@ -28,7 +28,7 @@ function addHandlersForAP() {
   if (_inacTypeHandler == null) {
     _inacTypeHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function (value) {
       setInacByClusterHKMO();
-      lockInacNacFieldsByScenarioSubType();
+      
     });
   }
   if (_inacCdHandler == null) {
@@ -50,7 +50,7 @@ function addHandlersForAP() {
       filterISUOnChangeMO();
       setISUAndCTCForDefaultApClusterIdMO();
       setInacByClusterHKMO();
-      lockInacNacFieldsByScenarioSubType();
+      
     });
   }
   
@@ -63,7 +63,7 @@ function addHandlersForAP() {
       filterISUOnChangeMO();
       setISUAndCTCForDefaultApClusterIdMO();
       setInacByClusterHKMO();
-      lockInacNacFieldsByScenarioSubType();
+      
     });
   }
 
@@ -300,7 +300,7 @@ function filterISUOnChangeMO() {
    FormManager.readOnly('isuCd');
    }
    
-   lockInacNacFieldsByScenarioSubType();
+   
 }
 
 function setISUAndCTCForDefaultApClusterIdMO() {
@@ -1082,14 +1082,6 @@ function resetFieldsAfterCustSubGrpChange() {
 // }
 }
 
-function lockInacNacFieldsByScenarioSubType() {
-  console.log(">>>> lockInacNacFieldsByScenarioSubType >>>>");
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  FormManager.readOnly('inacType');
-  FormManager.readOnly('inacCd');
-}
 
 
 function setCollectionCd() {
@@ -4670,7 +4662,7 @@ function afterConfigMO() {
   reqReasonHandler();
   defaultCMRNumberPrefix();
   
-  lockInacNacFieldsByScenarioSubType();
+  
 }
 
 function afterTemplateLoadMO() {
@@ -4686,7 +4678,7 @@ function afterTemplateLoadMO() {
   setCtcOnIsuCdChangeGCG();
   defaultCMRNumberPrefix();
   initChecklistMainAddress();
-  lockInacNacFieldsByScenarioSubType();
+  
 }
 
 function addAddrFunctionMO() {
