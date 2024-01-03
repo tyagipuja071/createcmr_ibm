@@ -114,7 +114,7 @@ function addAfterConfigAP() {
   FormManager.readOnly('isbuCd');
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
-    FormManager.readOnly('mrcCd');
+    // FormManager.readOnly('mrcCd');
     FormManager.readOnly('isbuCd');
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
@@ -126,7 +126,7 @@ function addAfterConfigAP() {
     FormManager.readOnly('IndustryClass');
     FormManager.readOnly('subIndustryCd');
   } else {
-    FormManager.enable('mrcCd');
+    // FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
@@ -176,7 +176,7 @@ function addAfterConfigAP() {
     FormManager.readOnly('subIndustryCd');
     FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
+    // FormManager.readOnly('mrcCd');
     FormManager.readOnly('inacType');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('inacCd');
@@ -1654,7 +1654,7 @@ function addSectorIsbuLogicOnSubIndu() {
 
 function updateIsbuCd() {
   console.log('>>>> updateIsbuCd >>>>');
-  var _mrcCd = FormManager.getActualValue('mrcCd');
+  // var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
   var _industryClass = FormManager.getActualValue('IndustryClass');
   var _isbuCd = null;
@@ -1664,17 +1664,17 @@ function updateIsbuCd() {
   if (_industryClass == null) {
     console.log('>>>> Error, _industryClass is null');
   }
-  if (_mrcCd == null) {
-    console.log('>>>> Error, _mrcCd is null');
-  }
+  // if (_mrcCd == null) {
+  //   console.log('>>>> Error, _mrcCd is null');
+  // }
   // FormManager.setValue('isbuCd', '');
-  if (_mrcCd == '3' && _industryClass != '') {
-    _isbuCd = 'GMB' + _industryClass;
-    FormManager.setValue('isbuCd', _isbuCd);
-  } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
-    _isbuCd = _sectorCd + _industryClass;
-    FormManager.setValue('isbuCd', _isbuCd);
-  }
+  // if (_mrcCd == '3' && _industryClass != '') {
+  //   _isbuCd = 'GMB' + _industryClass;
+  //   FormManager.setValue('isbuCd', _isbuCd);
+  // } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
+  //   _isbuCd = _sectorCd + _industryClass;
+  //   FormManager.setValue('isbuCd', _isbuCd);
+  // }
 
 }
 
@@ -2396,7 +2396,7 @@ function setISUDropDownValues() {
               FormManager.resetDropdownValues(FormManager.getField('isuCd'))
               FormManager.setValue('isuCd', '34');
               FormManager.readOnly('isuCd');
-              FormManager.readOnly('mrcCd');
+              // FormManager.readOnly('mrcCd');
             } else {
               FormManager.enable('clientTier');
               FormManager.enable('isuCd');
@@ -2734,7 +2734,7 @@ function handleObseleteExpiredDataForUpdate() {
   if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
     FormManager.readOnly('apCustClusterId');
     FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
+    // FormManager.readOnly('mrcCd');
     FormManager.readOnly('inacType');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('inacCd');
@@ -2760,7 +2760,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('cmrOwner', Validators.REQUIRED);
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
-    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+    // FormManager.removeValidator('mrcCd', Validators.REQUIRED);
     FormManager.removeValidator('inacType', Validators.REQUIRED);
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
@@ -3182,12 +3182,12 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
-function setMrcCd() {
-  if (FormManager.getActualValue('mrcCd') == '3') {
-    return;
-  }
-  FormManager.setValue('mrcCd', '3');
-}
+// function setMrcCd() {
+//   if (FormManager.getActualValue('mrcCd') == '3') {
+//     return;
+//   }
+//   FormManager.setValue('mrcCd', '3');
+// }
 
 function addAfterConfigAU() {
   updateIndustryClass();
@@ -3208,7 +3208,7 @@ function addAfterConfigAU() {
   addHandlersForAU();
   handleObseleteExpiredDataForUpdate(); 
   setRepTeamMemberNo();
-  setMrcCd();
+  // setMrcCd();
 }
 
 function addressFunctions() {
