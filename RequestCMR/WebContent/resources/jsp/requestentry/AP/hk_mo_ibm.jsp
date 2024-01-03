@@ -73,12 +73,9 @@ dojo.addOnLoad(function(){
                 <cmr:info text="${ui.info.ClusterIndia}" />
              </cmr:view>  --%>
 	         <cmr:delta text="${rdcdata.apCustClusterId}" oldValue="${reqentry.apCustClusterId}"/> 
-	         <cmr:view forCountry="834,615,652">
+	         <cmr:view forCountry="615,652">
 				<cmr:info text="${ui.info.AUForCluster}" />
 	         </cmr:view>
-	         <cmr:view forCountry="856">
-            	<cmr:info text="${ui.info.clusterReminderMsgTH_VN_PH}"></cmr:info>
-        	 </cmr:view> 
 	        </cmr:label>
 	        <cmr:field path="apCustClusterId" id="apCustClusterId" fieldId="Cluster" tabId="MAIN_IBM_TAB" />
 	      	</p>

@@ -48,9 +48,9 @@ function setInacType(){
 	var inacCd = FormManager.getActualValue('inacCd');
 	if(inacCd != undefined  && inacCd != ''){
 	 if(isNaN(inacCd)){
-		FormManager.setValue('inacType','I');
+		FormManager.setValue('inacType','N');
 	}else{
-	  FormManager.setValue('inacType','N');	
+	  FormManager.setValue('inacType','I');	
 	}
 	 FormManager.readOnly('inacType');
 	}
@@ -3102,6 +3102,12 @@ function coverage2024ForTH() {
 					}
 				});
 			}
+			
+				if(window.localStorage.getItem('cluster') == FormManager.getActualValue('apCustClusterId') && FormManager.getActualValue('apCustClusterId') == '00000'){
+					setISUCTCByCluster();
+					setInacByClusterSG();
+				}
+				
 		// for blank cluster, blank out others
 		if(FormManager.getActualValue('apCustClusterId') == ''){
 			FormManager.setValue('isuCd','');
