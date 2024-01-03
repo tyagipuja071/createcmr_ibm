@@ -105,7 +105,7 @@ dojo.addOnLoad(function(){
       	
      <!-- MRC Code, BP Relation Type, BP Function, Province Name, Province Code, Customer Service Code -->
       	<cmr:row topPad="10">
-      	  <cmr:column span="2" containerForField="MrcCd">
+      	  <cmr:column span="2" containerForField="MrcCd"  exceptForCountry="616,796">
       		<p>
         	<cmr:label fieldId="mrcCd"> <cmr:fieldLabel fieldId="MrcCd" />: </cmr:label>
         	<cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd" tabId="MAIN_IBM_TAB" />
