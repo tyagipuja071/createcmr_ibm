@@ -1572,7 +1572,7 @@ function setISUByMrcSubInd() {
         }
       }
     } else if (custGrp == 'SUBSI' && custSubGrp != 'BVMDS') {
-      FormManager.setValue('isuCd', '60');
+      // FormManager.setValue('isuCd', '60');
     }
   }
 }
