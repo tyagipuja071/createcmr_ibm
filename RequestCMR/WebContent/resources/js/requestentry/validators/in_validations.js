@@ -169,10 +169,10 @@ function setInacByCluster() {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     
    
-    var _clusterIndiaMrc2 = ['5224', '4477', '4490', '4467', '5225','08864', '08850', '08856', '08851', '08856', '08851', '08866','08863', '08857', '08868', 
+    var _clusterIndiaMrc2 = ['05224', '04477', '04490', '04467', '05225','08864', '08850', '08856', '08851', '08856', '08851', '08866','08863', '08857', '08868', 
       '08861', '08853', '08859', '08854', '08862', '08858', '08867', '08870', '08865', '08852', '08849', '08860','08848'];
     
-    var _clusterIndiaMrc3R = ['9202'];
+    var _clusterIndiaMrc3R = ['09202'];
        
     var _clusterIndiaMrc3NR = ['10654', '10655', '10656', '10657','12006','12005','12273','12272','12268','12266','12270','12263','12261','12264','12262','12258','12259',
       '12255','12257','12271','12267','12265','12269','12260','12254','12256','12470','12471','12472','12473','12474','12475'];
@@ -301,7 +301,7 @@ function savePreviousSubScenario() {
 function setIsuOnIsic(){
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var isuClusterList = ['5224', '4477', '4490', '4467', '5225','08864','08850','08856','08851','08866','08863','08857','08868','08861','08853',
+  var isuClusterList = ['05224', '04477', '04490', '04467', '05225','08864','08850','08856','08851','08866','08863','08857','08868','08861','08853',
     '08859','08854','08862','08858','08867','08870','08865','08852','08849','08860','08848'];
   var scenarioList =['NRML' , 'ESOSW' , 'CROSS'];
   var _cluster = FormManager.getActualValue('apCustClusterId');
@@ -635,25 +635,12 @@ function applyClusterFilters() {
     return;
   }
   
-  filterAvailableClustersByScenarioSubType('744', ['NRML'], [ '05224', '04477', '04490', '04467','05225','08864', '08850', '08856', '08851', '08856', '08851', '08866','08863', '08857', '08868', 
+  filterAvailableClustersByScenarioSubType('744', ['NRML','ESOSW','CROSS'], [ '05224', '04477', '04490', '04467','05225','08864', '08850', '08856', '08851', '08856', '08851', '08866','08863', '08857', '08868', 
     '08861', '08853', '08859', '08854', '08862', '08858', '08867', '08870', '08865', '08852', '08849', '08860','08848']);
   filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], [ '012D999' ]);
-  filterAvailableClustersByScenarioSubType('744', ['KYNDR'], [ '09202' ]);
-  filterAvailableClustersByScenarioSubType('744', ['ESOSW'], ['05224', '04477', '04490', '04467', '05225', '08864', '08850', '08856', '08851', '08856', '08851', '08866',
-	  '08863', '08857', '08868', '08861', '08853', '08859', '08854', '08862', '08858', '08867', '08870',
-	  '08865', '08852', '08849', '08860', '08848', '09202', '10654', '10655', '10656', '10657', '12006', '12005',
-	  '12273', '12272', '12268', '12266', '12270', '12263', '12261', '12264', '12262', '12258', '12259', '12255',
-	  '12257', '12271', '12267', '12265', '12269', '12260', '12254', '12256', '12470', '12471', '12472', '12473',
-	  '12474', '12475']);
-  filterAvailableClustersByScenarioSubType('744', ['ECSYS'], [ '10654', '10655', '10656', '10657' ,'12006','12005']);  
-  filterAvailableClustersByScenarioSubType('744', ['CROSS'], ['05224', '04477', '04490', '04467', '05225', '08864', '08850', '08856', '08851', '08856', '08851', '08866',
-	  '08863', '08857', '08868', '08861', '08853', '08859', '08854', '08862', '08858', '08867', '08870',
-	  '08865', '08852', '08849', '08860', '08848', '012D999', '9202', '10654', '10655', '10656', '10657',
-	  '12006', '12005', '12273', '12272', '12268', '12266', '12270', '12263', '12261', '12264', '12262', '12258',
-	  '12259', '12255', '12257', '12271', '12267', '12265', '12269', '12260', '12254', '12256', '12470', '12471',
-	  '12472', '12473', '12474', '12475']);  
-
-  filterAvailableClustersByScenarioSubType('744', ['NRMLC','AQSTN'], [ '12273','12272','12268','12266','12270','12263','12261','12264','12262','12258','12259',
+  filterAvailableClustersByScenarioSubType('744', ['KYNDR','ESOSW','CROSS'], [ '09202' ]);
+  filterAvailableClustersByScenarioSubType('744', ['ECSYS','ESOSW','CROSS'], [ '10654', '10655', '10656', '10657' ,'12006','12005']);
+  filterAvailableClustersByScenarioSubType('744', ['NRMLC','AQSTN','ESOSW','CROSS'], [ '12273','12272','12268','12266','12270','12263','12261','12264','12262','12258','12259',
     '12255','12257','12271','12267','12265','12269','12260','12254','12256','12470','12471','12472','12473','12474','12475']);
     
 }
@@ -774,7 +761,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     });
     
     if (['KYNDR'].includes(custSubGrp)) {
-      FormManager.setValue('apCustClusterId','9202');
+      FormManager.setValue('apCustClusterId','09202');
       FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier','0');
       FormManager.readOnly('clientTier');
@@ -1035,7 +1022,7 @@ function onInacTypeChange() {
   if (reqType == 'C') {
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-        var clusters_IN = ['5224','4477','4490','4467','5225','08864','08850','08856','08851','08866','08863','08857','08868','08861','08853','08859','08854',
+        var clusters_IN = ['05224','04477','04490','04467','05225','08864','08850','08856','08851','08866','08863','08857','08868','08861','08853','08859','08854',
           '08862','08858','08867','08870','08865','08852','08849','08860','08848']; 
         var cluster = FormManager.getActualValue('apCustClusterId');
         var cmt = value + ','+ cluster +'%';
@@ -2197,7 +2184,7 @@ function validateGSTForIndia() {
         if (dijit.byId('vatExempt').get('checked')) {
           return new ValidationResult(null, true);
         }
-        if (cntry != '744' || custSubGrp == 'CROSS') {
+        if (custSubGrp == 'CROSS') {
           return new ValidationResult(null, true);
         }
         var country = "";

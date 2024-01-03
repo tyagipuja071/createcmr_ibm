@@ -217,7 +217,6 @@ function addAfterConfigAP() {
     FormManager.readOnly('subIndustryCd');
   } else {
     FormManager.enable('mrcCd');
-    FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
     FormManager.enable('abbrevLocn');
@@ -282,18 +281,6 @@ function addAfterConfigAP() {
   var clusterId = FormManager.getActualValue('apCustClusterId');
   if (reqType == 'C' && cntry == '643' && clusterId == '00000') {
     FormManager.readOnly('apCustClusterId');
-  }
-
-  if (reqType == 'C' && cntry == '643' && clusterId == '00000') {
-    if (custSubGrp == 'DUMMY' || custSubGrp == 'INTER' || custSubGrp == 'BUSPR') {
-      FormManager.readOnly('inacType');
-      FormManager.readOnly('inacCd');
-    }
-    if (custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ASLOM') {
-      FormManager.enable('inacType');
-      FormManager.enable('inacCd');
-
-    }
   }
 
   if (reqType == 'U' && cntry == '834') {
@@ -433,6 +420,8 @@ function addAfterConfigAP() {
     console.log(">>> SG-834 >>> Lock ISIC For D&B Import.");
     FormManager.readOnly('isicCd');
   }
+  
+  inacValidation();
 }
 
 function saveClusterVal() {
@@ -1418,9 +1407,7 @@ function setISBUforBPscenario() {
     FormManager.enable('isbuCd');
   } else if (role == 'REQUESTER' || role == 'VIEWER') {
     FormManager.readOnly('isbuCd');
-  } else if (role == 'PROCESSOR') {
-    FormManager.enable('isbuCd');
-  }
+  } 
 }
 
 function onCustSubGrpChange() {
@@ -3008,6 +2995,7 @@ function updateIsbuCd() {
   var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
   var _industryClass = FormManager.getActualValue('IndustryClass');
+   var subScenariotype = FormManager.getActualValue('custSubGrp');
   var _isbuCd = null;
   if (_sectorCd == null) {
     console.log('>>>> Error, _sectorCd is null');
@@ -3019,10 +3007,10 @@ function updateIsbuCd() {
     console.log('>>>> Error, _mrcCd is null');
   }
   // FormManager.setValue('isbuCd', '');
-  if (_mrcCd == '3' && _industryClass != '') {
+  if (_mrcCd == '3' && _industryClass != '' && subScenariotype != 'BUSPR') {
     _isbuCd = 'GMB' + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
-  } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
+  } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '' && subScenariotype != 'BUSPR') {
     _isbuCd = _sectorCd + _industryClass;
     FormManager.setValue('isbuCd', _isbuCd);
   }
@@ -3067,25 +3055,20 @@ function setISBUScenarioLogic() {
     if (cmrIssuingCntry == '744') {
       FormManager.setValue('isbuCd', 'GMBW');
     }
-  } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-    if (cmrIssuingCntry == '643' || cmrIssuingCntry == '646' || cmrIssuingCntry == '714' || cmrIssuingCntry == '720' || cmrIssuingCntry == '749' || cmrIssuingCntry == '778'
-        || cmrIssuingCntry == '818' || cmrIssuingCntry == '834' || cmrIssuingCntry == '852' || cmrIssuingCntry == '856') {
-      isbuList = [ 'BPN1', 'BPN2' ];
-      console.log("isbuList = " + isbuList);
-      FormManager.enable('isbuCd');
-      FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
-    } 
   }
   
   var cluster = FormManager.getActualValue('apCustClusterId')
-  if (cmrIssuingCntry == '818' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'CROSS')) {
+  if (cmrIssuingCntry == '818' && (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'XASLO' || custSubGrp == 'CROSS')) {
     if (cluster == '09197') {
       FormManager.setValue('inacCd', '6272');
       FormManager.setValue('inacType', 'I');
       FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
     } else {
       FormManager.setValue('inacCd', '');
       FormManager.setValue('inacType', '');
+      FormManager.enable('inacType');
+      FormManager.enable('inacCd');
     }
   } 
   if(cluster == '') {
@@ -8584,6 +8567,35 @@ function checkCmrUpdateBeforeImport() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function inacValidation(){
+  var value = FormManager.getActualValue('inacType');
+  var cluster = FormManager.getActualValue('apCustClusterId');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (value && dojo.string.trim(value) == 'I') {
+    FormManager.addValidator('inacCd', Validators.NUMBER, [ 'INAC Code' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.removeValidator('inacCd', Validators.NUMBER);
+  }
+  if (value && dojo.string.trim(value) == 'N') {
+    FormManager.addValidator('inacCd', Validators.ALPHANUMONLY, [ 'NAC Code' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.removeValidator('inacCd', Validators.ALPHANUMONLY);
+  }
+  if (custSubGrp == 'KYND' || custSubGrp == 'ASLOM' || custSubGrp == 'XASLM' || custSubGrp == 'CROSS') {
+    if (cluster == '09197') {
+      FormManager.setValue('inacCd', '6272');
+      FormManager.setValue('inacType', 'I');
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
+    } else {
+      FormManager.setValue('inacCd', '');
+      FormManager.setValue('inacType', '');
+      FormManager.enable('inacType');
+      FormManager.enable('inacCd');
+    }
+  }
 }
 
 dojo.addOnLoad(function () {

@@ -4315,6 +4315,12 @@ function addAddressInstancesValidator() {
           _qall: 'Y',
           CMR_ISSUING_CNTRY: cmrCntry,
         };
+        var isPaygoUpgrade=false; 
+        var reqType=FormManager.getActualValue('reqType');
+        var reqReason= FormManager.getActualValue('reqReason');
+        if(reqType=='U' && reqReason=='PAYG'){
+          isPaygoUpgrade=true;
+        }
         var results = cmr.query('GETADDR_TYPES', qParams);
         var duplicatesAddr = [];
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
@@ -4346,7 +4352,7 @@ function addAddressInstancesValidator() {
               }
             }
           }
-          if (duplicatesAddr.length > 0) {
+          if (duplicatesAddr.length > 0 && isPaygoUpgrade==false) {
             return new ValidationResult(null, false, 'Only one instance of each address can be added.Please remove additional ' + duplicatesAddr + ' addresses');
           } else {
             return new ValidationResult(null, true);

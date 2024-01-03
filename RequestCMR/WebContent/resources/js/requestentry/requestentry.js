@@ -1034,6 +1034,11 @@ function afterConfigChange() {
       } else {
         FormManager.removeValidator('inacCd', Validators.NUMBER);
       }
+      if ((cmrCntry == '852' || cmrCntry == '818') && (value && dojo.string.trim(value) == 'N')) {
+        FormManager.addValidator('inacCd', Validators.ALPHANUMONLY, [ 'NAC Code' ], 'MAIN_IBM_TAB');
+      } else {
+        FormManager.removeValidator('inacCd', Validators.ALPHANUMONLY);
+      }
     });
   }
   if (_inacHandler && _inacHandler[0]) {
@@ -2636,11 +2641,10 @@ function executeRecreateCMR() {
 }
 
 function checkIfDataOrAddressFieldsUpdated(frmCMR) {
-	var reqRsn = FormManager.getActualValue('reqReason');
-  if(reqRsn == 'PAYG')
-	  {
-	  return;
-	  }
+  var reqRsn = FormManager.getActualValue('reqReason');
+  if (reqRsn == 'PAYG') {
+    return;
+  }
   console.log("checkIfDataOrAddressFieldsUpdated..............");
   var reqType = FormManager.getActualValue('reqType');
   var isNoDataUpdated = false;

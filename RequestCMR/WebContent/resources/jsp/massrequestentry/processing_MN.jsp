@@ -180,7 +180,7 @@
         <cmr:button label="${ui.btn.uploadFile}" onClick="submitMassFile()" highlight="true"></cmr:button>
         <cmr:info text="${ui.info.massUplNewVer}"></cmr:info>
       <%--1897817: ITALY - DPL check for mass update when customer name and/or customer name con't are changed	Help--%>
-      <%if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry()) && "Processor".equalsIgnoreCase(reqentry.getUserRole())  && !"760".equals((reqentry.getCmrIssuingCntry()))) {%>
+      <%if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry()) && "Processor".equalsIgnoreCase(reqentry.getUserRole())) {%>
         <cmr:button label="DPL Check" onClick="doDplCheck()" highlight="false"></cmr:button>
         <cmr:info text="Pressing the button will generate DPL Check results for addresses that were added new Customer Names on the Mass Update template."></cmr:info>
       <%} else if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry()) && "Requester".equalsIgnoreCase(reqentry.getUserRole())  && "760".equals((reqentry.getCmrIssuingCntry()))) {%>
