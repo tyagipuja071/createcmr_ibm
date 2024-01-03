@@ -7,6 +7,7 @@ var _vatRegisterHandlerSG = null;
 var _inacHandler = null;
 var  custSubGrpHandler = null;
 var  oldClusterCd = null;
+var _inacCdHandler = null;
 
 function addHandlersForAP() {
  if (_isicHandlerAP == null) {
@@ -18,6 +19,11 @@ function addHandlersForAP() {
     });
   }
     
+    if (_inacCdHandler == null) {
+    _inacCdHandler = dojo.connect(FormManager.getField('inacCd'), 'onChange', function (value) {
+		 setInacType(value);
+    });
+  }
  
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
@@ -60,6 +66,19 @@ function clearOldCluster(){
 	  FormManager.setValue('mrcCd', '');
 	}
 }
+
+function setInacType(){
+	var inacCd = FormManager.getActualValue('inacCd');
+	if(inacCd != undefined  && inacCd != ''){
+	 if(isNaN(inacCd)){
+		FormManager.setValue('inacType','I');
+	}else{
+	  FormManager.setValue('inacType','N');	
+	}
+	 FormManager.readOnly('inacType');
+	}
+}
+
 
 function addAfterConfigAP() {
   console.log('>>>> addAfterConfigAP >>>>');
