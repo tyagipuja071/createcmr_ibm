@@ -608,8 +608,6 @@ function setInacBySearchTerm() {
     if(!_clusterTWWithAllInac.includes(_cluster)){
       FormManager.setValue('inacCd','');
       FormManager.setValue('inacType', '');
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('inacType');
     }
     
     return;
@@ -617,8 +615,6 @@ function setInacBySearchTerm() {
   
   FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-  FormManager.enable('inacCd');
-  FormManager.enable('inacType');
   
   var qParams = {
     _qall : 'Y',
