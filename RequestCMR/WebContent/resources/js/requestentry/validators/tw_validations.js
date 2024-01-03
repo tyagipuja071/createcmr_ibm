@@ -823,7 +823,13 @@ function setAddrFieldsValidation() {
   console.log(" >>> Set Address Fields validation TW! <<<");
   
   FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ]);
+}
 
+function sortingSearchTerm() {
+  console.log(">>> sortingSearchTerm <<<");
+  var values = TemplateService.getCurrentTemplate().fields.find(element => element.fieldName == 'searchTerm').values;
+  var field = FormManager.getField('searchTerm');
+  FormManager.sortDropdownElements(field, values, true);
 }
 
 function afterConfigCallsTW() {
@@ -853,6 +859,8 @@ function afterTemplateLoadTW() {
   addCoverageFieldsValidator();
   setMrcCd();
   clearDescriptionOnScenarioChange();
+  sortingSearchTerm();
+  setAddrFieldsValidation();
 }
 
 function addrFunctionsTW() {
@@ -860,7 +868,6 @@ function addrFunctionsTW() {
   addSingleByteValidatorTW();
   setAbbrevNmLocnOnAddressSave();
   handleObseleteExpiredDataForUpdate();
-  setAddrFieldsValidation();
 }
 
 dojo.addOnLoad(function() {
