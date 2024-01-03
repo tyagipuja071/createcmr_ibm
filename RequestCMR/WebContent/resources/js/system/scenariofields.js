@@ -664,7 +664,31 @@ var SCENARIO_FIELDS = [ {
   name : 'mktgDept',
   tab : 'MAIN_CUST_TAB',
   address : false
-}, ];
+}, {
+  id : '##CMRNumber',
+  lbl : 'CMR Number (AP)',
+  name : 'cmrNo',
+  tab : 'MAIN_IBM_TAB',
+  address : false
+}, {
+  id : '##CAP',
+  lbl : 'CAP Indicator',
+  name : 'capInd',
+  tab : 'MAIN_IBM_TAB',
+  address : false
+}, {
+  id : '##SitePartyID',
+  lbl : 'iERP Site Party ID (AP)',
+  name : 'sitePartyId',
+  tab : 'MAIN_IBM_TAB',
+  address : false
+}, {
+  id : '##CustomerIdCd',
+  lbl : 'Customer Id Cd',
+  name : 'customerIdCd',
+  tab : 'MAIN_IBM_TAB',
+  address : false
+} ];
 
 function scenariofieldSort(field1, field2) {
   return field1.lbl.toUpperCase() < field2.lbl.toUpperCase() ? -1 : (field1.lbl.toUpperCase() > field2.lbl.toUpperCase() ? 1 : 0);

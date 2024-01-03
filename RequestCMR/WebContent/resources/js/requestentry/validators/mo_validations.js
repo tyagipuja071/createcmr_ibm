@@ -158,16 +158,6 @@ function addAfterConfigAP() {
     FormManager.enable('subIndustryCd');
   }
 
-  if (reqType == 'C' && custSubGrp == 'ECOSY') {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('mrcCd');
-    FormManager.setValue('clientTier', 'Y');
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('mrcCd', '3');
-  }
-
   if (reqType == 'C' && (custSubGrp && custSubGrp != '') && custSubGrp != 'INTER' && custSubGrp != 'XINT' &&  cntry == '736') {
     FormManager.setValue('repTeamMemberNo', _pagemodel.repTeamMemberNo == null ? '000000' : _pagemodel.repTeamMemberNo);
     FormManager.enable('repTeamMemberNo');

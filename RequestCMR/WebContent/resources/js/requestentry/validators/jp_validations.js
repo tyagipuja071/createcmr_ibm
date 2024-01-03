@@ -1582,7 +1582,7 @@ function setISUByMrcSubInd() {
         }
       }
     } else if (custGrp == 'SUBSI' && custSubGrp != 'BVMDS') {
-      FormManager.setValue('isuCd', '60');
+      // FormManager.setValue('isuCd', '60');
     }
   }
 }
@@ -6787,6 +6787,11 @@ function setAddrFieldsBFKSCScenario(addrType) {
   if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
     // ADU A, B, C, D, E, F, G, H
     if (addrType == 'ZI03' || addrType == 'ZP02' || addrType == 'ZP03' || addrType == 'ZP04' || addrType == 'ZP05' || addrType == 'ZP06' || addrType == 'ZP07' || addrType == 'ZP08') {
+      setAddrFieldOptional('custNm1', 'Customer Name-KANJI');
+      setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
+      setAddrFieldOptional('custNm4', 'Katakana');
+      setAddrFieldOptional('addrTxt', 'Address');
+
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('locationCode', 'LocationCode');
 
@@ -6806,6 +6811,11 @@ function setAddrFieldsBFKSCScenario(addrType) {
       setAddrFieldOptional('office', 'Office');
       setAddrFieldOptional('custFax', 'CustFax');
       setAddrFieldOptional('contact', 'Contact');
+    }
+
+    // Company, Establishment
+    if (addrType == 'ZC01' || addrType == 'ZE01') {
+      setAddrFieldOptional('bldg', 'Building');
     }
   }
 }

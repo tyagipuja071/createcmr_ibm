@@ -180,12 +180,6 @@
 					<width>35</width>
 					<length>35</length>
 				</column>
-				<column>
-					<label>ROL Flag</label>
-					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
-					<width>10</width>
-					<length>1</length>
-				</column>
 			</columns>
 		</tab>
 		<tab name="ADU-3" type="Address" typeCode="ZS01">
