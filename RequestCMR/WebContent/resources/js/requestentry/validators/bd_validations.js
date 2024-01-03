@@ -6285,6 +6285,8 @@ function setCTCIsuByClusterBDLK() {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
       FormManager.setValue('clientTier', '0');
       FormManager.setValue('isuCd', '5K');
+      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
       FormManager.setValue('inacCd', '6272');
       FormManager.setValue('inacType', 'I');
       FormManager.readOnly('inacCd');
@@ -6366,6 +6368,8 @@ function setCTCIsuByClusterBDLK() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
+    FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+    FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
     FormManager.setValue('inacType', 'I');
     FormManager.readOnly('inacType');
     FormManager.setValue('inacCd', '6272');
@@ -7347,8 +7351,8 @@ dojo.addOnLoad(function () {
   // CREATCMR-7878
   GEOHandler.addAfterTemplateLoad(setCTCIsuByClusterISA, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH]);
 
-  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
-  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
+//  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
+//  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
   GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
