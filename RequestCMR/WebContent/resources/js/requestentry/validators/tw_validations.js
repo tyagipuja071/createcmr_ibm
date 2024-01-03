@@ -823,6 +823,13 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setAddrFieldsValidation() {
+  console.log(" >>> Set Address Fields validation TW! <<<");
+  
+  FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ]);
+
+}
+
 function afterConfigCallsTW() {
   afterConfigTW();
   addHandlersForTW();
@@ -835,6 +842,7 @@ function afterConfigCallsTW() {
   setRepTeamMemberNo();
   setMrcCd();
   handleObseleteExpiredDataForUpdate();
+  
 }
 
 function afterTemplateLoadTW() {
@@ -856,6 +864,7 @@ function addrFunctionsTW() {
   addSingleByteValidatorTW();
   setAbbrevNmLocnOnAddressSave();
   handleObseleteExpiredDataForUpdate();
+  setAddrFieldsValidation();
 }
 
 dojo.addOnLoad(function() {
