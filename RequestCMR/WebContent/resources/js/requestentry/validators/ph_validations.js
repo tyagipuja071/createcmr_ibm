@@ -601,7 +601,8 @@ function setInacByCluster() {
     }
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
-    if(custSubGrp != 'KYND') {
+    var cluster = FormManager.getActualValue('apCustClusterId');
+    if(custSubGrp != 'KYND' && cluster != '09197') {
       FormManager.enable('inacCd');
       FormManager.enable('inacType');
     }
@@ -1704,8 +1705,8 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       FormManager.enable('apCustClusterId');
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
-
-      if (custSubGrp != 'KYNDR') {
+      var cluster = FormManager.getActualValue('apCustClusterId');
+      if(custSubGrp != 'KYND' && cluster != '09197') {
         FormManager.enable('inacCd');
         FormManager.enable('inacType');
       }
@@ -2838,10 +2839,6 @@ function setPrivate() {
   } else {
     FormManager.setValue('custSubGrp', 'PRIV');
   }
-}
-
-function setIsic() {
-  FormManager.setValue('isicCd', '');
 }
 
 function updateIndustryClass() {
