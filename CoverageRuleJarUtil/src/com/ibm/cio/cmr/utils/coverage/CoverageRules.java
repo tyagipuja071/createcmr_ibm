@@ -50,9 +50,9 @@ public class CoverageRules {
    */
   public static void main(String[] args) throws Exception {
     LOG.info("Starting..");
-    CoverageRules cov = new CoverageRules("1H2022");
-    String zipFile = "C:/ci/shared/data/batch/coverage/zip/1H2022.jar";
-    // cov.initializeFrom(zipFile);
+    CoverageRules cov = new CoverageRules("1H2023");
+    String zipFile = "C:/ci/shared/data/batch/coverage/zip/1H2023.jar";
+    cov.initializeFrom(zipFile);
     cov.initialize();
 
     String id = "T0001732";
