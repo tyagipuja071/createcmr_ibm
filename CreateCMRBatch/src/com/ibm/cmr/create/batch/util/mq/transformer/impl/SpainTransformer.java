@@ -219,7 +219,7 @@ public class SpainTransformer extends MessageTransformer {
       line2 = StringUtils.replace(line2, " - ", "-");
       line2 = StringUtils.replace(line2, "- ", "-");
       line2 = StringUtils.replace(line2, " -", "-");
-      String[] parts = line2.split("[^A-Za-z�?áÉé�?íÓóÚúÑñ.0-9]");
+      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
       for (String part : parts) {
         if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
           line3 = part;
@@ -1010,7 +1010,7 @@ public class SpainTransformer extends MessageTransformer {
       line2 = StringUtils.replace(line2, " - ", "-");
       line2 = StringUtils.replace(line2, "- ", "-");
       line2 = StringUtils.replace(line2, " -", "-");
-      String[] parts = line2.split("[^A-Za-z�?áÉé�?íÓóÚúÑñ.0-9]");
+      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
       for (String part : parts) {
         if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
           line3 = part;
