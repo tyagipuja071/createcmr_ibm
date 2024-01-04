@@ -61,13 +61,6 @@ var CNHandler = {
 
 };
 
-function resetSearchTermList(){
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  if (custSubType == 'CROSS' || custSubType == 'EMBSA') {
-    FormManager.resetDropdownValues(FormManager.getField('searchTerm'));
-  }
-}
-
 function afterConfigForCN() {
   if (FormManager.getActualValue('isicCd') != undefined && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
@@ -84,9 +77,6 @@ function afterConfigForCN() {
   }
   var custSubT = FormManager.getActualValue('custSubGrp');
   
-  if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C') {
-    resetSearchTermList();
-  }
   
   if (_isicHandlerCN == null) {
     _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -296,7 +286,7 @@ function setInacBySearchTerm(value) {
 
 function setIsuOnIsic() {
 //  var clusterVal = FormManager.getActualValue('searchTerm');
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || /^091/) {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -369,6 +359,7 @@ function setCTCIsuByCluster() {
           CLUSTER: _cluster,
         };
 
+        var isuValRetrieved = false;
         var results = cmr.query('GET.CTC_ISU_BY_CLUSTER_CNTRY', qParams);
         if (results != null && results.length > 0) {
           for (var i = 0; i < results.length; i++) {
@@ -383,13 +374,16 @@ function setCTCIsuByCluster() {
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
               FormManager.setValue('isuCd', isuCdValue[0]);
               FormManager.readOnly('isuCd');
+              isuValRetrieved = true;
             }
           } else if (apClientTierValue.length > 1) {
             FormManager.resetDropdownValues(FormManager.getField('clientTier'));
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
+            isuValRetrieved = true;
           }
-        } else {          
+        } 
+        if (!isuValRetrieved){          
           setIsuOnIsic();
         }
       }
