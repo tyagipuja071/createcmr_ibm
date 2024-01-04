@@ -6769,9 +6769,10 @@ function setAddrFieldsBFKSCScenario(addrType) {
     // ADU A, B, C, D, E, F, G, H
     if (addrType == 'ZI03' || addrType == 'ZP02' || addrType == 'ZP03' || addrType == 'ZP04' || addrType == 'ZP05' || addrType == 'ZP06' || addrType == 'ZP07' || addrType == 'ZP08') {
       setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
-      setAddrFieldMandatory('custNm2', 'Name-KANJI Continue');
       setAddrFieldMandatory('custNm4', 'Katakana');
       setAddrFieldMandatory('addrTxt', 'Address');
+
+      setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
 
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('locationCode', 'LocationCode');
@@ -6800,9 +6801,10 @@ function setAddrFieldsBFKSCScenario(addrType) {
         setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
       }
       setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
-      setAddrFieldMandatory('custNm2', 'Name-KANJI Continue');
       setAddrFieldMandatory('custNm4', 'Katakana');
       setAddrFieldMandatory('addrTxt', 'Address');
+
+      setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
 
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('locationCode', 'LocationCode');
