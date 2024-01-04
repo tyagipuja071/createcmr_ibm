@@ -6588,7 +6588,8 @@ function setCTCIsuByClusterIndonesia() {
     FormManager.setValue('inacCd', '');
     FormManager.setValue('inacType', '');
   }
-  if (custSubGrp != 'KYND') {
+  var cluster = FormManager.getActualValue('apCustClusterId');
+  if(custSubGrp != 'KYND' && cluster != '09198') {
     FormManager.enable('inacCd');
     FormManager.enable('inacType');
   }
