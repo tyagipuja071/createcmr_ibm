@@ -1207,6 +1207,57 @@ var FormManager = (function() {
     },
     checkBytes : function(fieldId) {
       return skipByteCheckFields.indexOf(fieldId) < 0;
+    },
+    sortDropdownElements : function(field, values, ascendingOrder) {
+      if (values && values.length == 0) {
+        var model = {
+          identifier : "id",
+          label : "name",
+          items : []
+        };
+        var tempStore = new dojo.data.ItemFileReadStore({
+          data : model,
+          clearOnClose : true
+        });
+        field.store = tempStore;
+        return;
+      }
+      var loadedStore = field.loadedStore;
+      if (!loadedStore) {
+        return;
+      }
+
+      var currentValue = field.get('value');
+      if (currentValue != '' && values.indexOf(currentValue) < 0) {
+        field.set('value', '');
+      }
+      var model = {
+        identifier : "id",
+        label : "name",
+        items : []
+      };
+
+      if (ascendingOrder) {
+        values.sort();
+      } else {
+        values.reverse();
+      }
+
+      var item = null;
+      for (var i = 0; i < values.length; i++) {
+        item = loadedStore._arrayOfAllItems.find(element => element.id[0] == values[i]);
+        if (item != null && item.id[0] >= 0) {
+          model.items.push({
+            id : item.id[0],
+            name : item.name[0]
+          });
+        }
+      }
+      var tempStore = new dojo.data.ItemFileReadStore({
+        data : model,
+        clearOnClose : true
+      });
+      field.store = tempStore;
     }
   };
 }());
