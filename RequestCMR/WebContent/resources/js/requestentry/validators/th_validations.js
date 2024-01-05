@@ -3090,6 +3090,10 @@ function checkCmrUpdateBeforeImport() {
 // Coverage 2024 for  THAILAND -> CREATCMR - 10535 
 function coverage2024ForTH() {
 	console.log("---- coverage2024ForTH ----");
+		var custSubGrp = FormManager.getActualValue('custSubGrp'); 
+	if(custSubGrp == 'PRIV'){
+		FormManager.setValue('isicCd', '9500');
+	}
 	var _clusterHandlerSG = null;
 	FormManager.resetDropdownValues(FormManager.getField('clientTier'));
 	if (_clusterHandlerSG == null && FormManager.getActualValue('reqType') != 'U') {
@@ -3164,6 +3168,10 @@ function setISUCTCByCluster() {
 		if (result.ret3 != null && result.ret3 != '') {
 			FormManager.setValue('mrcCd', result.ret3);
 		}
+	}
+	// if ISU is blank , generate by ISIC
+	if(FormManager.getActualValue('isuCd') == ''){
+						setIsuOnIsic();
 	}
 }
 
