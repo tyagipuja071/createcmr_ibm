@@ -2192,7 +2192,7 @@ function validateGSTForIndia() {
         if (dijit.byId('vatExempt').get('checked')) {
           return new ValidationResult(null, true);
         }
-        if (cntry != '744' || custSubGrp == 'CROSS') {
+        if (custSubGrp == 'CROSS') {
           return new ValidationResult(null, true);
         }
         var country = "";
