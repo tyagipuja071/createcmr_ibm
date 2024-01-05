@@ -776,15 +776,19 @@ function checkCmrUpdateBeforeImport() {
 function setCTCIsuMrcByCluster() {
   console.log('>>>> setCTCIsuByClusterANZ >>>>');
   var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var scenario = FormManager.getActualValue('custGrp');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function (value) {
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    var scenario = FormManager.getActualValue('custGrp');
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
     var clusterVal = FormManager.getActualValue('searchTerm');
     if (!clusterVal || clusterVal == '00003') {
+      if (custSubGrp == 'CROSS') {
+        FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Z');
+      }
       return;
     }
     var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');

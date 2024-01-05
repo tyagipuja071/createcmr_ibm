@@ -844,7 +844,7 @@ function afterConfigCallsTW() {
   setRepTeamMemberNo();
   setMrcCd();
   handleObseleteExpiredDataForUpdate();
-  
+  setAddrFieldsValidation();
 }
 
 function afterTemplateLoadTW() {
@@ -868,6 +868,7 @@ function addrFunctionsTW() {
   addSingleByteValidatorTW();
   setAbbrevNmLocnOnAddressSave();
   handleObseleteExpiredDataForUpdate();
+  setAddrFieldsValidation();
 }
 
 dojo.addOnLoad(function() {
