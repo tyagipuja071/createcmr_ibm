@@ -77,6 +77,12 @@ function afterConfigTW() {
     FormManager.removeValidator('email3', Validators.REQUIRED);
     FormManager.removeValidator('orgNo', Validators.REQUIRED);
     FormManager.removeValidator('restrictTo', Validators.REQUIRED);
+
+    FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
+    FormManager.removeValidator('bgId', Validators.REQUIRED);
+    FormManager.removeValidator('gbgId', Validators.REQUIRED);
+    FormManager.removeValidator('geoLocationCd', Validators.REQUIRED);
+    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
   }
 
   if (custSubGrp == 'LOECO' || custSubGrp == 'LOINT' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF' || custSubGrp == 'LOPRI') {
@@ -200,19 +206,18 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('inacType', Validators.REQUIRED);
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
     FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
     FormManager.removeValidator('collectionCd', Validators.REQUIRED);
     FormManager.removeValidator('sitePartyId', Validators.REQUIRED);
-    FormManager.removeValidator('bgId', Validators.REQUIRED);
-    FormManager.removeValidator('gbgId', Validators.REQUIRED);
-    FormManager.removeValidator('geoLocationId', Validators.REQUIRED);
     FormManager.removeValidator('dunsNo', Validators.REQUIRED);
-    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
     FormManager.removeValidator('customerIdCd', Validators.REQUIRED);
+    FormManager.removeValidator('geoLocationId', Validators.REQUIRED);
+
   }
 }
+
+
 
 /*
  * Set CMR Double Creation warning when its value is Y
@@ -830,6 +835,13 @@ function sortingSearchTerm() {
   var values = TemplateService.getCurrentTemplate().fields.find(element => element.fieldName == 'searchTerm').values;
   var field = FormManager.getField('searchTerm');
   FormManager.sortDropdownElements(field, values, true);
+}
+
+function setDefaultCustPrefLanguage() {
+  console.log (">>> Set Default Cust Pref Language <<<");
+  if (FormManager.getValue('reqType') == 'C' && FormManager.getValue('reqStatus') == 'DRA') {
+    FormManager.setValue('custPrefLang', 'M');
+  }
 }
 
 function afterConfigCallsTW() {
