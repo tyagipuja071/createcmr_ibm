@@ -7935,7 +7935,7 @@ function setCTCIsuByClusterGCG() {
         }
       }
       var setIsuByIsicClusters = ['09143' ,'09144' ,'09145' ,'09146'];      
-      if ((clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || clusterDesc[0].ret1.includes('S&S'))) || setIsuByIsicClusters.includes(_cluster)) {
+      if ((clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || clusterDesc[0].ret1.includes('S&S'))) || (_cluster != '' && setIsuByIsicClusters.includes(_cluster))) {
         setIsuOnIsic();
       }
       // setting MRC value for CLusters
