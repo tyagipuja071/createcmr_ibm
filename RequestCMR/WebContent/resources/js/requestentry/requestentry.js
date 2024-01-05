@@ -1236,8 +1236,6 @@ function saveDisableProcSetting() {
  * field
  */
 function ensureCMRNoValue() {
-  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (FormManager.getField('MAIN_GENERAL_TAB')) {
     cmr.hideProgress();
   }
@@ -1261,9 +1259,6 @@ function ensureCMRNoValue() {
     }
     if ((FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') && FormManager.getActualValue('cmrNo') != '') {
       FormManager.readOnly('cmrNo');
-    }
-    if (issuingCntry == '760' && custSubGrp == 'BPBIL') {
-      FormManager.enable('cmrNo');
     }
     window.setTimeout('ensureCMRNoValue()', 1000);
   }
