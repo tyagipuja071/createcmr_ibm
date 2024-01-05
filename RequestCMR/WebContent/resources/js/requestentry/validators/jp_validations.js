@@ -7449,7 +7449,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addHandlersForJP, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setCTCByOfficeCd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setMrcByOfficeCd, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
+  // GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setCreditToCustNoOptional4ISOCU, GEOHandler.JP);
 
