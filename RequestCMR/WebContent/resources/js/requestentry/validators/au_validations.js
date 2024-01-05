@@ -29,9 +29,9 @@ function addHandlersForAU() {
       lockFieldsForAU();
       _inacHandlerANZSG = _inacHandlerANZSG + 1;
       setIsuOnIsic();
-      if (_inacHandlerANZSG > 1) {        
+//      if (_inacHandlerANZSG > 1) {        
         setInacByCluster(value);
-      }
+//      }
     });
   }
 
