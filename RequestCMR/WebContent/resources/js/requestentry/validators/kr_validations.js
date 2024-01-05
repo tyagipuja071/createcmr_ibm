@@ -786,6 +786,8 @@ function setCTCIsuMrcByCluster() {
     var clusterVal = FormManager.getActualValue('searchTerm');
     if (!clusterVal || clusterVal == '00003') {
       if (custSubGrp == 'CROSS') {
+        FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+        FormManager.resetDropdownValues(FormManager.getField('isuCd'));
         FormManager.setValue('isuCd', '34');
         FormManager.setValue('clientTier', 'Z');
       }
