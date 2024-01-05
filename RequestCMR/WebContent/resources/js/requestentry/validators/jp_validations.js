@@ -7291,10 +7291,15 @@ function addCmrNoValidator() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqType = FormManager.getActualValue('reqType');
         var numCmr = /^[9]{1}[3|4]{1}\d{4}$/g;
         var alphaNumCmr = /^[9]{1}[3|4]{1}\d{1}[S]{1}\d{2}$/g;
 
         if (custSubType != 'BPBIL') {
+          return new ValidationResult(null, true);
+        }
+
+        if (reqType == 'U') {
           return new ValidationResult(null, true);
         }
 
