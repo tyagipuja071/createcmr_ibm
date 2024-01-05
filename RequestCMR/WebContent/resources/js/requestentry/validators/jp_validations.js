@@ -1410,15 +1410,15 @@ function setCTCByOfficeCd() {
     return;
   }
 
-  if (inTs38Ofcd()) {
+  // if (inTs38Ofcd()) {
     var clientTier = getCtcByOfcd();
     FormManager.setValue('clientTier', clientTier.trim());
-  } else {
-    FormManager.setValue('clientTier', 'Z');
-  }
-  if (custGrp == 'SUBSI' && custSubGrp != 'BQICL') {
-    FormManager.setValue('clientTier', 'Z');
-  }
+  // } else {
+    // FormManager.setValue('clientTier', 'Z');
+  // }
+  // if (custGrp == 'SUBSI' && custSubGrp != 'BQICL') {
+    // FormManager.setValue('clientTier', 'Z');
+  // }
 }
 function inTs38Ofcd() {
   var ofcd = FormManager.getActualValue('salesBusOffCd');
