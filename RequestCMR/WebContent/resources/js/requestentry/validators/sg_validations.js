@@ -143,9 +143,8 @@ function addAfterConfigAP() {
 	if (reqType == 'C') {
 		setIsuOnIsic();
 	}
-	if (cntry == '834') {
 		addVatValidationforSingapore();
-	}
+
 	// CREATCMR-5269
 	if (reqType == 'U') {
 		handleObseleteExpiredDataForUpdate();
@@ -241,13 +240,6 @@ function addFormatFieldValidator() {
 					var addrTxt2 = FormManager.getActualValue('addrTxt2');
 					var stateProv = FormManager.getActualValue('stateProv');
 					var dept = FormManager.getActualValue('dept');
-					// var reqType = FormManager.getActualValue('reqType');
-					// var role = FormManager.getActualValue('userRole').toUpperCase();
-
-					// if(role = 'REQUESTER' || role == 'PROCESSOR'){
-
-					// if (city1 && city1.length > 0 &&
-					// !city1.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
 					if (city1 && city1.length > 0 && !city1.match("([\\/]+$)|^([\\.]+$)|^([-]+$)|^([#]+$)|^([,]+$)|^([:]+$)|^([']+$)|^([&]+$)|^([;]+$)|^([0-9A-Za-z-#;:,'&()\\s+\\.\\/]+$)|^[(]+$|^[)]+$")) {
 						return new ValidationResult({
 							id: 'city1',
@@ -2673,6 +2665,11 @@ function checkCmrUpdateBeforeImport() {
 // Coverage 2024 for  SINGAPORE -> CREATCMR - 10535 
 function coverage2024ForSG() {
 	console.log("---- coverage2024ForSG ----");
+	var custSubGrp = FormManager.getActualValue('custSubGrp'); 
+	if(custSubGrp == 'PRIV'){
+		FormManager.setValue('isicCd', '9500');
+	}
+	
 	var _clusterHandlerSG = null;
 	FormManager.resetDropdownValues(FormManager.getField('clientTier'));
 	if (_clusterHandlerSG == null && FormManager.getActualValue('reqType') != 'U') {
@@ -2746,6 +2743,11 @@ function setISUCTCByCluster() {
 		if (result.ret3 != null && result.ret3 != '') {
 			FormManager.setValue('mrcCd', result.ret3);
 		}
+	}
+	
+	// if ISU is blank , generate by ISIC
+	if(FormManager.getActualValue('isuCd') == ''){
+						setIsuOnIsic();
 	}
 }
 
