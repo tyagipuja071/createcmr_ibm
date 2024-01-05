@@ -835,14 +835,14 @@ public class SpainTransformer extends MessageTransformer {
       builder.append(subInd);
       LOG.debug("***Auto setting Economic code as > " + builder.toString());
       cust.setEconomicCd(builder.toString());
-      if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
-        cust.setIsuCd(muData.getIsuCd() + "7");
-      } else {
-        String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
-        if (isuCd != null) {
-          cust.setIsuCd(isuCd);
-        }
-      }
+//      if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+//        cust.setIsuCd(muData.getIsuCd() + "7");
+//      } else {
+//        String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
+//        if (isuCd != null) {
+//          cust.setIsuCd(isuCd);
+//        }
+//      }
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
