@@ -252,12 +252,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           data.setCmrIssuingCntry(mainRecord.getCmrIssuedBy());
         }
 
+        geoHandler.setDefaultCustPrefLanguage(data);
+
       } else if (importAddress) {
-        // update admin
-        // if (StringUtils.isBlank(admin.getMainAddrType())) {
         admin.setMainAddrType(mainRecord.getCmrAddrTypeCode());
-        // }
-        // if (StringUtils.isBlank(admin.getMainCustNm1())) {
+
         int splitLength = 70;
         int splitLength2 = 70;
         if (geoHandler != null) {
@@ -267,22 +266,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         String[] parts = splitName(mainRecord.getCmrName1Plain().trim(), mainRecord.getCmrName2Plain(), splitLength, splitLength2);
         admin.setMainCustNm1(parts[0]);
         admin.setMainCustNm2(parts[1]);
-        // }
 
       }
-      // else if (geoHandler != null && !geoHandler.customerNamesOnAddress() &&
-      // importAddress) {
-      // int splitLength = 70;
-      // int splitLength2 = 70;
-      // if (geoHandler != null) {
-      // splitLength = geoHandler.getName1Length();
-      // splitLength2 = geoHandler.getName2Length();
-      // }
-      // String[] parts = splitName(mainRecord.getCmrName1Plain().trim(),
-      // mainRecord.getCmrName2Plain(), splitLength, splitLength2);
-      // admin.setMainCustNm1(parts[0]);
-      // admin.setMainCustNm2(parts[1]);
-      // }
 
       // transfer here back to model
       mainRecord.setCmrName1Plain(admin.getMainCustNm1());

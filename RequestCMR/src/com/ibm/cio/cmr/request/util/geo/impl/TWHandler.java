@@ -937,4 +937,8 @@ public class TWHandler extends GEOHandler {
     return true;
   }
 
+  @Override
+  public void setDefaultCustPrefLanguage(Data data) {
+    data.setCustPrefLang("M");
+  }
 }
