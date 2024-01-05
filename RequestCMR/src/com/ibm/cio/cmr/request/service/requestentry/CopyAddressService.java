@@ -530,8 +530,13 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
               copyIntlAddr.getIntlCustNm1().length() > 22 ? copyIntlAddr.getIntlCustNm1().substring(0, 22) : copyIntlAddr.getIntlCustNm1());
         }
       } else {
-        String custName2 = StringUtils.isEmpty(copyIntlAddr.getIntlCustNm2()) ? "" : " ".concat(copyIntlAddr.getIntlCustNm2());
-        copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1() + custName2);
+        String custName2 = "";
+        if (copyIntlAddr.getIntlCustNm1() != null && copyIntlAddr.getIntlCustNm2() != null) {
+          custName2 = StringUtils.isEmpty(copyIntlAddr.getIntlCustNm2()) ? "" : " ".concat(copyIntlAddr.getIntlCustNm2());
+          copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1() + custName2);
+        } else {
+          copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1());
+        }
       }
     }
   }

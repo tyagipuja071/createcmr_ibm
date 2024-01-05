@@ -1981,11 +1981,11 @@ public class JPHandler extends GEOHandler {
         addr.setCustNm3("");
       }
     } else {
-      if (StringUtils.isNotBlank(iAddr.getIntlCustNm1()) && StringUtils.isNotBlank(iAddr.getIntlCustNm2())) {
+      if (iAddr != null && StringUtils.isNotBlank(iAddr.getIntlCustNm1()) && StringUtils.isNotBlank(iAddr.getIntlCustNm2())) {
         String custName2 = StringUtils.isEmpty(iAddr.getIntlCustNm2()) ? "" : " ".concat(iAddr.getIntlCustNm2());
         addr.setCustNm3(iAddr.getIntlCustNm1() + custName2);
       } else {
-        addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");// chie
+        addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
       }
     }
 
