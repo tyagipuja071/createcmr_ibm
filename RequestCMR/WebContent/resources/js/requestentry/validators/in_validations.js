@@ -586,8 +586,7 @@ function onCustSubGrpChange() {
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     console.log('custSubGrp CHANGED here >>>>');
-     FormManager.readOnly('subIndustryCd');
-     updateIsbuCd();
+     FormManager.readOnly('subIndustryCd');    
 // if (FormManager.getActualValue('viewOnlyPage') != 'true')
 // FormManager.enable('isicCd');
        
@@ -1291,11 +1290,10 @@ function addSectorIsbuLogicOnSubIndu() {
     searchArryAndSetValue(arryIndCdForSectorCSI, _industryClass, 'sectorCd', 'CSI');
     searchArryAndSetValue(arryIndCdForSectorEXC, _industryClass, 'sectorCd', 'EXC');
   }
-   // updateIsbuCd();
+    updateIsbuCd();
 }
 
-function updateIsbuCd() {  
-  addSectorIsbuLogicOnSubIndu();
+function updateIsbuCd() {    
   console.log(">>>> updateIsbuCd >>>>");
   var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
