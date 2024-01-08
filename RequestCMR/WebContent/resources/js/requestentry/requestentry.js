@@ -1028,6 +1028,11 @@ function afterConfigChange() {
       } else {
         FormManager.removeValidator('inacCd', Validators.NUMBER);
       }
+      if ((cmrCntry == '852' || cmrCntry == '818') && (value && dojo.string.trim(value) == 'N')) {
+        FormManager.addValidator('inacCd', Validators.ALPHANUMONLY, [ 'NAC Code' ], 'MAIN_IBM_TAB');
+      } else {
+        FormManager.removeValidator('inacCd', Validators.ALPHANUMONLY);
+      }
     });
   }
   if (_inacHandler && _inacHandler[0]) {
