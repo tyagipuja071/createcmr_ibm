@@ -68,7 +68,7 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 </cmr:view>
 
 
-<cmr:view forGEO="AP" exceptForCountry="736,778,749,818,852">
+<cmr:view forGEO="AP" exceptForCountry="616,796,736,778,749,818,852">
   <script src="${resourcesPath}/js/requestentry/validators/ap_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
@@ -90,6 +90,14 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 
 <cmr:view forCountry="852">
   <script src="${resourcesPath}/js/requestentry/validators/vn_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forCountry="616">
+  <script src="${resourcesPath}/js/requestentry/validators/au_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forCountry="796">
+  <script src="${resourcesPath}/js/requestentry/validators/nz_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
 <cmr:view forGEO="MCO">
