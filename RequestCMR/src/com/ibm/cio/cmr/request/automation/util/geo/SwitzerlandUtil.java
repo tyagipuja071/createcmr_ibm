@@ -142,7 +142,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       case SCENARIO_PRIVATE_CUSTOMER:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       case SCENARIO_IBM_EMPLOYEE:
-        return doPrivatePersonChecks(engineData, SystemLocation.SWITZERLAND, soldTo.getLandCntry(), customerName, details,
+        return doPrivatePersonChecks(entityManager, engineData, SystemLocation.SWITZERLAND, soldTo.getLandCntry(), customerName, details,
             SCENARIO_IBM_EMPLOYEE.equals(actualScenario), requestData);
       case SCENARIO_INTERNAL:
         break;
@@ -401,8 +401,8 @@ public class SwitzerlandUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -410,9 +410,9 @@ public class SwitzerlandUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("D")) {
-    	output.setOnError(true);
-    	validation.setSuccess(false);
-    	validation.setMessage("Rejected");
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
     } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
       details.append("Updates to one or more fields cannot be validated.\n");
@@ -500,7 +500,7 @@ public class SwitzerlandUtil extends AutomationUtil {
           data.getBgId(), data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();

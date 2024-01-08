@@ -581,6 +581,8 @@ public class MassRequestEntryController extends BaseController {
           }
 
           templateName = docLink;
+          eManager.clear();
+          eManager.close();
         }
         LOG.debug("Mass Template to use for " + cmrIssuingCntry + " = " + templateName);
 

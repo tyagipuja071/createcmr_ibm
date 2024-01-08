@@ -739,12 +739,17 @@ public class SpainTransformer extends MessageTransformer {
       }
     }
 
-    if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+    if (StringUtils.isNotBlank(muData.getIsuCd())) {      
+      if ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()) || "21".equals(muData.getIsuCd())) {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
-      String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
-      if (isuCd != null) {
-        cust.setIsuCd(isuCd);
+        String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+            + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+        if (isuClientTier != null && isuClientTier.endsWith("@")) {
+          cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+        } else if (isuClientTier != null && isuClientTier.length() == 3) {
+          cust.setIsuCd(isuClientTier);
+        }
       }
     }
 
@@ -830,31 +835,31 @@ public class SpainTransformer extends MessageTransformer {
       builder.append(subInd);
       LOG.debug("***Auto setting Economic code as > " + builder.toString());
       cust.setEconomicCd(builder.toString());
-      if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
-        cust.setIsuCd(muData.getIsuCd() + "7");
-      } else {
-        String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
-        if (isuCd != null) {
-          cust.setIsuCd(isuCd);
-        }
-      }
+//      if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+//        cust.setIsuCd(muData.getIsuCd() + "7");
+//      } else {
+//        String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
+//        if (isuCd != null) {
+//          cust.setIsuCd(isuCd);
+//        }
+//      }
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
-    String isuClientTier;
-    if (!StringUtils.isEmpty(muData.getIsuCd()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
-      cust.setIsuCd(muData.getIsuCd() + "7");
-    } else {
-      isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-      if (isuClientTier != null && isuClientTier.contains("@")) {
-        cust.setIsuCd("7");
-      } else if (isuClientTier != null && isuClientTier.length() == 3) {
-        cust.setIsuCd(isuClientTier);
-      }
-    }
+//    String isuClientTier;
+//    if (!StringUtils.isEmpty(muData.getIsuCd()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+//      cust.setIsuCd(muData.getIsuCd() + "7");
+//    } else {
+//      isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+//          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+//      if (isuClientTier != null && isuClientTier.contains("@")) {
+//        cust.setIsuCd("7");
+//      } else if (isuClientTier != null && isuClientTier.length() == 3) {
+//        cust.setIsuCd(isuClientTier);
+//      }
+//    }
 
   }
 

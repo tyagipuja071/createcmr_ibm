@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.controller.util;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,7 +41,6 @@ import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
-import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
@@ -202,7 +202,7 @@ public class VatUtilController {
       };
       AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
       if (gstResponse != null && gstResponse.isSuccess()) {
-        if (gstResponse.getMessage().equals("GST provided is verified with the company details.")) {
+        if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")) {
           validation = ValidationResult.success();
         } else {
           validation = ValidationResult.error("GST# provided on the request is not valid as per GST Validation. Please verify the GST# provided.");
@@ -395,24 +395,24 @@ public class VatUtilController {
             }
           }
           if (!(success && custNmMatch && formerCustNmMatch)) {
-          if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
-              || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm)) && ((formerCustNm.equalsIgnoreCase(responseTradingNm))
+                || (formerCustNm.equalsIgnoreCase(responseOthTradingNm)) || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
               success = true;
               custNmMatch = true;
               formerCustNmMatch = true;
-          } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
-              && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            } else if (abnResponse.getRecord().isValid() && (custNm.equalsIgnoreCase(responseCustNm))
+                && !((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
               success = true;
               custNmMatch = true;
               formerCustNmMatch = false;
-          } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
-              && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
-                  || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
+            } else if (abnResponse.getRecord().isValid() && !(custNm.equalsIgnoreCase(responseCustNm))
+                && ((formerCustNm.equalsIgnoreCase(responseTradingNm)) || (formerCustNm.equalsIgnoreCase(responseOthTradingNm))
+                    || (formerCustNm.equalsIgnoreCase(responseBusinessNm)))) {
               success = true;
               custNmMatch = false;
               formerCustNmMatch = true;
-          } else {
+            } else {
               success = true;
               custNmMatch = false;
               formerCustNmMatch = false;
@@ -643,10 +643,16 @@ public class VatUtilController {
   // CREATCMR 3176 company Proof
   public static boolean isDnbOverrideAttachmentProvided(String reqId) {
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("ID", reqId);
-    return query.exists();
+    try {
+      String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ID", reqId);
+
+      return query.exists();
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
   }
 
   @RequestMapping(value = "/nz/nzbnFromAPI")

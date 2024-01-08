@@ -107,6 +107,9 @@ table.checklist span.checklist-radio {
     <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
       <jsp:include page="IL/israel_checklist.jsp" />
     <%  } %>  
+    </cmr:view>
+     <cmr:view forCountry="788">
+      <jsp:include page="NL/nl_checklist.jsp" />
     </cmr:view>    
     </cmr:column>
   </cmr:row>

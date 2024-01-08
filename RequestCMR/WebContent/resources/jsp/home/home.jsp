@@ -172,7 +172,7 @@ dojo.addOnLoad(function(){
                      for different geographical territories and handle data governance of client master records in accordance with IBM data standards.
                      </li>
                      <li>
-                     To know more about the CMDE teams and processes, please visit the <a href="https://w3.ibm.com/w3publisher/cmde-cmr" target="_blank">CMDE Site</a>.
+                     To know more about the CMDE teams and processes, please visit the <a href="https://w3.ibm.com/w3publisher/cmde" target="_blank">CMDE Site</a>.
                      </li>
                    </ul>
                  </div>
@@ -197,7 +197,7 @@ dojo.addOnLoad(function(){
               <input class="ibm-btn-small cmr-quick-search-btn-horizontal" type="button" value="Quick Search" onclick="openQuickSearch()" title="Quick Search">
                </div>
               <div class="home-btn">
-                You can also check out some <strong><a href="https://w3.ibm.com/w3publisher/cmde-cmr/tutorials/createcmr-tutorials" target="_blank">tutorials</a></strong> from the 
+                You can also check out some <strong><a href="https://w3.ibm.com/w3publisher/cmde" target="_blank">tutorials</a></strong> from the 
                 CMDE site for more information on how to create/update CMRs or watch a <strong><a href="https://video.ibm.com/embed/recorded/131988262" target="_blank">live demo</a></strong> of the tool.
               </div>
 						</div>

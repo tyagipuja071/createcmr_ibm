@@ -1695,6 +1695,7 @@ public class RequestUtils {
       } catch (Exception e) {
         LOG.warn("County and City computation error.", e);
       } finally {
+        entityManager.clear();
         entityManager.close();
       }
     }
@@ -1874,7 +1875,6 @@ public class RequestUtils {
     }
 
   }
-
 
   public static DPLSearchResponse convertToLegacySearchResults(String userId, KycScreeningResponse response) {
     DPLSearchResponse legacy = new DPLSearchResponse();

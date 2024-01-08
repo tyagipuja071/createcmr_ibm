@@ -70,8 +70,10 @@ public class IERPRequestUtils extends RequestUtils {
 
   public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
 
+    boolean closeEm = false;
     if (entityManager == null) {
       entityManager = JpaManager.getEntityManager();
+      closeEm = true;
     }
 
     boolean isDR = false;
@@ -96,6 +98,10 @@ public class IERPRequestUtils extends RequestUtils {
       isDR = false;
     }
 
+    if (closeEm & entityManager != null) {
+      entityManager.clear();
+      entityManager.close();
+    }
     return isDR;
   }
 

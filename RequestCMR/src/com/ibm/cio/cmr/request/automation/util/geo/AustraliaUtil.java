@@ -152,10 +152,25 @@ public class AustraliaUtil extends AutomationUtil {
     } else {
       eleResults.append("Error On Field Calculation.");
     }
+
+    // for P2L Conversions - checking of mandatory fields
+    if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId())) {
+      if ("NRMLC".equalsIgnoreCase(data.getCustSubGrp())) {
+        Addr soldtoAddr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+        if (StringUtils.isBlank(soldtoAddr.getStateProv())) {
+          details.append("\nState Prov is a mandatory field. Processor Review will be required.");
+          engineData.addNegativeCheckStatus("_stateMissing", "State Prov is a mandatory field.");
+        }
+        if (StringUtils.isBlank(soldtoAddr.getPostCd())) {
+          details.append("\nPostal Code is a mandatory field. Processor Review will be required.");
+          engineData.addNegativeCheckStatus("_postCdMissing", "State Prov is a mandatory field.");
+        }
+      }
+    }
     results.setResults(eleResults.toString());
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
-    
+
     return results;
   }
 
@@ -409,14 +424,14 @@ public class AustraliaUtil extends AutomationUtil {
       output.setProcessOutput(validation);
       output.setDetails("Updates to the dataFields fields skipped validation");
     }
-    
+
     if ("U".equals(admin.getReqType()) && ("PayGo-Test".equals(admin.getSourceSystId()) || "BSS".equals(admin.getSourceSystId()))) {
-        Addr pg01 = requestData.getAddress("PG01");
-        if(pg01 != null){
-        	// checkANZPaygoAddr(entityManager, data.getId().getReqId());
-        }
+      Addr pg01 = requestData.getAddress("PG01");
+      if (pg01 != null) {
+        // checkANZPaygoAddr(entityManager, data.getId().getReqId());
       }
-    
+    }
+
     return true;
   }
 
@@ -476,7 +491,8 @@ public class AustraliaUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false,
+          requestData);
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
       addToNotifyListANZ(entityManager, data.getId().getReqId());
@@ -626,9 +642,9 @@ public class AustraliaUtil extends AutomationUtil {
                           + (dnb.getMailingDnbPostalCd() == null ? "" : dnb.getMailingDnbPostalCd()) + " "
                           + (dnb.getMailingDnbCountry() == null ? "" : dnb.getMailingDnbCountry()) + "\n\n");
                     } else {
-                      checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " "
-                          + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2()) + " " + dnb.getDnbCity() + " "
-                          + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
+                      checkDetails
+                          .append(" - Address:  " + dnb.getDnbStreetLine1() + " " + (dnb.getDnbStreetLine2() == null ? "" : dnb.getDnbStreetLine2())
+                              + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry() + "\n\n");
                     }
                   }
                 }
@@ -716,12 +732,12 @@ public class AustraliaUtil extends AutomationUtil {
     anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
     return anzEcoNotifyList;
   }
-  
+
   public void checkANZPaygoAddr(EntityManager entityManager, long reqId) {
-	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
-	    query.setParameter("REQ_ID", reqId);
-	    query.executeSql();
-	  }
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ANZ.ADDR.PAYGO.U"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
 
   @Override
   protected List<String> getCountryLegalEndings() {

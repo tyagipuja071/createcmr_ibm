@@ -202,10 +202,10 @@ public class KscReportsService extends BaseBatchService {
    * @throws UnsupportedEncodingException
    */
   private ReportSpec configureAddressReport(boolean daily) throws UnsupportedEncodingException, IOException {
-    LOG.debug("Configuring daily accounts report..");
+    LOG.debug("Configuring daily address report..");
     ReportSpec spec = new ReportSpec("KSC.RPT.ADDR", "ABFAD" + (daily ? "D" : "M") + "1." + this.timestampString);
     spec.configureFields(new DateTimeReportField("DRXCN", 8, "yyyyMMdd"), new ReportField("RASXA", 5), new ReportField("RCUXA", 6),
-        new DBCSReportField("CZIPA", 8), new DBCSReportField("TXTBA01", 62), new DBCSReportField("TXTBA02", 62), new DBCSReportField("TXTBA03", 62),
+        new ReportField("CZIPA", 8), new DBCSReportField("TXTBA01", 62), new DBCSReportField("TXTBA02", 62), new DBCSReportField("TXTBA03", 62),
         new DBCSReportField("TXTBA06", 62), new DBCSReportField("TXTBA04", 62), new DBCSReportField("TXTBA05", 62), new DBCSReportField("NRPAA", 32),
         new ReportField("RPHAS", 17), new ReportField("RFAX", 17), new ReportField("UADUX", 16));
     if (daily) {
@@ -225,7 +225,7 @@ public class KscReportsService extends BaseBatchService {
    * @throws UnsupportedEncodingException
    */
   private ReportSpec configureCompanyReport(boolean daily) throws UnsupportedEncodingException, IOException {
-    LOG.debug("Configuring daily accounts report..");
+    LOG.debug("Configuring daily company report..");
     ReportSpec spec = new ReportSpec("KSC.RPT.COMP", "ABFCO" + (daily ? "D" : "M") + "1." + this.timestampString);
     spec.configureFields(new DateTimeReportField("DRXCN", 8, "yyyyMMdd"), new ReportField("RCOXA", 6), new ReportField("RCOCS", 9),
         new DBCSReportField("UNCUX01", 62), new DBCSReportField("UNCUX02", 62), new ReportField("NCUXB", 22), new ReportField("RLCXB", 5),
@@ -247,7 +247,7 @@ public class KscReportsService extends BaseBatchService {
    * @throws UnsupportedEncodingException
    */
   private ReportSpec configureEstablishmentReport(boolean daily) throws UnsupportedEncodingException, IOException {
-    LOG.debug("Configuring daily accounts report..");
+    LOG.debug("Configuring daily establishment report..");
     ReportSpec spec = new ReportSpec("KSC.RPT.ESTAB", "ABFES" + (daily ? "D" : "M") + "1." + this.timestampString);
     spec.configureFields(new DateTimeReportField("DRXCN", 8, "yyyyMMdd"), new ReportField("RESXA", 6), new ReportField("RCOXA", 6),
         new DBCSReportField("UNCUX01", 62), new DBCSReportField("UNCUX02", 62), new ReportField("NCUXB", 22));
@@ -257,6 +257,8 @@ public class KscReportsService extends BaseBatchService {
     spec.setOrderByKey("KSC.RPT.ESTAB.ORDER");
     spec.setTrailer(new KscReportTrailer());
     spec.setDateAdjust(JAPAN_DATE_ADJUST_FROM_GMT);
+    spec.setLimitDuplicateKeys(true);
+    spec.setKeyField("RESXA");
     return spec;
   }
 

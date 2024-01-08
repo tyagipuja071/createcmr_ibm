@@ -55,7 +55,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -626,9 +625,8 @@ public abstract class AutomationUtil {
    * @param output
    * @return
    */
-  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages, RequestData reqData) {
-    EntityManager entityManager = JpaManager.getEntityManager();
+  protected boolean doPrivatePersonChecks(EntityManager entityManeger, AutomationEngineData engineData, String country, String landCntry, String name,
+      StringBuilder details, boolean checkBluepages, RequestData reqData) {
     boolean legalEndingExists = false;
     for (Addr addr : reqData.getAddresses()) {
       String customerName = getCustomerFullName(addr);
@@ -862,12 +860,12 @@ public abstract class AutomationUtil {
         || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     } else if (DUP_ADDR_CHECK_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-    	if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()) 
-    	 || SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
-    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE");
-    	} else {
-    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
-    	}
+      if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())
+          || SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+        sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE");
+      } else {
+        sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
+      }
     } else {
       sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     }
@@ -1549,6 +1547,7 @@ public abstract class AutomationUtil {
 
   /**
    * Validates PPS CEID on Update request.
+   * 
    * @param engineData
    * @param data
    * @param details
@@ -1557,41 +1556,40 @@ public abstract class AutomationUtil {
    * @param reject
    * @return cmdeReview = true, for Update / Delete.
    */
-  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, 
-		  Set<String> resultCodes, UpdatedDataModel change, String reject) {
-	  String newppsceid = change.getNewData();
-	  String oldppsceid = change.getOldData();
-	  String kukla = data.getCustClass();
-	  List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
-	  boolean cmdeReview = false;
+  protected boolean validatePpsCeidForUpdateRequest(AutomationEngineData engineData, Data data, StringBuilder details, Set<String> resultCodes,
+      UpdatedDataModel change, String reject) {
+    String newppsceid = change.getNewData();
+    String oldppsceid = change.getOldData();
+    String kukla = data.getCustClass();
+    List<String> kuklaValuesStartingWith4 = Arrays.asList("41", "42", "43", "44", "45", "46", "47", "48", "49");
+    boolean cmdeReview = false;
 
-	  // ADD
-	  if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
-		  if (kuklaValuesStartingWith4.contains(kukla)) {
-			  if (checkPPSCEID(data.getPpsceid())) {
-				  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-			  } else {
-				  resultCodes.add(reject);
-				  details.append("PPS ceid on the request is invalid").append("\n");
-			  }
-		  } else {
-			  resultCodes.add(reject);
-			  details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
-		  }
-	  } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
-		  // DELETE
-		  cmdeReview = true;
-		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
-		  details.append("Deletion of ppsceid needs cmde review.\n");
-	  } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
-		  // UPDATE
-		  cmdeReview = true;
-		  engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
-		  details.append("Update of ppsceid needs cmde review.\n");
-	  }
+    // ADD
+    if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+      if (kuklaValuesStartingWith4.contains(kukla)) {
+        if (checkPPSCEID(data.getPpsceid())) {
+          details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+        } else {
+          resultCodes.add(reject);
+          details.append("PPS ceid on the request is invalid").append("\n");
+        }
+      } else {
+        resultCodes.add(reject);
+        details.append("PPS CE ID added for CMR with Kukla other than 41, 42, 43, 44, 45, 46, 47, 48, 49.").append("\n");
+      }
+    } else if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+      // DELETE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+      details.append("Deletion of ppsceid needs cmde review.\n");
+    } else if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
+      // UPDATE
+      cmdeReview = true;
+      engineData.addNegativeCheckStatus("_" + data.getCmrIssuingCntry() + "PpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+      details.append("Update of ppsceid needs cmde review.\n");
+    }
 
-	  return cmdeReview;
+    return cmdeReview;
   }
-  
 
 }

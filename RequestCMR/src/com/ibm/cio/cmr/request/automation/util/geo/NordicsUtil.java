@@ -312,7 +312,8 @@ public class NordicsUtil extends AutomationUtil {
     case LT_PRIPE_LOCAL:
     case LV_PRIPE_LOCAL:
     case CROSS_PRIPE:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false,
+          requestData);
 
     case DK_IBMEM_LOCAL:
     case FI_IBMEM_LOCAL:
@@ -323,7 +324,8 @@ public class NordicsUtil extends AutomationUtil {
     case EE_IBME_LOCAL:
     case LT_IBME_LOCAL:
     case LV_IBME_LOCAL:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, true, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, true,
+          requestData);
 
     case FO_GOV_LOCAL:
     case FO_INTSO_LOCAL:
@@ -648,8 +650,8 @@ public class NordicsUtil extends AutomationUtil {
         details.append("Thank you.");
         break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;

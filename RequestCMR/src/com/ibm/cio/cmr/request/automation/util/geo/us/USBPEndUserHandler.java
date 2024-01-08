@@ -267,7 +267,8 @@ public class USBPEndUserHandler extends USBPHandler {
     }
 
     // do final checks on request data
-    //overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
+    // overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA",
+    // "RESTRICT_IND", data.getRestrictInd(), "Y");
     // CREATCMR-6342
     if (!USUtil.CG_BY_MODEL.equals(data.getCustGrp())) {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
@@ -416,14 +417,14 @@ public class USBPEndUserHandler extends USBPHandler {
   }
 
   @Override
-  protected FindCMRRecordModel getIBMCMRBestMatch(AutomationEngineData engineData, RequestData requestData, List<DuplicateCMRCheckResponse> matches)
-      throws CmrException {
+  protected FindCMRRecordModel getIBMCMRBestMatch(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      List<DuplicateCMRCheckResponse> matches) throws CmrException {
     for (DuplicateCMRCheckResponse record : matches) {
       LOG.debug(" - Duplicate: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")" + record.getCompany() + " - "
           + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
       if (StringUtils.isBlank(record.getUsRestrictTo())) {
         // check US CMR DB first to confirm no restriction
-        if (hasBlankRestrictionCodeInUSCMR(record.getCmrNo())) {
+        if (hasBlankRestrictionCodeInUSCMR(entityManager, record.getCmrNo())) {
 
           // IBM Direct CMRs have blank restrict to
           LOG.debug("CMR No. " + record.getCmrNo() + " has BLANK restriction code in US CMR. Getting CMR Details..");
