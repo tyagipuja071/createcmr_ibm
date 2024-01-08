@@ -605,15 +605,6 @@ function onCustSubGrpChange() {
     var apCustClusterId = FormManager.getActualValue('apCustClusterId');
     var abbrevNm = null;
     
-    /*
-     * if (custSubGrp=='ECSYS') {
-     * FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-     * FormManager.resetDropdownValues(FormManager.getField('isuCd'));
-     * FormManager.enable('apCustClusterId'); FormManager.setValue('clientTier',
-     * 'Y'); FormManager.readOnly('clientTier'); FormManager.setValue('isuCd',
-     * '36'); FormManager.readOnly('isuCd'); }
-     */
-    
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB ) {
       FormManager.setValue('abbrevNm', _pagemodel.abbrevNm); 
       FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
