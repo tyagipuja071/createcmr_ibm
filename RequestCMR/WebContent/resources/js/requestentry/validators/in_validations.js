@@ -38,7 +38,8 @@ function custSubGrpHandler() {
   if (_custSubGrpHandler == null) {
     _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       onIsicChange();   
-      prospectFilterISBU();      
+      prospectFilterISBU();    
+      addSectorIsbuLogicOnSubIndu();
     });
   }
 }
@@ -604,18 +605,14 @@ function onCustSubGrpChange() {
     var apCustClusterId = FormManager.getActualValue('apCustClusterId');
     var abbrevNm = null;
     
-    if (custSubGrp=='ECSYS') {
-      FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-      FormManager.resetDropdownValues(FormManager.getField('isuCd'));
-      FormManager.enable('apCustClusterId');
-      FormManager.setValue('clientTier', 'Y'); 
-      FormManager.readOnly('clientTier');
-      FormManager.setValue('isuCd', '36');
-      FormManager.readOnly('isuCd');
-     // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),['10654','10655',
-      // '10656', '10657']);
-    }
+    /*
+     * if (custSubGrp=='ECSYS') {
+     * FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+     * FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+     * FormManager.enable('apCustClusterId'); FormManager.setValue('clientTier',
+     * 'Y'); FormManager.readOnly('clientTier'); FormManager.setValue('isuCd',
+     * '36'); FormManager.readOnly('isuCd'); }
+     */
     
     if (custSubGrpInDB != null && custSubGrp == custSubGrpInDB ) {
       FormManager.setValue('abbrevNm', _pagemodel.abbrevNm); 
@@ -1130,7 +1127,7 @@ function setIsicCdIfCmrResultAccepted(value) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYNDR', 'ESOSW', 'ECSYS', 'CROSS', 'XAQST', 'XBLUM', 'XESO', 'XMKTP', 'ASLOM'];
+  var custSubGroups = ['BLUMX', 'MKTPC', 'AQSTN', 'NRML', 'NRMLC', 'KYNDR', 'ESOSW', 'ECSYS', 'CROSS'];
   if(custSubGroups.includes(custSubGrp)){
     var reqIdParams = {
         REQ_ID : reqId,
@@ -1167,7 +1164,7 @@ function setIsicCdIfCmrResultAccepted(value) {
 
 function setIsicCdIfDnbResultAccepted(value){
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'SPOFF', 'XBLUM', 'XAQST', 'XMKTP', 'BUSPR', 'ASLOM','NRMLC','KYNDR']);
+  var cond2 = new Set(['AQSTN', 'BLUMX', 'ESOSW', 'ECSYS', 'MKTPC', 'NRML', 'CROSS', 'NRMLC','KYNDR']);
   var cond3 = new Set(['INTER', 'PRIV', 'XPRIV', 'DUMMY','IGF']);
   if (cond2.has(custSubGrp)) {
     var oldISIC = getIsicDataRDCValue();
@@ -1293,7 +1290,7 @@ function addSectorIsbuLogicOnSubIndu() {
     updateIsbuCd();
 }
 
-function updateIsbuCd() {    
+function updateIsbuCd() {
   console.log(">>>> updateIsbuCd >>>>");
   var _mrcCd = FormManager.getActualValue('mrcCd');
   var _sectorCd = FormManager.getActualValue('sectorCd');
@@ -1326,49 +1323,24 @@ function setISBUScenarioLogic() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isbuList = null;
-  if (cmrIssuingCntry == '744' && custSubGrp == 'PRIV') {
+  if (custSubGrp == 'PRIV') {
     FormManager.readOnly('apCustClusterId');
   }
   
 
-  if (custSubGrp == 'BLUMX' || custSubGrp == 'XBLUM') {
-    if (cmrIssuingCntry == '615' || cmrIssuingCntry == '652' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
-      FormManager.setValue('isbuCd', 'GMBW');
-    }
-  } else if (custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM') {
-    if (cmrIssuingCntry == '615' || cmrIssuingCntry == '643' || cmrIssuingCntry == '646' || cmrIssuingCntry == '652' || cmrIssuingCntry == '714' || cmrIssuingCntry == '720'
-        || cmrIssuingCntry == '744' || cmrIssuingCntry == '749' || cmrIssuingCntry == '778' || cmrIssuingCntry == '818' || cmrIssuingCntry == '834' || cmrIssuingCntry == '852'
-        || cmrIssuingCntry == '856') {
-      FormManager.setValue('isbuCd', 'DUM1');
-    }
-  } else if (custSubGrp == 'IGF' || custSubGrp == 'XIGF') {
-    if (cmrIssuingCntry == '744') {
-      FormManager.setValue('isbuCd', 'DUM1');
-    }
-  } else if (custSubGrp == 'INTER' || custSubGrp == 'XINT') {
-    if (cmrIssuingCntry == '615' || cmrIssuingCntry == '643' || cmrIssuingCntry == '646' || cmrIssuingCntry == '652' || cmrIssuingCntry == '714' || cmrIssuingCntry == '720'
-        || cmrIssuingCntry == '744' || cmrIssuingCntry == '749' || cmrIssuingCntry == '778' || cmrIssuingCntry == '818' || cmrIssuingCntry == '834' || cmrIssuingCntry == '852'
-        || cmrIssuingCntry == '856') {
-      FormManager.setValue('isbuCd', 'INT1');
-    }
-  } else if (custSubGrp == 'MKTPC' || custSubGrp == 'XMKTP') {
-    if (cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
-      FormManager.setValue('isbuCd', 'GMBW');
-    }
+  if (custSubGrp == 'BLUMX') {
+    FormManager.setValue('isbuCd', 'GMBW');
+  } else if (custSubGrp == 'DUMMY') {
+    FormManager.setValue('isbuCd', 'DUM1');
+  } else if (custSubGrp == 'IGF') {
+    FormManager.setValue('isbuCd', 'DUM1');
+  } else if (custSubGrp == 'INTER') {
+    FormManager.setValue('isbuCd', 'INT1');
+  } else if (custSubGrp == 'MKTPC') {
+    FormManager.setValue('isbuCd', 'GMBW');
   } else if (custSubGrp == 'PRIV') {
-    if (cmrIssuingCntry == '744') {
-           FormManager.setValue('isbuCd', 'GMBW');
-         }
-  } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-    if (cmrIssuingCntry == '643' || cmrIssuingCntry == '646' || cmrIssuingCntry == '714' || cmrIssuingCntry == '720' || cmrIssuingCntry == '749' || cmrIssuingCntry == '778'
-        || cmrIssuingCntry == '818' || cmrIssuingCntry == '834' || cmrIssuingCntry == '852' || cmrIssuingCntry == '856') {
-      isbuList = [ 'BPN1', 'BPN2' ];
-      console.log("isbuList = " + isbuList);
-      FormManager.enable('isbuCd');
-      FormManager.setValue('isbuCd', '');
-      FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
-    }
-  }
+    FormManager.setValue('isbuCd', 'GMBW');
+  } 
   
   
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
