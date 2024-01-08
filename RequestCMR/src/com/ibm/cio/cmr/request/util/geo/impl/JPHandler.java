@@ -1004,14 +1004,19 @@ public class JPHandler extends GEOHandler {
   private void handleBPEndUserCmrImport(Data data) throws Exception {
     if (isBPEndUserCMR(data)) {
       EntityManager entityManager = JpaManager.getEntityManager();
-      String creditCusNo = data.getCreditToCustNo();
-      String cmrNo = data.getCmrNo();
-      if (StringUtils.isNotEmpty(creditCusNo) && StringUtils.isNotEmpty(cmrNo)) {
-        Kna1 cmrNoKna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), cmrNo, "ZS01");
-        Kna1 creditCustKna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), creditCusNo, "ZS01");
-        if (creditCustKna1 != null && cmrNoKna1 != null && "42".equals(cmrNoKna1.getKukla())) {
-          mapBPEndUserOrIGFKna1ToData(data, creditCustKna1);
+      try {
+        String creditCusNo = data.getCreditToCustNo();
+        String cmrNo = data.getCmrNo();
+        if (StringUtils.isNotEmpty(creditCusNo) && StringUtils.isNotEmpty(cmrNo)) {
+          Kna1 cmrNoKna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), cmrNo, "ZS01");
+          Kna1 creditCustKna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), creditCusNo, "ZS01");
+          if (creditCustKna1 != null && cmrNoKna1 != null && "42".equals(cmrNoKna1.getKukla())) {
+            mapBPEndUserOrIGFKna1ToData(data, creditCustKna1);
+          }
         }
+      } finally {
+        entityManager.clear();
+        entityManager.close();
       }
     }
   }
@@ -1027,12 +1032,17 @@ public class JPHandler extends GEOHandler {
   private void handleIGFCmrImport(Data data) throws Exception {
     if (isIGFCmr(data)) {
       EntityManager entityManager = JpaManager.getEntityManager();
-      String ibmRelatedCmr = data.getProxiLocnNo();
-      if (StringUtils.isNotEmpty(ibmRelatedCmr)) {
-        Kna1 kna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), ibmRelatedCmr, "ZS01");
-        if (kna1 != null) {
-          mapBPEndUserOrIGFKna1ToData(data, kna1);
+      try {
+        String ibmRelatedCmr = data.getProxiLocnNo();
+        if (StringUtils.isNotEmpty(ibmRelatedCmr)) {
+          Kna1 kna1 = getKna1ByType(entityManager, SystemConfiguration.getValue("MANDT"), ibmRelatedCmr, "ZS01");
+          if (kna1 != null) {
+            mapBPEndUserOrIGFKna1ToData(data, kna1);
+          }
         }
+      } finally {
+        entityManager.clear();
+        entityManager.close();
       }
     }
   }
@@ -2032,7 +2042,7 @@ public class JPHandler extends GEOHandler {
     List<Addr> addrList = getAddrByReqId(entityManager, data.getId().getReqId());
     String rol = "";
     if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
-      rol = getRolByCreditToCustNo(data.getCreditToCustNo() == null ? "" : data.getCreditToCustNo());
+      rol = getRolByCreditToCustNo(entityManager, data.getCreditToCustNo() == null ? "" : data.getCreditToCustNo());
     }
     if ("IBMTP".equals(data.getCustGrp()) && "BPWPQ".equals(data.getCustSubGrp())) {
       // data.setIdentClient(rol);
@@ -2056,29 +2066,24 @@ public class JPHandler extends GEOHandler {
     }
   }
 
-  private String getRolByCreditToCustNo(String cmrNo) throws Exception {
+  private String getRolByCreditToCustNo(EntityManager entityManager, String cmrNo) throws Exception {
     String rol = "";
     List<String> results = new ArrayList<String>();
-    EntityManager entityManager = JpaManager.getEntityManager();
 
-    try {
-      String mandt = SystemConfiguration.getValue("MANDT");
-      if (StringUtils.isEmpty(cmrNo) || StringUtils.isEmpty(mandt)) {
-        return null;
-      }
-      String sql = ExternalizedQuery.getSql("GET.ROL.KNA1.BYCMR");
-      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
-      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-      sql = StringUtils.replace(sql, ":KATR6", "'" + "760" + "'");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      results = query.getResults(String.class);
-      if (results != null && results.size() > 0) {
-        rol = results.get(0);
-      }
-    } finally {
-      entityManager.clear();
-      entityManager.close();
+    String mandt = SystemConfiguration.getValue("MANDT");
+    if (StringUtils.isEmpty(cmrNo) || StringUtils.isEmpty(mandt)) {
+      return null;
     }
+    String sql = ExternalizedQuery.getSql("GET.ROL.KNA1.BYCMR");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + "760" + "'");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      rol = results.get(0);
+    }
+
     return rol;
   }
 

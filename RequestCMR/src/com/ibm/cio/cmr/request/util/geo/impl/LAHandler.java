@@ -2615,20 +2615,25 @@ public class LAHandler extends GEOHandler {
 
     if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(issuingCntry)) {
       EntityManager em = JpaManager.getEntityManager();
+      try {
 
-      if (em != null) {
-        String mandt = SystemConfiguration.getValue("MANDT");
-        String sql = ExternalizedQuery.getSql("LA.GET_COLLECTORNO_ON_IMPORT");
+        if (em != null) {
+          String mandt = SystemConfiguration.getValue("MANDT");
+          String sql = ExternalizedQuery.getSql("LA.GET_COLLECTORNO_ON_IMPORT");
 
-        sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-        sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
-        sql = StringUtils.replace(sql, ":KATR6", "'" + issuingCntry + "'");
-        sql = StringUtils.replace(sql, ":KTOKD", "'ZS01'");
+          sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+          sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+          sql = StringUtils.replace(sql, ":KATR6", "'" + issuingCntry + "'");
+          sql = StringUtils.replace(sql, ":KTOKD", "'ZS01'");
 
-        PreparedQuery query = new PreparedQuery(em, sql);
-        query.setForReadOnly(true);
+          PreparedQuery query = new PreparedQuery(em, sql);
+          query.setForReadOnly(true);
 
-        collectorNo = query.getSingleResult(String.class);
+          collectorNo = query.getSingleResult(String.class);
+        }
+      } finally {
+        em.clear();
+        em.close();
       }
     }
     return collectorNo;
@@ -2699,8 +2704,13 @@ public class LAHandler extends GEOHandler {
 
   private void assignLocationCodeOnImport(Addr address, String issuingCntry) throws Exception {
     EntityManager em = JpaManager.getEntityManager();
-    AddressService addSvc = new AddressService();
-    addSvc.assignLocationCode(em, address, issuingCntry);
+    try {
+      AddressService addSvc = new AddressService();
+      addSvc.assignLocationCode(em, address, issuingCntry);
+    } finally {
+      em.clear();
+      em.close();
+    }
   }
 
   public boolean isValidWWSubindustry(String bran1) throws Exception {
@@ -3038,37 +3048,48 @@ public class LAHandler extends GEOHandler {
   private String getStateProvCd(String issuingCntry, String state, String city) {
     LOG.debug("Get StateProv/Regio value...");
     EntityManager entityManager = JpaManager.getEntityManager();
-    String txt = "";
-    String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_TXT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
-    query.setParameter("FIELD_ID", "##StateProv");
-    query.setParameter("TXT", state);
-    List<String> results = query.getResults(String.class);
+    try {
+      String txt = "";
+      String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_TXT");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+      query.setParameter("FIELD_ID", "##StateProv");
+      query.setParameter("TXT", state);
+      List<String> results = query.getResults(String.class);
 
-    if (results != null && results.size() == 1) {
-      txt = results.get(0);
-    } else {
-      txt = getStateProvByCity(entityManager, issuingCntry, results, city);
+      if (results != null && results.size() == 1) {
+        txt = results.get(0);
+      } else {
+        txt = getStateProvByCity(entityManager, issuingCntry, results, city);
+      }
+
+      LOG.debug("Lov txt : " + txt);
+      return txt;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
 
-    LOG.debug("Lov txt : " + txt);
-    return txt;
   }
 
   private String getLovCdByUpperTxt(String issuingCntry, String fieldId, String txt) {
     EntityManager entityManager = JpaManager.getEntityManager();
-
     String lovTxt = "";
-    String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_UPPER_TXT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
-    query.setParameter("FIELD_ID", fieldId);
-    query.setParameter("TXT", txt);
-    List<String> results = query.getResults(String.class);
+    try {
+      String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_UPPER_TXT");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+      query.setParameter("FIELD_ID", fieldId);
+      query.setParameter("TXT", txt);
+      List<String> results = query.getResults(String.class);
 
-    if (results != null && results.size() > 0) {
-      lovTxt = results.get(0);
+      if (results != null && results.size() > 0) {
+        lovTxt = results.get(0);
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+
     }
 
     return lovTxt;
@@ -3107,21 +3128,26 @@ public class LAHandler extends GEOHandler {
   private String getLocationCd(String issuingCntry, String city, String stateProv) {
     EntityManager entityManager = JpaManager.getEntityManager();
     String txt = "";
-    String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CITY_DESC", city);
-    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
-    List<String> results = query.getResults(String.class);
+    try {
+      String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CITY_DESC", city);
+      query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+      List<String> results = query.getResults(String.class);
 
-    if (results != null && results.size() == 1) {
-      txt = results.get(0);
-    } else if (results != null && results.size() > 1) {
-      for (String res : results) {
-        if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
-          txt = res;
+      if (results != null && results.size() == 1) {
+        txt = results.get(0);
+      } else if (results != null && results.size() > 1) {
+        for (String res : results) {
+          if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
+            txt = res;
+          }
+
         }
-
       }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
 
     if (txt != null && StringUtils.isNotEmpty(txt) && txt.length() >= 5) {

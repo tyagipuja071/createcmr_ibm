@@ -174,7 +174,7 @@ public class BELUXHandler extends BaseSOFHandler {
                 newRecord.setCmrName3(null);
                 newRecord.setCmrName4(null);
                 newRecord.setCmrSapNumber(null);
-                mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
+                mapCmrtAddr2FindCMRRec(entityManager, newRecord, cmrAddr);
                 newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
                 if ("ZS02".equals(newRecord.getCmrAddrTypeCode())) {
                   newRecord.setCmrSitePartyID(null);
@@ -496,7 +496,7 @@ public class BELUXHandler extends BaseSOFHandler {
     return output;
   }
 
-  private void mapCmrtAddr2FindCMRRec(FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
+  private void mapCmrtAddr2FindCMRRec(EntityManager entityManager, FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
     if (cmrtAddr == null) {
       return;
     }
@@ -631,7 +631,7 @@ public class BELUXHandler extends BaseSOFHandler {
       }
     } else {
       if (!StringUtils.isBlank(countryNm)) {
-        String countryCd = getCountryCode(countryNm);
+        String countryCd = getCountryCode(entityManager, countryNm);
         zs02Addr.setCmrCountryLanded(countryCd);
       }
     }
@@ -2320,7 +2320,7 @@ public class BELUXHandler extends BaseSOFHandler {
         LOG.trace("Order Block Code should only @, D, P, J. >> ");
         error.addError(row.getRowNum() + 1, "Order Block Code", "Order Block Code should be only @, D, P, J. ");
       }
-       currCell = row.getCell(stcOrdBlkIndex);
+      currCell = row.getCell(stcOrdBlkIndex);
       String stcOrdBlk = validateColValFromCell(currCell);
       if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
         LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
@@ -2341,7 +2341,7 @@ public class BELUXHandler extends BaseSOFHandler {
       currCell = row.getCell(6);
       isuCd = validateColValFromCell(currCell);
 
-            if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+      if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
         error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
       } else if (!StringUtils.isBlank(isuCd) || !StringUtils.isBlank(ctc)) {
@@ -2352,25 +2352,21 @@ public class BELUXHandler extends BaseSOFHandler {
             error.addError((row.getRowNum() + 1), "Client Tier",
                 ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        }
-        else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
-            if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
-              LOG.trace("The row " + (row.getRowNum() + 1)
-                  + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "Client Tier",
-                  ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
-            }
+        } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1)
+                + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-            if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
-              LOG.trace("The row " + (row.getRowNum() + 1)
-                  + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "Client Tier",
-                  ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
-            }
+        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1)
+                + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier",
+                ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
-                && !"@".equalsIgnoreCase(ctc)) {
+        } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd))) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
@@ -2447,6 +2443,7 @@ public class BELUXHandler extends BaseSOFHandler {
         isDivestiture = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return isDivestiture;
   }
@@ -2475,6 +2472,7 @@ public class BELUXHandler extends BaseSOFHandler {
         is93cmr = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return is93cmr;
   }

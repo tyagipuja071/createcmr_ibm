@@ -406,6 +406,7 @@ public class SystemUtil {
     try {
       return getDBTimezone(em);
     } finally {
+      em.clear();
       em.close();
     }
   }

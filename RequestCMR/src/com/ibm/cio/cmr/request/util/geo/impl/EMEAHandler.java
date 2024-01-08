@@ -1817,6 +1817,8 @@ public class EMEAHandler extends BaseSOFHandler {
         if (records != null && records.size() >= 0) {
           data.setSpecialTaxCd("Bl");
         }
+        entityManager.clear();
+        entityManager.close();
       }
       // Changed abbreviated location if cross border to country
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
@@ -4939,19 +4941,24 @@ public class EMEAHandler extends BaseSOFHandler {
   private void setTelf2fromRDC(Addr addr, FindCMRRecordModel cmr) {
     String qry = ExternalizedQuery.getSql("GET_TELF2");
     EntityManager entityManager = JpaManager.getEntityManager();
-    PreparedQuery qrytelf2 = new PreparedQuery(entityManager, qry);
-    qrytelf2.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    qrytelf2.setParameter("CMR", cmr.getCmrNum());
-    qrytelf2.setParameter("KATR6", cmr.getCmrIssuedBy());
-    qrytelf2.setParameter("KTOKD", cmr.getCmrAddrTypeCode());
-    qrytelf2.setParameter("ZZKV_SEQNO", cmr.getCmrAddrSeq());
+    try {
+      PreparedQuery qrytelf2 = new PreparedQuery(entityManager, qry);
+      qrytelf2.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      qrytelf2.setParameter("CMR", cmr.getCmrNum());
+      qrytelf2.setParameter("KATR6", cmr.getCmrIssuedBy());
+      qrytelf2.setParameter("KTOKD", cmr.getCmrAddrTypeCode());
+      qrytelf2.setParameter("ZZKV_SEQNO", cmr.getCmrAddrSeq());
 
-    String results = qrytelf2.getSingleResult(String.class);
+      String results = qrytelf2.getSingleResult(String.class);
 
-    if (results != null && !results.isEmpty()) {
-      addr.setCustPhone(results);
-    } else {
-      addr.setCustPhone("");
+      if (results != null && !results.isEmpty()) {
+        addr.setCustPhone(results);
+      } else {
+        addr.setCustPhone("");
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
 
   }

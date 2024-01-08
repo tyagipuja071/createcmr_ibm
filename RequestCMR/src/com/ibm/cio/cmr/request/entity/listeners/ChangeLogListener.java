@@ -632,6 +632,7 @@ public class ChangeLogListener {
   public static void setManager(EntityManager entityManager) {
     LOG.debug("Setting thread local entity manager..");
     currentEntityManager.set(entityManager);
+    SystemUtil.setManager(entityManager);
   }
 
   public static void setUser(String userId) {
