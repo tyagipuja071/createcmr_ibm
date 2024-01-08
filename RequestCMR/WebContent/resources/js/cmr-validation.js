@@ -135,6 +135,14 @@ var Validators = (function() {
         return new ValidationResult(input, true);
       }
     },
+    ALPHANUMONLY : function(input) {
+      var value = FormManager.getActualValue(input);
+      if (value && value.length > 0 && !value.match(/^(?=.*[a-zA-Z])(?=.*\d).*$/)) {
+        return new ValidationResult(input, false, MessageMgr.MESSAGES.INVALID_ALPHANUMERIC);
+      } else {
+        return new ValidationResult(input, true);
+      }
+    },
     INVALID_VALUE : function(input) {
       var id = null;
       if (typeof (input) == 'string') {
