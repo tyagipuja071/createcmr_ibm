@@ -29,9 +29,9 @@ function addHandlersForAU() {
       lockFieldsForAU();
       _inacHandlerANZSG = _inacHandlerANZSG + 1;
       setIsuOnIsic();
-//      if (_inacHandlerANZSG > 1) {        
+// if (_inacHandlerANZSG > 1) {
         setInacByCluster(value);
-//      }
+// }
     });
   }
 
@@ -265,7 +265,7 @@ function setInacByCluster(searchTermChange) {
               inacCdValue.push(results[i].ret1);
             }
             FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-//            FormManager.setValue('inacCd', inacCdValue[0]);
+// FormManager.setValue('inacCd', inacCdValue[0]);
             if (inacCdValue.length == 1) {
               FormManager.setValue('inacCd', inacCdValue[0]);
             }
@@ -1560,15 +1560,15 @@ function updateIsbuCd() {
     console.log('>>>> Error, _industryClass is null');
   }
   // if (_mrcCd == null) {
-  //   console.log('>>>> Error, _mrcCd is null');
+  // console.log('>>>> Error, _mrcCd is null');
   // }
   // FormManager.setValue('isbuCd', '');
   // if (_mrcCd == '3' && _industryClass != '') {
-  //   _isbuCd = 'GMB' + _industryClass;
-  //   FormManager.setValue('isbuCd', _isbuCd);
+  // _isbuCd = 'GMB' + _industryClass;
+  // FormManager.setValue('isbuCd', _isbuCd);
   // } else if (_mrcCd == '2' && _sectorCd != '' && _industryClass != '') {
-  //   _isbuCd = _sectorCd + _industryClass;
-  //   FormManager.setValue('isbuCd', _isbuCd);
+  // _isbuCd = _sectorCd + _industryClass;
+  // FormManager.setValue('isbuCd', _isbuCd);
   // }
 
 }
@@ -1717,8 +1717,11 @@ function addAbnValidatorForAU() {
       validate: function () {
         var abn = FormManager.getActualValue('vat');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        /*if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp == "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp == "XNRML" || custSubGrp == "SOFT"
-        || custSubGrp == "XSOFT") {*/
+        /*
+         * if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp ==
+         * "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp ==
+         * "XNRML" || custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
+         */
         if (abn && abn.length != 11) {
           return new ValidationResult({
             id: 'vat',
@@ -1728,11 +1731,11 @@ function addAbnValidatorForAU() {
         } else {
           return new ValidationResult(null, true);
         }
-      //} 
+      // }
       
-     /* else {
-        return new ValidationResult(null, true);
-      }*/
+     /*
+       * else { return new ValidationResult(null, true); }
+       */
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
@@ -3071,10 +3074,10 @@ function checkCmrUpdateBeforeImport() {
 }
 
 // function setMrcCd() {
-//   if (FormManager.getActualValue('mrcCd') == '3') {
-//     return;
-//   }
-//   FormManager.setValue('mrcCd', '3');
+// if (FormManager.getActualValue('mrcCd') == '3') {
+// return;
+// }
+// FormManager.setValue('mrcCd', '3');
 // }
 
 function addAfterConfigAU() {
@@ -3084,7 +3087,7 @@ function addAfterConfigAU() {
   setCollectionCd();
   setCollCdFrAU();
   onIsuCdChangeAseanAnzIsa();
-//  setCTCIsuByClusterANZ();
+// setCTCIsuByClusterANZ();
   removeStateValidatorForHkMoNZ();
   addGovIndcHanlder();
   addGovCustTypHanlder();
@@ -3106,9 +3109,21 @@ function addressFunctions() {
   lockCustMainNames();
 }
 
+function checkForCompanyProofAttachment() {
+  var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+    ID: id
+  });
+  if (ret == null || ret.ret1 == null) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function afterTemplateLoadFunctions() {
   setRepTeamMemberNo();
-//  clearClusterFieldsOnScenarioChange();
+// clearClusterFieldsOnScenarioChange();
   lockCMRNumberPrefixforNoINTER();
   prospectFilter();
   defaultCMRNumberPrefixforANZ();
