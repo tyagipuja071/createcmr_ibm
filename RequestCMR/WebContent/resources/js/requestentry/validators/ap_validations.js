@@ -4352,7 +4352,7 @@ function addAddressInstancesValidator() {
               }
             }
           }
-          if (duplicatesAddr.length > 0 && isPaygoUpgrade==false) {
+          if (duplicatesAddr.length > 0 && reqType!='U') {
             return new ValidationResult(null, false, 'Only one instance of each address can be added.Please remove additional ' + duplicatesAddr + ' addresses');
           } else {
             return new ValidationResult(null, true);
