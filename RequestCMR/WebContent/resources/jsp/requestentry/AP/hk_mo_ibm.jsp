@@ -151,7 +151,7 @@ dojo.addOnLoad(function(){
     	
      <!-- Sales Rep No, Cmr No Prefix, IBM Collection Responsibility -->
     	<cmr:row topPad="10">
-  		  <cmr:column span="2" containerForField="SalRepNameNo">
+  		  <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="796">
       		<p>
         	  <cmr:label fieldId="repTeamMemberNo">
           	    <cmr:fieldLabel fieldId="SalRepNameNo" />:<cmr:info text="No impact on CMR/account owner, just AP CMR legacy system(WTAAS) requirement. "></cmr:info> 
