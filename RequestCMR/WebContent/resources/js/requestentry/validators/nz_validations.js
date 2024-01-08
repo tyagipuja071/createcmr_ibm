@@ -2971,7 +2971,7 @@ function afterTemplateLoadFunctions() {
   afterConfigForNewZeaLand();
   setRepTeamMemberNo();
   handleObseleteExpiredDataForUpdate();
-//  setInacByCluster()
+  setInacByCluster();
 }
 
 
