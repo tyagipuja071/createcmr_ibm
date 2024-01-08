@@ -2121,7 +2121,7 @@ function getMismatchFields(localLangData, translatedData) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'City';
   }
-  if(!hasMatchingFieldsFilled(translatedData.stateProv[0], localLangData.stateProv[0])) {
+  if(isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.stateProv[0], translatedData.stateProv[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'State/Province';
   }
