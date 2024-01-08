@@ -79,7 +79,7 @@ dojo.addOnLoad(function(){
 	         <cmr:view forCountry="616,834,615,652">
 				<cmr:info text="${ui.info.AUForCluster}" />
 	         </cmr:view>
-	         <cmr:view forCountry="852,856,818">
+	         <cmr:view forCountry="856">
             	<cmr:info text="${ui.info.clusterReminderMsgTH_VN_PH}"></cmr:info>
         	 </cmr:view>
 	        </cmr:label>
