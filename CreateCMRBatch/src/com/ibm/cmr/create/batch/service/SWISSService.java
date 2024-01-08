@@ -658,7 +658,6 @@ public class SWISSService extends BaseBatchService {
   private AddrRdc getAddrRdcRecords(EntityManager entityManager, Addr addr, String cmrNo) {
     LOG.debug("Searching for ADDR_RDC records for Request " + addr.getId().getReqId());
     String seqNo = addr.getId().getAddrSeq();
-
     if (addr.getId().getAddrSeq().length() == 5) {
       seqNo = "000" + cmrNo + "L" + addr.getId().getAddrSeq();
     }
