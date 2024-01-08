@@ -25,8 +25,9 @@ function addHandlersForNZ() {
   if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
     _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
 //      _inacHandlerANZSG = _inacHandlerANZSG + 1;
-      setIsuOnIsic();
+//      setIsuOnIsic();
       setInacByCluster(value);
+      setCTCIsuByClusterANZ();
     });
   }
   if (_custSubGrpHandler == null ) {
@@ -241,7 +242,7 @@ function setIsuOnIsic() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cluster = FormManager.getActualValue('apCustClusterId');
   
-  if (cluster != '10114' || cluster != '10115') {
+  if (cluster != '08794' && cluster != '08792') {
     return;
   }
 
@@ -1256,7 +1257,6 @@ function setCTCIsuByClusterANZ() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
-  var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
     var clusterVal = FormManager.getActualValue('apCustClusterId');
     if (!clusterVal) {
       return;
@@ -1366,14 +1366,9 @@ function setCTCIsuByClusterANZ() {
             }
           }
         }
+        setIsuOnIsic();
       }
     }
-
-
-  });
-  if (_clusterHandler && _clusterHandler[0]) {
-    _clusterHandler[0].onChange();
-  }
   // CREATCMR-7884
   if (FormManager.getActualValue('cmrIssuingCntry') == '796') {
     lockInacForIDMYSG();
@@ -2955,7 +2950,7 @@ function addAfterConfigNZ() {
   defaultCMRNumberPrefixforANZ();
   onInacTypeChange();
   removeStateValidatorForHkMoNZ();
-  setCTCIsuByClusterANZ();
+//  setCTCIsuByClusterANZ();
   handleObseleteExpiredDataForUpdate();
 }
 
@@ -2969,7 +2964,7 @@ function addressFunctions() {
 function afterTemplateLoadFunctions() {
   defaultCMRNumberPrefixforANZ();
   removeStateValidatorForHkMoNZ();
-  setCTCIsuByClusterANZ();
+//  setCTCIsuByClusterANZ();
   lockClusterFieldsOnScenarioChange();
   clearClusterFieldsOnScenarioChange();
   resetNZNBExempt();
