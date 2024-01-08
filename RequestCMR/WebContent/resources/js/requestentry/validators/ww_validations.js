@@ -1270,6 +1270,18 @@ var forceLockUnlock = function() {
   FormManager.readOnly('cmrIssuingCntry');
 }
 
+function checkForCompanyProofAttachment() {
+  var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+    ID: id
+  });
+  if (ret == null || ret.ret1 == null) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
