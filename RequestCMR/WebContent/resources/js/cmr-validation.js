@@ -1246,7 +1246,7 @@ var FormManager = (function() {
       var item = null;
       for (var i = 0; i < values.length; i++) {
         item = loadedStore._arrayOfAllItems.find(element => element.id[0] == values[i]);
-        if (item != null && item.id[0] >= 0) {
+        if (item != null && item.id.length > 0) {
           model.items.push({
             id : item.id[0],
             name : item.name[0]
