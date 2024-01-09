@@ -1579,6 +1579,16 @@ function addLAVatValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+function checkForCompanyProofAttachment() {
+  var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+    ID: id
+  });
+  if (ret == null || ret.ret1 == null) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 /* Register WW Validators */
