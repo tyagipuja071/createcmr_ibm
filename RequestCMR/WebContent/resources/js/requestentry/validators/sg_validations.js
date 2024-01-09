@@ -143,7 +143,7 @@ function addAfterConfigAP() {
 	if (reqType == 'C') {
 		setIsuOnIsic();
 	}
-		addVatValidationforSingapore();
+	addVatValidationforSingapore();
 
 	// CREATCMR-5269
 	if (reqType == 'U') {
@@ -2665,14 +2665,14 @@ function checkCmrUpdateBeforeImport() {
 // Coverage 2024 for  SINGAPORE -> CREATCMR - 10535 
 function coverage2024ForSG() {
 	console.log("---- coverage2024ForSG ----");
-	var custSubGrp = FormManager.getActualValue('custSubGrp'); 
-	if(custSubGrp == 'PRIV'){
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	if (custSubGrp == 'PRIV') {
 		FormManager.readOnly('isicCd');
 		FormManager.setValue('isicCd', '9500');
-	}else{
-			FormManager.enable('isicCd');	
+	} else {
+		FormManager.enable('isicCd');
 	}
-	
+
 	var _clusterHandlerSG = null;
 	FormManager.resetDropdownValues(FormManager.getField('clientTier'));
 	if (_clusterHandlerSG == null && FormManager.getActualValue('reqType') != 'U') {
@@ -2747,10 +2747,10 @@ function setISUCTCByCluster() {
 			FormManager.setValue('mrcCd', result.ret3);
 		}
 	}
-	
+
 	// if ISU is blank , generate by ISIC
-	if(FormManager.getActualValue('isuCd') == ''){
-						setIsuOnIsic();
+	if (FormManager.getActualValue('isuCd') == '') {
+		setIsuOnIsic();
 	}
 }
 
@@ -2783,7 +2783,7 @@ function setInacByClusterSG() {
 		FormManager.readOnly('inacCd');
 		FormManager.readOnly('inacType');
 		FormManager.removeValidator('inacCd', Validators.REQUIRED);
-	  FormManager.removeValidator('inacType', Validators.REQUIRED);
+		FormManager.removeValidator('inacType', Validators.REQUIRED);
 	}
 }
 

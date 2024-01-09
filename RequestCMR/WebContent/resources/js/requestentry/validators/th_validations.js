@@ -3090,12 +3090,12 @@ function checkCmrUpdateBeforeImport() {
 // Coverage 2024 for  THAILAND -> CREATCMR - 10535 
 function coverage2024ForTH() {
 	console.log("---- coverage2024ForTH ----");
-		var custSubGrp = FormManager.getActualValue('custSubGrp'); 
-	if(custSubGrp == 'PRIV'){
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	if (custSubGrp == 'PRIV') {
 		FormManager.readOnly('isicCd');
 		FormManager.setValue('isicCd', '9500');
-	}else{
-			FormManager.enable('isicCd');	
+	} else {
+		FormManager.enable('isicCd');
 	}
 	var _clusterHandlerSG = null;
 	FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -3173,8 +3173,8 @@ function setISUCTCByCluster() {
 		}
 	}
 	// if ISU is blank , generate by ISIC
-	if(FormManager.getActualValue('isuCd') == ''){
-						setIsuOnIsic();
+	if (FormManager.getActualValue('isuCd') == '') {
+		setIsuOnIsic();
 	}
 }
 
@@ -3207,7 +3207,7 @@ function setInacByClusterTH() {
 		FormManager.readOnly('inacCd');
 		FormManager.readOnly('inacType');
 		FormManager.removeValidator('inacCd', Validators.REQUIRED);
-	  FormManager.removeValidator('inacType', Validators.REQUIRED);
+		FormManager.removeValidator('inacType', Validators.REQUIRED);
 	}
 }
 
