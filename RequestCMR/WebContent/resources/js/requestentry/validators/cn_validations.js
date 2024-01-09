@@ -1,7 +1,3 @@
-/**
- * 
- */
-/* Register IERP Javascript */
 var _vatExemptHandler = null;
 var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
@@ -1231,12 +1227,6 @@ function addAddrUpdateValidator() {
                 var cnAddrTxtOther = null;
                 var cnAddrTxt2Other = null;
                 
-                var reqReason = FormManager.getActualValue('reqReason');
-                
-                if (reqReason == 'TREC') {
-                  return new ValidationResult(null, true);
-                }
-                
                 // get addr, addr_rdc, intl_addr, intl_addr_rdc
                 var reqId = FormManager.getActualValue('reqId');
                 var qParams = {
@@ -1370,9 +1360,8 @@ function addAddrUpdateValidator() {
 
                   if (ret == null || ret.ret1 == null) {
                     return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
-                        + ' If you insist on using different address from the Sold to (ZS01), you need to attach the screenshot of Customer Official Website,'
-                        + ' Business License, Government Website, Contract/Purchase order with signature, and file content selected must be "Name and Address Change(China Specific)". ');
-                  } else {
+                        + ' If you insist on using different address with Sold to (ZS01),you need to attach the screenshot of customer official website,'
+                        + ' business license,government website,contract/purchase order with signature in attachment, file content must be "Name and Address Change(China Specific)". ');                  } else {
                     return new ValidationResult(null, true);
                   }
                 } else {
@@ -1388,8 +1377,7 @@ function addAddrUpdateValidator() {
                       return new ValidationResult(null, true);
                     } else {
                       return new ValidationResult(null, false, 'Your request is not allowed to be sent for processing if the Chinese Company Name '
-                          + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'
-                          );
+                          + 'and Address match with D&B 100%, but you still added an attachment of type "Name and Address Change(China Specific)". Please remove this Attachment then try again.'                          );
                     }
                   }
                 }
@@ -1445,15 +1433,6 @@ function isChangedAddress(addrType, addrSeq, addrList, addrRdcList, cnAddrList, 
   return result;
 }
 
-function isChangedCustName(addrType, addrSeq, addrList, addrRdcList, cnAddrList, cnAddrRdcList) {
-  var result = false;
-  if (isChangedFieldCustNm('custNm1', addrType, addrSeq, addrList, addrRdcList) || isChangedFieldCustNm('custNm2', addrType, addrSeq, addrList, addrRdcList) || isChangedFieldCustNm('custNm3', addrType, addrSeq, addrList, addrRdcList) || 
-      isChangedFieldCustNm('cnCustName1', addrType, addrSeq, cnAddrList, cnAddrRdcList) || isChangedFieldCustNm('cnCustName2', addrType, addrSeq, cnAddrList, cnAddrRdcList) || isChangedFieldCustNm('cnCustName3', addrType, addrSeq, addrList, addrRdcList)) {
-    result = true;
-  }
-  return result;
-}
-
 function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
   var result = false;
   var fieldValue1 = null;
@@ -1488,59 +1467,6 @@ function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
           fieldValue2 = list2[j].cnAddrTxt;
         } else if (fieldName == 'cnAddrTxt2') {
           fieldValue2 = list2[j].cnAddrTxt2;
-        }
-      }
-    }
-  }
-  
-  if (convert2DBCSIgnoreCase(fieldValue1) != convert2DBCSIgnoreCase(fieldValue2)) {
-    result = true;
-  }
-  return result;
-}
-
-function isChangedFieldCustNm(fieldName, addrType, addrSeq, list1, list2) {
-  var result = false;
-  var fieldValue1 = null;
-  var fieldValue2 = null;
-  
-  // addr
-  if (list1 != null && list1.length > 0) {
-    for (var i = 0; i < list1.length; i ++) {
-      if (list1[i].addrType == addrType && list1[i].addrSeq == addrSeq) {
-        if (fieldName == 'custNm1') {
-          fieldValue1 = list1[i].custNm1;
-        } else if (fieldName == 'custNm2') {
-          fieldValue1 = list1[i].custNm2;
-        } else if (fieldName == 'custNm3') {
-          fieldValue1 = list1[i].custNm3;
-        } else if (fieldName == 'cnCustName1') {
-          fieldValue1 = list1[i].cnCustNm1;
-        } else if (fieldName == 'cnCustName2') {
-          fieldValue1 = list1[i].cnCustNm2;
-        } else if (fieldName == 'cnCustName3') {
-          fieldValue1 = list1[i].cnCustNm3;
-        }
-      }
-    }
-  }
-  
-  // addr_rdc
-  if (list2 != null && list2.length > 0) {
-    for (var j = 0; j < list2.length; j ++) {
-      if (list2[j].addrType == addrType && list2[j].addrSeq == addrSeq) {
-        if (fieldName == 'custNm1') {
-          fieldValue2 = list2[j].custNm1;
-        } else if (fieldName == 'custNm2') {
-          fieldValue2 = list2[j].custNm2;
-        } else if (fieldName == 'custNm3') {
-          fieldValue2 = list2[j].custNm3;
-        } else if (fieldName == 'cnCustName1') {
-          fieldValue2 = list2[j].cnCustNm1;
-        } else if (fieldName == 'cnCustName2') {
-          fieldValue2 = list2[j].cnCustNm2;
-        } else if (fieldName == 'cnCustName3') {
-          fieldValue2 = list2[j].cnCustNm3;
         }
       }
     }
@@ -2129,7 +2055,7 @@ function validateEnNameForInter() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-      	console.log("running validateCnNameAndAddr . . .");
+        console.log("running validateCnNameAndAddr . . .");
         var custSubType = FormManager.getActualValue('custSubGrp');
           if (custSubType == 'INTER') {
             var custNm1ZS01 = '';
@@ -3060,38 +2986,6 @@ function validateISICForCROSS() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function resetISICCode() {
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var field = FormManager.getField('isicCd');
-
-  var isicCodeArray = [ '','0001', '0002', '0003', '0111', '0112', '0113', '0121', '0122', '0130', '0140', '0150', '0200', '0501', '0502', '1010',
-      '1020', '1030', '1110', '1120', '1200', '1310', '1320', '1410', '1421', '1422', '1429', '1511', '1512', '1513', '1514', '1520', '1531', '1532',
-      '1533', '1541', '1542', '1543', '1544', '1549', '1551', '1552', '1553', '1554', '1600', '1711', '1712', '1721', '1722', '1723', '1729', '1730',
-      '1810', '1820', '1911', '1912', '1920', '2010', '2021', '2022', '2023', '2029', '2101', '2102', '2109', '2211', '2212', '2213', '2219', '2221',
-      '2222', '2230', '2310', '2320', '2330', '2411', '2412', '2413', '2421', '2422', '2423', '2424', '2429', '2430', '2511', '2519', '2520', '2610',
-      '2691', '2692', '2693', '2694', '2695', '2696', '2699', '2710', '2720', '2731', '2732', '2811', '2812', '2813', '2891', '2892', '2893', '2899',
-      '2911', '2912', '2913', '2914', '2915', '2919', '2921', '2922', '2923', '2924', '2925', '2926', '2927', '2929', '2930', '3000', '3110', '3120',
-      '3130', '3140', '3150', '3190', '3210', '3220', '3230', '3311', '3312', '3313', '3320', '3330', '3410', '3420', '3430', '3511', '3512', '3520',
-      '3530', '3591', '3592', '3599', '3610', '3691', '3692', '3693', '3694', '3699', '3710', '3720', '4010', '4020', '4030', '4100', '4510', '4520',
-      '4530', '4540', '4550', '4888', '5010', '5020', '5030', '5040', '5050', '5110', '5121', '5122', '5131', '5139', '5141', '5142', '5143', '5149',
-      '5151', '5152', '5159', '5190', '5211', '5219', '5220', '5231', '5232', '5233', '5234', '5239', '5240', '5251', '5252', '5259', '5260', '5510',
-      '5520', '6010', '6021', '6022', '6023', '6030', '6110', '6120', '6210', '6220', '6301', '6302', '6303', '6304', '6309', '6411', '6412', '6420',
-      '6511', '6519', '6591', '6592', '6599', '6601', '6602', '6603', '6711', '6712', '6719', '6720', '7010', '7020', '7111', '7112', '7113', '7121',
-      '7122', '7123', '7129', '7130', '7210', '7221', '7229', '7230', '7240', '7250', '7290', '7310', '7320', '7411', '7412', '7413', '7414', '7421',
-      '7422', '7430', '7491', '7492', '7493', '7494', '7495', '7499', '7511', '7512', '7513', '7514', '751M', '751P', '7521', '7522', '7523', '752M',
-      '752P', '7530', '7700', '7701', '7702', '7703', '7704', '7705', '7706', '7707', '7708', '7709', '7710', '7711', '7712', '7713', '7714', '7715',
-      '7716', '7717', '7718', '7719', '7720', '7721', '8010', '8021', '8022', '8030', '8090', '8511', '8512', '8519', '8520', '8531', '8532', '8889',
-      '8890', '9000', '9111', '9112', '9120', '9191', '9192', '9199', '9211', '9212', '9213', '9214', '9219', '9220', '9231', '9232', '9233', '9241',
-      '9249', '9301', '9302', '9303', '9309', '9801', '9802', '9804', '9806', '9807', '9808', '9811', '9812', '9813', '9814', '9816', '9817', '9818',
-      '9819', '9820', '9821', '9822', '9900', '9910', '9911', '9912', '9913', '9914', '9915', '9916', '9917', '9918', '9950', '9993', '9994', '999C',
-      '999D', '999E', '999F', '999G', '999I', '999J', '999M', '999O', '999P', '999Q', '999R', '999S', '999X', '999Y' ];
-  if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRMLC' || custSubType == 'NRMLD' || custSubType == 'KYND' || custSubType == 'EMBSA' 
-    || custSubType == 'AQSTN' || custSubType == 'ECOSY' || custSubType == 'MRKT' || custSubType == 'BLUMX')) {
-    FormManager.limitDropdownValues(field, isicCodeArray);
-// FormManager.enable(field);
-  }
-}
-
 function retrievedValueValidator() {
   console.log("RetrievedValueValidator for REQUESTER...");
   FormManager.addFormValidator((function() {
@@ -3411,7 +3305,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
   GEOHandler.addAfterConfig(setReadOnly4Update, GEOHandler.CN);
   GEOHandler.addAfterConfig(handleExpiredClusterCN, GEOHandler.CN);
-  GEOHandler.addAfterConfig(reqReasonHandler, GEOHandler.CN);
+//  GEOHandler.addAfterConfig(reqReasonHandler, GEOHandler.CN);
 // GEOHandler.addAfterConfig(setDropdownField2Values, GEOHandler.CN);
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
@@ -3449,15 +3343,16 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(convertPoBox, GEOHandler.CN);
   
   // CREATCMR-8581
-  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.CN,null,true);
+//  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.CN,null,true);
   
-  GEOHandler.registerValidator(addDPLCheckValidatorCN, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
+//  GEOHandler.registerValidator(addDPLCheckValidatorCN, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
-  GEOHandler.registerValidator(addChecklistValidatorCN, GEOHandler.CN);
+//  GEOHandler.registerValidator(addChecklistValidatorCN, GEOHandler.CN);
   GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
 // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addFastPassAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
+//  GEOHandler.registerValidator(addEROAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(setTDOFlagToYesValidator, GEOHandler.CN, GEOHandler.PROCESSOR, false, false);
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
@@ -3469,6 +3364,7 @@ dojo.addOnLoad(function() {
   // false);
   GEOHandler.registerValidator(validateCnNameAndAddr4Create, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateCnNameAndAddr4Update, GEOHandler.CN, null, false);
+//  GEOHandler.registerValidator(validateCustNmsForUpdate, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(addCNDnBMatchingAttachmentValidator, GEOHandler.CN, null, false);
   // GEOHandler.registerValidator(foreignValidator, GEOHandler.CN, null,
   // false,false);
@@ -3481,8 +3377,7 @@ dojo.addOnLoad(function() {
   // null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
-  // GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false,
-  // false);
+  GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
 });
