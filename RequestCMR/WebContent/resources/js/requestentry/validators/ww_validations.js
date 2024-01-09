@@ -723,7 +723,7 @@ function addGenericZIPValidator() {
         var cntry = FormManager.getActualValue('landCntry');
         var loc = FormManager.getActualValue('cmrIssuingCntry');
 
-        //handling landed cntry for Japan cmrissuingcntry
+        // handling landed cntry for Japan cmrissuingcntry
         if (cntry == '' && loc != '' && loc=='760'){
           cntry='JP';
         }
@@ -1476,7 +1476,7 @@ function payGoCreateErroMsg()
 	  
 //
 
-//CREATCMR-10034
+// CREATCMR-10034
 function addLAVatValidator() {
   FormManager.addFormValidator((function() {
 
@@ -1489,7 +1489,7 @@ function addLAVatValidator() {
         var custType = FormManager.getActualValue('custType');
         console.log(">>>> addLAVatValidator");
         var zs01Cntry = null;
-        //get vat Field 
+        // get vat Field
         var vat = FormManager.getActualValue('vat');
         if (!vat || vat == '' || vat.trim() == '') {
           // if taxcd1 is empty check for vat field
@@ -1579,6 +1579,8 @@ function addLAVatValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+  
 function checkForCompanyProofAttachment() {
   var id = FormManager.getActualValue('reqId');
   var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
