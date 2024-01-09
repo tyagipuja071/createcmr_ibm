@@ -50,8 +50,11 @@ public class GBLScenarioCheckElement extends ValidatingElement {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     String cmrIssuingCntry = data.getCmrIssuingCntry();
-
-    if ("Y".equals(admin.getScenarioVerifiedIndc())) {
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
+    if ("Y".equals(admin.getScenarioVerifiedIndc()) || isPaygoUpgrade) {
       log.debug("Skip processing of element");
       result.setDetails("Skip processing of element");
       result.setOnError(false);
