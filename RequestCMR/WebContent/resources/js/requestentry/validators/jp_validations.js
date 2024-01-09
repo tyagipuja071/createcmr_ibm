@@ -6768,9 +6768,15 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
 function setAddrFieldsBFKSCScenario(addrType) {
   var custType = FormManager.getActualValue('custType');
 
-  if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
+  if (custType == 'CEA' || custType == 'EA' || custType == 'A' || custType == 'CE' || custType == 'C') {
     // ADU A, B, C, D, E, F, G, H
     if (addrType == 'ZI03' || addrType == 'ZP02' || addrType == 'ZP03' || addrType == 'ZP04' || addrType == 'ZP05' || addrType == 'ZP06' || addrType == 'ZP07' || addrType == 'ZP08') {
+      setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
+      setAddrFieldMandatory('custNm4', 'Katakana');
+      setAddrFieldMandatory('addrTxt', 'Address');
+
+      setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
+
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('locationCode', 'LocationCode');
 
@@ -6783,6 +6789,27 @@ function setAddrFieldsBFKSCScenario(addrType) {
 
     // ADU 1, 2, 3, 4, 6, 7
     if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+      setAddrFieldMandatory('locationCode', 'LocationCode');
+
+      setAddrFieldOptional('bldg', 'Building');
+      setAddrFieldOptional('dept', 'Department');
+      setAddrFieldOptional('office', 'Office');
+      setAddrFieldOptional('custFax', 'CustFax');
+      setAddrFieldOptional('contact', 'Contact');
+    }
+
+    // Company, Establishment
+    if (addrType == 'ZC01' || addrType == 'ZE01') {
+      if (addrType == 'ZE01') {
+        setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
+      }
+      setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
+      setAddrFieldMandatory('custNm4', 'Katakana');
+      setAddrFieldMandatory('addrTxt', 'Address');
+
+      setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
+
+      setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('locationCode', 'LocationCode');
 
       setAddrFieldOptional('bldg', 'Building');
