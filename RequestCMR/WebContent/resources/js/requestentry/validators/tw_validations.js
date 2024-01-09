@@ -672,47 +672,71 @@ function setInacBySearchTerm() {
   }
 
 }
-
 // CREATCMR-7882
 function onInacTypeChange() {
+  console.log(">>> onInacTypeChange <<<")
   var searchTerm = FormManager.getActualValue('searchTerm');
   var reqType = null;
+
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var custSubT = FormManager.getActualValue('custSubGrp');
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-        var searchTerm = FormManager.getActualValue('searchTerm');
-        var cmt = value + ','+ searchTerm +'%';
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-          console.log(value);
+
           if (value != null) {
+            var searchTerm = FormManager.getActualValue('searchTerm');
+            var _clusterTWWithAllInac = ['09208','04476','09154','09151','09153','09147','09152','09155'];
+
+            var cmt = value + ','+ searchTerm +'%';
+            var cntry = FormManager.getActualValue('cmrIssuingCntry');
             var inacCdValue = [];
-            if(searchTerm == '09208' || searchTerm == '04476' || searchTerm == '09154'  
-              || searchTerm == '09151' || searchTerm == '09153' || searchTerm == '09147' || searchTerm == '09152' 
-                || searchTerm == '09155') {
-              var qParams = {
+            var qParams = {
               _qall : 'Y',
               ISSUING_CNTRY : cntry ,
               CMT : cmt ,
-              };
-            } 
-            if(qParams != undefined){
-              var results = cmr.query('GET.INAC_CD', qParams);
-              if (results != null) {
-                for (var i = 0; i < results.length; i++) {
-                  inacCdValue.push(results[i].ret1);
-                }
-                FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-                if (inacCdValue.length == 1) {
-                  FormManager.setValue('inacCd', inacCdValue[0]);
-                }
+            };
+            var results = cmr.query('GET.INAC_CD', qParams);
+            if (results != null && _clusterTWWithAllInac.includes(searchTerm)) {
+              for (var i = 0; i < results.length; i++) {
+                inacCdValue.push(results[i].ret1);
               }
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              if (inacCdValue.length == 1) {
+                FormManager.setValue('inacCd', inacCdValue[0]);
+              }
+            } else {
+              FormManager.resetDropdownValues(FormManager.getField('inacType'));
+              FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+              FormManager.removeValidator('inacCd', Validators.REQUIRED);
+              FormManager.removeValidator('inacType', Validators.REQUIRED);
+              FormManager.enable('inacCd');
+              FormManager.enable('inacType');
+
+              limitInacNacCodeByInacNacType();
             }
           }
       });
     }
   }
+}
+
+function limitInacNacCodeByInacNacType() {
+  var limitedInacNacCodeList = [];
+  var inacNacCodes = []
+  if (FormManager.getActualValue('inacType') == 'I') {
+    var inacNacCodes = FormManager.getField('inacCd').loadedStore._arrayOfAllItems.filter(function checkInacFinal(inacNode) {
+      return /^[0-9]+$/.test(inacNode.id[0]);
+    });
+  } else if (FormManager.getActualValue('inacType') == 'N') {
+    var inacNacCodes = FormManager.getField('inacCd').loadedStore._arrayOfAllItems.filter(function checkInacFinal(inacNode) {
+      return /^[A-Z]/.test(inacNode.id[0]);
+    });
+  }
+
+  var ids = inacNacCodes.map(elem => elem.id[0]);
+  
+  FormManager.sortDropdownElements(FormManager.getField('inacCd'), ids, true);
 }
 
 // CREATCMR-7882
