@@ -77,7 +77,7 @@ function addAfterConfigAP() {
       FormManager.readOnly('clientTier');
     }
     FormManager.readOnly('sectorCd');
-    FormManager.readOnly('abbrevLocn');
+  //  FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
     FormManager.readOnly('subIndustryCd');
@@ -1510,6 +1510,7 @@ function addAddressInstancesValidator() {
           _qall: 'Y',
           CMR_ISSUING_CNTRY: cmrCntry,
         };
+        var reqType=FormManager.getActualValue('reqType');
         var results = cmr.query('GETADDR_TYPES', qParams);
         var duplicatesAddr = [];
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
@@ -1541,7 +1542,7 @@ function addAddressInstancesValidator() {
               }
             }
           }
-          if (duplicatesAddr.length > 0) {
+          if (duplicatesAddr.length > 0 && reqType!='U') {
             return new ValidationResult(null, false, 'Only one instance of each address can be added.Please remove additional ' + duplicatesAddr + ' addresses');
           } else {
             return new ValidationResult(null, true);
