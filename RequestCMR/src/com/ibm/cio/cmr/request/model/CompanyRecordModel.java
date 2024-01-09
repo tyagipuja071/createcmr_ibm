@@ -58,6 +58,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private String cied;
 
   private long overrideReqId;
+  private boolean hasPaygoUpgradeChk;
 
   @Override
   public int compareTo(CompanyRecordModel o) {
@@ -225,6 +226,15 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   public void setMatchGrade(String matchGrade) {
     this.matchGrade = matchGrade;
   }
+  
+  public boolean isPaygoUpgradeChk() {
+    return hasPaygoUpgradeChk;
+  }
+
+  public void setHasPaygoUpgradeChk(boolean hasPaygoUpgradeChk) {
+    this.hasPaygoUpgradeChk = hasPaygoUpgradeChk;
+  }
+
 
   public boolean isHasCmr() {
     return hasCmr;

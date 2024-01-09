@@ -1201,6 +1201,108 @@ function prospectFilter() {
   }
 }
 
+// payGo upgrade implementation
+
+function payGoErroMsg()
+{
+  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	    	  var cmrNo = FormManager.getActualValue('cmrNo');
+	        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	        var reqType = FormManager.getActualValue('reqType');
+	        var reqRsn=FormManager.getField('reqReason');
+	    	  var payGo=checkPayGo(cmrNo,cntry);
+	    	  var reqReason = FormManager.getActualValue('reqReason');
+	    	  if(reqType=='U' && payGo==false && reqReason=='PAYG')
+	    		  {
+	    	  return new ValidationResult(reqRsn, false, "CMR provided to upgrade to Regular CMR is not a PayGo CMR");
+	    		  }
+	      }
+	    };
+  
+	  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function payGoCreateErroMsg()
+{
+  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	    	  var reqReason = FormManager.getActualValue('reqReason');
+	    	  var reqType = FormManager.getActualValue('reqType');
+	    	  var reqRsn=FormManager.getField('reqReason');
+	    	  if(reqType!='U' &&  reqReason=='PAYG')
+	    		  {
+	    	  return new ValidationResult(reqRsn, false, "Upgrade of PayGo CMR is only applicable for update request.");
+	    		  }
+	      }
+	    };
+  
+	  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+	  
+	  function newAddressValForPayGo()
+	  {
+	    FormManager.addFormValidator((function() {
+	  	    return {
+	  	      validate : function() {
+	  	    	  var reqReason = FormManager.getActualValue('reqReason');
+	  	    	  var reqType = FormManager.getActualValue('reqType');
+	  	    	  var reqId = FormManager.getActualValue('reqId');
+	  	    	  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	  	    	  var cmrNo = FormManager.getActualValue('cmrNo');
+	  	    	  var payGo=checkPayGo(cmrNo,cntry);
+	  	    	  var checkAddress=checkNewAddress(reqId);
+	  	    	  if(reqType=='U' && payGo==true &&  reqReason=='PAYG' && checkAddress==true)
+	  	    		  {
+	  	    	  return new ValidationResult(null, false, "Adding new Address is not allowed in Paygo Upgrade CMR.");
+	  	    		  }
+	  	      }
+	  	    };
+	    
+	  	  })(), 'MAIN_NAME_TAB', 'frmCMR');
+	  }
+
+	  function checkNewAddress(reqId) {
+	  	var newAddressAdded=false;
+	  	var addrCount=0;
+	  	    var newAddr = cmr.query('CHECK_NEW_ADDRESS', {
+	  	    	REQ_ID : reqId
+	          
+	        });
+	  	  addrCount = newAddr.ret1;
+	      if (Number(addrCount) >0) {
+	      	newAddressAdded = true;
+	        }
+	      else
+	    	  {
+	      	newAddressAdded = false;
+	    	  }
+	    	  return newAddressAdded;
+	  	  };  
+	  	  
+	  	function checkPayGo(cmrNo,cntry) {
+	  		var payGo=false;
+	  		    var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
+	  	        MANDT : cmr.MANDT,
+	  	        ZZKV_CUSNO : cmrNo,
+	  	        KATR6 : cntry
+	  	        
+	  	      });
+	  	    
+	  	    if (isPayGo && isPayGo.ret1 != 'PG') {
+	  	  	  payGo = false;
+	  	      }
+	  	    else
+	  	  	  {
+	  	  	  payGo = true;
+	  	  	  }
+	  	  	  return payGo;
+	  		  };
+	  
+//
+
 function setVatIndFieldsForGrp1AndNordx() {
   if (isViewOnly()) {
     return;
@@ -1450,4 +1552,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
   GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries)
 	GEOHandler.registerWWValidator(addLAVatValidator);
+  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries);
+  GEOHandler.registerValidator(payGoCreateErroMsg,GEOHandler.AllCountries);
+  GEOHandler.registerValidator(payGoErroMsg,GEOHandler.AllCountries);
+  GEOHandler.registerValidator(newAddressValForPayGo,['724', '848', '618', '624', '788', '649', '866', '754','846', '806', '702', '678' ,'897','706','616','796']);
 });
