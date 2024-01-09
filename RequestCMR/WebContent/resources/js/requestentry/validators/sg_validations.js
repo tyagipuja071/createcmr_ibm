@@ -2667,7 +2667,10 @@ function coverage2024ForSG() {
 	console.log("---- coverage2024ForSG ----");
 	var custSubGrp = FormManager.getActualValue('custSubGrp'); 
 	if(custSubGrp == 'PRIV'){
+		FormManager.readOnly('isicCd');
 		FormManager.setValue('isicCd', '9500');
+	}else{
+			FormManager.enable('isicCd');	
 	}
 	
 	var _clusterHandlerSG = null;
@@ -2760,6 +2763,8 @@ function setInacByClusterSG() {
 	var inacList = [];
 	var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
 	FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+	FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+	FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	if (results != null && results.length > 0) {
 		for (i = 0; i < results.length; i++) {
 			inacList.push(results[i].ret1);
@@ -2777,6 +2782,8 @@ function setInacByClusterSG() {
 		FormManager.setValue('inacCd', inacList[0]);
 		FormManager.readOnly('inacCd');
 		FormManager.readOnly('inacType');
+		FormManager.removeValidator('inacCd', Validators.REQUIRED);
+	  FormManager.removeValidator('inacType', Validators.REQUIRED);
 	}
 }
 
