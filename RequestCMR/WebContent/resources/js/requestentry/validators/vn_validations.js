@@ -2460,6 +2460,10 @@ function setISBUScenarioLogic() {
       FormManager.enable('inacCd');
     }
   }
+  if(cluster == '') {
+    FormManager.setValue('clientTier', '');
+    FormManager.setValue('isuCd', '');
+  }
 }
 
 function setCtcOnIsuCdChangeASEAN() {
@@ -7168,7 +7172,7 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
     
     if (cntry == '852') {
-      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLO', 'XAQST'];
+      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLM', 'XAQST', 'CROSS'];
       if (scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
         FormManager.setValue('apCustClusterId', '');
         FormManager.setValue('clientTier', '');
