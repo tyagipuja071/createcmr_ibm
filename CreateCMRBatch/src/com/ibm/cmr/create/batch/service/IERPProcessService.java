@@ -595,7 +595,7 @@ public class IERPProcessService extends BaseBatchService {
                 LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setCustAcctType(rdcOrderBlk);
-                data.setOrdBlk(rdcOrderBlk);
+//                data.setOrdBlk(rdcOrderBlk);
                 updateEntity(data, em);
                 if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
                   overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
