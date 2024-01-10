@@ -7699,7 +7699,7 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
     
     if (cntry == '818') {
-      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLO', 'XAQST'];
+      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLO', 'XAQST','CROSS'];
       if (scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
         FormManager.setValue('apCustClusterId', '');
         FormManager.setValue('clientTier', '');
