@@ -8584,6 +8584,41 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function validateInacValuesHK() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var errorMsg = '';
+        var reqType = FormManager.getActualValue('reqType');
+        var inacType = FormManager.getActualValue('inacType');
+        var inacCd = FormManager.getActualValue('inacCd');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (reqType != 'C' || inacType =='' || inacCd == '') {
+          return new ValidationResult(null, true);
+        }
+        var qParams = {
+            ISSUING_CNTRY: cntry,
+            CD: inacCd
+          };
+          var CMTList = cmr.query('GET.INACTYPE_BY_CLUSTER', qParams);
+          if (CMTList != null) {
+            var expectedInac =  CMTList.ret1;
+          }
+
+      if (expectedInac != '' && expectedInac == "N" && expectedInac != 'IN') {
+              return new ValidationResult(null, true);
+            } else if (expectedInac != '' && expectedInac == "I" && inacType != '' && inacType == 'N') {
+             errorMsg = inacCd + 'is not a valid value for NAC Code.';
+           if (errorMsg != '') {
+                return new ValidationResult(null, false, errorMsg);
+              }
+            } 
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'IBM_REQ_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.AP = [SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
   SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA];
@@ -8858,4 +8893,5 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [SysLoc.INDIA]);
   GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
+  GEOHandler.registerValidator(validateInacValuesHK, [SysLoc.HONG_KONG]);
 });
