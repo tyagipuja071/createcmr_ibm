@@ -4035,6 +4035,12 @@ function addClusterOfcdLogic() {
   FormManager.setValue('searchTerm', cluster);
 }
 
+function addIsuLogicOnIsicChange() {
+  dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    setISUByOfficeCd();
+  });
+}
+
 function showConfirmForTier2() {
   var _tier2Handler = dojo.connect(FormManager.getField('tier2'), 'onChange', function(value) {
     if (value == _pagemodel.tier2) {
@@ -7419,6 +7425,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetAccountAbbNmOnFieldChange, GEOHandler.JP);
   GEOHandler.addAfterConfig(showConfirmForTier2, GEOHandler.JP);
   GEOHandler.addAfterConfig(addJsicIsicLogic, GEOHandler.JP);
+  GEOHandler.addAfterConfig(addIsuLogicOnIsicChange, GEOHandler.JP);
+
   GEOHandler.addAfterConfig(addChargeCodeLogic, GEOHandler.JP);
   GEOHandler.addAfterConfig(updateINACType, GEOHandler.JP);
   GEOHandler.addAfterConfig(showHideCMRPrefix, GEOHandler.JP);
