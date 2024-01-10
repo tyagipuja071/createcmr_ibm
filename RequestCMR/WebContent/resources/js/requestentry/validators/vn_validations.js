@@ -88,7 +88,6 @@ function addAfterConfigAP() {
     FormManager.readOnly('subIndustryCd');
   } else {
     FormManager.enable('mrcCd');
-    FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
     FormManager.enable('abbrevLocn');
@@ -2460,6 +2459,10 @@ function setISBUScenarioLogic() {
       FormManager.enable('inacType');
       FormManager.enable('inacCd');
     }
+  }
+  if(cluster == '') {
+    FormManager.setValue('clientTier', '');
+    FormManager.setValue('isuCd', '');
   }
 }
 
@@ -7169,7 +7172,7 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
     
     if (cntry == '852') {
-      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLO', 'XAQST'];
+      clearClusterFieldsScenarios = ['ASLOM', 'AQSTN', 'ECSYS', 'NRML', 'XASLM', 'XAQST', 'CROSS'];
       if (scenarioChanged && clearClusterFieldsScenarios.includes(scenario)) {
         FormManager.setValue('apCustClusterId', '');
         FormManager.setValue('clientTier', '');
