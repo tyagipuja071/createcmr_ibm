@@ -2743,6 +2743,10 @@ function setISUCTCByCluster() {
 			FormManager.setValue('isuCd', result.ret2);
 			FormManager.readOnly('isuCd');
 		}
+		if(result.ret2 == null || result.ret2 == ''){
+			 FormManager.readOnly('isuCd');
+			 setIsuOnIsic();
+		}
 		if (result.ret3 != null && result.ret3 != '') {
 			FormManager.setValue('mrcCd', result.ret3);
 		}
@@ -2777,13 +2781,15 @@ function setInacByClusterSG() {
 		FormManager.clearValue('inacType');
 		FormManager.enable('inacType');
 		FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+		FormManager.removeValidator('inacCd', Validators.REQUIRED);
+		FormManager.removeValidator('inacType', Validators.REQUIRED);
 	}
 	if (inacList.length == 1) {
 		FormManager.setValue('inacCd', inacList[0]);
 		FormManager.readOnly('inacCd');
 		FormManager.readOnly('inacType');
-		FormManager.removeValidator('inacCd', Validators.REQUIRED);
-		FormManager.removeValidator('inacType', Validators.REQUIRED);
+		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+	  FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	}
 }
 
