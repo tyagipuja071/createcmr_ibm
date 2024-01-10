@@ -2955,9 +2955,9 @@ function validateISICForCROSS() {
           if (custSubType == 'CROSS'){
             subType = 'Foreign';
           } else if(custSubType == 'NRMLC') {
-            subType = 'Normal - Select Core';
+            subType = 'Normal - Select BPS/Digital';
           } else if(custSubType == 'NRMLD') {
-            subType = 'Normal - Signature / Strategic / Dedicated';
+            subType = 'Normal - Strategic';
           } else if(custSubType == 'KYND') {
             subType = 'Kyndryl';
           } else if(custSubType == 'EMBSA') {
@@ -2965,7 +2965,7 @@ function validateISICForCROSS() {
           } else if(custSubType == 'AQSTN') {
             subType = 'Acquisition';
           } else if(custSubType == 'ECOSY') {
-            subType = 'Ecosystem Partners';
+            subType = 'Ecosystem(Build/Service/Distribute)';
           } else if(custSubType == 'MRKT') {
             subType = 'Marketplace';
           } else if(custSubType == 'BLUMX') {
@@ -3038,7 +3038,7 @@ function sSDGBGIdValidator() {
               }
             }else {
               if(custSubType == 'NRMLD'){
-                  return new ValidationResult(null, false, 'Please do not select Scenario Sub Type - "Normal - Signature"  as this CMR is not belong to China Signature/Strategic/Dedicate account, please select Scenario Sub Type -"Normal - Select Core".');
+                  return new ValidationResult(null, false, 'Please do not select Scenario Sub Type - "Normal - Strategic"  as this CMR is not belong to China Signature/Strategic/Dedicate account, please select Scenario Sub Type -"Normal - Select BPS/Digital".');
                 }else{
                   return new ValidationResult(null, true);
                 }
