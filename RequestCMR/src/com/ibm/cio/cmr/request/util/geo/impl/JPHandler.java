@@ -1991,7 +1991,12 @@ public class JPHandler extends GEOHandler {
         addr.setCustNm3("");
       }
     } else {
-      addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
+      if (iAddr != null && StringUtils.isNotBlank(iAddr.getIntlCustNm1()) && StringUtils.isNotBlank(iAddr.getIntlCustNm2())) {
+        String custName2 = StringUtils.isEmpty(iAddr.getIntlCustNm2()) ? "" : " ".concat(iAddr.getIntlCustNm2());
+        addr.setCustNm3(iAddr.getIntlCustNm1() + custName2);
+      } else {
+        addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
+      }
     }
 
     setFieldBeforeAddrSave(entityManager, addr);
@@ -3081,8 +3086,8 @@ public class JPHandler extends GEOHandler {
       namePart3 = namePart3.trim();
 
       LOG.debug("namePart2 >>> " + namePart2);
-      System.out.println("idxStart >>> " + idxStart);
-      System.out.println("namePart3 >>>" + namePart3);
+      // System.out.println("idxStart >>> " + idxStart);
+      // System.out.println("namePart3 >>>" + namePart3);
 
     }
 
