@@ -223,6 +223,8 @@ public class FranceHandler extends GEOHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setPpsceid("");
     }
+    em.clear();
+    em.close();
 
   }
 
@@ -939,9 +941,9 @@ public class FranceHandler extends GEOHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(
-        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
-            "VAT", "VAT_IND","COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
+        "GEO_LOCATION_CD", "DUNS_NO"));
     return fields;
   }
 
@@ -1706,19 +1708,24 @@ public class FranceHandler extends GEOHandler {
     boolean isDivestiture = true;
     String mandt = SystemConfiguration.getValue("MANDT");
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("FR.GET.ZS01KATR10");
+    try {
+      String sql = ExternalizedQuery.getSql("FR.GET.ZS01KATR10");
 
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setForReadOnly(true);
-    query.setParameter("KATR6", SystemLocation.FRANCE);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR", cmrNo.length() > 6 ? cmrNo.substring(0, 6) : cmrNo);
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("KATR6", SystemLocation.FRANCE);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("CMR", cmrNo.length() > 6 ? cmrNo.substring(0, 6) : cmrNo);
 
-    Kna1 zs01 = query.getSingleResult(Kna1.class);
-    if (zs01 != null) {
-      if (StringUtils.isBlank(zs01.getKatr10())) {
-        isDivestiture = false;
+      Kna1 zs01 = query.getSingleResult(Kna1.class);
+      if (zs01 != null) {
+        if (StringUtils.isBlank(zs01.getKatr10())) {
+          isDivestiture = false;
+        }
       }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
     return isDivestiture;
   }
@@ -1836,18 +1843,23 @@ public class FranceHandler extends GEOHandler {
     List<String> results = new ArrayList<String>();
 
     EntityManager entityManager = JpaManager.getEntityManager();
-    String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYCMR");
-    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
-    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-    sql = StringUtils.replace(sql, ":KATR6", "'" + "706" + "'");
+    try {
+      String mandt = SystemConfiguration.getValue("MANDT");
+      String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYCMR");
+      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+      sql = StringUtils.replace(sql, ":KATR6", "'" + "706" + "'");
 
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    results = query.getResults(String.class);
-    if (results != null && results.size() > 0) {
-      department = results.get(0);
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        department = results.get(0);
+      }
+      return department;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    return department;
   }
 
   private String getDepartment(String kunnr) throws Exception {

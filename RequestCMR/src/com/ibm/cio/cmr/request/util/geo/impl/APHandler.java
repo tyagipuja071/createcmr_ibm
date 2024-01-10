@@ -32,7 +32,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -123,11 +122,12 @@ public abstract class APHandler extends GEOHandler {
                       record.setCmrAddrTypeCode(supportedAddrType);
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
-                  
-                  if (("616".equals(reqEntry.getCmrIssuingCntry()) || "796".equals(reqEntry.getCmrIssuingCntry())) && "MAIL".equals(record.getCmrAddrTypeCode())) {
-                      continue;
-                    }
-                  
+
+                  if (("616".equals(reqEntry.getCmrIssuingCntry()) || "796".equals(reqEntry.getCmrIssuingCntry()))
+                      && "MAIL".equals(record.getCmrAddrTypeCode())) {
+                    continue;
+                  }
+
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
                   }
@@ -358,9 +358,8 @@ public abstract class APHandler extends GEOHandler {
     }
   }
 
-  public DataRdc getAPClusterDataRdc(long reqId) {
+  public DataRdc getAPClusterDataRdc(EntityManager entityManager, long reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
-    EntityManager entityManager = JpaManager.getEntityManager();
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     query.setForReadOnly(true);
@@ -389,7 +388,7 @@ public abstract class APHandler extends GEOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-    if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG) || cmrIssuingCntry.equalsIgnoreCase(SystemLocation.MACAO)) {
+    if (cmrIssuingCntry.equalsIgnoreCase(SystemLocation.HONG_KONG)) {
       if (data.getMrcCd() != null && data.getApCustClusterId() != null && data.getCustSubGrp() != null && data.getClientTier() != null) {
         List<String> codes = Arrays.asList("03756", "03757", "03758", "03759", "04249", "05485", "05486");
         if ("3".equalsIgnoreCase(data.getMrcCd())

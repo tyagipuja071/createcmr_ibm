@@ -275,7 +275,7 @@ function handleRAFields() {
       FormManager.enable(RAFieldsList[i]);
     }
     FormManager.enable('cmrNo');
-    FormManager.enable('cmrNo2');
+    FormManager.readOnly('cmrNo2');
     FormManager.readOnly('searchTerm');
   } else {
     for (var i = 0; i < RAFieldsList.length; i++) {
@@ -321,9 +321,12 @@ function showRAFieldsValue() {
 }
 
 function setRAFieldsMandatory() {
-  FormManager.addValidator('jpCloseDays1', Validators.REQUIRED, [ 'Close Day01' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('jpPayCycles1', Validators.REQUIRED, [ 'Payment Cycle Code01' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('jpPayDays1', Validators.REQUIRED, [ 'Pay Day01' ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('jpCloseDays1', Validators.REQUIRED, [ 'Close Day01'
+// ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('jpPayCycles1', Validators.REQUIRED, [ 'Payment
+// Cycle Code01' ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('jpPayDays1', Validators.REQUIRED, [ 'Pay Day01' ],
+// 'MAIN_IBM_TAB');
   FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
 }
@@ -1624,7 +1627,7 @@ function canUpdateAddress(value, rowIndex, grid) {
   var addrType = rowData.addrType[0];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
-  console.log(addrType + ' - ' + custType);
+
   if (addrType == 'ZC01' && custType.includes('C')) {
     if (reqType == 'U' && (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER')) {
       return false;
@@ -6530,7 +6533,7 @@ function doImportCmrs(addressOnly) {
   }
   if (custSubGrp == 'BQICL') {
     addrType = 'EAIR';
-    message = 'Importing records with IBM Relate CMR ';
+    message = 'Importing records with IBM Related CMR ';
   }
   cmr.showProgress(message + cmrNo + '.  This process might take a while. Please wait..');
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
@@ -6963,8 +6966,9 @@ function setAddrFieldsUpdateBehavior() {
     } else {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ "English Street Address" ], null);
-      FormManager.resetValidations('cnDistrict');
-      FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English District" ], null);
+      // FormManager.resetValidations('cnDistrict');
+      // FormManager.addValidator('cnDistrict', Validators.REQUIRED, [ "English
+      // District" ], null);
       $('#cnCustName1').attr('maxlength', '70');
     }
 
@@ -7254,6 +7258,65 @@ function isIGFCMR() {
   return isIGFCmr;
 }
 
+function addJPAddressGridValidator() {
+  console.log(">>>> addJPAddressGridValidator ");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.JAPAN) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          var custNm1 = '';
+          var custNm4 = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            // Customer Name-KANJI
+            var isCustNm1Filled = (record.custNm1[0] != null && record.custNm1[0] != '');
+            if (!isCustNm1Filled) {
+              if (custNm1 != '') {
+                custNm1 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm1 += record.addrTypeText[0];
+              }
+            }
+
+            // Katakana
+            var isCustNm4Filled = (record.custNm4[0] != null && record.custNm4[0] != '');
+            if (!isCustNm4Filled) {
+              if (custNm4 != '') {
+                custNm4 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm4 += record.addrTypeText[0];
+              }
+            }
+          }
+
+          if (custNm1 != '') {
+            return new ValidationResult(null, false, 'Please fill out Customer Name-KANJI for the following address: ' + custNm1);
+          } else if (custNm4 != '') {
+            return new ValidationResult(null, false, 'Please fill out Katakana for the following address: ' + custNm4);
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -7371,6 +7434,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addBwpqCreditToValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.JP, null, true);
+	GEOHandler.registerValidator(addJPAddressGridValidator, [ SysLoc.JAPAN ], null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
