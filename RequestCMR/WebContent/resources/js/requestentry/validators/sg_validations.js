@@ -2767,14 +2767,14 @@ function setInacByClusterSG() {
 	var inacList = [];
 	var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
 	FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-	FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-	FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	if (results != null && results.length > 0) {
 		for (i = 0; i < results.length; i++) {
 			inacList.push(results[i].ret1);
 		}
 		FormManager.enable('inacCd');
 		FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacList);
+		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+	  FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	} else {
 		FormManager.clearValue('inacCd');
 		FormManager.enable('inacCd');
