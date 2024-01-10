@@ -4566,13 +4566,6 @@ function afterTemplateLoadMO() {
   
 }
 
-function addAddrFunctionMO() {
-  updateMainCustomerNames();
-  handleObseleteExpiredDataForUpdate();
-  setAbbrevNmLocnOnAddressSave();
-  lockCustMainNames();
-}
-
 dojo.addOnLoad(function () {
   GEOHandler.AP = [SysLoc.MACAO];
   GEOHandler.GCG = [SysLoc.MACAO];
@@ -4583,7 +4576,10 @@ dojo.addOnLoad(function () {
   GEOHandler.enableCopyAddress(SysLoc.MACAO);
   GEOHandler.addAfterConfig(afterConfigMO, SysLoc.MACAO);
   GEOHandler.enableCustomerNamesOnAddress(SysLoc.MACAO);
-  GEOHandler.addAddrFunction(addAddrFunctionMO, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(updateMainCustomerNames, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(lockCustMainNames, SysLoc.MACAO);	
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.APAC_1, null, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.GCG);
