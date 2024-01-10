@@ -3160,6 +3160,18 @@ function addressFunctions() {
   lockCustMainNames();
 }
 
+function checkForCompanyProofAttachment() {
+  var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+    ID: id
+  });
+  if (ret == null || ret.ret1 == null) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function afterTemplateLoadFunctions() {
   setRepTeamMemberNo();
 //  clearClusterFieldsOnScenarioChange();
