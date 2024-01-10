@@ -654,7 +654,7 @@ function setValuesForScenarios() {
             ID : _GBGId
           });
           if (ret && ret.ret1 && ret.ret1 != 0) {
-            cmr.showAlert("Please select Scenario Sub Type -'Normal - Signature / Strategic / Dedicated', as this CMR belongs to China Signature/Strategic/Dedicate account.", "Warning");
+            cmr.showAlert("Please select Scenario Sub Type -'Normal - Strategic', as this CMR belongs to China Signature/Strategic/Dedicate account.", "Warning");
           }
         }
       }
@@ -3019,7 +3019,7 @@ function sSDGBGIdValidator() {
                 if(!(id == 'GB000YEN' || id == 'GB001A7X' || id == 'GB001CQ3' || id == 'GB300S7F' || id == 'GB001CPY' || id == 'GB001CPW' || id == 'GB001DR4' || id == 'GB001B83'
                   || id == 'GB001CQ2' || id == 'GB001J73' || id == 'GB0018BN' || id == 'GB001A89' || id == 'GB001AUJ' || id == 'GB0018BS' || id == 'GB0018EZ' || id == 'GB227QFM'
                     || id == 'GB0019BN' || id == 'GB0018X2')){
-                  return new ValidationResult(null, false, 'Please Select Scenario Sub Type - "Normal - Select Core", as this CMR does not belong to China Signature/Strategic/Dedicate account.');
+                  return new ValidationResult(null, false, 'Please Select Scenario Sub Type - "Normal - Select BPS/Digital", as this CMR does not belong to China Signature/Strategic/Dedicate account.');
                 }else {
                   return new ValidationResult(null, true);
                 }
@@ -3028,7 +3028,7 @@ function sSDGBGIdValidator() {
                   || id == 'GB001CQ2' || id == 'GB001J73' || id == 'GB0018BN' || id == 'GB001A89' || id == 'GB001AUJ' || id == 'GB0018BS' || id == 'GB0018EZ' || id == 'GB227QFM'
                     || id == 'GB0019BN' || id == 'GB0018X2' ){
                   if(custSubType != 'EMBSA'){
-                    return new ValidationResult(null, false, 'Please select Scenario Sub Type -"Normal - Signature / Strategic / Dedicated", as this CMR belongs to China Signature/Strategic/Dedicate account.');
+                    return new ValidationResult(null, false, 'Please select Scenario Sub Type -"Normal - Strategic", as this CMR belongs to China Signature/Strategic/Dedicate account.');
                   }else{
                     return new ValidationResult(null, true);
                   }
@@ -3038,7 +3038,7 @@ function sSDGBGIdValidator() {
               }
             }else {
               if(custSubType == 'NRMLD'){
-                  return new ValidationResult(null, false, 'Please do not select Scenario Sub Type - "Normal - Signature / Strategic / Dedicated"  as this CMR is not belong to China Signature/Strategic/Dedicate account, please select Scenario Sub Type -"Normal - Select Core".');
+                  return new ValidationResult(null, false, 'Please do not select Scenario Sub Type - "Normal - Signature"  as this CMR is not belong to China Signature/Strategic/Dedicate account, please select Scenario Sub Type -"Normal - Select Core".');
                 }else{
                   return new ValidationResult(null, true);
                 }
