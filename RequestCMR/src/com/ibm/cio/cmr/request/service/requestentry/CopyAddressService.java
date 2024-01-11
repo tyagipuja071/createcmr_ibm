@@ -120,6 +120,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       String importInd = null;
       String createDt = null;
       String parCmrNo = null;
+      String extWalletId=null;
       int seq = 0;
       for (Addr copyAddr : results) {
 
@@ -136,6 +137,10 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
           }
         }
 
+        if ((model.getCmrIssuingCntry().equals("796") || (model.getCmrIssuingCntry().equals("616")))
+            && copyAddr.getId().getAddrType().equalsIgnoreCase("ZP01") && copyAddr.getExtWalletId() != null) {
+          extWalletId = copyAddr.getExtWalletId();
+        }
         sapNo = copyAddr.getSapNo();
         importInd = copyAddr.getImportInd();
         createDt = copyAddr.getRdcCreateDt();
@@ -144,6 +149,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
           sourceAddr.setId(copyAddr.getId());
           PropertyUtils.copyProperties(copyAddr, sourceAddr);
 
+          copyAddr.setExtWalletId(extWalletId);
           copyAddr.setSapNo(sapNo);
           copyAddr.setImportInd(importInd);
           copyAddr.setRdcCreateDt(createDt);
