@@ -769,7 +769,7 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
     
     if (['KYNDR'].includes(custSubGrp)) {
       FormManager.setValue('apCustClusterId','09202');
-      // FormManager.readOnly('apCustClusterId');
+      FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier','0');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '5K');
