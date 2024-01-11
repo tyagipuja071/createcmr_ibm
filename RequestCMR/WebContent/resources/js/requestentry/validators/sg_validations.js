@@ -167,6 +167,7 @@ function addAfterConfigAP() {
 	if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
 		FormManager.enable('clientTier');
 	}
+	setInacByClusterManageEnableSG();
 }
 
 
@@ -2797,6 +2798,36 @@ function setInacByClusterSG() {
 		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
 	  FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	}
+}
+
+function setInacByClusterManageEnableSG() {
+  var qParams = {
+    _qall: 'Y',
+    ISSUING_CNTRY: FormManager.getActualValue('cmrIssuingCntry'),
+    CMT: '%' + FormManager.getActualValue('apCustClusterId') + '%',
+  };
+  var inacList = [];
+  var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+  FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+  if (results != null && results.length > 0) {
+    for (i = 0; i < results.length; i++) {
+      inacList.push(results[i].ret1);
+    }
+    FormManager.enable('inacCd');
+    FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+    FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.enable('inacCd');
+    FormManager.enable('inacType');
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+  }
+  if (inacList.length == 1) {
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('inacType');
+    FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+    FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
+  }
 }
 
 
