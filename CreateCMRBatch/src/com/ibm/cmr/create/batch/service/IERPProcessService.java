@@ -414,6 +414,13 @@ public class IERPProcessService extends BaseBatchService {
         }
 
         boolean prospectConversion = CmrConstants.YES_NO.Y.equals(admin.getProspLegalInd()) ? true : false;
+        boolean isProspectIndY = CmrConstants.YES_NO.Y.toString().equals(admin.getProspLegalInd()) ? true : false;
+        boolean isJPProspectConversion = isProspectIndY && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry());
+        String origProspectCMR = "";
+
+        if (isJPProspectConversion) {
+          origProspectCMR = data.getCmrNo();
+        }
 
         if (CmrConstants.REQ_TYPE_UPDATE.equals(cmrServiceInput.getInputReqType()) && !enableTempReact) {
           actionRdc = "System Action:RDc Update";
@@ -773,6 +780,11 @@ public class IERPProcessService extends BaseBatchService {
             statusMessage
                 .append("Record with request ID " + admin.getId().getReqId() + " and CMR Number " + response.getCmrNo() + " created SUCCESSFULLY. ");
             statusMessage.append("CMR No. " + response.getCmrNo() + " generated for this request. ");
+
+            if (isJPProspectConversion) {
+              statusMessage.append(" Successfully converted prospect " + origProspectCMR + " to legal CMR: " + response.getCmrNo() + ". ");
+            }
+
             if (prospectConversion) {
               statusMessage.append(" RDc processing converted prospect " + cmrServiceInput + " to KUNNR(s): ");
             } else {

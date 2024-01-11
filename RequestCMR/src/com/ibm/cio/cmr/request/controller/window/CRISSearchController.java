@@ -276,8 +276,13 @@ public class CRISSearchController extends BaseWindowController {
         query.setEstablishmentNo(record.getEstablishmentNo());
         params = new ParamContainer();
         params.addParam("criteria", query);
-        queryResp = this.service.process(request, params);
-        if (queryResp != null && queryResp.isSuccess() && "E".equals(queryResp.getData().getResultType())
+        boolean isProspect = false;
+        if (id != null && id.startsWith("P")) {
+          isProspect = true;
+        } else {
+          queryResp = this.service.process(request, params);
+        }
+        if (!isProspect && queryResp != null && queryResp.isSuccess() && "E".equals(queryResp.getData().getResultType())
             && queryResp.getData().getEstablishments().size() > 0) {
           CRISEstablishment establishment = queryResp.getData().getEstablishments().get(0);
           mv.addObject("estab", establishment);
