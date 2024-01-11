@@ -7,6 +7,7 @@ var _inacCdHandler = null;
 var _customerTypeHandler = null;
 var oldClusterCd = null;
 var _vatRegisterHandlerTH = null;
+var _apCustClusterIdTH = null;
 var custSubGrpHandler = null;
 function addHandlersForAP() {
 	if (custSubGrpHandler == null) {
@@ -31,6 +32,16 @@ function addHandlersForAP() {
 				setIsuOnIsic();
 		});
 	}
+	
+	if (_apCustClusterIdTH == null) {
+	  _apCustClusterIdTH = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+      var allowedClustersFrISICISUDpndncy = ['04483', '08813', '08810', '08809'];
+      if (allowedClustersFrISICISUDpndncy.includes(FormManager.getActualValue('apCustClusterId'))){
+        setIsuOnIsic();
+        updateIsbuCd();
+      }
+    });
+  }
 
 	if (_vatRegisterHandlerTH == null) {
 		_vatRegisterHandlerTH = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
@@ -350,9 +361,9 @@ function addFieldFormatValidator() {
 						addrCity1 = recordList.city1;
 
 						/*
-						 * if (typeof (addrSequence) == 'object') { addrSequence =
-						 * addrSequence[0]; }
-						 */
+             * if (typeof (addrSequence) == 'object') { addrSequence =
+             * addrSequence[0]; }
+             */
 						if (typeof (addrDept) == 'object') {
 							addrDept = addrDept[0];
 						}
@@ -1482,9 +1493,9 @@ function addDoubleCreateValidatorSG() {
 					return new ValidationResult(null, true);
 				}
 				/*
-				 * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
-				 * }else{ showError = false; }
-				 */
+         * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
+         * }else{ showError = false; }
+         */
 				if (cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF') {
 					if (FormManager.getActualValue('cmrNo') != '' && cmrNumber.length == 6) {
 						var cmrNumber = FormManager.getActualValue('cmrNo');
@@ -3087,7 +3098,7 @@ function checkCmrUpdateBeforeImport() {
 }
 
 
-// Coverage 2024 for  THAILAND -> CREATCMR - 10535 
+// Coverage 2024 for THAILAND -> CREATCMR - 10535
 function coverage2024ForTH() {
 	console.log("---- coverage2024ForTH ----");
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -3271,7 +3282,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.THAILAND], null, true);
 	GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [SysLoc.THAILAND]);
 
-	// CREATCMR - 10575 -> Coverage 2024 for  Thailand
+	// CREATCMR - 10575 -> Coverage 2024 for Thailand
 	GEOHandler.addAfterConfig(coverage2024ForTH, [SysLoc.THAILAND]);
 	GEOHandler.addAfterTemplateLoad(coverage2024ForTH, [SysLoc.THAILAND]);
 

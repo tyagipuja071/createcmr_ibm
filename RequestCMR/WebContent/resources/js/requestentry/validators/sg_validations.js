@@ -8,6 +8,7 @@ var _inacHandler = null;
 var custSubGrpHandler = null;
 var oldClusterCd = null;
 var _inacCdHandler = null;
+var _apCustClusterIdSG = null;
 
 function addHandlersForAP() {
 	if (_isicHandlerAP == null) {
@@ -18,6 +19,16 @@ function addHandlersForAP() {
 				setIsuOnIsic();
 		});
 	}
+	
+	if (_apCustClusterIdSG == null) {
+	  _apCustClusterIdSG = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+      var allowedClustersFrISICISUDpndncy = ['04483', '08813', '08810', '08809'];
+      if (allowedClustersFrISICISUDpndncy.includes(FormManager.getActualValue('apCustClusterId'))){
+        setIsuOnIsic();
+        updateIsbuCd();
+      }
+    });
+  }
 
 	if (_inacCdHandler == null) {
 		_inacCdHandler = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
@@ -139,12 +150,7 @@ function addAfterConfigAP() {
 	if ((role == 'PROCESSOR' || role == 'VIEWER') && (custSubGrp.includes('DUM') || custSubGrp.includes('INT'))) {
 		FormManager.readOnly('mrcCd');
 	}
-
-	if (reqType == 'C') {
-		setIsuOnIsic();
-	}
 	addVatValidationforSingapore();
-
 	// CREATCMR-5269
 	if (reqType == 'U') {
 		handleObseleteExpiredDataForUpdate();
@@ -340,9 +346,9 @@ function addFieldFormatValidator() {
 						addrCity1 = recordList.city1;
 
 						/*
-						 * if (typeof (addrSequence) == 'object') { addrSequence =
-						 * addrSequence[0]; }
-						 */
+             * if (typeof (addrSequence) == 'object') { addrSequence =
+             * addrSequence[0]; }
+             */
 						if (typeof (addrDept) == 'object') {
 							addrDept = addrDept[0];
 						}
@@ -1323,9 +1329,9 @@ function addDoubleCreateValidatorSG() {
 					return new ValidationResult(null, true);
 				}
 				/*
-				 * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
-				 * }else{ showError = false; }
-				 */
+         * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
+         * }else{ showError = false; }
+         */
 				if (cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF') {
 					if (FormManager.getActualValue('cmrNo') != '' && cmrNumber.length == 6) {
 						var cmrNumber = FormManager.getActualValue('cmrNo');
@@ -2662,7 +2668,7 @@ function checkCmrUpdateBeforeImport() {
 
 
 
-// Coverage 2024 for  SINGAPORE -> CREATCMR - 10535 
+// Coverage 2024 for SINGAPORE -> CREATCMR - 10535
 function coverage2024ForSG() {
 	console.log("---- coverage2024ForSG ----");
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
