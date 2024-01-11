@@ -951,6 +951,12 @@ function setCmrNoCmrNo2Required() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
+  
+  var isProspect = FormManager.getActualValue('prospLegalInd');
+  if('Y' == isProspect) {
+    return;
+  }
+  
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _role = null;
   if (typeof (_pagemodel) != 'undefined') {
@@ -7461,6 +7467,49 @@ function addJPAddressGridValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addJPMandatoryAddressTypesValidator() {
+  console.log(">>>>  addJPMandatoryAddressTypesValidator");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isProspect = FormManager.getActualValue('prospLegalInd');
+        if('Y' != isProspect || FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var updateInd = null;
+          var companyCnt = 0;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            updateInd = record.updateInd;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (typeof (updateInd) == 'object') {
+              updateInd = updateInd[0];
+            }
+            if (type == 'ZC01') {
+              companyCnt++;
+            } 
+          }
+
+          if (companyCnt == 0) {
+            return new ValidationResult(null, false, 'Company address for Prospect CMR is mandatory.');
+          } 
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -7581,6 +7630,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addBwpqCreditToValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addJPAddressGridValidator, [ SysLoc.JAPAN ], null, true);
+	GEOHandler.registerValidator(addJPMandatoryAddressTypesValidator, [ SysLoc.JAPAN ], null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
