@@ -6541,8 +6541,8 @@ function doImportCmrs(addressOnly) {
 }
 
 function importPRCMRCompany() {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (reqType == 'C' && custSubGrp == 'PRCMR') {
     var result = {
       accepted: 'y',
