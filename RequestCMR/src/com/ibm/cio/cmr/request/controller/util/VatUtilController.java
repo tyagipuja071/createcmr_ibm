@@ -41,7 +41,6 @@ import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
-import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
@@ -277,7 +276,7 @@ public class VatUtilController {
 
       String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
       AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
-      autoClient.setReadTimeout(1000 * 60 * 5);
+      autoClient.setReadTimeout(1000 * 60 * 30);
       autoClient.setRequestMethod(Method.Get);
 
       BNValidationRequest requestToAPI = new BNValidationRequest();
