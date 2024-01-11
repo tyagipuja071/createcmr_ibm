@@ -1486,6 +1486,19 @@ function setISUByOfficeCd() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
   var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || (reqType == 'C' && custSubGrp == 'ISOCU'))) {
+    return;
+  }
+
+  if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL')) {
+    return;
+  }
+
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
+  }
   
   if(FormManager.getActualValue('reqType') == 'U' && (isBPEndUserCMR() || isIGFCMR())) {
     return;
@@ -1499,18 +1512,32 @@ function setISUByOfficeCd() {
   var isuCdResult = cmr.query('GET.ISU_BY_OFFICECD_BO_CODES', qParams);
 
   if (isuCdResult != null && isuCdResult.length == 1) {
-    if (isuCdResult[0].ret1.trim() != '') {
+    if (isuCdResult[0].ret1.trim() != '' && custGrp != 'SUBSI') {
       FormManager.setValue('isuCd', isuCdResult[0].ret1.trim());
+    } else if (custGrp == 'SUBSI') {
+      var sParams = {
+          _qall : 'Y',
+          ISSUING_CNTRY : cntry,
+          SUBSIDIARY_CD : custSubGrp.substring(0,2),
+          SUB_OFFICE_CD : salesBusOffCd
+        };      
+      var subsidiaryIsu = cmr.query('GET.ISU_BY_SUBSI_BO_CODES', sParams); 
+      if (subsidiaryIsu != null && subsidiaryIsu.length == 1 && subsidiaryIsu[0].ret1.trim()) {
+        FormManager.setValue('isuCd', subsidiaryIsu[0].ret1.trim());
+      } else {
+        // do not have isu override check in zzkv_sic
+        var isuCdValue = getIsuByZzkvsic();
+        if (isuCdValue != '') {
+          FormManager.setValue('isuCd', isuCdValue);
+        }
+      }
     } else {
-      // do not have isu overide check in zzkv_sic
+      // do not have isu override check in zzkv_sic
       var isuCdValue = getIsuByZzkvsic();
       if (isuCdValue != '') {
         FormManager.setValue('isuCd', isuCdValue);
       }
     }
-  }
-  if (custGrp == 'SUBSI' && salesBusOffCd == 'A9') {
-    FormManager.setValue('isuCd', '5K');
   }
 }
 
@@ -3958,16 +3985,16 @@ function setSortlOnOfcdChange() {
     return;
   }
 
-  if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
+  // if (custGrp == 'IBMTP' || custGrp == 'BUSPR') {
     var sortl = getSortlByOfcd();
     if (sortl != '') {
       FormManager.setValue('searchTerm', sortl);
     } else {
       FormManager.setValue('searchTerm', '91454');
     }
-  } else if (custGrp == 'SUBSI') {
-    FormManager.setValue('searchTerm', custSubGrp.substr(0, 2));
-  }
+  // } //else if (custGrp == 'SUBSI') {
+    // FormManager.setValue('searchTerm', custSubGrp.substr(0, 2));
+  // }
 }
 function getSortlByOfcd() {
   var ofcd = FormManager.getActualValue('salesBusOffCd');
@@ -4023,6 +4050,28 @@ function addClusterOfcdLogic() {
 }
 
 function addIsuLogicOnIsicChange() {
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if (custGrp == 'IBMTP' && (custSubGrp == 'BPWPQ' || (reqType == 'C' && custSubGrp == 'ISOCU'))) {
+    return;
+  }
+
+  if (custGrp == 'SUBSI' && (custSubGrp == 'BQICL')) {
+    return;
+  }
+
+  if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
+    return;
+  }
+  
+  if(FormManager.getActualValue('reqType') == 'U' && (isBPEndUserCMR() || isIGFCMR())) {
+    return;
+  }
+
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     setISUByOfficeCd();
   });
