@@ -109,6 +109,7 @@ function afterConfigForJP() {
     disableAddrFieldsForRA();
 
     setAbbrevNmReqForBFKSCScenario();
+    importPRCMRCompany();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -6184,6 +6185,7 @@ function setOutsourcingServiceRequired() {
   case 'BPIJB':
   case 'BRMSI':
   case 'BQICL':
+  case 'PRCMR':
     if (FormManager.getField('outsourcingService').set) {
       FormManager.getField('outsourcingService').set('checked', false);
     } else if (FormManager.getField('outsourcingService')) {
@@ -6659,6 +6661,26 @@ function doImportCmrs(addressOnly) {
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
       + cmrNo + '&system=cmr' + (cmr.searchIssuingCntry != null ? '&searchIssuingCntry=' + cmr.searchIssuingCntry : '') + (cmr.skipAddress != null ? '&skipAddress=' + cmr.skipAddress : ''));
   document.forms['frmCMR'].submit();
+}
+
+function importPRCMRCompany() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && custSubGrp == 'PRCMR') {
+    var result = {
+      accepted: 'y',
+      type: 'C',
+      data: {
+        issuedBy: '760',
+        issuedByDesc: 'Japan',
+        cmrNum: '666314'
+      }
+    };
+    console.log(result);
+    if (result != null) {
+      doImportCRISRecord(result);
+    }
+  }
 }
 
 function disableBpBqiImport() {
