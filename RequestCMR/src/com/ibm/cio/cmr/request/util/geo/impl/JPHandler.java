@@ -280,6 +280,7 @@ public class JPHandler extends GEOHandler {
                     data.setCustPrefLang(kna1.getSpras() != null ? kna1.getSpras() : "");
                     data.setIsuCd(kna1.getBrsch() != null ? kna1.getBrsch() : "");
                     data.setClientTier(kna1.getKatr3() != null ? kna1.getKatr3() : "");
+                    data.setJsicCd(kna1.getZzkvLic() != null ? kna1.getZzkvLic() : "");
                   }
                 }
               }
@@ -287,8 +288,10 @@ public class JPHandler extends GEOHandler {
             default:
               // only for requester
               if ("DRA".equalsIgnoreCase(admin.getReqStatus())) {
-                data.setJsicCd(establishment != null && establishment.getJsic() != null ? establishment.getJsic().trim()
-                    : company != null && company.getJsic() != null ? company.getJsic().trim() : null);
+                if (!"BQICL".equals(data.getCustSubGrp())) {
+                  data.setJsicCd(establishment != null && establishment.getJsic() != null ? establishment.getJsic().trim()
+                      : company != null && company.getJsic() != null ? company.getJsic().trim() : null);
+                }
               }
               break;
             }
