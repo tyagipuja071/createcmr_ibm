@@ -101,6 +101,8 @@ function addSoldToValidator() {
         };
         var record = cmr.query('GETZS01VALRECORDS', qParams);
         var zs01Reccount = record.ret1;
+        var reqType=FormManager.getActualValue('reqType');
+        
         // Story 1202261 : validation for Brazil
         if (FormManager.getActualValue('cmrIssuingCntry') == '631') {
           if (Number(zs01Reccount) > 1) {
@@ -111,7 +113,7 @@ function addSoldToValidator() {
             return new ValidationResult(null, true);
           }
         } else {
-          if (Number(zs01Reccount) > 1) {
+          if (Number(zs01Reccount) > 1 && ( reqType!='U' && FormManager.getActualValue('cmrIssuingCntry') != '796'  && FormManager.getActualValue('cmrIssuingCntry') != '616') ) {
             return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
           } else if (Number(zs01Reccount == 0)) {
             return new ValidationResult(null, false, 'At least one Sold-To Address must be defined.');
