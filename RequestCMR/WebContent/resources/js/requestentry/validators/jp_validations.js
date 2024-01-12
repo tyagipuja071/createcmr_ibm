@@ -997,8 +997,6 @@ function setCmrNoCmrNo2Required() {
       FormManager.readOnly('cmrNo2');
       FormManager.resetValidations('cmrNo2');
     } else if (_role == 'Processor') {
-      FormManager.enable('cmrNo');
-      FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
       FormManager.readOnly('cmrNo2');
       FormManager.resetValidations('cmrNo2');
     }
@@ -1015,10 +1013,9 @@ function setCmrNoCmrNo2Required() {
     FormManager.resetValidations('cmrNo2');
     break;
   case 'INTER':
-    FormManager.enable('cmrNo');
-    if (_role == 'Processor') {
-      FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
-    }
+    FormManager.readOnly('cmrNo');
+    FormManager.resetValidations('cmrNo');
+
     FormManager.setValue('cmrNo2', '');
     FormManager.readOnly('cmrNo2');
     FormManager.resetValidations('cmrNo2');
