@@ -350,8 +350,8 @@ public class USBPEhostHandler extends USBPHandler {
   }
 
   @Override
-  protected FindCMRRecordModel getIBMCMRBestMatch(AutomationEngineData engineData, RequestData requestData, List<DuplicateCMRCheckResponse> matches)
-      throws CmrException {
+  protected FindCMRRecordModel getIBMCMRBestMatch(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      List<DuplicateCMRCheckResponse> matches) throws CmrException {
 
     for (DuplicateCMRCheckResponse record : matches) {
       LOG.debug(" - Duplicate: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")" + record.getCompany() + " - "

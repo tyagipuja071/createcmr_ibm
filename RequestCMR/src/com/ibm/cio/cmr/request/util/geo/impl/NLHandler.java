@@ -1264,7 +1264,7 @@ public class NLHandler extends BaseSOFHandler {
   @Override
   public boolean hasChecklist(String cmrIssiungCntry) {
 
-    return false;
+    return true;
   }
 
   @Override
@@ -2453,6 +2453,7 @@ public class NLHandler extends BaseSOFHandler {
         isDivestiture = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return isDivestiture;
   }
@@ -2481,6 +2482,7 @@ public class NLHandler extends BaseSOFHandler {
         is93cmr = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return is93cmr;
   }
@@ -2696,19 +2698,24 @@ public class NLHandler extends BaseSOFHandler {
   // CMR-6019
   private boolean checkMEDupCMRExist(String cntry, String cmrNo) {
     EntityManager entityManager = JpaManager.getEntityManager();
-    String CEBO = cntry + "0000";
-    String sql = ExternalizedQuery.getSql("QUERY.CHECK.ME.DUP.EXIST.DB2");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CMRNO", cmrNo);
-    List<Object[]> results = query.getResults();
-    if (results != null && results.size() > 0) {
-      Object[] result = results.get(0);
-      String dupCEBO = result[0].toString();
-      if (CEBO.equals(dupCEBO)) {
-        return true;
+    try {
+      String CEBO = cntry + "0000";
+      String sql = ExternalizedQuery.getSql("QUERY.CHECK.ME.DUP.EXIST.DB2");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CMRNO", cmrNo);
+      List<Object[]> results = query.getResults();
+      if (results != null && results.size() > 0) {
+        Object[] result = results.get(0);
+        String dupCEBO = result[0].toString();
+        if (CEBO.equals(dupCEBO)) {
+          return true;
+        }
       }
+      return false;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    return false;
   }
 
   public static String getZP02importInit(EntityManager entityManager, long req_id) {

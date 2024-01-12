@@ -68,7 +68,7 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
   public static final String SCENARIO_IBMEM_LU = "LUIBM";
   private static final String QUERY_BG_SBO_BENELUX = "AUTO.COV.GET_COV_FROM_BG_ES_UK";
-  
+
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #");
@@ -140,11 +140,11 @@ public class BeLuxUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       break;
-    case SCENARIO_PRIVATE_CUSTOMER_LU: 
+    case SCENARIO_PRIVATE_CUSTOMER_LU:
       String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
-      
-    
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false,
+          requestData);
+
     case SCENARIO_THIRD_PARTY:
     case SCENARIO_THIRD_PARTY_LU:
     case SCENARIO_DATA_CENTER:
@@ -201,7 +201,7 @@ public class BeLuxUtil extends AutomationUtil {
     String bgId = data.getBgId();
     String commercialFin = "";
     String coverageId = container.getFinalCoverage();
-    
+
     if (StringUtils.isNotBlank(gbgCntry) && cmrCntry.equalsIgnoreCase(gbgCntry)) {
       details.append("Coverage calculated for: " + gbgCntry).append("\n");
     } else if (StringUtils.isNotBlank(gbgCntry) && !cmrCntry.equalsIgnoreCase(gbgCntry)) {
@@ -301,7 +301,7 @@ public class BeLuxUtil extends AutomationUtil {
     }
     return true;
   }
-  
+
   private String computeSBOForCovBelux(EntityManager entityManager, String queryBgFR, String bgId, String cmrIssuingCntry, boolean b) {
     String sortl = "";
     String sql = ExternalizedQuery.getSql(queryBgFR);
@@ -327,7 +327,7 @@ public class BeLuxUtil extends AutomationUtil {
     sortl = sortlList.get(0);
     return sortl;
   }
-  
+
   private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
     GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
     String gbgCntry = "";
@@ -637,7 +637,7 @@ public class BeLuxUtil extends AutomationUtil {
               if ("U".equals(admin.getReqType()) && payGoAddredited) {
                 LOG.debug("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
                 checkDetails.append("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
-            //    admin.setPaygoProcessIndc("Y");
+                // admin.setPaygoProcessIndc("Y");
               } else if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("X");

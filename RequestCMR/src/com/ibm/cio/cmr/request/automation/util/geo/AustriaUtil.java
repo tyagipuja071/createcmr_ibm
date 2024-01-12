@@ -103,7 +103,7 @@ public class AustriaUtil extends AutomationUtil {
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
+      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario), requestData);
     case SCENARIO_BUSINESS_PARTNER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
@@ -178,8 +178,8 @@ public class AustriaUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "PPS CEID":
-    	cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
-    	break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "D");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -494,12 +494,12 @@ public class AustriaUtil extends AutomationUtil {
     System.out.println("coverageId----------" + coverageId);
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
-        if (bgId != null && !"BGNONE".equals(bgId.trim())) {
+    if (bgId != null && !"BGNONE".equals(bgId.trim())) {
       List<DACHFieldContainer> queryResults = AutomationUtil.computeDACHCoverageElements(entityManager, "AUTO.COV.CALCULATE_COV_ELEMENTS_DACH", bgId,
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();
@@ -560,6 +560,7 @@ public class AustriaUtil extends AutomationUtil {
     return true;
 
   }
+
   private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");

@@ -108,7 +108,8 @@ public class NetherlandsUtil extends AutomationUtil {
 
     case SCENARIO_PRIVATE_CUSTOMER:
       String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false,
+          requestData);
 
     case SCENARIO_IBM_EMPLOYEE:
       Person person = null;
@@ -262,8 +263,8 @@ public class NetherlandsUtil extends AutomationUtil {
     } else {
       // Handle the case when the list is empty
       LOG.debug("The list is empty.");
-    }    
-    return sortl;    
+    }
+    return sortl;
   }
 
   private NLFieldsContainer calculate32SValuesFromIMSNL(EntityManager entityManager, Data data) {

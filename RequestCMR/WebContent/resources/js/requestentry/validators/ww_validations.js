@@ -1258,6 +1258,12 @@ function addLAVatValidator() {
         var custType = FormManager.getActualValue('custType');
         console.log(">>>> addLAVatValidator");
         var zs01Cntry = null;
+        var skipVatValidationCntry=['897'];
+        
+      //skipping validation for countries which don't have VAT and taxCd1
+        if (skipVatValidationCntry.includes(cmrIssuingCntry)) {     
+          return new ValidationResult(null, true);
+      } 
         //get vat Field 
         var vat = FormManager.getActualValue('vat');
         if (!vat || vat == '' || vat.trim() == '') {

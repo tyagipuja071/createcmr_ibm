@@ -230,7 +230,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
         // }
       }
-      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(model.getCmrIssuingCntry())) {
+      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry()) || CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
         if ("U".equals(admin.getReqType())) {
           String maxAddrSeq = null;
           maxAddrSeq = getMaxSequenceAddr(entityManager, model.getReqId());
