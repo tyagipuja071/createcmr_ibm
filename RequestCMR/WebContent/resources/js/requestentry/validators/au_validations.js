@@ -1699,7 +1699,6 @@ function setCTCIsuByClusterANZ() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var issuingCntries = ['852', '818', '856', '643', '778', '749', '834', '616', '796'];
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
@@ -1715,24 +1714,14 @@ function setCTCIsuByClusterANZ() {
 
     var apClientTierValue = [];
     var isuCdValue = [];
-    if ((scenario == 'LOCAL' && (custSubGrp == 'NRMLC' || custSubGrp == 'NRML' || custSubGrp == 'AQSTN' || custSubGrp == 'ESOSW' || custSubGrp == 'IGF' || custSubGrp == 'SOFT' || custSubGrp == 'PRIV' || custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'DUMMY' || custSubGrp == 'INTER'))
-      || (scenario == 'CROSS' && (custSubGrp == 'XNRML' || custSubGrp == 'XAQST' || custSubGrp == 'XESO' || custSubGrp == 'XIGF' || custSubGrp == 'XSOFT' || custSubGrp == 'CROSS' || custSubGrp == 'XPRIV' || custSubGrp == 'XMKTP' || custSubGrp == 'XDUMM' || custSubGrp == 'XINT' || custSubGrp == 'XBLUM'))
-      || (_cmrIssuingCntry == '616' && scenario == 'LOCAL' && (custSubGrp == 'ECSYS' || custSubGrp == 'KYND'))
-    ) {
       if (_cluster != '' && _cluster != '') {
         var qParams = {
           _qall: 'Y',
           ISSUING_CNTRY: _cmrIssuingCntry,
           CLUSTER: _cluster,
         };
-        // cluster description
-        var clusterDesc = cmr.query('GET.DESC_BY_CLUSTER', qParams);
-        var qParams = {
-          _qall: 'Y',
-          ISSUING_CNTRY: _cmrIssuingCntry,
-          CLUSTER: _cluster,
-        };
 
+        var isuValRetrieved = false;
         var results = cmr.query('GET.CTC_ISU_BY_CLUSTER_CNTRY', qParams);
         if (results != null) {
           for (var i = 0; i < results.length; i++) {
@@ -1743,22 +1732,23 @@ function setCTCIsuByClusterANZ() {
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
             FormManager.setValue('clientTier', apClientTierValue[0]);
             FormManager.readOnly('clientTier');
+            FormManager.readOnly('isuCd');
             if (isuCdValue.length == 1 && isuCdValue[0].trim().length > 0) {
               FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
               FormManager.setValue('isuCd', isuCdValue[0]);
-              FormManager.readOnly('isuCd');
+              isuValRetrieved = true;
             }
           } else if (apClientTierValue.length > 1) {
             FormManager.resetDropdownValues(FormManager.getField('clientTier'));
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
+            isuValRetrieved = true;
           }
         }
-        if (clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S1') || clusterDesc[0].ret1.includes('IA') || _cluster.includes('BLAN') || clusterDesc[0].ret1.includes('S&S'))) {
+        if (!isuValRetrieved){          
           setIsuOnIsic();
         }
       }
-    }
 
   });
   if (_clusterHandler && _clusterHandler[0]) {
@@ -1772,8 +1762,11 @@ function addAbnValidatorForAU() {
       validate: function () {
         var abn = FormManager.getActualValue('vat');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp == "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp == "XNRML" || custSubGrp == "SOFT"
-          || custSubGrp == "XSOFT") {
+        /*
+         * if (custSubGrp == "AQSTN" || custSubGrp == "XAQST" || custSubGrp ==
+         * "IGF" || custSubGrp == "XIGF" || custSubGrp == "NRML" || custSubGrp ==
+         * "XNRML" || custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
+         */
           if (abn && abn.length != 11) {
             return new ValidationResult({
               id: 'vat',
@@ -1783,10 +1776,12 @@ function addAbnValidatorForAU() {
           } else {
             return new ValidationResult(null, true);
           }
-        } else {
-          return new ValidationResult(null, true);
+      // }
+      
+     /*
+       * else { return new ValidationResult(null, true); }
+       */
         }
-      }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
@@ -3137,7 +3132,7 @@ function addAfterConfigAU() {
   setCollectionCd();
   setCollCdFrAU();
   onIsuCdChangeAseanAnzIsa();
-  setCTCIsuByClusterANZ();
+// setCTCIsuByClusterANZ();
   removeStateValidatorForHkMoNZ();
   addGovIndcHanlder();
   addGovCustTypHanlder();
