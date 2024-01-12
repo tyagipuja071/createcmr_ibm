@@ -1438,16 +1438,35 @@ function inTs38Ofcd() {
 function getCtcByOfcd() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var ofcd = FormManager.getActualValue('salesBusOffCd');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
   var clientTier = '';
-  var qParams = {
-    _qall : 'Y',
-    OFFICE_CD : ofcd
-  };
-  var results = cmr.query('GET.CTC_BY_OFFICE_CD_BO_CODES', qParams);
-  if (results != null && results.length > 0) {
-    for (var i = 0; i < results.length; i++) {
-      if (results[i].ret1 != '') {
-        clientTier = results[i].ret1;
+  if('SUBSI' == custGrp ) {
+    var qParams = {
+        _qall : 'Y',
+        SUBSIDIARY_CD : custSubGrp.substring(0,2),
+        SUB_OFFICE_CD : ofcd
+      };
+      var results = cmr.query('GET.CTC_BY_SUBSI_BO_CODES', qParams);
+      if (results != null && results.length > 0) {
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].ret1 != '') {
+            clientTier = results[i].ret1;
+          }
+        }
+      }
+  } else {
+    var qParams = {
+      _qall : 'Y',
+      OFFICE_CD : ofcd
+    };
+    var results = cmr.query('GET.CTC_BY_OFFICE_CD_BO_CODES', qParams);
+    if (results != null && results.length > 0) {
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].ret1 != '') {
+          clientTier = results[i].ret1;
+        }
       }
     }
   }
@@ -1472,14 +1491,29 @@ function setMrcByOfficeCd() {
   } else {
     return;
   }
-  var qParams = {
-    _qall : 'Y',
-    OFFICE_CD : ofcd
-  };
-  var results = cmr.query('GET.MRC_BY_OFFICE_CD_BO_CODES', qParams);
-  if (results != null && results.length > 0) {
-    for (var i = 0; i < results.length; i++) {
-      mrc = results[i].ret1;
+  
+  if('SUBSI' == custGrp ) {
+    var qParams = {
+        _qall : 'Y',
+        SUBSIDIARY_CD : custSubGrp.substring(0,2),
+        SUB_OFFICE_CD : ofcd
+    };
+    var results = cmr.query('GET.MRC_BY_SUBSI_BO_CODES', qParams);
+    if (results != null && results.length > 0) {
+      for (var i = 0; i < results.length; i++) {
+        mrc = results[i].ret1;
+      }
+    }
+  } else {
+    var qParams = {
+        _qall : 'Y',
+        OFFICE_CD : ofcd
+    };
+    var results = cmr.query('GET.MRC_BY_OFFICE_CD_BO_CODES', qParams);
+    if (results != null && results.length > 0) {
+      for (var i = 0; i < results.length; i++) {
+        mrc = results[i].ret1;
+      }
     }
   }
   FormManager.setValue('mrcCd', mrc);
@@ -4015,18 +4049,36 @@ function setSortlOnOfcdChange() {
 }
 function getSortlByOfcd() {
   var ofcd = FormManager.getActualValue('salesBusOffCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
   var sortl = '';
-  var qParams = {
-    _qall : 'Y',
-    OFFICE_CD : ofcd,
-  };
-  var results = cmr.query('GET.SORTL_BY_OFFICE_CD_BO_CODES', qParams);
-  if (results != null && results.length > 0) {
-    for (var i = 0; i < results.length; i++) {
-      if (results[i].ret2 != '') {
-        sortl = results[i].ret2;
+  if('SUBSI' == custGrp ) {
+    var qParams = {
+        _qall : 'Y',
+        SUBSIDIARY_CD : custSubGrp.substring(0,2),
+        SUB_OFFICE_CD : ofcd
+      };
+      var results = cmr.query('GET.SORTL_BY_SUBSI_BO_CODES', qParams);
+      if (results != null && results.length > 0) {
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].ret2 != '') {
+            sortl = results[i].ret2;
+          }
+        }
       }
-    }
+  } else {
+    var qParams = {
+        _qall : 'Y',
+        OFFICE_CD : ofcd,
+      };
+      var results = cmr.query('GET.SORTL_BY_OFFICE_CD_BO_CODES', qParams);
+      if (results != null && results.length > 0) {
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].ret2 != '') {
+            sortl = results[i].ret2;
+          }
+        }
+      }
   }
   return sortl;
 }
