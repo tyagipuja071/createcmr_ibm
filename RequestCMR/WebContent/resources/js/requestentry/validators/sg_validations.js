@@ -14,7 +14,7 @@ function addHandlersForAP() {
 	if (_isicHandlerAP == null) {
 		_isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
 
-			var allowedClustersFrISICISUDpndncy = ['04483', '08813', '08810', '08809'];
+			var allowedClustersFrISICISUDpndncy = ['08802','08796','08798','08807','08808','08800','08799','08805','08801','08804','08803','08795','08806'];
 			if (allowedClustersFrISICISUDpndncy.includes(FormManager.getActualValue('apCustClusterId')))
 				setIsuOnIsic();
 		});
@@ -22,7 +22,7 @@ function addHandlersForAP() {
 	
 	if (_apCustClusterIdSG == null) {
 	  _apCustClusterIdSG = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
-      var allowedClustersFrISICISUDpndncy = ['04483', '08813', '08810', '08809'];
+      var allowedClustersFrISICISUDpndncy = ['08802','08796','08798','08807','08808','08800','08799','08805','08801','08804','08803','08795','08806'];
       if (allowedClustersFrISICISUDpndncy.includes(FormManager.getActualValue('apCustClusterId'))){
         setIsuOnIsic();
         updateIsbuCd();
