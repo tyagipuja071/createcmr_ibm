@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -74,6 +76,8 @@ public class ReportSpec {
     PreparedQuery query = prepareQuery(entityManager, dateRange);
     List<Object[]> results = query.getResults();
 
+    Set<Integer> distinctByteLengths = new HashSet<Integer>();
+    Set<Integer> distinctByteLengthsPlain = new HashSet<Integer>();
     LOG.debug(results.size() + " records retrieved.");
     try (FileOutputStream fos = new FileOutputStream(outputDir + File.separator + this.reportFilename)) {
       try (OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8")) {
@@ -96,14 +100,20 @@ public class ReportSpec {
 
             }
             if (addRecord) {
+              int totalLength = 0;
+              int totalPlain = 0;
               for (int index = 0; index < record.length; index++) {
                 ReportField field = this.fields.get(index);
                 String fixedWidthValue = field.getFixedWidthValue(record[index]);
+                totalLength += fixedWidthValue.getBytes("UTF-8").length;
+                totalPlain += fixedWidthValue.getBytes().length;
                 pw.print(fixedWidthValue);
                 if (LOG.isTraceEnabled()) {
                   LOG.trace("Field: " + field.getName() + " = " + fixedWidthValue);
                 }
               }
+              distinctByteLengths.add(totalLength);
+              distinctByteLengthsPlain.add(totalPlain);
               pw.println();
             }
           }
@@ -113,6 +123,8 @@ public class ReportSpec {
         }
       }
     }
+    DBCSReportField.printUnwanted();
+    LOG.debug("Distinct row lengths for " + this.reportFilename + ": " + distinctByteLengths.toString());
   }
 
   /**

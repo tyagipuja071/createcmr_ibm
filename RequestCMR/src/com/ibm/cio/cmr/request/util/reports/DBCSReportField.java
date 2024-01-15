@@ -4,6 +4,10 @@
 package com.ibm.cio.cmr.request.util.reports;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
 
 /**
  * Handles report fields containing DBCS characters
@@ -12,6 +16,10 @@ import java.io.UnsupportedEncodingException;
  *
  */
 public class DBCSReportField extends ReportField {
+
+  private static final Logger LOG = Logger.getLogger(DBCSReportField.class);
+
+  private static List<String> abnormalCharacters = new ArrayList<String>();
 
   /**
    * @param name
@@ -45,6 +53,7 @@ public class DBCSReportField extends ReportField {
     } catch (UnsupportedEncodingException e) {
       // noop
     }
+    registerUnwanted(fwValue);
     fwValue += "!";
     return fwValue;
   }
@@ -93,8 +102,45 @@ public class DBCSReportField extends ReportField {
       modifiedVal = modifiedVal.replaceAll(" ", "　");
       modifiedVal = modifiedVal.replaceAll("-", "－");
       modifiedVal = modifiedVal.replaceAll("−", "－");
+      modifiedVal = modifiedVal.replaceAll("—", "―");
+      modifiedVal = modifiedVal.replaceAll("〜", "～");
+      modifiedVal = modifiedVal.replaceAll("�", "　");
+
+      StringBuilder finalVal = new StringBuilder();
+      for (int i = 0; i < modifiedVal.length(); i++) {
+        if (modifiedVal.charAt(i) == 32) {
+          finalVal.append(Character.toString((char) 12288));
+        } else {
+          finalVal.append(Character.toString(modifiedVal.charAt(i)));
+        }
+      }
+      return finalVal.toString();
+
     }
     return modifiedVal;
+  }
+
+  private void registerUnwanted(String input) {
+    for (int i = 0; i < input.length(); i++) {
+      char currChar = input.charAt(i);
+      String charString = Character.toString(currChar);
+      try {
+        if (charString.getBytes("UTF-8").length != 3) {
+          if (!abnormalCharacters.contains(charString)) {
+            abnormalCharacters.add(charString);
+          }
+          if (Character.UnicodeBlock.of(currChar) == Character.UnicodeBlock.BASIC_LATIN) {
+            abnormalCharacters.add(charString);
+          }
+        }
+      } catch (Exception e) {
+        // noop
+      }
+    }
+  }
+
+  public static void printUnwanted() {
+    LOG.warn("Unwanted characters found: " + abnormalCharacters.toString());
   }
 
 }
