@@ -184,11 +184,3 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 <cmr:view forCountry="652">
   <script src="${resourcesPath}/js/requestentry/validators/lk_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
-
-<cmr:view forCountry="834">
-  <script src="${resourcesPath}/js/requestentry/validators/sg_validations.js?${cmrv}" type="text/javascript"></script>
-</cmr:view>
-
-<cmr:view forCountry="856">
-  <script src="${resourcesPath}/js/requestentry/validators/th_validations.js?${cmrv}" type="text/javascript"></script>
-</cmr:view>
