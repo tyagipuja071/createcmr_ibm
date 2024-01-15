@@ -81,7 +81,7 @@ function afterConfigForCN() {
   if (_isicHandlerCN == null) {
     _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       setCTCIsuByCluster();
-//      setIsuOnIsic();
+// setIsuOnIsic();
     });
   }
   
@@ -92,7 +92,7 @@ function afterConfigForCN() {
         return;
       }
       filterISUOnChange();
-//      setIsuOnIsic();
+// setIsuOnIsic();
       setInacBySearchTerm(value);
       setCTCIsuByCluster();
     });
@@ -239,7 +239,7 @@ function setInacBySearchTerm(value) {
               inacCdValue.push(results[i].ret1);
             }
             FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-//            FormManager.setValue('inacCd', inacCdValue[0]);
+// FormManager.setValue('inacCd', inacCdValue[0]);
             if (inacCdValue.length == 1 && value != undefined) {
               FormManager.setValue('inacCd', inacCdValue[0]);
             }
@@ -254,8 +254,8 @@ function setInacBySearchTerm(value) {
         FormManager.resetDropdownValues(FormManager.getField('inacCd'));
         FormManager.removeValidator('inacCd', Validators.REQUIRED);
         FormManager.removeValidator('inacType', Validators.REQUIRED);
-        FormManager.enable('inacCd');
-        FormManager.enable('inacType');
+// FormManager.enable('inacCd');
+// FormManager.enable('inacType');
       }
       if (value && value != "inacChange" && value != undefined) {       
         FormManager.clearValue('inacCd');
@@ -285,7 +285,7 @@ function setInacBySearchTerm(value) {
 }
 
 function setIsuOnIsic() {
-//  var clusterVal = FormManager.getActualValue('searchTerm');
+// var clusterVal = FormManager.getActualValue('searchTerm');
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -3305,12 +3305,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
   GEOHandler.addAfterConfig(setReadOnly4Update, GEOHandler.CN);
   GEOHandler.addAfterConfig(handleExpiredClusterCN, GEOHandler.CN);
-//  GEOHandler.addAfterConfig(reqReasonHandler, GEOHandler.CN);
+// GEOHandler.addAfterConfig(reqReasonHandler, GEOHandler.CN);
 // GEOHandler.addAfterConfig(setDropdownField2Values, GEOHandler.CN);
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
-  GEOHandler.addAfterTemplateLoad(setInacBySearchTerm, GEOHandler.CN);
+  // GEOHandler.addAfterTemplateLoad(setInacBySearchTerm, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
   // GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.CN);
@@ -3343,16 +3343,19 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(convertPoBox, GEOHandler.CN);
   
   // CREATCMR-8581
-//  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.CN,null,true);
+// GEOHandler.registerValidator(checkCmrUpdateBeforeImport,
+// GEOHandler.CN,null,true);
   
-//  GEOHandler.registerValidator(addDPLCheckValidatorCN, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
+// GEOHandler.registerValidator(addDPLCheckValidatorCN, GEOHandler.CN,
+// GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
-//  GEOHandler.registerValidator(addChecklistValidatorCN, GEOHandler.CN);
+// GEOHandler.registerValidator(addChecklistValidatorCN, GEOHandler.CN);
   GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
 // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addFastPassAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
-//  GEOHandler.registerValidator(addEROAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
+// GEOHandler.registerValidator(addEROAttachmentValidator, GEOHandler.CN,
+// GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(setTDOFlagToYesValidator, GEOHandler.CN, GEOHandler.PROCESSOR, false, false);
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
@@ -3364,7 +3367,8 @@ dojo.addOnLoad(function() {
   // false);
   GEOHandler.registerValidator(validateCnNameAndAddr4Create, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateCnNameAndAddr4Update, GEOHandler.CN, null, false);
-//  GEOHandler.registerValidator(validateCustNmsForUpdate, GEOHandler.CN, null, false);
+// GEOHandler.registerValidator(validateCustNmsForUpdate, GEOHandler.CN, null,
+// false);
   GEOHandler.registerValidator(addCNDnBMatchingAttachmentValidator, GEOHandler.CN, null, false);
   // GEOHandler.registerValidator(foreignValidator, GEOHandler.CN, null,
   // false,false);
