@@ -278,6 +278,9 @@ public class JPHandler extends GEOHandler {
                     data.setCustClass(kna1.getKukla() != null ? kna1.getKukla() : "");
                     data.setInacCd(kna1.getZzkvInac() != null ? kna1.getZzkvInac() : "");
                     data.setCustPrefLang(kna1.getSpras() != null ? kna1.getSpras() : "");
+                    data.setIsuCd(kna1.getBrsch() != null ? kna1.getBrsch() : "");
+                    data.setClientTier(kna1.getKatr3() != null ? kna1.getKatr3() : "");
+                    data.setJsicCd(kna1.getZzkvLic() != null ? kna1.getZzkvLic() : "");
                   }
                 }
               }
@@ -285,8 +288,10 @@ public class JPHandler extends GEOHandler {
             default:
               // only for requester
               if ("DRA".equalsIgnoreCase(admin.getReqStatus())) {
-                data.setJsicCd(establishment != null && establishment.getJsic() != null ? establishment.getJsic().trim()
-                    : company != null && company.getJsic() != null ? company.getJsic().trim() : null);
+                if (!"BQICL".equals(data.getCustSubGrp())) {
+                  data.setJsicCd(establishment != null && establishment.getJsic() != null ? establishment.getJsic().trim()
+                      : company != null && company.getJsic() != null ? company.getJsic().trim() : null);
+                }
               }
               break;
             }
@@ -1991,7 +1996,12 @@ public class JPHandler extends GEOHandler {
         addr.setCustNm3("");
       }
     } else {
-      addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
+      if (iAddr != null && StringUtils.isNotBlank(iAddr.getIntlCustNm1()) && StringUtils.isNotBlank(iAddr.getIntlCustNm2())) {
+        String custName2 = StringUtils.isEmpty(iAddr.getIntlCustNm2()) ? "" : " ".concat(iAddr.getIntlCustNm2());
+        addr.setCustNm3(iAddr.getIntlCustNm1() + custName2);
+      } else {
+        addr.setCustNm3(iAddr != null && iAddr.getIntlCustNm1() != null ? iAddr.getIntlCustNm1() : "");
+      }
     }
 
     setFieldBeforeAddrSave(entityManager, addr);
@@ -3081,8 +3091,8 @@ public class JPHandler extends GEOHandler {
       namePart3 = namePart3.trim();
 
       LOG.debug("namePart2 >>> " + namePart2);
-      System.out.println("idxStart >>> " + idxStart);
-      System.out.println("namePart3 >>>" + namePart3);
+      // System.out.println("idxStart >>> " + idxStart);
+      // System.out.println("namePart3 >>>" + namePart3);
 
     }
 

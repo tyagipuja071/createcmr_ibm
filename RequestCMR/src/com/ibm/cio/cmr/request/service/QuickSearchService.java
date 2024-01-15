@@ -100,6 +100,11 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     RequestEntryModel reqModel = new RequestEntryModel();
     reqModel.setReqType(model.getReqType());
     reqModel.setCmrIssuingCntry(model.getIssuingCntry());
+    if(model.isPaygoUpgradeChk()==true)
+     {
+    reqModel.setReqReason("PAYG");
+    reqModel.setOrdBlk(null);
+     }
     controller.setDefaultValues(reqModel, request);
     if (model.getCmrNo() != null && model.getCmrNo().startsWith("P")) {
       reqModel.setProspLegalInd("Y");

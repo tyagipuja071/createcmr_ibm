@@ -7733,8 +7733,10 @@ function setCTCIsuByClusterMY() {
     }
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['32', '34', '5K', '36', '27']);
     FormManager.limitDropdownValues(FormManager.getField('inacType'), ['I']);
-    FormManager.setValue('inacCd', '');
-    FormManager.setValue('inacType', '');
+    if (_pagemodel.inacCd == null) {
+      FormManager.setValue('inacCd', '');
+      FormManager.setValue('inacType', '');
+    }
     if (_clusterHandlerINDONESIA == 0 && _pagemodel.apCustClusterId == null) {
       FormManager.setValue('clientTier', '');
       FormManager.setValue('apCustClusterId', '');

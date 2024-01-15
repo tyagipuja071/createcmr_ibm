@@ -68,6 +68,11 @@ public class UpdateSwitchElement extends ValidatingElement {
 
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
+    
+    boolean isPaygoUpgrade=false;
+    if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
+      isPaygoUpgrade=true;
+    }
 
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
@@ -283,7 +288,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
         }
 
-      } else if (NCHECK_NO_UPD_COUNTRIES.contains(data.getCmrIssuingCntry()) && !changes.hasDataChanges() && !changes.hasAddressChanges()
+      } else if (!isPaygoUpgrade && NCHECK_NO_UPD_COUNTRIES.contains(data.getCmrIssuingCntry()) && !changes.hasDataChanges() && !changes.hasAddressChanges()
           && !AutomationUtil.isLegalNameChanged(admin)) {
         // Set negative check if country is part of the list and there are no
         // updates/changes at all on the request
@@ -298,7 +303,7 @@ public class UpdateSwitchElement extends ValidatingElement {
         String details = output.getDetails() + "\n" + "Legal Name changes made on request.";
         output.setDetails(details);
         log.debug("Legal Name changes made on request.");
-      } else if (!changes.hasDataChanges() && !changes.hasAddressChanges()) {
+      } else if (!isPaygoUpgrade && !changes.hasDataChanges() && !changes.hasAddressChanges()) {
         // no updates/changes at all on the request
         validation.setSuccess(false);
         validation.setMessage("Not Validated");

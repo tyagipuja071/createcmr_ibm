@@ -188,6 +188,16 @@ public class AutomationEngine {
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
 
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
+
+
+    if (isPaygoUpgrade) {
+      requestData.getData().setOrdBlk(null);
+    }
+    
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
@@ -246,7 +256,7 @@ public class AutomationEngine {
         hasOverrideOrMatchingApplied = true;
       }
       // handle the special ALL types (approvals)
-      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)) {
+      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)  || isPaygoUpgrade) {
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
 
@@ -415,16 +425,16 @@ public class AutomationEngine {
           moveForPayGo = true;
         }
 
-        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI").contains(data.getCustSubGrp())) {
+        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI","CBPRI").contains(data.getCustSubGrp())) {
        // admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
 
         if ("U".equals(admin.getReqType())) {
-          if ("PG".equals(data.getOrdBlk())) {
+          if ("PG".equals(data.getOrdBlk()) && !"PAYG".equals(admin.getReqReason())) {
       //      admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
-          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited) {
+          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited &&  !"PAYG".equals(admin.getReqReason())) {
         //    admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
