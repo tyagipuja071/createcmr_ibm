@@ -3780,6 +3780,7 @@ function setINACCodeMandatory() {
   if (resultInac.ret1 == 1) {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
   } else {
+    FormManager.resetValidations('inacCd');
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
 }
