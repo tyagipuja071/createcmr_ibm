@@ -112,10 +112,10 @@ public class ReportSpec {
                 if (LOG.isTraceEnabled()) {
                   LOG.trace("Field: " + field.getName() + " = " + fixedWidthValue);
                 }
-                addedRecords.add(record);
               }
               distinctByteLengths.add(totalLength);
               distinctByteLengthsPlain.add(totalPlain);
+              addedRecords.add(record);
               pw.println();
             }
           }
