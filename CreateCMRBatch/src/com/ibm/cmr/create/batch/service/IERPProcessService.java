@@ -1654,6 +1654,16 @@ public class IERPProcessService extends BaseBatchService {
         isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
       }
 
+      if ("C".equals(admin.getCustType()) && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry()) && addresses != null && !addresses.isEmpty()
+          && StringUtils.isEmpty(request.getCmrNo())) {
+        Addr companyAddr = addresses.stream().filter(a -> "ZC01".equals(a.getId().getAddrType())).findAny().orElse(null);
+
+        if (companyAddr != null) {
+          String companyCMRNo = companyAddr.getParCmrNo();
+          request.setCmrNo(companyCMRNo);
+        }
+      }
+
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses
 
