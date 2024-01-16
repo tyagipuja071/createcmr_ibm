@@ -42,9 +42,6 @@ public class DBCSReportField extends ReportField {
     int targetLength = this.length - 1;
     String fwValue = value == null ? "" : value.toString().trim();
     fwValue = convert2DBCS(fwValue);
-    if ("*".equals(fwValue) || "**".equals(fwValue) || "***".equals(fwValue)) {
-      fwValue = "＊＊＊"; // force to use DBCS asterisk
-    }
     int toLength = (targetLength / 2) * 3;
     try {
       while (fwValue.getBytes("UTF-8").length < toLength) {
@@ -105,13 +102,21 @@ public class DBCSReportField extends ReportField {
       modifiedVal = modifiedVal.replaceAll("—", "―");
       modifiedVal = modifiedVal.replaceAll("〜", "～");
       modifiedVal = modifiedVal.replaceAll("�", "　");
+      modifiedVal = modifiedVal.replaceAll("[*]", "＊");
 
       StringBuilder finalVal = new StringBuilder();
       for (int i = 0; i < modifiedVal.length(); i++) {
-        if (modifiedVal.charAt(i) == 32) {
-          finalVal.append(Character.toString((char) 12288));
-        } else {
-          finalVal.append(Character.toString(modifiedVal.charAt(i)));
+        try {
+          if (modifiedVal.charAt(i) == 32) {
+            finalVal.append(Character.toString((char) 12288));
+          } else if (Character.toString(modifiedVal.charAt(i)).getBytes("UTF-8").length != 3) {
+            finalVal.append(Character.toString((char) 12288));
+            LOG.debug("Character Invalid: " + Character.toString(modifiedVal.charAt(i)));
+          } else {
+            finalVal.append(Character.toString(modifiedVal.charAt(i)));
+          }
+        } catch (UnsupportedEncodingException e) {
+
         }
       }
       return finalVal.toString();
