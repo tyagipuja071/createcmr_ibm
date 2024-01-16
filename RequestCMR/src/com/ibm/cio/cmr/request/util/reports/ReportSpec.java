@@ -79,6 +79,7 @@ public class ReportSpec {
     Set<Integer> distinctByteLengths = new HashSet<Integer>();
     Set<Integer> distinctByteLengthsPlain = new HashSet<Integer>();
     LOG.debug(results.size() + " records retrieved.");
+    List<Object[]> addedRecords = new ArrayList<Object[]>();
     try (FileOutputStream fos = new FileOutputStream(outputDir + File.separator + this.reportFilename)) {
       try (OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8")) {
         try (PrintWriter pw = new PrintWriter(osw)) {
@@ -111,6 +112,7 @@ public class ReportSpec {
                 if (LOG.isTraceEnabled()) {
                   LOG.trace("Field: " + field.getName() + " = " + fixedWidthValue);
                 }
+                addedRecords.add(record);
               }
               distinctByteLengths.add(totalLength);
               distinctByteLengthsPlain.add(totalPlain);
@@ -118,7 +120,7 @@ public class ReportSpec {
             }
           }
           if (this.trailer != null) {
-            pw.println(this.trailer.generateTrailer(entityManager, results, dateRange, sequence));
+            pw.println(this.trailer.generateTrailer(entityManager, addedRecords, dateRange, sequence));
           }
         }
       }
