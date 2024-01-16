@@ -109,7 +109,6 @@ function afterConfigForJP() {
     disableAddrFieldsForRA();
 
     setAbbrevNmReqForBFKSCScenario();
-    importPRCMRCompany();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -6546,24 +6545,33 @@ function doImportCmrs(addressOnly) {
   document.forms['frmCMR'].submit();
 }
 
-function importPRCMRCompany() {
+var currCustSubGrp = '';
+function importPRCMRCompany(fromAddress, scenario, scenarioChanged) {
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
   var reqType = FormManager.getActualValue('reqType');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (reqType == 'C' && custSubGrp == 'PRCMR') {
-    var result = {
-      accepted: 'y',
-      type: 'C',
-      data: {
-        issuedBy: '760',
-        issuedByDesc: 'Japan',
-        cmrNum: '666314'
+  var custGrp = FormManager.getActualValue('custGrp');
+
+  if (reqType == 'C' && custGrp == 'IBMTP') {
+    if (scenario == 'PRCMR' && scenarioChanged) {
+      var result = {
+        accepted: 'y',
+        type: 'C',
+        data: {
+          issuedBy: '760',
+          issuedByDesc: 'Japan',
+          cmrNum: '666314'
+        }
+      };
+      console.log(result);
+      if (result != null) {
+        doImportCRISRecord(result);
       }
-    };
-    console.log(result);
-    if (result != null) {
-      doImportCRISRecord(result);
     }
   }
+  currCustSubGrp = scenario;
 }
 
 function disableBpBqiImport() {
@@ -7436,6 +7444,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setCreditToCustNoOptional4ISOCU, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(importPRCMRCompany, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
