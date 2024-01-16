@@ -3788,10 +3788,17 @@ function setINACCodeMandatory() {
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
   }
 
-  var setInacRequiredForOfficeCd = "FT,GK, GN,GV, HD,JS,KL, KQ, LC, LG, LJ, PL, PR, QE";
   var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
-  if (setInacRequiredForOfficeCd.includes(salesBusOffCd)) {
+  var qParam = {
+    CMR_ISSUING_CNTRY : '760',
+    CD : salesBusOffCd,
+  };
+  var resultInac = cmr.query('GET.JP.INAC.REQUIRED_LOV', qParam);
+  if (resultInac.ret1 == 1) {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.resetValidations('inacCd');
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
 }
 function addJSICLogic() {
