@@ -673,7 +673,20 @@ function validateCustnameForKynd() {
       validate : function() {
         var errorMsg = '';
         var action = FormManager.getActualValue('yourAction');
-        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();        
+//        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase(); 
+        var custNm1 = '';
+        if (_allAddressData == undefined || _allAddressData == null || _allAddressData.length == 0) {
+          return;
+        }
+        for (var i=0; i<_allAddressData.length; i++) {  
+          if (_allAddressData[i]['addrType'][0] == 'ZS01') {
+            var custNm1 = _allAddressData[i]['custNm1'][0].toUpperCase();
+            break;
+          }
+        }
+        if (custNm1.length == 0) {
+          return;
+        }
         var reqType = FormManager.getActualValue('reqType');
         var custSubGrp = FormManager.getActualValue('custSubGrp');        
         if(reqType == 'C' && custSubGrp == 'LKYN'){
@@ -790,6 +803,9 @@ function setCTCIsuMrcByCluster() {
         FormManager.resetDropdownValues(FormManager.getField('isuCd'));
         FormManager.setValue('isuCd', '34');
         FormManager.setValue('clientTier', 'Z');
+      }
+      if (custSubGrp != 'INTER') {
+        FormManager.setValue('mrcCd', '3');
       }
       return;
     }
