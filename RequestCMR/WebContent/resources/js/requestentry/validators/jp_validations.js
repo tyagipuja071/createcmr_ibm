@@ -6474,7 +6474,7 @@ function addDnBSearchValidator() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var result = FormManager.getActualValue('findDnbResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
+        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == 'PRCMR') {
           return new ValidationResult(null, true);
         }
         if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
