@@ -216,7 +216,7 @@ function addAfterConfigAP() {
     FormManager.readOnly('IndustryClass');
     FormManager.readOnly('subIndustryCd');
   } else {
-    FormManager.enable('mrcCd');
+    // FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
@@ -7875,9 +7875,11 @@ function setCTCIsuByClusterGCG() {
           } else if (custSubGrp == 'CROSS') {
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z', 'Y', '0', 'Q']);
             FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['36', '5K', '34']);
-// FormManager.setValue('clientTier', 'Z');
-// FormManager.setValue('isuCd', '34');
             FormManager.setValue('mrcCd', '3');
+            if(_cluster == '00000') {
+            FormManager.setValue('clientTier', 'Z');
+            FormManager.setValue('isuCd', '34');
+            }
           }
           else if (custSubGrp == 'INTER' || custSubGrp == 'DUMMY') {
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
@@ -7901,8 +7903,8 @@ function setCTCIsuByClusterGCG() {
       // setting MRC value for CLusters
       if (_cmrIssuingCntry == '738') {
       var custSubGrpListMrc2 = ['BUSPR', 'DUMMY', 'INTER', 'NRMLD', 'CROSS', 'ASLOM'];
-      var Clusters4Mrc2 = ['71300' ,'00000' ,'09143' ,'09145' ,'09144' ,'09146'];      
-      if(custSubGrpListMrc2.includes(custSubGrp) && Clusters4Mrc2.includes(_cluster)) {
+      var Clusters4Mrc2 = ['71300' ,'09143' ,'09145' ,'09144' ,'09146'];      
+      if((custSubGrpListMrc2.includes(custSubGrp) && Clusters4Mrc2.includes(_cluster)) || (custSubGrp =='INTER' & _cluster == '00000')) {
         FormManager.setValue('mrcCd', '2');
       }
     }
@@ -7912,31 +7914,6 @@ function setCTCIsuByClusterGCG() {
     _clusterHandler[0].onChange();
   }
 }
-
-function setClusterOnScenarioChgGCG(fromAddress, scenario, scenarioChanged) {
-  console.log('>>>> setClusterOnScenarioChgGCG >>>>');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-
-  if (viewOnly == 'true' || role != 'REQUESTER') {
-    return;
-  }
-
-  if (reqType == 'C' && scenarioChanged) {
-    switch (custSubGrp) {
-      case 'CROSS':
-        FormManager.setValue('apCustClusterId', '00000');
-        break;
-      default:
-        // do nothing
-        break;
-    }
-  }
-}
-
 
 function validateCustnameForKynd() {
   FormManager.addFormValidator((function () {
@@ -8826,7 +8803,6 @@ dojo.addOnLoad(function () {
   // CREATCMR-7884
   GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
 
-  GEOHandler.addAfterTemplateLoad(setClusterOnScenarioChgGCG, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
 
   // CREATCMR-7883
