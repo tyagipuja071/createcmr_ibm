@@ -680,13 +680,16 @@ function setInacByClusterHKMO() {
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
       if (inacList.length == 1) {
         FormManager.setValue('inacCd', arr[0]);
+        FormManager.readOnly('inacCd');
       }
       if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
         FormManager.setValue('inacType', 'I');
+        FormManager.readOnly('inacType');
       } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
         FormManager.setValue('inacType', 'N');
+        FormManager.readOnly('inacType');
       } else if (inacType != '' && inacTypeSelected[0].includes(',IN')) {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
         var value = FormManager.getField('inacType');
@@ -709,6 +712,7 @@ function setInacByClusterHKMO() {
             FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
             if (inacCdValue.length == 1) {
               FormManager.setValue('inacCd', inacCdValue[0]);
+              FormManager.readOnly('inacCd');
             }
           }
         }
@@ -7876,6 +7880,7 @@ function setCTCIsuByClusterGCG() {
     var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
     var apClientTierValue = [];
     var isuCdValue = [];
     if (_cluster != '' && _cluster != '') {
@@ -7905,6 +7910,10 @@ function setCTCIsuByClusterGCG() {
           FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
           FormManager.setValue('clientTier', apClientTierValue[0]);
           FormManager.setValue('isuCd', isuCdValue[0]);
+          if(role == 'REQUESTER') {
+            FormManager.readOnly('isuCd');
+            FormManager.readOnly('clientTier');
+          }
         } else if (apClientTierValue.length > 1) {
           if (custSubGrp == 'MKTPC' || custSubGrp == 'BLUMX') {
             FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z']);
@@ -8604,11 +8613,18 @@ function validateInacValuesHK() {
           if (CMTList != null) {
             var expectedInac =  CMTList.ret1;
           }
-
+// NAC can't be of numberic
+      if(inacType == 'N' && inacCd.length >= 1 && inacCd.match(/^[0-9]+$/)) {
+            errorMsg = inacCd + ' is not a valid value for NAC Code.';
+          if (errorMsg != '') {
+               return new ValidationResult(null, false, errorMsg);
+             }      
+      }
+          
       if (expectedInac != '' && expectedInac == "N" && expectedInac != 'IN') {
               return new ValidationResult(null, true);
             } else if (expectedInac != '' && expectedInac == "I" && inacType != '' && inacType == 'N') {
-             errorMsg = inacCd + 'is not a valid value for NAC Code.';
+             errorMsg = inacCd + ' is not a valid value for NAC Code.';
            if (errorMsg != '') {
                 return new ValidationResult(null, false, errorMsg);
               }
