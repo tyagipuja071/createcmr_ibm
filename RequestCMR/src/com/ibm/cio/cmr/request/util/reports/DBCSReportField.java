@@ -4,6 +4,10 @@
 package com.ibm.cio.cmr.request.util.reports;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
 
 /**
  * Handles report fields containing DBCS characters
@@ -12,6 +16,10 @@ import java.io.UnsupportedEncodingException;
  *
  */
 public class DBCSReportField extends ReportField {
+
+  private static final Logger LOG = Logger.getLogger(DBCSReportField.class);
+
+  private static List<String> abnormalCharacters = new ArrayList<String>();
 
   /**
    * @param name
@@ -34,9 +42,6 @@ public class DBCSReportField extends ReportField {
     int targetLength = this.length - 1;
     String fwValue = value == null ? "" : value.toString().trim();
     fwValue = convert2DBCS(fwValue);
-    if ("*".equals(fwValue) || "**".equals(fwValue) || "***".equals(fwValue)) {
-      fwValue = "＊＊＊"; // force to use DBCS asterisk
-    }
     int toLength = (targetLength / 2) * 3;
     try {
       while (fwValue.getBytes("UTF-8").length < toLength) {
@@ -45,6 +50,7 @@ public class DBCSReportField extends ReportField {
     } catch (UnsupportedEncodingException e) {
       // noop
     }
+    registerUnwanted(fwValue);
     fwValue += "!";
     return fwValue;
   }
@@ -93,8 +99,53 @@ public class DBCSReportField extends ReportField {
       modifiedVal = modifiedVal.replaceAll(" ", "　");
       modifiedVal = modifiedVal.replaceAll("-", "－");
       modifiedVal = modifiedVal.replaceAll("−", "－");
+      modifiedVal = modifiedVal.replaceAll("—", "―");
+      modifiedVal = modifiedVal.replaceAll("〜", "～");
+      modifiedVal = modifiedVal.replaceAll("�", "　");
+      modifiedVal = modifiedVal.replaceAll("[*]", "＊");
+
+      StringBuilder finalVal = new StringBuilder();
+      for (int i = 0; i < modifiedVal.length(); i++) {
+        try {
+          if (modifiedVal.charAt(i) == 32) {
+            finalVal.append(Character.toString((char) 12288));
+          } else if (Character.toString(modifiedVal.charAt(i)).getBytes("UTF-8").length != 3) {
+            finalVal.append(Character.toString((char) 12288));
+            LOG.debug("Character Invalid: " + Character.toString(modifiedVal.charAt(i)));
+          } else {
+            finalVal.append(Character.toString(modifiedVal.charAt(i)));
+          }
+        } catch (UnsupportedEncodingException e) {
+
+        }
+      }
+      return finalVal.toString();
+
     }
     return modifiedVal;
+  }
+
+  private void registerUnwanted(String input) {
+    for (int i = 0; i < input.length(); i++) {
+      char currChar = input.charAt(i);
+      String charString = Character.toString(currChar);
+      try {
+        if (charString.getBytes("UTF-8").length != 3) {
+          if (!abnormalCharacters.contains(charString)) {
+            abnormalCharacters.add(charString);
+          }
+          if (Character.UnicodeBlock.of(currChar) == Character.UnicodeBlock.BASIC_LATIN) {
+            abnormalCharacters.add(charString);
+          }
+        }
+      } catch (Exception e) {
+        // noop
+      }
+    }
+  }
+
+  public static void printUnwanted() {
+    LOG.warn("Unwanted characters found: " + abnormalCharacters.toString());
   }
 
 }
