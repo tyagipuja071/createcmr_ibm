@@ -109,6 +109,7 @@ function afterConfigForJP() {
     disableAddrFieldsForRA();
 
     setAbbrevNmReqForBFKSCScenario();
+    setJSICforPRCMRScenario();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -6572,6 +6573,20 @@ function importPRCMRCompany(fromAddress, scenario, scenarioChanged) {
     }
   }
   currCustSubGrp = scenario;
+}
+
+function setJSICforPRCMRScenario() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  if (reqType == 'C' && custSubGrp == 'PRCMR') {
+    FormManager.setValue('jsicCd', '0386');
+  }
 }
 
 function disableBpBqiImport() {
