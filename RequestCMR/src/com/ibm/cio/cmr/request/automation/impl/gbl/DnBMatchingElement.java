@@ -82,7 +82,10 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     scorecard.setDnbMatchingResult("");
     Boolean override = false;
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }  
     // CREATCMR-8553: if the address matches with mailing address in DNB, show
     // mailing address in automation details.
     Boolean matchWithDnbMailingAddr = false;
@@ -130,7 +133,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry()))) {
+          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) && !isPaygoUpgrade) {
             result.setOnError(shouldThrowError);
           } else {
             result.setOnError(false);
@@ -144,13 +147,19 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
           } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          } else if (payGoAddredited && !hasValidMatches) {
+          } else if (payGoAddredited && !hasValidMatches && !"PAYG".equals(admin.getReqReason())) {
             LOG.debug("DnB Matches not found for PayGo.");
             admin.setPaygoProcessIndc("Y");
             result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");
           }
+          else if (payGoAddredited && !hasValidMatches && "PAYG".equals(admin.getReqReason())) {
+            LOG.debug("DnB Matches not found for PayGo.");
+            result.setOnError(true);
+            result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
+            result.setResults("No Matches");
+           }
         } else {
           // actions to be performed only when matches with high confidence are
           // found
@@ -280,8 +289,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
          // CREATCMR-9938 (KVK Implementation)
 
             if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
-                && data.getCustGrp().equalsIgnoreCase("LOCAL")
-                && data.getCustSubGrp().equalsIgnoreCase("COMME") && payGoAddredited) {
+                && "LOCAL".equalsIgnoreCase(data.getCustGrp())
+                && "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
               boolean taxCd2Found = false;
               String taxCd2Val = null;
               long confCode = 0L;
@@ -451,13 +460,17 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               }
               itemNo++;
             }
-            if (!override) {
+            if (!override && !isPaygoUpgrade) {
               engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
               result.setResults("Name/Address not matched");
-            } else {
+            } else if (isPaygoUpgrade) {
+              result.setResults("Name/Address not matched");
               result.setDetails("Matches against D&B were found but no record matched the request data.");
+            }else{
+              result.setDetails("Matches against D&B were found but no record matched the request data.");
+              
             }
-            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !isPaygoUpgrade) {
               result.setOnError(true);
             } else {
               result.setOnError(false);

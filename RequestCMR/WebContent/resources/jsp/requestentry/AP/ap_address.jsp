@@ -31,7 +31,7 @@
 
 
 <cmr:row addBackground="true">
-  <cmr:column span="4" exceptForCountry="616,796">`
+  <cmr:column span="4" exceptForCountry="616,796">
     <cmr:label fieldId="custNm1">
       <cmr:fieldLabel fieldId="CustomerName1" />: 
       <cmr:info text="${ui.info.custNm1AP}" />
