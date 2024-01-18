@@ -2950,6 +2950,13 @@ function handleCluster(value) {
     FormManager.setValue('apCustClusterId', results.ret1);
     // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
     // clusterValues);
+    var _cluster = FormManager.getActualValue('apCustClusterId');
+    if (_cluster != '' && _cluster != '') {
+        if (_cluster.indexOf(" - ") > 0) {
+          _cluster = _cluster.substring(0, _cluster.indexOf(" - "));
+        }
+    FormManager.setValue('apCustClusterId', _cluster);
+    }
   }
 }
 
