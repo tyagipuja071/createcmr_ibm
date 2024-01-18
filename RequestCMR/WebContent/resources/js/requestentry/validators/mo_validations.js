@@ -2091,57 +2091,9 @@ function updateIndustryClass() {
       FormManager.readOnly('taxCd2');
       FormManager.setValue('taxCd2', '');
     }
-    updateCluster(_industryClass);
   }
 }
 
-function updateCluster(value) {
-  console.log('>>>> updateCluster >>>>');
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var reqType = FormManager.getActualValue('reqType');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (viewOnlyPage == 'true' || reqType != 'C') {
-    return;
-  }
-  if (role != 'REQUESTER') {
-    return;
-  }
-  if (cmrIssuCntry != '738' && cmrIssuCntry != '736') {
-    return;
-  }
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  switch (custSubGrp) {
-    case 'NRMLC':
-    case 'AQSTN':
-    case 'NRML':
-      handleCluster(value);
-      break;
-    default:
-    // do nothing
-  }
-}
-
-function handleCluster(value) {
-  console.log('>>>> handleCluster >>>>');
-  var industryClass = FormManager.getActualValue('IndustryClass');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (!value) {
-    value = industryClass;
-  }
-  var clusterValues = [];
-  var qParams = {
-    CNTRY: cmrIssuCntry,
-    TXT: '%' + value + '%'
-  };
-  var results = cmr.query('GET_CLUSTER_BY_INDUSTRYCLASS', qParams);
-  if (results != null && results.ret1) {
-    FormManager.setValue('apCustClusterId', results.ret1);
-    // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
-    // clusterValues);
-  }
-}
 
 function searchArryAndSetValue(arry, searchValue, fieldID, setValue) {
   console.log('>>>> searchArryAndSetValue >>>>');
