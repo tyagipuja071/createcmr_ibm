@@ -329,8 +329,6 @@ function addHandlersForSWISS() {
         FormManager.setValue('clientTier', 'Q');
       } else if (value == '36') {
         FormManager.setValue('clientTier', 'Y');
-      } else if (value == '27') {
-        FormManager.setValue('clientTier', 'E');
       } else {
         FormManager.setValue('clientTier', '');
       }
