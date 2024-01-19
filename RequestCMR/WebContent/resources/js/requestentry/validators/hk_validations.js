@@ -7879,6 +7879,8 @@ function setCTCIsuByClusterGCG() {
             if(_cluster == '00000') {
             FormManager.setValue('clientTier', 'Z');
             FormManager.setValue('isuCd', '34');
+            FormManager.readOnly('isuCd');
+            FormManager.readOnly('clientTier');
             }
           }
           else if (custSubGrp == 'INTER' || custSubGrp == 'DUMMY') {
