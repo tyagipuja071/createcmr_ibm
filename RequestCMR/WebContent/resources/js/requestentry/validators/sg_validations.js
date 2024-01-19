@@ -2814,6 +2814,7 @@ function setInacByClusterManageEnableSG() {
       inacList.push(results[i].ret1);
     }
     FormManager.enable('inacCd');
+    FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacList);
     FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
   } else {
@@ -2828,6 +2829,22 @@ function setInacByClusterManageEnableSG() {
     FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
   }
+}
+
+function setReadOnlyFields() {
+  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
+    console.log("Enabling isuCd for PROCESSOR...");
+    FormManager.enable('isuCd');
+    FormManager.readOnly('clientTier');
+    
+  }
+  
+  if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
+    console.log("Disabling isuCd for REQUESTER...");
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }
+
 }
 
 
@@ -2929,4 +2946,6 @@ dojo.addOnLoad(function() {
 	// CREATCMR - 10575 -> Coverage 2024 for Singapore
 	GEOHandler.addAfterConfig(coverage2024ForSG, [SysLoc.SINGAPORE]);
 	GEOHandler.addAfterTemplateLoad(coverage2024ForSG, [SysLoc.SINGAPORE]);
+	GEOHandler.addAfterTemplateLoad(setReadOnlyFields, [SysLoc.SINGAPORE]);
+
 });
