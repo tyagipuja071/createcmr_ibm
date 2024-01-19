@@ -120,6 +120,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       String importInd = null;
       String createDt = null;
       String parCmrNo = null;
+      String extWalletId=null;
       int seq = 0;
       for (Addr copyAddr : results) {
 
@@ -136,6 +137,10 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
           }
         }
 
+        if ((model.getCmrIssuingCntry().equals("796") || (model.getCmrIssuingCntry().equals("616")))
+            && copyAddr.getId().getAddrType().equalsIgnoreCase("ZP01") && copyAddr.getExtWalletId() != null) {
+          extWalletId = copyAddr.getExtWalletId();
+        }
         sapNo = copyAddr.getSapNo();
         importInd = copyAddr.getImportInd();
         createDt = copyAddr.getRdcCreateDt();
@@ -144,6 +149,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
           sourceAddr.setId(copyAddr.getId());
           PropertyUtils.copyProperties(copyAddr, sourceAddr);
 
+          copyAddr.setExtWalletId(extWalletId);
           copyAddr.setSapNo(sapNo);
           copyAddr.setImportInd(importInd);
           copyAddr.setRdcCreateDt(createDt);
@@ -160,7 +166,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
           }
 
           if (JPHandler.isJPCountry(model.getCmrIssuingCntry())) {
-            processCopyJPAddress(entityManager, origSourceAddr, copyAddr, parCmrNo);
+            processCopyJPAddress(entityManager, origSourceAddr, copyAddr, parCmrNo, handler);
           }
 
           updateEntity(copyAddr, entityManager);
@@ -512,7 +518,8 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
     return zi01count;
   }
 
-  private void processCopyJPAddress(EntityManager entityManager, Addr origSourceAddr, Addr copyAddr, String parCmrNo) throws Exception {
+  private void processCopyJPAddress(EntityManager entityManager, Addr origSourceAddr, Addr copyAddr, String parCmrNo, GEOHandler geoHandler)
+      throws Exception {
     AddressService addressService = new AddressService();
     IntlAddr sourceIntlAddr = addressService.getIntlAddrById(origSourceAddr, entityManager);
     if (sourceIntlAddr != null) {
@@ -529,7 +536,13 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
               copyIntlAddr.getIntlCustNm1().length() > 22 ? copyIntlAddr.getIntlCustNm1().substring(0, 22) : copyIntlAddr.getIntlCustNm1());
         }
       } else {
-        copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1());
+        String custName2 = "";
+        if (copyIntlAddr.getIntlCustNm1() != null && copyIntlAddr.getIntlCustNm2() != null) {
+          custName2 = StringUtils.isEmpty(copyIntlAddr.getIntlCustNm2()) ? "" : " ".concat(copyIntlAddr.getIntlCustNm2());
+          copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1() + custName2);
+        } else {
+          copyAddr.setCustNm3(copyIntlAddr.getIntlCustNm1());
+        }
       }
     }
   }

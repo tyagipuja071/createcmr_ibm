@@ -821,12 +821,12 @@ function addHandlerForReqRsn() {
 function setAbbrvNmLoc() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-  if (role != 'REQUESTER') {
-    return;
-  }
+//  if (FormManager.getActualValue('reqType') != 'C') {
+//    return;
+//  }
+//  if (role != 'REQUESTER') {
+//    return;
+//  }
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
@@ -838,8 +838,24 @@ function setAbbrvNmLoc() {
   var abbrevLocn = null;
   var abbrvNm = custNm.ret1;
   var cntryRegion = FormManager.getActualValue('countryUse');
-  var mscenario = FormManager.getActualValue('custGrp');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var mscenario =null;
   var scenario = null;
+  if(custGrp==null || custGrp=='')
+  {  
+   var result = cmr.query('CROSSBORDER.CHK', {
+   REQ_ID : reqId
+  });
+   var landCntry=result.ret1;
+  if(cmrIssuingCntry!=landCntry)
+    {
+      mscenario='CROSS';
+    }
+  }
+  else {
+      mscenario=custGrp;
+  }
   if (mscenario == 'CROSS') {
     scenario = 'CROSS';
   } else if (mscenario == ((cntryRegion.substring(3, 5) + "CRO"))) {
@@ -869,55 +885,55 @@ function setAbbrvNmLoc() {
 }
 
 // CMR-1282
-function setAbbrvNmLocFrProc() {
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-  if (role != 'PROCESSOR') {
-    return;
-  }
-  var reqId = FormManager.getActualValue('reqId');
-  if (reqId != null) {
-    reqParam = {
-      REQ_ID : reqId,
-    };
-  }
-  var custNm = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', reqParam);
-  var city;
-  var abbrevLocn = null;
-  var abbrvNm = custNm.ret1;
-  var cntryRegion = FormManager.getActualValue('countryUse');
-  var mscenario = FormManager.getActualValue('custGrp');
-  var scenario = null;
-  if (mscenario == 'CROSS') {
-    scenario = 'CROSS';
-  } else if (mscenario == ((cntryRegion.substring(3, 5) + "CRO"))) {
-    scenario = 'CROSS';
-  }
-  if (scenario == 'CROSS') {
-    city = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', reqParam);
-    abbrevLocn = getLandCntryDesc(city.ret1);
-  } else {
-    city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
-    abbrevLocn = city.ret1;
-  }
-
-  if (abbrvNm && abbrvNm.length > 22) {
-    abbrvNm = abbrvNm.substring(0, 22);
-  }
-  if (abbrevLocn && abbrevLocn.length > 12) {
-    abbrevLocn = abbrevLocn.substring(0, 12);
-  }
-
-  if (abbrevLocn != null) {
-    FormManager.setValue('abbrevLocn', abbrevLocn);
-  }
-  if (abbrvNm != null) {
-    FormManager.setValue('abbrevNm', abbrvNm);
-  }
-}
+//function setAbbrvNmLocFrProc() {
+//  var role = FormManager.getActualValue('userRole').toUpperCase();
+//
+//  if (FormManager.getActualValue('reqType') != 'C') {
+//    return;
+//  }
+//  if (role != 'PROCESSOR') {
+//    return;
+//  }
+//  var reqId = FormManager.getActualValue('reqId');
+//  if (reqId != null) {
+//    reqParam = {
+//      REQ_ID : reqId,
+//    };
+//  }
+//  var custNm = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', reqParam);
+//  var city;
+//  var abbrevLocn = null;
+//  var abbrvNm = custNm.ret1;
+//  var cntryRegion = FormManager.getActualValue('countryUse');
+//  var mscenario = FormManager.getActualValue('custGrp');
+//  var scenario = null;
+//  if (mscenario == 'CROSS') {
+//    scenario = 'CROSS';
+//  } else if (mscenario == ((cntryRegion.substring(3, 5) + "CRO"))) {
+//    scenario = 'CROSS';
+//  }
+//  if (scenario == 'CROSS') {
+//    city = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', reqParam);
+//    abbrevLocn = getLandCntryDesc(city.ret1);
+//  } else {
+//    city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
+//    abbrevLocn = city.ret1;
+//  }
+//
+//  if (abbrvNm && abbrvNm.length > 22) {
+//    abbrvNm = abbrvNm.substring(0, 22);
+//  }
+//  if (abbrevLocn && abbrevLocn.length > 12) {
+//    abbrevLocn = abbrevLocn.substring(0, 12);
+//  }
+//
+//  if (abbrevLocn != null) {
+//    FormManager.setValue('abbrevLocn', abbrevLocn);
+//  }
+//  if (abbrvNm != null) {
+//    FormManager.setValue('abbrevNm', abbrvNm);
+//  }
+//}
 
 function getLandCntryDesc(cntryCd) {
   if (cntryCd != null) {
@@ -2251,8 +2267,9 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate,
   // GEOHandler.NL);
+  GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(setAbbrvNmLocFrProc, GEOHandler.NL);
+  //GEOHandler.addAfterTemplateLoad(setAbbrvNmLocFrProc, GEOHandler.NL);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForNL, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);

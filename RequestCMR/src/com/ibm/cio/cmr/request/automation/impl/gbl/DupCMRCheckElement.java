@@ -68,12 +68,16 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     boolean matchDepartment = false;
+    boolean isPaygoUpgrade=false; 
+    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
+      isPaygoUpgrade=true;
+    }
     if (engineData.get(AutomationEngineData.MATCH_DEPARTMENT) != null) {
       matchDepartment = (boolean) engineData.get(AutomationEngineData.MATCH_DEPARTMENT);
     }
 
     MatchingOutput output = new MatchingOutput();
-    if (!scenarioExceptions.isSkipDuplicateChecks()) {
+    if (!scenarioExceptions.isSkipDuplicateChecks() && !isPaygoUpgrade) {
       if (StringUtils.isNotBlank(admin.getDupCmrReason())) {
         StringBuilder details = new StringBuilder();
         details.append("User requested to proceed with Duplicate CMR Creation.").append("\n\n");

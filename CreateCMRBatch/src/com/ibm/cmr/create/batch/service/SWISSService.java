@@ -660,13 +660,18 @@ public class SWISSService extends BaseBatchService {
     return query.getSingleResult(DataRdc.class);
   }
 
-  private AddrRdc getAddrRdcRecords(EntityManager entityManager, Addr addr) {
+  private AddrRdc getAddrRdcRecords(EntityManager entityManager, Addr addr, String cmrNo) {
     LOG.debug("Searching for ADDR_RDC records for Request " + addr.getId().getReqId());
+    String seqNo = addr.getId().getAddrSeq();
+    if (addr.getId().getAddrSeq().length() == 5) {
+      seqNo = "000" + cmrNo + "L" + addr.getId().getAddrSeq();
+    }
+
     String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDRRDC.SEARCH_BY_REQID_TYPE_SEQ");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addr.getId().getReqId());
     query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
-    query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
+    query.setParameter("ADDR_SEQ", seqNo);
     query.setForReadOnly(true);
     return query.getSingleResult(AddrRdc.class);
   }
@@ -1180,7 +1185,7 @@ public class SWISSService extends BaseBatchService {
 
         if (addresses != null && addresses.size() > 0) {
           for (Addr addr : addresses) {
-            AddrRdc addrRdc = getAddrRdcRecords(entityManager, addr);
+            AddrRdc addrRdc = getAddrRdcRecords(entityManager, addr, data.getCmrNo());
             boolean isAddrUpdated = false;
 
             if (SystemLocation.SWITZERLAND.equals(data.getCmrIssuingCntry())) {
