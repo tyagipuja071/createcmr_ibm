@@ -1347,7 +1347,7 @@ function setVatIndFieldsForGrp1AndNordx() {
   }
 }
 
-// CREATCMR-10034
+//CREATCMR-10034
 function addLAVatValidator() {
   FormManager.addFormValidator((function() {
 
@@ -1362,11 +1362,11 @@ function addLAVatValidator() {
         var zs01Cntry = null;
         var skipVatValidationCntry=['897'];
         
-      // skipping validation for countries which don't have VAT and taxCd1
+      //skipping validation for countries which don't have VAT and taxCd1
         if (skipVatValidationCntry.includes(cmrIssuingCntry)) {     
           return new ValidationResult(null, true);
       } 
-        // get vat Field
+        //get vat Field 
         var vat = FormManager.getActualValue('vat');
         if (!vat || vat == '' || vat.trim() == '') {
           // if taxcd1 is empty check for vat field
@@ -1470,58 +1470,6 @@ function checkForCompanyProofAttachment() {
   }
 }
 
-function limitAPICluster() {
-  var reqId = FormManager.getActualValue('reqId');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  // Checking the UI element
-  var sourceElement = document.getElementsByClassName('cmr-source-sys-txt');
-  if (sourceElement.length > 0 && custSubGrp == 'NRMLC') {
-    FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
-    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '55555' ]);    
-    FormManager.setValue('apCustClusterId', '55555');
-    FormManager.setValue('clientTier', 'E');
-    FormManager.readOnly('apCustClusterId');
-  }
-
-
-  // Querying from DB will make it significantly slower
-// var result = cmr.query("GET.SOURCESYSTID", {
-// REQ_ID : "'" + reqId + "'"
-// });
-  // If source system ID exists then it's a Normal Scenario API request, limit
-  // the cluster to 55555
-// if (result != null && result.length > 0 && result.ret1.length > 0 &&
-// custSubGrp == 'NRMLC') {
-// FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
-// FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [
-// '55555' ]);
-// FormManager.setValue('apCustClusterId', '55555');
-// }
-}
-
-function validateAPICluster() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var sourceElement = document.getElementsByClassName('cmr-source-sys-txt');
-        var cluster = FormManager.getActualValue('apCustClusterId');
-
-        if (sourceElement.length == 0 && custSubGrp == 'NRMLC' && cluster == '55555') {
-            return new ValidationResult({
-              id : 'apCustClusterId',
-              type : 'text',
-              name : 'apCustClusterId'
-            }, false, 'API Specific Cluster is selected for Non-API request.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -1620,6 +1568,4 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(payGoCreateErroMsg,GEOHandler.AllCountries);
   GEOHandler.registerValidator(payGoErroMsg,GEOHandler.AllCountries);
   GEOHandler.registerValidator(newAddressValForPayGo,['724', '848', '618', '624', '788', '649', '866', '754','846', '806', '702', '678' ,'897','706','616','796']);
-  GEOHandler.registerWWValidator(validateAPICluster);
-  GEOHandler.addAfterTemplateLoad(limitAPICluster, GEOHandler.AllCountries);
 });
