@@ -174,6 +174,7 @@ function setInacBySearchTerm(value) {
   var _cluster = FormManager.getActualValue('searchTerm');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isInacRetrieved = false;
+  var role = FormManager.getActualValue('userRole').toUpperCase();
 
   FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
   FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
@@ -248,15 +249,23 @@ function setInacBySearchTerm(value) {
     } else {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
     }
+      if (role == 'PROCESSOR') {
+        FormManager.enable('inacType');
+        FormManager.enable('inacCd');
+      }
   } else {
     if (!isInacRetrieved) {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
-      // FormManager.enable('inacCd');
-      // FormManager.enable('inacType');
+        FormManager.enable('inacCd');
+        FormManager.enable('inacType');
     }
+      if (role == 'PROCESSOR') {
+        FormManager.enable('inacType');
+        FormManager.enable('inacCd');
+      }
     if (value && value != "inacChange" && value != undefined) {
       FormManager.clearValue('inacCd');
       FormManager.clearValue('inacType');
@@ -3779,7 +3788,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addDPLCheckValidatorCN, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [SysLoc.CHINA], null, true);
   GEOHandler.registerValidator(addChecklistValidatorCN, GEOHandler.CN);
-  GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
+//  GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
   // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addFastPassAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
