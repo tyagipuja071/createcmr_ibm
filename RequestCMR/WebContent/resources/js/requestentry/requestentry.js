@@ -409,15 +409,18 @@ function verifyGlcChangeIN() {
               TXT : newGlc,
             };
             var newCluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
-            if (newCluster != null && (oldGlc != newGlc || oldCluster != newCluster.ret1)) {
-              retrieveInterfaceValues();
-              FormManager.setValue('apCustClusterId', newCluster.ret1);
-              FormManager.readOnly('apCustClusterId');
-              cmr.showAlert('The GLC and Cluster has been overwritten to ' + newGlc + ' and ' + newCluster.ret1 + ' respectively' + '. Do you want to proceed with this request?',
-                  ' GLC and Cluster value overwritten', 'showAddressVerificationModal()');
-            } else {
-              showAddressVerificationModal();
-            }
+            /*
+             * if (newCluster != null && (oldGlc != newGlc || oldCluster !=
+             * newCluster.ret1)) { retrieveInterfaceValues();
+             * FormManager.setValue('apCustClusterId', newCluster.ret1);
+             * FormManager.readOnly('apCustClusterId'); cmr.showAlert('The GLC
+             * and Cluster has been overwritten to ' + newGlc + ' and ' +
+             * newCluster.ret1 + ' respectively' + '. Do you want to proceed
+             * with this request?', ' GLC and Cluster value overwritten',
+             * 'showAddressVerificationModal()'); } else {
+             * showAddressVerificationModal(); }
+             */
+            showAddressVerificationModal();
           }
         }
       } else {
@@ -1423,10 +1426,10 @@ function connectToCmrServices() {
     // FormManager.setValue('dunsNo', '');
   }
   FormManager.setValue('covBgRetrievedInd', 'Y');
-  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cmrCntry == '744') {
-    setClusterGlcCovIdMapNrmlc();
-  }
+  /*
+   * var cmrCntry = FormManager.getActualValue('cmrIssuingCntry'); if (cmrCntry ==
+   * '744') { setClusterGlcCovIdMapNrmlc(); }
+   */
 }
 
 /**
@@ -2632,11 +2635,10 @@ function executeRecreateCMR() {
 }
 
 function checkIfDataOrAddressFieldsUpdated(frmCMR) {
-	var reqRsn = FormManager.getActualValue('reqReason');
-  if(reqRsn == 'PAYG')
-	  {
-	  return;
-	  }
+  var reqRsn = FormManager.getActualValue('reqReason');
+  if (reqRsn == 'PAYG') {
+    return;
+  }
   console.log("checkIfDataOrAddressFieldsUpdated..............");
   var reqType = FormManager.getActualValue('reqType');
   var isNoDataUpdated = false;
