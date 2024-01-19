@@ -74,11 +74,11 @@ function afterConfigForIndia() {
   
     
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
-    dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
-       setClusterGlcCovIdMapNrmlc();
-    });
-  }
+  /*
+   * if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
+   * dojo.connect(FormManager.getField('geoLocationCd'), 'onChange',
+   * function(value) { setClusterGlcCovIdMapNrmlc(); }); }
+   */
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   
@@ -555,22 +555,22 @@ function defaultCMRNumberPrefix() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
-  if ((role == 'PROCESSOR') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
+  if (role == 'PROCESSOR' && custSubGrp == 'INTER') {
     FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CmrNoPrefix' ], 'MAIN_IBM_TAB');
   }
   // 2333
-  if ((role != 'PROCESSOR' && cmrIssuingCntry != '834') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
+  if (role != 'PROCESSOR' && custSubGrp == 'INTER') {
     FormManager.hide('CmrNoPrefix', 'cmrNoPrefix');
   } else {
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
   }
 
     // default cmrNoPrefix '994---' for PROCESSOR role
-  if (role == 'PROCESSOR' && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
+  if (role == 'PROCESSOR' && custSubGrp == 'INTER') {
     FormManager.setValue('cmrNoPrefix', '994---');
   }
 
-  if (custSubGrp == 'INTER' || custSubGrp == 'XINT') {
+  if (custSubGrp == 'INTER') {
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
     FormManager.setValue('cmrNoPrefix', '996---');
     }
@@ -1725,46 +1725,7 @@ function addContactInfoValidator() {
             if (typeof (state) == 'object') {
               state = state[0];
             }
-
-            switch (cntry) {
-            case '643':
-            case '834':
-              if ((custName == null || streetAddr == null || postCd == null)) {
-                mandtDetails++;
-              }
-              break;
-            case '778':
-            case '818':
-            case '852':
-            case '856':
-            case '749':
-            case '615':
-            case '744':
-            case '752':
-              if ((custName == null || streetAddr == null || postCd == null || city == null)) {
-                mandtDetails_1++;
-              }
-              break;
-            case '796':
-              if ((custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
-                mandtDetails_2++;
-              }
-              break;
-            case '616':
-              var custGrp = FormManager.getActualValue('custGrp');
-              if (custGrp != 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
-                mandtDetails_2++;
-              } else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
-                mandtDetails_2++;
-              }
-              break;
-            case '736':
-            case '738':
-              if ((custName == null || streetAddr == null)) {
-                mandtDetails_3++;
-              }
-              break;
-            }
+     
           }
           if (mandtDetails > 0) {
             return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required.");
@@ -1861,7 +1822,7 @@ function setFieldsForDoubleCreates() {
     return new ValidationResult(null, true);
   }
 
-  if (role == 'PROCESSOR' && (custSubGrp == 'ESOSW' || custSubGrp == 'XESO')) {
+  if (role == 'PROCESSOR' && custSubGrp == 'ESOSW') {
     FormManager.enable('cmrNo');
     FormManager.enable('cmrNoPrefix');
   }
@@ -1876,6 +1837,9 @@ function setFieldsForDoubleCreates() {
     FormManager.setValue('territoryCd', '709');
   }
   
+  if (role == 'PROCESSOR'){
+    FormManager.enable('apCustClusterId');
+  }
 }
 
 
@@ -1898,10 +1862,7 @@ function addDoubleCreateValidator() {
           showError = false;
         }
 
-        if ((cntry == '615' && role == 'PROCESSOR' && (custGrp == 'LOCAL' || custGrp == 'CROSS'))
-            || (cntry == '652' && (role == 'PROCESSOR' || role == 'REQUESTER') && (custGrp == 'LOCAL' || custGrp == 'CROSS'))
-            || (cntry == '744' && role == 'PROCESSOR' && (custSubGrp == 'ESOSW' || custSubGrp == 'XESO'))
-            || (cntry == '852' && role == 'PROCESSOR' && (custSubGrp != 'BLUMX' || custSubGrp != 'MKTPC'))) {
+        if (role == 'PROCESSOR' && custSubGrp == 'ESOSW') {
           if (showError)
             return new ValidationResult(null, false, 'For CMR Number and CMR Number Prefix in case of double creates, only one can be filled.');
           else if (FormManager.getActualValue('cmrNo') != '') {
@@ -2874,23 +2835,18 @@ function addKyndrylValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setClusterGlcCovIdMapNrmlc() {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var glc = FormManager.getActualValue('geoLocationCd');
-  if (custSubGrp == "NRMLC" || custSubGrp == "AQSTN") {
-    var glc = FormManager.getActualValue('geoLocationCd');
-    var covId = FormManager.getActualValue('covId');
-    var qParams = {
-        TXT : glc,
-      };
-    var cluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
-    if (cluster != null && cluster.ret1) {
-      FormManager.setValue('apCustClusterId', cluster.ret1);
-      FormManager.readOnly('apCustClusterId');
-    }
-  }
-}
+/*
+ * function setClusterGlcCovIdMapNrmlc() { var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var cntry =
+ * FormManager.getActualValue('cmrIssuingCntry'); var glc =
+ * FormManager.getActualValue('geoLocationCd'); if (custSubGrp == "NRMLC" ||
+ * custSubGrp == "AQSTN") { var glc =
+ * FormManager.getActualValue('geoLocationCd'); var covId =
+ * FormManager.getActualValue('covId'); var qParams = { TXT : glc, }; var
+ * cluster = cmr.query('GET_CLUSTER_BY_GLC', qParams); if (cluster != null &&
+ * cluster.ret1) { FormManager.setValue('apCustClusterId', cluster.ret1);
+ * FormManager.readOnly('apCustClusterId'); } } }
+ */
 
 
 function validateRetrieveValues() {
@@ -3005,8 +2961,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addCustGrpHandler, SysLoc.INDIA);
  
   GEOHandler.registerValidator(addKyndrylValidator, SysLoc.INDIA);
-  GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
+  // GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA
+  // ]);
+  // GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateRetrieveValues,  SysLoc.INDIA );
   GEOHandler.addAfterTemplateLoad(applyClusterFilters,  SysLoc.INDIA );
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, SysLoc.INDIA ); 
