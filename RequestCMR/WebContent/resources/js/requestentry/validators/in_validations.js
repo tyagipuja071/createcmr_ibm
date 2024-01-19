@@ -74,11 +74,11 @@ function afterConfigForIndia() {
   
     
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
-    dojo.connect(FormManager.getField('geoLocationCd'), 'onChange', function(value) {
-       setClusterGlcCovIdMapNrmlc();
-    });
-  }
+  /*
+   * if(custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
+   * dojo.connect(FormManager.getField('geoLocationCd'), 'onChange',
+   * function(value) { setClusterGlcCovIdMapNrmlc(); }); }
+   */
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   
@@ -2836,23 +2836,18 @@ function addKyndrylValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setClusterGlcCovIdMapNrmlc() {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var glc = FormManager.getActualValue('geoLocationCd');
-  if (custSubGrp == "NRMLC" || custSubGrp == "AQSTN") {
-    var glc = FormManager.getActualValue('geoLocationCd');
-    var covId = FormManager.getActualValue('covId');
-    var qParams = {
-        TXT : glc,
-      };
-    var cluster = cmr.query('GET_CLUSTER_BY_GLC', qParams);
-    if (cluster != null && cluster.ret1) {
-      FormManager.setValue('apCustClusterId', cluster.ret1);
-      FormManager.readOnly('apCustClusterId');
-    }
-  }
-}
+/*
+ * function setClusterGlcCovIdMapNrmlc() { var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var cntry =
+ * FormManager.getActualValue('cmrIssuingCntry'); var glc =
+ * FormManager.getActualValue('geoLocationCd'); if (custSubGrp == "NRMLC" ||
+ * custSubGrp == "AQSTN") { var glc =
+ * FormManager.getActualValue('geoLocationCd'); var covId =
+ * FormManager.getActualValue('covId'); var qParams = { TXT : glc, }; var
+ * cluster = cmr.query('GET_CLUSTER_BY_GLC', qParams); if (cluster != null &&
+ * cluster.ret1) { FormManager.setValue('apCustClusterId', cluster.ret1);
+ * FormManager.readOnly('apCustClusterId'); } } }
+ */
 
 
 function validateRetrieveValues() {
@@ -2967,8 +2962,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addCustGrpHandler, SysLoc.INDIA);
  
   GEOHandler.registerValidator(addKyndrylValidator, SysLoc.INDIA);
-  GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
+  // GEOHandler.addAfterTemplateLoad(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA
+  // ]);
+  // GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateRetrieveValues,  SysLoc.INDIA );
   GEOHandler.addAfterTemplateLoad(applyClusterFilters,  SysLoc.INDIA );
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, SysLoc.INDIA ); 
