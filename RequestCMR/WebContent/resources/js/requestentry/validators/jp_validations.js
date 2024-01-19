@@ -3527,6 +3527,10 @@ function setCSBOOnAddrSave() {
     case 'BRMSI':
       setCSBOSubsidiaryValue();
       break;
+    case 'PRCMR':
+      var postCd = FormManager.getActualValue('postCd');
+      addPostCdCSBOLogic(postCd);
+      break;
     case '':
     default:
       break;
