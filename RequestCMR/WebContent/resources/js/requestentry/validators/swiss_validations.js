@@ -315,7 +315,6 @@ function addHwMstrInstFlgValidator() {
 }
 
 function addHandlersForSWISS() {
-
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
@@ -323,12 +322,15 @@ function addHandlersForSWISS() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
+
       if (value == '32') {
         FormManager.setValue('clientTier', 'T');
       } else if (value == '34') {
         FormManager.setValue('clientTier', 'Q');
       } else if (value == '36') {
         FormManager.setValue('clientTier', 'Y');
+      } else if (value == '27') {
+        FormManager.setValue('clientTier', 'E');
       } else {
         FormManager.setValue('clientTier', '');
       }
@@ -611,7 +613,7 @@ function setMubotyOnPostalCodeIMS(value) {
   if (isuCd == null || isuCd == undefined || isuCd == '') {
     return;
     // CMR-710 use 34Q to replace 32S/N
-  } else if (isuCd == '34') {
+  } else if (['27'].includes(isuCd)) {
     if (postCd >= 3000) {
       postCd = 2;
     } else {
@@ -631,14 +633,20 @@ function setMubotyOnPostalCodeIMS(value) {
     POST_CD_RANGE : postCd
   });
 
+  document.getElementById('templatevalue-searchTerm').setAttribute("values", result.map(res => res.ret1).join(','))
+  if (role == 'REQUESTER') {
+    document.getElementById('templatevalue-searchTerm').setAttribute("disabled", true)
+  }
   if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
     FormManager.setValue('searchTerm', result[0].ret1);
     if (role == 'REQUESTER') {
       FormManager.readOnly('searchTerm');
     }
   } else {
-    FormManager.clearValue('searchTerm');
-    FormManager.enable('searchTerm');
+    if (role != 'REQUESTER') {
+      FormManager.clearValue('searchTerm');
+      FormManager.enable('searchTerm');
+    }
   }
 }
 
@@ -1491,6 +1499,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
 // }
 
 function lockIBMTabForSWISS() {
+  console.log('lockIBMTabForSWISS')
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
