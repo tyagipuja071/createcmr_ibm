@@ -1965,12 +1965,13 @@ function addSoltToAddressValidator() {
       validate: function () {
         var zs01ReqId = FormManager.getActualValue('reqId');
         var addrType = FormManager.getActualValue('addrType');
+        var reqType=FormManager.getActualValue('reqType');
         qParams = {
           REQ_ID: zs01ReqId,
         };
         var record = cmr.query('GETZS01VALRECORDS', qParams);
         var zs01Reccount = record.ret1;
-        if (addrType == 'ZS01' && Number(zs01Reccount) == 1 && cmr.addressMode != 'updateAddress') {
+        if (addrType == 'ZS01' && Number(zs01Reccount) == 1 && cmr.addressMode != 'updateAddress' && reqType!='U') {
           return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
         } else {
           return new ValidationResult(null, true);
@@ -1984,7 +1985,8 @@ function addAddressInstancesValidator() {
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+        var reqType1=FormManager.getActualValue('reqType');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0  && reqType1!='U') {
           return new ValidationResult(null, false, 'One Sold-To Address is mandatory. Only one address for each address type should be defined when sending for processing.');
         }
         var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
