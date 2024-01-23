@@ -105,7 +105,7 @@ public class IndiaUtil extends AutomationUtil {
     scenarioExceptions.setCheckVATForDnB(false);
     String[] scenariosToBeChecked = { "PRIV" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 

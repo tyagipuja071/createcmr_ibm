@@ -75,7 +75,7 @@ public class NewZealandUtil extends AutomationUtil {
     String customerName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
     String[] scenariosToBeChecked = { "PRIV" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 
@@ -244,8 +244,8 @@ public class NewZealandUtil extends AutomationUtil {
                     + (matchedDNBRecord.getMailingDnbCountry() == null ? "" : matchedDNBRecord.getMailingDnbCountry()) + "\n\n");
               } else {
                 details.append(" - Address:  " + matchedDNBRecord.getDnbStreetLine1() + " "
-                    + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " "
-                    + matchedDNBRecord.getDnbCity() + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
+                    + (matchedDNBRecord.getDnbStreetLine2() == null ? "" : matchedDNBRecord.getDnbStreetLine2()) + " " + matchedDNBRecord.getDnbCity()
+                    + " " + matchedDNBRecord.getDnbPostalCode() + " " + matchedDNBRecord.getDnbCountry() + "\n\n");
               }
             }
           } else {

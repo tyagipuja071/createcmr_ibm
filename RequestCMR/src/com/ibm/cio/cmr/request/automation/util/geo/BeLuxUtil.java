@@ -106,7 +106,7 @@ public class BeLuxUtil extends AutomationUtil {
     }
     String[] scenariosToBeChecked = { "BEPRI", "IBMEM", "LUIBM", "LUPRI" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameCombined, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario) || SCENARIO_BP_LOCAL_LU.equals(scenario)) && zp01 != null
@@ -154,11 +154,11 @@ public class BeLuxUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       break;
-    case SCENARIO_PRIVATE_CUSTOMER_LU: 
+    case SCENARIO_PRIVATE_CUSTOMER_LU:
       String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
-      
-    
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false,
+          requestData);
+
     case SCENARIO_THIRD_PARTY:
     case SCENARIO_THIRD_PARTY_LU:
     case SCENARIO_DATA_CENTER:
@@ -656,7 +656,7 @@ public class BeLuxUtil extends AutomationUtil {
               if ("U".equals(admin.getReqType()) && payGoAddredited) {
                 LOG.debug("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
                 checkDetails.append("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
-            //    admin.setPaygoProcessIndc("Y");
+                // admin.setPaygoProcessIndc("Y");
               } else if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                 resultCodes.add("X");
