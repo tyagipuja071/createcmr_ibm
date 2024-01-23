@@ -1721,4 +1721,6 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(payGoCreateErroMsg, GEOHandler.AllCountries);
   GEOHandler.registerValidator(payGoErroMsg, GEOHandler.AllCountries);
   GEOHandler.registerValidator(newAddressValForPayGo, ['724', '848', '618', '624', '788', '649', '866', '754', '846', '806', '702', '678', '897', '706', '616', '796']);
+  GEOHandler.registerWWValidator(validateAPICluster);
+  GEOHandler.addAfterTemplateLoad(limitAPICluster, GEOHandler.AllCountries);
 });
