@@ -404,6 +404,7 @@ function addHandlersForNL() {
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      setAccountTeamNumberValues(value);
       // setBOTeamValues(value);
       setSORTLBasedOnIsuCtc();
     });
@@ -411,6 +412,7 @@ function addHandlersForNL() {
 
   if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry')) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+      setAccountTeamNumberValues(value);
       // setBOTeamValues(value);
     });
   }
@@ -489,6 +491,70 @@ function setClientTierValues(isuCd) {
           FormManager.setValue('clientTier', clientTiers[0]);
         }
       }
+    }
+  }
+}
+
+function setAccountTeamNumberValues(clientTier) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  var nlSubGrpsList = [ 'COMME', 'THDPT', 'NLDAT', 'PUBCU', 'CBCOM' ];
+
+  if (cntry == '788') {
+
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (custGrp == 'CROSS') {
+      if (subGrp == 'CBCOM') {
+        FormManager.setValue('isuCd', '27');
+      } else if (subGrp == 'CBBUS') {
+        FormManager.setValue('isuCd', '8B');
+      } else if (subGrp == 'CBPRI') {
+        FormManager.setValue('isuCd', '21');
+      } else {
+        FormManager.setValue('isuCd', '');
+      }
+    }
+
+    if (clientTier == 'E' && isuCd == '27' && nlSubGrpsList.includes(subGrp)) {
+      if (subIndustryCd == '') {
+        FormManager.setValue('commercialFinanced', '');
+      }
+
+      var subindustryToSortlMap = {
+        'A' : 'T0011590',
+        'B' : 'T0011570',
+        'C' : 'T0011587',
+        'D' : 'T0011571',
+        'E' : 'T0011573',
+        'F' : 'T0011568',
+        'G' : 'T0011579',
+        'H' : 'T0011580',
+        'J' : 'T0011567',
+        'K' : 'T0011586',
+        'L' : 'T0011574',
+        'M' : 'T0011581',
+        'N' : 'T0011583',
+        'P' : 'T0011569',
+        'R' : 'T0011589',
+        'S' : 'T0011576',
+        'T' : 'T0011592',
+        'V' : 'T0011566',
+        'W' : 'T0003611',
+        'U' : 'T0011575',
+        'X' : 'T0011585',
+        'Y' : 'T0011578'
+      };
+
+      var userEnteredSubindustry = subindustryToSortlMap[subIndustryCd.substr(0, 1)];
+      console.log('>>>> Set value of SORTL on Subindustry Change.. >>>>');
+      FormManager.setValue('commercialFinanced', userEnteredSubindustry);
     }
   }
 }
@@ -1749,8 +1815,8 @@ function addNlIsuHandler() {
       value = FormManager.getActualValue('isuCd');
     }
     reqType = FormManager.getActualValue('reqType');
-    if (value == '32') {
-      FormManager.setValue('clientTier', 'T');
+    if (value == '27') {
+      FormManager.setValue('clientTier', 'E');
     } else if (value == '34') {
       FormManager.setValue('clientTier', 'Q');
     } else if (value == '36') {
@@ -1791,8 +1857,8 @@ function setSORTLBasedOnIsuCtc() {
    */
   //
   var isuList = [ '21', '34', '36', '5K', '32', '28' ];
-  if (isuCd == '34' && clientTier == 'Q') {
-    FormManager.setValue('commercialFinanced', 'T0003611');
+  if (isuCd == '27' && clientTier == 'E') {
+    // FormManager.setValue('commercialFinanced', 'T0003611');
     if (role == 'Requester') {
       FormManager.readOnly('commercialFinanced');
       FormManager.readOnly('clientTier');
@@ -1958,13 +2024,17 @@ function sortlCheckValidator() {
   var scenariosToBlock = [ 'CBBUS', 'BUSPR', 'INTER', 'IBMEM', 'PRICU' ];
 
   var accSeq_788 = {
-    '34Q' : [ 'T0003611' ],
-    '36Y' : [ 'T0007969', 'T0010029', 'T0010540' ],
-    '32T' : [ 'T0010435', 'T0010402', 'T0010437', 'T0010480', 'T0010401', 'T0010434' ],
-    '5K' : [ 'T0009067' ],
-    '21' : [ '33U00', 'P0000004' ],
-    '28' : [ 'I0000270' ]
+    '34Q' : [ 'T0011572', 'T0011577', 'T0011582', 'T0011584', 'T0011588', 'T0011591', 'T0011593' ],
+    '36Y' : [ 'T0007969', 'T0010540', 'T0010029' ],
+    '04' : [ 'A0008886', 'A0008890', 'A0008891' ],
+    '18' : [ 'A0008889' ],
+    '28' : [ 'A0008888', 'I000027' ],
+    '5E' : [ 'A0008887' ],
+    '5K' : [ 'A0009210' ]
   };
+  var nlIsuCdList = [ '05', '11', '12', '14', '15', '19', '1R', '31', '32', '3T', '40', '4A', '4D', '4F', '5B', '60', '8C', 'XX' ];
+  var nlScenarioFormatMatch = [ 'COMME', 'THDPT', 'NLDAT', 'PUBCU', 'CBCOM' ];
+  var sortlFormat = /^[A-Z0-9]{8}$/;
 
   if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
     if (cmrIssuingCntry == '788') {
@@ -1974,6 +2044,14 @@ function sortlCheckValidator() {
           type : 'text',
           name : 'commercialFinanced'
         }, false, 'SORTL can only accept ' + accSeq_788[isuCtc]);
+      } else if (nlIsuCdList.includes(isuCode) && nlScenarioFormatMatch.includes(custSubGrp) && clientTierCode == '') {
+        if (!sortlFormat.test(commercialFinanced)) {
+          return new ValidationResult({
+            id : 'commercialFinanced',
+            type : 'text',
+            name : 'commercialFinanced'
+          }, false, 'Any 8 characters alphanumeric in UPPERCASE for SORTL can be accepted');
+        }
       } else {
         return new ValidationResult(null, true);
       }
@@ -2401,6 +2479,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFields, GEOHandler.NL);
   GEOHandler.addAfterConfig(lockFields, GEOHandler.NL);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.NL, null, true);
+  GEOHandler.addAfterTemplateLoad(setAccountTeamNumberValues, GEOHandler.NL);
 
   GEOHandler.registerValidator(addNLChecklistValidator, GEOHandler.NL);
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.NL);
