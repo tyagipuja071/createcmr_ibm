@@ -625,7 +625,7 @@ public abstract class AutomationUtil {
    * @param output
    * @return
    */
-  protected boolean doPrivatePersonChecks(EntityManager entityManeger, AutomationEngineData engineData, String country, String landCntry, String name,
+  protected boolean doPrivatePersonChecks(EntityManager entityManager, AutomationEngineData engineData, String country, String landCntry, String name,
       StringBuilder details, boolean checkBluepages, RequestData reqData) {
     boolean legalEndingExists = false;
     for (Addr addr : reqData.getAddresses()) {
