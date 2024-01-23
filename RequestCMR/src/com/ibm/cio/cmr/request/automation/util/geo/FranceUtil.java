@@ -257,11 +257,11 @@ public class FranceUtil extends AutomationUtil {
       String[] scenariosToBeChecked = { "IBMEM", "CBIEM" };
       String[] privCust = {"XBLUM", "PRICU"};
       if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+        doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
             Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
       }
       else if(Arrays.asList(privCust).contains(scenario)){
-        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+        doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
             false, requestData);
       }
       switch (scenario) {
@@ -1358,7 +1358,7 @@ public class FranceUtil extends AutomationUtil {
    * @return
    */
   @Override
-  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
+  protected boolean doPrivatePersonChecks(EntityManager entityManager, AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
       boolean checkBluepages, RequestData reqData) {
     LOG.debug("***FranceUtil.doPrivatePersonChecks");
     EntityManager entityManager = JpaManager.getEntityManager();

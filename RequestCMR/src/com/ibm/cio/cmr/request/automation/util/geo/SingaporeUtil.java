@@ -286,7 +286,7 @@ public class SingaporeUtil extends AutomationUtil {
     }
     String[] scenariosToBeChecked = { "PRIV", "XPRIV" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
     switch (scenario) {
