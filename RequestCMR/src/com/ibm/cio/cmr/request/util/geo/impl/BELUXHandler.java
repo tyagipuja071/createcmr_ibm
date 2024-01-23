@@ -2360,12 +2360,12 @@ public class BELUXHandler extends BaseSOFHandler {
             LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'Y' for the selected ISU code.");
             error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'Y' for the selected ISU code: " + isuCd + ".<br>");
           }
-        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
-            LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'T' for the selected ISU code.");
-            error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'T' for the selected ISU code :" + isuCd + ".<br>");
+        } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'E' for the selected ISU code.");
+            error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'E' for the selected ISU code :" + isuCd + ".<br>");
           }
-        } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+        } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("27", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
