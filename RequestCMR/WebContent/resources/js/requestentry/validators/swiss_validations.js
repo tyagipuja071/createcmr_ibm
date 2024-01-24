@@ -127,6 +127,10 @@ function addAfterConfigForSWISS() {
   if (reqType == 'C') {
     FormManager.getField('capInd').set('checked', true);
     FormManager.readOnly('capInd');
+    // pre-select ISU 27 for commercial, government, third party and private person.
+    if(role == 'REQUESTER' && ['CHCOM','CHGOV','CH3PA','CHPRI'].includes(custSubGrp)) {
+      FormManager.setValue('isuCd', '27');
+    }
   }
 
   // disable copy address
