@@ -69,19 +69,13 @@ dojo.addOnLoad(function(){
 	      	<p>
 	        <cmr:label fieldId="apCustClusterId"> 
 	         <cmr:fieldLabel fieldId="Cluster" />:
-             <cmr:view forCountry="744">
+             <!-- <cmr:view forCountry="744">
                 <cmr:info text="${ui.info.ClusterIndia}" />
-             </cmr:view> 
+             </cmr:view> --> 
 	         <cmr:delta text="${rdcdata.apCustClusterId}" oldValue="${reqentry.apCustClusterId}"/> 
-	         <cmr:view forCountry="796">
-				<cmr:info text="${ui.info.NZForCluster}" />
-	         </cmr:view>
-	         <cmr:view forCountry="616,834,615,652">
+	         <cmr:view forCountry="615,652">
 				<cmr:info text="${ui.info.AUForCluster}" />
 	         </cmr:view>
-	         <cmr:view forCountry="852,856,818">
-            	<cmr:info text="${ui.info.clusterReminderMsgTH_VN_PH}"></cmr:info>
-        	 </cmr:view>
 	        </cmr:label>
 	        <cmr:field path="apCustClusterId" id="apCustClusterId" fieldId="Cluster" tabId="MAIN_IBM_TAB" />
 	      	</p>
@@ -108,7 +102,7 @@ dojo.addOnLoad(function(){
       	
      <!-- MRC Code, BP Relation Type, BP Function, Province Name, Province Code, Customer Service Code -->
       	<cmr:row topPad="10">
-      	  <cmr:column span="2" containerForField="MrcCd">
+      	  <cmr:column span="2" containerForField="MrcCd" exceptForCountry="616,796">
       		<p>
         	<cmr:label fieldId="mrcCd"> <cmr:fieldLabel fieldId="MrcCd" />: </cmr:label>
         	<cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd" tabId="MAIN_IBM_TAB" />
@@ -154,7 +148,7 @@ dojo.addOnLoad(function(){
     	
      <!-- Sales Rep No, Cmr No Prefix, IBM Collection Responsibility -->
     	<cmr:row topPad="10">
-  		  <cmr:column span="2" containerForField="SalRepNameNo">
+  		  <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="796">
       		<p>
         	  <cmr:label fieldId="repTeamMemberNo">
           	    <cmr:fieldLabel fieldId="SalRepNameNo" />:<cmr:info text="No impact on CMR/account owner, just AP CMR legacy system(WTAAS) requirement. "></cmr:info> 

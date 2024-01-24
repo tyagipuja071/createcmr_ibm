@@ -38,6 +38,10 @@ public class ReportField {
    */
   public String getFixedWidthValue(Object value) {
     String fwValue = value == null ? "" : value.toString().trim();
+    fwValue = fwValue.replaceAll("[\t]", " ");
+    if (fwValue.length() > this.length) {
+      fwValue = "";
+    }
     return StringUtils.rightPad(fwValue, this.length, this.padCharacter);
   }
 

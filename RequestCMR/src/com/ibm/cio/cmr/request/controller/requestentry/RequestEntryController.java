@@ -301,7 +301,14 @@ public class RequestEntryController extends BaseController {
     model.setYourId(user.getIntranetId());
     model.setYourNm(user.getBluePagesName());
     model.setRequestingLob(user.getDefaultLineOfBusn());
-    model.setReqReason(user.getDefaultRequestRsn());
+    if(("PAYG").equalsIgnoreCase(model.getReqReason()))
+    {
+   // do nothing
+    }
+    else
+    {
+      model.setReqReason(user.getDefaultRequestRsn());
+    }
 
     if (!StringUtils.isEmpty(model.getNewReqCntry())) {
       if (model.getNewReqCntry().length() > 3) {

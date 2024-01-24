@@ -25,17 +25,7 @@ function addHandlersForAP() {
       setIsuOnIsic();
     });
   }
-  if (_inacTypeHandler == null) {
-    _inacTypeHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function (value) {
-      setInacByClusterHKMO();
-      
-    });
-  }
-  if (_inacCdHandler == null) {
-    _inacCdHandler = dojo.connect(FormManager.getField('inacCd'), 'onChange', function (value) {
-      setInacByClusterHKMO();
-    });
-  }
+
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
     });
@@ -222,11 +212,9 @@ function addAfterConfigAP() {
   }
   if (reqType == 'C') {
     setIsuOnIsic();
-    onInacTypeChange();
     // CREATCMR-7883-7884
     _inacHandlerANZSG = 0;
     // setInacByCluster();
-    filterInacCd('744', '10215', 'N', 'I529');
   }
  
   // CREATCMR-5269
@@ -400,46 +388,72 @@ function setInacByClusterHKMO() {
   }
 }
 
-function onInacTypeChange() {
+function filterInacCdBasedInacTypeChange() {
+  console.log(">>> onInacTypeChange <<<")
   var searchTerm = FormManager.getActualValue('searchTerm');
   var reqType = null;
+
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var custSubT = FormManager.getActualValue('custSubGrp');
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-        var searchTerm = FormManager.getActualValue('searchTerm');
-        var cmt = value + ','+ searchTerm +'%';
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-          console.log(value);
+
           if (value != null) {
+            var searchTerm = FormManager.getActualValue('apCustClusterId');
+            var _clusterTWWithAllInac = ['09207'];
+
+            var cmt = value + ','+ searchTerm +'%';
+            var cntry = FormManager.getActualValue('cmrIssuingCntry');
             var inacCdValue = [];
-            if(searchTerm == '09208' || searchTerm == '04476' || searchTerm == '09154'  
-              || searchTerm == '09151' || searchTerm == '09153' || searchTerm == '09147' || searchTerm == '09152' 
-                || searchTerm == '09155') {
-              var qParams = {
+            var qParams = {
               _qall : 'Y',
               ISSUING_CNTRY : cntry ,
               CMT : cmt ,
-              };
-            } 
-            if(qParams != undefined){
-              var results = cmr.query('GET.INAC_CD', qParams);
-              if (results != null) {
-                for (var i = 0; i < results.length; i++) {
-                  inacCdValue.push(results[i].ret1);
-                }
-                FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-                if (inacCdValue.length == 1) {
-                  FormManager.setValue('inacCd', inacCdValue[0]);
-                }
+            };
+            var results = cmr.query('GET.INAC_CD', qParams);
+            if (results != null && _clusterTWWithAllInac.includes(searchTerm)) {
+              for (var i = 0; i < results.length; i++) {
+                inacCdValue.push(results[i].ret1);
               }
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              if (inacCdValue.length == 1) {
+                FormManager.setValue('inacCd', inacCdValue[0]);
+              }
+            } else {
+              FormManager.resetDropdownValues(FormManager.getField('inacType'));
+              FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+              FormManager.removeValidator('inacCd', Validators.REQUIRED);
+              FormManager.removeValidator('inacType', Validators.REQUIRED);
+              FormManager.enable('inacCd');
+              FormManager.enable('inacType');
+
+              limitInacNacCodeByInacNacType();
             }
           }
       });
     }
   }
 }
+
+function limitInacNacCodeByInacNacType() {
+  var limitedInacNacCodeList = [];
+  var inacNacCodes = []
+  if (FormManager.getActualValue('inacType') == 'I') {
+    var inacNacCodes = FormManager.getField('inacCd').loadedStore._arrayOfAllItems.filter(function checkInacFinal(inacNode) {
+      return /^[0-9]+$/.test(inacNode.id[0]);
+    });
+  } else if (FormManager.getActualValue('inacType') == 'N') {
+    var inacNacCodes = FormManager.getField('inacCd').loadedStore._arrayOfAllItems.filter(function checkInacFinal(inacNode) {
+      return /^[A-Z]/.test(inacNode.id[0]);
+    });
+  }
+
+  var ids = inacNacCodes.map(elem => elem.id[0]);
+  
+  FormManager.limitDropdownValues(FormManager.getField('inacCd'), ids, true);
+}
+
 
 var previousCluster = null;
 var previousSubScenario = null;
@@ -500,9 +514,9 @@ function checkClusterSubScenarioChanged() {
 
 /* ASEAN ANZ GCG ISIC MAPPING */
 function setIsuOnIsic() {
-  if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
-    return;
-  }
+	if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
+		return;
+	}
   console.log('>>>> setIsuOnIsic >>>>');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (FormManager.getActualValue('reqType') != 'C' || (FormManager.getActualValue('viewOnlyPage') == 'true' && !(cmrIssuingCntry == '738'))) {
@@ -1934,133 +1948,6 @@ function onSubIndustryChange() {
   }
 }
 
-// Story -2125 drop down list needed in INAC/NAC FIELD based on INAC Type
-var _inacCdHandler = null;
-function onInacTypeChange() {
-  console.log('>>>> onInacTypeChange >>>>');
-  // CREATCMR-7883
-  var _clusterAUWithAllInac = ['01150', '00001', '08039'];
-  var _clusterNZWithAllInac = ['10662', '10663', '01147', '08037', '00002'];
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var reqType = null;
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  reqType = FormManager.getActualValue('reqType');
-  custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  if (reqType == 'C') {
-    if (_inacCdHandler == null) {
-      _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function (value) {
-
-        var cluster = FormManager.getActualValue('apCustClusterId');
-        var cmt = value + ',' + cluster + '%';
-        console.log('onInacTypeChange cluster=' + cluster);
-        console.log('onInacTypeChange value=' + value);
-        console.log('onInacTypeChange cmt=' + cmt);
-        if (value != null && value.length > 0) {
-          var inacCdValue = [];
-          if (cluster.includes('BLAN') ||
-            ((cluster == '04501' || cluster == '04683' || cluster == '04690') &&
-              (cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO)) || ((cluster.includes('05224') || cluster.includes('05225') || cluster.includes('09062') || cluster.includes('09063') || cluster.includes('09064') || cluster.includes('04477') || cluster.includes('04496') || cluster.includes('04490') || cluster.includes('04494') || cluster.includes('04691') || cluster.includes('04467') || cluster.includes('10195') || cluster.includes('10197')) && (cntry == SysLoc.INDIA || cntry == SysLoc.BANGLADESH || cntry == SysLoc.SRI_LANKA)) ||
-            ((cluster.includes('04492') || cluster.includes('04503') || cluster.includes('04692') || cluster.includes('04481') || cluster.includes('04462') || cluster.includes('04483') || cluster.includes('00149') || cluster.includes('05220') || cluster.includes('10690')) && (cntry == SysLoc.THAILAND || cntry == SysLoc.SINGAPORE))) {
-            var qParams = {
-              _qall: 'Y',
-              ISSUING_CNTRY: cntry,
-              CMT: cmt,
-            };
-          } else if (cntry == '616') {
-            if (_clusterAUWithAllInac.includes(cluster)) {
-              cmt = value + '%';
-            }
-            var qParams = {
-              _qall: 'Y',
-              ISSUING_CNTRY: cntry,
-              CMT: cmt,
-            };
-          } else if (cntry == '796') {
-            if (_clusterNZWithAllInac.includes(cluster)) {
-              cmt = value + '%';
-            } else {
-              // Get INAC for cluster related ONLY >>>> 002005 >>>>
-              // CREATCMR-7884 : Get INAC for cluster related ONLY
-              console.log('Get INAC for cluster [' + cluster + '] related ONLY for 796.');
-              cmt = value + '%' + cluster + '%';
-              console.log('onInacTypeChange >> NEW cmt=' + cmt);
-            }
-            var qParams = {
-              _qall: 'Y',
-              ISSUING_CNTRY: cntry,
-              CMT: cmt,
-            };
-          }
-
-          if (qParams != undefined) {
-            var results = cmr.query('GET.INAC_CD', qParams);
-            if (results != null && results.length > 0) {
-              for (var i = 0; i < results.length; i++) {
-                inacCdValue.push(results[i].ret1);
-              }
-              // if (value == 'N' && !(cluster.includes('BLAN')) && cntry ==
-              // '616') {
-              if (value == 'N' && (!(cluster.includes('BLAN') || cluster.includes('00035') || cluster.includes('00127') || cluster.includes('00105') || cluster.includes('04470') || cluster.includes('04469') || cluster.includes('04471') || cluster.includes('04485') || cluster.includes('04500') || cluster.includes('04746') || cluster.includes('04744') || cluster.includes('04745')) && (cntry == SysLoc.AUSTRALIA))) {
-                inacCdValue.push('new');
-              }
-              if ((value == 'N' && (!((cluster.includes('05224') || cluster.includes('05225') || cluster.includes('09062') || cluster.includes('09063') || cluster.includes('09064') || cluster.includes('04477') || cluster.includes('04496') || cluster.includes('04490') || cluster.includes('04494') || cluster.includes('04691') || cluster.includes('04467') || cluster.includes('10195') || cluster.includes('10197')) && (cntry == SysLoc.INDIA || cntry == SysLoc.BANGLADESH || cntry == SysLoc.SRI_LANKA)))) && cntry != SysLoc.AUSTRALIA && (cntry != SysLoc.THAILAND && cntry != SysLoc.SINGAPORE)) {
-                inacCdValue.push('new');
-              }
-              if (value == 'N' && (!(cluster.includes('04492') || cluster.includes('04503') || cluster.includes('04692') || cluster.includes('04481') || cluster.includes('04462') || cluster.includes('04483') || cluster.includes('00149') || cluster.includes('05220')) && (cntry == SysLoc.THAILAND || cntry == SysLoc.SINGAPORE))) {
-                inacCdValue.push('new');
-              }
-              FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-              FormManager.setValue('inacCd', inacCdValue[0]);
-              if (inacCdValue.length == 1) {
-                FormManager.setValue('inacCd', inacCdValue[0]);
-              }
-            } else {
-              var inacType = FormManager.getActualValue('inacType');
-              cmt = inacType + '%';
-              qParams = {
-                _qall: 'Y',
-                ISSUING_CNTRY: cntry,
-                CMT: cmt,
-              };
-              results = cmr.query('GET.INAC_CD', qParams);
-              for (var i = 0; i < results.length; i++) {
-                inacCdValue.push(results[i].ret1);
-              }
-              FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-            }
-          }
-        }
-
-      });
-    }
-  }
-  var custSubGrpList = ['AQSTN', 'BLUMX', 'MKTPC', 'IGF', 'PRIV', 'NRMLC', 'MKTPC', 'ECOSY', 'ECOSW', 'ESOSY', 'INTER', 'KYNDR', 'CROSS'];
-  if (!custSubGrpList.includes(custSubGrp) && cntry == SysLoc.INDIA) {
-    FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-  }
-
-}
-
-function filterInacCd(cmrIssuCntry, clusters, inacType, inacCd) {
-  var actualCmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var actualCluster = FormManager.getActualValue('apCustClusterId');
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (actualCmrIssuCntry == cmrIssuCntry && actualCluster == clusters) {
-    FormManager.limitDropdownValues(FormManager.getField('inacType'), inacType);
-    FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCd);
-    FormManager.setValue('inacCd', inacCd);
-    FormManager.setValue('inacType', inacType);
-    FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-    FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-  }
-}
-
-
 function setIsicCdIfCmrResultAccepted(value) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   console.log(">>>>setDefaultValueForCreate()>>>> SubGrp=" + custSubGrp);
@@ -2204,57 +2091,9 @@ function updateIndustryClass() {
       FormManager.readOnly('taxCd2');
       FormManager.setValue('taxCd2', '');
     }
-    updateCluster(_industryClass);
   }
 }
 
-function updateCluster(value) {
-  console.log('>>>> updateCluster >>>>');
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var reqType = FormManager.getActualValue('reqType');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (viewOnlyPage == 'true' || reqType != 'C') {
-    return;
-  }
-  if (role != 'REQUESTER') {
-    return;
-  }
-  if (cmrIssuCntry != '738' && cmrIssuCntry != '736') {
-    return;
-  }
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  switch (custSubGrp) {
-    case 'NRMLC':
-    case 'AQSTN':
-    case 'NRML':
-      handleCluster(value);
-      break;
-    default:
-    // do nothing
-  }
-}
-
-function handleCluster(value) {
-  console.log('>>>> handleCluster >>>>');
-  var industryClass = FormManager.getActualValue('IndustryClass');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (!value) {
-    value = industryClass;
-  }
-  var clusterValues = [];
-  var qParams = {
-    CNTRY: cmrIssuCntry,
-    TXT: '%' + value + '%'
-  };
-  var results = cmr.query('GET_CLUSTER_BY_INDUSTRYCLASS', qParams);
-  if (results != null && results.ret1) {
-    FormManager.setValue('apCustClusterId', results.ret1);
-    // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
-    // clusterValues);
-  }
-}
 
 function searchArryAndSetValue(arry, searchValue, fieldID, setValue) {
   console.log('>>>> searchArryAndSetValue >>>>');
@@ -2415,9 +2254,9 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 }
 
 function setCTCIsuByCluster() {
-  if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
-    return;
-  }
+	if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
+		return;
+	}
   console.log('>>>> setCTCIsuByCluster >>>>');
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -2584,9 +2423,9 @@ function setCTCIsuByCluster() {
 }
 
 function setIsuByClusterCTC() {
-  if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
-    return;
-  }
+	if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
+		return;
+	}
   console.log('>>>> setIsuByClusterCTC >>>>');
   var reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
@@ -3110,9 +2949,9 @@ function lockCustMainNames() {
 }
 
 function setISUDropDownValues() {
-  if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
-    return;
-  }
+	if(FormManager.getActualValue('cmrIssuingCntry') == '834'){
+		return;
+	}
   console.log('>>>> setISUDropDownValues >>>>');
   var reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
@@ -4655,13 +4494,12 @@ function afterConfigMO() {
   updateRegionCd();
   setCollectionCd();
   onSubIndustryChange();
-  setInacByClusterHKMO();
   handleObseleteExpiredDataForUpdate();
   setAbbrvNameBPScen();
   setCtcOnIsuCdChangeGCG();
   reqReasonHandler();
   defaultCMRNumberPrefix();
-  
+  filterInacCdBasedInacTypeChange();
   
 }
 
@@ -4671,7 +4509,6 @@ function afterTemplateLoadMO() {
   updateRegionCd();
   setCollectionCd();
   onSubIndustryChange();
-  setInacByClusterHKMO();
   addCustGrpHandler();
   handleObseleteExpiredDataForUpdate();
   setAbbrvNameBPScen();
@@ -4679,13 +4516,6 @@ function afterTemplateLoadMO() {
   defaultCMRNumberPrefix();
   initChecklistMainAddress();
   
-}
-
-function addAddrFunctionMO() {
-  updateMainCustomerNames();
-  handleObseleteExpiredDataForUpdate();
-  setAbbrevNmLocnOnAddressSave();
-  lockCustMainNames();
 }
 
 dojo.addOnLoad(function () {
@@ -4698,7 +4528,10 @@ dojo.addOnLoad(function () {
   GEOHandler.enableCopyAddress(SysLoc.MACAO);
   GEOHandler.addAfterConfig(afterConfigMO, SysLoc.MACAO);
   GEOHandler.enableCustomerNamesOnAddress(SysLoc.MACAO);
-  GEOHandler.addAddrFunction(addAddrFunctionMO, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(updateMainCustomerNames, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, SysLoc.MACAO);
+  GEOHandler.addAddrFunction(lockCustMainNames, SysLoc.MACAO);	
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.APAC_1, null, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.GCG);
