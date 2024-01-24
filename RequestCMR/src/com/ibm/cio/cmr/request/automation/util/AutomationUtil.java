@@ -55,7 +55,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -626,9 +625,8 @@ public abstract class AutomationUtil {
    * @param output
    * @return
    */
-  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages, RequestData reqData) {
-    EntityManager entityManager = JpaManager.getEntityManager();
+  protected boolean doPrivatePersonChecks(EntityManager entityManager, AutomationEngineData engineData, String country, String landCntry, String name,
+      StringBuilder details, boolean checkBluepages, RequestData reqData) {
     boolean legalEndingExists = false;
     for (Addr addr : reqData.getAddresses()) {
       String customerName = getCustomerFullName(addr);
@@ -874,12 +872,12 @@ public abstract class AutomationUtil {
         || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     } else if (DUP_ADDR_CHECK_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-    	if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()) 
-    	 || SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
-    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE");
-    	} else {
-    		sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
-    	}
+      if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())
+          || SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+        sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE");
+      } else {
+        sql = ExternalizedQuery.getSql("AUTO.DUP_ADDR_EXIST_WITH_SAMETYPE_OR_SOLDTO");
+      }
     } else {
       sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     }
@@ -1591,6 +1589,7 @@ public abstract class AutomationUtil {
 
   /**
    * Validates PPS CEID on Update request.
+   * 
    * @param engineData
    * @param data
    * @param details

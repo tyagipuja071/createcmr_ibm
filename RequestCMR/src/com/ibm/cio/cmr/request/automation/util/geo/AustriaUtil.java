@@ -112,10 +112,10 @@ public class AustriaUtil extends AutomationUtil {
 
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           false, requestData);
     case SCENARIO_IBM_EMPLOYEE:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario), requestData);
     case SCENARIO_BUSINESS_PARTNER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
