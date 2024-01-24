@@ -899,14 +899,6 @@ function afterTemplateLoadTW() {
   setAddrFieldsValidation();
 }
 
-function addrFunctionsTW() {
-  updateMainCustomerNames();
-  addSingleByteValidatorTW();
-  setAbbrevNmLocnOnAddressSave();
-  handleObseleteExpiredDataForUpdate();
-  setAddrFieldsValidation();
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -924,7 +916,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterTemplateLoadTW, GEOHandler.TW);
 
   // addr funtion
-  GEOHandler.addAddrFunction(addrFunctionsTW, GEOHandler.TW);
+  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
+  GEOHandler.addAddrFunction(addSingleByteValidatorTW, GEOHandler.TW);
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.TW);
+  GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.TW);
+  GEOHandler.addAddrFunction(setAddrFieldsValidation, GEOHandler.TW);
   
   // validators
   GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
