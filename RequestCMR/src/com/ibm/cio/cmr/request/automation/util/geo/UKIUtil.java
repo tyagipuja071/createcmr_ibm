@@ -27,7 +27,6 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-
 import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
@@ -46,10 +45,6 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
-
-import com.ibm.cio.cmr.request.entity.DataRdc;
-import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
-
 
 public class UKIUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(UKIUtil.class);
@@ -139,7 +134,7 @@ public class UKIUtil extends AutomationUtil {
 
     String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 
@@ -355,7 +350,7 @@ public class UKIUtil extends AutomationUtil {
         details.append(" - " + field + "\n");
       }
     }
-    
+
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;

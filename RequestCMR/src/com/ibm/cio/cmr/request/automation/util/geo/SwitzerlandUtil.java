@@ -144,7 +144,7 @@ public class SwitzerlandUtil extends AutomationUtil {
     LOG.debug("Scenario to check: " + actualScenario);
     String[] scenariosToBeChecked = { "LIIBM", "LIPRI", "CHIBM", "CHPRI" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 

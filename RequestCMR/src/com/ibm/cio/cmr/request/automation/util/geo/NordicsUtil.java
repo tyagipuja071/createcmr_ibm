@@ -269,7 +269,7 @@ public class NordicsUtil extends AutomationUtil {
     }
     String[] scenariosToBeChecked = { "DKPRI", "ISPRI", "GLPRI", "FOPRI", "DKIBM", "ISIIBM", "GLIBM", "FOIBM" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
           Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
     }
 
@@ -327,7 +327,8 @@ public class NordicsUtil extends AutomationUtil {
     case LT_PRIPE_LOCAL:
     case LV_PRIPE_LOCAL:
     case CROSS_PRIPE:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false,
+          requestData);
 
     case DK_IBMEM_LOCAL:
     case FI_IBMEM_LOCAL:
@@ -338,7 +339,8 @@ public class NordicsUtil extends AutomationUtil {
     case EE_IBME_LOCAL:
     case LT_IBME_LOCAL:
     case LV_IBME_LOCAL:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, true, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, true,
+          requestData);
 
     case FO_GOV_LOCAL:
     case FO_INTSO_LOCAL:

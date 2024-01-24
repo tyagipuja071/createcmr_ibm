@@ -49,7 +49,6 @@ import com.ibm.cio.cmr.request.ui.template.TemplateManager;
 import com.ibm.cio.cmr.request.ui.template.TemplatedField;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -245,7 +244,7 @@ public abstract class USBPHandler {
    * @return
    * @throws CmrException
    */
-  protected abstract FindCMRRecordModel getIBMCMRBestMatch(AutomationEngineData engineData, RequestData requestData,
+  protected abstract FindCMRRecordModel getIBMCMRBestMatch(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       List<DuplicateCMRCheckResponse> matches) throws CmrException;
 
   /**
@@ -724,7 +723,7 @@ public abstract class USBPHandler {
             }
           }
         }
-        return getIBMCMRBestMatch(engineData, requestData, res.getMatches());
+        return getIBMCMRBestMatch(entityManager, engineData, requestData, res.getMatches());
       } else {
         LOG.debug("Response matches" + res.getMatched());
         LOG.debug("Response success" + res.getSuccess());
@@ -790,50 +789,43 @@ public abstract class USBPHandler {
    * @param cmrNo
    * @return
    */
-  protected boolean hasBlankRestrictionCodeInUSCMR(String cmrNo) {
+  protected boolean hasBlankRestrictionCodeInUSCMR(EntityManager entityManager, String cmrNo) {
 
-    EntityManager emgp = JpaManager.getEntityManager();
-    try {
-      String processingType = getProcessingTypeForUS(emgp, "897");
+    String processingType = getProcessingTypeForUS(entityManager, "897");
 
-      if ("TC".equals(processingType)) {
-        String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
-        String sql = ExternalizedQuery.getSql("AUTO.USBP.CHECK_RESTRICTION", usSchema);
-        sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
-        System.err.println(sql);
-        QueryRequest query = new QueryRequest();
-        query.setSql(sql);
-        query.setRows(1);
-        query.addField("C_COM_RESTRCT_CODE");
-        query.addField("I_CUST_ENTITY");
+    if ("TC".equals(processingType)) {
+      String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+      String sql = ExternalizedQuery.getSql("AUTO.USBP.CHECK_RESTRICTION", usSchema);
+      sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
+      System.err.println(sql);
+      QueryRequest query = new QueryRequest();
+      query.setSql(sql);
+      query.setRows(1);
+      query.addField("C_COM_RESTRCT_CODE");
+      query.addField("I_CUST_ENTITY");
 
-        try {
-          String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-          QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-          QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
+      try {
+        String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+        QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+        QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
 
-          if (!response.isSuccess()) {
-            LOG.warn("Not successful executiong of US CMR query: " + response.getMsg());
-            return true;
-          } else if (response.getRecords() == null || response.getRecords().size() == 0) {
-            LOG.warn("No records in US CMR DB");
-            return true;
-          } else {
-            Map<String, Object> record = response.getRecords().get(0);
-            return StringUtils.isBlank((String) record.get("C_COM_RESTRCT_CODE"));
-          }
-        } catch (Exception e) {
-          LOG.warn("Error in executing US CMR query", e);
+        if (!response.isSuccess()) {
+          LOG.warn("Not successful executiong of US CMR query: " + response.getMsg());
           return true;
+        } else if (response.getRecords() == null || response.getRecords().size() == 0) {
+          LOG.warn("No records in US CMR DB");
+          return true;
+        } else {
+          Map<String, Object> record = response.getRecords().get(0);
+          return StringUtils.isBlank((String) record.get("C_COM_RESTRCT_CODE"));
         }
-      } else {
+      } catch (Exception e) {
+        LOG.warn("Error in executing US CMR query", e);
         return true;
       }
-    } catch (Exception e) {
-      LOG.warn("Error in get processing type", e);
+    } else {
       return true;
     }
-
   }
 
   /**

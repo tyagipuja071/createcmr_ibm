@@ -41,7 +41,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -255,14 +254,12 @@ public class FranceUtil extends AutomationUtil {
         removeDuplicateAddresses(entityManager, requestData, details);
       }
       String[] scenariosToBeChecked = { "IBMEM", "CBIEM" };
-      String[] privCust = {"XBLUM", "PRICU"};
+      String[] privCust = { "XBLUM", "PRICU" };
       if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+        doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
             Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
-      }
-      else if(Arrays.asList(privCust).contains(scenario)){
-        doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
-            false, requestData);
+      } else if (Arrays.asList(privCust).contains(scenario)) {
+        doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
       }
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
@@ -1358,10 +1355,9 @@ public class FranceUtil extends AutomationUtil {
    * @return
    */
   @Override
-  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages, RequestData reqData) {
+  protected boolean doPrivatePersonChecks(EntityManager entityManager, AutomationEngineData engineData, String country, String landCntry, String name,
+      StringBuilder details, boolean checkBluepages, RequestData reqData) {
     LOG.debug("***FranceUtil.doPrivatePersonChecks");
-    EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
     Data data = reqData.getData();
     for (Addr addr : reqData.getAddresses()) {

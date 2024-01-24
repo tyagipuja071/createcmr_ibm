@@ -198,69 +198,71 @@ public class USUtil extends AutomationUtil {
 
   @SuppressWarnings("unchecked")
   public USUtil() {
-    LOG.debug("Initializing US Util");
-    // initialize mapping per scenario
-    LOG.debug("US - initializing mapping per scenario");
-    if (USUtil.boMappings.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
+    synchronized (USUtil.class) {
+      LOG.debug("Initializing US Util");
+      // initialize mapping per scenario
+      LOG.debug("US - initializing mapping per scenario");
+      if (USUtil.boMappings.isEmpty()) {
+        Digester digester = new Digester();
+        digester.setValidating(false);
+        digester.addObjectCreate("mappings", ArrayList.class);
 
-      digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
+        digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
 
-      digester.addBeanPropertySetter("mappings/mapping/scenario", "scenario");
-      digester.addBeanPropertySetter("mappings/mapping/csoSite", "csoSite");
-      digester.addBeanPropertySetter("mappings/mapping/mktgDept", "mktgDept");
-      digester.addBeanPropertySetter("mappings/mapping/mtkgArDept", "mtkgArDept");
-      digester.addBeanPropertySetter("mappings/mapping/svcArOffice", "svcArOffice");
-      digester.addBeanPropertySetter("mappings/mapping/pccArDept", "pccArDept");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("us-branchoff-mapping.xml");
-        USUtil.boMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
+        digester.addBeanPropertySetter("mappings/mapping/scenario", "scenario");
+        digester.addBeanPropertySetter("mappings/mapping/csoSite", "csoSite");
+        digester.addBeanPropertySetter("mappings/mapping/mktgDept", "mktgDept");
+        digester.addBeanPropertySetter("mappings/mapping/mtkgArDept", "mtkgArDept");
+        digester.addBeanPropertySetter("mappings/mapping/svcArOffice", "svcArOffice");
+        digester.addBeanPropertySetter("mappings/mapping/pccArDept", "pccArDept");
+        digester.addSetNext("mappings/mapping", "add");
+        try {
+          InputStream is = ConfigUtil.getResourceStream("us-branchoff-mapping.xml");
+          USUtil.boMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
+        } catch (Exception e) {
+          LOG.error("Error occured while digesting xml.", e);
+        }
       }
-    }
 
-    // initialize mktg AR dept and svc AR Office mapping
-    LOG.debug("US - initializing mktg AR dept and svc AR Office mapping.");
-    if (USUtil.svcARBOMappings.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
+      // initialize mktg AR dept and svc AR Office mapping
+      LOG.debug("US - initializing mktg AR dept and svc AR Office mapping.");
+      if (USUtil.svcARBOMappings.isEmpty()) {
+        Digester digester = new Digester();
+        digester.setValidating(false);
+        digester.addObjectCreate("mappings", ArrayList.class);
 
-      digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
+        digester.addObjectCreate("mappings/mapping", USBranchOffcMapping.class);
 
-      digester.addBeanPropertySetter("mappings/mapping/mktgDepartmentAR", "mktgDepartmentAR");
-      digester.addBeanPropertySetter("mappings/mapping/svcOfficeAR", "svcOfficeAR");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("us-mktgsvc-mapping.xml");
-        USUtil.svcARBOMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
+        digester.addBeanPropertySetter("mappings/mapping/mktgDepartmentAR", "mktgDepartmentAR");
+        digester.addBeanPropertySetter("mappings/mapping/svcOfficeAR", "svcOfficeAR");
+        digester.addSetNext("mappings/mapping", "add");
+        try {
+          InputStream is = ConfigUtil.getResourceStream("us-mktgsvc-mapping.xml");
+          USUtil.svcARBOMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
+        } catch (Exception e) {
+          LOG.error("Error occured while digesting xml.", e);
+        }
       }
-    }
 
-    LOG.debug("US - initializing mapping for Fed Isic for DnB matches");
-    if (USUtil.usFedIsicMap.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
+      LOG.debug("US - initializing mapping for Fed Isic for DnB matches");
+      if (USUtil.usFedIsicMap.isEmpty()) {
+        Digester digester = new Digester();
+        digester.setValidating(false);
+        digester.addObjectCreate("mappings", ArrayList.class);
 
-      digester.addObjectCreate("mappings/mapping", USFedIsicMapping.class);
+        digester.addObjectCreate("mappings/mapping", USFedIsicMapping.class);
 
-      digester.addBeanPropertySetter("mappings/mapping/dnb-isic", "dnbIsic");
-      digester.addBeanPropertySetter("mappings/mapping/cmr-isic", "cmrIsic");
-      digester.addBeanPropertySetter("mappings/mapping/dnb-subInd", "dnbSubInd");
-      digester.addBeanPropertySetter("mappings/mapping/cmr-subInd", "cmrSubInd");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("us-fed-isic-mapping.xml");
-        USUtil.usFedIsicMap = (ArrayList<USFedIsicMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
+        digester.addBeanPropertySetter("mappings/mapping/dnb-isic", "dnbIsic");
+        digester.addBeanPropertySetter("mappings/mapping/cmr-isic", "cmrIsic");
+        digester.addBeanPropertySetter("mappings/mapping/dnb-subInd", "dnbSubInd");
+        digester.addBeanPropertySetter("mappings/mapping/cmr-subInd", "cmrSubInd");
+        digester.addSetNext("mappings/mapping", "add");
+        try {
+          InputStream is = ConfigUtil.getResourceStream("us-fed-isic-mapping.xml");
+          USUtil.usFedIsicMap = (ArrayList<USFedIsicMapping>) digester.parse(is);
+        } catch (Exception e) {
+          LOG.error("Error occured while digesting xml.", e);
+        }
       }
     }
   }
@@ -714,9 +716,9 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
+      isPaygoUpgrade = true;
     }
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK")) && !isPaygoUpgrade) {
       // skip checks if requester is from USCMDE team
@@ -927,7 +929,7 @@ public class USUtil extends AutomationUtil {
             return true;
           }
         }
-        
+
         boolean isPayGo = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
         if (changes.isLegalNameChanged() && !isPayGo) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
@@ -1377,9 +1379,9 @@ public class USUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    boolean isPaygoUpgrade=false;
-    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
@@ -1398,50 +1400,22 @@ public class USUtil extends AutomationUtil {
             validation.setMessage("Validated.");
             validation.setSuccess(true);
           } else {
-        	// company proof
-        	  //CREATCMR-9466
-              if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-                validation.setMessage("Validated");
-                details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-                details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
-                validation.setSuccess(true);
-              } else if (isPaygoUpgrade){
-                engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
-                details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
-                validation.setMessage("Review needed");
-                validation.setSuccess(false);        
-              }else {
-                validation.setMessage("Rejected");
-                validation.setSuccess(false);
-                details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-                details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
-                engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
-                output.setOnError(true);
-                output.setDetails(details.toString());
-                if (payGoAddredited) {
-                  admin.setPaygoProcessIndc("Y");
-                }
-                LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
-              }
-        	  //CREATCMR-9466
-          }
-        } else {
-        	// company proof
-        	//CREATCMR-9466
+            // company proof
+            // CREATCMR-9466
             if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
               validation.setMessage("Validated");
-              details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
               validation.setSuccess(true);
-            }else if (isPaygoUpgrade){
-              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+            } else if (isPaygoUpgrade) {
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
               details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
               validation.setMessage("Review needed");
-              validation.setSuccess(false);        
+              validation.setSuccess(false);
             } else {
               validation.setMessage("Rejected");
               validation.setSuccess(false);
-              details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
               engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
               output.setOnError(true);
@@ -1451,25 +1425,26 @@ public class USUtil extends AutomationUtil {
               }
               LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
             }
-      	  	//CREATCMR-9466
-        }
-      } else {
-    	// company proof
-    	  //CREATCMR-9466
+            // CREATCMR-9466
+          }
+        } else {
+          // company proof
+          // CREATCMR-9466
           if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
             validation.setMessage("Validated");
-            details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
             details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
             validation.setSuccess(true);
-          } else if (isPaygoUpgrade){
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+          } else if (isPaygoUpgrade) {
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
             details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
             validation.setMessage("Review needed");
-            validation.setSuccess(false);        
-          }else {
+            validation.setSuccess(false);
+          } else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
-            details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
             engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
             output.setOnError(true);
             output.setDetails(details.toString());
@@ -1478,7 +1453,34 @@ public class USUtil extends AutomationUtil {
             }
             LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
           }
-          //CREATCMR-9466
+          // CREATCMR-9466
+        }
+      } else {
+        // company proof
+        // CREATCMR-9466
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          validation.setMessage("Validated");
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+          validation.setSuccess(true);
+        } else if (isPaygoUpgrade) {
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
+          details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
+          validation.setMessage("Review needed");
+          validation.setSuccess(false);
+        } else {
+          validation.setMessage("Rejected");
+          validation.setSuccess(false);
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+          output.setOnError(true);
+          output.setDetails(details.toString());
+          if (payGoAddredited) {
+            admin.setPaygoProcessIndc("Y");
+          }
+          LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+        }
+        // CREATCMR-9466
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");

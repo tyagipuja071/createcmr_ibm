@@ -170,7 +170,7 @@ public class SpainUtil extends AutomationUtil {
     }
     String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           false, requestData);
     }
     switch (scenario) {
