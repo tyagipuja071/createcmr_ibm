@@ -7311,8 +7311,8 @@ function hideNonRelevantFieldsInDRFlow() {
 
   // IBM Tab fields
   switch (custSubType) {
-    case 'BFKSC':
     case 'RACMR':
+    case 'BFKSC':
       break;
     default:
       FormManager.disable('salesTeamCd');
