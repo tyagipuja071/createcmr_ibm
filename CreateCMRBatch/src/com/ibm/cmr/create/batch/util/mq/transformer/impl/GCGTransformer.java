@@ -112,7 +112,7 @@ public abstract class GCGTransformer extends APTransformer {
     if (handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.TAIWAN) || handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.HONG_KONG)
         || handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.MACAO)) {
       // Handling obsolete data
-      DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+      DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.getEntityManager(), handler.cmrData.getId().getReqId());
       String reqType = handler.adminData.getReqType();
       if (StringUtils.equalsIgnoreCase(reqType, "U")) {
         if (!StringUtils.isNotBlank(handler.cmrData.getApCustClusterId())) {

@@ -78,17 +78,18 @@ public class BrazilRetrieveDataController {
       }
 
       EntityManager entityManager = JpaManager.getEntityManager();
-      List<Stxl> stxlList = getStxlAddlContactsByKunnr(entityManager, kunnr);
+      try {
+        List<Stxl> stxlList = getStxlAddlContactsByKunnr(entityManager, kunnr);
 
-      for (Stxl stxl : stxlList) {
-        if ("ZOA1".equals(stxl.getId().getTdid())) {
-          email1 = stxl.getClustd();
-        } else if ("ZOA2".equals(stxl.getId().getTdid())) {
-          email2 = stxl.getClustd();
-        } else if ("ZOA3".equals(stxl.getId().getTdid())) {
-          email3 = stxl.getClustd();
+        for (Stxl stxl : stxlList) {
+          if ("ZOA1".equals(stxl.getId().getTdid())) {
+            email1 = stxl.getClustd();
+          } else if ("ZOA2".equals(stxl.getId().getTdid())) {
+            email2 = stxl.getClustd();
+          } else if ("ZOA3".equals(stxl.getId().getTdid())) {
+            email3 = stxl.getClustd();
+          }
         }
-      }
 
       List<TaxData> taxDataList = getTaxDataByKunnr(entityManager, kunnr);
       for (TaxData taxData : taxDataList) {
@@ -110,7 +111,20 @@ public class BrazilRetrieveDataController {
       map.addAttribute("collectorNameNo", collectorNameNo);
       map.addAttribute("salesBusOffCd", salesBusOffCd);
 
-      map.addAttribute("success", true);
+        map.addAttribute("email1", email1);
+        map.addAttribute("email2", email2);
+        map.addAttribute("email3", email3);
+        map.addAttribute("taxSepInd", taxSepInd);
+        map.addAttribute("muniFiscalCodeLE", muniFiscalCodeLE);
+        map.addAttribute("muniFiscalCodeUS", muniFiscalCodeUS);
+        map.addAttribute("proxiLocnNo", proxiLocNo);
+        map.addAttribute("success", true);
+      } finally {
+        if (entityManager != null) {
+          entityManager.clear();
+          entityManager.close();
+        }
+      }
     } else {
       map.addAttribute("success", false);
     }

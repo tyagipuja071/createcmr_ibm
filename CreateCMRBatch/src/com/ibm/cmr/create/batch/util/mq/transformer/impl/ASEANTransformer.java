@@ -82,7 +82,7 @@ public abstract class ASEANTransformer extends APTransformer {
       handler.messageHash.put("ClusterNo", clusterID);
     }
     // Handling obsolete data
-    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.getEntityManager(), handler.cmrData.getId().getReqId());
     String reqType = handler.adminData.getReqType();
     if (StringUtils.equalsIgnoreCase(reqType, "U")) {
       if (StringUtils.isBlank(handler.cmrData.getApCustClusterId())) {

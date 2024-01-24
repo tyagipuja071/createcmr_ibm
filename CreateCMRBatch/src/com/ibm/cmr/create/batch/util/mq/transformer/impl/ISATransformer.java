@@ -91,7 +91,7 @@ public abstract class ISATransformer extends APTransformer {
     }
 
     // Handling obsolete data
-    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+    DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.getEntityManager(), handler.cmrData.getId().getReqId());
     if (StringUtils.equalsIgnoreCase(reqType, "U")) {
       if (StringUtils.isBlank(handler.cmrData.getApCustClusterId())) {
         handler.messageHash.put("ClusterNo", oldDataRdc.getApCustClusterId());
