@@ -86,7 +86,6 @@ function afterConfigForJP() {
     setDefaultValueForChargeCode();
     // setTier2Required();
     disableRequestFor();
-    disableProductType();
     showHideJSIC();
     showHideSubindustry();
     setOutsourcingServiceRequired();
@@ -120,8 +119,8 @@ function afterConfigForJP() {
   setContractSignDate();
   setFieldsBehaviorForBPEndUserAndIGFCmr();
   
-  // CREATCMR-10048 - Hide non sunset fields
-  hideNonSunsetFields();
+  // CREATCMR-10048 - Hide non relevant fields for DR flow
+  hideNonRelevantFieldsInDRFlow();
 }
 
 /**
@@ -1086,11 +1085,12 @@ function setAdminDeptOptional() {
 
 function setAccountAbbNm() {
   if (FormManager.getActualValue('reqType') == 'C') {
-    setAccountAbbNmForCreate();
+    // setAccountAbbNmForCreate();
   } else if (FormManager.getActualValue('reqType') == 'U') {
     // setAccountAbbNmForUpdate();
   }
 }
+
 function setAccountAbbNmForCreate() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1167,6 +1167,7 @@ function setAccountAbbNmForCreate() {
     FormManager.setValue('abbrevNm', accountAbbNm);
   }
 }
+
 function setAccountAbbNmForUpdate() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1233,6 +1234,7 @@ function resetAccountAbbNmOnFieldChange() {
     }
   });
 }
+
 function setAccountAbbNmRequired() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1274,8 +1276,7 @@ function setAccountAbbNmRequired() {
     break;
   case '':
   default:
-    FormManager.enable('abbrevNm');
-    FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
+    break;
   }
 }
 
@@ -3534,13 +3535,15 @@ function setCustNmDetailOnAddrSave() {
   FormManager.addValidator('email2', Validators.NO_SINGLE_BYTE, [ 'Customer Name_Detail' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('email2', Validators.NO_HALF_ANGLE, [ 'Customer Name_Detail' ], 'MAIN_CUST_TAB');
 }
+
 function setAccountAbbNmOnAddrSave() {
   if (cmr.currentRequestType == 'C') {
-    setAccountAbbNmOnAddrSaveCreate();
+    // setAccountAbbNmOnAddrSaveCreate();
   } else if (cmr.currentRequestType == 'U') {
-    setAccountAbbNmOnAddrSaveUpdate();
+    // setAccountAbbNmOnAddrSaveUpdate();
   }
 }
+
 function setAccountAbbNmOnAddrSaveCreate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var fullEngNm = FormManager.getActualValue('cnCustName1');
@@ -4259,58 +4262,7 @@ function disableRequestFor() {
     FormManager.disable('privIndc_3');
   }
 }
-function disableProductType() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-  if (custSubGrp == 'INTER' && reqType == 'C') {
-    document.getElementById('ast-ProdType').innerHTML = '* ';
-    document.getElementById('ast-ProdType').setAttribute('style', 'color:red');
-    document.getElementById('ast-ProdType').setAttribute('class', 'cmr-ast');
 
-    FormManager.enable('prodType_1');
-    FormManager.enable('prodType_2');
-    FormManager.enable('prodType_3');
-    FormManager.enable('prodType_4');
-    FormManager.enable('prodType_5');
-    FormManager.enable('prodType_6');
-    FormManager.enable('prodType_7');
-    FormManager.enable('prodType_8');
-  } else if (custSubGrp == '') {
-    return;
-  } else {
-    document.getElementById('ast-ProdType').innerHTML = '';
-    try {
-      FormManager.getField('prodType_1').set('checked', false);
-      FormManager.getField('prodType_2').set('checked', false);
-      FormManager.getField('prodType_3').set('checked', false);
-      FormManager.getField('prodType_4').set('checked', false);
-      FormManager.getField('prodType_5').set('checked', false);
-      FormManager.getField('prodType_6').set('checked', false);
-      FormManager.getField('prodType_7').set('checked', false);
-      FormManager.getField('prodType_8').set('checked', false);
-    } catch (e) {
-      FormManager.getField('prodType_1').checked = false;
-      FormManager.getField('prodType_2').checked = false;
-      FormManager.getField('prodType_3').checked = false;
-      FormManager.getField('prodType_4').checked = false;
-      FormManager.getField('prodType_5').checked = false;
-      FormManager.getField('prodType_6').checked = false;
-      FormManager.getField('prodType_7').checked = false;
-      FormManager.getField('prodType_8').checked = false;
-    }
-    FormManager.readOnly('prodType_1');
-    FormManager.readOnly('prodType_2');
-    FormManager.readOnly('prodType_3');
-    FormManager.readOnly('prodType_4');
-    FormManager.readOnly('prodType_5');
-    FormManager.readOnly('prodType_6');
-    FormManager.readOnly('prodType_7');
-    FormManager.readOnly('prodType_8');
-  }
-}
 function updateBillToCustomerNo() {
   var _billToCustNoHandler = dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
     if ('IBMTP' == FormManager.getActualValue('custGrp')) {
@@ -5125,9 +5077,6 @@ function disableFieldsForUpdateOnScenarios() {
   case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
-
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
@@ -5164,9 +5113,6 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     break;
   case 'OUTSC':
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
-
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
@@ -5217,9 +5163,6 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('privIndc_2');
     FormManager.disable('privIndc_3');
 
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
-
     FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
     FormManager.removeValidator('channelCd', Validators.REQUIRED);
     FormManager.removeValidator('govType', Validators.REQUIRED);
@@ -5264,9 +5207,6 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.removeValidator('siInd', Validators.REQUIRED);
     break;
   case 'ISOCU':
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
-
     FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
     FormManager.removeValidator('channelCd', Validators.REQUIRED);
     FormManager.removeValidator('govType', Validators.REQUIRED);
@@ -7327,22 +7267,70 @@ function addJPMandatoryAddressTypesValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function hideNonSunsetFields() {
-  // Solution: Hide fields and remove all of the js code that
-  // enable/required/show the fields
-  // and then make sure that the field is empty -- might need to set this in
-  // JPHandler doBeforeDataSave and doAfterImport
-  // check for default value setting in Service
-  // test in random scenarios (one of each scenario type)
-  // test create scratch, create by model, update
-  // test viewonly -- the fields should not be visible
-  
-  /*
-   * Customer Name_Detail, OEM, Education Group, Customer Group, IIN, SI, CRS
-   * Code, CAR Code, Government Entity, Outsourcing Service,
-   */
-  console.log("DR Flow hideNonSunsetFields() ")
-  // FormManager.hide('AbbrevLocation', 'email2');
+function hideNonRelevantFieldsInDRFlow() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  console.log('>>>> DR Flow. Non-relevant fields are hidden/removed.');
+  // General Tab
+  FormManager.disable('icmsInd');
+  FormManager.hide('ICMSContribution', 'icmsInd');
+  FormManager.removeValidator('icmsInd', Validators.REQUIRED);
+
+  // Customer Tab fields
+  FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+  FormManager.disable('email2');
+  FormManager.hide('AbbrevLocation', 'email2');
+  FormManager.removeValidator('email2', Validators.REQUIRED);
+  FormManager.clearValue('oemInd');
+  FormManager.disable('oemInd');
+  FormManager.hide('OEMInd', 'oemInd');
+  FormManager.removeValidator('oemInd', Validators.REQUIRED);
+  FormManager.disable('educAllowCd');
+  FormManager.hide('EducationAllowance', 'educAllowCd');
+  FormManager.disable('custAcctType');
+  FormManager.hide('CustAcctType', 'custAcctType');
+  FormManager.disable('iinInd');
+  FormManager.hide('IinInd', 'iinInd');
+  FormManager.disable('siInd');
+  FormManager.hide('SiInd', 'siInd');
+  FormManager.removeValidator('siInd', Validators.REQUIRED);
+  FormManager.disable('crsCd');
+  FormManager.hide('CrsCd', 'crsCd');
+  FormManager.disable('creditCd');
+  FormManager.hide('CreditCd', 'creditCd');
+  FormManager.disable('govType');
+  FormManager.hide('Government', 'govType');
+  FormManager.removeValidator('govType', Validators.REQUIRED);
+  FormManager.disable('outsourcingService');
+  FormManager.hide('OutsourcingServ', 'outsourcingService');
+
+  // IBM Tab fields
+  switch (custSubType) {
+    case 'BFKSC':
+    case 'RACMR':
+      break;
+    default:
+      FormManager.disable('salesTeamCd');
+      FormManager.hide('SalesSR', 'salesTeamCd');
+      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+      break;
+  }
+  FormManager.disable('repTeamMemberNo');
+  FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
+  FormManager.disable('privIndc');
+  FormManager.hide('PrivIndc', 'privIndc');
+  FormManager.disable('csDiv');
+  FormManager.hide('CSDiv', 'csDiv');
+  FormManager.removeValidator('csDiv', Validators.REQUIRED);
+  FormManager.disable('tier2');
+  FormManager.hide('Tier2', 'tier2');
+  FormManager.disable('adminDeptLine');
+  FormManager.hide('AdminDeptLine', 'adminDeptLine');
 }
 
 dojo.addOnLoad(function() {
@@ -7470,6 +7458,9 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(disableBpBqiImport, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(disableBpBqiImport, GEOHandler.JP);
+
+  GEOHandler.addAfterConfig(hideNonRelevantFieldsInDRFlow, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(hideNonRelevantFieldsInDRFlow, GEOHandler.JP);
 
   GEOHandler.addAfterConfig(setFieldsForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setFieldsForBFKSCScenario, GEOHandler.JP);
