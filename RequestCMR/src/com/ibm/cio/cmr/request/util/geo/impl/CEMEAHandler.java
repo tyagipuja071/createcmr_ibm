@@ -1061,7 +1061,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       if (!(StringUtils.isEmpty(mainRecord.getSR()))) {
         data.setRepTeamMemberNo(mainRecord.getSR());
       }
-
+      em.clear();
+      em.close();
     }
     // Phone
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {

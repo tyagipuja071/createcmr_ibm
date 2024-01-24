@@ -764,6 +764,8 @@ public class IsraelHandler extends EMEAHandler {
           if (record != null && !record.isEmpty()) {
             data.setDunsNo(record.get(0));
           }
+          entityManager.clear();
+          entityManager.close();
         }
 
         String codflag = !StringUtils.isEmpty(legacyObjects.getCustomer().getDeptCd()) ? legacyObjects.getCustomer().getDeptCd() : "";
@@ -2029,6 +2031,65 @@ public class IsraelHandler extends EMEAHandler {
     }
   }
 
+  private static String validateMassKna1AddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate rdc address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("IL.MASS.GET.KNA1.ADDR.SEQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("KATR6", SystemLocation.ISRAEL);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("ZZKV_CUSNO", cmrNo);
+        query.setParameter("ZZKV_SEQNO", Integer.valueOf(seqNo));
+        query.setParameter("ZZKV_SEQNO_PAD", seqNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+
+        if (StringUtils.isBlank(result)) {
+          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+              + " does not exist in RDC. Please raise single update for CMR " + cmrNo + " so the address can be inserted to RDC.";
+        }
+
+        entityManager.clear();
+        entityManager.close();
+      }
+    }
+    return errMessage;
+  }
+
+  private static String validateMassLegacyAddrSeqExist(String cmrNo, String seqNo, String addrType) {
+    LOG.info("Israel MU validate legacy address sequence " + seqNo + " for CMR No. " + cmrNo);
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        if (entityManager != null) {
+          String sql = ExternalizedQuery.getSql("IL.MASS.GET.LEGACY.ADDR.SEQ");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("RCYAA", SystemLocation.ISRAEL);
+          query.setParameter("RCUXA", cmrNo);
+          query.setParameter("SEQ", seqNo);
+          query.setForReadOnly(true);
+          String result = query.getSingleResult(String.class);
+
+          if (StringUtils.isBlank(result)) {
+            errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
+                + " does not exist in DB2. Please contact CMDE team to review the CMR.";
+          }
+
+        }
+      } finally {
+        entityManager.clear();
+        entityManager.close();
+      }
+    }
+    return errMessage;
+  }
+
   private void validateAddrRequiredFields(XSSFRow row, TemplateValidation error, String sheetName) {
     // Check required fields
     boolean checkRequiredFields = false;
@@ -2152,71 +2213,26 @@ public class IsraelHandler extends EMEAHandler {
     boolean isDivestiture = true;
     String mandt = SystemConfiguration.getValue("MANDT");
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("IL.GET.ZS01KATR10");
+    try {
+      String sql = ExternalizedQuery.getSql("IL.GET.ZS01KATR10");
 
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setForReadOnly(true);
-    query.setParameter("KATR6", cntry);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR", cmrNo);
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("KATR6", cntry);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("CMR", cmrNo);
 
-    Kna1 zs01 = query.getSingleResult(Kna1.class);
-    if (zs01 != null) {
-      if (StringUtils.isBlank(zs01.getKatr10())) {
-        isDivestiture = false;
-      }
-    }
-    return isDivestiture;
-  }
-
-  private static String validateMassKna1AddrSeqExist(String cmrNo, String seqNo, String addrType) {
-    LOG.info("Israel MU validate rdc address sequence " + seqNo + " for CMR No. " + cmrNo);
-    String errMessage = "";
-
-    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
-      EntityManager entityManager = JpaManager.getEntityManager();
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("IL.MASS.GET.KNA1.ADDR.SEQ");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("KATR6", SystemLocation.ISRAEL);
-        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-        query.setParameter("ZZKV_CUSNO", cmrNo);
-        query.setParameter("ZZKV_SEQNO", Integer.valueOf(seqNo));
-        query.setParameter("ZZKV_SEQNO_PAD", seqNo);
-        query.setForReadOnly(true);
-        String result = query.getSingleResult(String.class);
-
-        if (StringUtils.isBlank(result)) {
-          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
-              + " does not exist in RDC. Please raise single update for CMR " + cmrNo + " so the address can be inserted to RDC.";
+      Kna1 zs01 = query.getSingleResult(Kna1.class);
+      if (zs01 != null) {
+        if (StringUtils.isBlank(zs01.getKatr10())) {
+          isDivestiture = false;
         }
       }
+      return isDivestiture;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    return errMessage;
-  }
-
-  private static String validateMassLegacyAddrSeqExist(String cmrNo, String seqNo, String addrType) {
-    LOG.info("Israel MU validate legacy address sequence " + seqNo + " for CMR No. " + cmrNo);
-    String errMessage = "";
-
-    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(seqNo) && StringUtils.isNotBlank(addrType)) {
-      EntityManager entityManager = JpaManager.getEntityManager();
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("IL.MASS.GET.LEGACY.ADDR.SEQ");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("RCYAA", SystemLocation.ISRAEL);
-        query.setParameter("RCUXA", cmrNo);
-        query.setParameter("SEQ", seqNo);
-        query.setForReadOnly(true);
-        String result = query.getSingleResult(String.class);
-
-        if (StringUtils.isBlank(result)) {
-          errMessage = "CMR " + cmrNo + ": Address with sequence " + seqNo + " (" + addrType + ") "
-              + " does not exist in DB2. Please contact CMDE team to review the CMR.";
-        }
-      }
-    }
-    return errMessage;
   }
 
   private static String validateISICKukla(String cmrNo, String cntry, String usrIsic, String usrKukla) {
@@ -2264,6 +2280,8 @@ public class IsraelHandler extends EMEAHandler {
           }
         }
       }
+      entityManager.clear();
+      entityManager.close();
     }
     if (mismatch) {
       errMessage = "ISIC/KUKLA Mismatch. CMR currently has ISIC 9500/KUKLA 60.  Please change both ISIC and KUKLA.";
@@ -2276,16 +2294,16 @@ public class IsraelHandler extends EMEAHandler {
 
     if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(cntry) && StringUtils.isNotBlank(userSalesRep)) {
       EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        CmrtCust cmrtCust = LegacyDirectUtil.getRealCountryCodeBankNumber(entityManager, cmrNo, cntry);
+        if (cmrtCust != null) {
+          String realCtyCd = StringUtils.isNotEmpty(cmrtCust.getRealCtyCd()) ? cmrtCust.getRealCtyCd() : "";
+          String bankNoInitial = StringUtils.isNotEmpty(cmrtCust.getBankNo()) ? cmrtCust.getBankNo().substring(0, 1) : "";
+          if (!bankNoInitial.equals("9")) {
+            bankNoInitial = "0";
+          }
 
-      CmrtCust cmrtCust = LegacyDirectUtil.getRealCountryCodeBankNumber(entityManager, cmrNo, cntry);
-      if (cmrtCust != null) {
-        String realCtyCd = StringUtils.isNotEmpty(cmrtCust.getRealCtyCd()) ? cmrtCust.getRealCtyCd() : "";
-        String bankNoInitial = StringUtils.isNotEmpty(cmrtCust.getBankNo()) ? cmrtCust.getBankNo().substring(0, 1) : "";
-        if (!bankNoInitial.equals("9")) {
-          bankNoInitial = "0";
-        }
-
-        if (StringUtils.isNotEmpty(realCtyCd) && StringUtils.isNotEmpty(bankNoInitial)) {
+         if (StringUtils.isNotEmpty(realCtyCd) && StringUtils.isNotEmpty(bankNoInitial)) {
           int salesRepInt = Integer.parseInt(userSalesRep);
           int minRange = 220;
           int maxRange = 239;
@@ -2298,8 +2316,12 @@ public class IsraelHandler extends EMEAHandler {
             if (salesRepInt < minRange || salesRepInt > maxRange) {
               errMessage = "Invalid Sales Rep value. Sales Rep must be from 000220-000239 range. Please change it.";
             }
+            }
           }
         }
+      } finally {
+        entityManager.clear();
+        entityManager.close();
       }
     }
     return errMessage;
@@ -2448,6 +2470,8 @@ public class IsraelHandler extends EMEAHandler {
                   + ") and " + sheet2.getSheetName() + " (" + transSeqNumFromTemplate + "). " + "Sequences entered are not a matching pair.";
               error.addError(i + 1, "<br>Address Sequence", errorMsg);
             }
+            entityManager.clear();
+            entityManager.close();
           }
         }
       }

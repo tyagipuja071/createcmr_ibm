@@ -1708,6 +1708,7 @@ public class RequestUtils {
       } catch (Exception e) {
         LOG.warn("County and City computation error.", e);
       } finally {
+        entityManager.clear();
         entityManager.close();
       }
     }

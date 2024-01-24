@@ -1045,18 +1045,23 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     String rdcAufsd = "";
     String mandt = SystemConfiguration.getValue("MANDT");
     EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("WW.GET_RDC_AUFSD");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("KATR6", cntry);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("ZZKV_CUSNO", cmrNo);
-    query.setParameter("KTOKD", "ZS01");
-    query.setForReadOnly(true);
-    String result = query.getSingleResult(String.class);
-    if (result != null) {
-      rdcAufsd = result;
+    try {
+      String sql = ExternalizedQuery.getSql("WW.GET_RDC_AUFSD");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("KATR6", cntry);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("ZZKV_CUSNO", cmrNo);
+      query.setParameter("KTOKD", "ZS01");
+      query.setForReadOnly(true);
+      String result = query.getSingleResult(String.class);
+      if (result != null) {
+        rdcAufsd = result;
+      }
+      return rdcAufsd;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
-    return rdcAufsd;
   }
 
   /**

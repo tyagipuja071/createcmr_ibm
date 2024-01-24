@@ -72,7 +72,7 @@ public abstract class APTransformer extends MessageTransformer {
     GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     if (handler != null && handler instanceof APHandler) {
       this.geoHandler = (APHandler) handler;
-    } else if( !"616".equalsIgnoreCase(cmrIssuingCntry) && !"796".equalsIgnoreCase(cmrIssuingCntry)) {
+    } else if (!"616".equalsIgnoreCase(cmrIssuingCntry) && !"796".equalsIgnoreCase(cmrIssuingCntry)) {
       throw new Exception("Handler should be an instance of APHandler.");
     }
   }
@@ -142,7 +142,7 @@ public abstract class APTransformer extends MessageTransformer {
 
     // Handling obsolete data
     if (handler.cmrData.getCmrIssuingCntry().equals(SystemLocation.KOREA)) {
-      DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.cmrData.getId().getReqId());
+      DataRdc oldDataRdc = aphandler.getAPClusterDataRdc(handler.getEntityManager(), handler.cmrData.getId().getReqId());
       String reqType = handler.adminData.getReqType();
       if (StringUtils.equalsIgnoreCase(reqType, "U")) {
         if (StringUtils.isBlank(handler.cmrData.getApCustClusterId())) {

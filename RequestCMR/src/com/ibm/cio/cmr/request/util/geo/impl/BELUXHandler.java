@@ -174,7 +174,7 @@ public class BELUXHandler extends BaseSOFHandler {
                 newRecord.setCmrName3(null);
                 newRecord.setCmrName4(null);
                 newRecord.setCmrSapNumber(null);
-                mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
+                mapCmrtAddr2FindCMRRec(entityManager, newRecord, cmrAddr);
                 newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
                 if ("ZS02".equals(newRecord.getCmrAddrTypeCode())) {
                   newRecord.setCmrSitePartyID(null);
@@ -496,7 +496,7 @@ public class BELUXHandler extends BaseSOFHandler {
     return output;
   }
 
-  private void mapCmrtAddr2FindCMRRec(FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
+  private void mapCmrtAddr2FindCMRRec(EntityManager entityManager, FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
     if (cmrtAddr == null) {
       return;
     }
@@ -631,7 +631,7 @@ public class BELUXHandler extends BaseSOFHandler {
       }
     } else {
       if (!StringUtils.isBlank(countryNm)) {
-        String countryCd = getCountryCode(countryNm);
+        String countryCd = getCountryCode(entityManager, countryNm);
         zs02Addr.setCmrCountryLanded(countryCd);
       }
     }
@@ -2453,6 +2453,7 @@ public class BELUXHandler extends BaseSOFHandler {
         isDivestiture = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return isDivestiture;
   }
@@ -2481,6 +2482,7 @@ public class BELUXHandler extends BaseSOFHandler {
         is93cmr = true;
       }
     }
+    entityManager.clear();
     entityManager.close();
     return is93cmr;
   }

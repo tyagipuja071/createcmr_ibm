@@ -21,7 +21,6 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
-import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -38,7 +37,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -390,17 +388,8 @@ public abstract class APHandler extends GEOHandler {
     }
   }
 
-  public String getCodeAndDescription(String code, String fieldId, String cntry) {
-    String desc = DropdownListController.getDescription(fieldId, code, cntry);
-    if (!StringUtils.isEmpty(desc)) {
-      return desc;
-    }
-    return code;
-  }
-
-  public DataRdc getAPClusterDataRdc(long reqId) {
+  public DataRdc getAPClusterDataRdc(EntityManager entityManager, long reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
-    EntityManager entityManager = JpaManager.getEntityManager();
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     query.setForReadOnly(true);
