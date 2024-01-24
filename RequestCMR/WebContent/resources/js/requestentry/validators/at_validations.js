@@ -871,7 +871,7 @@ function setSBOValuesForIsuCtc(value) {
         UPDATE_BY_ID: '%' + ims.substring(0, 1) + '%',
         SALES_BO_DESC: salesBoDesc
       };
-      results = cmr.query('GET.SBOLIST.BYISUCTC', qParams);
+      results = cmr.query('AUSTRIA.GET.SBOLIST.BYISUCTC', qParams);
     } else {
       qParams = {
         _qall: 'Y',
@@ -879,7 +879,7 @@ function setSBOValuesForIsuCtc(value) {
         ISU: '%' + isuCtc + '%',
         SALES_BO_DESC: salesBoDesc
       };
-      results = cmr.query('GET.SBOLIST.BYISU', qParams);
+      results = cmr.query('AUSTRIA.GET.SBOLIST.BYISU', qParams);
     }
     console.log("There are " + results.length + " SBO returned.");
 
@@ -926,7 +926,7 @@ function validateSBOValuesForIsuCtc() {
               ISSUING_CNTRY: cntry,
               ISU: '%' + isuCtc + '%'
             };
-            results = cmr.query('GET.SBOLIST.BYISU', qParams);
+            results = cmr.query('AUSTRIA.GET.SBOLIST.BYISU', qParams);
           }
         }
         if (results == null) {
