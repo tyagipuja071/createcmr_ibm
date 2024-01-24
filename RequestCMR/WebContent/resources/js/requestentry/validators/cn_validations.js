@@ -249,23 +249,23 @@ function setInacBySearchTerm(value) {
     } else {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
     }
-      if (role == 'PROCESSOR') {
-        FormManager.enable('inacType');
-        FormManager.enable('inacCd');
-      }
+    if (role == 'PROCESSOR') {
+      FormManager.enable('inacType');
+      FormManager.enable('inacCd');
+    }
   } else {
     if (!isInacRetrieved) {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
-        FormManager.enable('inacCd');
-        FormManager.enable('inacType');
+      FormManager.enable('inacCd');
+      FormManager.enable('inacType');
     }
-      if (role == 'PROCESSOR') {
-        FormManager.enable('inacType');
-        FormManager.enable('inacCd');
-      }
+    if (role == 'PROCESSOR') {
+      FormManager.enable('inacType');
+      FormManager.enable('inacCd');
+    }
     if (value && value != "inacChange" && value != undefined) {
       FormManager.clearValue('inacCd');
       FormManager.clearValue('inacType');
@@ -3788,7 +3788,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addDPLCheckValidatorCN, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [SysLoc.CHINA], null, true);
   GEOHandler.registerValidator(addChecklistValidatorCN, GEOHandler.CN);
-//  GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
+  //  GEOHandler.registerValidator(retrievedValueValidator, GEOHandler.CN);
   // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addFastPassAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
@@ -3819,5 +3819,5 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(sSDGBGIdValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(setIsicCdFromDnb, GEOHandler.CN, null, false);
-//  GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
+  //  GEOHandler.registerValidator(retrievedForCNValidator, GEOHandler.CN, null, false, false);
 });
