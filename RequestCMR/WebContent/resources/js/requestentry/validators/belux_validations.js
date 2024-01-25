@@ -644,8 +644,8 @@ function addBeIsuHandler() {
       value = FormManager.getActualValue('isuCd');
     }
     reqType = FormManager.getActualValue('reqType');
-    if (value == '32') {
-      FormManager.setValue('clientTier', 'T');
+    if (value == '27') {
+      FormManager.setValue('clientTier', 'E');
     } else if (value == '34') {
       FormManager.setValue('clientTier', 'Q');
     } else if (value == '36') {
@@ -876,6 +876,66 @@ function setAccountTeamNumberValues(clientTier) {
   var ims = FormManager.getActualValue('subIndustryCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
+
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole');
+  if (cntry == '624') {
+
+    if ((clientTier == 'E' && isuCd == '27') && (subGrp == 'BECOM' || subGrp == 'CBCOM' || subGrp == 'BE3PA' || subGrp == 'BEDAT' || subGrp == 'BEPUB' || subGrp == 'GOVRN')) {
+
+      if (ims == '') {
+        FormManager.setValue('commercialFinanced', '');
+      }
+      if (ims != '' && (ims.startsWith("A") || ims.startsWith("K"))) {
+        FormManager.setValue('commercialFinanced', 'T0011315');
+      } else if (ims != '' && (ims.startsWith("B") || ims.startsWith("C"))) {
+        FormManager.setValue('commercialFinanced', 'T0011312');
+      } else if (ims != '' && (ims.startsWith("D") || ims.startsWith("R") || ims.startsWith("W"))) {
+        FormManager.setValue('commercialFinanced', 'T0003601');
+      } else if (ims != '' && (ims.startsWith("E") || ims.startsWith("G") || ims.startsWith("H") || ims.startsWith("Y"))) {
+        FormManager.setValue('commercialFinanced', 'T0011318');
+      } else if (ims != '' && (ims.startsWith("F") || ims.startsWith("S"))) {
+        FormManager.setValue('commercialFinanced', 'T0011317');
+      } else if (ims != '' && (ims.startsWith("J") || ims.startsWith("V"))) {
+        FormManager.setValue('commercialFinanced', 'T0011320');
+      } else if (ims != '' && (ims.startsWith("M") || ims.startsWith("L") || ims.startsWith("P"))) {
+        FormManager.setValue('commercialFinanced', 'T0011313');
+      } else if (ims != '' && ims.startsWith("N")) {
+        FormManager.setValue('commercialFinanced', 'T0011319');
+      } else if (ims != '' && ims.startsWith("T")) {
+        FormManager.setValue('commercialFinanced', 'T0011324');
+      } else if (ims != '' && ims.startsWith("U")) {
+        FormManager.setValue('commercialFinanced', 'T0011325');
+      } else if (ims != '' && ims.startsWith("X")) {
+        FormManager.setValue('commercialFinanced', 'T0011311');
+      } else {
+        FormManager.setValue('commercialFinanced', '');
+      }
+    }
+  }
+
+  var countryUse = FormManager.getActualValue('countryUse');
+  var luSubGrpsList = [ 'LUCOM', 'LUCOM', 'LUGOV', 'LU3PA', 'LUDAT', 'LUPUB', 'CBCOM' ];
+  var luSubindustryStartList1 = [ 'A', 'B', 'C', 'D', 'J', 'K', 'L', 'M', 'P', 'R', 'T', 'U', 'V', 'W' ];
+  var luSubindustryStartList2 = [ 'F', 'N', 'S' ];
+  var luSubindustryStartList3 = [ 'E', 'G', 'H', 'Y', 'X' ];
+
+  if (countryUse == '624LU') {
+    if ((clientTier == 'Q' && isuCd == '34') && luSubGrpsList.includes(subGrp)) {
+      if (ims == '') {
+        FormManager.setValue('commercialFinanced', '');
+      }
+      if (ims != '' && luSubindustryStartList1.includes(ims.substr(0, 1))) {
+        FormManager.setValue('commercialFinanced', 'T0003500');
+      } else if (ims != '' && luSubindustryStartList2.includes(ims.substr(0, 1))) {
+        FormManager.setValue('commercialFinanced', 'T0011332');
+      } else if (ims != '' && luSubindustryStartList3.includes(ims.substr(0, 1))) {
+        FormManager.setValue('commercialFinanced', 'T0011335');
+      } else {
+        FormManager.setValue('commercialFinanced', '');
+      }
+    }
+  }
 
   var accountTeamNumber = [];
   if (isuCd != '') {
@@ -1663,8 +1723,16 @@ function setSBOValuesForIsuCtc() {
     }
   }
   if (countryUse == '624') {
+    if (subGrp == 'BECOM' || subGrp == 'CBCOM' || subGrp == 'BE3PA' || subGrp == 'BEDAT' || subGrp == 'BEPUB' || subGrp == 'GOVRN') {
+
+      if (role == 'Requester') {
+        FormManager.setValue('isuCd', '27');
+        FormManager.setValue('clientTier', 'E');
+      }
+    }
+
     if (isuCd == '34' && clientTier == 'Q') {
-      FormManager.setValue('commercialFinanced', 'T0003601');
+      // FormManager.setValue('commercialFinanced', 'T0003601');
       if (role == 'Requester') {
         FormManager.readOnly('commercialFinanced');
         FormManager.readOnly('clientTier');
@@ -1680,16 +1748,16 @@ function setSBOValuesForIsuCtc() {
       FormManager.setValue('commercialFinanced', 'T0007967');
     } else if (isuCd == '28' && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'A0004504');
-    } else if (isuCd == '21' && (subGrp == 'BEBUS' || subGrp == 'CBBUS') && clientTier == '') {
+    } else if (isuCd == '8B' && (subGrp == 'BEBUS' || subGrp == 'CBBUS') && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'P0000003');
     } else if (isuCd == '21' && (beSubGrpsList.includes(subGrp)) && clientTier == '') {
-      FormManager.setValue('commercialFinanced', 'BU0000');
+      FormManager.setValue('commercialFinanced', '33U000');
     }
   }
 
   if (countryUse == '624LU') {
     if (isuCd == '34' && clientTier == 'Q') {
-      FormManager.setValue('commercialFinanced', 'T0003500');
+      // FormManager.setValue('commercialFinanced', 'T0003500');
       if (role == 'Requester') {
         FormManager.readOnly('commercialFinanced');
         FormManager.readOnly('clientTier');
@@ -1703,7 +1771,7 @@ function setSBOValuesForIsuCtc() {
       FormManager.setValue('commercialFinanced', 'T0007968');
     } else if (isuCd == '5K' && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'T0009902');
-    } else if (isuCd == '21' && (subGrp == 'LUBUS' || subGrp == 'CBBUS') && clientTier == '') {
+    } else if (isuCd == '8B' && (subGrp == 'LUBUS' || subGrp == 'CBBUS') && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'P0000046');
     } else if (isuCd == '21' && (luSubGrpsList.includes(subGrp)) && clientTier == '') {
       FormManager.setValue('commercialFinanced', 'LU0000');
@@ -1828,10 +1896,12 @@ function addCmrNoValidator() {
           return new ValidationResult(null, true);
         }
         if (cmrNo != '' && cmrNo != null) {
+
           var isProspect = FormManager.getActualValue('prospLegalInd');
           if ('Y' == isProspect && cmrNo.startsWith('P') && cmrNo.length == 6) {
             return new ValidationResult(null, true);
           }
+
           if (cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
           } else if (isNaN(cmrNo)) {
@@ -1972,8 +2042,8 @@ function clientTierCodeValidator() {
 
   // if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType ==
   // 'C') || (isuCode != '34' && reqType == 'U')) {
-  var activeIsuCd = [ '32', '34', '36' ];
-  var activeCtc = [ 'Q', 'Y', 'T' ];
+  var activeIsuCd = [ '27', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -2014,15 +2084,15 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'.');
     }
-  } else if (isuCode == '32') {
-    if (clientTierCode == 'T') {
+  } else if (isuCode == '27') {
+    if (clientTierCode == 'E') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'T\'.');
+      }, false, 'Client Tier can only accept \'E\'.');
     }
   } else {
     if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
@@ -2037,7 +2107,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' , \'T\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\' , \'E\' or blank.');
     }
   }
 }
@@ -2093,20 +2163,26 @@ function sortlCheckValidator() {
   var scenariosToBlock = [ 'CBBUS', 'BEBUS', 'BEINT', 'IBMEM', 'BEPRI', 'LUBUS', 'LUINT', 'LUIBM', 'LUPRI', 'LUISO' ];
 
   var accSeq_624 = {
-    '34Q' : [ 'T0003601' ],
-    '36Y' : [ 'T0007967' ],
-    '32T' : [ 'T0010421', 'T0010425', 'T0010403', 'T0010422', 'T0010426', 'T0010423', 'T0010424' ],
-    '5K' : [ 'T0009066' ],
-    '21' : [ 'BU0000', 'P0000003' ],
-    '28' : [ 'A0004504' ]
+    '34Q' : [ 'T0011326', 'T0011316', 'T0011331', 'T0011321', 'T0011314', 'T0011322', 'T0011323', 'T0011327', 'T0011330', 'T0011329' ],
+    '36Y' : [ 'T0007967', 'T0012106', 'T0012105' ],
+    '21' : [ '33U00' ],
+    '27E' : [ 'T0011315', 'T0011312', 'T0003601', 'T0011318', 'T0011317', 'T0011320', 'T0011313', 'T0011319', 'T0011324', 'T0011325', 'T0011311' ],
+    '04' : [ 'A0008871', 'A0009312', 'A0008876' ],
+    '28' : [ 'A0004504', 'A0008875' ],
+    '4F' : [ 'A0008874' ],
+    '5B' : [ 'A0008873' ],
+    '5K' : [ 'A0009209' ]
   };
 
   var accSeq_624LU = {
-    '34Q' : [ 'T0003500' ],
-    '21' : [ 'P0000046', 'LU0000' ],
-    '36Y' : [ 'T0007968' ],
-    '5K' : [ 'T0009902' ]
+    '34Q' : [ 'T0011333', 'T0011334', 'T0011336' ],
+    // '21' : [ 'P0000046', 'LU0000' ],
+    '36Y' : [ 'T0007968', 'T0012108', 'T0012107' ],
+    '5K' : [ 'A0009229' ]
   };
+  var beIsuCdList = [ '05', '11', '12', '14', '15', '18', '19', '1R', '31', '32', '3T', '40', '4A', '4D', '4E', '60', '8C', 'XX' ];
+  var beScenarioFormatMatch = [ 'BECOM', 'CBCOM', 'BE3PA', 'BEDAT', 'BEPUB', 'GOVRN' ];
+  var sortlFormat = /^[A-Z0-9]{8}$/;
 
   if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
     if (cmrIssuingCntry == '624') {
@@ -2118,6 +2194,16 @@ function sortlCheckValidator() {
             name : 'commercialFinanced'
           }, false, 'SORTL can only accept ' + accSeq_624[isuCtc]);
         }
+        if (beIsuCdList.includes(isuCode) && beScenarioFormatMatch.includes(custSubGrp) && clientTierCode == '') {
+
+          if (!sortlFormat.test(commercialFinanced)) {
+            return new ValidationResult({
+              id : 'commercialFinanced',
+              type : 'text',
+              name : 'commercialFinanced'
+            }, false, 'Any 8 characters alphanumeric in UPPERCASE for SORTL can be accepted');
+          }
+        }
       }
       if (cmrIssuingCntry == '624') {
         if (countryUse == '624LU') {
@@ -2128,6 +2214,19 @@ function sortlCheckValidator() {
               name : 'commercialFinanced'
             }, false, 'SORTL can only accept ' + accSeq_624LU[isuCtc]);
           }
+          var luIsuCdList = [ '04', '05', '11', '12', '14', '15', '18', '19', '1R', '27', '28', '31', '32', '3T', '40', '4A', '4D', '4F', '5B', '5E', '60', '8C', 'XX' ];
+          var luScenarioFormatMatch = [ 'LUCOM', 'LUCOM', 'LUGOV', 'LU3PA', 'LUDAT', 'LUPUB', 'CBCOM' ];
+
+          if (luIsuCdList.includes(isuCode) && luScenarioFormatMatch.includes(custSubGrp) && clientTierCode == '') {
+            if (!sortlFormat.test(commercialFinanced)) {
+              return new ValidationResult({
+                id : 'commercialFinanced',
+                type : 'text',
+                name : 'commercialFinanced'
+              }, false, 'Any 8 characters alphanumeric in UPPERCASE for SORTL can be accepted');
+            }
+          }
+
         }
       }
     }
@@ -2198,8 +2297,9 @@ function addVatIndValidator() {
       // FormManager.readOnly('vatInd');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
+
       FormManager.setValue('vatInd', '');
-    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
+    } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
       // FormManager.readOnly('vatInd');
@@ -2213,7 +2313,6 @@ function addVatIndValidator() {
     }
   }
 }
-
 
 function StcOrderBlockValidation() {
   FormManager.addFormValidator((function() {
