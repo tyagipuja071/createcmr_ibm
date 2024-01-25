@@ -2186,6 +2186,7 @@ public class JPHandler extends GEOHandler {
   private void setDataValuesOnNonRelevantFieldsInDRFlow(EntityManager entityManager, Admin admin, Data data) {
     String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
     if ("DR".equals(currentConnection)) {
+      String custSubGrp = data.getCustSubGrp() == null ? "" : data.getCustSubGrp();
 
       // General Tab
       data.setIcmsInd(""); // OFCD /Sales(Team) No/Rep Sales No Change
@@ -2203,8 +2204,17 @@ public class JPHandler extends GEOHandler {
       data.setOutsourcingService(""); // Outsourcing Service
 
       // IBM Tab
+      switch (custSubGrp) {
+      case "RACMR":
+      case "BFKSC":
+        break;
+      case "":
+      default:
+        data.setSalesTeamCd(""); // Sales/Team No (Dealer No.)
+        break;
+      }
+
       data.setRepTeamMemberNo(""); // Rep Sales No.
-      data.setSalesTeamCd(""); // Sales/Team No (Dealer No.)
       data.setPrivIndc(""); // Request For
       data.setProdType(""); // Product Type
       data.setCsDiv(""); // CS DIV
