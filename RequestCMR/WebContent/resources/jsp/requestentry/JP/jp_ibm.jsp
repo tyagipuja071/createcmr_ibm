@@ -118,7 +118,7 @@
         </p>
     </cmr:column>
   </cmr:row>
-<!--  <cmr:row addBackground="false">
+  <cmr:row addBackground="false">
     <cmr:column span="4">
       <cmr:label fieldId="ibmBankNumber">
         <cmr:fieldLabel fieldId="ProdType" />: <span id="ast-ProdType"></span>
@@ -162,7 +162,7 @@
     <br>
     <br>
     <br>
-  </cmr:row> -->
+  </cmr:row>
   <cmr:row addBackground="false">
     
     <cmr:column span="2" containerForField="ChargeCd">

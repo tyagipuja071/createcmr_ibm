@@ -1000,7 +1000,7 @@ public class JPHandler extends GEOHandler {
     data.setCustClass(mainRecord.getCustClass());
     // data.setIcmsInd(mainRecord.getIcmsInd());
     data.setCsDiv(mainRecord.getCsDiv());
-    // data.setOemInd(mainRecord.getOemInd());
+    data.setOemInd(mainRecord.getOemInd());
     data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
 
     data.setSvcArOffice(mainRecord.getCmrCustGrpId());
