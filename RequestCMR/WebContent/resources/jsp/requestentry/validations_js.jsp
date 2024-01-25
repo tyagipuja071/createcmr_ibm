@@ -135,8 +135,6 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   		<script src="${resourcesPath}/js/requestentry/validators/jp_validations.js?${cmrv}" type="text/javascript"></script>
     	<script src="${resourcesPath}/js/requestentry/validators/jp_import.js?${cmrv}" type="text/javascript"></script>
     <%  } %>
-  
-  
 </cmr:view>
 
 <cmr:view forGEO="CEMEA">

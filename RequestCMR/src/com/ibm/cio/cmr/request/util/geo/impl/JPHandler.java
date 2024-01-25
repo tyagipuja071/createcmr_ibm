@@ -77,6 +77,7 @@ import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CRISServiceClient;
@@ -1683,6 +1684,8 @@ public class JPHandler extends GEOHandler {
     handleData4RAOnDataSave(data);
     setROLBeforeDataSave(entityManager, data, admin);
     setTAIGABeforeDataSave(entityManager, data);
+
+    setDataValuesOnNonRelevantFieldsInDRFlow(entityManager, admin, data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -2178,6 +2181,36 @@ public class JPHandler extends GEOHandler {
       }
     }
     data.setTerritoryCd(taigaCd);
+  }
+
+  private void setDataValuesOnNonRelevantFieldsInDRFlow(EntityManager entityManager, Admin admin, Data data) {
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+
+      // General Tab
+      data.setIcmsInd(""); // OFCD /Sales(Team) No/Rep Sales No Change
+
+      // Customer Tab
+      data.setEmail2(""); // Customer Name_Detail
+      data.setOemInd(""); // "OEM"
+      data.setEducAllowCd(""); // Education Group
+      data.setCustAcctType(""); // Customer Group
+      data.setIinInd(""); // IIN
+      data.setSiInd(""); // SI
+      data.setCrsCd(""); // CRS Code
+      data.setCreditCd(""); // CAR Code
+      data.setGovType(""); // Government Entity
+      data.setOutsourcingService(""); // Outsourcing Service
+
+      // IBM Tab
+      data.setRepTeamMemberNo(""); // Rep Sales No.
+      data.setSalesTeamCd(""); // Sales/Team No (Dealer No.)
+      data.setPrivIndc(""); // Request For
+      data.setProdType(""); // Product Type
+      data.setCsDiv(""); // CS DIV
+      data.setTier2(""); // TIER-2
+      data.setAdminDeptLine(""); // Admin Depart Line
+    }
   }
 
   private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
@@ -2722,6 +2755,7 @@ public class JPHandler extends GEOHandler {
     setSapNoOnImport(entityManager, admin, data);
     copyIntlAddrValuesToAddr(entityManager, admin);
     copyOtherValuesOfCompanyEstabToADUs(entityManager, admin, data);
+    setDataValuesOnNonRelevantFieldsInDRFlow(entityManager, admin, data);
   }
 
   private void copyOtherValuesOfCompanyEstabToADUs(EntityManager entityManager, Admin admin, Data data) {
