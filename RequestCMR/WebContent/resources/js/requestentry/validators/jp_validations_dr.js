@@ -5284,7 +5284,6 @@ function disableFieldsForUpdateOnScenarios() {
   case 'WHCMR':
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5305,7 +5304,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5320,7 +5318,6 @@ function disableFieldsForUpdateOnScenarios() {
   case 'OUTSC':
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5341,7 +5338,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5388,7 +5384,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5436,7 +5431,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5643,7 +5637,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5696,7 +5689,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5747,7 +5739,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5788,7 +5779,6 @@ function disableFieldsForUpdateOnScenarios() {
 
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5810,7 +5800,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
@@ -5840,7 +5829,6 @@ function disableFieldsForUpdateOnScenarios() {
 
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5862,7 +5850,6 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
     FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
