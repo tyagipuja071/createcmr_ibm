@@ -632,16 +632,28 @@
 		<put-attribute name="title" value="CreateCMR | Automation Engine | Maintain Configuration" />
 		<put-attribute name="body" value="/resources/jsp/auto/code/auto_config.jsp" />
 	</definition>
+  
+  <definition name="rdcsearch" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcsearch.jsp" />
+  </definition>
 
 	<definition name="salesBoModel" extends="base">
 		<put-attribute name="title" value="CreateCMR | Sales Branch Off Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/salesbomaint.jsp" />
 	</definition>
+  
+  <definition name="rdccomplist" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdccomplist.jsp" />
+  </definition>
 
 	<definition name="apClusterModel" extends="base">
 		<put-attribute name="title" value="CreateCMR | AP Customer CLuster Tier Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/apClusterMaint.jsp" />
 	</definition>
+  
+  <definition name="rdccompdet" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdccompdet.jsp" />
+  </definition>
 
 	<definition name="salesBoMaintModel" extends="base">
 		<put-attribute name="title" value="CreateCMR | Sales Branch Off Maintenance" />
@@ -657,16 +669,28 @@
 		<put-attribute name="title" value="CreateCMR | Rep Team Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/repteammaint.jsp" />
 	</definition>
+  
+  <definition name="rdcaccountlist" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcaccountlist.jsp" />
+  </definition>
 
 	<definition name="repTeamMaintModel" extends="base">
 		<put-attribute name="title" value="CreateCMR | Rep Team Maintenance" />
 		<put-attribute name="body" value="/resources/jsp/code/addrepteam.jsp" />
 	</definition>
+  
+  <definition name="rdcaccountdet" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcaccountdet.jsp" />
+  </definition>
 
 	<definition name="quick_search" extends="base">
 		<put-attribute name="title" value="CreateCMR | Quick Search" />
 		<put-attribute name="body" value="/resources/jsp/quick_search.jsp" />
 	</definition>
+  
+  <definition name="rdcnoresults" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcnoresults.jsp" />
+  </definition>
 
 	<definition name="company_details" extends="window">
 		<put-attribute name="body" value="/resources/jsp/quick_search.jsp" />

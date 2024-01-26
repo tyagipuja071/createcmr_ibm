@@ -131,8 +131,13 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 </cmr:view>
 
 <cmr:view forGEO="JP">
-  <script src="${resourcesPath}/js/requestentry/validators/jp_validations.js?${cmrv}" type="text/javascript"></script>
-  <script src="${resourcesPath}/js/requestentry/validators/jp_import.js?${cmrv}" type="text/javascript"></script>
+    <%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+    	<script src="${resourcesPath}/js/requestentry/validators/jp_validations_dr.js?${cmrv}" type="text/javascript"></script>
+    	<script src="${resourcesPath}/js/requestentry/validators/jp_import_dr.js?${cmrv}" type="text/javascript"></script>
+    <%  }  else { %>  
+  		<script src="${resourcesPath}/js/requestentry/validators/jp_validations.js?${cmrv}" type="text/javascript"></script>
+    	<script src="${resourcesPath}/js/requestentry/validators/jp_import.js?${cmrv}" type="text/javascript"></script>
+    <%  } %>
 </cmr:view>
 
 <cmr:view forGEO="CEMEA">
