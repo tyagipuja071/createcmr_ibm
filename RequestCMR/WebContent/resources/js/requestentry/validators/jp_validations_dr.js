@@ -7559,9 +7559,6 @@ function hideNonRelevantFieldsInDRFlow() {
 
   console.log('>>>> DR Flow. Non-relevant fields are hidden/removed.');
   // General Tab
-  FormManager.disable('icmsInd');
-  FormManager.hide('ICMSContribution', 'icmsInd');
-  FormManager.removeValidator('icmsInd', Validators.REQUIRED);
 
   // Customer Tab fields
   FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
