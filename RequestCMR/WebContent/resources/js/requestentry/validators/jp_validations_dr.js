@@ -1904,6 +1904,13 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
   if (cmr.addressMode == 'updateAddress') {
     addrType = cmr.addrdetails.ret2;
   }
+  
+  if('ZS01' == addrType) {
+    setAddrFieldOptional('divn', 'Division');
+  } else {
+    setAddrFieldHide('divn', 'Division');
+  }
+  
   switch (custSubGrp) {
   case 'NORML':
   case 'BPBIL':
@@ -1924,7 +1931,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldMandatory('companySize', 'CompanySize', 'Company Size');
         setAddrFieldOptional('bldg', 'Building');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -1954,7 +1961,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -1984,7 +1991,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('companySize', 'CompanySize');
         setAddrFieldHide('rol', 'ROL');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('custFax', 'CustFAX');
         setAddrFieldHide('office', 'Office');
@@ -2031,7 +2038,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('city2', 'City2');
         setAddrFieldHide('companySize', 'CompanySize');
@@ -2050,7 +2057,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('bldg', 'Building');
         setAddrFieldHide('companySize', 'CompanySize');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -2099,7 +2106,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('city2', 'City2');
         setAddrFieldHide('companySize', 'CompanySize');
@@ -2127,7 +2134,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
 
         setAddrFieldOptional('bldg', 'Building');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -2160,7 +2167,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('custFax', 'CustFax');
         setAddrFieldOptional('postCd', 'PostalCode', 'Postal Code');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -2189,7 +2196,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('companySize', 'CompanySize');
         setAddrFieldHide('rol', 'ROL');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('custFax', 'CustFAX');
         setAddrFieldHide('office', 'Office');
@@ -2236,7 +2243,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('city2', 'City2');
         setAddrFieldHide('companySize', 'CompanySize');
@@ -2255,7 +2262,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('bldg', 'Building');
         setAddrFieldHide('companySize', 'CompanySize');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -2342,7 +2349,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('dept', 'Department');
       setAddrFieldHide('contact', 'Contact');
       setAddrFieldHide('custFax', 'CustFax');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('rol', 'ROL');
       setAddrFieldHide('city2', 'City2');
@@ -2360,7 +2367,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('dept', 'Department');
         setAddrFieldHide('contact', 'Contact');
         setAddrFieldHide('custFax', 'CustFax');
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -2371,7 +2378,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('dept', 'Department');
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -2403,7 +2410,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('dept', 'Department');
       setAddrFieldHide('contact', 'Contact');
       setAddrFieldHide('custFax', 'CustFax');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('locationCode', 'LocationCode');
       setAddrFieldHide('rol', 'ROL');
@@ -2424,7 +2431,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('dept', 'Department');
       setAddrFieldHide('contact', 'Contact');
       setAddrFieldHide('custFax', 'CustFax');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('rol', 'ROL');
       setAddrFieldHide('city2', 'City2');
@@ -2471,7 +2478,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldMandatory('companySize', 'CompanySize', 'Company Size');
       setAddrFieldOptional('bldg', 'Building');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2519,7 +2526,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldOptional('custFax', 'CustFax');
 
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2543,7 +2550,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldMandatory('companySize', 'CompanySize', 'Company Size');
       setAddrFieldOptional('bldg', 'Building');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2579,7 +2586,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldOptional('custFax', 'CustFax');
 
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2603,7 +2610,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('companySize', 'CompanySize');
       setAddrFieldOptional('bldg', 'Building');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2650,7 +2657,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       }
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2679,7 +2686,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
           FormManager.setValue('rol', 'Y');
         }
       }
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2709,7 +2716,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
 
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2774,7 +2781,7 @@ function showOrHideAddrFieldInter(addrType, custSubGrp, role) {
     setAddrFieldHide('bldg', 'Building');
     setAddrFieldHide('companySize', 'CompanySize');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
     setAddrFieldHide('custFax', 'CustFAX');
@@ -2801,7 +2808,6 @@ function showOrHideAddrFieldInter(addrType, custSubGrp, role) {
     setAddrFieldOptional('dept', 'Department');
     setAddrFieldOptional('contact', 'Contact');
     setAddrFieldOptional('rol', 'ROL');
-    setAddrFieldOptional('divn', 'Division');
   } else {
     if (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
       setAddrFieldOptional('office', 'Office');
@@ -2829,7 +2835,7 @@ function showOrHideAddrFieldInter(addrType, custSubGrp, role) {
     setAddrFieldOptional('contact', 'Contact');
     setAddrFieldOptional('custFax', 'CustFax');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('rol', 'ROL');
     setAddrFieldHide('city2', 'City2');
@@ -2853,7 +2859,7 @@ function showOrHideAddrFieldInterOld(addrType, custSubGrp, role) {
     setAddrFieldHide('bldg', 'Building');
     setAddrFieldHide('companySize', 'CompanySize');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
     setAddrFieldHide('custFax', 'CustFAX');
@@ -2863,9 +2869,8 @@ function showOrHideAddrFieldInterOld(addrType, custSubGrp, role) {
     setAddrFieldHide('rol', 'ROL');
   } else if (addrType == 'ZE01') {
     if (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
-      setAddrFieldOptional('divn', 'Division');
     } else if (custSubGrp == 'INTER') {
-      setAddrFieldHide('divn', 'Division');
+      
     }
     setAddrFieldHide('custNm1', 'CustomerName1');
     setAddrFieldHide('custNm2', 'CustomerName2');
@@ -2912,7 +2917,7 @@ function showOrHideAddrFieldInterOld(addrType, custSubGrp, role) {
     setAddrFieldOptional('contact', 'Contact');
     setAddrFieldOptional('custFax', 'CustFax');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('rol', 'ROL');
     setAddrFieldHide('city2', 'City2');
@@ -6848,7 +6853,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
     setAddrFieldHide('dept', 'Department');
     setAddrFieldHide('contact', 'Contact');
     setAddrFieldHide('custFax', 'CustFax');
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('locationCode', 'LocationCode');
     setAddrFieldHide('rol', 'ROL');
@@ -6907,7 +6912,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
 
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('rol', 'ROL');
 
@@ -6939,7 +6944,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
     setAddrFieldHide('dept', 'Department');
     setAddrFieldHide('contact', 'Contact');
     setAddrFieldHide('custFax', 'CustFax');
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('rol', 'ROL');
     setAddrFieldHide('city2', 'City2');
