@@ -529,13 +529,25 @@
   <definition name="crissearch" extends="window">
     <put-attribute name="body" value="/resources/jsp/windows/JP/crissearch.jsp" />
   </definition>
+  
+  <definition name="rdcsearch" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcsearch.jsp" />
+  </definition>
 
   <definition name="criscomplist" extends="window">
     <put-attribute name="body" value="/resources/jsp/windows/JP/criscomplist.jsp" />
   </definition>
+  
+  <definition name="rdccomplist" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdccomplist.jsp" />
+  </definition>
 
   <definition name="criscompdet" extends="window">
     <put-attribute name="body" value="/resources/jsp/windows/JP/criscompdet.jsp" />
+  </definition>
+  
+  <definition name="rdccompdet" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdccompdet.jsp" />
   </definition>
 
   <definition name="crisestablist" extends="window">
@@ -549,13 +561,25 @@
   <definition name="crisaccountlist" extends="window">
     <put-attribute name="body" value="/resources/jsp/windows/JP/crisaccountlist.jsp" />
   </definition>
+  
+  <definition name="rdcaccountlist" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcaccountlist.jsp" />
+  </definition>
 
   <definition name="crisaccountdet" extends="window">
     <put-attribute name="body" value="/resources/jsp/windows/JP/crisaccountdet.jsp" />
   </definition>
+  
+  <definition name="rdcaccountdet" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcaccountdet.jsp" />
+  </definition>
 
   <definition name="crisnoresults" extends="window">
     <put-attribute name="body" value="/resources/jsp/windows/JP/crisnoresults.jsp" />
+  </definition>
+  
+  <definition name="rdcnoresults" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/JP/rdcnoresults.jsp" />
   </definition>
 
   <!-- CRIS end -->

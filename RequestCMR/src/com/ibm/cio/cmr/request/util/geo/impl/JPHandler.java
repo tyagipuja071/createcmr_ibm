@@ -77,6 +77,7 @@ import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CRISServiceClient;
@@ -182,6 +183,9 @@ public class JPHandler extends GEOHandler {
   @Override
   public ImportCMRModel handleImportAddress(EntityManager entityManager, HttpServletRequest request, ParamContainer params,
       ImportCMRModel searchModel) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.JAPAN, "U");
+    boolean isIERPProcessingType = CmrConstants.PROCESSING_TYPE_IERP.equals(processingType);
+    LOG.info("Processing Type: " + processingType + ", is IERP: " + isIERPProcessingType);
 
     // this is called when Estab + Company or Company is imported
     String addrType = searchModel.getAddrType();
@@ -428,7 +432,7 @@ public class JPHandler extends GEOHandler {
         removeOtherAddresses(entityManager, reqentry.getReqId(), "ZC01");
       } else {
         // normal import
-        if (establishment != null) {
+        if (establishment != null && !isIERPProcessingType) {
           removeCurrentAddr(entityManager, reqentry.getReqId(), "ZE01");
           LOG.debug("Adding Establishment Address to Request ID " + reqentry.getReqId());
           addrPk = new AddrPK();
@@ -630,6 +634,10 @@ public class JPHandler extends GEOHandler {
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.JAPAN, "U");
+    boolean isIERPProcessingType = CmrConstants.PROCESSING_TYPE_IERP.equals(processingType);
+    LOG.info("Processing Type: " + processingType + ", is IERP: " + isIERPProcessingType);
+
     FindCMRRecordModel mainRecord = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
     String mandt = SystemConfiguration.getValue("MANDT");
     boolean onlyCrisAddrFlag = false;
@@ -941,7 +949,10 @@ public class JPHandler extends GEOHandler {
       record.setBillingCustNo(reqEntry.getBillToCustNo());
       record.setCreditToCustNo(reqEntry.getCreditToCustNo());
     }
-    converted.add(record);
+
+    if (!isIERPProcessingType) {
+      converted.add(record);
+    }
 
     source.setItems(converted);
   }
@@ -1673,6 +1684,8 @@ public class JPHandler extends GEOHandler {
     handleData4RAOnDataSave(data);
     setROLBeforeDataSave(entityManager, data, admin);
     setTAIGABeforeDataSave(entityManager, data);
+
+    setDataValuesOnNonRelevantFieldsInDRFlow(entityManager, admin, data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -2029,9 +2042,43 @@ public class JPHandler extends GEOHandler {
     }
 
     setFieldBeforeAddrSave(entityManager, addr);
-
     setAbbrevBeforeAddrSave(entityManager, addr);
+    copySoldToEstabNoToADUs(entityManager, addr);
+  }
 
+  private void copySoldToEstabNoToADUs(EntityManager entityManager, Addr addr) {
+    Addr soldToAddr;
+    List<Addr> addrs = getAddresses(entityManager, addr.getId().getReqId());
+    if ("ZS01".equals(addr.getId().getAddrType())) {
+      soldToAddr = addr;
+      if (soldToAddr != null) {
+        copyEstabToOtherADUs(entityManager, addrs, soldToAddr);
+      }
+    } else {
+      soldToAddr = addrs.stream().filter(a -> a != null && "ZS01".equals(a.getId().getAddrType())).findAny().orElse(null);
+      if (soldToAddr != null && StringUtils.isNotBlank(soldToAddr.getDivn())) {
+        copyEstabFromSoldTo(addr, soldToAddr);
+      }
+    }
+  }
+
+  private void copyEstabFromSoldTo(Addr addr, Addr soldToAddr) {
+    addr.setDivn(soldToAddr.getDivn());
+  }
+
+  private void copyEstabToOtherADUs(EntityManager entityManager, List<Addr> addrs, Addr soldToAddr) {
+    if (soldToAddr != null && StringUtils.isNotBlank(soldToAddr.getDivn()) && addrs != null && !addrs.isEmpty()) {
+      String estabNo = soldToAddr.getDivn();
+      for (Addr addr : addrs) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          continue;
+        }
+        addr.setDivn(estabNo);
+        entityManager.merge(addr);
+      }
+    }
+
+    entityManager.flush();
   }
 
   public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
@@ -2134,6 +2181,46 @@ public class JPHandler extends GEOHandler {
       }
     }
     data.setTerritoryCd(taigaCd);
+  }
+
+  private void setDataValuesOnNonRelevantFieldsInDRFlow(EntityManager entityManager, Admin admin, Data data) {
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      String custSubGrp = data.getCustSubGrp() == null ? "" : data.getCustSubGrp();
+
+      // General Tab
+      data.setIcmsInd(""); // OFCD /Sales(Team) No/Rep Sales No Change
+
+      // Customer Tab
+      data.setEmail2(""); // Customer Name_Detail
+      data.setOemInd(""); // "OEM"
+      data.setEducAllowCd(""); // Education Group
+      data.setCustAcctType(""); // Customer Group
+      data.setIinInd(""); // IIN
+      data.setSiInd(""); // SI
+      data.setCrsCd(""); // CRS Code
+      data.setCreditCd(""); // CAR Code
+      data.setGovType(""); // Government Entity
+      data.setOutsourcingService(""); // Outsourcing Service
+
+      // IBM Tab
+      switch (custSubGrp) {
+      case "RACMR":
+      case "BFKSC":
+        break;
+      case "":
+      default:
+        data.setSalesTeamCd(""); // Sales/Team No (Dealer No.)
+        break;
+      }
+
+      data.setRepTeamMemberNo(""); // Rep Sales No.
+      data.setPrivIndc(""); // Request For
+      data.setProdType(""); // Product Type
+      data.setCsDiv(""); // CS DIV
+      data.setTier2(""); // TIER-2
+      data.setAdminDeptLine(""); // Admin Depart Line
+    }
   }
 
   private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
@@ -2678,6 +2765,7 @@ public class JPHandler extends GEOHandler {
     setSapNoOnImport(entityManager, admin, data);
     copyIntlAddrValuesToAddr(entityManager, admin);
     copyOtherValuesOfCompanyEstabToADUs(entityManager, admin, data);
+    setDataValuesOnNonRelevantFieldsInDRFlow(entityManager, admin, data);
   }
 
   private void copyOtherValuesOfCompanyEstabToADUs(EntityManager entityManager, Admin admin, Data data) {
