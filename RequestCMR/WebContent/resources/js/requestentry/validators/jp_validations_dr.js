@@ -7554,6 +7554,7 @@ function hideNonRelevantFieldsInDRFlow() {
   var custSubType = FormManager.getActualValue('custSubGrp');
 
   if (viewOnly != '' && viewOnly == 'true') {
+    hideFieldsInViewOnlyMode(custSubType);
     return;
   }
 
@@ -7609,6 +7610,37 @@ function hideNonRelevantFieldsInDRFlow() {
   FormManager.disable('tier2');
   FormManager.hide('Tier2', 'tier2');
   FormManager.disable('adminDeptLine');
+  FormManager.hide('AdminDeptLine', 'adminDeptLine');
+}
+
+function hideFieldsInViewOnlyMode(custSubType) {
+  // General Tab fields
+
+  // Customer Tab fields
+  FormManager.hide('AbbrevLocation', 'email2');
+  FormManager.hide('OEMInd', 'oemInd');
+  FormManager.hide('EducationAllowance', 'educAllowCd');
+  FormManager.hide('CustAcctType', 'custAcctType');
+  FormManager.hide('IinInd', 'iinInd');
+  FormManager.hide('SiInd', 'siInd');
+  FormManager.hide('CrsCd', 'crsCd');
+  FormManager.hide('CreditCd', 'creditCd');
+  FormManager.hide('Government', 'govType');
+  FormManager.hide('OutsourcingServ', 'outsourcingService');
+
+  // IBM Tab fields
+  switch (custSubType) {
+    case 'RACMR':
+    case 'BFKSC':
+      break;
+    default:
+      FormManager.hide('SalesSR', 'salesTeamCd');
+      break;
+  }
+  FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
+  FormManager.hide('PrivIndc', 'privIndc');
+  FormManager.hide('CSDiv', 'csDiv');
+  FormManager.hide('Tier2', 'tier2');
   FormManager.hide('AdminDeptLine', 'adminDeptLine');
 }
 
