@@ -7558,7 +7558,7 @@ function hideNonRelevantFieldsInDRFlow() {
   }
 
   console.log('>>>> DR Flow. Non-relevant fields are hidden/removed.');
-  // General Tab
+  // General Tab fields
 
   // Customer Tab fields
   FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
