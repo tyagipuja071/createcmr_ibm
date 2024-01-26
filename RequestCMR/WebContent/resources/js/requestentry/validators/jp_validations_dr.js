@@ -3294,21 +3294,6 @@ function dbcs2ascii(value) {
   return modifiedVal;
 }
 
-function showOfcdMessage() {
-  if (FormManager.getField('icmsInd').checked == true) {
-    FormManager.getField('ofcdMessage').style.display = "inline-block";
-  } else {
-    FormManager.getField('ofcdMessage').style.display = "none";
-  }
-  dojo.connect(FormManager.getField('icmsInd'), 'onClick', function(value) {
-    if (FormManager.getField('icmsInd').checked == true) {
-      FormManager.getField('ofcdMessage').style.display = "inline-block";
-    } else {
-      FormManager.getField('ofcdMessage').style.display = "none";
-    }
-  });
-}
-
 function showOrHideDirectBpZSeriesSw() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -7638,7 +7623,6 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterConfig(handleFields4RAOnPageLoad, GEOHandler.JP);
   GEOHandler.addAfterConfig(afterConfigForJP, GEOHandler.JP);
-  GEOHandler.addAfterConfig(showOfcdMessage, GEOHandler.JP);
   GEOHandler.addAfterConfig(addLogicOnOfficeCdChange, GEOHandler.JP);
   GEOHandler.addAfterConfig(resetAccountAbbNmOnFieldChange, GEOHandler.JP);
   GEOHandler.addAfterConfig(showConfirmForTier2, GEOHandler.JP);
