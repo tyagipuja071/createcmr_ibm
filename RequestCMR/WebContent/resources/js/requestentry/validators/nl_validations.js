@@ -1899,13 +1899,11 @@ function clientTierCodeValidator() {
   var reqType = FormManager.getActualValue('reqType');
   var reqType = FormManager.getActualValue('reqType');
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  var activeIsuCd = ['32', '34', '36'];
-  var activeCtc = ['Q', 'Y', 'T'];
+  var activeIsuCd = [ '27', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'E' ];
 
   // if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType ==
   // 'C') || (isuCode != '34' && reqType == 'U')) {
-  var activeIsuCd = ['32', '34', '36', '21'];
-  var activeCtc = ['Q', 'Y', 'T'];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -1954,7 +1952,7 @@ function clientTierCodeValidator() {
         id: 'clientTier',
         type: 'text',
         name: 'clientTier'
-      }, false, 'Client Tier can only accept \'T\'.');
+      }, false, 'Client Tier can only accept \'E\'.');
     }
   } else {
     if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
