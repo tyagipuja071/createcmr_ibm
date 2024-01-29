@@ -505,10 +505,13 @@ function setAccountTeamNumberValues(clientTier) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var subGrp = FormManager.getActualValue('custSubGrp');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var nlSubGrpsList = ['COMME', 'THDPT', 'NLDAT', 'PUBCU', 'CBCOM'];
 
   if (cntry == '788') {
-
+    if (nlSubGrpsList.includes(subGrp) && (role == 'REQUESTER')) {
+      FormManager.setValue('isuCd', '27');
+    }
     var custGrp = FormManager.getActualValue('custGrp');
     if (custGrp == 'CROSS') {
       if (subGrp == 'CBCOM') {
