@@ -178,6 +178,10 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyseqNoformat = StringUtils.leftPad(seqNo, 5, '0');
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
+            /*
+             * if (StringUtils.isBlank(legacyAddressSeq)) { continue; }
+             */
+
             if (StringUtils.isBlank(legacyAddressSeq)) {
               if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
                 record.setCmrAddrTypeCode("PG01");
@@ -1224,12 +1228,12 @@ public class NORDXHandler extends BaseSOFHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isBlank(isu) && "32".equals(isu)) {
+              } else if (!StringUtils.isBlank(isu) && "27".equals(isu)) {
                 if (!"T".contains(ctc) || StringUtils.isBlank(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if (!StringUtils.isBlank(isu) && "36".equals(isu)) {
                 if (!"Y".contains(ctc) || StringUtils.isBlank(ctc)) {
@@ -1238,14 +1242,14 @@ public class NORDXHandler extends BaseSOFHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(ctc)) {
+              } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("27", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(ctc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
               } else if (!"@QYT".contains(ctc)) {
                 LOG.trace(
-                    "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.");
+                    "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
+                    ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.<br>");
               }
               currCell = (XSSFCell) row.getCell(13);
               leadingAccount = validateColValFromCell(currCell);
@@ -1336,8 +1340,9 @@ public class NORDXHandler extends BaseSOFHandler {
               String streetCon = "";// 7
               String postCd = "";// 8
               String city = "";// 9
-              String landedCntry = "";// 10
-              String poBox = "";// 11
+              String stateProv = ""; // 10
+              String landedCntry = "";// 11
+              String poBox = "";// 12
 
               currCell = (XSSFCell) row.getCell(2);
               custNm = validateColValFromCell(currCell);
@@ -1356,8 +1361,10 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(9);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
-              landedCntry = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
+              landedCntry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
               poBox = validateColValFromCell(currCell);
 
               if ("Installing,Shipping,EPL".contains(name)) {
@@ -1471,6 +1478,16 @@ public class NORDXHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "PO BOX",
                     ":Note that PO Box only accept digits. Please fix and upload the template again.<br>");
 
+              }
+
+              String pattern = "^[a-zA-Z0-9]*$";
+              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+              } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedCntry)) {
+                LOG.trace("State/Province and Landed country both should be filled");
+                error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
               }
 
               if (StringUtils.isBlank(poBox)) {
@@ -2613,26 +2630,21 @@ public class NORDXHandler extends BaseSOFHandler {
     boolean isDivestiture = true;
     String mandt = SystemConfiguration.getValue("MANDT");
     EntityManager entityManager = JpaManager.getEntityManager();
-    try {
-      String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
+    String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
 
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setForReadOnly(true);
-      query.setParameter("KATR6", cntry);
-      query.setParameter("MANDT", mandt);
-      query.setParameter("CMR", cmrNo);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
 
-      Kna1 zs01 = query.getSingleResult(Kna1.class);
-      if (zs01 != null) {
-        if (StringUtils.isBlank(zs01.getKatr10())) {
-          isDivestiture = false;
-        }
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = false;
       }
-      return isDivestiture;
-    } finally {
-      entityManager.clear();
-      entityManager.close();
     }
+    return isDivestiture;
   }
 
   // CREATCMR-1653
@@ -2808,46 +2820,36 @@ public class NORDXHandler extends BaseSOFHandler {
     String acAdmin = "";
     String sql = ExternalizedQuery.getSql("ND.GETACADMIN");
     EntityManager em = JpaManager.getEntityManager();
-    try {
-      PreparedQuery query = new PreparedQuery(em, sql);
-      query.setParameter("RCYAA", rcyaa);
-      query.setParameter("RCUXA", cmr_no);
-      List<String> results = new ArrayList<String>();
-      results = query.getResults(String.class);
-      if (results != null && !results.isEmpty()) {
-        if (results.get(0) != null) {
-          acAdmin = results.get(0);
-        }
+    PreparedQuery query = new PreparedQuery(em, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    List<String> results = new ArrayList<String>();
+    results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      if (results.get(0) != null) {
+        acAdmin = results.get(0);
       }
-      LOG.debug("acAdmin of Legacy" + acAdmin);
-      return acAdmin;
-    } finally {
-      em.clear();
-      em.close();
     }
+    LOG.debug("acAdmin of Legacy" + acAdmin);
+    return acAdmin;
   }
 
   // CMR-1746
   private String getSRFromLegacy(String rcyaa, String cmr_no) {
     String salesRep = "";
     EntityManager entityManager = JpaManager.getEntityManager();
-    try {
-      String sql = ExternalizedQuery.getSql("ND.GETSALESREP");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("RCYAA", rcyaa);
-      query.setParameter("RCUXA", cmr_no);
-      List<String> results = query.getResults(String.class);
-      if (results != null && !results.isEmpty()) {
-        if (results.get(0) != null) {
-          salesRep = results.get(0);
-        }
+    String sql = ExternalizedQuery.getSql("ND.GETSALESREP");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      if (results.get(0) != null) {
+        salesRep = results.get(0);
       }
-      LOG.debug("saresRep of Legacy" + salesRep);
-      return salesRep;
-    } finally {
-      entityManager.clear();
-      entityManager.close();
     }
+    LOG.debug("saresRep of Legacy" + salesRep);
+    return salesRep;
   }
 
   @Override
@@ -3014,5 +3016,20 @@ public class NORDXHandler extends BaseSOFHandler {
 
     return addrSeq;
   }
+
+  // private boolean isAllClientTierAllowed(String country, String isuCd) {
+  // boolean isAllClientTierAllowed = true;
+  // if (country.equals("678") && (isuCd == "5K" || isuCd == "19")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("806") && (isuCd == "5K" || isuCd == "04")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("846") && Arrays.asList("5K", "5E", "1R",
+  // "04").contains(isuCd)) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("702") && isuCd.equals("5K")) {
+  // isAllClientTierAllowed = false;
+  // }
+  // return isAllClientTierAllowed;
+  // }
 
 }
