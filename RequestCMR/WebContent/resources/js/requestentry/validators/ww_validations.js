@@ -1,3 +1,4 @@
+
 /*
  * File: ww_validations.js
  * Description:
@@ -5,6 +6,7 @@
  */
 
 var _GBL_NO_INIT = false;
+var _scenarioTypeHandler = null;
 /**
  * Validator for Address Standardization completion
  */
@@ -35,6 +37,59 @@ function addAddrStdValidator() {
 }
 
 /**
+ * Validator for mandt stateProv according to landCntry
+ */
+
+function addStateProvValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var reqId = FormManager.getActualValue('reqId');
+        var landCntry = "";
+        var addrTxt = FormManager.getActualValue('addrTxt');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var viewOnly = FormManager.getActualValue('viewOnlyPage');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var landCountryList = ['IT', 'ES', 'US'];
+        var addrType = "";
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
+              recordList = _allAddressData[i];
+            }
+            addrType = recordList.addrType;
+            if (typeof (addrType) == 'object') {
+              addrType = addrType[0];
+            }
+            // fetch land Cntry and stateProv frm Addr type
+            var reqIdParams = {
+              REQ_ID: reqId,
+              ADDR_TYPE: addrType
+            };
+            var addrResult = cmr.query('GETLANDSTATEBYREQID', reqIdParams);
+            stateProv = addrResult.ret1;
+            landCntry = addrResult.ret2;
+            if (stateProv != null && landCntry != null) {
+            }
+            if (addrType != undefined && addrType != null && addrType != '' && landCntry != undefined && landCntry != null && landCntry != '' && landCountryList.includes(landCntry)) {
+              if (stateProv == undefined || stateProv == null || stateProv == '') {
+                return new ValidationResult(null, false, 'State Province is mandatory for address with landCntry: ' + landCntry + ' addrType: ' + addrType);
+              }
+            }
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+
+
+/**
  * Validator for only a single Sold-to record for the request
  */
 function addSoldToValidator() {
@@ -48,6 +103,7 @@ function addSoldToValidator() {
         var record = cmr.query('GETZS01VALRECORDS', qParams);
         var zs01Reccount = record.ret1;
         var reqType = FormManager.getActualValue('reqType');
+
         // Story 1202261 : validation for Brazil
         if (FormManager.getActualValue('cmrIssuingCntry') == '631') {
           if (Number(zs01Reccount) > 1) {
@@ -373,10 +429,16 @@ function addCovBGValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var forceLockUnlock = function () {
+  console.log(">>>> forceLockUnlock");
+  FormManager.readOnly('cmrIssuingCntry');
+}
+
 function initGenericTemplateHandler() {
   // templates/scenarios initialization. connect onchange of the customer type
   // to load the template
   console.log('init init');
+  forceLockUnlock();
   if (_templateHandler == null && FormManager.getField('custSubGrp')) {
     _templateHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
       if (_delayedLoadComplete) {
@@ -470,6 +532,7 @@ function addClientTierDefaultLogic() {
       }
     });
   }
+
   if (_clientTierHandler && _clientTierHandler[0]) {
     _clientTierHandler[0].onChange();
   }
@@ -504,11 +567,6 @@ function addGenericVATValidator(cntry, tabName, formName, aType) {
             zs01Cntry = ret.ret1;
           }
           console.log('ZS01 VAT Country: ' + zs01Cntry);
-          if (zs01Cntry == 'VE' || zs01Cntry == 'CO' || zs01Cntry == 'CL') {
-            // skip validation for Chile, Colombia, Venezuela landed country
-            // handled sperately under CREATCMR-10034
-            return new ValidationResult(null, true);
-          }
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
             if (result.errorPattern == null) {
@@ -668,76 +726,39 @@ function addGenericZIPValidator() {
         var cntry = FormManager.getActualValue('landCntry');
         var loc = FormManager.getActualValue('cmrIssuingCntry');
 
+        // handling landed cntry for Japan cmrissuingcntry
+        if (cntry == '' && loc != '' && loc == '760') {
+          cntry = 'JP';
+        }
         if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '')) {
           return new ValidationResult(null, true);
         }
-
         var postCd = FormManager.getActualValue('postCd');
 
-        // skip input validation when Postal Code field is emtpy for CR, EC
-        if (postCd == '' && (cntry == 'CR' || cntry == 'EC')) {
-          return new ValidationResult(null, true);
-        }
-
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
-        if (cntry == 'LV') {
-          if (postCd == '') {
+        var result = cmr.validateZIP(cntry, postCd, loc);
+        if (result && !result.success) {
+          if (result.errorPattern == null) {
             return new ValidationResult({
               id: 'postCd',
               type: 'text',
               name: 'postCd'
-            }, false, ('Postal Code for LV is required.'));
-          }
-
-          if (!postCd.startsWith("LV-")) {
-            return new ValidationResult({
-              id: 'postCd',
-              type: 'text',
-              name: 'postCd'
-            }, false, ('Postal Code format should be LV-nnnn.'));
-          } else if (postCd.length != '7') {
-            return new ValidationResult({
-              id: 'postCd',
-              type: 'text',
-              name: 'postCd'
-            }, false, ('Postal Code format should be LV-nnnn.'));
-          } else if (postCd.length == '7') {
-            var numPattern = /^[0-9]+$/;
-            if (!postCd.substr(3, 7).match(numPattern)) {
-              return new ValidationResult({
-                id: 'postCd',
-                type: 'text',
-                name: 'postCd'
-              }, false, ('Postal Code format should be LV-nnnn.'));
+            }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
+          } else {
+            var msg;
+            if (loc == '754' || loc == '866') {
+              msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+            } else {
+              msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
             }
+            return new ValidationResult({
+              id: 'postCd',
+              type: 'text',
+              name: 'postCd'
+            }, false, msg);
           }
         } else {
-          var result = cmr.validateZIP(cntry, postCd, loc);
-          if (result && !result.success) {
-            if (result.errorPattern == null) {
-              return new ValidationResult({
-                id: 'postCd',
-                type: 'text',
-                name: 'postCd'
-              }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
-            } else {
-              var msg;
-
-              if (loc == '754' || loc == '866') {
-                msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
-              } else {
-                msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
-              }
-
-              return new ValidationResult({
-                id: 'postCd',
-                type: 'text',
-                name: 'postCd'
-              }, false, msg);
-            }
-          } else {
-            return new ValidationResult(null, true);
-          }
+          return new ValidationResult(null, true);
         }
       }
     };
@@ -1020,21 +1041,6 @@ function addIsuCdObsoleteValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function updateProspectLegalInd() {
-  var CMRDataRdc = "";
-  var reqId = FormManager.getActualValue('reqId');
-  var reqType = FormManager.getActualValue('reqType');
-  var result = cmr.query("GET.CMR.DATARDC", {
-    REQ_ID: reqId
-  });
-  if (result != null && result.ret1 != '' && result.ret1 != null) {
-    CMRDataRdc = result.ret1;
-  }
-  if (CMRDataRdc != '' && CMRDataRdc.includes("P") && reqType == 'C') {
-    FormManager.setValue('prospLegalInd', 'Y');
-  }
-}
-
 // CREATCMR-6244
 function vatOptionalForLandedUK() {
   var _reqId = FormManager.getActualValue('reqId');
@@ -1114,7 +1120,6 @@ function addVatIndValidator() {
 
 function setToReadOnly() {
 
-
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
   if (viewOnlyPage == 'true') {
@@ -1133,6 +1138,10 @@ function vatIndOnChange() {
   if (_vatIndHandler == null) {
     _vatIndHandler = dojo.connect(FormManager.getField('vatInd'), 'onChange', function (value) {
       var vatInd = FormManager.getActualValue('vatInd');
+      var userRole = FormManager.getActualValue('userRole');
+      if (userRole == 'Viewer') {
+        return;
+      }
       if (vatInd && dojo.string.trim(vatInd) == 'T') {
         FormManager.addValidator('vat', Validators.REQUIRED, ['VAT'], 'MAIN_CUST_TAB');
         FormManager.enable('vat');
@@ -1177,8 +1186,7 @@ function isViewOnly() {
 }
 
 function isImportingFromQuickSearch() {
-  var quickSearch = new URLSearchParams(location.search).get('qs');
-  return quickSearch == "Y";
+  return dojo.cookie('qs') == 'Y' || new URLSearchParams(location.search).get('qs') == 'Y';
 }
 
 function isPrivateScenario() {
@@ -1335,10 +1343,125 @@ function setVatIndFieldsForGrp1AndNordx() {
   if ('T' == FormManager.getActualValue('vatInd') && vat == '') {
     FormManager.addValidator('vat', Validators.REQUIRED, ['VAT'], 'MAIN_CUST_TAB');
   }
+
   if ('E' == FormManager.getActualValue('vatInd')) {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
 }
+
+function updateProspectLegalInd() {
+  var CMRDataRdc = "";
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var result = cmr.query("GET.CMR.DATARDC", {
+    REQ_ID: reqId
+  });
+  if (result != null && result.ret1 != '' && result.ret1 != null) {
+    CMRDataRdc = result.ret1;
+  }
+  if (CMRDataRdc != '' && CMRDataRdc.includes("P") && reqType == 'C') {
+    FormManager.setValue('prospLegalInd', 'Y');
+  }
+}
+
+var forceLockUnlock = function () {
+  console.log(">>>> forceLockUnlock");
+  FormManager.readOnly('cmrIssuingCntry');
+}
+
+// payGo upgrade implementation
+
+function payGoErroMsg() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var reqType = FormManager.getActualValue('reqType');
+        var reqRsn = FormManager.getField('reqReason');
+        var payGo = checkPayGo(cmrNo, cntry);
+        var reqReason = FormManager.getActualValue('reqReason');
+        if (reqType == 'U' && payGo == false && reqReason == 'PAYG') {
+          return new ValidationResult(reqRsn, false, "CMR provided to upgrade to Regular CMR is not a PayGo CMR");
+        }
+      }
+    };
+
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function payGoCreateErroMsg() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var reqReason = FormManager.getActualValue('reqReason');
+        var reqType = FormManager.getActualValue('reqType');
+        var reqRsn = FormManager.getField('reqReason');
+        if (reqType != 'U' && reqReason == 'PAYG') {
+          return new ValidationResult(reqRsn, false, "Upgrade of PayGo CMR is only applicable for update request.");
+        }
+      }
+    };
+
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function newAddressValForPayGo() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var reqReason = FormManager.getActualValue('reqReason');
+        var reqType = FormManager.getActualValue('reqType');
+        var reqId = FormManager.getActualValue('reqId');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var payGo = checkPayGo(cmrNo, cntry);
+        var checkAddress = checkNewAddress(reqId);
+        if (reqType == 'U' && payGo == true && reqReason == 'PAYG' && checkAddress == true) {
+          return new ValidationResult(null, false, "Adding new Address is not allowed in Paygo Upgrade CMR.");
+        }
+      }
+    };
+
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function checkNewAddress(reqId) {
+  var newAddressAdded = false;
+  var addrCount = 0;
+  var newAddr = cmr.query('CHECK_NEW_ADDRESS', {
+    REQ_ID: reqId
+
+  });
+  addrCount = newAddr.ret1;
+  if (Number(addrCount) > 0) {
+    newAddressAdded = true;
+  }
+  else {
+    newAddressAdded = false;
+  }
+  return newAddressAdded;
+};
+
+function checkPayGo(cmrNo, cntry) {
+  var payGo = false;
+  var isPayGo = cmr.query('CHECK_CMR_AUFSD_KNA1_ZS01', {
+    MANDT: cmr.MANDT,
+    ZZKV_CUSNO: cmrNo,
+    KATR6: cntry
+
+  });
+
+  if (isPayGo && isPayGo.ret1 != 'PG') {
+    payGo = false;
+  }
+  else {
+    payGo = true;
+  }
+  return payGo;
+};
+
+//
 
 // CREATCMR-10034
 function addLAVatValidator() {
@@ -1353,12 +1476,6 @@ function addLAVatValidator() {
         var custType = FormManager.getActualValue('custType');
         console.log(">>>> addLAVatValidator");
         var zs01Cntry = null;
-        var skipVatValidationCntry = ['897'];
-
-        // skipping validation for countries which don't have VAT and taxCd1
-        if (skipVatValidationCntry.includes(cmrIssuingCntry)) {
-          return new ValidationResult(null, true);
-        }
         // get vat Field
         var vat = FormManager.getActualValue('vat');
         if (!vat || vat == '' || vat.trim() == '') {
@@ -1463,7 +1580,6 @@ function checkForCompanyProofAttachment() {
   }
 }
 
-
 function limitAPICluster() {
   var reqId = FormManager.getActualValue('reqId');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -1548,13 +1664,16 @@ dojo.addOnLoad(function () {
     '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708',
     '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '649', '729', '678', '702', '806', '846'], null, false, true);
   GEOHandler.registerWWValidator(addAddrStdValidator);
+  GEOHandler.registerWWValidator(addStateProvValidator);
+
   // exclude for LA
   GEOHandler.registerWWValidator(addTaxCodesValidator, GEOHandler.LA, null, false, true);
 
   // exclude for JP
   // GEOHandler.registerWWValidator(addDPLCheckValidator,GEOHandler.ROLE_PROCESSOR);
 
-  GEOHandler.registerValidator(addDPLCheckValidator, ['760'], GEOHandler.ROLE_PROCESSOR, true, true);
+  // GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ],
+  // GEOHandler.ROLE_PROCESSOR, true, true);
 
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
@@ -1579,6 +1698,9 @@ dojo.addOnLoad(function () {
   GEOHandler.registerWWValidator(addGenericZIPValidator);
   // GEOHandler.registerValidator(addGenericZIPValidator,
   // GEOHandler.NO_ME_CEMEA, null, true);
+  GEOHandler.NEW_EMEA = ['624', '788', '706', SysLoc.Switzerland, SysLoc.Sweden, SysLoc.FINLAND, SysLoc.NORWAY, SysLoc.AUSTRIA, SysLoc.GERMANY, SysLoc.SPAIN];
+  GEOHandler.addAfterConfig(afterConfigForEMEA, GEOHandler.NEW_EMEA);
+  GEOHandler.addAfterTemplateLoad(afterConfigForEMEA, GEOHandler.NEW_EMEA);
 
   // Postal Code validation for Ireland as Landed Country - CMR - 6033
   GEOHandler.addAddrFunction(addGenericPostalCodeValidator, GEOHandler.GROUP1);
@@ -1592,10 +1714,11 @@ dojo.addOnLoad(function () {
   GEOHandler.registerWWValidator(addVatIndValidator);
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = ['AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ', 'TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI'];
+
+  GEOHandler.registerWWValidator(forceLockUnlock);
   GEOHandler.addAfterConfig(prospectFilter, GEOHandler.AllCountries);
-  GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries)
-  GEOHandler.registerWWValidator(addLAVatValidator);
   GEOHandler.addAfterTemplateLoad(prospectFilter, GEOHandler.AllCountries);
+  GEOHandler.registerWWValidator(addLAVatValidator);
   GEOHandler.registerValidator(payGoCreateErroMsg, GEOHandler.AllCountries);
   GEOHandler.registerValidator(payGoErroMsg, GEOHandler.AllCountries);
   GEOHandler.registerValidator(newAddressValForPayGo, ['724', '848', '618', '624', '788', '649', '866', '754', '846', '806', '702', '678', '897', '706', '616', '796']);
