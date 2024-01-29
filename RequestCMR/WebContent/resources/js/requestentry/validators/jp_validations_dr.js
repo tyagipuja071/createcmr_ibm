@@ -109,6 +109,9 @@ function afterConfigForJP() {
 
     setAbbrevNmReqForBFKSCScenario();
     setJSICforPRCMRScenario();
+
+    // CREATCMR-10048 - Hide non relevant fields for DR flow
+    showHideSalesTeamNo();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -7577,16 +7580,6 @@ function hideNonRelevantFieldsInDRFlow() {
   FormManager.hide('OutsourcingServ', 'outsourcingService');
 
   // IBM Tab fields
-  switch (custSubType) {
-    case 'RACMR':
-    case 'BFKSC':
-      break;
-    default:
-      FormManager.disable('salesTeamCd');
-      FormManager.hide('SalesSR', 'salesTeamCd');
-      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
-      break;
-  }
   FormManager.disable('repTeamMemberNo');
   FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
   FormManager.disable('privIndc');
@@ -7629,6 +7622,27 @@ function hideFieldsInViewOnlyMode(custSubType) {
   FormManager.hide('CSDiv', 'csDiv');
   FormManager.hide('Tier2', 'tier2');
   FormManager.hide('AdminDeptLine', 'adminDeptLine');
+}
+
+function showHideSalesTeamNo() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
+
+  switch (custSubType) {
+    case 'RACMR':
+      FormManager.show('SalesSR', 'salesTeamCd');
+      FormManager.readOnly('salesTeamCd');
+      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+      break;
+    case 'BFKSC':
+      FormManager.show('SalesSR', 'salesTeamCd');
+      FormManager.addValidator('SalesSR', Validators.REQUIRED, [ 'Sales/Team No (Dealer No.)' ], 'MAIN_IBM_TAB');
+      break;
+    default:
+      FormManager.disable('salesTeamCd');
+      FormManager.hide('SalesSR', 'salesTeamCd');
+      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+      break;
+  }
 }
 
 dojo.addOnLoad(function() {
