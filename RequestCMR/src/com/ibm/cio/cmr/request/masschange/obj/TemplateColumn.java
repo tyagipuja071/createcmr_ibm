@@ -135,6 +135,9 @@ public class TemplateColumn {
         if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country) || JPHandler.isJPIssuingCountry(country)) {
           lovs = IERPRequestUtils.getLovsDR(entityManager, this.lovId, country, true);
           lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.lovId);
+          if (JPHandler.isJPIssuingCountry(country) && "INACCode".equals(this.lovId)) {
+            lovs.add("@@@@");
+          }
         } else if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
           lovs = getLovs(entityManager, this.lovId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.lovId);
