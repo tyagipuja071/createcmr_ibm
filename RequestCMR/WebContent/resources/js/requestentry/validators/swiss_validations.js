@@ -127,6 +127,10 @@ function addAfterConfigForSWISS() {
   if (reqType == 'C') {
     FormManager.getField('capInd').set('checked', true);
     FormManager.readOnly('capInd');
+    // pre-select ISU 27 for commercial, government, third party and private person.
+    if(role == 'REQUESTER' && ['CHCOM','CHGOV','CH3PA','CHPRI'].includes(custSubGrp)) {
+      FormManager.setValue('isuCd', '27');
+    }
   }
 
   // disable copy address
@@ -1617,7 +1621,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
+  if (((isuCode == '27' || isuCode == '34' || isuCode == '36'))) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -1679,7 +1683,7 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'\'.');
     }
-  } else if (isuCode != '36' || isuCode != '34' || isuCode != '32') {
+  } else if (isuCode != '36' || isuCode != '34' || isuCode != '27') {
     if (clientTierCode == '') {
       return new ValidationResult(null, true);
     } else {

@@ -144,9 +144,13 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <cmr:view forCountry="620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
 	<script src="${resourcesPath}/js/requestentry/validators/me_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
-  <cmr:view exceptForCountry="620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
+  <cmr:view exceptForCountry="620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,618">
 	<script src="${resourcesPath}/js/requestentry/validators/cemea_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
+</cmr:view>
+
+<cmr:view forCountry="618">
+  <script src="${resourcesPath}/js/requestentry/validators/at_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
 <cmr:view forGEO="CN">
