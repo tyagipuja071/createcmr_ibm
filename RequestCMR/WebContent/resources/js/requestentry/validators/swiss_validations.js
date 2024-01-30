@@ -1590,100 +1590,100 @@ function setCTCValues() {
   }
 }
 
-function clientTierCodeValidator() {
-  var isuCode = FormManager.getActualValue('isuCd');
-  var clientTierCode = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
-
-  if (((isuCode == '27' || isuCode == '34' || isuCode == '36'))) {
-    if (clientTierCode == '') {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult(null, true);
-    } else {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-    }
-  } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\'\'.');
-    }
-  } else if (isuCode == '32') {
-    if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'T') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'T\'\'.');
-    }
-  } else if (isuCode == '36') {
-    if (clientTierCode == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Y') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Y\'\'.');
-    }
-  } else if (isuCode != '36' || isuCode != '34' || isuCode != '27') {
-    if (clientTierCode == '') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-    }
-  } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'Y' || clientTierCode == '') {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult(null, true);
-    } else {
-      $("#clientTierSpan").html('');
-      $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
-
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
-    }
-  }
-}
+// function clientTierCodeValidator() {
+//   var isuCode = FormManager.getActualValue('isuCd');
+//   var clientTierCode = FormManager.getActualValue('clientTier');
+//   var reqType = FormManager.getActualValue('reqType');
+//
+//   if (((isuCode == '27' || isuCode == '34' || isuCode == '36'))) {
+//     if (clientTierCode == '') {
+//       $("#clientTierSpan").html('');
+//
+//       return new ValidationResult(null, true);
+//     } else {
+//       $("#clientTierSpan").html('');
+//
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier can only accept blank.');
+//     }
+//   } else if (isuCode == '34') {
+//     if (clientTierCode == '') {
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier code is Mandatory.');
+//     } else if (clientTierCode == 'Q') {
+//       return new ValidationResult(null, true);
+//     } else {
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier can only accept \'Q\'\'.');
+//     }
+//   } else if (isuCode == '32') {
+//     if (clientTierCode == '') {
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier code is Mandatory.');
+//     } else if (clientTierCode == 'T') {
+//       return new ValidationResult(null, true);
+//     } else {
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier can only accept \'T\'\'.');
+//     }
+//   } else if (isuCode == '36') {
+//     if (clientTierCode == '') {
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier code is Mandatory.');
+//     } else if (clientTierCode == 'Y') {
+//       return new ValidationResult(null, true);
+//     } else {
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier can only accept \'Y\'\'.');
+//     }
+//   } else if (isuCode != '36' || isuCode != '34' || isuCode != '27') {
+//     if (clientTierCode == '') {
+//       return new ValidationResult(null, true);
+//     } else {
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier can only accept blank.');
+//     }
+//   } else {
+//     if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'Y' || clientTierCode == '') {
+//       $("#clientTierSpan").html('');
+//
+//       return new ValidationResult(null, true);
+//     } else {
+//       $("#clientTierSpan").html('');
+//       $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+//
+//       return new ValidationResult({
+//         id : 'clientTier',
+//         type : 'text',
+//         name : 'clientTier'
+//       }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
+//     }
+//   }
+// }
 // CREATCMR-4293
 
 function clientTierValidator() {
@@ -1976,12 +1976,32 @@ function validateISUandCTCCombination() {
           '5K': '',
           '8C': '',
         }
+
+        let CTCForIsu = mapping[isuCd]
+
         if(!mapping[isuCd]) {
           return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
         }
-        if(ctcCd != mapping[isuCd]) {
-            return new ValidationResult(null, false, `ISU code ${isuCd} cannot have ${ctcCd} client tier.`);
+        if(ctcCd != CTCForIsu) {
+            if (CTCForIsu == '' && ctcCd != '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank.');
+            }
+
+          if (CTCForIsu != '' && ctcCd == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+          }
+
+            return new ValidationResult(null, false, `ISU code ${isuCd} can only accept client tier ${ctcCd} .`);
         }
+        return new ValidationResult(null, true);
       }
     }
   }));
