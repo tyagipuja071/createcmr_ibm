@@ -1944,8 +1944,9 @@ function clientTierCodeValidator() {
         name: 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'.');
     }
-  } else if (isuCode == '32') {
-    if (clientTierCode == 'T') {
+  } else if (isuCode == '27') {
+    if (clientTierCode == 'E') {
+      console.log(">>>>  Client Tier validation for ISU 27 and Client Tier E");
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -2049,7 +2050,7 @@ function sortlCheckValidator() {
             id: 'commercialFinanced',
             type: 'text',
             name: 'commercialFinanced'
-          }, false, 'Any 8 characters alphanumeric in UPPERCASE for SORTL can be accepted');
+          }, false, 'Any 8 characters alphanumeric in UPPERCASE for SORTL can be accepted for ISU ' + isuCode);
         }
       } else {
         return new ValidationResult(null, true);
