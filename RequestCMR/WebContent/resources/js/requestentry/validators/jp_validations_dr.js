@@ -7775,6 +7775,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(hideNonRelevantFieldsInDRFlow, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(hideNonRelevantFieldsInDRFlow, GEOHandler.JP);
+  GEOHandler.addAfterConfig(showHideSalesTeamNo, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(showHideSalesTeamNo, GEOHandler.JP);
 
   GEOHandler.addAfterConfig(setFieldsForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setFieldsForBFKSCScenario, GEOHandler.JP);
