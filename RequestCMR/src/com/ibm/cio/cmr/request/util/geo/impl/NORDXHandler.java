@@ -1228,12 +1228,12 @@ public class NORDXHandler extends BaseSOFHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isBlank(isu) && "32".equals(isu)) {
+              } else if (!StringUtils.isBlank(isu) && "27".equals(isu)) {
                 if (!"T".contains(ctc) || StringUtils.isBlank(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if (!StringUtils.isBlank(isu) && "36".equals(isu)) {
                 if (!"Y".contains(ctc) || StringUtils.isBlank(ctc)) {
@@ -1242,14 +1242,14 @@ public class NORDXHandler extends BaseSOFHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(ctc)) {
+              } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("27", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(ctc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
               } else if (!"@QYT".contains(ctc)) {
                 LOG.trace(
-                    "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.");
+                    "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
+                    ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.<br>");
               }
               currCell = (XSSFCell) row.getCell(13);
               leadingAccount = validateColValFromCell(currCell);
@@ -2633,11 +2633,11 @@ public class NORDXHandler extends BaseSOFHandler {
     try {
       String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
 
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setForReadOnly(true);
-    query.setParameter("KATR6", cntry);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR", cmrNo);
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("KATR6", cntry);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("CMR", cmrNo);
 
       Kna1 zs01 = query.getSingleResult(Kna1.class);
       if (zs01 != null) {
