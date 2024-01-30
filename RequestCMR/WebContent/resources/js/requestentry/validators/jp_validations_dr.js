@@ -4944,45 +4944,6 @@ function addRequestForValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
-function addProductTypeValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var checked = false;
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var reqType = FormManager.getActualValue('reqType');
-        if (reqType == 'C' && custSubGrp == 'INTER') {
-          if (FormManager.getField('prodType_1').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_1').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_2').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_3').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_4').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_5').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_6').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_7').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_8').checked == true) {
-            checked = true;
-          }
-          if (checked == false) {
-            return new ValidationResult(null, false, 'Product Type is required.');
-          } else {
-            return new ValidationResult(null, true, null);
-          }
-        } else {
-          return new ValidationResult(null, true, null);
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
 
 function addDPLCheckValidatorJP() {
   FormManager.addFormValidator((function() {
@@ -5006,6 +4967,7 @@ function addDPLCheckValidatorJP() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
+
 function addFailedDPLValidatorJP() {
   FormManager.addFormValidator((function() {
     return {
@@ -7749,7 +7711,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(checkEstabFuncCdMandatory, GEOHandler.JP,
   // null, true);
   GEOHandler.registerValidator(addRequestForValidator, GEOHandler.JP, null, true);
-  GEOHandler.registerValidator(addProductTypeValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addDPLCheckValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidatorJP, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addINACValidator, GEOHandler.JP, null, true);
