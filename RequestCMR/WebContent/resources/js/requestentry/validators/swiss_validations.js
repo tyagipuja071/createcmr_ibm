@@ -127,10 +127,6 @@ function addAfterConfigForSWISS() {
   if (reqType == 'C') {
     FormManager.getField('capInd').set('checked', true);
     FormManager.readOnly('capInd');
-    // pre-select ISU 27 for commercial, government, third party and private person.
-    if(role == 'REQUESTER' && ['CHCOM','CHGOV','CH3PA','CHPRI'].includes(custSubGrp)) {
-      FormManager.setValue('isuCd', '27');
-    }
   }
 
   // disable copy address
@@ -324,18 +320,7 @@ function addHandlersForSWISS() {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
       setMubotyOnPostalCodeIMS(value);
-      if (!value) {
-        value = FormManager.getActualValue('isuCd');
-      }
-      if (value == '32') {
-        FormManager.setValue('clientTier', 'T');
-      } else if (value == '34') {
-        FormManager.setValue('clientTier', 'Q');
-      } else if (value == '36') {
-        FormManager.setValue('clientTier', 'Y');
-      } else {
-        FormManager.setValue('clientTier', '');
-      }
+      setCTCInitialValueBasedOnCurrentIsu();
     });
   }
 
@@ -1358,7 +1343,7 @@ function setPreferredLangAddr() {
       FormManager.setValue('custLangCd', 'D');
     } else if (postCd >= 6500 && postCd <= 6999) {
       FormManager.setValue('custLangCd', 'I');
-    } else if (postCd >= 0000 && postCd < 3000) {
+    } else if (postCd >= 0 && postCd < 3000) {
       FormManager.setValue('custLangCd', 'F');
     }
   } else {
@@ -1935,6 +1920,41 @@ function addVatIndValidator(){
   }
 }
 }
+
+function setIsuInitialValueBasedOnSubScenario(){
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+  // pre-select ISU 27 for commercial, government, third party and private person.
+  if(role == 'REQUESTER' && [
+  'COMME',
+  'GOVMT',
+  '3PA',
+  'DC',
+  'SENMS',
+    'SENSI',
+    'BROKR',
+    'PRIPE'].includes(custSubGrp)) {
+    FormManager.setValue('isuCd', '27');
+  }
+}
+
+function setCTCInitialValueBasedOnCurrentIsu() {
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  if (!isuCd) {
+    isuCd = FormManager.getActualValue('isuCd');
+  }
+
+  if (isuCd == '27') {
+    FormManager.setValue('clientTier', 'E');
+  } else if (isuCd == '34') {
+    FormManager.setValue('clientTier', 'Q');
+  } else if (isuCd == '36') {
+    FormManager.setValue('clientTier', 'Y');
+  } else {
+    FormManager.setValue('clientTier', '');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -2008,4 +2028,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
+
+  GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
+
 });
