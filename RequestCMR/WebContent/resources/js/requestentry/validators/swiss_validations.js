@@ -1955,6 +1955,38 @@ function setCTCInitialValueBasedOnCurrentIsu() {
   }
 }
 
+function validateISUandCTCCombination() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate: function () {
+        var isuCd = FormManager.getActualValue('isuCd');
+        var ctcCd = FormManager.getActualValue('clientTier');
+        var mapping = {
+          '8B': '',
+          '21': '',
+          '27': 'E',
+          '34': 'Q',
+          '36': 'Y',
+          '04': '',
+          '18': '',
+          '28': '',
+          '31': '',
+          '4D': '',
+          '4F': '',
+          '5K': '',
+          '8C': '',
+        }
+        if(!mapping[isuCd]) {
+          return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
+        }
+        if(ctcCd != mapping[isuCd]) {
+            return new ValidationResult(null, false, `ISU code ${isuCd} cannot have ${ctcCd} client tier.`);
+        }
+      }
+    }
+  }));
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -2031,5 +2063,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateISUandCTCCombination, GEOHandler.SWISS)
 
 });
