@@ -1229,7 +1229,7 @@ public class NORDXHandler extends BaseSOFHandler {
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if (!StringUtils.isBlank(isu) && "27".equals(isu)) {
-                if (!"T".contains(ctc) || StringUtils.isBlank(ctc)) {
+                if (!"E".contains(ctc) || StringUtils.isBlank(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
