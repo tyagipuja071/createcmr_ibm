@@ -1036,6 +1036,10 @@ public class IERPProcessService extends BaseBatchService {
             addr.setSapNo(rdcAddrRecord.get().getSapNo());
             addr.setIerpSitePrtyId(rdcAddrRecord.get().getIerpSitePartyId());
             addr.setParCmrNo(recordNo);
+
+            if (!"ZC01".equals(addr.getId().getAddrType())) {
+              addr.setDivn(estabNo);
+            }
           }
         }
 

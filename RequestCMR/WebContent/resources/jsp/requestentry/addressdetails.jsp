@@ -1140,13 +1140,6 @@
   </cmr:row>
   <cmr:row  addBackground="true">
   <cmr:column span="1">
-        <cmr:label fieldId="EstabFuncCd_view">
-          <span class="lbl-EstabFuncCd">Estab Function Code</span>:</cmr:label>
-  </cmr:column>
-  <cmr:column span="2">
-        <div id="estabFuncCd_view">-</div>
-  </cmr:column>
-  <cmr:column span="1">
         <cmr:label fieldId="Division_view">
           <span class="lbl-Division">Estab No</span>:</cmr:label>
   </cmr:column>
@@ -1161,13 +1154,6 @@
   </cmr:column>
   <cmr:column span="2">
         <div id="city2_view">-</div>
-  </cmr:column>
-  <cmr:column span="1">
-        <cmr:label fieldId="CompanySize_view">
-          <span class="lbl-CompanySize">Company Size</span>:</cmr:label>
-  </cmr:column>
-  <cmr:column span="2">
-        <div id="companySize_view">-</div>
   </cmr:column>
   </cmr:row>
   <cmr:row  addBackground="true">
