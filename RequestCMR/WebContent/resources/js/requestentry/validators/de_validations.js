@@ -1307,8 +1307,6 @@ function setIsuInitialValueBasedOnSubScenario() {
       _custSubGrp == 'BROKR' ||
       _custSubGrp == 'PRIPE'
   ) {
-    //todo remove when done
-    FormManager.enable('isuCd');
     FormManager.setValue('isuCd', '27');
   }
 }
