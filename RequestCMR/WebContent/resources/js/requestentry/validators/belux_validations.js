@@ -941,7 +941,7 @@ function setAccountTeamNumberValues(clientTier) {
         FormManager.setValue('commercialFinanced', '');
       }
       if (sortlList.includes(newCommercialFinanced) && role == 'PROCESSOR') {
-        FormManager.setValue('commercialFinanced', commercialFinanced);
+        FormManager.setValue('commercialFinanced', newCommercialFinanced);
       } else {
         if (ims != '' && luSubindustryStartList1.includes(ims.substr(0, 1))) {
           FormManager.setValue('commercialFinanced', 'T0003500');
