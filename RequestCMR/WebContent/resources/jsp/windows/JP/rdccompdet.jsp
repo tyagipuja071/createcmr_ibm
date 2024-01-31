@@ -10,6 +10,12 @@
   String actionUrl = request.getContextPath()+"/window/rdcprocess";
   CRISCompany company = (CRISCompany) request.getAttribute("record");
   String companyNo = company.getCompanyNo();
+  boolean fromAccount = "Y".equals(request.getParameter("fromAccount"));
+  
+  String access = (String) request.getParameter("access");
+  if (access == null){
+    access = "";
+  }
 %>
 <script>
 function backToSearch(){
@@ -17,7 +23,11 @@ function backToSearch(){
 }
 
 function backToCompanyList(){
-  window.location = '<%=request.getContextPath()+"/window/rdccomplist"%>';
+  <%if (fromAccount && !"CL".equals(access)){ %>
+  	window.location = '<%=request.getContextPath()+"/window/rdcaccountlist"%>';
+  <%} else {%>
+  	window.location = '<%=request.getContextPath()+"/window/rdccomplist"%>';
+  <%} %>
 }
 
 function showAccounts(){
