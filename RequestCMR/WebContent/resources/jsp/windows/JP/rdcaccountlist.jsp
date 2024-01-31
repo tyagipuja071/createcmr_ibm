@@ -53,7 +53,7 @@ function companyNoFormatter(value, rowIndex){
 }
 
 function showCompany(companyNo){
-  window.location = '<%=request.getContextPath()+"/window/rdccompdet/"%>'+companyNo;
+  window.location = '<%=request.getContextPath()+"/window/rdccompdet/"%>'+companyNo+'?fromAccount=Y&&access=<%=access%>';
 }
 
 function showAccount(accountNo, establishmentNo, companyNo){
