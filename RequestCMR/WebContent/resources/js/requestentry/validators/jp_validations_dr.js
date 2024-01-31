@@ -10,7 +10,7 @@ var isPageLoad = true;
 var setFieldsRequiredCount = 0;
 function addSingleByteValidatorJP(cntry, addressMode, details) {
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'ZC01' || reqType == 'ZE01') {
+  if (reqType == 'ZC01') {
     FormManager.removeValidator('office', Validators.NO_SINGLE_BYTE);
     FormManager.removeValidator('dept', Validators.NO_SINGLE_BYTE);
     FormManager.removeValidator('contact', Validators.NO_SINGLE_BYTE);
@@ -134,7 +134,7 @@ var _officeCdHandler = null;
 var _mrcCdHandler = null;
 var _subIndCdHandler = null;
 var _gtcAddrTypeHandlerJp = [];
-var _gtcAddrTypesJp = [ 'ZC01', 'ZE01', 'ZI01', 'ZI02', 'ZI03', 'ZP01', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08', 'ZP09', 'ZS01', 'ZS02' ];
+var _gtcAddrTypesJp = [ 'ZC01', 'ZI01', 'ZI03', 'ZP01', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08', 'ZP09', 'ZS01', 'ZS02' ];
 var _jsicHandler = null;
 
 function addHandlersForJP() {
@@ -174,7 +174,7 @@ function addROLFieldLogic() {
     var companyRolFlag = '';
     enableRolFlag(addrType);
 
-    if (addrType != 'ZC01' && addrType != 'ZE01') {
+    if (addrType != 'ZC01') {
 
       var qParams = {
         _qall : 'Y',
@@ -487,9 +487,7 @@ function addScenarioDriven() {
       FormManager.removeValidator('custClass', Validators.REQUIRED)
       if (addrType == 'ZC01') {
         FormManager.enable('city2', Validators.REQUIRED);
-      } else if (addrType == 'ZE01') {
-        FormManager.enable('divn', Validators.REQUIRED, [ 'Estab No.' ]);
-      } else if (addrType != 'ZC01' && addrType != 'ZE01') {
+      } else if (addrType != 'ZC01') {
         FormManager.removeValidator('postCd', Validators.REQUIRED);
         FormManager.removeValidator('custPhone', Validators.REQUIRED);
         FormManager.removeValidator('custNm4', Validators.REQUIRED);
@@ -1302,12 +1300,10 @@ function toggleAddrTypesForJP(cntry, addressMode) {
       case 'STOSC':
       case 'STOSI':
         cmr.hideNode('radiocont_ZC01');
-        cmr.hideNode('radiocont_ZE01');
         break;
       case '':
       default:
         cmr.showNode('radiocont_ZC01');
-        cmr.showNode('radiocont_ZE01');
         break;
       }
     }
@@ -1315,7 +1311,6 @@ function toggleAddrTypesForJP(cntry, addressMode) {
 
   if (FormManager.getActualValue('reqType') == 'C') {
     if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-      // cmr.hideNode('radiocont_ZI02');
       // cmr.hideNode('radiocont_ZI01');
       cmr.hideNode('radiocont_ZI03');
       cmr.hideNode('radiocont_ZP02');
@@ -1725,13 +1720,13 @@ function canUpdateAddress(value, rowIndex, grid) {
     } else {
       return true;
     }
-  } else if (addrType == 'ZE01' && custType.includes('E')) {
+  } else if (custType.includes('E')) {
     if (reqType == 'U' && (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER')) {
       return false;
     } else {
       return true;
     }
-  } else if (addrType != 'ZC01' && addrType != 'ZE01') {
+  } else if (addrType != 'ZC01') {
     return true;
   }
   return false;
@@ -1745,7 +1740,7 @@ function addrSeqFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   var addrType = rowData.addrType[0];
 
-  if (addrType == 'ZC01' || addrType == 'ZE01') {
+  if (addrType == 'ZC01') {
     return 'N/A';
   }
   return value;
@@ -1774,13 +1769,6 @@ function showOrHideAddrFields(cntry, addressMode, details) {
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
       removeDefaultValueTelNo();
     });
-    dojo.connect(FormManager.getField('addrType_ZE01'), 'onClick', function(value) {
-      if (FormManager.getField('addrType_ZE01').checked == true) {
-        addrType = 'ZE01';
-      }
-      showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
-      removeDefaultValueTelNo();
-    });
     dojo.connect(FormManager.getField('addrType_ZS02'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZS02').checked == true) {
         addrType = 'ZS02';
@@ -1802,12 +1790,6 @@ function showOrHideAddrFields(cntry, addressMode, details) {
     dojo.connect(FormManager.getField('addrType_ZP09'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP09').checked == true) {
         addrType = 'ZP09';
-      }
-      showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
-    });
-    dojo.connect(FormManager.getField('addrType_ZI02'), 'onClick', function(value) {
-      if (FormManager.getField('addrType_ZI02').checked == true) {
-        addrType = 'ZI02';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
     });
@@ -1870,8 +1852,6 @@ function showOrHideAddrFields(cntry, addressMode, details) {
 function checkAddrType(addrType) {
   if (FormManager.getField('addrType_ZC01').checked == true) {
     addrType = 'ZC01';
-  } else if (FormManager.getField('addrType_ZE01').checked == true) {
-    addrType = 'ZE01';
   } else if (FormManager.getField('addrType_ZS02').checked == true) {
     addrType = 'ZS02';
   } else if (FormManager.getField('addrType_ZS01').checked == true) {
@@ -1880,8 +1860,6 @@ function checkAddrType(addrType) {
     addrType = 'ZP01';
   } else if (FormManager.getField('addrType_ZP09').checked == true) {
     addrType = 'ZP09';
-  } else if (FormManager.getField('addrType_ZI02').checked == true) {
-    addrType = 'ZI02';
   } else if (FormManager.getField('addrType_ZI01').checked == true) {
     addrType = 'ZI01';
   } else if (FormManager.getField('addrType_ZI03').checked == true) {
@@ -2364,7 +2342,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       } else if (role == 'PROCESSOR') {
         setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
       }
-      if (addrType == 'ZC01' || addrType == 'ZE01') {
+      if (addrType == 'ZC01') {
         setAddrFieldHide('office', 'Office');
         setAddrFieldHide('custFax', 'CustFax');
         setAddrFieldHide('dept', 'Department');
@@ -2656,7 +2634,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('contact', 'Contact');
       setAddrFieldOptional('custFax', 'CustFax');
-      if ('ZE01' != FormManager.getActualValue('addrType') || 'newAddress' != cmr.addressMode) {
+      if ('newAddress' != cmr.addressMode) {
         setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       }
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
@@ -3064,14 +3042,14 @@ function replaceBuildingChar(value) {
 
 function convertBranch(cntry, addressMode, details) {
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType == 'ZC01' || addrType == 'ZE01') {
+  if (addrType == 'ZC01') {
     return;
   } else {
     convertBranchInDetails();
   }
   dojo.connect(FormManager.getField('office'), 'onChange', function(value) {
     var _addrType = FormManager.getActualValue('addrType');
-    if (_addrType == 'ZC01' || _addrType == 'ZE01') {
+    if (_addrType == 'ZC01') {
       return;
     } else {
       convertBranchInDetails();
@@ -3106,14 +3084,14 @@ function replaceBranchChar(value) {
 
 function convertDept(cntry, addressMode, details) {
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType == 'ZC01' || addrType == 'ZE01') {
+  if (addrType == 'ZC01') {
     return;
   } else {
     convertDeptInDetails();
   }
   dojo.connect(FormManager.getField('dept'), 'onChange', function(value) {
     var _addrType = FormManager.getActualValue('addrType');
-    if (_addrType == 'ZC01' || _addrType == 'ZE01') {
+    if (_addrType == 'ZC01') {
       return;
     } else {
       convertDeptInDetails();
@@ -3394,7 +3372,7 @@ function addSpaceForCustNm1(cntry, addressMode) {
     // custNm1KanJi = convertHalfToFullKatakana(custNm1KanJi);
     FormManager.setValue('custNm1', custNm1KanJi);
     // When address type is COMPANY -> ZC01 or ESTAB -> ZE01 - ignore.
-    if ('ZE01' == FormManager.getActualValue('addrType') || 'ZC01' == FormManager.getActualValue('addrType')) {
+    if ('ZC01' == FormManager.getActualValue('addrType')) {
       return;
     }
     // Defect 1676927 2 spaces between specific company type and legal name
@@ -4918,6 +4896,7 @@ function checkEstabFuncCdMandatory() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
+
 function addRequestForValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -5040,7 +5019,7 @@ function removeDefaultValueTelNo() {
       }
     } else if (custType == 'A' && cmr.addressMode == 'newAddress') {
       if (changed) {
-        if (addrType == 'ZC01' || addrType == 'ZE01') {
+        if (addrType == 'ZC01') {
           setAddrFieldHide('custPhone', 'CustPhone');
           FormManager.setValue('custPhone', '');
         } else {
@@ -5073,7 +5052,7 @@ function removeDefaultValueTelNo() {
       }
     } else if (custType == 'A' && cmr.addressMode == 'newAddress') {
       if (changed) {
-        if (addrType == 'ZC01' || addrType == 'ZE01') {
+        if (addrType == 'ZC01') {
           setAddrFieldHide('custPhone', 'CustPhone');
           FormManager.setValue('custPhone', '');
         } else {
@@ -5128,7 +5107,7 @@ function removeDefaultValueTelNo() {
   case 'BQICL':
     if (changed) {
       if (cmr.addressMode == 'newAddress') {
-        if (addrType == 'ZC01' || addrType == 'ZE01') {
+        if (addrType == 'ZC01') {
           setAddrFieldHide('custPhone', 'CustPhone');
           FormManager.setValue('custPhone', '');
         } else {
@@ -5157,7 +5136,7 @@ function removeDefaultValueTelNo() {
         }
       }
     } else if (custType == 'A') {
-      if (addrType == 'ZC01' || addrType == 'ZE01') {
+      if (addrType == 'ZC01') {
         setAddrFieldHide('custPhone', 'CustPhone');
         FormManager.setValue('custPhone', '');
       } else {
@@ -6807,7 +6786,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldOptional('contact', 'Contact');
     }
   } else if ((custType == 'CEA' || custType == 'EA' || custType == 'A')
-      && (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZE01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09')) {
+      && (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09')) {
 
     if ((custType == 'CEA' || custType == 'EA') && addrType == 'ZE01') {
 
@@ -6854,7 +6833,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('rol', 'ROL');
 
       // ADU 1, 2, 3, 4, 6, 7
-      if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+      if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
         setAddrFieldMandatory('locationCode', 'LocationCode');
 
         setAddrFieldOptional('bldg', 'Building');
@@ -6918,7 +6897,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
     }
 
     // ADU 1, 2, 3, 4, 6, 7
-    if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+    if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
       setAddrFieldMandatory('locationCode', 'LocationCode');
 
       setAddrFieldOptional('bldg', 'Building');
@@ -6929,10 +6908,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
     }
 
     // Company, Establishment
-    if (addrType == 'ZC01' || addrType == 'ZE01') {
-      if (addrType == 'ZE01') {
-        setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
-      }
+    if (addrType == 'ZC01') {
       setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
       setAddrFieldMandatory('custNm4', 'Katakana');
       setAddrFieldMandatory('addrTxt', 'Address');
@@ -6953,8 +6929,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
 
 function setTelNoForBFKSCScenario(addrType) {
 
-  if (addrType == 'ZC01' || addrType == 'ZC01' || addrType == 'ZE01' || addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZE01' || addrType == 'ZP01' || addrType == 'ZI02'
-      || addrType == 'ZI01' || addrType == 'ZP09') {
+  if (addrType == 'ZC01' || addrType == 'ZC01' || addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
     setAddrFieldMandatory('custPhone', 'CustPhone', 'Phone #');
     FormManager.setValue('custPhone', '00-0000-0000');
   } else {
@@ -7047,7 +7022,7 @@ function setAddrFieldsBehavior() {
   if (reqType == 'C') {
     console.log(">>>>  setAddrFieldsBehavior");
     var addrType = FormManager.getActualValue('addrType');
-    if (addrType == 'ZC01' || addrType == 'ZE01') {
+    if (addrType == 'ZC01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
       $('#cnCustName1').attr('maxlength', '22');
@@ -7092,7 +7067,7 @@ function setAddrFieldsUpdateBehavior() {
       addrType = result.ret2;
     }
 
-    if (addrType == 'ZC01' || addrType == 'ZE01') {
+    if (addrType == 'ZC01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
       $('#cnCustName1').attr('maxlength', '22');
