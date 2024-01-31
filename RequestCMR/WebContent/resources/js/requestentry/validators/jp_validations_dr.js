@@ -5249,13 +5249,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     break;
@@ -5283,13 +5281,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5329,13 +5325,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5376,13 +5370,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5434,13 +5426,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('repTeamMemberNo');
     FormManager.disable('govType');
     FormManager.disable('educAllowCd');
-    FormManager.disable('iinInd');
     FormManager.disable('valueAddRem');
     FormManager.disable('channelCd');
     FormManager.disable('siInd');
     FormManager.disable('inacType');
     FormManager.disable('inacCd');
-    FormManager.disable('creditCd');
     FormManager.disable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     // FormManager.enable('zseriesSw');
@@ -5483,14 +5473,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('repTeamMemberNo');
     FormManager.disable('govType');
     FormManager.disable('educAllowCd');
-    FormManager.disable('iinInd');
     FormManager.disable('valueAddRem');
     FormManager.disable('channelCd');
     FormManager.disable('siInd');
     FormManager.disable('inacType');
     FormManager.disable('inacCd');
-    FormManager.disable('creditCd');
-    FormManager.disable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5533,13 +5520,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('repTeamMemberNo');
     FormManager.disable('govType');
     FormManager.disable('educAllowCd');
-    FormManager.disable('iinInd');
     FormManager.disable('valueAddRem');
     FormManager.disable('channelCd');
     FormManager.disable('siInd');
     FormManager.disable('inacType');
     FormManager.disable('inacCd');
-    FormManager.disable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5582,12 +5567,10 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     // FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to
@@ -5634,12 +5617,10 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
 
@@ -5684,12 +5665,10 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
 
@@ -5745,12 +5724,10 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
 
@@ -5795,12 +5772,10 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     // FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to
@@ -7503,6 +7478,7 @@ function hideNonRelevantFieldsInDRFlow() {
   FormManager.hide('CustAcctType', 'custAcctType');
   FormManager.disable('iinInd');
   FormManager.hide('IinInd', 'iinInd');
+  FormManager.removeValidator('iinInd', Validators.REQUIRED);
   FormManager.disable('siInd');
   FormManager.hide('SiInd', 'siInd');
   FormManager.removeValidator('siInd', Validators.REQUIRED);
@@ -7510,6 +7486,7 @@ function hideNonRelevantFieldsInDRFlow() {
   FormManager.hide('CrsCd', 'crsCd');
   FormManager.disable('creditCd');
   FormManager.hide('CreditCd', 'creditCd');
+  FormManager.removeValidator('creditCd', Validators.REQUIRED);
   FormManager.disable('govType');
   FormManager.hide('Government', 'govType');
   FormManager.removeValidator('govType', Validators.REQUIRED);
