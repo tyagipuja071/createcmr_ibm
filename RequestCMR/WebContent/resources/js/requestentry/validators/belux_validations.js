@@ -919,20 +919,27 @@ function setAccountTeamNumberValues(clientTier) {
   var luSubindustryStartList1 = [ 'A', 'B', 'C', 'D', 'J', 'K', 'L', 'M', 'P', 'R', 'T', 'U', 'V', 'W' ];
   var luSubindustryStartList2 = [ 'F', 'N', 'S' ];
   var luSubindustryStartList3 = [ 'E', 'G', 'H', 'Y', 'X' ];
+  var sortlList = [ 'T0011333', 'T0011334', 'T0011336' ];
+  var newCommercialFinanced = FormManager.getActualValue('commercialFinanced');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
 
   if (countryUse == '624LU') {
     if ((clientTier == 'Q' && isuCd == '34') && luSubGrpsList.includes(subGrp)) {
       if (ims == '') {
         FormManager.setValue('commercialFinanced', '');
       }
-      if (ims != '' && luSubindustryStartList1.includes(ims.substr(0, 1))) {
-        FormManager.setValue('commercialFinanced', 'T0003500');
-      } else if (ims != '' && luSubindustryStartList2.includes(ims.substr(0, 1))) {
-        FormManager.setValue('commercialFinanced', 'T0011332');
-      } else if (ims != '' && luSubindustryStartList3.includes(ims.substr(0, 1))) {
-        FormManager.setValue('commercialFinanced', 'T0011335');
+      if (sortlList.includes(newCommercialFinanced) && role == 'PROCESSOR') {
+        FormManager.setValue('commercialFinanced', commercialFinanced);
       } else {
-        FormManager.setValue('commercialFinanced', '');
+        if (ims != '' && luSubindustryStartList1.includes(ims.substr(0, 1))) {
+          FormManager.setValue('commercialFinanced', 'T0003500');
+        } else if (ims != '' && luSubindustryStartList2.includes(ims.substr(0, 1))) {
+          FormManager.setValue('commercialFinanced', 'T0011332');
+        } else if (ims != '' && luSubindustryStartList3.includes(ims.substr(0, 1))) {
+          FormManager.setValue('commercialFinanced', 'T0011335');
+        } else {
+          FormManager.setValue('commercialFinanced', '');
+        }
       }
     }
   }
