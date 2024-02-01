@@ -7154,15 +7154,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CUST_NM4":
         if (StringUtils.isNotBlank(tempVal)) {
-          String convertedNm4 = IERPRequestUtils.dbcsConversionForJP(tempVal);
-          String[] namearray = IERPRequestUtils.limitName1Name2(convertedNm4, null);
-
-          if (namearray != null && namearray.length == 2) {
-            muaModel.setCustNm4(namearray[0]);
-            muaModel.setCity2(namearray[1]);
-          } else {
-            muaModel.setCustNm4(convertedNm4);
-          }
+          muaModel.setCustNm4(tempVal);
         }
         break;
       case "ADDR_TXT":
