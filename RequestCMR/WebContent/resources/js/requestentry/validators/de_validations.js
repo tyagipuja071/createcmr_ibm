@@ -117,7 +117,7 @@ function saveOldIsic() {
 		return;
 	}
 	oldIsicValue = FormManager.getActualValue('isicCd');
-	// CREATCMR - 9967 
+	// CREATCMR - 9967
 	var oldISIC = null;
 	var requestId = FormManager.getActualValue('reqId');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -267,7 +267,7 @@ function disableVatExemptForScenarios() {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
-    //  autoSetTax();
+    // autoSetTax();
     }
   }
 }
@@ -1133,7 +1133,7 @@ function addVatIndValidator(){
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' &&  vatInd == '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
-      //  FormManager.readOnly('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
@@ -1460,7 +1460,7 @@ dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
   GEOHandler.addAfterConfig(afterConfigForDE, GEOHandler.DE);
-  //GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
+  // GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
@@ -1516,8 +1516,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.DE, null, true);
 
-  //GEOHandler.addAfterConfig(saveVatExemptStat, GEOHandler.DE);
-  //GEOHandler.addAfterConfig(saveCustSubStat, GEOHandler.DE);
+  // GEOHandler.addAfterConfig(saveVatExemptStat, GEOHandler.DE);
+  // GEOHandler.addAfterConfig(saveCustSubStat, GEOHandler.DE);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
