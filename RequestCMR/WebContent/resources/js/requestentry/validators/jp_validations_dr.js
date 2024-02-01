@@ -4897,33 +4897,6 @@ function checkEstabFuncCdMandatory() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function addRequestForValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var checked = false;
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
-          if (FormManager.getField('privIndc_1').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('privIndc_2').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('privIndc_3').checked == true) {
-            checked = true;
-          }
-          if (checked == false) {
-            return new ValidationResult(null, false, 'Requset For is required.');
-          } else {
-            return new ValidationResult(null, true, null);
-          }
-        } else {
-          return new ValidationResult(null, true, null);
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
 function addDPLCheckValidatorJP() {
   FormManager.addFormValidator((function() {
     return {
@@ -7498,6 +7471,7 @@ function hideNonRelevantFieldsInDRFlow() {
   FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
   FormManager.disable('privIndc');
   FormManager.hide('PrivIndc', 'privIndc');
+  FormManager.removeValidator('privIndc', Validators.REQUIRED);
   FormManager.disable('csDiv');
   FormManager.hide('CSDiv', 'csDiv');
   FormManager.removeValidator('csDiv', Validators.REQUIRED);
@@ -7505,6 +7479,7 @@ function hideNonRelevantFieldsInDRFlow() {
   FormManager.hide('Tier2', 'tier2');
   FormManager.disable('adminDeptLine');
   FormManager.hide('AdminDeptLine', 'adminDeptLine');
+  FormManager.removeValidator('adminDeptLine', Validators.REQUIRED);
 }
 
 function hideFieldsInViewOnlyMode(custSubType) {
@@ -7662,7 +7637,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addLengthValidatorForPC, [ '760' ], null, true);
   // GEOHandler.registerValidator(checkEstabFuncCdMandatory, GEOHandler.JP,
   // null, true);
-  GEOHandler.registerValidator(addRequestForValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addDPLCheckValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidatorJP, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addINACValidator, GEOHandler.JP, null, true);
