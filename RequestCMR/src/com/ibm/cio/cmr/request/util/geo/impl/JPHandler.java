@@ -654,6 +654,7 @@ public class JPHandler extends GEOHandler {
       mainRecord.setCmrAddrTypeCode(StringUtils.isNotEmpty(searchModel.getAddrType()) ? searchModel.getAddrType() : "ZS01");
       onlyCrisAddrFlag = true;
     }
+    String cmrNum = mainRecord.getCmrNum() != null ? mainRecord.getCmrNum() : "";
 
     Set<String> addedRecords = new HashSet<>();
     this.currentAccount = findAccountFromCRIS(searchModel.getCmrNum());
@@ -661,13 +662,16 @@ public class JPHandler extends GEOHandler {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
     CRISCompany company = this.currentAccount.getParentCompany();
-    if (company == null) {
+    if (company == null && !cmrNum.startsWith("P")) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
     }
-    company.setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
+    if (company != null) {
+      company
+          .setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
+    }
 
     CRISEstablishment establishment = this.currentAccount.getParentEstablishment();
-    if (establishment == null) {
+    if (establishment == null && !cmrNum.startsWith("P")) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_ESTABLISHMENT_DATA);
     }
 
@@ -711,8 +715,6 @@ public class JPHandler extends GEOHandler {
     if ("ZS01".equals(mainRecord.getCmrAddrTypeCode()) && StringUtils.isBlank(mainRecord.getCmrShortName())) {
       mainRecord.setCmrShortName(this.currentAccount.getNameAbbr());
     }
-
-    String cmrNum = mainRecord.getCmrNum() != null ? mainRecord.getCmrNum() : "";
 
     if (cmrNum.startsWith("P")) {
       mainRecord.setCmrOrderBlock(this.currentAccount.getProspectInd());
@@ -897,66 +899,69 @@ public class JPHandler extends GEOHandler {
       }
     }
 
-    // now add company and establishment
-    record = new FindCMRRecordModel();
-
-    // add here company fields
-    record.setCompanyNo(company.getCompanyNo());
-    record.setSbo(company.getSBO());
-    record.setLocationNo(company.getLocCode());
-    record.setCompanySize(company.getEmployeeSize());
-    record.setCmrAddrTypeCode("ZC01");
-    record.setCmrAddrSeq("C");
-    record.setParentCMRNo(company.getCompanyNo());
-    record.setCmrStreetAddress(company.getAddress());
-    record.setCmrName1Plain(company.getNameKanji());
-    record.setCmrName2Plain(company.getNameKana());
-    record.setCmrName3(company.getNameAbbr());
-    record.setCmrBldg(company.getBldg());
-    sbPhone = new StringBuilder();
-    sbPhone.append(!StringUtils.isEmpty(company.getPhoneShi()) ? company.getPhoneShi() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneKyo()) ? company.getPhoneKyo() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneBango()) ? company.getPhoneBango() : "");
-    record.setCmrCustPhone(sbPhone.toString());
-    record.setCmrCountryLanded("JP");
-    record.setCmrPostalCode(company.getPostCode());
-    record.setCmrPOBoxPostCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, mandt, company.getCompanyNo()));
-    record.setInspbydebi(JPHandler.getRolByKtokd(entityManager, company.getCompanyNo(), "ZORG"));
-
     if (!cmrNum.startsWith("P")) {
-      converted.add(record);
-    }
 
-    // add here establishment fields
-    record = new FindCMRRecordModel();
-    record.setCmrAddrTypeCode("ZE01");
-    record.setCmrAddrSeq("E");
-    // s establishment.getEstablishmentNo();
-    record.setEstabNo(establishment.getEstablishmentNo());
-    record.setCompanyNo(establishment.getCompanyNo());
-    // record.setSbo(establishment.getSBO());
-    record.setEstabFuncCd(establishment.getFuncCode());
-    record.setLocationNo(establishment.getLocCode());
-    record.setParentCMRNo(establishment.getEstablishmentNo());
-    record.setCmrStreetAddress(establishment.getAddress());
-    record.setCmrName1Plain(establishment.getNameKanji());
-    record.setCmrName2Plain(establishment.getNameKana());
-    record.setCmrName3(establishment.getNameAbbr());
-    record.setCmrBldg(establishment.getBldg());
-    sbPhone = new StringBuilder();
-    sbPhone.append(!StringUtils.isEmpty(establishment.getPhoneShi()) ? establishment.getPhoneShi() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(establishment.getPhoneKyo()) ? establishment.getPhoneKyo() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(establishment.getPhoneBango()) ? establishment.getPhoneBango() : "");
-    record.setCmrCustPhone(sbPhone.toString());
-    record.setCmrCountryLanded("JP");
-    record.setCmrPostalCode(establishment.getPostCode());
-    if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
-      record.setBillingCustNo(reqEntry.getBillToCustNo());
-      record.setCreditToCustNo(reqEntry.getCreditToCustNo());
-    }
+      // now add company and establishment
+      record = new FindCMRRecordModel();
 
-    if (!isIERPProcessingType) {
+      // add here company fields
+      record.setCompanyNo(company.getCompanyNo());
+      record.setSbo(company.getSBO());
+      record.setLocationNo(company.getLocCode());
+      record.setCompanySize(company.getEmployeeSize());
+      record.setCmrAddrTypeCode("ZC01");
+      record.setCmrAddrSeq("C");
+      record.setParentCMRNo(company.getCompanyNo());
+      record.setCmrStreetAddress(company.getAddress());
+      record.setCmrName1Plain(company.getNameKanji());
+      record.setCmrName2Plain(company.getNameKana());
+      record.setCmrName3(company.getNameAbbr());
+      record.setCmrBldg(company.getBldg());
+      sbPhone = new StringBuilder();
+      sbPhone.append(!StringUtils.isEmpty(company.getPhoneShi()) ? company.getPhoneShi() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneKyo()) ? company.getPhoneKyo() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneBango()) ? company.getPhoneBango() : "");
+      record.setCmrCustPhone(sbPhone.toString());
+      record.setCmrCountryLanded("JP");
+      record.setCmrPostalCode(company.getPostCode());
+      record.setCmrPOBoxPostCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, mandt, company.getCompanyNo()));
+      record.setInspbydebi(JPHandler.getRolByKtokd(entityManager, company.getCompanyNo(), "ZORG"));
+
       converted.add(record);
+
+      // add here establishment fields
+      record = new FindCMRRecordModel();
+      record.setCmrAddrTypeCode("ZE01");
+      record.setCmrAddrSeq("E");
+      // s establishment.getEstablishmentNo();
+      record.setEstabNo(establishment.getEstablishmentNo());
+      record.setCompanyNo(establishment.getCompanyNo());
+      // record.setSbo(establishment.getSBO());
+      record.setEstabFuncCd(establishment.getFuncCode());
+      record.setLocationNo(establishment.getLocCode());
+      record.setParentCMRNo(establishment.getEstablishmentNo());
+      record.setCmrStreetAddress(establishment.getAddress());
+      record.setCmrName1Plain(establishment.getNameKanji());
+      record.setCmrName2Plain(establishment.getNameKana());
+      record.setCmrName3(establishment.getNameAbbr());
+      record.setCmrBldg(establishment.getBldg());
+      sbPhone = new StringBuilder();
+      sbPhone.append(!StringUtils.isEmpty(establishment.getPhoneShi()) ? establishment.getPhoneShi() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(establishment.getPhoneKyo()) ? establishment.getPhoneKyo() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "")
+          .append(!StringUtils.isEmpty(establishment.getPhoneBango()) ? establishment.getPhoneBango() : "");
+      record.setCmrCustPhone(sbPhone.toString());
+      record.setCmrCountryLanded("JP");
+      record.setCmrPostalCode(establishment.getPostCode());
+      if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
+        record.setBillingCustNo(reqEntry.getBillToCustNo());
+        record.setCreditToCustNo(reqEntry.getCreditToCustNo());
+      }
+
+      if (!isIERPProcessingType) {
+        converted.add(record);
+      }
+
     }
 
     source.setItems(converted);
