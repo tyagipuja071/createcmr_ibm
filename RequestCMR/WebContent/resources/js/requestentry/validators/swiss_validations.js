@@ -618,10 +618,13 @@ function setMubotyOnPostalCodeIMS(value) {
     CLIENT_TIER : '%' + clientTier + '%',
     IMS : '%' + ims + '%',
     POST_CD_RANGE : postCd
-  });
+  }).map(({ret1}) => ret1);
 
-  if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
-    FormManager.setValue('searchTerm', result[0].ret1);
+  let dropdownField = document.getElementById('templatevalue-searchTerm')
+  if(!!dropdownField) dropdownField.setAttribute('values', result);
+
+  if (result != null && Object.keys(result).length > 0) {
+    FormManager.setValue('searchTerm', result[0]);
     if (role == 'REQUESTER') {
       FormManager.readOnly('searchTerm');
     }
@@ -1990,5 +1993,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateISUandCTCCombination, GEOHandler.SWISS)
+  GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
 });
