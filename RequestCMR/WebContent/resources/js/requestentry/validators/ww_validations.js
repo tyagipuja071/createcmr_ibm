@@ -174,9 +174,7 @@ function validateCustomername() {
                 } 
           else {
                   return new ValidationResult(null, true);
-
                 }
-
               }
             };
           })(), 'MAIN_GENERAL_TAB', 'frmCMR');
@@ -205,9 +203,7 @@ function validateCustomeraddress() {
             };
           })(), null, 'frmCMR_addressModal');
         }
-        
-
-        
+               
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR CN
