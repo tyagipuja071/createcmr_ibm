@@ -866,6 +866,15 @@ public class JPHandler extends GEOHandler {
               record.setCmrName1Plain(legacyAddr.getCompanyNameKanji()); // this.currentAccount.getNameKanji()
               record.setCmrName2Plain(legacyAddr.getCompanyNameKana()); // this.currentAccount.getNameKana()
               record.setCmrName3(this.currentAccount.getNameAbbr());
+
+              if (StringUtils.isBlank(record.getCmrName3())) {
+                if (StringUtils.isNotBlank(legacyAddr.getEnglishName1())) {
+                  record.setCmrName3(legacyAddr.getEnglishName1());
+                }
+              }
+
+              record.setCmrName(legacyAddr.getEnglishName1());
+
               record.setCmrBldg(legacyAddr.getBldg());
               record.setCmrCountryLanded("JP");
               sbPhone = new StringBuilder();
@@ -1233,6 +1242,10 @@ public class JPHandler extends GEOHandler {
       }
     } else {
       address.setCustNm3(currentRecord.getCmrName3() == null ? currentRecord.getCmrName3() : currentRecord.getCmrName3().trim());
+    }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      address.setDivn(currentRecord.getEstabNo());
     }
 
     converAbbNm(address.getCustNm3(), address);
