@@ -1592,7 +1592,6 @@ function setCTCValues() {
     }
   }
 }
-
 // CREATCMR-4293
 
 function clientTierValidator() {
@@ -1818,7 +1817,7 @@ function addVatIndValidator(){
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
-      //  FormManager.readOnly('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
@@ -1832,7 +1831,8 @@ function addVatIndValidator(){
 
 function setIsuInitialValueBasedOnSubScenario(){
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-  // pre-select ISU 27 for commercial, government, third party and private person.
+  // pre-select ISU 27 for commercial, government, third party and private
+  // person.
   if(role == 'REQUESTER' && [
   'COMME',
   'GOVMT',

@@ -162,6 +162,48 @@ function addDnBMatchingAttachmentValidator() {
           }
         }
         
+function validateCustomername() {
+    FormManager.addFormValidator((function() {
+      return {
+         validate : function() {
+          var addrTxt = FormManager.getActualValue('mainCustNm1');
+          var addrTxt2 = FormManager.getActualValue('mainCustNm2');
+          var combinedstring = addrTxt.concat(addrTxt2)
+          if (combinedstring.includes("—") || combinedstring.includes("–")) {
+                  return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
+                } 
+          else {
+                  return new ValidationResult(null, true);
+                }
+              }
+            };
+          })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+        }
+        
+function validateCustomeraddress() {
+      FormManager.addFormValidator((function() {
+        return {
+           validate : function() {
+           var addrTxt = FormManager.getActualValue('addrTxt');
+           var addrTxt2 = FormManager.getActualValue('addrTxt2');
+           var custNm1 = FormManager.getActualValue('custNm1');
+           var custNm2 = FormManager.getActualValue('custNm2');
+           var addrcombinedstring = addrTxt.concat(addrTxt2)
+           var namecombinedstring = custNm1.concat(custNm2)
+           if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
+                 return new ValidationResult(null, false, 'Address can contain only -.Long Dash not allowed in Address');
+                }
+           if (namecombinedstring.includes("—") || namecombinedstring.includes("–")) {
+                  return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
+                } 
+           else {
+                  return new ValidationResult(null, true);
+                }
+              }
+            };
+          })(), null, 'frmCMR_addressModal');
+        }
+               
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR CN
@@ -1471,6 +1513,44 @@ function checkForCompanyProofAttachment() {
   }
 }
 
+
+function limitAPICluster() {
+  var reqId = FormManager.getActualValue('reqId');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // Checking the UI element
+  var sourceElement = document.getElementsByClassName('cmr-source-sys-txt');
+  if (sourceElement.length > 0 && custSubGrp == 'NRMLC') {
+    FormManager.resetDropdownValues(FormManager.getField('apCustClusterId'));
+    FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), [ '55555' ]);    
+    FormManager.setValue('apCustClusterId', '55555');
+    FormManager.setValue('clientTier', 'E');
+    FormManager.readOnly('apCustClusterId');
+  }
+}
+
+function validateAPICluster() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var sourceElement = document.getElementsByClassName('cmr-source-sys-txt');
+        var cluster = FormManager.getActualValue('apCustClusterId');
+
+        if (sourceElement.length == 0 && custSubGrp == 'NRMLC' && cluster == '55555') {
+            return new ValidationResult({
+              id : 'apCustClusterId',
+              type : 'text',
+              name : 'apCustClusterId'
+            }, false, 'API Specific Cluster is selected for Non-API request.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -1504,7 +1584,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.GROUP1 = [ '724', '848', '618', '624', '788', '649', '866', '754' ];
   GEOHandler.AllCountries =  ['229' ,'358' ,'359' ,'363' ,'373' ,'382' ,'383' ,'428' ,'433' ,'440' ,'443' ,'446' ,'461' ,'465' ,'479' ,'498' ,'602' ,'603' ,'607' ,'608' ,'610' ,'613' ,'614' ,'615' ,'616' ,'618' ,'619' ,'620' ,'621' ,'624' ,'626' ,'627' ,'629' ,'631' ,'635' ,'636' ,'637' ,'638' ,'640' ,'641' ,'642' ,'643' ,'644' ,'645' ,'646' ,'647' ,'649' ,'651' ,'652' ,'655' ,'656' ,'661' ,'662' ,'663' ,'666' ,'667' ,'668' ,'669' ,'670' ,'677' ,'678' ,'680' ,'681' ,'682' ,'683' ,'691' ,'692' ,'693' ,'694' ,'695' ,'698' ,'699' ,'700' ,'702' ,'704' ,'705' ,'706' ,'707' ,'708' ,'711' ,'713' ,'717' ,'718' ,'724' ,'725' ,'726' ,'729' ,'731' ,'733' ,'735' ,'736' ,'738' ,'740' ,'741' ,'742' ,'744' ,'745' ,'749' ,'750' ,'752' ,'753' ,'754' ,'755' ,'756' ,'758' ,'759' ,'760' ,'762' ,'764' ,'766' ,'767' ,'768' ,'769' ,'770' ,'772' ,'778' ,'780' ,'781' ,'782' ,'787' ,'788' ,'791' ,'796' ,'799' ,'804' ,'805' ,'806' ,'808' ,'810' ,'811' ,'813' ,'815' ,'818' ,'820' ,'821' ,'822' ,'823' ,'825' ,'826' ,'827' ,'829' ,'831' ,'832' ,'833' ,'834' ,'835' ,'838' ,'839' ,'840' ,'841' ,'842' ,'843' ,'846' ,'848' ,'849' ,'850' ,'851' ,'852' ,'853' ,'855' ,'856' ,'857' ,'858' ,'859' ,'862' ,'864' ,'865' ,'866' ,'869' ,'871' ,'876' ,'881' ,'883' ,'889' ,'897' ,'714' ,'720' ,'790' ,'675' ,'879' ,'880'];
-  
+      
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
   GEOHandler.registerWWValidator(addDnBMatchingAttachmentValidator);
@@ -1569,4 +1649,11 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(payGoCreateErroMsg,GEOHandler.AllCountries);
   GEOHandler.registerValidator(payGoErroMsg,GEOHandler.AllCountries);
   GEOHandler.registerValidator(newAddressValForPayGo,['724', '848', '618', '624', '788', '649', '866', '754','846', '806', '702', '678' ,'897','706','616','796']);
+  GEOHandler.registerWWValidator(validateAPICluster);
+  GEOHandler.addAfterTemplateLoad(limitAPICluster, GEOHandler.AllCountries);
+  GEOHandler.registerWWValidator(validateCustomeraddress);
+  GEOHandler.registerWWValidator(validateCustomername);
+ 
 });
+
+
