@@ -877,7 +877,6 @@ function setAccountTeamNumberValues(clientTier) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   var subGrp = FormManager.getActualValue('custSubGrp');
-
   var custGrp = FormManager.getActualValue('custGrp');
   var commercialFinanced = FormManager.getActualValue('commercialFinanced');
   var role = FormManager.getActualValue('userRole').toUpperCase();
