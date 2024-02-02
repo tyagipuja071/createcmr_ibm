@@ -48,6 +48,31 @@ function afterConfigForDE() {
     });
   }
 
+  if (_IMSHandler == null) {
+    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
+      setSboOnIMS(FormManager.getActualValue('isicCd'));
+    });
+  }
+
+  if (_deIsuCdHandler == null) {
+    _deIsuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
+      if (!value) {
+        value = FormManager.getActualValue('isuCd');
+      }
+
+      lockCtcFieldOnIsu();
+    });
+  }
+
+  if (!PageManager.isReadOnly() && FormManager.getActualValue('reqType') == 'C') {
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('ordBlk');
+    } else {
+      FormManager.enable('ordBlk');
+    }
+  }
+
+
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
       setCTCInitialValueBasedOnCurrentIsu();
