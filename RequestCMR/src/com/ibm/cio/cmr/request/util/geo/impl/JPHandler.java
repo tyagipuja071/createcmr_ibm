@@ -770,6 +770,7 @@ public class JPHandler extends GEOHandler {
         sourceRecord.setLocationNo(this.currentAccount.getLocCode());
         sourceRecord.setCmrPOBoxPostCode(
             JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
+        sourceRecord.setEstabNo(this.currentAccount.getEstablishmentNo());
         for (String adu : crisAddr.getAddrType().split("")) {
           String cmrAddrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
 
@@ -874,6 +875,7 @@ public class JPHandler extends GEOHandler {
               }
 
               record.setCmrName(legacyAddr.getEnglishName1());
+              record.setEstabNo(this.currentAccount.getEstablishmentNo());
 
               record.setCmrBldg(legacyAddr.getBldg());
               record.setCmrCountryLanded("JP");
@@ -1178,7 +1180,6 @@ public class JPHandler extends GEOHandler {
     address.setLocationCode(currentRecord.getLocationNo());
     address.setCompanySize(currentRecord.getCompanySize());
     address.setCity2(currentRecord.getCompanyNo());
-    address.setDivn(currentRecord.getEstabNo());
 
     address.setOffice(currentRecord.getCmrOffice());
     address.setCustPhone(currentRecord.getCmrCustPhone());
