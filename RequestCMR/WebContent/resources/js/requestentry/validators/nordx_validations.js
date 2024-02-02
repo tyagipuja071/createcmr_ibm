@@ -3401,11 +3401,11 @@ function setSalesRepValues(value) {
           } else {
             FormManager.setValue('searchTerm', '');
           }
-        } else if (isuAndCtc == '5K') {
+        } else if (isuCd == '5K') {
           FormManager.setValue('searchTerm', 'A0009226');
-        } else if (isuAndCtc == '21') {
+        } else if (isuCd == '21') {
           FormManager.setValue('searchTerm', 'T0000490');
-        } else if (isuAndCtc == '8B') {
+        } else if (isuCd == '8B') {
           FormManager.setValue('searchTerm', 'P0000007');
         } else {
           FormManager.setValue('searchTerm', '');
