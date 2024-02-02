@@ -162,18 +162,17 @@ function addDnBMatchingAttachmentValidator() {
           }
         }
         
-
-        function validateCustomername() {
-          FormManager.addFormValidator((function() {
-            return {
-              validate : function() {
-                var addrTxt = FormManager.getActualValue('mainCustNm1');
-                var addrTxt2 = FormManager.getActualValue('mainCustNm2');
-                var combinedstring = addrTxt.concat(addrTxt2)
-                if (combinedstring.includes("—") || combinedstring.includes("–")) {
-                  return new ValidationResult(null, false, 'Customer name can contain only -');
-
-                } else {
+function validateCustomername() {
+    FormManager.addFormValidator((function() {
+      return {
+         validate : function() {
+          var addrTxt = FormManager.getActualValue('mainCustNm1');
+          var addrTxt2 = FormManager.getActualValue('mainCustNm2');
+          var combinedstring = addrTxt.concat(addrTxt2)
+          if (combinedstring.includes("—") || combinedstring.includes("–")) {
+                  return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
+                } 
+          else {
                   return new ValidationResult(null, true);
 
                 }
@@ -183,28 +182,25 @@ function addDnBMatchingAttachmentValidator() {
           })(), 'MAIN_GENERAL_TAB', 'frmCMR');
         }
         
-        function validateCustomeraddress() {
-          FormManager.addFormValidator((function() {
-            return {
-              validate : function() {
-                var addrTxt = FormManager.getActualValue('addrTxt');
-                var addrTxt2 = FormManager.getActualValue('addrTxt2');
-                var custNm1 = FormManager.getActualValue('custNm1');
-                var custNm2 = FormManager.getActualValue('custNm2');
-                var addrcombinedstring = addrTxt.concat(addrTxt2)
-                var namecombinedstring = custNm1.concat(custNm2)
-                if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
-                  return new ValidationResult(null, false, 'Address can contain only -');
-
+function validateCustomeraddress() {
+      FormManager.addFormValidator((function() {
+        return {
+           validate : function() {
+           var addrTxt = FormManager.getActualValue('addrTxt');
+           var addrTxt2 = FormManager.getActualValue('addrTxt2');
+           var custNm1 = FormManager.getActualValue('custNm1');
+           var custNm2 = FormManager.getActualValue('custNm2');
+           var addrcombinedstring = addrTxt.concat(addrTxt2)
+           var namecombinedstring = custNm1.concat(custNm2)
+           if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
+                 return new ValidationResult(null, false, 'Address can contain only -.Long Dash not allowed in Address');
                 }
-                if (namecombinedstring.includes("—") || namecombinedstring.includes("–")) {
-                  return new ValidationResult(null, false, 'Customer name can contain only -');
-
-                } else {
+           if (namecombinedstring.includes("—") || namecombinedstring.includes("–")) {
+                  return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
+                } 
+           else {
                   return new ValidationResult(null, true);
-
                 }
-
               }
             };
           })(), null, 'frmCMR_addressModal');
