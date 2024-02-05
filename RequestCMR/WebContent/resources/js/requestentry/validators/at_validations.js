@@ -836,7 +836,11 @@ function setSBOValuesForIsuCtc() {
   var qParams = null;
   var sbo = [];
   var salesBoDesc = ' '
+  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
 
+  if (postCd.substring(0, 2).match(/(8[0-9])||(7[0-5]||(5[1-3])||(4[0-9])||(3[0-9])||(2[0-8])||(1[0-2]))/g)){
+    salesBoDesc = '1'
+  }
 
   // SBO will be based on IMS
   if (isuCd != '') {
