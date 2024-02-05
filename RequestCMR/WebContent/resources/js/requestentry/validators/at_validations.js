@@ -2215,14 +2215,12 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     setAddressDetailsForViewAT,
     resetSortlValidator,
-    setVatIndFieldsForGrp1AndNordx,
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
 
   for (const func of [
     addAUSTRIALandedCountryHandler,
-    updateMainCustomerNames,
     changeAbbrevNmLocn,
     addLatinCharValidator,
     toggleLocalCountryNameOnOpen,
@@ -2244,7 +2242,6 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     togglePPSCeidCEE,
     resetSortlValidator,
-    setVatIndFieldsForGrp1AndNordx,
     setCTCBasedOnISUCode
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
