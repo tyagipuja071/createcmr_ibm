@@ -2364,7 +2364,7 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
       requireSalesRepEnterpriseSBOByRole();
     } else {
       FormManager.setValue('repTeamMemberNo', '000651');
-//      FormManager.setValue('enterprise', '006510');
+// FormManager.setValue('enterprise', '006510');
       FormManager.setValue('salesBusOffCd', '006');
       requireSalesRepEnterpriseSBOByRole();
     }
