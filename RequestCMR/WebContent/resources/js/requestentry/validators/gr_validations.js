@@ -2309,7 +2309,7 @@ function setValuesWRTIsuCtc(value) {
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isu == '34' && ctc == 'Q') {
-    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) ?? '');
+    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) || '');
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('salesBusOffCd', '000');
@@ -2336,7 +2336,7 @@ function setEnterpriseOnSubIndustry(value) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  if (isuCd + clientTier != '34Q' || !value) {
+  if (isuCd + clientTier != '34Q' || !value || !subIndustryCd) {
     return;
   }
   const subIndustryEnterpriseMap = {
@@ -2346,7 +2346,7 @@ function setEnterpriseOnSubIndustry(value) {
       'F' : '822805', 'N' : '822810', 'S' : '822805',
       'E' : '822825', 'G' : '822825', 'H' : '822825', 'X' : '822825', 'Y' : '822825'
   }
-  return subIndustryEnterpriseMap[subIndustryCd?.substring(0,1)];
+  return subIndustryEnterpriseMap[subIndustryCd.substring(0,1)];
 }
 
 function addPpsCeidValidator() {

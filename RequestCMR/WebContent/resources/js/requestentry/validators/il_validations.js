@@ -2235,7 +2235,7 @@ function setEnterpriseSalesRepSBO() {
   var clientTier = FormManager.getActualValue('clientTier');
 
   if (isuCd == '34' && clientTier == 'Q') {
-    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) ?? '');
+    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) || '');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   } else if (isuCd == '36' && clientTier == 'Y') {
@@ -2266,7 +2266,7 @@ function setEnterpriseOnSubIndustry(value) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  if (isuCd + clientTier != '34Q' || !value) {
+  if (isuCd + clientTier != '34Q' || !value || !subIndustryCd) {
     return;
   }
   const subIndustryEnterpriseMap = {
@@ -2276,7 +2276,7 @@ function setEnterpriseOnSubIndustry(value) {
       'F' : '011269', 'N' : '011269', 'S' : '011269',
       'E' : '011290', 'G' : '011290', 'H' : '011290', 'X' : '011290', 'Y' : '011290'
   }
-  return subIndustryEnterpriseMap[subIndustryCd?.substring(0,1)];
+  return subIndustryEnterpriseMap[subIndustryCd.substring(0,1)];
 }
 
 function checkCmrUpdateBeforeImport() {
