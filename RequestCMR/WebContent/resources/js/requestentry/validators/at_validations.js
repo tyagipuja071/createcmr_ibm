@@ -263,20 +263,6 @@ function addHandlersForAUSTRIA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
-      if (!value) {
-        value = FormManager.getActualValue('isuCd');
-      }
-      if (value == '27') {
-        FormManager.setValue('clientTier', 'E');
-      } else if (value == '32') {
-        FormManager.setValue('clientTier', 'T');
-      } else if (value == '34') {
-        FormManager.setValue('clientTier', 'Q');
-      } else if (value == '36') {
-        FormManager.setValue('clientTier', 'Y');
-      } else {
-        FormManager.setValue('clientTier', '');
-      }
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
       // CreateCMR-811
       // if (CEE_INCL.has(cntry)) {
@@ -2187,6 +2173,19 @@ function addressQuotationValidatorAUSTRIA() {
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, ['Phone number']);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, ['PO BOX']);
 }
+
+function setCTCBasedOnISUCode() {
+  isuCd = FormManager.getActualValue('isuCd');
+  const CTCMapping = {
+    '27': 'E',
+    '32': 'T',
+    '34': 'Q',
+    '36': 'Y'
+  }
+
+  FormManager.setValue('clientTier', CTCMapping[isuCd] || '');
+}
+
 dojo.addOnLoad(function () {
   console.log('adding AUSTRIA functions...');
   GEOHandler.enableCustomerNamesOnAddress([SysLoc.AUSTRIA]);
@@ -2246,6 +2245,7 @@ dojo.addOnLoad(function () {
     togglePPSCeidCEE,
     resetSortlValidator,
     setVatIndFieldsForGrp1AndNordx,
+    setCTCBasedOnISUCode
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
