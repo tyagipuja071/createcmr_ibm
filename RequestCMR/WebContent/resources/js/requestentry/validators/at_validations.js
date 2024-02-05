@@ -282,7 +282,6 @@ function addHandlersForAUSTRIA() {
           setSBOValues()
         } else {
           setClientTierValuesAT(value);
-          setSBOValuesForIsuCtc(value);
         }
     });
   }
@@ -299,7 +298,6 @@ function addHandlersForAUSTRIA() {
       if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
         setSalesRepValues(value);
       }
-      setSBOValuesForIsuCtc(value);// CMR-2101
     });
   }
 
@@ -314,7 +312,6 @@ function addHandlersForAUSTRIA() {
       // CMR-2101 Austria remove ISR
       // setSalesRepValues();
       setISUCTCOnIMSChange();
-      setSBOValuesForIsuCtc(value);// CMR-2101
     });
   }
 
@@ -821,7 +818,7 @@ function setSalesRepValues(clientTier) {
 /**
  * CMR-2101:Austria - sets SBO based on isuCtc
  */
-function setSBOValuesForIsuCtc(value) {
+function setSBOValuesForIsuCtc() {
   if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
     return;
   }
@@ -829,10 +826,6 @@ function setSBOValuesForIsuCtc(value) {
   if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (value == undefined) {
-    return;
-  }
-
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
@@ -2242,7 +2235,8 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     togglePPSCeidCEE,
     resetSortlValidator,
-    setCTCBasedOnISUCode
+    setCTCBasedOnISUCode,
+    setSBOValuesForIsuCtc
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
