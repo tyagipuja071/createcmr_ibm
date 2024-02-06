@@ -724,6 +724,14 @@ function validatePairedAddrFieldNumericValue() {
                   }
                 }
               }
+              // postal code
+              if (!isNumericValueEqual(localAddress.postCd[0], translatedAddress.postCd[0])) {
+                if (arrErrorMsg.length > 0) {
+                  arrErrorMsg.push(indentSpace + errorMsg + ' Postal Code numeric values.<br>');
+                } else {
+                  arrErrorMsg.push(errorMsg + ' Postal Code numeric values.<br>');
+                }
+              }
             }
           } // for
           if (arrErrorMsg.length > 0) {
@@ -1414,9 +1422,6 @@ function limitCustomerClassValues(value) {
     break;
   case 'CROSS':
     var kuklaValues = [ '11', '33', '35', '71' ];
-    break;
-  case 'CROSS':
-    var kuklaValues = [ '71' ];
     break;
   default:
     break;
@@ -2122,10 +2127,6 @@ function getMismatchFields(localLangData, translatedData) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'City';
   }
-  if(isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.stateProv[0], translatedData.stateProv[0])) {
-    mismatchFields += mismatchFields != '' ? ', ' : '';
-    mismatchFields += 'State/Province';
-  }
   return mismatchFields;
 }
 
@@ -2234,11 +2235,10 @@ function setEnterpriseSalesRepSBO() {
   var clientTier = FormManager.getActualValue('clientTier');
 
   if (isuCd == '34' && clientTier == 'Q') {
-    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) ?? '');
+    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) || '');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   } else if (isuCd == '36' && clientTier == 'Y') {
-    FormManager.setValue('enterprise', '');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   } else if (isuCd == '21' && clientTier == '') {
@@ -2266,7 +2266,7 @@ function setEnterpriseOnSubIndustry(value) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  if (isuCd + clientTier != '34Q' || !value) {
+  if (isuCd + clientTier != '34Q' || !value || !subIndustryCd) {
     return;
   }
   const subIndustryEnterpriseMap = {
@@ -2276,7 +2276,7 @@ function setEnterpriseOnSubIndustry(value) {
       'F' : '011269', 'N' : '011269', 'S' : '011269',
       'E' : '011290', 'G' : '011290', 'H' : '011290', 'X' : '011290', 'Y' : '011290'
   }
-  return subIndustryEnterpriseMap[subIndustryCd?.substring(0,1)];
+  return subIndustryEnterpriseMap[subIndustryCd.substring(0,1)];
 }
 
 function checkCmrUpdateBeforeImport() {
@@ -3007,8 +3007,7 @@ function addressQuotationValidatorIsrael() {
     FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
     FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Cont' ]);
     FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-// FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code'
-// ]);
+    FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
     FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Att. Person' ]);
     FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
     FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
@@ -3020,7 +3019,7 @@ function addressQuotationValidatorIsrael() {
     FormManager.removeValidator('addrTxt', Validators.NO_QUOTATION);
     FormManager.removeValidator('addrTxt2', Validators.NO_QUOTATION);
     FormManager.removeValidator('city1', Validators.NO_QUOTATION);
-// FormManager.removeValidator('postCd', Validators.NO_QUOTATION);
+    FormManager.removeValidator('postCd', Validators.NO_QUOTATION);
     FormManager.removeValidator('dept', Validators.NO_QUOTATION);
     FormManager.removeValidator('poBox', Validators.NO_QUOTATION);
     FormManager.removeValidator('custPhone', Validators.NO_QUOTATION);

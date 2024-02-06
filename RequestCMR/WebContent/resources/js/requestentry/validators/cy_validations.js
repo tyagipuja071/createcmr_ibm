@@ -1549,7 +1549,7 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
     }
     
-    if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
+    if (custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       // CREATCMR-4293
       // FormManager.setValue('clientTier', '7');
@@ -2272,7 +2272,7 @@ function autoPopulateISUClientTierUK() {
     return;
   }
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-  var noScenario = new Set([ 'INTER', 'XINTR', 'BUSPR', 'XBSPR' ]);
+  var noScenario = new Set([ 'INTER', 'XINTR' ]);
 
   if (custSubGroup != undefined && custSubGroup != '' && !noScenario.has(custSubGroup)) {
 
@@ -2912,29 +2912,17 @@ function setValuesWRTIsuCtc(ctc){
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('salesBusOffCd', '000');
-  } else if (isu == '36' && ctc == 'Y') {
-    FormManager.setValue('enterprise', '822840');
-    FormManager.setValue('salesTeamCd', '000000');
-    FormManager.setValue('repTeamMemberNo', '000000');
-    FormManager.setValue('salesBusOffCd', '000');
-  } else if (isu == '32' && ctc == 'T') {
-    FormManager.setValue('enterprise', '985985');
-    FormManager.setValue('salesTeamCd', '000000');
-    FormManager.setValue('repTeamMemberNo', '000000');
-    FormManager.setValue('salesBusOffCd', '000');
   } else if (isu == '5K' && ctc == '') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('salesBusOffCd', '000');
-  }else if (isu == '21' && ctc == '') {
+  } else if (isu == '21' && ctc == '') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('salesBusOffCd', '000');
   }
-  
-  
   
   if(role == 'REQUESTER') {
     FormManager.removeValidator('enterprise', Validators.REQUIRED);
@@ -3189,7 +3177,8 @@ function validatorEnterpriseCY(){
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var enterprise = FormManager.getActualValue('enterprise');
-  var isuCdSet1 = new Set([ '21', '5K' ]);
+  const isuCdSet1 = new Set([ '21', '5K', '8B' ]);
+  const enterprise36Y = [ '822840', '822850', '822860' ];
   
   if (isuCdSet1.has(isuCd) && enterprise != '985999') {
     return new ValidationResult({
@@ -3197,24 +3186,18 @@ function validatorEnterpriseCY(){
       type : 'text',
       name : 'enterprise'
     }, false, 'Enterprise can only accept \'985999\'.');
-  } else if (isuCd == '34' && enterprise != '822830') {
+  } else if (isuCd == '34' && (enterprise != '822830' || enterprise != '822835')) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'822830\'.');
-  } else if (isuCd == '32' && enterprise != '985985') {
+    }, false, 'Enterprise can only accept \'822830\' or \'822835\'.');
+  } else if (isuCd == '36' && enterprise36Y.includes(enterprise)) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'985985\'.');
-  } else if (isuCd == '36' && enterprise != '822840') {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'822840\'.');
+    }, false, 'Enterprise can only accept: ' + enterprise36Y);
   } else {
     return new ValidationResult(null, true);
   }
