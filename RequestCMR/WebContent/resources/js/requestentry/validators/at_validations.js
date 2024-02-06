@@ -835,11 +835,13 @@ function setSBOValuesForIsuCtc() {
   var isuCtc = isuCd + clientTier;
   var qParams = null;
   var sbo = [];
-  var salesBoDesc = ' '
+  var salesBoDesc = ''
   var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
 
-  if (postCd.substring(0, 2).match(/(8[0-9])||(7[0-5]||(5[1-3])||(4[0-9])||(3[0-9])||(2[0-8])||(1[0-2]))/g)){
-    salesBoDesc = '1'
+  if(isuCd == '27' && clientTier == 'E') {
+    if (postCd.substring(0, 2).match(/(8[0-9])||(7[0-5]||(5[1-3])||(4[0-9])||(3[0-9])||(2[0-8])||(1[0-2]))/g)){
+      salesBoDesc = '1'
+    }
   }
 
   // SBO will be based on IMS
@@ -854,7 +856,7 @@ function setSBOValuesForIsuCtc() {
         UPDATE_BY_ID: '%' + ims.substring(0, 1) + '%',
         SALES_BO_DESC: '%' + salesBoDesc + '%'
       };
-      results = cmr.query('AUSTRIA.GET.SBOLIST.BYISUCTC', qParams);
+      results = cmr.query('GET.SBOLIST.BYISUCTC.AUSTRIA', qParams);
     } else {
       qParams = {
         _qall: 'Y',
@@ -862,7 +864,7 @@ function setSBOValuesForIsuCtc() {
         ISU: '%' + isuCtc + '%',
         SALES_BO_DESC: '%' + salesBoDesc + '%'
       };
-      results = cmr.query('AUSTRIA.GET.SBOLIST.BYISU', qParams);
+      results = cmr.query('GET.SBOLIST.BYISU.AUSTRIA', qParams);
     }
     console.log("There are " + results.length + " SBO returned.");
 
