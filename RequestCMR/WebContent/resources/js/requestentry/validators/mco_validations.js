@@ -2974,7 +2974,7 @@ function setEntepriseAndSalesRepES() {
 
   var isuCtc = isuCd + clientTier;
   
-  if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && isuCtc == '21') {
+  if (isuCtc == '8B') {
     FormManager.setValue('enterprise', '985107');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else if (custSubGrpSet21.has(custSubGrp) && isuCtc == '21') {
@@ -2994,6 +2994,15 @@ function setEntepriseAndSalesRepES() {
     FormManager.setValue('repTeamMemberNo', '012540');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '5K') {
     FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '5K') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '12') {
+    FormManager.setValue('enterprise', '986160');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  } else if (custSubGrpSet34.has(custSubGrp) && (isuCtc == '4F' || isuCtc == '4D' || isuCtc == '31' || isuCtc == '19')) {
+    FormManager.setValue('enterprise', '985985');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else if ((custGrp == 'CROSS' || custSubGrpSet34.has(custSubGrp)) && isuCtc == '34Q') {
     setEnterpriseValues34Q();
@@ -3257,98 +3266,36 @@ function validatorISUCTCES() {
 }
 
 function validatorEnterpriseES() {
-  console.log(">>>> validatorEnterpriseES");
-  var custGrp = FormManager.getActualValue('custGrp');
+  const enterpriseMapping = {
+      '8B' : ['985107'],
+      '21' : ['985999'],
+      '27E' : ['985412', '985413', '985415', '985411', '985414', '985416', '985612', '985112', '985512', '986154', '985313', '985312', '985213', 
+        '985713', '985113', '985513', '985613', '985813', '986194', '985514', '986081', '986040', '985912', '986062', '986180', '985117', '986011', 
+        '986190', '985011', '986170'],
+      '34Q' : ['985204','985245','985780','985784','985788','985798','985801'],
+      '36Y' : ['985135', '985137', '985129'],
+      '04' : ['986111', '986232', '103075', '111900', '060000', '985985'],
+      '12' : ['986160'],
+      '19' : ['985985'],
+      '31' : ['985985'],
+      '4D' : ['985985'],
+      '4F' : ['985985'],
+      '3T' : ['045250'],
+      '5K' : ['985999'],
+      '28' : ['986237', '986140', '985985'],
+      '1R' : ['986181', '986234', '985985']
+  };
   var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCtc = isuCd + clientTier;
   var enterprise = FormManager.getActualValue('enterprise');
-  var landCntry = getLandedCntry();
-  var entp = '';
-  var salRep = '';
-  var enterpriseSetForCB = new Set([ '985111', '985107', '985902', '985504', '985404', '985403', '985603', '985703', '985303', '985212', '986111', '986162', '986140', '986181', '986254', '986270',
-      '986294', '985204' ])
-
-  var result1 = setEntAndSalesRep();
-  if (result1 != null && result1 != '') {
-    entp = result1[0].ret1;
-    salRep = result1[0].ret2;
-  }
-
-  var condForEntCross1 = isuCd == '34' && !enterpriseSetForCB.has(enterprise) && custGrp == 'CROSS';
-  var condForEnt2 = isuCd == '34' && !entFor34QES.has(enterprise) && enterprise != entp && custGrp != 'CROSS';
-  var condForEnt3 = isuCd == '36' && !entFor36YES.has(enterprise);
-  var condForEnt4 = isuCd == '32' && enterprise != '985985';
-  var condForEnt5 = isuCd == '04' && !entFor04ES.has(enterprise);
-  var condForEnt6 = isuCd == '1R' && enterprise != '986181' && enterprise != '986234';
-  var condForEnt7 = isuCd == '28' && enterprise != '986237' && enterprise != '986140';
-  var condForEnt8 = isuCd == '12' && enterprise != '986160' && enterprise != '986235';
-  var condForEnt9 = isuCd == '3T' && enterprise != '045250';
-  var condForEnt10 = isuCd == '5K' && enterprise != '985999';
-
-  if (condForEntCross1) {
-    return new ValidationResult(
-        {
-          id : 'enterprise',
-          type : 'text',
-          name : 'enterprise'
-        },
-        false,
-        'Enterprise can only accept \'985111\', \'985107\', \'985902\', \'985504\', \'985404\', \'985403\', \'985603\', \'985703\', \'985303\', \'985212\', \'986111\', \'986162\', \'986140\', \'986181\', \'986254\', \'986270\', \'986294\', \'985204\'.');
-  } else if (condForEnt2) {
+  
+  if (enterpriseMapping[isuCtc] && !enterpriseMapping[isuCtc].includes(enterprise)) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'986111\', \'986162\', \'986140\', \'986181\', \'986254\', \'986270\', \'986294\',' + " '" + entp + "'.");
-  } else if (condForEnt3) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'985135\', \'985137\', \'985129\'.');
-  } else if (condForEnt4) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise value not correct.');
-  } else if (condForEnt5) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'986111\', \'986232\', \'103075\', \'111900\', \'060000\'.');
-  } else if (condForEnt6) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'986181\', \'986234\'.');
-  } else if (condForEnt7) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'986237\', \'986140\'.');
-  } else if (condForEnt8) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'986160\', \'986235\'.');
-  } else if (condForEnt9) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'045250\'.');
-  } else if (condForEnt10) {
-    return new ValidationResult({
-      id : 'enterprise',
-      type : 'text',
-      name : 'enterprise'
-    }, false, 'Enterprise can only accept \'985999\'.');
-  } else if (reqType == 'C') {
-    return validatorSalRepES();
+    }, false, 'Enterprise can only accept: ' + enterpriseMapping[isuCtc]);
   }
 }
 
