@@ -3951,12 +3951,12 @@ function setCtcByIsu(value) {
   if (!value) {
     value = FormManager.getActualValue('isuCd');
   }
-  if (value == '32') {
-    FormManager.setValue('clientTier', 'T');
-  } else if (value == '34') {
+  if (value == '34') {
     FormManager.setValue('clientTier', 'Q');
   } else if (value == '36') {
     FormManager.setValue('clientTier', 'Y');
+  } else if (value == '27') {
+    FormManager.setValue('clientTier', 'E');
   } else {
     FormManager.setValue('clientTier', '');
   }
