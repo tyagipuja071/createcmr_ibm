@@ -810,14 +810,6 @@ function setSBOAndEBO() {
       if (FormManager.getActualValue('custSubGrp') == 'IBMEM' || FormManager.getActualValue('custSubGrp') == '') {
         return;
       }
-      // if (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '21') {
-      // if (ent == undefined) {
-      // FormManager.setValue('enterprise', '');
-      // } else {
-      // FormManager.resetDropdownValues(FormManager.getField('enterprise'));
-      // // FormManager.setValue('enterprise', ent);
-      // }
-      // }
     }
   }
   forceLockUnlock();
@@ -3036,7 +3028,7 @@ function setEntepriseAndSalesRepPT() {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('repTeamMemberNo', '000001');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '34Q') {
-    FormManager.setValue('enterprise', '990340');
+    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) || '');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '36Y') {
     FormManager.setValue('enterprise', '990305');
@@ -3049,6 +3041,25 @@ function setEntepriseAndSalesRepPT() {
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   }
   forceLockUnlock();
+}
+
+function setEnterpriseOnSubIndustry(value) {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (isuCd + clientTier != '34Q' || !value || !subIndustryCd) {
+    return;
+  }
+  const subIndustryEnterpriseMap = {
+      'A' : '990310',
+      'K' : '990315', 'U' : '990315',
+      'B' : '990330', 'C' : '990330', 'J' : '990330', 'L' : '990330', 'M' : '990330', 'P' : '990330', 'V' : '990330',
+      'D' : '990355', 'R' : '990355', 'T' : '990350', 'W' : '990355',
+      'F' : '990325', 'N' : '990320', 'S' : '990325',
+      'E' : '990345', 'G' : '990345', 'H' : '990345', 'X' : '990345',
+      'Y' : '990335'
+  }
+  return subIndustryEnterpriseMap[subIndustryCd.substring(0,1)];
 }
 
 function setEnterpriseValues34Q() {
