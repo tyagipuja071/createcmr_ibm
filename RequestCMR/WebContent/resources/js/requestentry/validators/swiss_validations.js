@@ -1608,7 +1608,7 @@ function clientTierValidator() {
         var requestId = FormManager.getActualValue('reqId');
 
         if (reqType == 'C') {
-          valResult = clientTierCodeValidator();
+          valResult = validateISUandCTCCombination();
         } else {
           qParams = {
             REQ_ID : requestId,
@@ -1620,7 +1620,7 @@ function clientTierValidator() {
             oldISU = result.ret3 != null ? result.ret3 : '';
 
             if (clientTier != oldClientTier || isuCd != oldISU) {
-              valResult = clientTierCodeValidator();
+              valResult = validateISUandCTCCombination();
             }
           }
         }
