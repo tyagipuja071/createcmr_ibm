@@ -72,7 +72,8 @@ function addISUHandler() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       if (_oldClientTier != FormManager.getActualValue('clientTier') || (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp'))) {
-        setEnterpriseValues();
+//        setEnterpriseValues();
+        setValuesWRTIsuCtc(value);
         _oldClientTier = FormManager.getActualValue('clientTier');
       }
     });
@@ -1324,6 +1325,7 @@ function addHandlersForSubindustryCd() {
         _subindustryChanged = true;
       }
       var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
+      setValuesWRTIsuCtc(value);
     });
   }
   if (_subindustryCdHandler && _subindustryCdHandler[0]) {
@@ -2298,16 +2300,16 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setValuesWRTIsuCtc(ctc) {
+function setValuesWRTIsuCtc(value) {
   console.log(">>>> setValuesWRTIsuCtc ");
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var isu = FormManager.getActualValue('isuCd');
-  if (ctc == null) {
-    var ctc = FormManager.getActualValue('clientTier');
-  }
+  var ctc = FormManager.getActualValue('clientTier');
+  if (!value) return;
+  
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isu == '34' && ctc == 'Q') {
-    FormManager.setValue('enterprise', '822830');
+    FormManager.setValue('enterprise', setEnterpriseOnSubIndustry(isuCd) || '');
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('salesBusOffCd', '000');
@@ -2316,12 +2318,7 @@ function setValuesWRTIsuCtc(ctc) {
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('salesBusOffCd', '000');
-  } else if (isu == '32' && ctc == 'T') {
-    FormManager.setValue('enterprise', '985985');
-    FormManager.setValue('salesTeamCd', '000000');
-    FormManager.setValue('repTeamMemberNo', '000000');
-    FormManager.setValue('salesBusOffCd', '000');
-  } else if ((isu == '5K' || isu == '21') && ctc == '') {
+  } else if ((isu == '5K' || isu == '21' || isu == '8B') && ctc == '') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesTeamCd', '000000');
     FormManager.setValue('repTeamMemberNo', '000000');
@@ -2333,6 +2330,23 @@ function setValuesWRTIsuCtc(ctc) {
     FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
   }
   lockUnlockField();
+}
+
+function setEnterpriseOnSubIndustry(value) {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (isuCd + clientTier != '34Q' || !value || !subIndustryCd) {
+    return;
+  }
+  const subIndustryEnterpriseMap = {
+      'A' : '822800', 'K' : '822800', 'U' : '822800',
+      'B' : '822800', 'C' : '822800', 'J' : '822800', 'L' : '822800', 'M' : '822800', 'P' : '822800', 'V' : '822800',
+      'D' : '822815', 'R' : '822815', 'T' : '822815', 'W' : '822815',
+      'F' : '822805', 'N' : '822810', 'S' : '822805',
+      'E' : '822825', 'G' : '822825', 'H' : '822825', 'X' : '822825', 'Y' : '822825'
+  }
+  return subIndustryEnterpriseMap[subIndustryCd.substring(0,1)];
 }
 
 function addPpsCeidValidator() {
@@ -2475,7 +2489,8 @@ function setClientTierValuesGR() {
     FormManager.setValue('clientTier', '');
   }
   addRemoveValidator();
-  setEnterpriseValues();
+//  setEnterpriseValues();
+  setValuesWRTIsuCtc(value);
   lockUnlockField();
 }
 
@@ -2594,7 +2609,9 @@ function validatorEnterpriseGR() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var enterprise = FormManager.getActualValue('enterprise');
-  var isuCdSet1 = new Set([ '21', '5K' ]);
+  const isuCdSet1 = new Set([ '21', '5K', '8B' ]);
+  const enterprise34Q = ['822835', '822870', '822800', '822820', '822815', '822825', '822805', '822810' ];
+  const enterprise36Y = ['822840', '822850', '822860'];
 
   if (isuCdSet1.has(isuCd) && enterprise != '985999') {
     return new ValidationResult({
@@ -2602,7 +2619,7 @@ function validatorEnterpriseGR() {
       type : 'text',
       name : 'enterprise'
     }, false, 'Enterprise can only accept \'985999\'.');
-  } else if (isuCd == '34' && enterprise != '822830') {
+  } else if (isuCd == '34' && !enterprise34Q.includes(enterprise)) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',
@@ -2614,7 +2631,7 @@ function validatorEnterpriseGR() {
       type : 'text',
       name : 'enterprise'
     }, false, 'Enterprise can only accept \'985985\'.');
-  } else if (isuCd == '36' && enterprise != '822840' && enterprise != '822850') {
+  } else if (isuCd == '36' && !enterprise36Y.includes(enterprise)) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',

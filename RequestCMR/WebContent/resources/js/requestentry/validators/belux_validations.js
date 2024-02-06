@@ -876,12 +876,29 @@ function setAccountTeamNumberValues(clientTier) {
   var ims = FormManager.getActualValue('subIndustryCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
-
   var subGrp = FormManager.getActualValue('custSubGrp');
-  var role = FormManager.getActualValue('userRole');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var commercialFinanced = FormManager.getActualValue('commercialFinanced');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var postalCodeStartWith = [ '1', '2', '3', '8', '9' ];
+  var postalCodeStartWithLoc = [ '4', '5', '6', '7' ];
+  var subIndustryCdList = [ 'E', 'G', 'H', 'Y' ];
+
+  var defultSortlBE = [ 'T0011315', 'T0011312', 'T0003601', 'T0011318', 'T0011328', 'T0011317', 'T0011320', 'T0011313', 'T0011319', 'T0011324', 'T0011325', 'T0011311' ];
+
   if (cntry == '624') {
 
     if ((clientTier == 'E' && isuCd == '27') && (subGrp == 'BECOM' || subGrp == 'CBCOM' || subGrp == 'BE3PA' || subGrp == 'BEDAT' || subGrp == 'BEPUB' || subGrp == 'GOVRN')) {
+
+      var postalResult = '';
+      var reqId = FormManager.getActualValue('reqId');
+      if (postalResult == '') {
+        var params = {
+          REQ_ID : reqId,
+        };
+        var postalResult = cmr.query('ADD.GET_POSTAL_CD.BY_REQID', params);
+        postalResult = postalResult.ret1;
+      }
 
       if (ims == '') {
         FormManager.setValue('commercialFinanced', '');
@@ -892,8 +909,10 @@ function setAccountTeamNumberValues(clientTier) {
         FormManager.setValue('commercialFinanced', 'T0011312');
       } else if (ims != '' && (ims.startsWith("D") || ims.startsWith("R") || ims.startsWith("W"))) {
         FormManager.setValue('commercialFinanced', 'T0003601');
-      } else if (ims != '' && (ims.startsWith("E") || ims.startsWith("G") || ims.startsWith("H") || ims.startsWith("Y"))) {
+      } else if (ims != '' && (postalCodeStartWith.includes(postalResult.substring(0, 1)) && subIndustryCdList.includes(ims.substring(0, 1)))) {
         FormManager.setValue('commercialFinanced', 'T0011318');
+      } else if (ims != '' && custGrp == 'LOCAL' && (postalCodeStartWithLoc.includes(postalResult.substring(0, 1)) && subIndustryCdList.includes(ims.substring(0, 1)))) {
+        FormManager.setValue('commercialFinanced', 'T0011328');
       } else if (ims != '' && (ims.startsWith("F") || ims.startsWith("S"))) {
         FormManager.setValue('commercialFinanced', 'T0011317');
       } else if (ims != '' && (ims.startsWith("J") || ims.startsWith("V"))) {
@@ -909,8 +928,9 @@ function setAccountTeamNumberValues(clientTier) {
       } else if (ims != '' && ims.startsWith("X")) {
         FormManager.setValue('commercialFinanced', 'T0011311');
       } else {
-        FormManager.setValue('commercialFinanced', '');
+        FormManager.setValue('commercialFinanced', 'T0003601');
       }
+
     }
   }
 
@@ -2185,7 +2205,7 @@ function sortlCheckValidator() {
     '34Q' : [ 'T0011326', 'T0011316', 'T0011331', 'T0011321', 'T0011314', 'T0011322', 'T0011323', 'T0011327', 'T0011330', 'T0011329' ],
     '36Y' : [ 'T0007967', 'T0012106', 'T0012105' ],
     '21' : [ '33U00' ],
-    '27E' : [ 'T0011315', 'T0011312', 'T0003601', 'T0011318', 'T0011317', 'T0011320', 'T0011313', 'T0011319', 'T0011324', 'T0011325', 'T0011311' ],
+    '27E' : [ 'T0011315', 'T0011312', 'T0003601', 'T0011318', 'T0011328', 'T0011317', 'T0011320', 'T0011313', 'T0011319', 'T0011324', 'T0011325', 'T0011311' ],
     '04' : [ 'A0008871', 'A0009312', 'A0008876' ],
     '28' : [ 'A0004504', 'A0008875' ],
     '4F' : [ 'A0008874' ],

@@ -257,6 +257,7 @@ function addHandlersForNORDX() {
 
   if (_inacHandler == null) {
     _inacHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      setSalesRepValues(value);
       prospectFilter();
     });
   }
@@ -3184,7 +3185,7 @@ function lockDunsNo() {
 var oldIsuCtc = null;
 function setSalesRepValues(value) {
   console.log('setSalesRepValues=====');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U' || !value) {
     return;
   }
   reqType = FormManager.getActualValue('reqType');
@@ -3329,7 +3330,7 @@ function setSalesRepValues(value) {
           if (isuAndCtc == '34Q') {
             FormManager.setValue('searchTerm', 'T0004422');
           } else if (isuAndCtc == '5K') {
-            FormManager.setValue('searchTerm', 'T0009073');
+            FormManager.setValue('searchTerm', 'A0009216');
           } else if (isuAndCtc == '21') {
             FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
@@ -3341,7 +3342,7 @@ function setSalesRepValues(value) {
           if (isuAndCtc == '34Q') {
             FormManager.setValue('searchTerm', 'T0004390');
           } else if (isuAndCtc == '5K') {
-            FormManager.setValue('searchTerm', 'T0009071');
+            FormManager.setValue('searchTerm', 'A0009214');
           } else if (isuAndCtc == '21') {
             FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
@@ -3353,7 +3354,7 @@ function setSalesRepValues(value) {
           if (isuAndCtc == '34Q') {
             FormManager.setValue('searchTerm', 'T0004394');
           } else if (isuAndCtc == '5K') {
-            FormManager.setValue('searchTerm', 'T0009072');
+            FormManager.setValue('searchTerm', 'A0009215');
           } else if (isuAndCtc == '21') {
             FormManager.setValue('searchTerm', 'T0001661');
           } else if (isuAndCtc == '8B') {
@@ -3400,11 +3401,11 @@ function setSalesRepValues(value) {
           } else {
             FormManager.setValue('searchTerm', '');
           }
-        } else if (isuAndCtc == '5K') {
+        } else if (isuCd == '5K') {
           FormManager.setValue('searchTerm', 'A0009226');
-        } else if (isuAndCtc == '21') {
+        } else if (isuCd == '21') {
           FormManager.setValue('searchTerm', 'T0000490');
-        } else if (isuAndCtc == '8B') {
+        } else if (isuCd == '8B') {
           FormManager.setValue('searchTerm', 'P0000007');
         } else {
           FormManager.setValue('searchTerm', '');
@@ -3707,12 +3708,16 @@ function searchTermCodeValidator() {
         var isuCtc = isuCode.concat(clientTierCode);
         var subIndustry = FormManager.getActualValue('subIndustryCd');
         var ind = subIndustry.substring(0, 1);
+        
+        if (!searchTerm) {
+          return;
+        }
 
         var scenariosToBlock = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT',
             'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT' ];
 
         var accSeq_678 = {
-          '34Q' : [ 'T0006607', 'T0006644', 'T0006880', 'T0006881', 'T0001375', 'T0011618' ],
+          '34Q' : [ 'T0006607', 'T0006644', 'T0006880', 'T0006881', 'T0001375', 'T0011618', 'T0001376' ],
           '36Y' : [ 'T0011694', 'T0007973', 'T0010026' ],
           '5K' : [ 'A0009227' ],
           '04' : [ 'A0001243', 'A0004750', 'A0008881', 'A0008882' ],
@@ -3752,7 +3757,7 @@ function searchTermCodeValidator() {
         };
         var accSeq_806 = {
           '34Q' : [ 'T0011597', 'T0006611', 'T0011598', 'T0011599', 'T0011613', 'T0011603', 'T0011615', 'T0011616', 'T0011608', 'T0011596', 'T0011610', 'T0011611', 
-              'T0011606', 'T0011609', 'T0011601', 'T0011604', 'T0011602', 'T0011595', 'T0011607', 'T0001383', 'T0001383', 'T0011614' ],
+              'T0011606', 'T0011609', 'T0011601', 'T0011604', 'T0011602', 'T0011595', 'T0011607', 'T0001383', 'T0001383', 'T0011614', 'T0011271' ],
           '36Y' : [ 'T0007975', 'T0010024', 'T0011310' ],
           '5K' : [ 'A0009226' ]
         };
