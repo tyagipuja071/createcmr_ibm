@@ -4112,7 +4112,7 @@ function sboCodeValidator() {
     return new ValidationResult(null, true);
   }
   if (isuCtc == '36Y' && !(sbo == '09A09A' || sbo == '10A10A' || sbo == '11A11A' || sbo == 'BUILD1' || sbo == 'DISTR1' || sbo == 'SRVCE1')
-      && !(landedCountry == 'TN' || countyCd == "LY" || countyCd == "DZ")) {
+      && !(landedCountry == 'TN' || landedCountry == "LY" || landedCountry == "DZ")) {
     return new ValidationResult({
       id : 'salesBusOffCd',
       type : 'text',
