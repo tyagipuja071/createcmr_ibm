@@ -263,20 +263,6 @@ function addHandlersForAUSTRIA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
-      if (!value) {
-        value = FormManager.getActualValue('isuCd');
-      }
-      if (value == '27') {
-        FormManager.setValue('clientTier', 'E');
-      } else if (value == '32') {
-        FormManager.setValue('clientTier', 'T');
-      } else if (value == '34') {
-        FormManager.setValue('clientTier', 'Q');
-      } else if (value == '36') {
-        FormManager.setValue('clientTier', 'Y');
-      } else {
-        FormManager.setValue('clientTier', '');
-      }
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
       // CreateCMR-811
       // if (CEE_INCL.has(cntry)) {
@@ -296,7 +282,6 @@ function addHandlersForAUSTRIA() {
           setSBOValues()
         } else {
           setClientTierValuesAT(value);
-          setSBOValuesForIsuCtc(value);
         }
     });
   }
@@ -313,7 +298,6 @@ function addHandlersForAUSTRIA() {
       if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
         setSalesRepValues(value);
       }
-      setSBOValuesForIsuCtc(value);// CMR-2101
     });
   }
 
@@ -328,7 +312,6 @@ function addHandlersForAUSTRIA() {
       // CMR-2101 Austria remove ISR
       // setSalesRepValues();
       setISUCTCOnIMSChange();
-      setSBOValuesForIsuCtc(value);// CMR-2101
     });
   }
 
@@ -835,7 +818,7 @@ function setSalesRepValues(clientTier) {
 /**
  * CMR-2101:Austria - sets SBO based on isuCtc
  */
-function setSBOValuesForIsuCtc(value) {
+function setSBOValuesForIsuCtc() {
   if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
     return;
   }
@@ -843,10 +826,6 @@ function setSBOValuesForIsuCtc(value) {
   if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (value == undefined) {
-    return;
-  }
-
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
@@ -857,7 +836,11 @@ function setSBOValuesForIsuCtc(value) {
   var qParams = null;
   var sbo = [];
   var salesBoDesc = ' '
+  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
 
+  if (postCd.substring(0, 2).match(/(8[0-9])||(7[0-5]||(5[1-3])||(4[0-9])||(3[0-9])||(2[0-8])||(1[0-2]))/g)){
+    salesBoDesc = '1'
+  }
 
   // SBO will be based on IMS
   if (isuCd != '') {
@@ -871,7 +854,7 @@ function setSBOValuesForIsuCtc(value) {
         UPDATE_BY_ID: '%' + ims.substring(0, 1) + '%',
         SALES_BO_DESC: salesBoDesc
       };
-      results = cmr.query('GET.SBOLIST.BYISUCTC', qParams);
+      results = cmr.query('AUSTRIA.GET.SBOLIST.BYISUCTC', qParams);
     } else {
       qParams = {
         _qall: 'Y',
@@ -879,7 +862,7 @@ function setSBOValuesForIsuCtc(value) {
         ISU: '%' + isuCtc + '%',
         SALES_BO_DESC: salesBoDesc
       };
-      results = cmr.query('GET.SBOLIST.BYISU', qParams);
+      results = cmr.query('AUSTRIA.GET.SBOLIST.BYISU', qParams);
     }
     console.log("There are " + results.length + " SBO returned.");
 
@@ -926,7 +909,7 @@ function validateSBOValuesForIsuCtc() {
               ISSUING_CNTRY: cntry,
               ISU: '%' + isuCtc + '%'
             };
-            results = cmr.query('GET.SBOLIST.BYISU', qParams);
+            results = cmr.query('AUSTRIA.GET.SBOLIST.BYISU', qParams);
           }
         }
         if (results == null) {
@@ -2187,6 +2170,19 @@ function addressQuotationValidatorAUSTRIA() {
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, ['Phone number']);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, ['PO BOX']);
 }
+
+function setCTCBasedOnISUCode() {
+  isuCd = FormManager.getActualValue('isuCd');
+  const CTCMapping = {
+    '27': 'E',
+    '32': 'T',
+    '34': 'Q',
+    '36': 'Y'
+  }
+
+  FormManager.setValue('clientTier', CTCMapping[isuCd] || '');
+}
+
 dojo.addOnLoad(function () {
   console.log('adding AUSTRIA functions...');
   GEOHandler.enableCustomerNamesOnAddress([SysLoc.AUSTRIA]);
@@ -2216,14 +2212,12 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     setAddressDetailsForViewAT,
     resetSortlValidator,
-    setVatIndFieldsForGrp1AndNordx,
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
 
   for (const func of [
     addAUSTRIALandedCountryHandler,
-    updateMainCustomerNames,
     changeAbbrevNmLocn,
     addLatinCharValidator,
     toggleLocalCountryNameOnOpen,
@@ -2245,7 +2239,8 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     togglePPSCeidCEE,
     resetSortlValidator,
-    setVatIndFieldsForGrp1AndNordx,
+    setCTCBasedOnISUCode,
+    setSBOValuesForIsuCtc
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
