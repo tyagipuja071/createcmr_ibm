@@ -159,7 +159,7 @@ function setSboOnIMS(value) {
     IMS : '%' + ims + '%'
   });
 
-  if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
+  if (result != null && Object.keys(result).length > 0) {
     FormManager.setValue('searchTerm', result[0].ret1);
   } else {
     FormManager.clearValue('searchTerm');
@@ -1327,16 +1327,9 @@ function setCTCInitialValueBasedOnCurrentIsu() {
 }
 
 function setSortlDropdownValuesBasedOnIsu() {
-  var isuCd = FormManager.getActualValue('isuCd');
   var result = []
 
-  if (['27'].includes(isuCd)) {
-    result = setInitialValueFor27Eand36Y()
-  } else if (['36'].includes(isuCd)) {
-    result = [...setInitialValueFor27Eand36Y(), ...getSortlListBasedOnIsu()]
-} else {
-    result = getSortlListBasedOnIsu()
-  }
+  result = getSortlListBasedOnIsu().map(({ret1}) => ret1)
 
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if(!!dropdownField) dropdownField.setAttribute('values', result);
@@ -1351,109 +1344,54 @@ function setSortlDropdownValuesBasedOnIsu() {
 function getSortlListBasedOnIsu() {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   if (isuCd + clientTier != '34Q') {
     ims = '';
   }
 
-  return cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', {
-    _qall : 'Y',
-    ISU_CD : isuCd,
-    CLIENT_TIER : clientTier,
-    IMS : '%%'
-  }).map(({ret1}) => ret1)
-}
-
-function setInitialValueFor27Eand36Y() {
-  var clientTier = FormManager.getActualValue('clientTier');
-  var isuCd = FormManager.getActualValue('isuCd');
-  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0];
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var result = [];
-
-  const postalCodeHead = postCd.substring(0, 2);
+  const postalCodeHead = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0].substring(0, 2);
   const is27E = () => isuCd == '27' && clientTier == 'E'
   const is27notE = () => isuCd == '27' && clientTier != 'E'
   const is36Y = () => isuCd == '36' && clientTier == 'Y'
 
-  const is11341 = () => {
-    if (parseInt(postalCodeHead) > 0 && parseInt(postalCodeHead) <= 19) {
-      if(!['05', '07', '11'].includes(postalCodeHead)) {
-        return true
-      }
-    } else {
-      if(['39'].includes(postalCodeHead)) {
-        return true
-      }
-    }
-  }
-
-  const isGroup1 = () => {
-    if (['76', '98', '99'].includes(postalCodeHead)) return true
-    if (parseInt(postalCodeHead) >= 34 && parseInt(postalCodeHead) <= 36) return true
-    if (parseInt(postalCodeHead) >= 54 && parseInt(postalCodeHead) <= 57) return true
-    if (parseInt(postalCodeHead) >= 60 && parseInt(postalCodeHead) <= 67) {
-      if(!['62'].includes(postalCodeHead)) {
-        return true
-      }
-    }
-  }
-
-  const isGroup2 = () => {
-    if (['37', '38', '49'].includes(postalCodeHead)) return true
-    if (parseInt(postalCodeHead) >= 20 && parseInt(postalCodeHead) <= 31) return true
-  }
-
-  const isGroup3 = () => {
-    if (parseInt(postalCodeHead) >= 80 && parseInt(postalCodeHead) <= 97) {
-      if (!['88'].includes(postalCodeHead)) return true
-    }
-  }
-
-  const isGroup4 = () => {
-    if (['88'].includes(postalCodeHead)) return true
-    if (parseInt(postalCodeHead) >= 68 && parseInt(postalCodeHead) <= 79) {
-      if (!['76'].includes(postalCodeHead)) return true
-    }
-  }
-
-  const isGroup5 = () => {
-    if (['32', '33', '58', '59'].includes(postalCodeHead)) return true
-    if (parseInt(postalCodeHead) >= 40 && parseInt(postalCodeHead) <= 53) {
-      if (!['43', '49'].includes(postalCodeHead)) return true
-    }
-  }
+  result = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', {
+    _qall : 'Y',
+    ISU_CD : isuCd,
+    CLIENT_TIER : clientTier,
+    IMS : '%%'
+  })
 
   if(custSubGrp != 'CROSS'){
     if(is27E()){
-      if (is11341()) result.push('T0011341')
-      else if (isGroup1()) result.push('T0011357')
-      else if (isGroup2()) result.push('T0011373')
-      else if (isGroup3()) result.push('T0011389')
-      else if (isGroup4()) result.push('T0011405')
-      else if (isGroup5()) result.push('T0011421')
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter(({ret1}) => ret1 == 'T0011341')
+      else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter(({ret1}) => ret1 == 'T0011357')
+      else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter(({ret1}) => ret1 == 'T0011373')
+      else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter(({ret1}) => ret1 == 'T0011389')
+      else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter(({ret1}) => ret1 == 'T0011405')
+      else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter(({ret1}) => ret1 == 'T0011421')
     } else if (is27notE()) {
-      if (is11341()) result.push('T0011351')
-      else if (isGroup1()) result.push('T0011367')
-      else if (isGroup2()) result.push('T0011383')
-      else if (isGroup3()) result.push('T0011399')
-      else if (isGroup4()) result.push('T0011415')
-      else if (isGroup5()) result.push('T0011431')
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter(({ret1}) => ret1 == 'T0011351')
+      else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter(({ret1}) => ret1 == 'T0011367')
+      else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter(({ret1}) => ret1 == 'T0011383')
+      else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter(({ret1}) => ret1 == 'T0011399')
+      else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter(({ret1}) => ret1 == 'T0011415')
+      else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter(({ret1}) => ret1 == 'T0011431')
     } else if (is36Y()) {
-      if (is11341()) result.push('T0007970')
-      else if (isGroup1()) result.push('T0012010')
-      else if (isGroup2()) result.push('T0012011')
-      else if (isGroup3()) result.push('T0012012')
-      else if (isGroup4()) result.push('T0012013')
-      else if (isGroup5()) result.push('T0012014')
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter(({ret1}) => ret1 == 'T0007970')
+      else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter(({ret1}) => ret1 == 'T0012010')
+      else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter(({ret1}) => ret1 == 'T0012011')
+      else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter(({ret1}) => ret1 == 'T0012012')
+      else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter(({ret1}) => ret1 == 'T0012013')
+      else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter(({ret1}) => ret1 == 'T0012014')
     }
   } else {
-    if(is27E()) result.push('T0011405')
-    else if (is27notE()) result.push('T0011415')
-    else if (is36Y()) result.push('T0012013')
+    if(is27E()) result.filter(({ret1}) => ret1 == 'T0011405')
+    else if (is27notE()) result.filter(({ret1}) => ret1 == 'T0011415')
+    else if (is36Y()) result.filter(({ret1}) => ret1 == 'T0012013')
   }
 
-  return result;
+  return result
 }
 
 dojo.addOnLoad(function() {
