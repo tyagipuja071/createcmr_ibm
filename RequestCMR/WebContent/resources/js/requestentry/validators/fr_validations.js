@@ -146,7 +146,7 @@ function afterConfigForFR() {
     setHideFieldForFR();
     setINACOnScenario();
     setISICAndSubindustryOnScenario();
-  //  setVATOnScenario();
+    // setVATOnScenario();
     // setSBOOnScenarioLD();
     setSalesRepLogic();
     setTaxCdOnScnrio();
@@ -202,7 +202,7 @@ function afterConfigForFR() {
   } else {
     FormManager.readOnly('taxCd1');
   }
-  //addVatExemptHandler();
+  // addVatExemptHandler();
   if (reqType == 'U') {
     return;
   }
@@ -1484,7 +1484,7 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
     if (addrType == 'ZS01' || copyingToA) {
       addAbbrevLocnlogic();
       // add32SBODependcyOnPostCdOnAddrSave();
-     // addVATScenarioOnAddrSave();
+      // addVATScenarioOnAddrSave();
       setTaxCdOnAddrSave();
     }
   }
@@ -3677,7 +3677,7 @@ function addVatExemptHandler() {
           FormManager.enable('vat');
           FormManager.removeValidator('vat', Validators.REQUIRED);
         } else {
-        //  setVATOnScenario(true);
+          // setVATOnScenario(true);
         }
       });
     }
@@ -3953,6 +3953,9 @@ function setCTCValues() {
 function setCtcByIsu(value) {
   if (!value) {
     value = FormManager.getActualValue('isuCd');
+  }
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
   }
   if (value == '34') {
     FormManager.setValue('clientTier', 'Q');
@@ -4409,7 +4412,7 @@ function addVatIndValidator() {
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
-    // FormManager.readOnly('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'R' && vat == '' && vatInd != 'E' && vatInd != 'N' && vatInd != 'T' && vatInd != '') {
       FormManager.setValue('vat', '');
       FormManager.setValue('vatInd', '');
