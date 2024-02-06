@@ -647,6 +647,7 @@ function validateSBOValuesForIsuCtc() {
         var sbo = FormManager.getActualValue('searchTerm');
         var validSboList = [];
         var qParams = null;
+        var sboDesc = ''
         
         if (isuCd != '') {
           var results = null;
@@ -655,7 +656,8 @@ function validateSBOValuesForIsuCtc() {
               _qall : 'Y',
               ISSUING_CNTRY : cntry,
               ISU : '%' + isuCd + '%',
-              CTC : '%' + clientTier + '%'
+              CTC : '%' + clientTier + '%',
+              SALES_BO_DESC : '%' + sboDesc + '%'
             };
             results = cmr.query('GET.SBOLIST.BYISU', qParams);
           }

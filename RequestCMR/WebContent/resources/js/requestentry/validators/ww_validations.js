@@ -161,87 +161,87 @@ function addDnBMatchingAttachmentValidator() {
             }
           }
         }
-        
-function validateCustomername() {
-    FormManager.addFormValidator((function() {
-      return {
-         validate : function() {
-          var addrTxt = FormManager.getActualValue('mainCustNm1');
-          var addrTxt2 = FormManager.getActualValue('mainCustNm2');
-          var combinedstring = addrTxt.concat(addrTxt2)
-          if (combinedstring.includes("—") || combinedstring.includes("–")) {
-                  return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
-                } 
-          else {
-                  return new ValidationResult(null, true);
-                }
-              }
-            };
-          })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-        }
-        
+      }
+    }
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 function validateCustomeraddress() {
-      FormManager.addFormValidator((function() {
-        return {
-           validate : function() {
-           var addrTxt = FormManager.getActualValue('addrTxt');
-           var addrTxt2 = FormManager.getActualValue('addrTxt2');
-           var custNm1 = FormManager.getActualValue('custNm1');
-           var custNm2 = FormManager.getActualValue('custNm2');
-           var addrcombinedstring = addrTxt.concat(addrTxt2)
-           var namecombinedstring = custNm1.concat(custNm2)
-           if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
-                 return new ValidationResult(null, false, 'Address can contain only -.Long Dash not allowed in Address');
-                }
-           if (namecombinedstring.includes("—") || namecombinedstring.includes("–")) {
-                  return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
-                } 
-           else {
-                  return new ValidationResult(null, true);
-                }
-              }
-            };
-          })(), null, 'frmCMR_addressModal');
-        }
-               
-        if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
-          // FOR CN
-          var cntry = FormManager.getActualValue('landCntry');
-          var loc = FormManager.getActualValue('cmrIssuingCntry');
-          var custSubGroup = FormManager.getActualValue('custSubGrp');
-          if(cntry == 'CN' || loc == '641' && custSubGroup != 'CROSS') {
-            var id = FormManager.getActualValue('reqId');
-            var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
-              ID : id
-            });
-            if (ret == null || ret.ret1 == null) {
-              return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
-                  + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
-                  + "of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
-            } else {
+  FormManager.addFormValidator((function() {
+    return {
+       validate : function() {
+       var addrTxt = FormManager.getActualValue('addrTxt');
+       var addrTxt2 = FormManager.getActualValue('addrTxt2');
+       var custNm1 = FormManager.getActualValue('custNm1');
+       var custNm2 = FormManager.getActualValue('custNm2');
+       var addrcombinedstring = addrTxt.concat(addrTxt2)
+       var namecombinedstring = custNm1.concat(custNm2)
+       if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
+             return new ValidationResult(null, false, 'Address can contain only -.Long Dash not allowed in Address');
+            }
+       if (namecombinedstring.includes("—") || namecombinedstring.includes("–")) {
+              return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
+            } 
+       else {
               return new ValidationResult(null, true);
             }
           }
-          
-          // FOR US Temporary
-          var id = FormManager.getActualValue('reqId');
-          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
-            ID : id
-          });
-          if (ret == null || ret.ret1 == null) {
-            return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
-                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
-                + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
-          } else {
-            return new ValidationResult(null, true);
-          }
+        };
+      })(), null, 'frmCMR_addressModal');
+           
+    if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+        && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+      // FOR CN
+      var cntry = FormManager.getActualValue('landCntry');
+      var loc = FormManager.getActualValue('cmrIssuingCntry');
+      var custSubGroup = FormManager.getActualValue('custSubGrp');
+      if(cntry == 'CN' || loc == '641' && custSubGroup != 'CROSS') {
+        var id = FormManager.getActualValue('reqId');
+        var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+          ID : id
+        });
+        if (ret == null || ret.ret1 == null) {
+          return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+              + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+              + "of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+        } else {
+          return new ValidationResult(null, true);
         }
+      }
+      
+      // FOR US Temporary
+      var id = FormManager.getActualValue('reqId');
+      var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+        ID : id
+      });
+      if (ret == null || ret.ret1 == null) {
+        return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+            + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+            + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+      } else {
         return new ValidationResult(null, true);
       }
-    };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
-}
+    }
+    return new ValidationResult(null, true);
+  }
+
+function validateCustomername() {
+  FormManager.addFormValidator((function() {
+    return {
+       validate : function() {
+        var addrTxt = FormManager.getActualValue('mainCustNm1');
+        var addrTxt2 = FormManager.getActualValue('mainCustNm2');
+        var combinedstring = addrTxt.concat(addrTxt2)
+        if (combinedstring.includes("—") || combinedstring.includes("–")) {
+                return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
+              } 
+        else {
+                return new ValidationResult(null, true);
+              }
+            }
+          };
+        })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+      }
 
 /**
  * Method to check whether for a scenario dnb matching is allowed or not
