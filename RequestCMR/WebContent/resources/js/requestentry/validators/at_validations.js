@@ -852,7 +852,7 @@ function setSBOValuesForIsuCtc() {
         ISSUING_CNTRY: cntry,
         ISU: '%' + isuCtc + '%',
         UPDATE_BY_ID: '%' + ims.substring(0, 1) + '%',
-        SALES_BO_DESC: salesBoDesc
+        SALES_BO_DESC: '%' + salesBoDesc + '%'
       };
       results = cmr.query('AUSTRIA.GET.SBOLIST.BYISUCTC', qParams);
     } else {
@@ -860,7 +860,7 @@ function setSBOValuesForIsuCtc() {
         _qall: 'Y',
         ISSUING_CNTRY: cntry,
         ISU: '%' + isuCtc + '%',
-        SALES_BO_DESC: salesBoDesc
+        SALES_BO_DESC: '%' + salesBoDesc + '%'
       };
       results = cmr.query('AUSTRIA.GET.SBOLIST.BYISU', qParams);
     }

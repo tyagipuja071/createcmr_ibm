@@ -647,6 +647,7 @@ function validateSBOValuesForIsuCtc() {
         var sbo = FormManager.getActualValue('searchTerm');
         var validSboList = [];
         var qParams = null;
+        var sboDesc = ''
         
         if (isuCd != '') {
           var results = null;
@@ -655,7 +656,8 @@ function validateSBOValuesForIsuCtc() {
               _qall : 'Y',
               ISSUING_CNTRY : cntry,
               ISU : '%' + isuCd + '%',
-              CTC : '%' + clientTier + '%'
+              CTC : '%' + clientTier + '%',
+              SALES_BO_DESC : '%' + sboDesc + '%'
             };
             results = cmr.query('GET.SBOLIST.BYISU', qParams);
           }
@@ -1608,7 +1610,7 @@ function clientTierValidator() {
         var requestId = FormManager.getActualValue('reqId');
 
         if (reqType == 'C') {
-          valResult = clientTierCodeValidator();
+          valResult = validateISUandCTCCombination();
         } else {
           qParams = {
             REQ_ID : requestId,
@@ -1620,7 +1622,7 @@ function clientTierValidator() {
             oldISU = result.ret3 != null ? result.ret3 : '';
 
             if (clientTier != oldClientTier || isuCd != oldISU) {
-              valResult = clientTierCodeValidator();
+              valResult = validateISUandCTCCombination();
             }
           }
         }
