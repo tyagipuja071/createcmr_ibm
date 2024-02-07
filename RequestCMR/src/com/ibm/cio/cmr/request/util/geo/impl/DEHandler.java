@@ -974,17 +974,17 @@ public class DEHandler extends GEOHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-                if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+              } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
-                  && !"@".equalsIgnoreCase(ctc)) {
-                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "27".equals(isuCd) || "36".equals(isuCd)))
+                  && !StringUtils.isBlank(ctc)) {
+                LOG.trace("Client Tier should be blank for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should be blank for IsuCd Value :" + isuCd + ".<br>");
               }
             }
             if (error.hasErrors()) {
