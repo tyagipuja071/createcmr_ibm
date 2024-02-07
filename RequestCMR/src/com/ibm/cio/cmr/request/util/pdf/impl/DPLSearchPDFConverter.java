@@ -157,7 +157,7 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
               }
               document.add(blankLine());
 
-              document.add(createSubHeader("Results"));
+              document.add(createSubHeader("Results - " + result.getSearchArgument()));
               section = createDetailsTable(new float[] { 10, 10, 10, 50, 20 });
               section.addCell(createLabelCell("ID"));
               section.addCell(createLabelCell("Denial Country"));
