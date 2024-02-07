@@ -1390,8 +1390,6 @@ function getSortlListBasedOnIsu() {
     else if (is27notE()) return result.filter(({ret1}) => ret1 == 'T0011415')
     else if (is36Y()) return result.filter(({ret1}) => ret1 == 'T0012013')
   }
-
-  return result
 }
 
 dojo.addOnLoad(function() {
