@@ -123,6 +123,12 @@ function afterConfigForFR() {
         if (value == undefined) {
           return;
         }
+        var isuCd = FormManager.getActualValue('isuCd');
+        var clientTier = FormManager.getActualValue('clientTier');
+        if ((isuCd == '34' && clientTier == 'Q') || (isuCd == '36' && clientTier == 'Y') || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
+          // ISUs have multiple value
+          FormManager.setValue('salesBusOffCd', '');
+        }
         setCtcByIsu(value);
         setCoverageSBOBasedOnIsuCtc();
       });
@@ -554,6 +560,12 @@ function addISUHandler() {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
+      }
+      var isuCd = FormManager.getActualValue('isuCd');
+      var clientTier = FormManager.getActualValue('clientTier');
+      if ((isuCd == '34' && clientTier == 'Q') || (isuCd == '36' && clientTier == 'Y') || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
+        // ISUs have multiple value
+        FormManager.setValue('salesBusOffCd', '');
       }
       setCoverageSBOBasedOnIsuCtc();
     });
