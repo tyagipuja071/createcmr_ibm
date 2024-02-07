@@ -795,6 +795,11 @@ function lockIBMTabForDE() {
     FormManager.readOnly('covId');
     FormManager.readOnly('geoLocationCode');
     FormManager.readOnly('dunsNo');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    document.getElementById('templatevalue-searchTerm').setAttribute('disabled', true)
+
     if (custSubType != 'BUSPR') {
       FormManager.readOnly('ppsceid');
     } else {
@@ -809,11 +814,12 @@ function lockIBMTabForDE() {
     FormManager.readOnly('custClass');
   }
   if (reqType == 'C' && role == 'PROCESSOR') {
-    if (['INTIN', 'INTSO', 'INTAM', 'IBMEM', 'BUSPR', 'PRIPE'].includes(custSubType)) {
-      FormManager.readOnly('searchTerm');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-    } else {
+    FormManager.enable('searchTerm');
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+    document.getElementById('templatevalue-searchTerm').setAttribute('disabled', false)
+
+    if (!['INTIN', 'INTSO', 'INTAM', 'IBMEM', 'BUSPR', 'PRIPE'].includes(custSubType)) {
       FormManager.enable('searchTerm');
       FormManager.enable('isuCd');
       FormManager.enable('clientTier');
@@ -1390,6 +1396,8 @@ function getSortlListBasedOnIsu() {
     else if (is27notE()) return result.filter(({ret1}) => ret1 == 'T0011415')
     else if (is36Y()) return result.filter(({ret1}) => ret1 == 'T0012013')
   }
+
+  return result
 }
 
 dojo.addOnLoad(function() {
@@ -1457,5 +1465,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
 
 });
