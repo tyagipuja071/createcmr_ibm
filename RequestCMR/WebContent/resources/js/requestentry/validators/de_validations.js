@@ -1386,9 +1386,9 @@ function getSortlListBasedOnIsu() {
       else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter(({ret1}) => ret1 == 'T0012014')
     }
   } else {
-    if(is27E()) result.filter(({ret1}) => ret1 == 'T0011405')
-    else if (is27notE()) result.filter(({ret1}) => ret1 == 'T0011415')
-    else if (is36Y()) result.filter(({ret1}) => ret1 == 'T0012013')
+    if(is27E()) return result.filter(({ret1}) => ret1 == 'T0011405')
+    else if (is27notE()) return result.filter(({ret1}) => ret1 == 'T0011415')
+    else if (is36Y()) return result.filter(({ret1}) => ret1 == 'T0012013')
   }
 
   return result
