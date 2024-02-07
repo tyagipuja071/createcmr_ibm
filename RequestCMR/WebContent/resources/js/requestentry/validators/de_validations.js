@@ -798,7 +798,6 @@ function lockIBMTabForDE() {
     FormManager.readOnly('searchTerm');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-    document.getElementById('templatevalue-searchTerm').setAttribute('disabled', true)
 
     if (custSubType != 'BUSPR') {
       FormManager.readOnly('ppsceid');
@@ -817,7 +816,6 @@ function lockIBMTabForDE() {
     FormManager.enable('searchTerm');
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
-    document.getElementById('templatevalue-searchTerm').setAttribute('disabled', false)
   }
 }
 
