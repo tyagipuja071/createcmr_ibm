@@ -778,46 +778,6 @@ function unlockCustGrpSubGrp() {
   }
 }
 
-function lockIBMTabForDE() {
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  if (reqType == 'C' && role == 'REQUESTER') {
-    FormManager.readOnly('cmrNo');
-    FormManager.readOnly('cmrOwner');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('inacCd');
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('enterprise');
-    FormManager.readOnly('buyingGroupId');
-    FormManager.readOnly('globalBuyingGroupId');
-    FormManager.readOnly('covId');
-    FormManager.readOnly('geoLocationCode');
-    FormManager.readOnly('dunsNo');
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-
-    if (custSubType != 'BUSPR') {
-      FormManager.readOnly('ppsceid');
-    } else {
-      FormManager.enable('ppsceid');
-    }
-    FormManager.readOnly('soeReqNo');
-    if (custSubType != 'INTIN' && custSubType != 'INTSO' && custSubType != 'INTAM') {
-      FormManager.readOnly('ibmDeptCostCenter');
-    } else {
-      FormManager.enable('ibmDeptCostCenter');
-    }
-    FormManager.readOnly('custClass');
-  }
-  if (reqType == 'C' && role == 'PROCESSOR') {
-    FormManager.enable('searchTerm');
-    FormManager.enable('isuCd');
-    FormManager.enable('clientTier');
-  }
-}
 
 function validateDeptAttnBldg() {
   FormManager.addFormValidator((function() {
@@ -1457,6 +1417,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
-  GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
 
 });
