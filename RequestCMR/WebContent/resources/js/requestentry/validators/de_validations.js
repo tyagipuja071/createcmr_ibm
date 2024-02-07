@@ -818,12 +818,6 @@ function lockIBMTabForDE() {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     document.getElementById('templatevalue-searchTerm').setAttribute('disabled', false)
-
-    if (!['INTIN', 'INTSO', 'INTAM', 'IBMEM', 'BUSPR', 'PRIPE'].includes(custSubType)) {
-      FormManager.enable('searchTerm');
-      FormManager.enable('isuCd');
-      FormManager.enable('clientTier');
-    }
   }
 }
 
