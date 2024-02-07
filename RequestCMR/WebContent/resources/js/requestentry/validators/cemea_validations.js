@@ -280,8 +280,18 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   } else if (saving) {
     var landCntry = FormManager.getActualValue('landCntry');
     var postCode = FormManager.getActualValue('postCd');
+    var stateProv = FormManager.getActualValue('stateProv');
+    var reqType = FormManager.getActualValue('reqType');
+
     if (landCntry == 'SA' && postCode == '') {
       FormManager.setValue('postCd', '00000');
+    } else if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U')) {
+      FormManager.setValue('custNm1', FormManager.getActualValue('custNm1').toUpperCase());
+      FormManager.setValue('custNm2', FormManager.getActualValue('custNm2').toUpperCase());
+      FormManager.setValue('custNm3', FormManager.getActualValue('custNm3').toUpperCase());
+      FormManager.setValue('custNm4', FormManager.getActualValue('custNm4').toUpperCase());
+      FormManager.setValue('addrTxt', FormManager.getActualValue('addrTxt').toUpperCase());
+      FormManager.setValue('city1', FormManager.getActualValue('city1').toUpperCase());
     }
 
     /**
@@ -5348,6 +5358,46 @@ function retainVatValueAT() {
     FormManager.setValue('vat', _vat);
   }
 }
+// CREATCMR-9427
+function addProvinceCityValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var landCntry = FormManager.getActualValue('landCntry');
+        var stateProv = FormManager.getActualValue('stateProv');
+        var city = FormManager.getActualValue('city1');
+        var addrType = FormManager.getActualValue('addrType');
+        var variationCityList = [ 'BUCHAREST', 'BUKAREST', 'BUCUREŞTI', 'BUCURESTI' ];
+        var cityLastDigit = [ '1', '2', '3', '4', '5', '6' ];
+
+        if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U') && (stateProv == 'B' || stateProv == '')) {
+          if (addrType == 'ZP02') {
+
+            if (variationCityList.includes(city)) {
+              return new ValidationResult(null, false, 'Correct format for city is BUCUREȘTI SECTORUL \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+            }
+            if ((city.substr(0, 18) == 'BUCUREȘTI SECTORUL') && (!cityLastDigit.includes(city.at(-1)))) {
+              return new ValidationResult(null, false, 'Correct format for city is BUCUREȘTI SECTORUL \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+          if (variationCityList.includes(city)) {
+            return new ValidationResult(null, false, 'Correct format for city is BUCHAREST SECTOR \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+          }
+          if ((city.substr(0, 16) == 'BUCHAREST SECTOR') && (!cityLastDigit.includes(city.at(-1)))) {
+            return new ValidationResult(null, false, 'Correct format for city is BUCHAREST SECTOR \'N\'' + ' (N = number 1,2,3,4,5 or 6)');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 // CREATCMR-788
 function addressQuotationValidatorCEMEA() {
   var cmrIssueCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -5627,4 +5677,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEMEA_COPY, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
+  GEOHandler.registerValidator(addProvinceCityValidator, [SysLoc.ROMANIA], null, true);
 });
