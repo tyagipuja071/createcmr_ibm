@@ -1,4 +1,5 @@
 let currentlyLoadedSORTL = []
+let SORTLandCTCandISUMapping = []
 
 /* Register SWISS Javascripts */
 function addAfterConfigForSWISS() {
@@ -10,6 +11,9 @@ function addAfterConfigForSWISS() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var impIndc = getImportedIndcForSwiss();  
+
+  SORTLandCTCandISUMapping = loadSORTLandCTCandISUMapping(cntry)
+
   if (role == 'REQUESTER') {
     FormManager.removeValidator('custLangCd', Validators.REQUIRED);
   } else {
@@ -164,6 +168,12 @@ const IS27ESCENARIO = () => {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   return isuCd == '27' && clientTier == 'E'
+}
+
+const FILTER_SORTL_MAPPING_BY_ISU_AND_CTC = () => {
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  return SORTLandCTCandISUMapping.filter(({CTC, ISU}) => CTC == clientTier && ISU == isuCd)
 }
 
 function resetAddrTypeValidation() {
@@ -1914,7 +1924,11 @@ function setSortlListValues(values) {
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if(!!dropdownField) {
     dropdownField.setAttribute('values', values);
-    FormManager.setValue('searchTerm', values[0])
+    if(values.length == 0) {
+      FormManager.clearValue('searchTerm')
+    } else {
+      FormManager.setValue('searchTerm', values[0])
+    }
   }
 }
 
@@ -1926,6 +1940,18 @@ function loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd) {
     IMS : '%' + ims + '%',
     POST_CD_RANGE : postCd
   }).map(({ret1}) => ret1);
+}
+
+function loadSORTLandCTCandISUMapping(cntry) {
+  return SORTLandCTCandISUMapping = cmr.query('GET.ISU.CTC.BY_SBO.V2', {
+    _qall : 'Y',
+    ISSUING_CNTRY : cntry,
+    SALES_BO_CD : '%%'
+  }).map(({ret1, ret2, ret3}) => ({
+    SORTL: ret1,
+    ISU: ret2,
+    CTC: ret3
+  }));
 }
 
 dojo.addOnLoad(function() {
@@ -2004,7 +2030,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
-  GEOHandler.registerValidator(validateISUandCTCCombination, GEOHandler.SWISS)
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-
+  
 });
