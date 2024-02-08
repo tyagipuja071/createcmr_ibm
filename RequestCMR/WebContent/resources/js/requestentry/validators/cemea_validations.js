@@ -754,11 +754,12 @@ function addHandlersForCEMEA() {
     });
   }
 
-//  if (_SalesRepHandler == null) {
-//    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-//      setSBO(value);
-//    });
-//  }
+// if (_SalesRepHandler == null) {
+// _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'),
+// 'onChange', function(value) {
+// setSBO(value);
+// });
+// }
 
   if (_ExpediteHandler == null) {
     _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
@@ -1994,7 +1995,7 @@ function setSalesRepValues(clientTier) {
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
-//        setSBO();
+// setSBO();
       }
     }
   }
@@ -5369,7 +5370,7 @@ function addProvinceCityValidator() {
         var stateProv = FormManager.getActualValue('stateProv');
         var city = FormManager.getActualValue('city1');
         var addrType = FormManager.getActualValue('addrType');
-        var variationCityList = [ 'BUCHAREST', 'BUKAREST', 'BUCUREŞTI', 'BUCURESTI' ];
+        var variationCityList = [ 'BUCHAREST', 'BUKAREST','BUCUREŞT', 'BUCUREŞTI', 'BUCURESTI' ];
         var cityLastDigit = [ '1', '2', '3', '4', '5', '6' ];
 
         if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U') && (stateProv == 'B' || stateProv == '')) {
@@ -5458,7 +5459,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.CEMEA);
   // CMR-801:comment out to unlock embargo code
-  //GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
+  // GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
 
   // CMR-2096-Austria - "Central order block code"
   GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
@@ -5485,8 +5486,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
   // CMR-2101 Austria the func for Austria, setSBO also used by CEE
   // countries
-//  GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
-//  GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
+// GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
+// GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
   // GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
   // GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);
@@ -5515,10 +5516,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
-//  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
-//  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]);
-//  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
-//  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
+// GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); //
+// CMR-2101
+// GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]);
+// GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
+// GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(resetVatExemptOnchange, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockLocationNo, [ SysLoc.AUSTRIA ]);
 
@@ -5542,7 +5544,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
-  //GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
+  // GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA
+  // ], null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
       '787', '820', '821', '826', '889', '358', '359', '363' ]);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
@@ -5573,8 +5576,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
-  //GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
-  //GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA
+  // ]);
   /*
    * GEOHandler.addAfterConfig(cemeaCustomVATMandatory, GEOHandler.CEMEA);
    * GEOHandler.addAfterTemplateLoad(cemeaCustomVATMandatory, GEOHandler.CEMEA);

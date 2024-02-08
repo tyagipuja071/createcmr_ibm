@@ -2282,7 +2282,8 @@ public class CEMEAHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(11);
               hardWareMaster = validateColValFromCell(currCell);
 
-              if (!StringUtils.isBlank(cmrNo) && "RO".equals(landCntry) && ("B".equals(stateProv) || "@".equals(stateProv))) {
+              if (!StringUtils.isBlank(cmrNo) && ("RO".equals(landCntry) || "".equals(landCntry))
+                  && ("B".equals(stateProv) || "@".equals(stateProv) || "".equals(stateProv))) {
                 if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
                     || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
                   error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
@@ -2360,7 +2361,8 @@ public class CEMEAHandler extends BaseSOFHandler {
               for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
                 row = sheet.getRow(rowIndex);
                 if (row == null) {
-                  return; // stop immediately when row is blank
+                  // return; // stop immediately when row is blank
+                  break;
                 }
                 currCell = (XSSFCell) row.getCell(ordBlkIndex);
                 String ordBlk = validateColValFromCell(currCell);
