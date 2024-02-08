@@ -2002,7 +2002,7 @@ function setSalesRepValues(clientTier) {
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
-        // setSBO();
+// setSBO();
       }
     }
   }
@@ -5378,7 +5378,7 @@ function addProvinceCityValidator() {
         var stateProv = FormManager.getActualValue('stateProv');
         var city = FormManager.getActualValue('city1');
         var addrType = FormManager.getActualValue('addrType');
-        var variationCityList = [ 'BUCHAREST', 'BUKAREST', 'BUCUREŞTI', 'BUCURESTI' ];
+        var variationCityList = [ 'BUCHAREST', 'BUKAREST','BUCUREŞT', 'BUCUREŞTI', 'BUCURESTI' ];
         var cityLastDigit = [ '1', '2', '3', '4', '5', '6' ];
 
         if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U') && (stateProv == 'B' || stateProv == '')) {
@@ -5554,8 +5554,8 @@ dojo.addOnLoad(function () {
   // true);
   // GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA
   // ], null, true);
-  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, ['603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
-    '787', '820', '821', '826', '889', '358', '359', '363']);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
+      '787', '820', '821', '826', '889', '358', '359', '363' ]);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
   // GEOHandler.registerValidator(customCrossPostCdValidator,
   // GEOHandler.CEMEA,

@@ -184,7 +184,7 @@ function setSboOnIMS(value) {
     IMS: '%' + ims + '%'
   });
 
-  if (result != null && Object.keys(result).length > 0 && Object.keys(result).length == 1) {
+  if (result != null && Object.keys(result).length > 0) {
     FormManager.setValue('searchTerm', result[0].ret1);
   } else {
     FormManager.clearValue('searchTerm');
@@ -807,48 +807,6 @@ function unlockCustGrpSubGrp() {
   }
 }
 
-function lockIBMTabForDE() {
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  if (reqType == 'C' && role == 'REQUESTER') {
-    FormManager.readOnly('cmrNo');
-    FormManager.readOnly('cmrOwner');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('inacCd');
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('enterprise');
-    FormManager.readOnly('buyingGroupId');
-    FormManager.readOnly('globalBuyingGroupId');
-    FormManager.readOnly('covId');
-    FormManager.readOnly('geoLocationCode');
-    FormManager.readOnly('dunsNo');
-    if (custSubType != 'BUSPR') {
-      FormManager.readOnly('ppsceid');
-    } else {
-      FormManager.enable('ppsceid');
-    }
-    FormManager.readOnly('soeReqNo');
-    if (custSubType != 'INTIN' && custSubType != 'INTSO' && custSubType != 'INTAM') {
-      FormManager.readOnly('ibmDeptCostCenter');
-    } else {
-      FormManager.enable('ibmDeptCostCenter');
-    }
-    FormManager.readOnly('custClass');
-  }
-  if (reqType == 'C' && role == 'PROCESSOR') {
-    if (['INTIN', 'INTSO', 'INTAM', 'IBMEM', 'BUSPR', 'PRIPE'].includes(custSubType)) {
-      FormManager.readOnly('searchTerm');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-    } else {
-      FormManager.enable('searchTerm');
-      FormManager.enable('isuCd');
-      FormManager.enable('clientTier');
-    }
-  }
-}
 
 function validateDeptAttnBldg() {
   FormManager.addFormValidator((function () {
@@ -1321,7 +1279,6 @@ function setCTCInitialValueBasedOnCurrentIsu() {
 }
 
 function setSortlDropdownValuesBasedOnIsu() {
-  var isuCd = FormManager.getActualValue('isuCd');
   var result = []
 
   if (['27'].includes(isuCd)) {
@@ -1345,6 +1302,7 @@ function setSortlDropdownValuesBasedOnIsu() {
 function getSortlListBasedOnIsu() {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   if (isuCd + clientTier != '34Q') {
     ims = '';
@@ -1427,19 +1385,19 @@ function setInitialValueFor27Eand36Y() {
       else if (isGroup4()) result.push('T0011405')
       else if (isGroup5()) result.push('T0011421')
     } else if (is27notE()) {
-      if (is11341()) result.push('T0011351')
-      else if (isGroup1()) result.push('T0011367')
-      else if (isGroup2()) result.push('T0011383')
-      else if (isGroup3()) result.push('T0011399')
-      else if (isGroup4()) result.push('T0011415')
-      else if (isGroup5()) result.push('T0011431')
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter(({ret1}) => ret1 == 'T0011351')
+      else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter(({ret1}) => ret1 == 'T0011367')
+      else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter(({ret1}) => ret1 == 'T0011383')
+      else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter(({ret1}) => ret1 == 'T0011399')
+      else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter(({ret1}) => ret1 == 'T0011415')
+      else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter(({ret1}) => ret1 == 'T0011431')
     } else if (is36Y()) {
-      if (is11341()) result.push('T0007970')
-      else if (isGroup1()) result.push('T0012010')
-      else if (isGroup2()) result.push('T0012011')
-      else if (isGroup3()) result.push('T0012012')
-      else if (isGroup4()) result.push('T0012013')
-      else if (isGroup5()) result.push('T0012014')
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter(({ret1}) => ret1 == 'T0007970')
+      else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter(({ret1}) => ret1 == 'T0012010')
+      else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter(({ret1}) => ret1 == 'T0012011')
+      else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter(({ret1}) => ret1 == 'T0012012')
+      else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter(({ret1}) => ret1 == 'T0012013')
+      else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter(({ret1}) => ret1 == 'T0012014')
     }
   } else {
     if (is27E()) result.push('T0011405')
@@ -1447,7 +1405,7 @@ function setInitialValueFor27Eand36Y() {
     else if (is36Y()) result.push('T0012013')
   }
 
-  return result;
+  return result
 }
 
 dojo.addOnLoad(function () {
