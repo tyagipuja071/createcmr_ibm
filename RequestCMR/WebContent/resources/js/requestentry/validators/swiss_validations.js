@@ -35,14 +35,14 @@ function addAfterConfigForSWISS() {
     }
   }
 
-  if (reqType == 'C' && role == 'PROCESSOR' && cntry == '848') {
+  if (reqType == 'C' && role == 'PROCESSOR') {
     FormManager.enable('cmrNo');
   } else {
     FormManager.readOnly('cmrNo');
   }
 
   if (reqType == 'U') {
-    FormManager.enable('clientTier');
+    FormManager.readOnly('clientTier');
     FormManager.readOnly('custLangCd');
     setClientTierValues();
 
@@ -58,7 +58,6 @@ function addAfterConfigForSWISS() {
       && role == 'REQUESTER'
       && (custSubGrp == 'CHCOM' || custSubGrp == 'LICOM' || custSubGrp == 'CHGOV' || custSubGrp == 'LIGOV' || custSubGrp == 'CHSOF' || custSubGrp == 'LISOF' || custSubGrp == 'CH3PA'
           || custSubGrp == 'LI3PA' || custSubGrp == 'XCHCM' || custSubGrp == 'XCHGV' || custSubGrp == 'XCHSF' || custSubGrp == 'XCH3P')) {
-    // FormManager.enable('clientTier');
   } else if (reqType == 'C'
       && role == 'REQUESTER'
       && (custSubGrp == 'CHINT' || custSubGrp == 'XCHIN' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'XCHPR' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM'
@@ -749,9 +748,6 @@ function setFieldsMandtStatus() {
   if (role == 'REQUESTER') {
     FormManager.readOnly('sensitiveFlag');
     // FormManager.readOnly('currencyCd');
-    if (reqType == 'U') {
-      FormManager.enable('clientTier');
-    }
   } else {
     // FormManager.enable('currencyCd');
     FormManager.enable('abbrevNm');
@@ -1553,9 +1549,6 @@ function setCTCValues() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '8B') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      if (reqType == 'U') {
-        FormManager.enable('clientTier');
-      }
     }
   }
 
@@ -1568,9 +1561,6 @@ function setCTCValues() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '21') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      if (reqType == 'U') {
-        FormManager.enable('clientTier');
-      }
     }
   }
 }
@@ -1874,45 +1864,17 @@ function validateISUandCTCCombination() {
       validate: function () {
         var isuCd = FormManager.getActualValue('isuCd');
         var ctcCd = FormManager.getActualValue('clientTier');
-        var mapping = {
-          '8B': '',
-          '21': '',
-          '27': 'E',
-          '34': 'Q',
-          '36': 'Y',
-          '04': '',
-          '18': '',
-          '28': '',
-          '31': '',
-          '4D': '',
-          '4F': '',
-          '5K': '',
-          '8C': '',
-        }
-
-        let CTCForIsu = mapping[isuCd]
+        let CTCForIsu = SORTLandCTCandISUMapping.filter(({ISU, CTC}) => ISU == isuCd && CTC == ctcCd)
 
         if(!mapping[isuCd]) {
           return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
         }
-        if(ctcCd != CTCForIsu) {
-            if (CTCForIsu == '' && ctcCd != '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-            }
-
-          if (CTCForIsu != '' && ctcCd == '') {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-          }
-
-            return new ValidationResult(null, false, `ISU code ${isuCd} can only accept client tier ${ctcCd} .`);
+        if(CTCForIsu.length == 0) {
+          return new ValidationResult({
+            id : 'clientTier',
+            type : 'text',
+            name : 'clientTier'
+          }, false, `Client Tier ${ctcCd} not compatible with ISU ${isuCd}.`);
         }
         return new ValidationResult(null, true);
       }
@@ -2031,5 +1993,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-  
+
 });
