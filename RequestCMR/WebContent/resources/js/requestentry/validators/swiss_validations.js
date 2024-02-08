@@ -1,3 +1,5 @@
+let currentlyLoadedSORTL = []
+
 /* Register SWISS Javascripts */
 function addAfterConfigForSWISS() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -597,26 +599,9 @@ function setMubotyOnPostalCodeIMS(value) {
     ims = '';
   }
 
-  var result = cmr.query('SWISS.GET.SORTL_BY_ISUCTCIMS', {
-    _qall : 'Y',
-    ISU_CD : '%' + isuCd + '%',
-    CLIENT_TIER : '%' + clientTier + '%',
-    IMS : '%' + ims + '%',
-    POST_CD_RANGE : postCd
-  }).map(({ret1}) => ret1);
+  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd)
 
-  let dropdownField = document.getElementById('templatevalue-searchTerm')
-  if(!!dropdownField) dropdownField.setAttribute('values', result);
-
-  if (result != null && Object.keys(result).length > 0) {
-    FormManager.setValue('searchTerm', result[0]);
-    if (role == 'REQUESTER') {
-      FormManager.readOnly('searchTerm');
-    }
-  } else {
-    FormManager.clearValue('searchTerm');
-    FormManager.enable('searchTerm');
-  }
+  setSortlListValues([...currentlyLoadedSORTL]);
 }
 
 function validateSBOValuesForIsuCtc() {
@@ -1640,6 +1625,14 @@ function validateSortl() {
               name : 'searchTerm'
             }, false, 'SORTL should be alpha numeric.');
           }
+
+          if(!currentlyLoadedSORTL.includes(searchTerm)) {
+            return new ValidationResult({
+              id : 'searchTerm',
+              type : 'text',
+              name : 'searchTerm'
+            }, false, `The provided SORTL does not match any one of the allowed values: ${currentlyLoadedSORTL.join(',\n')}`);
+          }
         }
 
         return new ValidationResult(null, true);
@@ -1923,6 +1916,16 @@ function setSortlListValues(values) {
     dropdownField.setAttribute('values', values);
     FormManager.setValue('searchTerm', values[0])
   }
+}
+
+function loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd) {
+  return cmr.query('SWISS.GET.SORTL_BY_ISUCTCIMS', {
+    _qall : 'Y',
+    ISU_CD : '%' + isuCd + '%',
+    CLIENT_TIER : '%' + clientTier + '%',
+    IMS : '%' + ims + '%',
+    POST_CD_RANGE : postCd
+  }).map(({ret1}) => ret1);
 }
 
 dojo.addOnLoad(function() {
