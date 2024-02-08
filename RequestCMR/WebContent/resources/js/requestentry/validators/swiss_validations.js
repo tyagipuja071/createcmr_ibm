@@ -158,6 +158,12 @@ function addAfterConfigForSWISS() {
   }  
 }
 
+const IS27ESCENARIO = () => {
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  return isuCd == '27' && clientTier == 'E'
+}
+
 function resetAddrTypeValidation() {
   FormManager.addFormValidator((function() {
     return {
@@ -462,27 +468,6 @@ function setVatValidatorSWISS() {
 
   }
 }
-
-/*
- * function setVatValueOnPrefLang(custLangCd) { if
- * (FormManager.getActualValue('reqType') != 'C' ||
- * FormManager.getActualValue('addrType') != 'ZS01') { return; } var cntry =
- * FormManager.getActualValue('cmrIssuingCntry'); var zs01ReqId =
- * FormManager.getActualValue('reqId'); var qParams = { REQ_ID : zs01ReqId, };
- * var custLangCd = FormManager.getActualValue('custLangCd'); var result =
- * cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams); if (custLangCd == '')
- * custLangCd = result.ret1;
- * 
- * var vatSuffix = []; if (custLangCd != '') { var qParams = { _qall : 'Y',
- * ISSUING_CNTRY : cntry, REP_TEAM_CD : '%' + custLangCd + '%' };
- * 
- * var results = cmr.query('GET.VATSUFFIX.BYCUSTLANGCD', qParams); if (results !=
- * null) { for ( var i = 0; i < results.length; i++) {
- * vatSuffix.push(results[i].ret1); } if (vatSuffix != null) {
- * FormManager.limitDropdownValues(FormManager.getField('vat'), vatSuffix); if
- * (vatSuffix.length == 1) { FormManager.setValue('vat', vatSuffix[0]); } if
- * (vatSuffix.length == 0) { FormManager.setValue('vat', ''); } } } } }
- */
 
 function checkEmbargoCd(value) {
   if (value != 'TREC')
@@ -1757,6 +1742,9 @@ function onPostalCodeChangeHandler() {
   console.log(">>>> Preferred Language on Postal Coade change");
   dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
     setPreferredLangSwiss();
+    if(IS27ESCENARIO()){
+      setSortlBasedOnPostalCode(value);
+    }
   });
 }
 function setPreferredLangSwiss() {
@@ -1785,6 +1773,17 @@ function setPreferredLangSwiss() {
   } else if (postCd < 3000) {
     FormManager.setValue('custPrefLang', 'F');
     role == 'PROCESSOR' && flag ? FormManager.enable('custPrefLang') : FormManager.readOnly('custPrefLang');
+  }
+}
+
+function setSortlBasedOnPostalCode(value) {
+  let postalCodeHead = value.substring(0, 1)
+  let match3To9Range = (v) => v.match(/[3-9]/)
+  let isPostalCodeHeadMatching3To9Range = match3To9Range(postalCodeHead)
+  if(!!isPostalCodeHeadMatching3To9Range) {
+    setSortlListValues(['T0011479'])
+  } else {
+    setSortlListValues(['T0011495'])
   }
 }
 
@@ -1916,6 +1915,14 @@ function validateISUandCTCCombination() {
       }
     }
   }));
+}
+
+function setSortlListValues(values) {
+  let dropdownField = document.getElementById('templatevalue-searchTerm')
+  if(!!dropdownField) {
+    dropdownField.setAttribute('values', values);
+    FormManager.setValue('searchTerm', values[0])
+  }
 }
 
 dojo.addOnLoad(function() {
