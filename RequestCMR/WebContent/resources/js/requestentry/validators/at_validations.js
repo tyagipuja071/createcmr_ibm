@@ -924,36 +924,12 @@ function validateSBOValuesForIsuCtc() {
         if (FormManager.getActualValue('reqType') != 'C') {
           return;
         }
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
         var sbo = FormManager.getActualValue('salesBusOffCd');
-        var isuCtc = isuCd + clientTier;
-        var validSboList = [];
-        var qParams = null;
-
-        if (isuCd != '') {
-          var results = null;
-          if (isuCtc != '34Q') {
-            qParams = {
-              _qall: 'Y',
-              ISSUING_CNTRY: cntry,
-              ISU: '%' + isuCtc + '%'
-            };
-            results = cmr.query('AUSTRIA.GET.SBOLIST.BYISU', qParams);
-          }
-        }
-        if (results == null) {
-          return new ValidationResult(null, true);
-        } else {
-          for (let i = 0; i < results.length; i++) {
-            validSboList.push(results[i].ret1);
-          }
-          if (!validSboList.includes(sbo)) {
+          if (!currentlyLoadedSORTL.includes(sbo)) {
             return new ValidationResult(null, false,
               'The SBO provided is invalid. It should be from the list: ' + validSboList);
-          }
         }
+        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
