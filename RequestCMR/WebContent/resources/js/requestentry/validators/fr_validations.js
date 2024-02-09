@@ -126,7 +126,7 @@ function afterConfigForFR() {
         }
         var isuCd = FormManager.getActualValue('isuCd');
         var clientTier = FormManager.getActualValue('clientTier');
-        if ((isuCd == '34' && clientTier == 'Q') || (isuCd == '36' && clientTier == 'Y') || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
+        if (isuCd == '34' || isuCd == '36' || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
           // ISUs have multiple value
           FormManager.setValue('salesBusOffCd', '');
         }
@@ -485,8 +485,8 @@ function setSBOOnScenarioLD() {
     return;
   } else {
     FormManager.readOnly('installBranchOff');
-    FormManager.setValue('isuCd', '27');
-    FormManager.setValue('clientTier', 'E');
+    // FormManager.setValue('isuCd', '27');
+    // FormManager.setValue('clientTier', 'E');
     if (countyCd == "LY" || countyCd == "DZ" || countyCd == "TN") {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
@@ -560,7 +560,7 @@ function addISUHandler() {
       }
       var isuCd = FormManager.getActualValue('isuCd');
       var clientTier = FormManager.getActualValue('clientTier');
-      if ((isuCd == '34' && clientTier == 'Q') || (isuCd == '36' && clientTier == 'Y') || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
+      if (isuCd == '34' || isuCd == '36' || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
         // ISUs have multiple value
         FormManager.setValue('salesBusOffCd', '');
       }
@@ -4124,13 +4124,13 @@ function sboCodeValidator() {
     return new ValidationResult(null, true);
   }
   if (isuCtc == '36Y' && !(sbo == '09A09A' || sbo == '10A10A' || sbo == '11A11A' || sbo == 'BUILD1' || sbo == 'DISTR1' || sbo == 'SRVCE1')
-      && !(landedCountry == 'TN' || landedCountry == "LY" || landedCountry == "DZ")) {
+      && (landedCountry == 'TN' || landedCountry == "LY" || landedCountry == "DZ")) {
     return new ValidationResult({
       id : 'salesBusOffCd',
       type : 'text',
       name : 'salesBusOffCd'
     }, false, 'SORTL can only accept \'09A09A\'\ \'10A10A\'\ \'11A11A\'\ \'BUILD1\'\ \'DISTR1\'\ \'SRVCE1\'\ for ISU CTC 36Y.');
-  } else if (isuCtc == '36Y' && !(sbo == '09A09A' || sbo == '10A10A' || sbo == '11A11A') && (landedCountry == 'TN' || countyCd == "LY" || countyCd == "DZ")) {
+  } else if (isuCtc == '36Y' && !(sbo == '09A09A' || sbo == '10A10A' || sbo == '11A11A') && !(landedCountry == 'TN' || countyCd == "LY" || countyCd == "DZ")) {
     // apply land Cntry logic here
     return new ValidationResult({
       id : 'salesBusOffCd',
@@ -4517,7 +4517,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
   GEOHandler.registerValidator(sboValidator, [ '706' ], null, true);
   GEOHandler.addAddrFunction(set2H23CoverageChangesOnLandedCoutrychange, '706');
-  GEOHandler.addAfterTemplateLoad(set2H23CoverageChanges, '706');
+  // GEOHandler.addAfterTemplateLoad(set2H23CoverageChanges, '706');
   GEOHandler.addAfterTemplateLoad(setCoverage2H23FieldBehaviour, '706');
 
   GEOHandler.registerValidator(addVatIndValidator, [ '706' ], null, true);
