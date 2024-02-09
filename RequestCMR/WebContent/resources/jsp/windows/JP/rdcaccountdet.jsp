@@ -91,12 +91,6 @@ table.ibm-data-table th, table.ibm-data-table td {
       <cmr:column span="2" width="300">
         ${company.nameKanji}
       </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="establishmentName">Establishment Name:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${estab.nameKanji}
-      </cmr:column>
     </cmr:row>
     <cmr:row>
       <cmr:column span="1" width="180">
@@ -104,12 +98,6 @@ table.ibm-data-table th, table.ibm-data-table td {
       </cmr:column>
       <cmr:column span="2" width="300">
         ${company.address}
-      </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="establishmentAddress">Establishment Address:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${estab.address}
       </cmr:column>
     </cmr:row>
     <cmr:hr />
@@ -155,22 +143,6 @@ table.ibm-data-table th, table.ibm-data-table td {
       </cmr:column>
       <cmr:column span="4">
         ${record.addrNameKana}
-      </cmr:column>
-    </cmr:row>
-    <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="nameKanji">Customer Name_Detail:</label>
-      </cmr:column>
-      <cmr:column span="4">
-        ${record.nameKanji}
-      </cmr:column>
-    </cmr:row>
-    <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="nameKana">Customer Name-Detail (Katakana):</label>
-      </cmr:column>
-      <cmr:column span="4">
-        ${record.nameKana}
       </cmr:column>
     </cmr:row>
     <cmr:row>
@@ -222,12 +194,6 @@ table.ibm-data-table th, table.ibm-data-table td {
       <cmr:column span="2" width="300">
         ${record.channelCode}
       </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="dealerNo">Dealer No.:</label>
-      </cmr:column>
-      <cmr:column span="2">
-        ${record.dealerNo}
-      </cmr:column>
     </cmr:row>
     <cmr:row>
       <cmr:column span="1" width="180">
@@ -235,12 +201,6 @@ table.ibm-data-table th, table.ibm-data-table td {
       </cmr:column>
       <cmr:column span="2" width="300">
         ${record.CSBO}
-      </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="CSDiv">CS Division:</label>
-      </cmr:column>
-      <cmr:column span="2">
-        ${record.CSDiv}
       </cmr:column>
     </cmr:row>
     <cmr:row>
@@ -272,12 +232,6 @@ table.ibm-data-table th, table.ibm-data-table td {
       </cmr:column>
     </cmr:row>
     <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="IPSS">IPSS:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${record.IPSS}
-      </cmr:column>
       <cmr:column span="1" width="150">
         <label for="inacCode">INAC/NAC Code:</label>
       </cmr:column>
@@ -286,45 +240,11 @@ table.ibm-data-table th, table.ibm-data-table td {
       </cmr:column>
     </cmr:row>
     <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="CRSCode">CRS Code:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${record.CRSCode}
-      </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="CARCode">CAR Code:</label>
-      </cmr:column>
-      <cmr:column span="2">
-        ${record.CARCode}
-      </cmr:column>
-    </cmr:row>
-    <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="OEM">OEM:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${record.OEMInd}
-      </cmr:column>
       <cmr:column span="1" width="150">
         <label for="leasingCompanyInd">Leasing Company:</label>
       </cmr:column>
       <cmr:column span="2">
         ${record.leasingCompanyInd}
-      </cmr:column>
-    </cmr:row>
-    <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="SIInd">SI:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${record.SIInd}
-      </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="prospectInd">Type of Customer/Prospect:</label>
-      </cmr:column>
-      <cmr:column span="2">
-        ${record.prospectInd}
       </cmr:column>
     </cmr:row>
     <cmr:row>
@@ -339,34 +259,6 @@ table.ibm-data-table th, table.ibm-data-table td {
       </cmr:column>
       <cmr:column span="2">
         ${record.agreementSignDate}
-      </cmr:column>
-    </cmr:row>
-    <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="educAllowanceGrp">Education Allowance Group:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${record.educAllowanceGrp}
-      </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="govOfficeDivCode">Government Division Code:</label>
-      </cmr:column>
-      <cmr:column span="2">
-        ${record.govOfficeDivCode}
-      </cmr:column>
-    </cmr:row>
-     <cmr:row>
-      <cmr:column span="1" width="180">
-        <label for="tier2">TIER-2 CODE:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${record.tier2}
-      </cmr:column>
-      <cmr:column span="1" width="150">
-        <label for="companyCd">IIN:</label>
-      </cmr:column>
-      <cmr:column span="2" width="300">
-        ${record.INNInd}
       </cmr:column>
     </cmr:row>
     <cmr:row>
