@@ -98,9 +98,10 @@ function addAfterConfigAP() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
+  var reqReason = FormManager.getActualValue('reqReason');
   _clusterHandlerINDONESIA = 0;
   _inacHandlerANZSG = 0;
-  if (reqType == 'U') {
+  if (reqType == 'U' && reqReason!='PAYG') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
   FormManager.removeValidator('cmrNo', Validators.REQUIRED);
