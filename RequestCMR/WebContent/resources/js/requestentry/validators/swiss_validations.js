@@ -584,10 +584,6 @@ function setMubotyOnPostalCodeIMS(value) {
   if (((custSubGrp != 'CHBUS') || (custSubGrp != 'XCHBP') || (custSubGrp != 'CHINT') || (custSubGrp != 'XCHIN')) && (postCd == '')) {
     postCd = result.ret1;
   }
-  // for cross use post cd 3000 values
-  if (custSubGrp == 'XCHCM') {
-    postCd = 3000;
-  }
 
   var isuCd = FormManager.getActualValue('isuCd');
   var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
@@ -596,21 +592,25 @@ function setMubotyOnPostalCodeIMS(value) {
   if (isuCd == null || isuCd == undefined || isuCd == '') {
     return;
     // CMR-710 use 34Q to replace 32S/N
-  } else if (isuCd == '27' && clientTier == 'E') {
-    if ([1, 2].includes(postCd.substring(0, 1))) {
-      postCd = 1;
-    } else {
-      postCd = 2;
-      ims = '';
-    }
-  } else {
-    postCd = '';
-    ims = '';
   }
 
-  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd)
+  let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postCd, custSubGrp)
+
+  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postalCodeSubgroup)
 
   setSortlListValues([...currentlyLoadedSORTL]);
+}
+
+function assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postalCode, custSubGrp) {
+  if (isuCd == '27' && clientTier == 'E') {
+    if (['1', '2'].includes(postalCode.toString().substring(0, 1)) && custSubGrp != 'XCHCM') {
+      return '1';
+    } else {
+      return '2';
+    }
+  } else {
+    return '';
+  }
 }
 
 function validateSBOValuesForIsuCtc() {
@@ -1886,11 +1886,11 @@ function setSortlListValues(values) {
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if(!!dropdownField) {
     dropdownField.setAttribute('values', values);
-    if(values.length == 0) {
-      FormManager.clearValue('searchTerm')
-    } else {
-      FormManager.setValue('searchTerm', values[0])
-    }
+  }
+  if(values.length == 0) {
+    FormManager.clearValue('searchTerm')
+  } else {
+    FormManager.setValue('searchTerm', values[0])
   }
 }
 
@@ -1993,5 +1993,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-
+  
 });
