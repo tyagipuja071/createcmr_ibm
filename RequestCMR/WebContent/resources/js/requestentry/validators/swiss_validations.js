@@ -594,10 +594,12 @@ function setMubotyOnPostalCodeIMS(value) {
     // CMR-710 use 34Q to replace 32S/N
   }
 
+  reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, ims)
+}
+
+function reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, ims) {
   let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postCd, custSubGrp)
-
   currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postalCodeSubgroup)
-
   setSortlListValues([...currentlyLoadedSORTL]);
 }
 
@@ -1769,17 +1771,6 @@ function setPreferredLangSwiss() {
   }
 }
 
-function setSortlBasedOnPostalCode(value) {
-  let postalCodeHead = value.substring(0, 1)
-  let match3To9Range = (v) => v.match(/[3-9]/)
-  let isPostalCodeHeadMatching3To9Range = match3To9Range(postalCodeHead)
-  if(!!isPostalCodeHeadMatching3To9Range) {
-    setSortlListValues(['T0011479'])
-  } else {
-    setSortlListValues(['T0011495'])
-  }
-}
-
 function addVatIndValidator(){
   var _vatHandler = null;
   var _vatIndHandler = null;
@@ -1993,5 +1984,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-  
+  GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+
 });
