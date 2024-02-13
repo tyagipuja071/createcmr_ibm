@@ -195,9 +195,9 @@ public class FranceHandler extends GEOHandler {
     if (mainRecord.getCmrNum().startsWith("P") && !"88".equalsIgnoreCase(data.getOrdBlk())) {
       data.setOrdBlk("");
       data.setCmrNo("");
-    } else if(CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
       data.setOrdBlk("");
-    } 
+    }
     // changes made as part of defect CMR - 3242
     try {
       data.setCurrencyCd(geCurrencyCode(zs01sapNo));
@@ -1439,6 +1439,13 @@ public class FranceHandler extends GEOHandler {
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
+              } else if ((!StringUtils.isBlank(isuCd) && isuCd.startsWith("32")) || (StringUtils.isBlank(ctc) || "T".contains(ctc))) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace(
+                    "The row " + (rowIndex + 1) + ":Note that ISU 32 & Client Tier T has been obsolete.. Please fix and upload the template again.");
+                error.addError((rowIndex + 1), "Client Tier",
+                    ":Note that ISU 32 & Client Tier T has been obsolete. Please fix and upload the template again.<br>");
+                validations.add(error);
               } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("36")) {
                 if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
@@ -1448,16 +1455,16 @@ public class FranceHandler extends GEOHandler {
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("32")) {
-                if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+              } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("27")) {
+                if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (rowIndex + 1)
-                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((rowIndex + 1), "Client Tier",
-                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !(isuCd.startsWith("34") || isuCd.startsWith("32") || isuCd.startsWith("36")))
+              } else if ((!StringUtils.isBlank(isuCd) && !(isuCd.startsWith("34") || isuCd.startsWith("27") || isuCd.startsWith("36")))
                   && !"@".equalsIgnoreCase(ctc)) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
