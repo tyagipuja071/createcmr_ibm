@@ -594,7 +594,7 @@ function setMubotyOnPostalCodeIMS(value) {
     // CMR-710 use 34Q to replace 32S/N
   }
 
-  reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, ims)
+  reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, '')
 }
 
 function reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, ims) {
@@ -615,49 +615,6 @@ function assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postalCode, cu
   }
 }
 
-function validateSBOValuesForIsuCtc() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('reqType') != 'C') {
-          return;
-        }
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
-        var sbo = FormManager.getActualValue('searchTerm');
-        var validSboList = [];
-        var qParams = null;
-        var sboDesc = ''
-        
-        if (isuCd != '') {
-          var results = null;
-          if (isuCd + clientTier != '34Q') {
-            qParams = {
-              _qall : 'Y',
-              ISSUING_CNTRY : cntry,
-              ISU : '%' + isuCd + '%',
-              CTC : '%' + clientTier + '%',
-              SALES_BO_DESC : '%' + sboDesc + '%'
-            };
-            results = cmr.query('GET.SBOLIST.BYISU', qParams);
-          }
-        }
-        if (results == null || results.length == 0) {
-          return new ValidationResult(null, true);
-        } else {
-          for (let i=0; i<results.length; i++) {
-            validSboList.push(results[i].ret1);
-          }
-          if (!validSboList.includes(sbo)) {
-            return new ValidationResult(null, false, 
-                'The SORTL provided is invalid. It should be from the list: ' + validSboList);
-          }
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
 
 
 function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
@@ -1627,6 +1584,7 @@ function validateSortl() {
               name : 'searchTerm'
             }, false, 'SORTL should be alpha numeric.');
           }
+          
 
           if(!currentlyLoadedSORTL.includes(searchTerm)) {
             return new ValidationResult({
@@ -1891,7 +1849,7 @@ function loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd) {
     ISU_CD : '%' + isuCd + '%',
     CLIENT_TIER : '%' + clientTier + '%',
     IMS : '%' + ims + '%',
-    POST_CD_RANGE : postCd
+    POST_CD_RANGE : '%' + postCd + '%'
   }).map(({ret1}) => ret1);
 }
 
@@ -1975,7 +1933,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
-  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.SWISS, null, true);
   GEOHandler.addAfterConfig(setPreferredLangAddr, GEOHandler.SWISS);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
@@ -1984,6 +1941,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(() => FormManager.enable('isuCd'), GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(() => FormManager.enable('searchTerm'), GEOHandler.SWISS);
+
+
   GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
 });
