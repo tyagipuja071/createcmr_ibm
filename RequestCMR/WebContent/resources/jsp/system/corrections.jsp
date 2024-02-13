@@ -132,6 +132,10 @@ div.buttons {
           <input type="radio" ng-model="model.correctionType" name="correctionType" value="L">
           <div class="lbl" ng-click="model.correctionType = 'L'" style="cursor:pointer">DB2 Record</div>
         </cmr:column>
+        <cmr:column span="1" width="200">
+          <input type="radio" ng-model="model.correctionType" name="correctionType" value="P">
+          <div class="lbl" ng-click="model.correctionType = 'P'" style="cursor:pointer">PayGo Addresses</div>
+        </cmr:column>
       </cmr:row>
       <cmr:row>
                &nbsp;
@@ -161,6 +165,15 @@ div.buttons {
           </cmr:column>
           <cmr:column span="2">
             <button ng-show="!current" class="action" ng-click="retrieveDetails()">Retrieve Details</button>
+          </cmr:column>
+        </div>
+        <div ng-show="model.correctionType == 'P'">
+          <cmr:column span="1" width="300">
+            <div class="lbl">Request ID:</div>
+            <input ng-model="model.reqId">
+          </cmr:column>
+          <cmr:column span="2">
+            <button ng-show="!current" class="action" ng-click="confirmFixPayGoAddresses()">Process Corrections</button>
           </cmr:column>
         </div>
       </cmr:row>

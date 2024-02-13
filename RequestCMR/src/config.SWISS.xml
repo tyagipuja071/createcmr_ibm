@@ -123,13 +123,6 @@
         </column>
         
         <column>
-		  <label>State/Province</label>
-		  <dbColumn>STATE_PROV</dbColumn>
-		  <width>40</width>
-		  <bdsId>StateProv</bdsId>		  
-		</column>
-        
-        <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
           <width>40</width>
@@ -142,6 +135,13 @@
           <width>40</width>
           <length>24</length>
         </column>
+        
+        <column>
+         <label>State/Province</label>
+         <dbColumn>STATE_PROV</dbColumn>
+         <width>40</width>
+         <bdsId>StateProv</bdsId>      
+       </column>
         
         <column>
           <label>Department</label>
@@ -244,14 +244,7 @@
           <width>40</width>
           <length>30</length>
         </column>
-        
-        <column>
-		  <label>State/Province</label>
-		  <dbColumn>STATE_PROV</dbColumn>
-		  <width>40</width>
-		  <bdsId>StateProv</bdsId>		  
-		</column>
-		
+        		
         <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
@@ -265,6 +258,13 @@
           <width>40</width>
           <length>24</length>
         </column>
+        
+        <column>
+         <label>State/Province</label>
+         <dbColumn>STATE_PROV</dbColumn>
+         <width>40</width>
+         <bdsId>StateProv</bdsId>      
+       </column>
         
         <column>
           <label>Department</label>
@@ -360,13 +360,6 @@
           <width>40</width>
           <length>30</length>
         </column>
-        
-        <column>
-		  <label>State/Province</label>
-		  <dbColumn>STATE_PROV</dbColumn>
-		  <width>40</width>
-		  <bdsId>StateProv</bdsId>		  
-		</column>
 		
         <column>
           <label>Street</label>
@@ -381,6 +374,13 @@
           <width>40</width>
           <length>24</length>
         </column>
+        
+        <column>
+         <label>State/Province</label>
+         <dbColumn>STATE_PROV</dbColumn>
+         <width>40</width>
+         <bdsId>StateProv</bdsId>      
+       </column>
         
         <column>
           <label>Department</label>
@@ -483,14 +483,7 @@
           <width>40</width>
           <length>30</length>
         </column>
-        
-       <column>
-		  <label>State/Province</label>
-		  <dbColumn>STATE_PROV</dbColumn>
-		  <width>40</width>
-		  <bdsId>StateProv</bdsId>		  
-		</column>
-        
+              
         <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
@@ -504,6 +497,13 @@
           <width>40</width>
           <length>24</length>
         </column>
+        
+        <column>
+         <label>State/Province</label>
+         <dbColumn>STATE_PROV</dbColumn>
+         <width>40</width>
+         <bdsId>StateProv</bdsId>      
+       </column>
         
         <column>
           <label>Department</label>

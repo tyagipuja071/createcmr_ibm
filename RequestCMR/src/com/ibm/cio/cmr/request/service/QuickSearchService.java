@@ -29,6 +29,8 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.service.requestentry.ImportCMRService;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
@@ -173,6 +175,19 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
       throw new Exception("The CMR cannot be imported at this time. Please try again later");
     }
 
+  }
+  
+  public static String getAufsdByCmrNo(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
+    LOG.trace("Checking Aufsd " + cmrNo);
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_CMR_AUFSD_KNA1_ZS01");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setForReadOnly(true);
+    List<String>  res= query.getResults(0,String.class);
+    String result=res.get(0);
+     return result;
   }
 
   /**

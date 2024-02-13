@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 
 import javax.persistence.EntityManager;
@@ -413,6 +414,13 @@ public class IERPProcessService extends BaseBatchService {
         }
 
         boolean prospectConversion = CmrConstants.YES_NO.Y.equals(admin.getProspLegalInd()) ? true : false;
+        boolean isProspectIndY = CmrConstants.YES_NO.Y.toString().equals(admin.getProspLegalInd()) ? true : false;
+        boolean isJPProspectConversion = isProspectIndY && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry());
+        String origProspectCMR = "";
+
+        if (isJPProspectConversion) {
+          origProspectCMR = data.getCmrNo();
+        }
 
         if (CmrConstants.REQ_TYPE_UPDATE.equals(cmrServiceInput.getInputReqType()) && !enableTempReact) {
           actionRdc = "System Action:RDc Update";
@@ -477,7 +485,7 @@ public class IERPProcessService extends BaseBatchService {
             }
 
             if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-            statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
+              statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
             }
             
             createCommentLog(em, admin, statusMessage.toString());
@@ -558,14 +566,14 @@ public class IERPProcessService extends BaseBatchService {
           StringBuilder comment = new StringBuilder();
           HashMap<String, Object> overallResponse = null;
           boolean firstRun = false;
-          
+
           // For temporary reactivate
           if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
             rdcOrderBlk = dataRdc.getOrdBlk();
             data.setOrdBlk("");
             dataOrderBlk = data.getOrdBlk();
           }
-          
+
           if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
               && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && (rdcOrderBlk != null && !StringUtils.isBlank(rdcOrderBlk))
               && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
@@ -657,7 +665,7 @@ public class IERPProcessService extends BaseBatchService {
                   + " has FAILED processing. Status: NOT COMPLETED. Response message: " + ncMessage);
               wfHistCmt = statusMessage.toString();
             }
-            
+
             if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry()) && !SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
               statusMessage = processPartnerFunctionForZS01(admin, data, cmrServiceInput, overallStatus, statusMessage);
             }
@@ -772,6 +780,11 @@ public class IERPProcessService extends BaseBatchService {
             statusMessage
                 .append("Record with request ID " + admin.getId().getReqId() + " and CMR Number " + response.getCmrNo() + " created SUCCESSFULLY. ");
             statusMessage.append("CMR No. " + response.getCmrNo() + " generated for this request. ");
+
+            if (isJPProspectConversion) {
+              statusMessage.append(" Successfully converted prospect " + origProspectCMR + " to legal CMR: " + response.getCmrNo() + ". ");
+            }
+
             if (prospectConversion) {
               statusMessage.append(" RDc processing converted prospect " + cmrServiceInput + " to KUNNR(s): ");
             } else {
@@ -874,12 +887,12 @@ public class IERPProcessService extends BaseBatchService {
                 break;
               }
 
-              if (response.getRecords() != null && response.getRecords().size() != 0) {
-            	  if(index >= response.getRecords().size() ){
-            		  LOG.debug("size = " + response.getRecords().size());
-            		  LOG.debug("index = " + index);
-            		  break;
-            	  }
+              if (response.getRecords() != null && response.getRecords().size() != 0 && !SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+                if (index >= response.getRecords().size()) {
+                  LOG.debug("size = " + response.getRecords().size());
+                  LOG.debug("index = " + index);
+                  break;
+                }
 
                 if (CmrConstants.RDC_SOLD_TO.equals(response.getRecords().get(index).getAddressType())) {
                   String[] addrSeqs = response.getRecords().get(index).getSeqNo().split(",");
@@ -921,6 +934,11 @@ public class IERPProcessService extends BaseBatchService {
 
                 updateEntity(addr, em);
               }
+
+              if (SystemLocation.JAPAN.equals(data.getCmrIssuingCntry())) {
+                handleJPUpdateAddrsOnCompleted(em, addr, response, index);
+              }
+
               index++;
             }
           }
@@ -944,10 +962,90 @@ public class IERPProcessService extends BaseBatchService {
         ProfilerLogger.LOG.trace("After monitorCreqcmr for Request ID: " + admin.getId().getReqId() + " "
             + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
       }
-      
-      // Check and send the notifications to the recipients for soon to be blocked back CMRs..
-      //RequestUtils.sendEmailNotificationsTREC_CN(em);
+
+      // Check and send the notifications to the recipients for soon to be
+      // blocked back CMRs..
+      // RequestUtils.sendEmailNotificationsTREC_CN(em);
       Thread.currentThread().setName("IERPProcess-" + Thread.currentThread().getId());
+    }
+
+  }
+
+  private void handleJPUpdateAddrsOnCompleted(EntityManager em, Addr addr, ProcessResponse response, int index) {
+    if (response.getRecords() != null && response.getRecords().size() != 0) {
+      // Addresses not saved in RDC
+      if ("ZE01".equals(addr.getId().getAddrType())) {
+        Optional<RDcRecord> rdcAddrRecord = response.getRecords().stream()
+            .filter(r -> r != null && CmrConstants.RDC_SOLD_TO.equals(r.getAddressType())).findFirst();
+
+        if (rdcAddrRecord.isPresent()) {
+          String[] seqNoRecordNoEstabNo = rdcAddrRecord.get().getSeqNo().split(",");
+          String seqNo = "";
+          String recordNo = "";
+          String estabNo = "";
+
+          if (seqNoRecordNoEstabNo.length > 0) {
+            seqNo = seqNoRecordNoEstabNo[0];
+          }
+
+          if (seqNoRecordNoEstabNo.length > 1) {
+            recordNo = seqNoRecordNoEstabNo[1];
+          }
+
+          if (seqNoRecordNoEstabNo.length > 2) {
+            estabNo = seqNoRecordNoEstabNo[2];
+          }
+
+          LOG.debug("ZE01 - Sold to Seq No: " + seqNo);
+          LOG.debug("ZE01 - Sold to Record No: " + recordNo);
+          LOG.debug("ZE01 - Sold to Estab No: " + estabNo);
+          LOG.debug("ZE01 - Sold to Address Type: " + rdcAddrRecord.get().getAddressType());
+
+          addr.setParCmrNo(estabNo);
+        }
+      } else {
+        // Addresses saved in RDC
+        String currentAddressType = addr.getId().getAddrType();
+        if (StringUtils.isNotBlank(currentAddressType)) {
+          Optional<RDcRecord> rdcAddrRecord = response.getRecords().stream().filter(r -> r != null && currentAddressType.equals(r.getAddressType()))
+              .findFirst();
+
+          if (rdcAddrRecord.isPresent()) {
+            String[] seqNoRecordNoEstabNo = rdcAddrRecord.get().getSeqNo().split(",");
+            String seqNo = "";
+            String recordNo = "";
+            String estabNo = "";
+
+            if (seqNoRecordNoEstabNo.length > 0) {
+              seqNo = seqNoRecordNoEstabNo[0];
+            }
+
+            if (seqNoRecordNoEstabNo.length > 1) {
+              recordNo = seqNoRecordNoEstabNo[1];
+            }
+
+            if (seqNoRecordNoEstabNo.length > 2) {
+              estabNo = seqNoRecordNoEstabNo[2];
+            }
+
+            LOG.debug("Seq No: " + seqNo);
+            LOG.debug("Record No: " + recordNo);
+            LOG.debug("Estab No: " + estabNo);
+            LOG.debug("Address Type: " + rdcAddrRecord.get().getAddressType());
+
+            addr.setSapNo(rdcAddrRecord.get().getSapNo());
+            addr.setIerpSitePrtyId(rdcAddrRecord.get().getIerpSitePartyId());
+            addr.setParCmrNo(recordNo);
+
+            if (!"ZC01".equals(addr.getId().getAddrType())) {
+              addr.setDivn(estabNo);
+            }
+          }
+        }
+
+      }
+
+      updateEntity(addr, em);
     }
 
   }
@@ -1232,6 +1330,14 @@ public class IERPProcessService extends BaseBatchService {
           respStatuses.add(response.getStatus());
           keepAlive();
         }
+      }
+
+      if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) && isDataUpdated && !StringUtils.isBlank(dataRdc.getOrdBlk())
+          && !"PAYG".equals(admin.getReqReason())) {
+        PreparedQuery q = new PreparedQuery(em, ExternalizedQuery.getSql("DE.UPDATE.ORD_BLK"));
+        q.setParameter("ORD_BLK", dataRdc.getOrdBlk());
+        q.setParameter("REQ_ID", data.getId().getReqId());
+        q.executeSql();
       }
 
       if (respStatuses.size() > 0) {
@@ -1541,17 +1647,27 @@ public class IERPProcessService extends BaseBatchService {
       boolean isDataUpdated = false;
       boolean isAdminUpdated = false;
       if (!CmrConstants.ANZ_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-    	  isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
-      		}else{
-      			isDataUpdated = true;
-      		}
+        isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      } else {
+        isDataUpdated = true;
+      }
       isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
       isDataUpdated = isAdminUpdated || isDataUpdated;
 
       if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) && !isDataUpdated) {
         isDataUpdated = LAHandler.isTaxInfoUpdated(em, admin.getId().getReqId());
       }
-      
+
+      if ("C".equals(admin.getCustType()) && SystemLocation.JAPAN.equals(data.getCmrIssuingCntry()) && addresses != null && !addresses.isEmpty()
+          && StringUtils.isEmpty(request.getCmrNo())) {
+        Addr companyAddr = addresses.stream().filter(a -> "ZC01".equals(a.getId().getAddrType())).findAny().orElse(null);
+
+        if (companyAddr != null) {
+          String companyCMRNo = companyAddr.getParCmrNo();
+          request.setCmrNo(companyCMRNo);
+        }
+      }
+
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses
 

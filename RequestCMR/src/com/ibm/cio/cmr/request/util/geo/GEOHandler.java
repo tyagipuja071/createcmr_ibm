@@ -1117,4 +1117,7 @@ public abstract class GEOHandler {
     // TODO Auto-generated method stub
     return false;
   }
+
+  public void setDefaultCustPrefLanguage(Data data) {
+  }
 }

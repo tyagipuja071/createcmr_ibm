@@ -2350,12 +2350,12 @@ public class NLHandler extends BaseSOFHandler {
               LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'Y' for the selected ISU code.");
               error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'Y' for the selected ISU code:" + isuCd + ".<br>");
             }
-          } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-            if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
-              LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'T' for the selected ISU code.");
-              error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'T' for the selected ISU code:" + isuCd + ".<br>");
+          } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+            if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'E' for the selected ISU code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'E' for the selected ISU code:" + isuCd + ".<br>");
             }
-          } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+          } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("27", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
           }
@@ -2381,6 +2381,8 @@ public class NLHandler extends BaseSOFHandler {
           String street = ""; // 6
           String pobox = ""; // 7
           String city = ""; // 9
+          String stateProv = ""; // 10
+          String landCntry = ""; // 12
           int addrFldCnt1 = 0;
 
           currCell = row.getCell(2);
@@ -2395,7 +2397,10 @@ public class NLHandler extends BaseSOFHandler {
           pobox = validateColValFromCell(currCell);
           currCell = row.getCell(9);
           city = validateColValFromCell(currCell);
-
+          currCell = row.getCell(10);
+          stateProv = validateColValFromCell(currCell);
+          currCell = row.getCell(12);
+          landCntry = validateColValFromCell(currCell);
           if (!StringUtils.isEmpty(name3)) {
             addrFldCnt1++;
           }
@@ -2422,6 +2427,16 @@ public class NLHandler extends BaseSOFHandler {
           if (StringUtils.isBlank(city)) {
             LOG.trace("City is required. ");
             errorAddr.addError(row.getRowNum(), "City", "City is required. ");
+          }
+
+          String pattern = "^[a-zA-Z0-9]*$";
+          if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+            LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+            errorAddr.addError(row.getRowNum(), "State/Province",
+                "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+          } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+            LOG.trace("State/Province and Landed country both should be filled");
+            errorAddr.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
           }
 
         }
@@ -2843,4 +2858,5 @@ public class NLHandler extends BaseSOFHandler {
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
   }
+
 }

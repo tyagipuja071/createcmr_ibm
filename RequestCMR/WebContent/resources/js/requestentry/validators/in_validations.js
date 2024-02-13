@@ -2203,6 +2203,7 @@ function validateGSTForIndia() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+
 function lockFieldsForIndia(){
   console.log('>>>> lockFieldsForIndia >>>>');
   var reqType = FormManager.getActualValue('reqType');

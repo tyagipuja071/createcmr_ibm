@@ -109,6 +109,7 @@ function afterConfigForJP() {
     disableAddrFieldsForRA();
 
     setAbbrevNmReqForBFKSCScenario();
+    setJSICforPRCMRScenario();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -807,6 +808,7 @@ function setFieldsRequired() {
     return;
     break;
   case 'NORML':
+  case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
     if (!isPageLoad && setFieldsRequiredCount > 2) {
@@ -950,6 +952,12 @@ function setCmrNoCmrNo2Required() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
+  
+  var isProspect = FormManager.getActualValue('prospLegalInd');
+  if('Y' == isProspect) {
+    return;
+  }
+  
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var _role = null;
   if (typeof (_pagemodel) != 'undefined') {
@@ -993,8 +1001,6 @@ function setCmrNoCmrNo2Required() {
       FormManager.readOnly('cmrNo2');
       FormManager.resetValidations('cmrNo2');
     } else if (_role == 'Processor') {
-      FormManager.enable('cmrNo');
-      FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
       FormManager.readOnly('cmrNo2');
       FormManager.resetValidations('cmrNo2');
     }
@@ -1011,10 +1017,9 @@ function setCmrNoCmrNo2Required() {
     FormManager.resetValidations('cmrNo2');
     break;
   case 'INTER':
-    FormManager.enable('cmrNo');
-    if (_role == 'Processor') {
-      FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
-    }
+    FormManager.readOnly('cmrNo');
+    FormManager.resetValidations('cmrNo');
+
     FormManager.setValue('cmrNo2', '');
     FormManager.readOnly('cmrNo2');
     FormManager.resetValidations('cmrNo2');
@@ -1022,6 +1027,12 @@ function setCmrNoCmrNo2Required() {
   case 'RACMR':
     FormManager.enable('cmrNo');
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+    FormManager.resetValidations('cmrNo2');
+    break;
+  case 'BPBIL':
+    FormManager.enable('cmrNo');
+    FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+    FormManager.readOnly('cmrNo2');
     FormManager.resetValidations('cmrNo2');
     break;
   default:
@@ -1890,6 +1901,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
   }
   switch (custSubGrp) {
   case 'NORML':
+  case 'BPBIL':
   case 'OUTSC':
     if (custType == 'CEA') {
       if (addrType == 'ZC01') {
@@ -3479,6 +3491,7 @@ function setCSBOOnAddrSave() {
   if (!(cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U')) {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -3514,6 +3527,10 @@ function setCSBOOnAddrSave() {
     case 'BRMSI':
       setCSBOSubsidiaryValue();
       break;
+    case 'PRCMR':
+      var postCd = FormManager.getActualValue('postCd');
+      addPostCdCSBOLogic(postCd);
+      break;
     case '':
     default:
       break;
@@ -3521,6 +3538,7 @@ function setCSBOOnAddrSave() {
   } else if (cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U') {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -4248,6 +4266,7 @@ function showHideJSIC() {
   var hasZs01 = true;
   switch (custSubGrp) {
   case 'NORML':
+  case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
   case 'OUTSC':
@@ -4652,6 +4671,7 @@ function setCSBOOnScenarioChange() {
   if (!(cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U')) {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -4694,6 +4714,7 @@ function setCSBOOnScenarioChange() {
   } else if (cmr.currentRequestType == 'U' || FormManager.getActualValue('reqType') == 'U') {
     switch (custSubGrp) {
     case 'NORML':
+    case 'BPBIL':
     case 'EUCMR':
     case 'WHCMR':
     case 'OUTSC':
@@ -5071,6 +5092,7 @@ function removeDefaultValueTelNo() {
   var addrType = FormManager.getActualValue('addrType');
   switch (custSubGrp) {
   case 'NORML':
+  case 'BPBIL':
   case 'OUTSC':
   case 'ABIJS':
   case 'AHIJE':
@@ -5311,6 +5333,7 @@ function disableFieldsForUpdateOnScenarios() {
   // return;
   // break;
   case 'NORML':
+  case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
     FormManager.enable('icmsInd');
@@ -6180,6 +6203,7 @@ function setOutsourcingServiceRequired() {
   case 'INTER':
   case 'ISOCU':
   case 'NORML':
+  case 'BPBIL':
     if (FormManager.getField('outsourcingService').set) {
       FormManager.getField('outsourcingService').set('checked', false);
     } else if (FormManager.getField('outsourcingService')) {
@@ -6224,6 +6248,7 @@ function setOutsourcingServiceRequired() {
   case 'BPIJB':
   case 'BRMSI':
   case 'BQICL':
+  case 'PRCMR':
     if (FormManager.getField('outsourcingService').set) {
       FormManager.getField('outsourcingService').set('checked', false);
     } else if (FormManager.getField('outsourcingService')) {
@@ -6630,7 +6655,7 @@ function addDnBSearchValidator() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var result = FormManager.getActualValue('findDnbResult');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
+        if (custSubGrp == 'RACMR' || custSubGrp == 'BFKSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU' || custSubGrp == 'PRCMR') {
           return new ValidationResult(null, true);
         }
         if ((result == '' || result.toUpperCase() == 'NOT DONE') && cntry != SysLoc.CHINA) {
@@ -6699,6 +6724,49 @@ function doImportCmrs(addressOnly) {
   document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/import?addressOnly=' + (addressOnly ? 'true' : 'false') + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum='
       + cmrNo + '&system=cmr' + (cmr.searchIssuingCntry != null ? '&searchIssuingCntry=' + cmr.searchIssuingCntry : '') + (cmr.skipAddress != null ? '&skipAddress=' + cmr.skipAddress : ''));
   document.forms['frmCMR'].submit();
+}
+
+var currCustSubGrp = '';
+function importPRCMRCompany(fromAddress, scenario, scenarioChanged) {
+  if (fromAddress || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+
+  if (reqType == 'C' && custGrp == 'IBMTP') {
+    if (scenario == 'PRCMR' && scenarioChanged) {
+      var result = {
+        accepted: 'y',
+        type: 'C',
+        data: {
+          issuedBy: '760',
+          issuedByDesc: 'Japan',
+          cmrNum: '666314'
+        }
+      };
+      console.log(result);
+      if (result != null) {
+        doImportCRISRecord(result);
+      }
+    }
+  }
+  currCustSubGrp = scenario;
+}
+
+function setJSICforPRCMRScenario() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  if (reqType == 'C' && custSubGrp == 'PRCMR') {
+    FormManager.setValue('jsicCd', '0386');
+  }
 }
 
 function disableBpBqiImport() {
@@ -7177,6 +7245,67 @@ function setCreditToCustNoOptional4ISOCU() {
   }
 }
 
+function contractSignDateValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('Checking requested Contract Sign Date...');
+        var agreementSignDate = FormManager.getActualValue('agreementSignDate');
+        var datePatternYYMMDD = /^\d{2}((0|[1-9]|[10-12]){2})((0|[1-9]|[10-31]){2})$/g;
+
+        if (agreementSignDate != '' && agreementSignDate != null) {
+          if (agreementSignDate.length >= 1 && agreementSignDate.length != 6) {
+            return new ValidationResult(null, false, 'Contract Sign Date length should be 6 characters long.');
+          }
+          if (!agreementSignDate.match(datePatternYYMMDD)) {
+            return new ValidationResult(null, false, 'Contract Sign Date format should be YYMMDD.');
+          }
+        }
+
+        return new ValidationResult({
+          id : 'agreementSignDate',
+          type : 'text',
+          name : 'agreementSignDate'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function setContractSignDate() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  var agreementSignDate = FormManager.getActualValue('agreementSignDate');
+  const
+  date = new Date();
+
+  if (viewOnly == 'true') {
+    return;
+  }
+
+  var dd = date.getDate().toString();
+  // get the month (adding 1 because months are zero-based)
+  var mm = date.getMonth() + 1;
+  var yy = date.getFullYear().toString().substring(2, 4);
+
+  // add leading zero if the day is less than 10
+  if (dd < 10) {
+    dd = '0' + dd;
+  }
+  // add leading zero if the month is less than 10
+  if (mm < 10) {
+    mm = '0' + mm;
+  }
+
+  currentDate = yy + mm.toString() + dd;
+  if (reqType == 'C') {
+    // set contract sign date if field is empty
+    if (agreementSignDate == '' || agreementSignDate == null) {
+      FormManager.setValue('agreementSignDate', currentDate);
+    }
+  }
+}
+
 function convertEnglishFieldsToSBCS(cntry, addressMode, details) {
   convertFieldsToSBCS(['cnCustName1', 'cnAddrTxt', 'cnCity', 'cnDistrict']);
 }
@@ -7238,67 +7367,6 @@ function addBwpqCreditToValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
-function contractSignDateValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        console.log('Checking requested Contract Sign Date...');
-        var agreementSignDate = FormManager.getActualValue('agreementSignDate');
-        var datePatternYYMMDD = /^\d{2}((0|[1-9]|[10-12]){2})((0|[1-9]|[10-31]){2})$/g;
-
-        if (agreementSignDate != '' && agreementSignDate != null) {
-          if (agreementSignDate.length >= 1 && agreementSignDate.length != 6) {
-            return new ValidationResult(null, false, 'Contract Sign Date length should be 6 characters long.');
-          }
-          if (!agreementSignDate.match(datePatternYYMMDD)) {
-            return new ValidationResult(null, false, 'Contract Sign Date format should be YYMMDD.');
-          }
-        }
-
-        return new ValidationResult({
-          id : 'agreementSignDate',
-          type : 'text',
-          name : 'agreementSignDate'
-        }, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
-function setContractSignDate() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  var reqType = FormManager.getActualValue('reqType');
-  var agreementSignDate = FormManager.getActualValue('agreementSignDate');
-  const
-  date = new Date();
-
-  if (viewOnly == 'true') {
-    return;
-  }
-
-  var dd = date.getDate().toString();
-  // get the month (adding 1 because months are zero-based)
-  var mm = date.getMonth() + 1;
-  var yy = date.getFullYear().toString().substring(2, 4);
-
-  // add leading zero if the day is less than 10
-  if (dd < 10) {
-    dd = '0' + dd;
-  }
-  // add leading zero if the month is less than 10
-  if (mm < 10) {
-    mm = '0' + mm;
-  }
-
-  currentDate = yy + mm.toString() + dd;
-  if (reqType == 'C') {
-    // set contract sign date if field is empty
-    if (agreementSignDate == '' || agreementSignDate == null) {
-      FormManager.setValue('agreementSignDate', currentDate);
-    }
-  }
 }
 
 function setFieldsBehaviorForBPEndUserAndIGFCmr() {
@@ -7382,6 +7450,69 @@ function isIGFCMR() {
   return isIGFCmr;
 }
 
+function addCmrNoValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqType = FormManager.getActualValue('reqType');
+        var numCmr = /^[9]{1}[3|4]{1}\d{4}$/g;
+        var alphaNumCmr = /^[9]{1}[3|4]{1}\d{1}[S]{1}\d{2}$/g;
+
+        if (custSubType != 'BPBIL') {
+          return new ValidationResult(null, true);
+        }
+
+        if (reqType == 'U') {
+          return new ValidationResult(null, true);
+        }
+
+        if (cmrNo != '' && cmrNo != null) {
+
+          var isProspect = FormManager.getActualValue('prospLegalInd');
+          if ('Y' == isProspect && cmrNo.startsWith('P') && cmrNo.length == 6) {
+            return new ValidationResult(null, true);
+          }
+
+          if (cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+          } else if (cmrNo == "000000") {
+            return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+          } else if (!(cmrNo.match(numCmr) || cmrNo.match(alphaNumCmr))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 930000-939999, 940000-94999 or 930S01-939S99, 940S01-949S99 range.');
+          } else {
+            var qParams = {
+              CMRNO: cmrNo,
+              CNTRY: cntry,
+              MANDT: cmr.MANDT
+            };
+            var results = cmr.query('GET.CMR.JP', qParams);
+            if (results.ret1 != null) {
+              return new ValidationResult(null, false, 'The CMR Number already exists.');
+            } else {
+              results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY: cntry,
+                CMR_NO: cmrNo,
+                MANDT: cmr.MANDT
+              });
+              if (results && results.ret1) {
+                return new ValidationResult({
+                  id: 'cmrNo',
+                  type: 'text',
+                  name: 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function addJPAddressGridValidator() {
   console.log(">>>> addJPAddressGridValidator ");
   FormManager.addFormValidator((function() {
@@ -7441,6 +7572,49 @@ function addJPAddressGridValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addJPMandatoryAddressTypesValidator() {
+  console.log(">>>>  addJPMandatoryAddressTypesValidator");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isProspect = FormManager.getActualValue('prospLegalInd');
+        if('Y' != isProspect || FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var updateInd = null;
+          var companyCnt = 0;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            updateInd = record.updateInd;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (typeof (updateInd) == 'object') {
+              updateInd = updateInd[0];
+            }
+            if (type == 'ZC01') {
+              companyCnt++;
+            } 
+          }
+
+          if (companyCnt == 0) {
+            return new ValidationResult(null, false, 'Company address for Prospect CMR is mandatory.');
+          } 
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -7494,6 +7668,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(setISUByMrcSubInd, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSortlOnOfcdChange, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setCreditToCustNoOptional4ISOCU, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(importPRCMRCompany, GEOHandler.JP);
 
   // CREATCMR-9327
   GEOHandler.addAfterConfig(disableFields, GEOHandler.JP);
@@ -7542,7 +7717,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoldToValidatorJP, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addLengthValidatorForWorkNo, [ '760' ], null, true);
   GEOHandler.registerValidator(addLengthValidatorForPC, [ '760' ], null, true);
-  GEOHandler.registerValidator(checkEstabFuncCdMandatory, GEOHandler.JP, null, true);
+  // GEOHandler.registerValidator(checkEstabFuncCdMandatory, GEOHandler.JP,
+  // null, true);
   GEOHandler.registerValidator(addRequestForValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addProductTypeValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addDPLCheckValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
@@ -7558,7 +7734,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(jpBlueGroupValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addBwpqCreditToValidator, GEOHandler.JP, null, true);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addJPAddressGridValidator, [ SysLoc.JAPAN ], null, true);
+	GEOHandler.registerValidator(addJPMandatoryAddressTypesValidator, [ SysLoc.JAPAN ], null, true);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);

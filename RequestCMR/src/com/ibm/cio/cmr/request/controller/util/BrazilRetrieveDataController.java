@@ -34,7 +34,8 @@ public class BrazilRetrieveDataController {
 
   private static final Logger LOG = Logger.getLogger(BrazilRetrieveDataController.class);
 
-  @RequestMapping(value = "/getBRData")
+  @RequestMapping(
+      value = "/getBRData")
   public ModelMap getBRData(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String issuingCntry = request.getParameter("issuingCntry");
@@ -51,11 +52,24 @@ public class BrazilRetrieveDataController {
       String email3 = "";
       String taxSepInd = "";
       String proxiLocNo = "";
+      String company = "";
+      String inacCd = "";
+      String isuCd = "";
+      String collectorNameNo = "";
+      String salesBusOffCd = "";
+
       for (FindCMRRecordModel item : searchFindCMR.getItems()) {
         if ("ZS01".equals(item.getCmrAddrTypeCode())) {
           muniFiscalCodeLE = item.getCmrFiscalCd();
           kunnr = item.getCmrSapNumber();
           proxiLocNo = item.getCmrProxiLocn();
+
+          company = item.getCmrCompanyNo();
+          inacCd = item.getCmrInac();
+          isuCd = item.getIsuCode();
+          collectorNameNo = item.getCmrCollectorNo();
+          salesBusOffCd = item.getCmrSortl();
+
         } else if ("ZI01".equals(item.getCmrAddrTypeCode())) {
           muniFiscalCodeUS = item.getCmrFiscalCd();
         }
@@ -77,12 +91,25 @@ public class BrazilRetrieveDataController {
           }
         }
 
-        List<TaxData> taxDataList = getTaxDataByKunnr(entityManager, kunnr);
-        for (TaxData taxData : taxDataList) {
-          if ("30".equals(taxData.getId().getTaxCd())) {
-            taxSepInd = taxData.getTaxSeparationIndc();
-          }
+      List<TaxData> taxDataList = getTaxDataByKunnr(entityManager, kunnr);
+      for (TaxData taxData : taxDataList) {
+        if ("30".equals(taxData.getId().getTaxCd())) {
+          taxSepInd = taxData.getTaxSeparationIndc();
         }
+      }
+
+      map.addAttribute("email1", email1);
+      map.addAttribute("email2", email2);
+      map.addAttribute("email3", email3);
+      map.addAttribute("taxSepInd", taxSepInd);
+      map.addAttribute("muniFiscalCodeLE", muniFiscalCodeLE);
+      map.addAttribute("muniFiscalCodeUS", muniFiscalCodeUS);
+      map.addAttribute("proxiLocnNo", proxiLocNo);
+      map.addAttribute("company", company);
+      map.addAttribute("inacCd", inacCd);
+      map.addAttribute("isuCd", isuCd);
+      map.addAttribute("collectorNameNo", collectorNameNo);
+      map.addAttribute("salesBusOffCd", salesBusOffCd);
 
         map.addAttribute("email1", email1);
         map.addAttribute("email2", email2);

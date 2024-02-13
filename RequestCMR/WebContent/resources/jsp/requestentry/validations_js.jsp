@@ -54,6 +54,9 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <cmr:view exceptForCountry="726,666,862,755">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
+  <cmr:view forCountry="754">
+  <script src="${resourcesPath}/js/requestentry/licenses.js?${cmrv}" type="text/javascript"></script>
+  </cmr:view>
 </cmr:view>
 <cmr:view forCountry="758">
   <script src="${resourcesPath}/js/requestentry/validators/sr_import.js?${cmrv}" type="text/javascript"></script>
@@ -79,6 +82,14 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <script src="${resourcesPath}/js/requestentry/validators/mo_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
+<cmr:view forCountry="616">
+  <script src="${resourcesPath}/js/requestentry/validators/au_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forCountry="796">
+  <script src="${resourcesPath}/js/requestentry/validators/nz_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
 <cmr:view forCountry="778">
   <script src="${resourcesPath}/js/requestentry/validators/my_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
@@ -93,14 +104,6 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 
 <cmr:view forCountry="852">
   <script src="${resourcesPath}/js/requestentry/validators/vn_validations.js?${cmrv}" type="text/javascript"></script>
-</cmr:view>
-
-<cmr:view forCountry="616">
-  <script src="${resourcesPath}/js/requestentry/validators/au_validations.js?${cmrv}" type="text/javascript"></script>
-</cmr:view>
-
-<cmr:view forCountry="796">
-  <script src="${resourcesPath}/js/requestentry/validators/nz_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
 <cmr:view forGEO="MCO">
@@ -128,8 +131,13 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 </cmr:view>
 
 <cmr:view forGEO="JP">
-  <script src="${resourcesPath}/js/requestentry/validators/jp_validations.js?${cmrv}" type="text/javascript"></script>
-  <script src="${resourcesPath}/js/requestentry/validators/jp_import.js?${cmrv}" type="text/javascript"></script>
+    <%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+    	<script src="${resourcesPath}/js/requestentry/validators/jp_validations_dr.js?${cmrv}" type="text/javascript"></script>
+    	<script src="${resourcesPath}/js/requestentry/validators/jp_import_dr.js?${cmrv}" type="text/javascript"></script>
+    <%  }  else { %>  
+  		<script src="${resourcesPath}/js/requestentry/validators/jp_validations.js?${cmrv}" type="text/javascript"></script>
+    	<script src="${resourcesPath}/js/requestentry/validators/jp_import.js?${cmrv}" type="text/javascript"></script>
+    <%  } %>
 </cmr:view>
 
 <cmr:view forGEO="CEMEA">
@@ -188,18 +196,18 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <script src="${resourcesPath}/js/requestentry/validators/bn_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
-<cmr:view forCountry="615">
-  <script src="${resourcesPath}/js/requestentry/validators/bd_validations.js?${cmrv}" type="text/javascript"></script>
-</cmr:view>
-
-<cmr:view forCountry="652">
-  <script src="${resourcesPath}/js/requestentry/validators/lk_validations.js?${cmrv}" type="text/javascript"></script>
-</cmr:view>
-
 <cmr:view forCountry="834">
   <script src="${resourcesPath}/js/requestentry/validators/sg_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
 <cmr:view forCountry="856">
   <script src="${resourcesPath}/js/requestentry/validators/th_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forCountry="615">
+  <script src="${resourcesPath}/js/requestentry/validators/bd_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forCountry="652">
+  <script src="${resourcesPath}/js/requestentry/validators/lk_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>

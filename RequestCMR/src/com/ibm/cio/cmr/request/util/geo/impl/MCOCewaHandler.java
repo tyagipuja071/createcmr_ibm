@@ -563,9 +563,11 @@ public class MCOCewaHandler extends MCOHandler {
             String nameCont = ""; // 3
             String street = ""; // 4
             String streetCont = ""; // 5
+            String stateProv = ""; // 7
+
             String collectioncd = ""; // 4
             String sbo = ""; // 5
-            String landedcountry = "";// 8
+            String landedcountry = "";// 9
             String embargo = ""; // 9
             String cof = ""; // 10
             String cod = ""; // 11
@@ -573,11 +575,11 @@ public class MCOCewaHandler extends MCOHandler {
             String deptNo = ""; // 14
             String city = "";
             String postalcd = "";
-            String phoneNo = ""; // 10
-            String phoneNoData = ""; // 13
+            String phoneNo = ""; // 11
+            String phoneNoData = ""; // 14
             String stcont = ""; // 5
             String addnameinfo = ""; // 9
-            String poBox = "";// 10
+            String poBox = "";// 11
             String tin = "";// 15
             String isuCd = "";// 7
             String clientTier = "";// 8
@@ -632,28 +634,30 @@ public class MCOCewaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(6);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
-              postalcd = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
-              landedcountry = validateColValFromCell(currCell);
+              postalcd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
+              landedcountry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
               addnameinfo = validateColValFromCell(currCell);
 
               if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
-                currCell = (XSSFCell) row.getCell(10);
+                currCell = (XSSFCell) row.getCell(11);
                 poBox = validateColValFromCell(currCell);
                 if (currCell != null) {
                   DataFormatter df = new DataFormatter();
-                  poBox = df.formatCellValue(row.getCell(10));
+                  poBox = df.formatCellValue(row.getCell(11));
                 }
               }
             }
 
             if ("Shipping Address".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(10);
+              currCell = (XSSFCell) row.getCell(11);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNo = df.formatCellValue(row.getCell(10));
+                phoneNo = df.formatCellValue(row.getCell(11));
               }
             }
 
@@ -694,6 +698,16 @@ public class MCOCewaHandler extends MCOHandler {
                 if (StringUtils.isBlank(city)) {
                   LOG.trace("City is required.");
                   error.addError((row.getRowNum() + 1), "City", "City is required. ");
+                }
+
+                String pattern = "^[a-zA-Z0-9]*$";
+                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                  LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedcountry)) {
+                  LOG.trace("State/Province and Landed country both should be filled");
+                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
                 }
 
                 if (StringUtils.isBlank(landedcountry)) {

@@ -487,28 +487,6 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var postCd = FormManager.getActualValue('postCd');
-        if (cntry != SysLoc.PORTUGAL) {
-          return new ValidationResult(null, true);
-        } else if (FormManager.getActualValue('landCntry') != 'PT') {
-          return new ValidationResult(null, true);
-        } else {
-          var postCodeRegEx = /[\d]{4}\-[\d]{3}/;
-          if (postCd != '' && postCodeRegEx.test(postCd)) {
-            return new ValidationResult(null, true);
-          } else {
-            return new ValidationResult(null, false, 'Postal Code format error. Please refer to info bubble for details. ');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var poBox = FormManager.getActualValue('poBox');
         var poBoxRegEx = /^[0-9]*$/;
         if (poBox != '' && poBoxRegEx.test(poBox)) {
@@ -3460,7 +3438,7 @@ function addressQuotationValidatorMCO() {
   FormManager.addValidator('dept', Validators.NO_QUOTATION, [ 'Department' ]);
   FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street Address' ]);
   FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Address Con\'t' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
+//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
   FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PostBox' ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('prefSeqNo', Validators.NO_QUOTATION, [ 'Sequence Number' ]);

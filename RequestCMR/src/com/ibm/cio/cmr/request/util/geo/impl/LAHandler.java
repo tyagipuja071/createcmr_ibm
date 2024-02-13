@@ -326,7 +326,7 @@ public class LAHandler extends GEOHandler {
 
       }
     } else {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
+      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord); // flow
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
       data.setBgRuleId(mainRecord.getCmrLde());
@@ -1620,6 +1620,15 @@ public class LAHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cntry, "MrcCd", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd())) {
+      update = new UpdatedDataModel();
+      String cntry = null;
+      update.setDataField(PageManager.getLabel(cntry, "INACCode", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getInacCd(), "INACCode", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getInacCd(), "INACCode", cmrCountry));
       results.add(update);
     }
 
@@ -3074,6 +3083,7 @@ public class LAHandler extends GEOHandler {
 
   private String getLovCdByUpperTxt(String issuingCntry, String fieldId, String txt) {
     EntityManager entityManager = JpaManager.getEntityManager();
+
     String lovTxt = "";
     try {
       String sql = ExternalizedQuery.getSql("GET.LOV.CD_BY_UPPER_TXT");
@@ -3128,26 +3138,21 @@ public class LAHandler extends GEOHandler {
   private String getLocationCd(String issuingCntry, String city, String stateProv) {
     EntityManager entityManager = JpaManager.getEntityManager();
     String txt = "";
-    try {
-      String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("CITY_DESC", city);
-      query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
-      List<String> results = query.getResults(String.class);
+    String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CITY_DESC", city);
+    query.setParameter("CMR_ISSUING_CNTRY", issuingCntry);
+    List<String> results = query.getResults(String.class);
 
-      if (results != null && results.size() == 1) {
-        txt = results.get(0);
-      } else if (results != null && results.size() > 1) {
-        for (String res : results) {
-          if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
-            txt = res;
-          }
-
+    if (results != null && results.size() == 1) {
+      txt = results.get(0);
+    } else if (results != null && results.size() > 1) {
+      for (String res : results) {
+        if (StringUtils.isNotBlank(stateProv) && res.startsWith(stateProv)) {
+          txt = res;
         }
+
       }
-    } finally {
-      entityManager.clear();
-      entityManager.close();
     }
 
     if (txt != null && StringUtils.isNotEmpty(txt) && txt.length() >= 5) {
@@ -3801,6 +3806,7 @@ public class LAHandler extends GEOHandler {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     BrazilV2ReqModel model = new BrazilV2ReqModel();
+
     try {
       PropertyUtils.copyProperties(model, admin);
       PropertyUtils.copyProperties(model, data);
@@ -3893,6 +3899,10 @@ public class LAHandler extends GEOHandler {
 
     } else {
       LOG.error("ZI01 address not found on request.");
+    }
+
+    if (brModel.getProxiLocnNo() != null) {
+      requestData.getData().setProxiLocnNo(brModel.getProxiLocnNo());
     }
 
     LOG.debug("Getting contact info from V2 inputs..");
@@ -4019,6 +4029,46 @@ public class LAHandler extends GEOHandler {
           entityManager.flush();
         }
       }
+    }
+
+    // roll-back to user's new values to Update IBM Codes
+    // mexicoBillingName is a temporary placeholder for Update Reason
+    if ("U".equalsIgnoreCase(admin.getReqType()) && "UPIC".equalsIgnoreCase(data.getMexicoBillingName())) {
+      data.setSalesBusOffCd(brModel.getSalesBusOffCd());
+      data.setIsuCd(brModel.getIsuCd());
+      data.setInacCd(brModel.getInacCd());
+      data.setCompany(brModel.getCompany());
+      data.setCollectorNameNo(brModel.getCollectorNameNo());
+
+      entityManager.merge(data);
+
+      if (StringUtils.isNotBlank(data.getSalesBusOffCd())) {
+
+        String isuCd = "";
+        String clientTier = "";
+        String mrcCd = "";
+
+        // set ISU_CD, CLIENT_TIER, MRC_CD values based on SALES_BO_CD value
+        // as per BR Coverage / SORTL Rules Combination 1H2023
+        LOG.debug("Getting ISU_CD, CLIENT_TIER, MRC_CD values...");
+        String extQuery = ExternalizedQuery.getSql("BR.GET_SORTL_RULES");
+        PreparedQuery prepQuery = new PreparedQuery(entityManager, extQuery);
+        prepQuery.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+        prepQuery.setParameter("SALES_BO_CD", data.getSalesBusOffCd());
+        List<Object[]> results = prepQuery.getResults();
+
+        if (results != null && results.size() == 1) {
+          isuCd = (String) results.get(0)[0];
+          clientTier = (String) results.get(0)[1];
+          mrcCd = (String) results.get(0)[2];
+
+          data.setIsuCd(isuCd);
+          data.setClientTier(clientTier);
+          data.setMrcCd(mrcCd);
+        }
+      }
+
+      entityManager.flush();
     }
   }
 
@@ -4542,6 +4592,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4588,6 +4640,11 @@ public class LAHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
               }
 
+              // VAT
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
+              }
+
             }
             if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -4610,6 +4667,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4655,6 +4714,10 @@ public class LAHandler extends GEOHandler {
               if (isShipToFilled && "@".equals(postal)) {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
               }
+
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
+              }
             }
             if ("Bill-To".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -4677,6 +4740,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4722,6 +4787,10 @@ public class LAHandler extends GEOHandler {
               if (isBillToFilled && "@".equals(postal)) {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
               }
+
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
+              }
             }
             if ("Sold-To".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -4744,6 +4813,8 @@ public class LAHandler extends GEOHandler {
               postal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               landed = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              vat = validateColValFromCell(currCell);
 
               if (StringUtils.isNotBlank(cmrNo) || StringUtils.isNotBlank(addrNoSeq) || StringUtils.isNotBlank(addrName)
                   || StringUtils.isNotBlank(addrNameCont) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(streetCont)
@@ -4788,6 +4859,11 @@ public class LAHandler extends GEOHandler {
               // Postal Code
               if (isSoldToFilled && "@".equals(postal)) {
                 error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              }
+
+              // vat
+              if (SystemLocation.BRAZIL.equals(country) && StringUtils.isNotBlank(vat) && vat.length() != 14) {
+                error.addError((row.getRowNum() + 1), "VAT", "VAT should have 14 digits numeric value.<br>");
               }
             }
 

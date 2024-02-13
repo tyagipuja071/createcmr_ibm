@@ -105,13 +105,16 @@ public class SpainTransformer extends MessageTransformer {
         // }
 
         // for nonEU, set CustomerLocation = Country Code + 000, 999 if EU
-        if (EU_COUNTRIES.contains(addrData.getLandCntry())) {
+        if (SystemLocation.SPAIN.equals(addrData.getLandCntry()) && StringUtils.isNotBlank(addrData.getStateProv())) {
+          messageHash.put("LocationNumber", addrData.getStateProv() + "000");
+        } else if (EU_COUNTRIES.contains(addrData.getLandCntry())) {
           messageHash.put("LocationNumber", addrData.getLandCntry() + "999");
         } else if (NON_EU_COUNTRIES.contains(addrData.getLandCntry())) {
           messageHash.put("LocationNumber", addrData.getLandCntry() + "999");
         } else {
           messageHash.put("LocationNumber", addrData.getLandCntry() + "000");
         }
+
         messageHash.put("VAT", "CEE000000");
       } else {
         // CB without VAT : AbbrevLoc =Country Name, VAT =A00000000
@@ -268,6 +271,13 @@ public class SpainTransformer extends MessageTransformer {
 
       if (crossBorder) {
         line5 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+        // line 4 : postCd+city+stateProv
+        int calcLengthOfCity = 27 - (addrData.getPostCd().length()) - (addrData.getStateProv().length());
+        if (addrData.getCity1().length() < calcLengthOfCity) {
+          line4 = addrData.getPostCd() + " " + addrData.getCity1() + " " + addrData.getStateProv();
+        } else {
+          line4 = addrData.getPostCd() + " " + addrData.getCity1().substring(0, calcLengthOfCity) + " " + addrData.getStateProv();
+        }
       } else {
         line5 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
         if (!StringUtils.isEmpty(line5) && !line5.toUpperCase().startsWith("ATT ") && !line5.toUpperCase().startsWith("ATT:")) {
@@ -712,9 +722,9 @@ public class SpainTransformer extends MessageTransformer {
         cust.setCeBo(cebo);
       }
 
-      if (!StringUtils.isEmpty(cusLocNum)) {
-        cust.setLocNo(cusLocNum);
-      }
+      // if (!StringUtils.isEmpty(cusLocNum)) {
+      // cust.setLocNo(cusLocNum);
+      // }
     }
   }
 
@@ -741,8 +751,8 @@ public class SpainTransformer extends MessageTransformer {
 
     if (StringUtils.isNotBlank(muData.getIsuCd())) {      
       if ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()) || "21".equals(muData.getIsuCd())) {
-      cust.setIsuCd(muData.getIsuCd() + "7");
-    } else {
+        cust.setIsuCd(muData.getIsuCd() + "7");
+      } else {
         String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
             + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
         if (isuClientTier != null && isuClientTier.endsWith("@")) {
@@ -835,14 +845,14 @@ public class SpainTransformer extends MessageTransformer {
       builder.append(subInd);
       LOG.debug("***Auto setting Economic code as > " + builder.toString());
       cust.setEconomicCd(builder.toString());
-//      if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
-//        cust.setIsuCd(muData.getIsuCd() + "7");
-//      } else {
-//        String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
-//        if (isuCd != null) {
-//          cust.setIsuCd(isuCd);
-//        }
-//      }
+      if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+        cust.setIsuCd(muData.getIsuCd() + "7");
+      } else {
+        String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
+        if (isuCd != null) {
+          cust.setIsuCd(isuCd);
+        }
+      }
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());

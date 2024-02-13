@@ -64,6 +64,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.SWISSHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -539,8 +540,7 @@ public class MassRequestEntryController extends BaseController {
   }
 
   @RequestMapping(
-      value = "/massrequest/download",
-      method = RequestMethod.POST)
+      value = "/massrequest/download", method = RequestMethod.POST)
   public void downloadMassFile(HttpServletRequest request, HttpServletResponse response) throws Exception {
     String token = request.getParameter("dlTokenId");
     String reqId = request.getParameter("dlReqId");
@@ -568,7 +568,8 @@ public class MassRequestEntryController extends BaseController {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else if ("618".equals(cmrIssuingCntry) || "706".equals(cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
-          } else if (LegacyDirectUtil.isCountryDREnabled(eManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)) {
+          } else if (LegacyDirectUtil.isCountryDREnabled(eManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)
+              || JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else {
             docLink = SystemConfiguration.getSystemProperty("massupdate." + cmrIssuingCntry);
@@ -683,8 +684,7 @@ public class MassRequestEntryController extends BaseController {
               String type = "";
               try {
                 type = MIME_TYPES.getContentType(docLink);
-              } catch (Exception e) {
-              }
+              } catch (Exception e) {}
               if (StringUtils.isEmpty(type)) {
                 type = "application/octet-stream";
               }
@@ -736,8 +736,7 @@ public class MassRequestEntryController extends BaseController {
                   String type = "";
                   try {
                     type = MIME_TYPES.getContentType(docLink);
-                  } catch (Exception e) {
-                  }
+                  } catch (Exception e) {}
                   if (StringUtils.isEmpty(type)) {
                     type = "application/octet-stream";
                   }
@@ -771,8 +770,7 @@ public class MassRequestEntryController extends BaseController {
   }
 
   @RequestMapping(
-      value = "/massrequest/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+      value = "/massrequest/process", method = { RequestMethod.POST, RequestMethod.GET })
   public void processMassFile(HttpServletRequest request, HttpServletResponse response) throws CmrException {
     try {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -824,8 +822,7 @@ public class MassRequestEntryController extends BaseController {
   }
 
   @RequestMapping(
-      value = "/reactivaterequest/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+      value = "/reactivaterequest/process", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap maintainCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
       @RequestParam("cmrList") String cmrList, @RequestParam("reqType") String reqType, MassUpdateModel model) throws CmrException {
 

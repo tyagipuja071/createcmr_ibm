@@ -216,7 +216,7 @@ function focusActualField(id, tabId, modal) {
 
     if (dojo.query('#' + id).length > 0) {
       var parentSection = dojo.query('#' + id).parents('.cmr-sub');
-      if (parentSection) {
+      if (parentSection.length > 0) {
         parentSection = parentSection[0];
         var sections = dojo.query('.cmr-sub');
         for (var i = 0; i < sections.length; i++) {

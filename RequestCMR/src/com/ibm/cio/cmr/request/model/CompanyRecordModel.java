@@ -60,6 +60,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private long overrideReqId;
   private boolean hasPaygoUpgradeChk;
 
+ 
   @Override
   public int compareTo(CompanyRecordModel o) {
     if (o == null) {
@@ -251,6 +252,8 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   public void setHasDnb(boolean hasDnb) {
     this.hasDnb = hasDnb;
   }
+  
+ 
 
   public String getReqType() {
     return reqType;

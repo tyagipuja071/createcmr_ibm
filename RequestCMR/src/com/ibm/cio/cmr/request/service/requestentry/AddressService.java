@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
@@ -109,6 +110,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       AdminPK pk = new AdminPK();
       pk.setReqId(model.getReqId());
       Admin admin = entityManager.find(Admin.class, pk);
+
+      DataPK dataPk = new DataPK();
+      dataPk.setReqId(model.getReqId());
+      Data data = entityManager.find(Data.class, dataPk);
       /*
        * if (SystemLocation.NETHERLANDS.equals(model.getCmrIssuingCntry()) &&
        * (model.getAddrType().equals("ZD01"))) { newAddrSeq =
@@ -151,10 +156,18 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-
         newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
-
       }
+
+      /*
+       * if (("866".equals(model.getCmrIssuingCntry()) ||
+       * "754".equals(model.getCmrIssuingCntry())) &&
+       * "U".equals(admin.getReqType())) { int legacyMaxSeq =
+       * getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(),
+       * data.getCmrNo()); if (legacyMaxSeq > Integer.parseInt(newAddrSeq)) {
+       * String maxSeq = Integer.toString(legacyMaxSeq); newAddrSeq =
+       * StringUtils.leftPad(maxSeq, 5, '0'); } }
+       */
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
         int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
@@ -240,6 +253,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           }
         }
       }
+
       model.setAddrSeq(newAddrSeq);
       if (addrExists(entityManager, model.getAddrType(), model.getAddrSeq(), model.getReqId())) {
         throw new CmrException(MessageUtil.ERROR_ALREADY_ADDRESS, uniqAddr.toString());
@@ -1382,10 +1396,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     request.setId(id);
     request.setPrivate(isPrivate);
 
-    if (JPHandler.isJPIssuingCountry(issuingCountry))
-      request.setCompanyName(addr.getCustNm3());
-    else
+    if (JPHandler.isJPIssuingCountry(issuingCountry)) {
+      name = addr.getCustNm3();
       request.setCompanyName(name);
+    } else {
+      request.setCompanyName(name);
+    }
     log.debug("Performing DPL Check (service) on Request ID " + admin.getId().getReqId() + " (" + id + ")");
     log.debug(" - Name: " + name);
     String dplSystemId = SystemUtil.useKYCForDPLChecks() ? DPLCheckClient.KYC_APP_ID : DPLCheckClient.EVS_APP_ID;
@@ -2146,6 +2162,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
 
     iAddr = query.getSingleResult(IntlAddr.class);
+
+    // try with removed padded zeros in addr seq
+    if (iAddr == null) {
+      query.setParameter("ADDR_SEQ", StringUtils.stripStart(addr.getId().getAddrSeq(), "0"));
+      iAddr = query.getSingleResult(IntlAddr.class);
+    }
 
     return iAddr;
   }

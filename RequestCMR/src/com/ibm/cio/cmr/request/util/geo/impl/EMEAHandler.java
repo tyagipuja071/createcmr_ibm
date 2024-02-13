@@ -40,7 +40,9 @@ import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Knvl;
 import com.ibm.cio.cmr.request.entity.KunnrExt;
+import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
@@ -53,6 +55,8 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -154,11 +158,6 @@ public class EMEAHandler extends BaseSOFHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
-      // name4 in rdc = Attn on SOF
-      if (!("866".equals(SystemLocation.UNITED_KINGDOM) || ("754".equals(SystemLocation.IRELAND)))) {
-        record.setCmrDept(record.getCmrName4());
-        record.setCmrName4(null);
-      }
       if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
         record.setCmrStreetAddressCont(record.getCmrName4());
         record.setCmrName3(record.getCmrName3());
@@ -166,6 +165,11 @@ public class EMEAHandler extends BaseSOFHandler {
         // name3 in rdc = Address Con't on SOF
         record.setCmrStreetAddressCont(record.getCmrName3());
         record.setCmrName3(null);
+      }
+      // name4 in rdc = Attn on SOF
+      if (!("866".equals(SystemLocation.UNITED_KINGDOM) || ("754".equals(SystemLocation.IRELAND)))) {
+        record.setCmrDept(record.getCmrName4());
+        record.setCmrName4(null);
       }
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
         if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
@@ -1817,6 +1821,11 @@ public class EMEAHandler extends BaseSOFHandler {
         if (records != null && records.size() >= 0) {
           data.setSpecialTaxCd("Bl");
         }
+
+        if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+          CmrtCust cust = this.legacyObjects.getCustomer();
+          data.setSpecialTaxCd(StringUtils.isNotEmpty(cust.getTaxCd()) ? cust.getTaxCd() : "Bl");
+        }
         entityManager.clear();
         entityManager.close();
       }
@@ -2309,6 +2318,17 @@ public class EMEAHandler extends BaseSOFHandler {
         } else {
           data.setCrosSubTyp(null);
         }
+      }
+    }
+
+    if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      // Update the ZS01 indicator so that the batch process will pick up this
+      // request even if only the licenses were updated
+      LicenseService licService = new LicenseService();
+      long reqId = data.getId().getReqId();
+      List<Licenses> newLicenses = licService.getLicensesByIndc(entityManager, reqId, "N");
+      if (!newLicenses.isEmpty()) {
+        updateChangeIndc(entityManager, reqId);
       }
     }
   }
@@ -3131,6 +3151,41 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
     }
 
+    if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      AddressService addrSvc = new AddressService();
+      String reqId = String.valueOf(data.getId().getReqId());
+
+      String sapNumber = addrSvc.getAddressSapNo(entityManager, reqId, "ZS01");
+      importLicenses(entityManager, data, data.getId().getReqId(), sapNumber, admin.getRequesterId());
+    }
+  }
+
+  private void importLicenses(EntityManager entityManager, Data data, long reqId, String sapNumber, String requesterId) {
+    if (entityManager != null && sapNumber != null) {
+      LicenseService licenseService = new LicenseService();
+
+      List<Licenses> licensesResult = licenseService.getAllLicenses(entityManager, reqId);
+
+      // clear licenses
+      if (licensesResult != null && !licensesResult.isEmpty() && licensesResult.size() > 0) {
+        licenseService.deleteAllLicense(licensesResult, entityManager);
+      }
+
+      List<Knvl> knvlList = licenseService.getKnvlByKunnr(entityManager, sapNumber);
+      if (knvlList != null && knvlList.size() > 0) {
+        // create licenses
+        for (Knvl knvl : knvlList) {
+          licenseService.createLicenseFromKnvl(entityManager, knvl, reqId, requesterId);
+        }
+      }
+    }
+  }
+
+  private void updateChangeIndc(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.CHANGED_INDC.IE"));
+    query.setParameter("CHANGED_INDC", "Y");
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 
   private void updateImportIndicatior(EntityManager entityManager, long reqId) {
@@ -4166,10 +4221,19 @@ public class EMEAHandler extends BaseSOFHandler {
                 ":Note that Client Tier only accept @,Q,Y or T. Please fix and upload the template again.<br>");
           }
           if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
-            LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+            LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
+            error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br> ");
           }
           if (error.hasErrors()) {
+            validations.add(error);
+          }
+        }
+
+        if ("Data".equalsIgnoreCase(sheet.getSheetName()) && country.equals(SystemLocation.IRELAND)) {
+          String taxCode = validateColValFromCell(row.getCell(5));
+          if (StringUtils.isNotBlank(taxCode) && !"Z".equalsIgnoreCase(taxCode) && isZTaxCdDB2Legacy(cmrNo)
+              && hasValidLicenseDate(cmrNo, SystemLocation.IRELAND)) {
+            error.addError((row.getRowNum() + 1), "Tax Code", "CMR No. " + cmrNo + " license(s) are still valid. Tax Code value should remain = Z");
             validations.add(error);
           }
         }
@@ -4179,19 +4243,20 @@ public class EMEAHandler extends BaseSOFHandler {
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-
-        String cbCity = ""; // 8
+        String stateProv = ""; // 8
+        String landCntry = ""; // 11
+        String cbCity = ""; // 9
         String localCity = ""; // 7
-        String cbPostal = ""; // 10
-        String localPostal = ""; // 9
+        String cbPostal = ""; // 11
+        String localPostal = ""; // 10
 
         String streetCont = ""; // 5
-        String poBox = ""; // 11
-        String attPerson = ""; // 13
+        String poBox = ""; // 12
+        String attPerson = ""; // 14
 
-        String district = "";// 12
-        String taxOffice = ""; // 13
-        String name4 = "";// 10
+        String district = "";// 13
+        String taxOffice = ""; // 14
+        String name4 = "";// 11
 
         row = sheet.getRow(rowIndex);
         if (row == null) {
@@ -4203,22 +4268,42 @@ public class EMEAHandler extends BaseSOFHandler {
         currCell = row.getCell(7);
         cbCity = validateColValFromCell(currCell);
         currCell = row.getCell(8);
-        localPostal = validateColValFromCell(currCell);
+        stateProv = validateColValFromCell(currCell);
+        currCell = row.getCell(11);
+        landCntry = validateColValFromCell(currCell);
         currCell = row.getCell(9);
+        localPostal = validateColValFromCell(currCell);
+        currCell = row.getCell(10);
         cbPostal = validateColValFromCell(currCell);
 
         TemplateValidation error = new TemplateValidation(name);
 
         // CMR-2731 Turkey: Mass Update: country modification
         if (SystemLocation.TURKEY.equals(country)) {
-          currCell = row.getCell(12);
-          district = validateColValFromCell(currCell);
           currCell = row.getCell(13);
+          district = validateColValFromCell(currCell);
+          currCell = row.getCell(14);
           taxOffice = validateColValFromCell(currCell);
           currCell = row.getCell(5);
           streetCont = validateColValFromCell(currCell);
-          currCell = row.getCell(10);
+          currCell = row.getCell(11);
           name4 = validateColValFromCell(currCell);
+          currCell = row.getCell(8);
+          stateProv = validateColValFromCell(currCell);
+          currCell = row.getCell(12);
+          landCntry = validateColValFromCell(currCell);
+
+          String pattern = "^[a-zA-Z0-9]*$";
+          if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+            LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+            error.addError(row.getRowNum(), "State/Province",
+                "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+            validations.add(error);
+          } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+            LOG.trace("State/Province and Landed country both should be filled");
+            error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+            validations.add(error);
+          }
 
           if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
             LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
@@ -4259,9 +4344,9 @@ public class EMEAHandler extends BaseSOFHandler {
         } else {
           currCell = row.getCell(5);
           streetCont = validateColValFromCell(currCell);
-          currCell = row.getCell(11);
-          poBox = validateColValFromCell(currCell);
           currCell = row.getCell(12);
+          poBox = validateColValFromCell(currCell);
+          currCell = row.getCell(13);
           attPerson = validateColValFromCell(currCell);
           // DTN: Defect 1898300: UKI - mass updates - addresses
           /*
@@ -4273,6 +4358,18 @@ public class EMEAHandler extends BaseSOFHandler {
             LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
             error.addError((row.getRowNum() + 1), "Local City",
                 "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+            validations.add(error);
+          }
+
+          String pattern = "^[a-zA-Z0-9]*$";
+          if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+            LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+            error.addError(row.getRowNum(), "State/Province",
+                "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+            validations.add(error);
+          } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+            LOG.trace("State/Province and Landed country both should be filled");
+            error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
             validations.add(error);
           }
 
@@ -4315,6 +4412,42 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  private boolean isZTaxCdDB2Legacy(String cmrNo) {
+    if (StringUtils.isNotBlank(cmrNo)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("GET.LEGACYTAXCD.IE");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("RCUXA", cmrNo);
+        query.setForReadOnly(true);
+        String result = query.getSingleResult(String.class);
+        if (StringUtils.isNotBlank(result) && "Z".equalsIgnoreCase(result)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private boolean hasValidLicenseDate(String cmrNo, String issuingCntry) {
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(issuingCntry)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      if (entityManager != null) {
+        String sql = ExternalizedQuery.getSql("COUNT.VALID.LICENSEDATE");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("KATR6", issuingCntry);
+        query.setParameter("ZZKV_CUSNO", cmrNo);
+
+        int count = query.getSingleResult(Integer.class);
+        if (count > 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @Override
@@ -4486,14 +4619,16 @@ public class EMEAHandler extends BaseSOFHandler {
             String cmrNo = ""; // 0
             String seqNo = "";// 1
             String localCity = ""; // 7
-            String crossCity = ""; // 8
-            String localPostal = ""; // 9
-            String cbPostal = ""; // 10
+            String stateProv = ""; // 8
+            String landCntry = ""; // 11
+            String crossCity = ""; // 9
+            String localPostal = ""; // 10
+            String cbPostal = ""; // 11
             String street = ""; // 4
             String addressCont = ""; // 5
-            String poBox = ""; // 12
-            String attPerson = ""; // 11
-            String poBox1 = ""; // 12
+            String poBox = ""; // 13
+            String attPerson = ""; // 12
+            String poBox1 = ""; // 13
 
             if (row.getRowNum() == 2001) {
               continue;
@@ -4509,20 +4644,24 @@ public class EMEAHandler extends BaseSOFHandler {
             currCell = (XSSFCell) row.getCell(7);
             crossCity = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(8);
-            localPostal = validateColValFromCell(currCell);
+            stateProv = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(9);
+            localPostal = validateColValFromCell(currCell);
+            currCell = (XSSFCell) row.getCell(10);
             cbPostal = validateColValFromCell(currCell);
+            currCell = (XSSFCell) row.getCell(11);
+            landCntry = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(4);
             street = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(5);
             addressCont = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(11);
-            attPerson = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(12);
+            attPerson = validateColValFromCell(currCell);
+            currCell = (XSSFCell) row.getCell(13);
             poBox = validateColValFromCell(currCell);
             if (currCell != null) {
               DataFormatter df = new DataFormatter();
-              poBox1 = df.formatCellValue(row.getCell(12));
+              poBox1 = df.formatCellValue(row.getCell(13));
             }
 
             TemplateValidation error = new TemplateValidation(name);
@@ -4537,6 +4676,17 @@ public class EMEAHandler extends BaseSOFHandler {
                   + "If one is populated, the other must be empty. >>");
               error.addError(row.getRowNum(), "Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty.");
+              validations.add(error);
+            }
+            String pattern = "^[a-zA-Z0-9]*$";
+            if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+              LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+              error.addError(row.getRowNum(), "State/Province",
+                  "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+              validations.add(error);
+            } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+              LOG.trace("State/Province and Landed country both should be filled");
+              error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
               validations.add(error);
             }
 
@@ -4949,7 +5099,7 @@ public class EMEAHandler extends BaseSOFHandler {
       qrytelf2.setParameter("KTOKD", cmr.getCmrAddrTypeCode());
       qrytelf2.setParameter("ZZKV_SEQNO", cmr.getCmrAddrSeq());
 
-      String results = qrytelf2.getSingleResult(String.class);
+    String results = qrytelf2.getSingleResult(String.class);
 
       if (results != null && !results.isEmpty()) {
         addr.setCustPhone(results);

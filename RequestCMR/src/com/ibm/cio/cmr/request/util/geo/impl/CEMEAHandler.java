@@ -124,47 +124,68 @@ public class CEMEAHandler extends BaseSOFHandler {
     LANDED_CNTRY_MAP.put(SystemLocation.YEMEN, "YE");
   }
 
-  public static final List<String> CEMEA_CHECKLIST = Arrays.asList("358", "359", "363", "603", "607", "620", "626", "651", "675", "677", "680", "694",
-      "695", "699", "705", "707", "713", "741", "752", "762", "767", "768", "772", "787", "805", "808", "821", "823", "832", "849", "850", "865",
+  public static final List<String> CEMEA_CHECKLIST = Arrays.asList("358", "359", "363", "603", "607", "620", "626",
+      "651", "675", "677", "680", "694",
+      "695", "699", "705", "707", "713", "741", "752", "762", "767", "768", "772", "787", "805", "808", "821", "823",
+      "832", "849", "850", "865",
       "889");
-  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA,
-      SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN, SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA,
-      SystemLocation.BELARUS, SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN, SystemLocation.BOSNIA_AND_HERZEGOVINA,
-      SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
-      SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA,
+  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN,
+      SystemLocation.SERBIA,
+      SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN, SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN,
+      SystemLocation.ALBANIA,
+      SystemLocation.BELARUS, SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN,
+      SystemLocation.BOSNIA_AND_HERZEGOVINA,
+      SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN,
+      SystemLocation.MOLDOVA,
+      SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE,
+      SystemLocation.CROATIA,
       SystemLocation.CZECH_REPUBLIC);
 
-  private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
-      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
-      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
+  private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO,
+      SystemLocation.GULF,
+      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN,
+      SystemLocation.KUWAIT,
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR,
+      SystemLocation.SAUDI_ARABIA,
       SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT);
 
-  private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
-      "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
+  private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate",
+      "Company", "CAP", "CMROwner",
+      "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX",
+      "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "Department" };
 
-  private static final String[] CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner", "CustClassCode",
-      "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
+  private static final String[] CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP",
+      "CMROwner", "CustClassCode",
+      "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone",
+      "Office", "Floor", "Building",
       "County", "City2", "Department", "Company", "LocalTax1" };
 
-  private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
-      "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX",
+  private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company",
+      "CAP", "CMROwner",
+      "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity",
+      "POBoxPostalCode", "CustFAX",
       "TransportZone", "Office", "Floor", "Building", "County", "City2", "Department", "BPRelationType", "MembLevel" };
 
-  public static final List<String> CEMEA_POSTAL_FORMAT = Arrays.asList("603", "607", "644", "651", "740", "705", "708", "626", "694", "695", "826",
+  public static final List<String> CEMEA_POSTAL_FORMAT = Arrays.asList("603", "607", "644", "651", "740", "705", "708",
+      "626", "694", "695", "826",
       "821", "363", "359", "741", "699", "704", "707", "707", "889", "668", "693", "787", "820", "358");
 
-  private static final List<String> CIS_DUPLICATE_COUNTRIES = Arrays.asList("607", "358", "626", "651", "694", "695", "787", "363", "359", "889",
+  private static final List<String> CIS_DUPLICATE_COUNTRIES = Arrays.asList("607", "358", "626", "651", "694", "695",
+      "787", "363", "359", "889",
       "741");
 
-  private static final List<String> CEE_COUNTRIES_LIST = Arrays.asList("358", "359", "363", "603", "607", "626", "644", "651", "668", "693", "694",
+  private static final List<String> CEE_COUNTRIES_LIST = Arrays.asList("358", "359", "363", "603", "607", "626", "644",
+      "651", "668", "693", "694",
       "695", "699", "704", "705", "707", "708", "740", "741", "787", "820", "821", "826", "889");
 
-  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Data", "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
+  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Data", "Address in Local language", "Sold To",
+      "Mail to", "Bill To", "Ship To",
       "Install At" };
 
   @Override
-  protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
+  protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source,
+      RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
     // CMR-2719 divestiture CMR not imported
     if ("AT".equals(mainRecord.getCmrCountryLanded())) {
@@ -196,7 +217,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       // if
       // (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
       // && "AT".equals(record.getCmrCountryLanded())) {
-      if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()) && "618".equals(reqEntry.getCmrIssuingCntry())) {
+      if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+          && "618".equals(reqEntry.getCmrIssuingCntry())) {
 
         record.setCmrAddrSeq("1");
       }
@@ -207,7 +229,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       List<FindCMRRecordModel> recordsFromSearch = source.getItems();
       List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
 
-      if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0 && "618".equals(reqEntry.getCmrIssuingCntry())) {
+      if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0
+          && "618".equals(reqEntry.getCmrIssuingCntry())) {
         doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
         if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
           source.setItems(filteredRecords);
@@ -229,7 +252,8 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-            String soldtoseqinrdc = getSoldtoSeqFromRDC(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
+            String soldtoseqinrdc = getSoldtoSeqFromRDC(entityManager, SystemConfiguration.getValue("MANDT"),
+                reqEntry.getCmrIssuingCntry(),
                 record.getCmrNum());
             System.out.println("soldtoseqinrdc = " + soldtoseqinrdc);
             System.out.println("seqNo = " + seqNo);
@@ -240,16 +264,19 @@ public class CEMEAHandler extends BaseSOFHandler {
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
                 if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
+                    && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))
+                    && "598".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZD02");
                 }
                 if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
+                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode()))
+                    && "599".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZP03");
                 }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
-                  stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
+                  stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(),
+                      SystemConfiguration.getValue("MANDT"));
                   int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
                   if ("0".equals(stkzn) || parvmCount > 0) {
                     addr.setCmrAddrTypeCode("ZS02");
@@ -257,16 +284,22 @@ public class CEMEAHandler extends BaseSOFHandler {
                 }
                 converted.add(addr);
               }
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()) && record.getCmrAddrSeq().equals(soldtoseqinrdc)) {
+              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+                  && record.getCmrAddrSeq().equals(soldtoseqinrdc)) {
                 String kunnr = addr.getCmrSapNumber();
-                String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
+                String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"),
+                    kunnr, addr.getCmrAddrTypeCode(),
                     addr.getCmrAddrSeq());
-                int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
+                int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"),
+                    reqEntry.getCmrIssuingCntry(),
                     record.getCmrNum());
-                int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(),
+                    record.getCmrNum());
                 String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
-                String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(),
+                    record.getCmrNum());
+                String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(),
+                    record.getCmrNum());
                 String gAddrSeq = "";
                 if (!StringUtils.isEmpty(legacyGaddrSeq)) {
                   gAddrSeq = legacyGaddrSeq;
@@ -306,7 +339,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                     installing.setCmrSapNumber("");
                     converted.add(installing);
                   } else {
-                    CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                    CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(),
+                        searchModel.getCmrNum());
                     if (gAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
@@ -343,7 +377,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                     }
                   }
                 } else {
-                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(),
+                      searchModel.getCmrNum());
                   if (gAddr != null) {
                     LOG.debug("Adding installing to the records");
                     FindCMRRecordModel installing = new FindCMRRecordModel();
@@ -381,17 +416,22 @@ public class CEMEAHandler extends BaseSOFHandler {
                 }
 
                 // add new here
-                String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(),
+                    record.getCmrNum());
                 // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
                 // reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 // String maxSeqs =
                 // StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
 
                 // check if share seq address
-                String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-                String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-                String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-                String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
+                String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(),
+                    soldtoseq);
+                String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(),
+                    soldtoseq);
+                String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(),
+                    soldtoseq);
+                String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(),
+                    soldtoseq);
 
                 // add share ZP01
                 if (isShareZP01 != null) {
@@ -465,13 +505,15 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (source.getItems() != null) {
           for (FindCMRRecordModel record : source.getItems()) {
 
-            if ((!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) && (!"618".equals(reqEntry.getCmrIssuingCntry()))) {
+            if ((!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()))
+                && (!"618".equals(reqEntry.getCmrIssuingCntry()))) {
               LOG.trace("Non Sold-to will be ignored. Will get from SOF");
               this.rdcShippingRecords.add(record);
               continue;
             }
 
-            if ("618".equals(reqEntry.getCmrIssuingCntry()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+            if ("618".equals(reqEntry.getCmrIssuingCntry())
+                && CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
                 && StringUtils.isAlpha(record.getCmrAddrSeq())) {
               record.setCmrAddrSeq("1");
             }
@@ -503,17 +545,20 @@ public class CEMEAHandler extends BaseSOFHandler {
               record.setCmrAddrTypeCode("ZS02");
             }
 
-            if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
+            if ("618".equals(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
                 && "598".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZD02");
             }
 
-            if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+            if ("618".equals(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
                 && "599".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZP02");
             }
 
-            if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+            if ("618".equals(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
                 && StringUtils.isNotEmpty(record.getExtWalletId())) {
               record.setCmrAddrTypeCode("PG01");
             }
@@ -545,14 +590,16 @@ public class CEMEAHandler extends BaseSOFHandler {
           if (sequences != null && !sequences.isEmpty()) {
             LOG.debug("Shipping Sequences is not empty. Importing " + sequences.size() + " shipping addresses.");
             for (String seq : sequences) {
-              record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping_" + seq + "_", zi01Map);
+              record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(),
+                  "Shipping_" + seq + "_", zi01Map);
               if (record != null) {
                 converted.add(record);
               }
             }
           } else {
             LOG.debug("Shipping Sequences is empty. ");
-            record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping", zi01Map);
+            record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping",
+                zi01Map);
             if (record != null) {
               converted.add(record);
             }
@@ -564,9 +611,11 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
   }
 
-  protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
+  protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry,
+      Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted) {
-    FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(), "Mailing", zi01Map);
+    FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(),
+        "Mailing", zi01Map);
     if (record != null) {
       record.setCmrBldg(null);
       converted.add(record);
@@ -592,7 +641,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  protected void handleSOFAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
+  protected void handleSOFAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address,
+      String addressKey) {
 
     if (SystemLocation.AUSTRIA.equals(cmrIssuingCntry)) {
       handleAustriaAddress(entityManager, cmrIssuingCntry, address, addressKey);
@@ -738,7 +788,8 @@ public class CEMEAHandler extends BaseSOFHandler {
    * @param address
    * @param addressKey
    */
-  private void handleAustriaAddress(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
+  private void handleAustriaAddress(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address,
+      String addressKey) {
     // Domestic and Cross-border - Austria
     // line2 = Name2
     // line3 = Name3 or (ATT + phone)
@@ -883,7 +934,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     return "-/X".equalsIgnoreCase(val) ? "" : ("*".equalsIgnoreCase(val) ? "" : val);
   }
 
-  protected void handlePhoneAndAttn(String line, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
+  protected void handlePhoneAndAttn(String line, String cmrIssuingCntry, FindCMRRecordModel address,
+      String addressKey) {
     if (line == null || StringUtils.isEmpty(line)) {
       return;
     }
@@ -893,7 +945,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     StringBuilder sbAttn = new StringBuilder();
     boolean attnStart = false;
     for (String part : parts) {
-      if (!attnStart && (StringUtils.isNumeric(part) || (part.length() > 1 && part.startsWith("+") && StringUtils.isNumeric(part.substring(1))))) {
+      if (!attnStart && (StringUtils.isNumeric(part)
+          || (part.length() > 1 && part.startsWith("+") && StringUtils.isNumeric(part.substring(1))))) {
         sbPhone.append(part);
       } else {
         attnStart = true;
@@ -907,7 +960,8 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   }
 
-  protected void handleCityAndPostCode(String line, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
+  protected void handleCityAndPostCode(String line, String cmrIssuingCntry, FindCMRRecordModel address,
+      String addressKey) {
     if (line == null || StringUtils.isEmpty(line)) {
       return;
     }
@@ -936,7 +990,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     address.setCmrCity(city);
   }
 
-  protected void handleCityAndPostCodeCMEA(String line, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
+  protected void handleCityAndPostCodeCMEA(String line, String cmrIssuingCntry, FindCMRRecordModel address,
+      String addressKey) {
     if (line == null || StringUtils.isEmpty(line)) {
       return;
     }
@@ -949,7 +1004,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       numericMatch.add(matcher.group());
     }
     if (!numericMatch.isEmpty()) {
-      int postalLength = line.indexOf(numericMatch.get(numericMatch.size() - 1)) + numericMatch.get(numericMatch.size() - 1).length();
+      int postalLength = line.indexOf(numericMatch.get(numericMatch.size() - 1))
+          + numericMatch.get(numericMatch.size() - 1).length();
       postalCode = line.substring(0, postalLength);
       if (line.substring(line.substring(0, postalLength).length()).trim().startsWith(",")) {
         city = line.substring(line.substring(0, postalLength).length()).trim().substring(1).trim();
@@ -992,7 +1048,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord)
+      throws Exception {
     // CMR-2001 data attribute not changed by SOF source for AT
     if (!this.currentImportValues.isEmpty() && !SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
@@ -1090,7 +1147,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     // DIC and OIB fields
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())
+        || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())) {
       data.setTaxCd1(this.currentImportValues.get("BankAccountNo"));
       LOG.trace("BankAccountNo: " + data.getTaxCd1());
     }
@@ -1132,10 +1190,12 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     // Ticked - load CIS duplicate fields
-    if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+    if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry())
+        && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
         && "Y".equals(data.getCisServiceCustIndc())) {
       loadDuplicateCMR(data, data.getDupIssuingCntryCd(), mainRecord.getCmrNum());
-    } else if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+    } else if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry())
+        && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Not ticked - check and load CIS duplicate fields
       for (String dupCntry : CIS_DUPLICATE_COUNTRIES) {
         if (loadDuplicateCMR(data, dupCntry, mainRecord.getCmrNum())) {
@@ -1161,7 +1221,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     // Type of Customer
     data.setBpAcctTyp(this.currentImportValues.get("BpAcctTyp"));
 
-    if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+    if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry())
+        && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setEngineeringBo("");
     }
   }
@@ -1257,7 +1318,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo)
+      throws Exception {
     boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
         || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 35);
 
@@ -1274,6 +1336,12 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.setCustNm1(currentRecord.getCmrName1Plain());
       address.setCustNm2(currentRecord.getCmrName2Plain());
       address.setCustNm3(currentRecord.getCmrName3());
+    }
+
+    if ("826".equals(country)) {
+      address.setCity1(StringUtils.isNotBlank(address.getCity1()) ? address.getCity1().toUpperCase() : "");
+      address.setCustNm1(StringUtils.isNotBlank(address.getCustNm1()) ? address.getCustNm1().toUpperCase() : "");
+      address.setAddrTxt(StringUtils.isNotBlank(address.getAddrTxt()) ? address.getAddrTxt().toUpperCase() : "");
     }
 
     if ("826".equals(country)) {
@@ -1345,7 +1413,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+  public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model)
+      throws Exception {
   }
 
   @Override
@@ -1356,7 +1425,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
+  public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr,
+      RequestEntryModel data) {
     request.setSORTL(data.getSalesBusOffCd());
     request.setCompanyNumber(data.getEnterprise());
   }
@@ -1366,9 +1436,11 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry)
+      throws Exception {
 
-    if (("BUSPR".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp())) && CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    if (("BUSPR".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp()))
+        && CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setBpRelType("CA");
     }
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
@@ -1407,7 +1479,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
 
-    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && data != null && "ZP02".equals(addr.getId().getAddrType())) {
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && data != null
+        && "ZP02".equals(addr.getId().getAddrType())) {
       upperChar(addr);
     }
 
@@ -1426,7 +1499,8 @@ public class CEMEAHandler extends BaseSOFHandler {
 
     for (Addr addr : addresses) {
       if ("ZS01".equals(addr.getId().getAddrType())) {
-        String adrnr = getaddAddressAdrnr(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), addr.getSapNo(),
+        String adrnr = getaddAddressAdrnr(entityManager, data.getCmrIssuingCntry(),
+            SystemConfiguration.getValue("MANDT"), addr.getSapNo(),
             addr.getId().getAddrType(), addr.getId().getAddrSeq());
         String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
         if (StringUtils.isBlank(adrnr) && !StringUtils.isBlank(legacyGaddrSeq)) {
@@ -1436,7 +1510,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
 
-    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && !"707".equals(data.getCmrIssuingCntry())) {
       String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       // check if share seq address
       String isShareZP01 = isShareZP01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), soldtoseq);
@@ -1445,19 +1519,23 @@ public class CEMEAHandler extends BaseSOFHandler {
       String isShareZI01 = isShareZI01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), soldtoseq);
 
       if (isShareZP01 != null) {
-        updateImportIndToNForSharezp01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+        updateImportIndToNForSharezp01Addr(entityManager, data.getId().getReqId(),
+            SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
             data.getCmrNo());
       }
       if (isShareZS02 != null) {
-        updateImportIndToNForSharezs02Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+        updateImportIndToNForSharezs02Addr(entityManager, data.getId().getReqId(),
+            SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
             data.getCmrNo());
       }
       if (isShareZD01 != null) {
-        updateImportIndToNForSharezd01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+        updateImportIndToNForSharezd01Addr(entityManager, data.getId().getReqId(),
+            SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
             data.getCmrNo());
       }
       if (isShareZI01 != null) {
-        updateImportIndToNForSharezi01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+        updateImportIndToNForSharezi01Addr(entityManager, data.getId().getReqId(),
+            SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
             data.getCmrNo());
       }
       if (isShareZP01 != null || isShareZS02 != null || isShareZD01 != null || isShareZI01 != null) {
@@ -1470,7 +1548,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "ADDR_TXT", "ADDR_TXT2", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX",
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "ADDR_TXT", "ADDR_TXT2", "CITY1",
+        "POST_CD", "LAND_CNTRY", "PO_BOX",
         "CUST_PHONE", "BLDG", "DEPT"));
     return fields;
   }
@@ -1488,7 +1567,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
+  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData,
+      DataRdc oldData,
       List<UpdatedDataModel> results) {
 
     UpdatedDataModel update = null;
@@ -1506,13 +1586,17 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())
         && SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "Customer Classification Code", "Customer Classification Code"));
-      update.setNewData(service.getCodeAndDescription(newData.getCustClass(), "Customer Classification Code", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "Customer Classification Code", cmrCountry));
+      update.setDataField(
+          PageManager.getLabel(cmrCountry, "Customer Classification Code", "Customer Classification Code"));
+      update.setNewData(
+          service.getCodeAndDescription(newData.getCustClass(), "Customer Classification Code", cmrCountry));
+      update.setOldData(
+          service.getCodeAndDescription(oldData.getCustClass(), "Customer Classification Code", cmrCountry));
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type)
+        && !service.equals(oldData.getTaxExempt3(), newData.getTaxExemptStatus3())
         && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "TaxExemptStatus3", "-"));
@@ -1535,21 +1619,26 @@ public class CEMEAHandler extends BaseSOFHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      update
+          .setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      update
+          .setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getAgreementSignDate(), newData.getAgreementSignDate())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getAgreementSignDate(), newData.getAgreementSignDate())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "AECISubDate", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getAgreementSignDate(), "AECISubDate", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getAgreementSignDate(), "AECISubDate", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())
+    if (RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())
         && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
@@ -1572,7 +1661,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getDupSalesRepNo(), "SalRepNameNo2", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getDupEnterpriseNo(), newData.getDupEnterpriseNo())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getDupEnterpriseNo(), newData.getDupEnterpriseNo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Enterprise2", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getDupEnterpriseNo(), "Enterprise2", cmrCountry));
@@ -1594,7 +1684,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getDupIsuCd(), "ISU2", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getDupClientTierCd(), newData.getDupClientTierCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getDupClientTierCd(), newData.getDupClientTierCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "ClientTier2", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getDupClientTierCd(), "ClientTier2", cmrCountry));
@@ -1609,7 +1700,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2()) && CEE_COUNTRIES_LIST.contains(cmrCountry)) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())
+        && CEE_COUNTRIES_LIST.contains(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getTaxCd2(), "Enterprise", cmrCountry));
@@ -1640,17 +1732,18 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
     switch (cntry) {
-    case SystemLocation.AUSTRIA:
-      return Arrays.asList(AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
-    case SystemLocation.CZECH_REPUBLIC:
-      return Arrays.asList(CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
-    default:
-      return Arrays.asList(CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+      case SystemLocation.AUSTRIA:
+        return Arrays.asList(AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+      case SystemLocation.CZECH_REPUBLIC:
+        return Arrays.asList(CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+      default:
+        return Arrays.asList(CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     }
   }
 
   @Override
-  public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
+  public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc,
+      String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
     if (!equals(addr.getBldg(), addr.getBldgOld())) {
       UpdatedNameAddrModel update = new UpdatedNameAddrModel();
@@ -1672,7 +1765,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     if (CEE_COUNTRY_LIST.contains(cmrCountry)) {
       for (UpdatedNameAddrModel model : results) {
-        if (model.getDataField() != null && model.getDataField().equals(PageManager.getLabel(cmrCountry, "CustPhone", "-"))) {
+        if (model.getDataField() != null
+            && model.getDataField().equals(PageManager.getLabel(cmrCountry, "CustPhone", "-"))) {
           results.remove(model);
           break;
         }
@@ -1766,8 +1860,10 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD",
+        "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "VAT_IND", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID",
+        "BG_RULE_ID", "GEO_LOC_DESC",
         "GEO_LOCATION_CD", "DUNS_NO", "ABBREV_LOCN", "TAX_CD1", "ORD_BLK", "ENTERPRISE", "TAX_EXEMPT_STATUS_3"));// CMR-1947:add
     // Abbrev_locn
     // field
@@ -1784,7 +1880,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     Field trgField = null;
 
     for (Field field : Data.class.getDeclaredFields()) {
-      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+          || Modifier.isAbstract(field.getModifiers()))) {
         srcCol = field.getAnnotation(Column.class);
         if (srcCol != null) {
           srcName = srcCol.name();
@@ -1849,7 +1946,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
 
     for (Field field : Addr.class.getDeclaredFields()) {
-      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+          || Modifier.isAbstract(field.getModifiers()))) {
         srcCol = field.getAnnotation(Column.class);
         if (srcCol != null) {
           srcName = srcCol.name();
@@ -1953,7 +2051,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     return knvpParvmCount;
   }
 
-  public String getaddAddressAdrnr(EntityManager entityManager, String katr6, String mandt, String kunnr, String ktokd, String seq) {
+  public String getaddAddressAdrnr(EntityManager entityManager, String katr6, String mandt, String kunnr, String ktokd,
+      String seq) {
     String adrnr = "";
     String sql = ExternalizedQuery.getSql("CEE.GETADRNR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -2084,8 +2183,10 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
-        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD",
+        "COLLECTION_CD", "ABBREV_NM",
+        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN",
+        "PPSCEID", "MEM_LVL",
         "BP_REL_TYPE", "COMMERCIAL_FINANCED", "ENTERPRISE", "PHONE1", "TAX_CD1"));
     return fields;
   }
@@ -2161,7 +2262,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq,
+      String cmrIssuingCntry) {
     String newSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
     return newSeq;
   }
@@ -2209,7 +2311,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows,
+      String country) {
     // super.validateMassUpdateTemplateDupFills(validations, book, maxRows,
     // country);
     XSSFCell currCell = null;
@@ -2284,44 +2387,59 @@ public class CEMEAHandler extends BaseSOFHandler {
 
               if (!StringUtils.isBlank(cmrNo) && ("RO".equals(landCntry) || "".equals(landCntry))
                   && ("B".equals(stateProv) || "@".equals(stateProv) || "".equals(stateProv))) {
-                if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
-                    || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
-                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                if (!StringUtils.isBlank(city)
+                    && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
+                        || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
+                  error.addError(row.getRowNum(), "City",
+                      "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 }
 
                 String pattern = "^[a-zA-Z0-9]*$";
-                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                if (!StringUtils.isBlank(stateProv)
+                    && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
                   LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
                   error.addError(row.getRowNum(), "State/Province",
                       "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
                 } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
                   LOG.trace("State/Province and Landed country both should be filled");
-                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State/Province and Landed country both should be filled together.\n");
                 }
 
-                if (!StringUtils.isBlank(city) && Pattern.compile("[0,7,8,9]").matcher(city.substring(city.length() - 1)).find()
+                if (!StringUtils.isBlank(city)
+                    && Pattern.compile("[0,7,8,9]").matcher(city.substring(city.length() - 1)).find()
                     && "BUCHAREST SECTOR".equals(city.substring(0, 16))) {
-                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                  error.addError(row.getRowNum(), "City",
+                      "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 }
 
                 if (!StringUtils.isBlank(custName1) && !custName1.equals(custName1.toUpperCase())) {
-                  error.addError(row.getRowNum(), "Customer Name 1", "The address data must be entered in capital letters'. <br>");
+                  error.addError(row.getRowNum(), "Customer Name 1",
+                      "The address data must be entered in capital letters'. <br>");
                 } else if (!StringUtils.isBlank(name2) && !name2.equals(name2.toUpperCase())) {
-                  error.addError(row.getRowNum(), "Customer Name 2", "The address data must be entered in capital letters'. <br>");
+                  error.addError(row.getRowNum(), "Customer Name 2",
+                      "The address data must be entered in capital letters'. <br>");
                 } else if (!StringUtils.isBlank(name3) && !name3.equals(name3.toUpperCase())) {
-                  error.addError(row.getRowNum(), "Customer Name 3", "The address data must be entered in capital letters'. <br>");
+                  error.addError(row.getRowNum(), "Customer Name 3",
+                      "The address data must be entered in capital letters'. <br>");
                 } else if (!StringUtils.isBlank(AttnPerson) && !AttnPerson.equals(AttnPerson.toUpperCase())) {
-                  error.addError(row.getRowNum(), "Att. Person", "The address data must be entered in capital letters'. <br>");
+                  error.addError(row.getRowNum(), "Att. Person",
+                      "The address data must be entered in capital letters'. <br>");
                 } else if (!StringUtils.isBlank(street) && !street.equals(street.toUpperCase())) {
-                  error.addError(row.getRowNum(), "Street", "The address data must be entered in capital letters'. <br>");
+                  error.addError(row.getRowNum(), "Street",
+                      "The address data must be entered in capital letters'. <br>");
                 } else if (!StringUtils.isBlank(postalCode) && !postalCode.equals(postalCode.toUpperCase())) {
-                  error.addError(row.getRowNum(), "Postal Code", "The address data must be entered in capital letters'. <br>");
+                  error.addError(row.getRowNum(), "Postal Code",
+                      "The address data must be entered in capital letters'. <br>");
                 } else if (!StringUtils.isBlank(city) && !city.equals(city.toUpperCase())) {
                   error.addError(row.getRowNum(), "City", "The address data must be entered in capital letters'. <br>");
                 } else if (!StringUtils.isBlank(stateProv) && !stateProv.equals(stateProv.toUpperCase())) {
-                  error.addError(row.getRowNum(), "State/Province", "The address data must be entered in capital letters'. <br>");
-                } else if (!StringUtils.isBlank(hardWareMaster) && !hardWareMaster.equals(hardWareMaster.toUpperCase())) {
-                  error.addError(row.getRowNum(), "Hardware Master", "The address data must be entered in capital letters'. <br>");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "The address data must be entered in capital letters'. <br>");
+                } else if (!StringUtils.isBlank(hardWareMaster)
+                    && !hardWareMaster.equals(hardWareMaster.toUpperCase())) {
+                  error.addError(row.getRowNum(), "Hardware Master",
+                      "The address data must be entered in capital letters'. <br>");
                 }
               }
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -2368,13 +2486,16 @@ public class CEMEAHandler extends BaseSOFHandler {
                 String ordBlk = validateColValFromCell(currCell);
                 currCell = (XSSFCell) row.getCell(stcOrdBlkIndex);
                 String stcOrdBlk = validateColValFromCell(currCell);
-                if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
+                if (StringUtils.isNotBlank(ordBlk)
+                    && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
                   LOG.trace("Order Block Code should only @, E, R, J. >> ");
-                  error.addError((rowIndex + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");
+                  error.addError((rowIndex + 1), "Order Block Code",
+                      "Order Block Code should be only @, E, R, J.<br> ");
                 }
                 if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
                   LOG.trace("Please fill either STC Order Block Code or Order Block Code ");
-                  error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Order Block Code.<br> ");
+                  error.addError((row.getRowNum() + 1), "Order Block Code",
+                      "Please fill either STC Order Block Code or Order Block Code.<br> ");
                 }
                 currCell = (XSSFCell) row.getCell(fiscalCdIndex);
                 String fiscalCd = validateColValFromCell(currCell);
@@ -2386,7 +2507,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                 String isuCd = validateColValFromCell(currCell);
                 currCell = (XSSFCell) row.getCell(ctcIndex);
                 String ctc = validateColValFromCell(currCell);
-                if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+                if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc))
+                    || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                   LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
                   error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
                 } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
@@ -2410,10 +2532,12 @@ public class CEMEAHandler extends BaseSOFHandler {
                     error.addError((rowIndex + 1), "Client Tier",
                         ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
                   }
-                } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                } else if ((!StringUtils.isBlank(isuCd)
+                    && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
                     && !"@".equalsIgnoreCase(ctc)) {
                   LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                  error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+                  error.addError((rowIndex + 1), "Client Tier",
+                      "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
                 }
                 if (error.hasErrors()) {
                   validations.add(error);
@@ -2565,8 +2689,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     return zi01Seq;
   }
 
-  public void updateImportIndToNForSharezp01Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZP01SHARE.N.IMPORTIND"));
+  public void updateImportIndToNForSharezp01Addr(EntityManager entityManager, long reqId, String mandt, String katr6,
+      String cmrNo) {
+    PreparedQuery query = new PreparedQuery(entityManager,
+        ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZP01SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
     query.setParameter("MANDT", mandt);
     query.setParameter("KATR6", katr6);
@@ -2574,8 +2700,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     query.executeSql();
   }
 
-  public void updateImportIndToNForSharezs02Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZS02SHARE.N.IMPORTIND"));
+  public void updateImportIndToNForSharezs02Addr(EntityManager entityManager, long reqId, String mandt, String katr6,
+      String cmrNo) {
+    PreparedQuery query = new PreparedQuery(entityManager,
+        ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZS02SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
     query.setParameter("MANDT", mandt);
     query.setParameter("KATR6", katr6);
@@ -2583,8 +2711,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     query.executeSql();
   }
 
-  public void updateImportIndToNForSharezd01Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZD01SHARE.N.IMPORTIND"));
+  public void updateImportIndToNForSharezd01Addr(EntityManager entityManager, long reqId, String mandt, String katr6,
+      String cmrNo) {
+    PreparedQuery query = new PreparedQuery(entityManager,
+        ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZD01SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
     query.setParameter("MANDT", mandt);
     query.setParameter("KATR6", katr6);
@@ -2592,8 +2722,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     query.executeSql();
   }
 
-  public void updateImportIndToNForSharezi01Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZI01SHARE.N.IMPORTIND"));
+  public void updateImportIndToNForSharezi01Addr(EntityManager entityManager, long reqId, String mandt, String katr6,
+      String cmrNo) {
+    PreparedQuery query = new PreparedQuery(entityManager,
+        ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZI01SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
     query.setParameter("MANDT", mandt);
     query.setParameter("KATR6", katr6);
@@ -2602,7 +2734,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   public void updateChangeindToYForSharezs01Addr(EntityManager entityManager, long reqId) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZS01SHARE.Y.CHANGEINCD"));
+    PreparedQuery query = new PreparedQuery(entityManager,
+        ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZS01SHARE.Y.CHANGEINCD"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }
@@ -2680,70 +2813,90 @@ public class CEMEAHandler extends BaseSOFHandler {
       if (StringUtils.isNotEmpty(addressDataMap.get(key))) {
         addressDataMap.put(key, addressDataMap.get(key).toUpperCase());
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("addrTxt"))) && !(addressDataMap.get("addrTxt").equals(addr.getAddrTxt()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("addrTxt")))
+          && !(addressDataMap.get("addrTxt").equals(addr.getAddrTxt()))) {
         addr.setAddrTxt(addressDataMap.get("addrTxt"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("addrTxt2"))) && !(addressDataMap.get("addrTxt2").equals(addr.getAddrTxt2()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("addrTxt2")))
+          && !(addressDataMap.get("addrTxt2").equals(addr.getAddrTxt2()))) {
         addr.setAddrTxt2(addressDataMap.get("addrTxt2"));
       }
       if (!(StringUtils.isEmpty(addressDataMap.get("bldg"))) && !(addressDataMap.get("bldg").equals(addr.getBldg()))) {
         addr.setBldg(addressDataMap.get("bldg"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("city1"))) && !(addressDataMap.get("city1").equals(addr.getCity1()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("city1")))
+          && !(addressDataMap.get("city1").equals(addr.getCity1()))) {
         addr.setCity1(addressDataMap.get("city1"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("city2"))) && !(addressDataMap.get("city2").equals(addr.getCity2()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("city2")))
+          && !(addressDataMap.get("city2").equals(addr.getCity2()))) {
         addr.setCity2(addressDataMap.get("city2"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("county"))) && !(addressDataMap.get("county").equals(addr.getCounty()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("county")))
+          && !(addressDataMap.get("county").equals(addr.getCounty()))) {
         addr.setCounty(addressDataMap.get("county"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("countyName"))) && !(addressDataMap.get("countyName").equals(addr.getCountyName()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("countyName")))
+          && !(addressDataMap.get("countyName").equals(addr.getCountyName()))) {
         addr.setCountyName(addressDataMap.get("countyName"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("custNm1"))) && !(addressDataMap.get("custNm1").equals(addr.getCustNm1()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("custNm1")))
+          && !(addressDataMap.get("custNm1").equals(addr.getCustNm1()))) {
         addr.setCustNm1(addressDataMap.get("custNm1"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("custNm2"))) && !(addressDataMap.get("custNm2").equals(addr.getCustNm2()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("custNm2")))
+          && !(addressDataMap.get("custNm2").equals(addr.getCustNm2()))) {
         addr.setCustNm2(addressDataMap.get("custNm2"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("custNm3"))) && !(addressDataMap.get("custNm3").equals(addr.getCustNm3()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("custNm3")))
+          && !(addressDataMap.get("custNm3").equals(addr.getCustNm3()))) {
         addr.setCustNm3(addressDataMap.get("custNm3"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("custNm4"))) && !(addressDataMap.get("custNm4").equals(addr.getCustNm4()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("custNm4")))
+          && !(addressDataMap.get("custNm4").equals(addr.getCustNm4()))) {
         addr.setCustNm4(addressDataMap.get("custNm4"));
       }
       if (!(StringUtils.isEmpty(addressDataMap.get("dept"))) && !(addressDataMap.get("dept").equals(addr.getDept()))) {
         addr.setDept(addressDataMap.get("dept"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("division"))) && !(addressDataMap.get("division").equals(addr.getDivn()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("division")))
+          && !(addressDataMap.get("division").equals(addr.getDivn()))) {
         addr.setDept(addressDataMap.get("division"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("floor"))) && !(addressDataMap.get("floor").equals(addr.getFloor()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("floor")))
+          && !(addressDataMap.get("floor").equals(addr.getFloor()))) {
         addr.setFloor(addressDataMap.get("floor"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("office"))) && !(addressDataMap.get("office").equals(addr.getOffice()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("office")))
+          && !(addressDataMap.get("office").equals(addr.getOffice()))) {
         addr.setOffice(addressDataMap.get("office"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("poBox"))) && !(addressDataMap.get("poBox").equals(addr.getPoBox()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("poBox")))
+          && !(addressDataMap.get("poBox").equals(addr.getPoBox()))) {
         addr.setPoBox(addressDataMap.get("poBox"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxCity"))) && !(addressDataMap.get("poBoxCity").equals(addr.getPoBoxCity()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxCity")))
+          && !(addressDataMap.get("poBoxCity").equals(addr.getPoBoxCity()))) {
         addr.setPoBoxCity(addressDataMap.get("poBoxCity"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxPostCd"))) && !(addressDataMap.get("poBoxPostCd").equals(addr.getPoBoxPostCd()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxPostCd")))
+          && !(addressDataMap.get("poBoxPostCd").equals(addr.getPoBoxPostCd()))) {
         addr.setPoBoxPostCd(addressDataMap.get("poBoxPostCd"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("postCd"))) && !(addressDataMap.get("postCd").equals(addr.getPostCd()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("postCd")))
+          && !(addressDataMap.get("postCd").equals(addr.getPostCd()))) {
         addr.setPostCd(addressDataMap.get("postCd"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("stateProv"))) && !(addressDataMap.get("stateProv").equals(addr.getStateProv()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("stateProv")))
+          && !(addressDataMap.get("stateProv").equals(addr.getStateProv()))) {
         addr.setStateProv(addressDataMap.get("stateProv"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("stdCityNm"))) && !(addressDataMap.get("stdCityNm").equals(addr.getStdCityNm()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("stdCityNm")))
+          && !(addressDataMap.get("stdCityNm").equals(addr.getStdCityNm()))) {
         addr.setStdCityNm(addressDataMap.get("stdCityNm"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("taxOffice"))) && !(addressDataMap.get("taxOffice").equals(addr.getTaxOffice()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("taxOffice")))
+          && !(addressDataMap.get("taxOffice").equals(addr.getTaxOffice()))) {
         addr.setTaxOffice(addressDataMap.get("taxOffice"));
       }
     }
@@ -2755,7 +2908,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
-  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo, CmrCloningQueue cloningQueue) {
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo,
+      CmrCloningQueue cloningQueue) {
     if (SystemLocation.AUSTRIA.equals(katr6)) {
       LOG.debug("generateCNDCmr :: START");
       String cndCMR = "";
@@ -2847,7 +3001,8 @@ public class CEMEAHandler extends BaseSOFHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode()) && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
+            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode())
+                && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
               tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS03.toString());
             }
             recordsToReturn.add(tempRec);

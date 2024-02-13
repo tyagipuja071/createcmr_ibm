@@ -3640,7 +3640,6 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##CoverageID", "covId");
     map.put("##OriginatorID", "originatorId");
-    map.put("##BPRelationType", "bpRelType");
     map.put("##CAP", "capInd");
     map.put("##RequestReason", "reqReason");
     map.put("##SpecialTaxCd", "specialTaxCd");
@@ -3687,7 +3686,6 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##BuyingGroupID", "bgId");
     map.put("##RequesterID", "requesterId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##EngineeringBo", "engineeringBo");
@@ -3696,6 +3694,8 @@ public class TurkeyHandler extends BaseSOFHandler {
     map.put("##CustClass", "custClass");
     map.put("##TypeOfCustomer", "crosSubTyp");
     map.put("##IERPSitePrtyId", "ierpSitePrtyId");
+    map.put("##BPRelationType", "bpRelType");
+    map.put("##MembLevel", "memLvl");
     return map;
   }
 
@@ -4048,18 +4048,20 @@ public class TurkeyHandler extends BaseSOFHandler {
             if (row.getRowNum() == 2001) {
               break;
             }
-            String cbCity = ""; // 8
+            String stateProv = ""; // 8
+            String landCntry = ""; // 12
+            String cbCity = ""; // 9
             String localCity = ""; // 7
-            String cbPostal = ""; // 10
-            String localPostal = ""; // 9
+            String cbPostal = ""; // 11
+            String localPostal = ""; // 10
 
             String streetCont = ""; // 5
-            String poBox = ""; // 11
-            String attPerson = ""; // 13
+            String poBox = ""; // 12
+            String attPerson = ""; // 14
 
-            String district = "";// 12
-            String taxOffice = ""; // 14
-            String name4 = "";// 10
+            String district = "";// 13
+            String taxOffice = ""; // 15
+            String name4 = "";// 11
             TemplateValidation error = new TemplateValidation(name);
             if ("Data".equalsIgnoreCase(name)) {
               String isuCd = ""; // 11
@@ -4129,17 +4131,21 @@ public class TurkeyHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(7);
               cbCity = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
-              localPostal = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
+              landCntry = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
+              localPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
               cbPostal = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(12);
+              currCell = (XSSFCell) row.getCell(13);
               district = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(14);
+              currCell = (XSSFCell) row.getCell(15);
               taxOffice = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(5);
               streetCont = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(10);
+              currCell = (XSSFCell) row.getCell(11);
               name4 = validateColValFromCell(currCell);
 
               if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
@@ -4170,6 +4176,18 @@ public class TurkeyHandler extends BaseSOFHandler {
                 if ("@".equals(district)) {
                   LOG.trace("Local address must not be populate District with @. ");
                   error.addError((row.getRowNum() + 1), "District", "Local address must not be populate District with @. ");
+                  validations.add(error);
+                }
+
+                String pattern = "^[a-zA-Z0-9]*$";
+                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                  LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                  validations.add(error);
+                } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+                  LOG.trace("State/Province and Landed country both should be filled");
+                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
                   validations.add(error);
                 }
 

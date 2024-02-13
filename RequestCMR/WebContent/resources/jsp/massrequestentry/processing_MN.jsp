@@ -183,8 +183,10 @@
       <%if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry()) && "Processor".equalsIgnoreCase(reqentry.getUserRole())) {%>
         <cmr:button label="DPL Check" onClick="doDplCheck()" highlight="false"></cmr:button>
         <cmr:info text="Pressing the button will generate DPL Check results for addresses that were added new Customer Names on the Mass Update template."></cmr:info>
-        
-      <%} %>
+      <%} else if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry()) && "Requester".equalsIgnoreCase(reqentry.getUserRole())  && "760".equals((reqentry.getCmrIssuingCntry()))) {%>
+      	<cmr:button label="DPL Check" onClick="doDplCheck()" highlight="false"></cmr:button>
+        <cmr:info text="Pressing the button will generate DPL Check results for addresses that were added new Customer Names on the Mass Update template."></cmr:info>
+      <%}%>
       </div>
       <input name="massTokenId" id="massTokenId" type="hidden">
     </cmr:column>
@@ -197,14 +199,21 @@
         </div>
       </cmr:column>
     </c:if>
-   <%if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry())  && "Processor".equalsIgnoreCase(reqentry.getUserRole())) {%>
+   <%if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry())  && "Processor".equalsIgnoreCase(reqentry.getUserRole()) && !"760".equals((reqentry.getCmrIssuingCntry()))) {%>
        <cmr:column span="2">
         <div style="padding-top: 12px">
           <cmr:button label="DPL Summary" onClick="showDPLSummaryScreen()" highlight="true" id="btnDplSum"></cmr:button>
           <cmr:info text="Pressing the button will open a pop-up to view the DPL Check summary"></cmr:info>
         </div>
       </cmr:column>
-   <%} %>
+   <%} else if (handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry())  && "Requester".equalsIgnoreCase(reqentry.getUserRole()) && "760".equals((reqentry.getCmrIssuingCntry())) ) {%>
+   	 <cmr:column span="2">
+        <div style="padding-top: 12px">
+          <cmr:button label="DPL Summary" onClick="showDPLSummaryScreen()" highlight="true" id="btnDplSum"></cmr:button>
+          <cmr:info text="Pressing the button will open a pop-up to view the DPL Check summary"></cmr:info>
+        </div>
+      </cmr:column>
+   <%}%>   
     <%
       } else {
     %>

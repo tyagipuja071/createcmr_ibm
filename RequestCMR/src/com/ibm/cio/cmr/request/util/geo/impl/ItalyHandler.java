@@ -980,6 +980,12 @@ public class ItalyHandler extends BaseSOFHandler {
       data.setSpecialTaxCd(cExt.getItIVA());
     }
 
+    if (!StringUtils.isEmpty(taxCode)) {
+      data.setSpecialTaxCd(taxCode);
+    } else if (cExt != null) {
+      data.setSpecialTaxCd(cExt.getItIVA());
+    }
+
     if (!"IT".equals(countryLanded)) {
       data.setTaxCd1("");
       if (!StringUtils.isEmpty(vat) && vat.length() > 2) {
@@ -1760,17 +1766,12 @@ public class ItalyHandler extends BaseSOFHandler {
   private CmrtCustExt getBillingCustExtFields(String cmr) {
     EntityManager entityManager = JpaManager.getEntityManager();
     CmrtCustExt cmrtCExt = null;
-    try {
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("ITALY.GET.BILLINGFIELDS");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("CNTRY", SystemLocation.ITALY);
-        query.setParameter("CMR", cmr);
-        cmrtCExt = query.getSingleResult(CmrtCustExt.class);
-      }
-    } finally {
-      entityManager.clear();
-      entityManager.close();
+    if (entityManager != null) {
+      String sql = ExternalizedQuery.getSql("ITALY.GET.BILLINGFIELDS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", SystemLocation.ITALY);
+      query.setParameter("CMR", cmr);
+      cmrtCExt = query.getSingleResult(CmrtCustExt.class);
     }
     return cmrtCExt;
   }

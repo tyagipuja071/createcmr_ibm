@@ -4225,5 +4225,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NORDX);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.NORDX, null, true);
-
 });

@@ -58,12 +58,12 @@ public class DPLCheckElement extends ValidatingElement {
       throws Exception {
 
     AppUser user = (AppUser) engineData.get("appUser");
-
-    long reqId = requestData.getAdmin().getId().getReqId();
     boolean isPaygoUpgrade=false; 
     if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
       isPaygoUpgrade=true;
     }
+    long reqId = requestData.getAdmin().getId().getReqId();
+
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
     StringBuilder details = new StringBuilder();
@@ -136,7 +136,7 @@ public class DPLCheckElement extends ValidatingElement {
                 engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
                 output.setOnError(true);
               }
-            } else if(!isPaygoUpgrade){
+            } else if(!isPaygoUpgrade) {
               output.setOnError(true);
               engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
             }
@@ -188,7 +188,6 @@ public class DPLCheckElement extends ValidatingElement {
             entityManager.merge(addr);
           } else {
             Boolean isPrivate = isPrivate(data);
-
             Boolean errorStatus = false;
             try {
               dplResult = addrService.dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
@@ -405,7 +404,7 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("mainCustNam2", requestData.getAdmin().getMainCustNm2());
 
       try {
-        dplService.process(null, params);
+        dplService.doProcess(entityManager, null, params);
       } catch (Exception e) {
         log.warn("DPL results not attached to the request", e);
       }

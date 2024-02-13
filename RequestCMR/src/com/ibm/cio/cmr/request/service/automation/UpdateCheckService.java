@@ -53,6 +53,7 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
         // CREATCMR-10246 not copying due to field name difference
         setModeOfPayment(reqEntryModel);
         PropertyUtils.copyProperties(data, reqEntryModel);
+
       }
       if (admin != null) {
         entityManager.detach(admin);

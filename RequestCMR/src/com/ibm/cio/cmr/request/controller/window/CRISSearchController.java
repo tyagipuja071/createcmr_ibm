@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.service.cris.CRISService;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.cris.CRISAccount;
 import com.ibm.cmr.services.client.cris.CRISCompany;
 import com.ibm.cmr.services.client.cris.CRISData;
@@ -44,26 +45,62 @@ public class CRISSearchController extends BaseWindowController {
   @Autowired
   private CRISService service;
 
-  @RequestMapping(value = WINDOW_URL + "/crissearch")
+  @RequestMapping(
+      value = WINDOW_URL + "/crissearch")
   public ModelAndView showSearchPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crissearch");
     if ("Y".equals(request.getParameter("clear"))) {
       request.getSession().removeAttribute(SESSION_KEY_CRITERIA);
     }
     addCriteria(request, mv);
-    return getWindow(mv, "CRIS - Search");
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      return getWindow(mv, "RDC - Search");
+    } else {
+      return getWindow(mv, "CRIS - Search");
+    }
   }
 
-  @RequestMapping(value = WINDOW_URL + "/criscomplist")
+  @RequestMapping(
+      value = WINDOW_URL + "/rdcsearch")
+  public ModelAndView showSearchPageRdc(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelAndView mv = new ModelAndView("rdcsearch");
+    if ("Y".equals(request.getParameter("clear"))) {
+      request.getSession().removeAttribute(SESSION_KEY_CRITERIA);
+    }
+    addCriteria(request, mv);
+    return getWindow(mv, "RDC - Search");
+  }
+
+  @RequestMapping(
+      value = WINDOW_URL + "/criscomplist")
   public ModelAndView showCompanyList(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("criscomplist");
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
     mv.addObject("list", data.getCompanies());
     addCriteria(request, mv);
-    return getWindow(mv, "CRIS - Company List Results");
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      return getWindow(mv, "RDC - Company List Results");
+    } else {
+      return getWindow(mv, "CRIS - Company List Results");
+    }
   }
 
-  @RequestMapping(value = "/criscomplistget")
+  @RequestMapping(
+      value = WINDOW_URL + "/rdccomplist")
+  public ModelAndView showCompanyListRdc(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelAndView mv = new ModelAndView("rdccomplist");
+    CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
+    mv.addObject("list", data.getCompanies());
+    addCriteria(request, mv);
+    return getWindow(mv, "RDC - Company List Results");
+  }
+
+  @RequestMapping(
+      value = "/criscomplistget")
   public ModelMap getCompanyList(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
@@ -71,7 +108,17 @@ public class CRISSearchController extends BaseWindowController {
     return map;
   }
 
-  @RequestMapping(value = WINDOW_URL + "/criscompdet/{id1}")
+  @RequestMapping(
+      value = "/rdccomplistget")
+  public ModelMap getCompanyListRdc(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
+    map.addAttribute("items", data.getCompanies());
+    return map;
+  }
+
+  @RequestMapping(
+      value = WINDOW_URL + "/criscompdet/{id1}")
   public ModelAndView showCompanyDetails(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("criscompdet");
     CRISQueryRequest query = new CRISQueryRequest();
@@ -86,24 +133,62 @@ public class CRISSearchController extends BaseWindowController {
       mv.addObject("record", new CRISCompany());
     }
     addCriteria(request, mv);
-    return getWindow(mv, "CRIS - Company Details - " + id);
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      return getWindow(mv, "RDC - Company Details - " + id);
+    } else {
+      return getWindow(mv, "CRIS - Company Details - " + id);
+    }
   }
 
-  @RequestMapping(value = WINDOW_URL + "/crisestablist")
+  @RequestMapping(
+      value = WINDOW_URL + "/rdccompdet/{id1}")
+  public ModelAndView showCompanyDetailsRdc(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response)
+      throws Exception {
+    ModelAndView mv = new ModelAndView("rdccompdet");
+    CRISQueryRequest query = new CRISQueryRequest();
+    query.setCompanyNo(id);
+    ParamContainer params = new ParamContainer();
+    params.addParam("criteria", query);
+    CRISQueryResponse queryResp = this.service.process(request, params);
+    if (queryResp != null && queryResp.isSuccess() && "C".equals(queryResp.getData().getResultType())
+        && queryResp.getData().getCompanies().size() > 0) {
+      mv.addObject("record", queryResp.getData().getCompanies().get(0));
+    } else {
+      mv.addObject("record", new CRISCompany());
+    }
+    addCriteria(request, mv);
+    return getWindow(mv, "RDC - Company Details - " + id);
+  }
+
+  @RequestMapping(
+      value = WINDOW_URL + "/crisestablist")
   public ModelAndView showEstablishmentList(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisestablist");
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
     mv.addObject("list", data.getEstablishments());
     addCriteria(request, mv);
     String companyNo = request.getParameter("companyNo");
-    if (!StringUtils.isEmpty(companyNo)) {
-      return getWindow(mv, "CRIS - Establishment List (Company " + companyNo + ")");
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    boolean isRdc = false;
+    if ("DR".equals(currentConnection)) {
+      isRdc = true;
     } else {
-      return getWindow(mv, "CRIS - Establishment List Results");
+      isRdc = false;
+    }
+
+    String source = isRdc ? "RDC" : "CRIS";
+    if (!StringUtils.isEmpty(companyNo)) {
+      return getWindow(mv, source + " - Establishment List (Company " + companyNo + ")");
+    } else {
+      return getWindow(mv, source + " - Establishment List Results");
     }
   }
 
-  @RequestMapping(value = "/crisestablistget")
+  @RequestMapping(
+      value = "/crisestablistget")
   public ModelMap getEstablishments(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String companyNo = request.getParameter("companyNo");
@@ -125,7 +210,8 @@ public class CRISSearchController extends BaseWindowController {
     return map;
   }
 
-  @RequestMapping(value = WINDOW_URL + "/crisestabdet/{id1}")
+  @RequestMapping(
+      value = WINDOW_URL + "/crisestabdet/{id1}")
   public ModelAndView showEstablishmentDetails(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response)
       throws Exception {
     ModelAndView mv = new ModelAndView("crisestabdet");
@@ -157,24 +243,60 @@ public class CRISSearchController extends BaseWindowController {
     }
 
     addCriteria(request, mv);
-    return getWindow(mv, "CRIS - Establishment Details - " + id);
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      return getWindow(mv, "CRIS - Establishment Details - " + id);
+    } else {
+      return getWindow(mv, "CRIS - Establishment Details - " + id);
+    }
   }
 
-  @RequestMapping(value = WINDOW_URL + "/crisaccountlist")
+  @RequestMapping(
+      value = WINDOW_URL + "/crisaccountlist")
   public ModelAndView showAccountList(ModelMap map, HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisaccountlist");
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
     mv.addObject("list", data.getAccounts());
     addCriteria(request, mv);
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    boolean isRdc = false;
+    if ("DR".equals(currentConnection)) {
+      isRdc = true;
+    } else {
+      isRdc = false;
+    }
+
+    String source = isRdc ? "RDC" : "CRIS";
+
     String establishmentNo = request.getParameter("establishmentNo");
     if (!StringUtils.isEmpty(establishmentNo)) {
-      return getWindow(mv, "CRIS - Account List (Establishment " + establishmentNo + ")");
+      return getWindow(mv, source + " - Account List (Establishment " + establishmentNo + ")");
     } else {
-      return getWindow(mv, "CRIS - Account List");
+      return getWindow(mv, source + " - Account List");
     }
   }
 
-  @RequestMapping(value = "/crisaccountlistget")
+  @RequestMapping(
+      value = WINDOW_URL + "/rdcaccountlist")
+  public ModelAndView showAccountListRdc(ModelMap map, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelAndView mv = new ModelAndView("rdcaccountlist");
+    CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
+
+    mv.addObject("list", data.getAccounts());
+    addCriteria(request, mv);
+
+    String companyNo = request.getParameter("companyNo");
+    if (!StringUtils.isEmpty(companyNo)) {
+      return getWindow(mv, "RDC - Account List (Company " + companyNo + ")");
+    } else {
+      return getWindow(mv, "RDC - Account List");
+    }
+  }
+
+  @RequestMapping(
+      value = "/crisaccountlistget")
   public ModelMap getAccounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String establishmentNo = request.getParameter("establishmentNo");
@@ -196,7 +318,33 @@ public class CRISSearchController extends BaseWindowController {
     return map;
   }
 
-  @RequestMapping(value = WINDOW_URL + "/crisaccountdet/{id1}")
+  @RequestMapping(
+      value = "/rdcaccountlistget")
+  public ModelMap getAccountsRdc(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    String establishmentNo = request.getParameter("establishmentNo");
+    String companyNo = request.getParameter("companyNo");
+    if (!StringUtils.isEmpty(companyNo)) {
+      CRISQueryRequest query = new CRISQueryRequest();
+      // query.setAccountEstablishmentNo(establishmentNo);
+      query.setAccountCompanyNo(companyNo);
+      ParamContainer params = new ParamContainer();
+      params.addParam("criteria", query);
+      CRISQueryResponse queryResp = this.service.process(request, params);
+      if (queryResp != null && queryResp.isSuccess() && "A".equals(queryResp.getData().getResultType())) {
+        map.addAttribute("items", queryResp.getData().getAccounts());
+      } else {
+        map.addAttribute("items", new ArrayList<CRISAccount>());
+      }
+    } else {
+      CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
+      map.addAttribute("items", data.getAccounts() != null ? data.getAccounts() : new ArrayList<CRISAccount>());
+    }
+    return map;
+  }
+
+  @RequestMapping(
+      value = WINDOW_URL + "/crisaccountdet/{id1}")
   public ModelAndView showAccountDetails(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisaccountdet");
     CRISAccount record = null;
@@ -220,13 +368,24 @@ public class CRISSearchController extends BaseWindowController {
         query.setEstablishmentNo(record.getEstablishmentNo());
         params = new ParamContainer();
         params.addParam("criteria", query);
-        queryResp = this.service.process(request, params);
-        if (queryResp != null && queryResp.isSuccess() && "E".equals(queryResp.getData().getResultType())
+        boolean isProspect = false;
+        if (id != null && id.startsWith("P")) {
+          isProspect = true;
+        } else {
+          queryResp = this.service.process(request, params);
+        }
+        if (!isProspect && queryResp != null && queryResp.isSuccess() && "E".equals(queryResp.getData().getResultType())
             && queryResp.getData().getEstablishments().size() > 0) {
           CRISEstablishment establishment = queryResp.getData().getEstablishments().get(0);
           mv.addObject("estab", establishment);
           query = new CRISQueryRequest();
-          query.setCompanyNo(establishment.getCompanyNo());
+
+          String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+          if ("DR".equals(currentConnection)) {
+            query.setCompanyNo(record.getCompanyNo());
+          } else {
+            query.setCompanyNo(establishment.getCompanyNo());
+          }
           params = new ParamContainer();
           params.addParam("criteria", query);
           queryResp = this.service.process(request, params);
@@ -249,14 +408,35 @@ public class CRISSearchController extends BaseWindowController {
       mv.addObject("record", new CRISAccount());
     }
     addCriteria(request, mv);
-    return getWindow(mv, "CRIS - Account Details - " + id);
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      return getWindow(mv, "RDC - Account Details - " + id);
+    } else {
+      return getWindow(mv, "CRIS - Account Details - " + id);
+    }
   }
 
-  @RequestMapping(value = WINDOW_URL + "/crisnoresults")
+  @RequestMapping(
+      value = WINDOW_URL + "/crisnoresults")
   public ModelAndView showNoResults(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisnoresults");
     addCriteria(request, mv);
-    return getWindow(mv, "CRIS - No Results");
+
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      return getWindow(mv, "RDC - No Results");
+    } else {
+      return getWindow(mv, "CRIS - No Results");
+    }
+  }
+
+  @RequestMapping(
+      value = WINDOW_URL + "/rdcnoresults")
+  public ModelAndView showNoResultsRdc(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelAndView mv = new ModelAndView("rdcnoresults");
+    addCriteria(request, mv);
+    return getWindow(mv, "RDC - No Results");
   }
 
   private void addCriteria(HttpServletRequest request, ModelAndView mv) {
@@ -271,7 +451,8 @@ public class CRISSearchController extends BaseWindowController {
     request.getSession().setAttribute(key, object);
   }
 
-  @RequestMapping(value = WINDOW_URL + "/crisprocess")
+  @RequestMapping(
+      value = WINDOW_URL + "/crisprocess")
   public ModelAndView searchAndRedirect(CRISQueryRequest criteria, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     storeToSession(criteria, SESSION_KEY_CRITERIA, request);
@@ -335,5 +516,132 @@ public class CRISSearchController extends BaseWindowController {
       }
       return mv;
     }
+  }
+
+  @RequestMapping(
+      value = WINDOW_URL + "/rdcprocess")
+  public ModelAndView searchAndRedirectRdc(CRISQueryRequest criteria, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+    storeToSession(criteria, SESSION_KEY_CRITERIA, request);
+    ParamContainer params = new ParamContainer();
+    params.addParam("criteria", criteria);
+
+    try {
+      CRISQueryResponse queryResponse = this.service.process(request, params);
+      if (queryResponse == null || !queryResponse.isSuccess() || queryResponse.getData() == null || queryResponse.getData().getResultType() == null) {
+        throw new Exception("RDC response was null or is not successful.");
+      }
+      storeToSession(queryResponse.getData(), SESSION_KEY_RESULTS, request);
+      ModelAndView mv = null;
+      switch (queryResponse.getData().getResultType()) {
+      case "C":
+        // company results
+        List<CRISCompany> companies = queryResponse.getData().getCompanies();
+        if (companies == null || companies.size() == 0) {
+          mv = new ModelAndView("redirect:/window/rdcnoresults");
+        } else {
+          mv = new ModelAndView("redirect:/window/rdccomplist");
+        }
+
+        break;
+      case "A":
+        // account results
+        List<CRISAccount> accounts = queryResponse.getData().getAccounts();
+        if (accounts == null || accounts.size() == 0) {
+          mv = new ModelAndView("redirect:/window/rdcnoresults");
+        } else {
+          mv = new ModelAndView("redirect:/window/rdcaccountlist");
+        }
+        break;
+      case "F":
+        CRISAccount account = queryResponse.getData().getAccount();
+        // full account results
+        if (account == null) {
+          mv = new ModelAndView("redirect:/window/rdcnoresults");
+        }
+        mv = new ModelAndView("redirect:/rdcaccountdet/" + account.getAccountNo());
+        break;
+      }
+      return mv;
+    } catch (Exception e) {
+      LOG.debug("Error in executing RDC search.", e);
+      ModelAndView mv = new ModelAndView("redirect:/window/rdcsearch");
+      if (e instanceof CmrException) {
+        CmrException cmre = (CmrException) e;
+        MessageUtil.setErrorMessage(mv, cmre.getCode());
+      } else {
+        MessageUtil.setErrorMessage(mv, MessageUtil.CRIS_ERROR_QUERY);
+      }
+      return mv;
+    }
+  }
+
+  @RequestMapping(
+      value = WINDOW_URL + "/rdcaccountdet/{id1}")
+  public ModelAndView showAccountDetailsRdc(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response)
+      throws Exception {
+    ModelAndView mv = new ModelAndView("rdcaccountdet");
+    CRISAccount record = null;
+    CRISQueryRequest query = new CRISQueryRequest();
+    query.setAccountNo(id);
+    ParamContainer params = new ParamContainer();
+    params.addParam("criteria", query);
+    CRISQueryResponse queryResp = this.service.process(request, params);
+    if (queryResp != null && queryResp.isSuccess() && "A".equals(queryResp.getData().getResultType())
+        && queryResp.getData().getAccounts().size() > 0) {
+      record = queryResp.getData().getAccounts().get(0);
+    }
+    if (record != null) {
+      CRISFullAccountRequest acctReq = new CRISFullAccountRequest(record.getId().getAccountNo());
+      params = new ParamContainer();
+      params.addParam("criteria", acctReq);
+      CRISQueryResponse acctResp = this.service.process(request, params);
+      if (acctResp != null && acctResp.isSuccess()) {
+        record = acctResp.getData().getAccount();
+        query = new CRISQueryRequest();
+        query.setEstablishmentNo(record.getEstablishmentNo());
+        params = new ParamContainer();
+        params.addParam("criteria", query);
+        boolean isProspect = false;
+        if (id != null && id.startsWith("P")) {
+          isProspect = true;
+        } else {
+          queryResp = this.service.process(request, params);
+        }
+        if (!isProspect && queryResp != null && queryResp.isSuccess() && "E".equals(queryResp.getData().getResultType())
+            && queryResp.getData().getEstablishments().size() > 0) {
+          CRISEstablishment establishment = queryResp.getData().getEstablishments().get(0);
+          mv.addObject("estab", establishment);
+          query = new CRISQueryRequest();
+
+          String currentConnection = "DR";
+          if ("DR".equals(currentConnection)) {
+            query.setCompanyNo(record.getCompanyNo());
+          } else {
+            query.setCompanyNo(establishment.getCompanyNo());
+          }
+          params = new ParamContainer();
+          params.addParam("criteria", query);
+          queryResp = this.service.process(request, params);
+          if (queryResp != null && queryResp.isSuccess() && "C".equals(queryResp.getData().getResultType())
+              && queryResp.getData().getCompanies().size() > 0) {
+            CRISCompany company = queryResp.getData().getCompanies().get(0);
+            mv.addObject("company", company);
+          } else {
+            mv.addObject("company", new CRISCompany());
+          }
+        } else {
+          mv.addObject("estab", new CRISEstablishment());
+          mv.addObject("company", new CRISCompany());
+        }
+        mv.addObject("record", record);
+      } else {
+        mv.addObject("record", new CRISAccount());
+      }
+    } else {
+      mv.addObject("record", new CRISAccount());
+    }
+    addCriteria(request, mv);
+    return getWindow(mv, "RDC - Account Details - " + id);
   }
 }

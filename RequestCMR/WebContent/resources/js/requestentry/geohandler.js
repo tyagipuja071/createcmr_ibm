@@ -397,12 +397,12 @@ var GEOHandler = (function() {
     isTGMERequired : function(cntry) {
       // CREATCMR-5741 no TGME Addr Std
       return false;
-//      for (var i = 0; i < noTGME.length; i++) {
-//        if (noTGME[i] == cntry) {
-//          return false;
-//        }
-//      }
-//      return true;
+      // for (var i = 0; i < noTGME.length; i++) {
+      // if (noTGME[i] == cntry) {
+      // return false;
+      // }
+      // }
+      // return true;
     },
     enableCopyAddress : function(arrayOfCountries, validator, arrayOfTypesWithoutCopy) {
       var cntry = getCMRIssuingCountry();

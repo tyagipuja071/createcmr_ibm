@@ -266,12 +266,21 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     // query all addresses where name1 or name2 is not empty.
     List<MassUpdtAddr> addrs = LegacyDirectUtil.getMassUpdtAddrsForDPLCheck(entityManager, String.valueOf(model.getReqId()),
         String.valueOf(admin.getIterationId()));
+    if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
+      addrs = IERPRequestUtils.getMassUpdtAddrsForJpDPLCheck(entityManager, String.valueOf(model.getReqId()), String.valueOf(admin.getIterationId()));
+    }
     GEOHandler handler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
     if (addrs != null && addrs.size() > 0) {
       for (MassUpdtAddr addr : addrs) {
         String cmrNoVal = addr.getCmrNo();
         String custName1Val = addr.getCustNm1();
         String custName2Val = addr.getCustNm2();
+        if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
+          if (!StringUtils.isEmpty(addr.getCustNm3())) {
+            custName1Val = addr.getCustNm3();
+            custName2Val = "";
+          }
+        }
         String custToUse = "";
         Map<String, String> dplStatRowMap = null;
 
@@ -679,7 +688,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     // CMR-7562 - append legacy only addresses here
-    cmrs.addAll(getAddressesNotInRdc(cmrs, entityManager, cmrNo, cmrCntry));
+    if (!model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+      cmrs.addAll(getAddressesNotInRdc(cmrs, entityManager, cmrNo, cmrCntry));
+    }
 
     if (cmrs.size() > 0) {
       String type = null;
@@ -691,7 +702,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         String muAddrSeqNo = "";
         String cmrsModsSeqNo = "";
 
-        if (muAddr.getAddrSeqNo().length() != cmrsMods.getCmrAddrSeq().length()) {
+        if (!model.getCmrIssuingCntry().equals(SystemLocation.JAPAN) && (muAddr.getAddrSeqNo().length() != cmrsMods.getCmrAddrSeq().length())) {
           muAddrSeqNo = LegacyDirectUtil.handleLDSeqNoScenario(muAddr.getAddrSeqNo(), true);
           cmrsModsSeqNo = LegacyDirectUtil.handleLDSeqNoScenario(cmrsMods.getCmrAddrSeq(), true);
         }
@@ -711,12 +722,18 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           addr.setCity1(cmrsMods.getCmrCity());
           addr.setParCmrNo(muAddr.getCmrNo());
 
-          if (!StringUtils.isEmpty(muAddr.getCustNm1())) {
+          if (!StringUtils.isEmpty(muAddr.getCustNm1()) && !model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
             addr.setCustNm1(muAddr.getCustNm1());
           }
 
-          if (!StringUtils.isEmpty(muAddr.getCustNm2())) {
+          if (!StringUtils.isEmpty(muAddr.getCustNm2()) && !model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
             addr.setCustNm2(muAddr.getCustNm2());
+          }
+
+          if (model.getCmrIssuingCntry().equals(SystemLocation.JAPAN)) {
+            if (!StringUtils.isEmpty(muAddr.getCustNm3())) {
+              addr.setCustNm3(muAddr.getCustNm3());
+            }
           }
 
           tempExtractAddr.add(addr);
@@ -1044,30 +1061,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           Scorecard score = entity.getEntity(Scorecard.class);
           score.getId().setReqId(reqId);
           createEntity(score, entityManager);
-        } else if (model.getCmrIssuingCntry().equalsIgnoreCase("760")) {
-          // create the MassUpdt record
-          MassUpdt massUpdt = new MassUpdt();
-          MassUpdtPK pk = new MassUpdtPK();
-          // massUpdt.setRowStatusCd(rowStatusCd);
-          pk.setIterationId(0);
-          pk.setSeqNo(0);
-          pk.setParReqId(reqId);
-
-          massUpdt.setId(pk);
-          massUpdt.setRowStatusCd("");
-          massUpdt.setCmrNo("");
-          createEntity(massUpdt, entityManager);
-
-          // create the MassUpdtData record
-          MassUpdtData massUpdtData = new MassUpdtData();
-          MassUpdtDataPK pk1 = new MassUpdtDataPK();
-          pk1.setIterationId(0);
-          pk1.setSeqNo(0);
-          pk1.setParReqId(reqId);
-          massUpdtData.setId(pk1);
-          createEntity(massUpdtData, entityManager);
-
-          admin.setIterationId(0);
         }
       }
 
@@ -1118,7 +1111,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
       admin.setWarnMsgSentDt(null);
 
-      // POOJA TYAGI
       // setDisableProc(model, admin); // FOR LA and EMEA
       if (StringUtils.isEmpty(admin.getLockInd())) {
         admin.setLockInd(CmrConstants.YES_NO.N.toString());
@@ -1433,8 +1425,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     if (CmrConstants.REQ_TYPE_MASS_UPDATE.equals(model.getReqType()) && CNDHandler.isCNDCountry(cmrIssuingCntry)) {
       performMassUpdateValidationsDECND(model, entityManager, request);
-    } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
-      performMassUpdateJP(model, entityManager, request);
     }
     String result = null;
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
@@ -1449,49 +1439,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
     }
     performGenericAction(trans, model, entityManager, request, procCenterName, null, false, StringUtils.isBlank(result));
-  }
-
-  private void performMassUpdateJP(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
-    int iterationId = 0;
-    String sql = null;
-    PreparedQuery query = null;
-    model.setEmeaSeqNo(0);
-    try {
-      // get latest iteration id
-      sql = ExternalizedQuery.getSql("GET.MASS.UPDATE.ITERID.DECND");
-      query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", model.getReqId());
-      List<Integer> iterId = query.getResults(Integer.class);
-      if (iterId != null && iterId.size() > 0) {
-        iterationId = iterId.get(0);
-      }
-      String sqlUpdate = ExternalizedQuery.getSql("UPDATE.MASS.UPDATE");
-      PreparedQuery updateQuery = new PreparedQuery(entityManager, sqlUpdate);
-      updateQuery.setParameter("PAR_REQ_ID", model.getReqId());
-      updateQuery.setParameter("SEQ_NO", 0);
-      updateQuery.setParameter("ITERATION_ID", iterationId);
-
-      log.debug("Updating MassUpdate records for mass reqId = " + model.getReqId());
-      updateQuery.executeSql();
-
-      String sqlMassUpdate = ExternalizedQuery.getSql("UPDATE.MASS.UPDATE.DATA");
-      PreparedQuery updateMassQuery = new PreparedQuery(entityManager, sqlMassUpdate);
-      updateMassQuery.setParameter("PAR_REQ_ID", model.getReqId());
-      updateMassQuery.setParameter("SEQ_NO", 0);
-      updateMassQuery.setParameter("ITERATION_ID", iterationId);
-
-      log.debug("Updating MassUpdateData records for mass reqId = " + model.getReqId());
-      updateMassQuery.executeSql();
-
-    } catch (Exception e) {
-      this.log.error("Error in processing file for mass change.", e);
-      if (e instanceof CmrException) {
-        CmrException cmre = (CmrException) e;
-        throw cmre;
-      } else {
-        throw e;
-      }
-    }
   }
 
   /**
@@ -1838,7 +1785,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       if (cmrIssuingCntry != null && IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)
           && ((!cmrIssuingCntry.equals(SystemLocation.CANADA) && !CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType()))
               || (cmrIssuingCntry.equals(SystemLocation.CANADA) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType())))
-          || (LAHandler.isLACountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType()))) {
+          || (LAHandler.isLACountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType()))
+          || (JPHandler.isJPIssuingCountry(cmrIssuingCntry) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType()))) {
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
@@ -1904,11 +1852,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileNORDX(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
-                } else if (PageManager.fromGeo("JP", cmrIssuingCntry)) {
-                  if (!validateMassUpdateFileJP(item.getInputStream(), data, admin)) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
-                } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)) {
+                } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry) || LAHandler.isLACountry(cmrIssuingCntry)
+                    || JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
                   if (!validateDRMassUpdateFile(filePath, data, admin, cmrIssuingCntry)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
@@ -2020,7 +1965,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListNORDX(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("FR", cmrIssuingCntry)) {
                     setMassUpdateListFR(modelList, item.getInputStream(), reqId, newIterId, filePath);
-                  } else if (PageManager.fromGeo("JP", cmrIssuingCntry)) {
+                  } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
                     setMassUpdateListJP(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
                     setMassUpdateListCA(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -3121,11 +3066,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     log.debug("Total cmrRecords = " + cmrRecords);
-    return true;
-  }
-
-  public boolean validateMassUpdateFileJP(InputStream mfStream, Data data, Admin admin) throws Exception {
-    // noop
     return true;
   }
 
@@ -5013,9 +4953,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           for (TemplateValidation validation : validations) {
             if (validation.hasErrors()) {
               if (StringUtils.isEmpty(errTxt.toString())) {
-                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+                errTxt.append("<br />Tab name :" + validation.getTabName() + ", " + validation.getAllError());
               } else {
-                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+                errTxt.append("<br />Tab name :" + validation.getTabName() + ", " + validation.getAllError());
               }
             }
           }
@@ -5343,10 +5283,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileNORDX(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
-                } else if (PageManager.fromGeo("JP", cmrIssuingCntry)) {
-                  if (!validateMassUpdateFileJP(item.getInputStream(), data, admin)) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
                 } else {
                   if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
@@ -5426,6 +5362,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
                     setMassUpdateListForLA(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
+                  } else if (JPHandler.isJPIssuingCountry(data.getCmrIssuingCntry())) {
+                    // JAPAN
+                    setMassUpdateListForJP(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
@@ -5606,29 +5545,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
   }
 
-  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
-      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
-    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
-
-    for (Row cmrRow : dataSheet) {
-      int seqNo = cmrRow.getRowNum() + 1;
-
-      if (seqNo > 1) {
-        // 4. then for every sheet, get the fields
-        addrModel = new MassUpdateAddressModel();
-        addrModel.setParReqId(reqId);
-        addrModel.setSeqNo(seqNo);
-        addrModel.setIterationId(newIterId);
-        addrModel.setAddrType(tab.getTypeCode());
-        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
-        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
-          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
-          addrModels.add(addrModel);
-        }
-      }
-    }
-  }
-
   private void createAddrModelsFromMapForUKI(long reqId, int newIterId, String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
       List<MassUpdateAddressModel> addrModels) {
     if (!cmrPhoneMap.isEmpty() && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
@@ -5683,6 +5599,29 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("RCUXA", cmr);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     return query;
+  }
+
+  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        // 4. then for every sheet, get the fields
+        addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setSeqNo(seqNo);
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType(tab.getTypeCode());
+        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
+          addrModels.add(addrModel);
+        }
+      }
+    }
   }
 
   private void dataSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
@@ -7035,4 +6974,452 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   }
 
+  private void setMassUpdateListForJP(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+      String filePath, String cmrIssuingCntry) throws Exception {
+    LOG.debug("setMassUpdateListFor JP....");
+
+    // 1. get the config file and get all the valid tabs
+    try {
+      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
+      // change to the ID of the config you are generating
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
+      List<TemplateTab> tabs = template.getTabs();
+
+      InputStream mfStream = new FileInputStream(filepath);
+
+      // 2. loop through all the tabs returned by the config
+      if (tabs != null && tabs.size() > 0) {
+        MassUpdateModel model = new MassUpdateModel();
+        List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
+        List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
+
+        try (Workbook mfWb = new XSSFWorkbook(mfStream)) {
+          for (int i = 0; i < tabs.size(); i++) {
+            // 3. For every sheet, do: Sheet dataSheet =
+            // mfWb.getSheet(CMR_SHEET_NAME);
+            TemplateTab tab = tabs.get(i);
+            Sheet dataSheet = mfWb.getSheet(tab.getName());
+
+            // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER
+            // only ==========================================
+            if ("Data".equals(tab.getName())) {
+
+              // call method that will set to Data table
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  model = new MassUpdateModel();
+                  model.setParReqId(reqId);
+                  model.setSeqNo(seqNo);
+                  model.setIterationId(newIterId);
+                  model.setErrorTxt("");
+                  model.setRowStatusCd("");
+
+                  // 4. then for every sheet, get the fields
+                  model = setMassUpdateDataJP(entityManager, cmrRow, model, tab, reqId);
+
+                  if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+                    models.add(model);
+                  }
+                }
+              }
+            } else {
+
+              // if it is not Data, that means it is an address
+              MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
+
+                if (seqNo > 1) {
+                  // 4. then for every sheet, get the fields
+                  addrModel = new MassUpdateAddressModel();
+                  addrModel.setParReqId(reqId);
+                  addrModel.setSeqNo(seqNo);
+                  addrModel.setIterationId(newIterId);
+                  addrModel.setAddrType(tab.getTypeCode());
+                  addrModel = setMassUpdateAddrJP(entityManager, cmrRow, addrModel, tab, reqId);
+
+                  if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+                    addrModels.add(addrModel);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        massUpdtCol.put("dataModels", models);
+        massUpdtCol.put("addrModels", addrModels);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private MassUpdateAddressModel setMassUpdateAddrJP(EntityManager entityManager, Row cmrRow, MassUpdateAddressModel muaModel, TemplateTab dataTab,
+      long reqId) throws Exception {
+
+    if (muaModel == null) {
+      muaModel = new MassUpdateAddressModel();
+    }
+
+    List<TemplateColumn> columns = dataTab.getColumns();
+    DataFormatter df = new DataFormatter();
+
+    for (int i = 0; i < columns.size(); i++) {
+      TemplateColumn col = columns.get(i);
+      String tempVal = "";
+
+      if (!StringUtils.isEmpty(col.getLovId()) || !StringUtils.isEmpty(col.getBdsId())) {
+        String lov = col.getLovId();
+
+        String txt = df.formatCellValue(cmrRow.getCell(i));
+
+        if (txt != null && txt.contains("|")) {
+          txt = txt.replace("|", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[1].trim();
+
+          if (txt.contains("-")) {
+            txtSplit = txt.split("-");
+
+            if ("LAND_CNTRY".equals(col.getDbColumn())) {
+              txt = txtSplit[1].trim();
+            } else {
+              txt = txtSplit[0].trim();
+            }
+          }
+        } else if (txt != null && txt.contains("-")) {
+          txt = txt.replace("-", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[0].trim();
+        }
+
+        tempVal = txt;
+      } else if (!StringUtils.isEmpty(col.getBdsId())) {
+        String bds = col.getBdsId();
+
+        String txt = df.formatCellValue(cmrRow.getCell(i));
+
+        if (txt != null && txt.contains("|")) {
+          txt = txt.replace("|", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[0].trim();
+        } else if (txt != null && txt.contains("-")) {
+          txt = txt.replace("-", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[0].trim();
+        }
+
+        tempVal = txt;
+      } else {
+        tempVal = df.formatCellValue(cmrRow.getCell(i));
+      }
+
+      if ((tempVal != null && tempVal.equals("DO NOT INPUT ANYTHING BEYOND THIS LINE. THIS IS THE MAXIMUM ALLOWED NUMBER OF ENTRIES."))
+          || (StringUtils.isEmpty(tempVal) && "CMR_NO".equals(col.getDbColumn()))) {
+        muaModel = new MassUpdateAddressModel();
+        break;
+      }
+
+      switch (col.getDbColumn()) {
+      case "CMR_NO":
+        muaModel.setCmrNo(tempVal);
+        break;
+      case "ADDR_SEQUENCE_NO":
+        muaModel.setAddrSeqNo(tempVal);
+        break;
+      case "ADDR_TYPE":
+        muaModel.setAddrType(tempVal);
+        break;
+      case "CUST_NM1":
+        if (StringUtils.isNotBlank(tempVal)) {
+          String subStrNm1 = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
+          String subStrNm2 = tempVal.length() > 17 ? tempVal.substring(17) : "";
+          muaModel.setCustNm1(subStrNm1);
+          muaModel.setCustNm2(subStrNm2);
+        }
+        break;
+      case "CUST_NM2":
+        if (StringUtils.isNotBlank(tempVal)) {
+          tempVal = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
+          muaModel.setCustNm2(tempVal);
+        }
+        break;
+      case "CUST_NM3":
+        muaModel.setCustNm3(tempVal);
+        break;
+      case "CUST_NM4":
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setCustNm4(tempVal);
+        }
+        break;
+      case "ADDR_TXT":
+        if (StringUtils.isNotBlank(tempVal)) {
+          String convertedAddrTxt = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          if (StringUtils.isNotBlank(convertedAddrTxt)) {
+            muaModel.setAddrTxt(convertedAddrTxt);
+          }
+        }
+        break;
+      case "ADDR_TXT2":
+        muaModel.setAddrTxt2(tempVal);
+        break;
+      case "CITY1":
+        muaModel.setCity1(tempVal);
+        break;
+      case "FLOOR":
+        muaModel.setFloor(tempVal);
+        break;
+      case "POST_CD":
+        if (StringUtils.isNotBlank(tempVal)) {
+          String postal = tempVal.replace("-", "");
+          String locn = IERPRequestUtils.getLocationByPostal(entityManager, postal);
+          if (StringUtils.isNotBlank(locn)) {
+            muaModel.setPostCd(tempVal);
+            muaModel.setCounty(locn);
+          }
+        }
+        break;
+      case "OFFICE":
+        if (StringUtils.isNotBlank(tempVal)) {
+          String branchOfc = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          if (StringUtils.isNotBlank(branchOfc)) {
+            muaModel.setDivn(branchOfc);
+          }
+        }
+        break;
+      case "DEPT":
+        if (StringUtils.isNotBlank(tempVal)) {
+          String dept = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          if (StringUtils.isNotBlank(dept)) {
+            muaModel.setDept(dept);
+          }
+        }
+        break;
+      case "BLDG":
+        if (StringUtils.isNotBlank(tempVal)) {
+          String bldg = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          if (StringUtils.isNotBlank(bldg)) {
+            muaModel.setBldg(bldg);
+          }
+        }
+        muaModel.setBldg(tempVal);
+        break;
+      case "LOCN_CD":
+        break;
+      case "CUST_PHONE":
+        muaModel.setCustPhone(tempVal);
+        break;
+      case "CUST_FAX":
+        muaModel.setCustFax(tempVal);
+        break;
+      case "CONTACT":
+        muaModel.setPoBox(tempVal);
+        break;
+      case "LAND_CNTRY":
+        muaModel.setLandCntry(tempVal);
+        break;
+      default:
+        LOG.debug("Default condition was executed [nothing is saved] for DB column >> " + col.getLabel());
+        break;
+      }
+    }
+    return muaModel;
+  }
+
+  private MassUpdateModel setMassUpdateDataJP(EntityManager entityManager, Row cmrRow, MassUpdateModel muModel, TemplateTab dataTab, long reqId)
+      throws Exception {
+    if (muModel == null) {
+      muModel = new MassUpdateModel();
+    }
+
+    List<TemplateColumn> columns = dataTab.getColumns();
+    DataFormatter df = new DataFormatter();
+    Data data = getCurrentDataRecordById(entityManager, reqId);
+
+    boolean isOfcdFilled = false;
+    boolean isJsicFilled = false;
+
+    for (int i = 0; i < columns.size(); i++) {
+      TemplateColumn col = columns.get(i);
+      String tempVal = "";
+
+      if (!StringUtils.isEmpty(col.getLovId()) || !StringUtils.isEmpty(col.getBdsId())) {
+        String lov = col.getLovId();
+
+        String txt = df.formatCellValue(cmrRow.getCell(i));
+
+        if (txt != null && txt.contains("|")) {
+          txt = txt.replace("|", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[1].trim();
+
+          if (txt.contains("-")) {
+            txtSplit = txt.split("-");
+            txt = txtSplit[0].trim();
+          }
+
+        } else if (txt != null && txt.contains("-")) {
+          txt = txt.replace("-", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[0].trim();
+        }
+
+        tempVal = txt;// getLovCode(entityManager, txt,
+                      // data.getCmrIssuingCntry(), lov);
+      } else if (!StringUtils.isEmpty(col.getBdsId())) {
+        String bds = col.getBdsId();
+
+        String txt = df.formatCellValue(cmrRow.getCell(i));
+
+        if (txt != null && txt.contains("|")) {
+          txt = txt.replace("|", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[0].trim();
+        } else if (txt != null && txt.contains("-")) {
+          txt = txt.replace("-", ",");
+          String[] txtSplit = txt.split(",");
+          txt = txtSplit[0].trim();
+        }
+
+        tempVal = txt;// getBdsCode(entityManager, txt, bds);
+      } else {
+        tempVal = df.formatCellValue(cmrRow.getCell(i));
+      }
+
+      if (tempVal != null && tempVal.equals("DO NOT INPUT ANYTHING BEYOND THIS LINE. THIS IS THE MAXIMUM ALLOWED NUMBER OF ENTRIES.")) {
+        muModel = new MassUpdateModel();
+        break;
+      }
+
+      if (StringUtils.isEmpty(tempVal) && "CMR_NO".equals(col.getDbColumn())) {
+        muModel = new MassUpdateModel();
+        break;
+      }
+
+      switch (col.getDbColumn()) {
+      case "ABBREV_NM":
+        muModel.setAbbrevNm(tempVal);
+        break;
+      case "JSIC_CD":
+        if (StringUtils.isNotBlank(tempVal)) {
+          // Set JSIC
+          muModel.setAffiliate(tempVal);
+          isJsicFilled = true;
+        }
+        break;
+      case "SECONDARY_LOCN_NO":
+        muModel.setIbmBankNumber(tempVal);
+        break;
+      case "CUST_CLASS":
+        muModel.setCustClass(tempVal);
+        break;
+      case "COLLECTION_CD":
+        muModel.setCollectionCd(tempVal);
+        break;
+      case "SALES_BO_CD":
+        if (StringUtils.isNotBlank(tempVal)) {
+          // Set Office Code
+          muModel.setModeOfPayment(tempVal);
+          isOfcdFilled = true;
+        }
+        break;
+      case "INAC_CD":
+        muModel.setInacCd(tempVal);
+        break;
+      case "BILLING_PROC_CD":
+        muModel.setCodReason(tempVal);
+        break;
+      case "CS_BO":
+        if (StringUtils.isNotBlank(tempVal)) {
+          String postal = tempVal.replace("-", "");
+          String csbo = IERPRequestUtils.getCsboByPostal(entityManager, postal);
+          if (StringUtils.isNotBlank(csbo)) {
+            muModel.setRepTeamMemberNo(csbo);
+          }
+        }
+        break;
+      case "CSBO":
+        if (StringUtils.isNotBlank(tempVal)) {
+          boolean isValid = IERPRequestUtils.isCsboValid(entityManager, tempVal);
+          if (isValid) {
+            muModel.setNewEntp(tempVal);
+          }
+        }
+        break;
+      case "CMR_NO":
+        muModel.setCmrNo(tempVal);
+        break;
+      case "OUT_CITY_LIMIT":
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setOutCityLimit(tempVal);
+          break;
+        }
+      default:
+        LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
+        break;
+      }
+    }
+
+    if (isOfcdFilled || isJsicFilled) {
+      // pull isic by office code
+      String[] result = IERPRequestUtils.getJPCoverageFieldsValue(entityManager, muModel.getModeOfPayment(), muModel.getAffiliate(),
+          muModel.getCmrNo());
+      if (result != null) {
+        String ofcd = result[0] != null ? (String) result[0] : "";
+        String jsic = result[1] != null ? (String) result[1] : "";
+
+        String mrc = result[2] != null ? (String) result[2] : "";
+        String ctc = result[3] != null ? (String) result[3] : "";
+        String sortl = result[4] != null ? (String) result[4] : "";
+
+        String isic = result[5] != null ? (String) result[5] : "";
+        String subind = result[6] != null ? (String) result[6] : "";
+        String isu = result[7] != null ? (String) result[7] : "";
+
+        // Set OFFICE CODE
+        if (StringUtils.isNotBlank(ofcd)) {
+          muModel.setModeOfPayment(ofcd);
+        }
+
+        // Set JSIC
+        if (StringUtils.isNotBlank(jsic)) {
+          muModel.setAffiliate(jsic);
+        }
+
+        // Set MRC
+        if (StringUtils.isNotBlank(mrc)) {
+          muModel.setRestrictInd(mrc);
+        }
+
+        // Set CTC
+        muModel.setClientTier(StringUtils.isBlank(ctc) ? "@" : ctc);
+
+        // Set SORTL
+        if (StringUtils.isNotBlank(sortl)) {
+          muModel.setSearchTerm(sortl);
+        }
+
+        // Set ISIC
+        if (StringUtils.isNotBlank(isic)) {
+          muModel.setIsicCd(isic);
+        }
+
+        // Set SUBINDUSTRY
+        if (StringUtils.isNotBlank(subind)) {
+          muModel.setSubIndustryCd(subind);
+        }
+
+        // Set ISU
+        if (StringUtils.isNotBlank(isu)) {
+          muModel.setIsuCd(isu);
+        }
+
+      }
+    }
+    return muModel;
+  }
 }

@@ -696,7 +696,8 @@ public class METransformer extends EMEATransformer {
       addrLineT = "";
     }
 
-    legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
+    // legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv())
+    // ? addrData.getStateProv() : "");
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
@@ -1273,21 +1274,30 @@ public class METransformer extends EMEATransformer {
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
           && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        LOG.debug("CEETransformer legacyCust.setEmbargoCd - blank");
         legacyCust.setEmbargoCd("");
         blankOrdBlockFromData(entityManager, data);
+        LOG.debug("CEETransformer - resetOrdBlockToData - data.getOrdBlk -" + data.getOrdBlk());
+        LOG.debug("CEETransformer - resetOrdBlockToData - data.getEmbargoCd -" + data.getEmbargoCd());
       }
 
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
           && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        LOG.debug("CEETransformer legacyCust.setEmbargoCd - " + rdcEmbargoCd);
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
+        LOG.debug("CEETransformer - resetOrdBlockToData - data.getOrdBlk -" + data.getOrdBlk());
+        LOG.debug("CEETransformer - resetOrdBlockToData - data.getEmbargoCd -" + data.getEmbargoCd());
       }
       if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && CMR_REQUEST_STATUS_PCR.equals(admin.getReqStatus())
           && "Wx".equals(admin.getProcessedFlag())) {
+        LOG.debug("CEETransformer legacyCust.setEmbargoCd - E ");
         legacyCust.setEmbargoCd("E");
         resetOrdBlockToData(entityManager, data);
+        LOG.debug("CEETransformer - resetOrdBlockToData - data.getOrdBlk -" + data.getOrdBlk());
+        LOG.debug("CEETransformer - resetOrdBlockToData - data.getEmbargoCd -" + data.getEmbargoCd());
       }
     }
 

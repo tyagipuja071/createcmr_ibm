@@ -55,6 +55,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -119,6 +120,7 @@ public class USUtil extends AutomationUtil {
   public static final String SC_DOMINO = "DOM";
   public static final String SC_HILTON = "HILT";
   public static final String SC_FLORIDA = "FPL";
+  public static final String SC_IBME = "IBMEM";
   public static final String SC_REST_OIO = "OIO";
   public static final String SC_REST_OEMHW = "OEMHW";
   public static final String SC_REST_OEMSW = "OEM-SW";
@@ -563,7 +565,7 @@ public class USUtil extends AutomationUtil {
     String[] skipCompanyChecksScenarioList = { SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL, SC_DUMMY,
         SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
-        SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
+        SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD, SC_IBME };
     String scenarioSubType = "";
     if (StringUtils.isNotEmpty(admin.getSourceSystId()) && admin.getSourceSystId().equals("FedCMR")) {
       Addr zs01 = requestData.getAddress("ZS01");
@@ -624,6 +626,31 @@ public class USUtil extends AutomationUtil {
           setDummyGBGMatchForInternal(engineData);
         }
 
+      }
+    }
+
+    if (SC_IBME.equals(data.getCustSubGrp())) {
+      Person person = null;
+      if (StringUtils.isNotBlank(admin.getMainCustNm1())) {
+        try {
+          String mainCustName = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
+          if (person == null) {
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+            details.append("Employee details not found in IBM People.").append("\n");
+            return false;
+          } else {
+            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
+          }
+        } catch (Exception e) {
+          LOG.error("Not able to check name against bluepages", e);
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+          return false;
+        }
+      } else {
+        LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+        engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+        return false;
       }
     }
 
@@ -689,9 +716,9 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
+      isPaygoUpgrade = true;
     }
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK")) && !isPaygoUpgrade) {
       // skip checks if requester is from USCMDE team
@@ -909,7 +936,7 @@ public class USUtil extends AutomationUtil {
         } else if (changes.isLegalNameChanged() && isPaygoUpgrade) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         }
-     } finally {
+      } finally {
         cedpManager.clear();
         cedpManager.close();
       }
@@ -1352,9 +1379,9 @@ public class USUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    boolean isPaygoUpgrade=false;
-    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
@@ -1374,13 +1401,14 @@ public class USUtil extends AutomationUtil {
             validation.setSuccess(true);
           } else {
             // company proof
+            // CREATCMR-9466
             if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
               validation.setMessage("Validated");
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
               validation.setSuccess(true);
-            }else if (isPaygoUpgrade){
-              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+            } else if (isPaygoUpgrade) {
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
               details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
               validation.setMessage("Review needed");
               validation.setSuccess(false);
@@ -1397,20 +1425,22 @@ public class USUtil extends AutomationUtil {
               }
               LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
             }
+            // CREATCMR-9466
           }
         } else {
           // company proof
+          // CREATCMR-9466
           if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
             validation.setMessage("Validated");
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
             details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
             validation.setSuccess(true);
-          } else if (isPaygoUpgrade){
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+          } else if (isPaygoUpgrade) {
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
             details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
             validation.setMessage("Review needed");
             validation.setSuccess(false);
-          }else {
+          } else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -1423,20 +1453,22 @@ public class USUtil extends AutomationUtil {
             }
             LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
           }
+          // CREATCMR-9466
         }
       } else {
         // company proof
+        // CREATCMR-9466
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
           validation.setMessage("Validated");
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
           details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
           validation.setSuccess(true);
-        } else if (isPaygoUpgrade){
-          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+        } else if (isPaygoUpgrade) {
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
           details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
           validation.setMessage("Review needed");
           validation.setSuccess(false);
-        }else {
+        } else {
           validation.setMessage("Rejected");
           validation.setSuccess(false);
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -1448,6 +1480,7 @@ public class USUtil extends AutomationUtil {
           }
           LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
         }
+        // CREATCMR-9466
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");

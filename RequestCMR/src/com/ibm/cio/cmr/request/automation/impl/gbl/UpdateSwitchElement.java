@@ -99,14 +99,14 @@ public class UpdateSwitchElement extends ValidatingElement {
     } else if ("U".equals(admin.getReqType())) {
 
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-
+      
       boolean isLegalNameUpdtd = handler != null && !handler.customerNamesOnAddress() && AutomationUtil.isLegalNameChanged(admin);
       RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
 
-      if("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())){
-    	  data.setRestrictInd(usRestricted);
+      if ("897".equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
+        data.setRestrictInd(usRestricted);
       }
-
+      
       if (changes.hasDataChanges() || isLegalNameUpdtd) {
         boolean hasCountryLogic = false;
         if (automationUtil != null) {
@@ -158,7 +158,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       }
 
-      if (!output.isOnError() && changes.hasAddressChanges()) {        
+      if (!output.isOnError() && changes.hasAddressChanges()) {
         List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
         String addrTypeCode = null;
         // Start CREATCMR-6229
@@ -172,8 +172,8 @@ public class UpdateSwitchElement extends ValidatingElement {
             if (!"PG01".equals(addrTypeCode)) {
               paygoToBill = false;
             }
-            if ("PG01".equals(addrTypeCode)) {
-              if (!"P".equals(addr.getDplChkResult())) {
+            if (addr!=null && "PG01".equals(addrTypeCode)) {
+              if (StringUtils.isNotEmpty(addr.getDplChkResult()) && !"P".equals(addr.getDplChkResult())) {
                 isDPLpassed = false;
                 log.debug("DPL failed: " + reqId);
               }
@@ -303,7 +303,7 @@ public class UpdateSwitchElement extends ValidatingElement {
         String details = output.getDetails() + "\n" + "Legal Name changes made on request.";
         output.setDetails(details);
         log.debug("Legal Name changes made on request.");
-      } else if (!isPaygoUpgrade && !changes.hasDataChanges() && !changes.hasAddressChanges()) {
+      } else if (!isPaygoUpgrade && !changes.hasDataChanges() && !changes.hasAddressChanges() && !changes.hasNewLicenses()) {
         // no updates/changes at all on the request
         validation.setSuccess(false);
         validation.setMessage("Not Validated");

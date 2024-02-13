@@ -65,6 +65,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
+import com.itextpdf.styledxmlparser.jsoup.internal.StringUtil;
 
 /**
  * @author Jeffrey Zamora
@@ -92,7 +93,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
   @Override
   public ImportCMRModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
-
     if (this.reqEntryService == null) {
       this.reqEntryService = new RequestEntryService();
     }
@@ -228,6 +228,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
           if ("Y".equals(admin.getProspLegalInd())) {
             data.setInacCd(null);
+            // CREATCMR-10267
+            data.setCapInd("Y");
           }
           admin.setDelInd(null);
           admin.setModelCmrNo(null);
@@ -637,9 +639,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     // Resolve Data issue (length of field ISIC_CD is 4 in db
     // data.setIsicCd(record.getCmrIsic());
     data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic())
-        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
+        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim())
+        : "");
     data.setUsSicmen(!StringUtils.isEmpty(record.getCmrIsic())
-        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
+        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim())
+        : "");
     data.setIsuCd(record.getCmrIsu());
     data.setSearchTerm(record.getCmrSortl());
     data.setSitePartyId(record.getCmrSitePartyID());
@@ -664,7 +668,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       data.setMemLvl(record.getCmrMembLevel());
       data.setBpRelType(record.getCmrBPRelType());
     }
-
     data.setCovId(record.getCmrCoverage());
     data.setBgId(record.getCmrBuyingGroup());
     data.setGeoLocationCd(record.getCmrGeoLocCd());
@@ -845,11 +848,55 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setPoBox(cmr.getCmrPOBox());
       addr.setPoBoxCity(cmr.getCmrPOBoxCity());
       addr.setPoBoxPostCd(cmr.getCmrPOBoxPostCode());
+      addr.setRol(cmr.getInspbydebi());
       addr.setBldg(cmr.getCmrBldg());
       addr.setFloor(cmr.getCmrFloor());
       addr.setOffice(cmr.getCmrOffice());
       addr.setExtWalletId(cmr.getExtWalletId());
       addr.setDept(cmr.getCmrDept());
+      int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
+      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
+        addrLength = 35;
+      }
+
+      if (SystemLocation.IRELAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.UNITED_KINGDOM.equals(reqModel.getCmrIssuingCntry())) {
+        String street = cmr.getCmrStreetAddress();
+        String streetCont = cmr.getCmrDept();
+        if (street != null && street.length() > addrLength) {
+          // Align with API
+          /*
+           * if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) { // there
+           * is a con't, trim this only addr.setAddrTxt(street.substring(0,
+           * addrLength)); if (cmr.getCmrStreetAddressCont().length() >
+           * addrLength) {
+           * addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0,
+           * addrLength)); } else {
+           * addr.setAddrTxt2(cmr.getCmrStreetAddressCont()); } } else {
+           */
+          // no street address con't, overflow
+          String[] streetParts;
+          if (!StringUtils.isBlank(streetCont)) {
+            streetParts = converter.doSplitName(street, streetCont, 30, 30);
+          } else {
+            streetParts = converter.doSplitName(street, "", 30, 30);
+          }
+          String street1 = streetParts[0];
+          String street2 = streetParts[1];
+          addr.setAddrTxt(street1);
+          addr.setDept(street2);
+        } else {
+          addr.setAddrTxt(street);
+          if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
+            if (StringUtils.isNotBlank(streetCont) && streetCont.length() > addrLength) {
+              addr.setDept(streetCont.substring(0, addrLength));
+            } else {
+              addr.setDept(streetCont);
+            }
+          }
+        }
+      }
       if (converter != null) {
         converter.setAddressValuesOnImport(addr, admin, cmr, cmrNo);
       }

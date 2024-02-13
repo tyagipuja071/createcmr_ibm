@@ -22,17 +22,17 @@
     <cmr:column span="6" width="550">
       <input type="radio" name="jpScenarioC" value="CEA">
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        A new Company (modeled after chosen record), Establishment, and Account
+        A new Company (modeled after chosen record) and Account
       </cmr:label>
       <br>
       <input type="radio" name="jpScenarioC" value="EA">
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        A new Establishment and Account under the chosen Company
+        A new Account under the chosen Company
       </cmr:label>
       <br>
       <input type="radio" name="jpScenarioC" value="C">
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        A new Subsidiary Company (BC or BF) modeled after chosen Company
+        A new Subsidiary Company (BF) modeled after chosen Company
       </cmr:label>
     </cmr:column>
   </cmr:row>
@@ -81,12 +81,12 @@
     <cmr:column span="6" width="550">
 <%--      <input type="radio" name="jpScenarioA" value="CEA">
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        A new Company, Establishment, and Account, all modeled after the chosen Account's details and parent records.
+        A new Company and Account, all modeled after the chosen Account's details and parent records.
       </cmr:label>
       <br> --%>
       <input type="radio" name="jpScenarioA" value="A" checked>
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        A new Account (modeled after the chosen record) under the Establishment and Company of the chosen Account.
+        A new Account (modeled after the chosen record) under the Company of the chosen Account.
       </cmr:label>
     </cmr:column>
   </cmr:row>
@@ -106,12 +106,12 @@
     <cmr:column span="6" width="550">
       <input type="radio" name="jpScenarioX" value="CEA">
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        A new Company, Establishment, and Account
+        A new Company and Account
       </cmr:label>
       <br>
       <input type="radio" name="jpScenarioX" value="C">
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        A new Subsidiary Company (BC or BF) 
+        A new Subsidiary Company (BF)
       </cmr:label>
     </cmr:column>
   </cmr:row>
@@ -130,12 +130,7 @@
     <cmr:column span="6" width="550">
       <input type="radio" name="jpScenarioU" value="CEA">
       <cmr:label fieldId="" forRadioOrCheckbox="true">
-        Update Account only/Account & Establishment/ Account & Establishment & Company
-      </cmr:label>
-      <br>
-      <input type="radio" name="jpScenarioU" value="CE">
-      <cmr:label fieldId="" forRadioOrCheckbox="true">
-        Update Establishment only/Establishment & Company
+        Update Account only/Account & Company
       </cmr:label>
       <br>
       <input type="radio" name="jpScenarioU" value="C">

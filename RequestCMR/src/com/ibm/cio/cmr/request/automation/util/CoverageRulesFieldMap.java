@@ -94,7 +94,7 @@ public class CoverageRulesFieldMap {
     
     addLogicalFieldMapping(SystemLocation.AUSTRALIA, "SORTL", "Cluster");
     addPhysicalFieldMapping(SystemLocation.AUSTRALIA, "SORTL", "AP_CUST_CLUSTER_ID");
-
+    
     addLogicalFieldMapping(SystemLocation.NEW_ZEALAND, "SORTL", "Cluster");
     addPhysicalFieldMapping(SystemLocation.NEW_ZEALAND, "SORTL", "AP_CUST_CLUSTER_ID");
 

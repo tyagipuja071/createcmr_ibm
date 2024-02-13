@@ -7,8 +7,7 @@
 var _addrTypesForFR = [ 'ZP01', 'ZS01', 'ZI01', 'ZD01' ];
 var _poBOXHandler = [];
 var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
-var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO", "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB",
-    "UA" ];
+var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO", "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "UA" ];
 var SUB_REGIONS = new Set([ 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VU', 'WF', 'PF', 'MC', 'AD', 'DZ' ]);
 
 function afterConfigForFR() {
@@ -145,6 +144,7 @@ function afterConfigForFR() {
     }
     setCtcByIsu(value);
   });
+
   var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     // setAbbrevNmOnCustSubGrpChange();
     setAbbrevLocnOnCustSubGrpChange();
@@ -153,7 +153,7 @@ function afterConfigForFR() {
     setINACOnScenario();
     setISICAndSubindustryOnScenario();
     // setVATOnScenario();
-    // setSBOOnScenario();
+    // setSBOOnScenarioLD();
     setSalesRepLogic();
     setTaxCdOnScnrio();
     affacturageLogic();
@@ -209,6 +209,9 @@ function afterConfigForFR() {
     FormManager.readOnly('taxCd1');
   }
   // addVatExemptHandler();
+  if (reqType == 'U') {
+    return;
+  }
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     if (value != '' || value != 'undefined') {
       var landedCountry = getSoldToLanded();
@@ -3963,6 +3966,9 @@ function setCtcByIsu(value) {
   if (!value) {
     value = FormManager.getActualValue('isuCd');
   }
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
   if (value == '34') {
     FormManager.setValue('clientTier', 'Q');
   } else if (value == '36') {
@@ -4322,7 +4328,6 @@ function setCoverage1H24Sbo(fromAddress, currentLanded) {
   } else {
     landedCountry = getSoldToLanded();
   }
-
   var countyCd = null;
   var countryUse = FormManager.getActualValue('countryUse');
   if (countryUse.length > 3) {
@@ -4330,7 +4335,6 @@ function setCoverage1H24Sbo(fromAddress, currentLanded) {
   } else {
     countyCd = "FR";
   }
-
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custSubGrpArrayBP = [ 'BUSPR', 'XBUSP' ];
@@ -4528,6 +4532,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addVatIndValidator, [ '706' ], null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, '706');
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [ '706' ]);
+  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, '706');
 
 });

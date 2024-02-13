@@ -441,16 +441,6 @@
         <div id="custNm4_view">-</div>
       </cmr:column>
     </cmr:row>
-    <cmr:row>
-     <cmr:column span="1">
-        <cmr:label fieldId="stateProv_view">
-          <span class="lbl-StateProv">State/Province</span>:
-          </cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="stateProv_view">-</div>
-      </cmr:column>
-    </cmr:row>
   </cmr:view>
 
   <cmr:view forGEO="BELUX,NL">
@@ -795,15 +785,6 @@
 				<div id="dept_view">-</div>
 			</cmr:column>
 		</cmr:row>
-		<cmr:row addBackground="true">
-			<cmr:column span="1" exceptForCountry="724">
-				<cmr:label fieldId="stateProv_view">
-					<span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
-			</cmr:column>
-			<cmr:column span="2">
-				<div id="stateProv_view">-</div>
-			</cmr:column>
-		</cmr:row>
 	</cmr:view>
 
 	<cmr:view forGEO="IERP,CND,CEMEA" exceptForCountry="754,866,755,726,862,666,618,724,848">
@@ -1140,13 +1121,6 @@
   </cmr:row>
   <cmr:row  addBackground="true">
   <cmr:column span="1">
-        <cmr:label fieldId="EstabFuncCd_view">
-          <span class="lbl-EstabFuncCd">Estab Function Code</span>:</cmr:label>
-  </cmr:column>
-  <cmr:column span="2">
-        <div id="estabFuncCd_view">-</div>
-  </cmr:column>
-  <cmr:column span="1">
         <cmr:label fieldId="Division_view">
           <span class="lbl-Division">Estab No</span>:</cmr:label>
   </cmr:column>
@@ -1161,13 +1135,6 @@
   </cmr:column>
   <cmr:column span="2">
         <div id="city2_view">-</div>
-  </cmr:column>
-  <cmr:column span="1">
-        <cmr:label fieldId="CompanySize_view">
-          <span class="lbl-CompanySize">Company Size</span>:</cmr:label>
-  </cmr:column>
-  <cmr:column span="2">
-        <div id="companySize_view">-</div>
   </cmr:column>
   </cmr:row>
   <cmr:row  addBackground="true">
@@ -1468,7 +1435,7 @@
   </cmr:row> --%>
 
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS,TW,KR,NORDX" exceptForCountry="862,858,766,758">
+	<cmr:view exceptForGEO="CN,JP,TW,KR" exceptForCountry="858,766,866,724,754" forCountry="624,788,603,607,358,626,699,644,704,668,651,740,694,695,705,787,820,826,821,707,693,708,363,359,889,741,758,680,610,620,840,636,841,645,692,669,810,881,667,662,865,383,745,698,656,753,725,691,879,675,750,752,637,762,764,767,768,770,772,700,769,382,717,373,642,782,880,804,805,808,823,670,831,827,832,635,876,833,835,864,842,850,851,718,729,862,857,677,849,883,825,678,702,806,846,726,755,822,838,666,618,848,706,780">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
           <span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
@@ -1497,8 +1464,8 @@
     </cmr:view>
   </cmr:row>
 
-  <cmr:view exceptForGEO="CN,TW,KR,NORDX" exceptForCountry="618,724,858,766,649">
     <cmr:row addBackground="true">
+      <cmr:view exceptForGEO="CN,TW,KR,NORDX" exceptForCountry="618,724,858,766,649,866,754,624,788,603,607,358,626,699,644,704,668,651,740,694,695,705,787,820,826,821,707,693,708,363,359,889,741,758,680,610,620,840,636,841,645,692,669,810,881,667,662,865,383,745,698,656,753,725,691,879,675,750,752,637,762,764,767,768,770,772,700,769,382,717,373,642,782,880,804,805,808,823,670,831,827,832,635,876,833,835,864,842,850,851,718,729,862,857,677,849,883,825,678,702,806,846,726,755,822,838,666,618,848,706,780">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
           <span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
@@ -1506,6 +1473,8 @@
       <cmr:column span="2" >
         <div id="stateProv_view">-</div>
       </cmr:column>
+        </cmr:view>
+        <cmr:view exceptForGEO="CN,TW,KR,NORDX" exceptForCountry="618,724,858,766,649,866,754">
       <cmr:column span="1" exceptForCountry="848">
         <cmr:label fieldId="custNm4_view">
           <span class="lbl-CustomerName4">${ui.custName4}</span>
@@ -1514,11 +1483,11 @@
       <cmr:column span="2" exceptForCountry="848">
         <div id="custNm4_view">-</div>
       </cmr:column>
+        </cmr:view>
     </cmr:row>
-  </cmr:view>
 
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,TW,KR" exceptForCountry="862,726,666,822,838,758,760,858,766,649">
+    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,TW,KR" exceptForCountry="624,788,603,607,358,626,699,644,704,668,651,740,694,695,705,787,820,826,821,707,693,708,363,359,889,741,758,680,610,620,840,636,841,645,692,669,810,881,667,662,865,383,745,698,656,753,725,691,879,675,750,752,637,762,764,767,768,770,772,700,769,382,717,373,642,782,880,804,805,808,823,670,831,827,832,635,876,833,835,864,842,850,851,718,729,862,857,677,849,883,825,678,702,806,846,726,755,822,838,666,618,848,706,780,760,858,766,649">
       <cmr:column span="1">
         <cmr:label fieldId="county_view">
           <span class="lbl-County">${ui.county}</span>:</cmr:label>
