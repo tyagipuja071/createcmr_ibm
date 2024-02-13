@@ -260,12 +260,12 @@ if(values.length == 0) {
 }
 }
 
-function getSORTLAndLoadIntoList() {
+function getSORTLAndLoadIntoList(postCd) {
+  if(!(!!postCd)) postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('ClientTier');
   var ims = FormManager.getActualValue('subIndustryCd');
-  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
   var isuCtc = `${isuCd}${ctc}`
 
   currentlyLoadedSORTL = getSBOListByISU(cntry, isuCtc, ims, postCd)
@@ -358,7 +358,8 @@ function addHandlersForAUSTRIA() {
           FormManager.removeValidator('clientTier', Validators.REQUIRED);
         // CREATCMR-4293
 
-        getSORTLAndLoadIntoList()
+      setCTCBasedOnISUCode()
+      getSORTLAndLoadIntoList(CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0])
     });
   }
 
@@ -372,11 +373,10 @@ function addHandlersForAUSTRIA() {
 
       // CMR-2101 Austria remove ISR
       if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
-        setSalesRepValues(value);
-
-      getSORTLAndLoadIntoList()
-      
+        setSalesRepValues(value);      
       }
+
+      getSORTLAndLoadIntoList(CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0])
     });
   }
 
@@ -1405,6 +1405,7 @@ function populateBundeslandercode() {
 
 function populateBundeslandercodeOnChange() {
   dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
+    getSORTLAndLoadIntoList(value);
     populateBundeslandercode();
   });
   dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
@@ -1997,7 +1998,7 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  let CTCForIsu = SORTLandCTCandISUMapping.filter(({ISUCTC}) => ISUCTC == `${isuCode}${clientTierCode}`)
+  let CTCForIsu = SORTLandCTCandISUMapping.filter(({ISUCTC}) => ISUCTC.split(',').includes(`${isuCode}${clientTierCode}`))
 
   if(CTCForIsu.length == 0) {
     return new ValidationResult({
@@ -2061,8 +2062,24 @@ function clientTierCodeValidator() {
         name: 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'\'.');
     }
+  } else if (isuCode == '27') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'E') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
+      }, false, 'Client Tier can only accept \'E\'\'.');
+    }
   } else {
-    let permittedValues = ['Q', 'Y', 'E', '']
+    let permittedValues = ['Q', 'Y', 'E', 'T', '']
     if (permittedValues.includes(clientTierCode)) {
       $("#clientTierSpan").html('');
 
@@ -2189,6 +2206,7 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     setAddressDetailsForViewAT,
     resetSortlValidator,
+    getSORTLAndLoadIntoList
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
