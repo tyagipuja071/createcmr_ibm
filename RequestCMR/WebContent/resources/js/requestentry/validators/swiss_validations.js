@@ -584,10 +584,6 @@ function setMubotyOnPostalCodeIMS(value) {
   if (((custSubGrp != 'CHBUS') || (custSubGrp != 'XCHBP') || (custSubGrp != 'CHINT') || (custSubGrp != 'XCHIN')) && (postCd == '')) {
     postCd = result.ret1;
   }
-  // for cross use post cd 3000 values
-  if (custSubGrp == 'XCHCM') {
-    postCd = 3000;
-  }
 
   var isuCd = FormManager.getActualValue('isuCd');
   var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
@@ -596,66 +592,29 @@ function setMubotyOnPostalCodeIMS(value) {
   if (isuCd == null || isuCd == undefined || isuCd == '') {
     return;
     // CMR-710 use 34Q to replace 32S/N
-  } else if (isuCd == '27' && clientTier == 'E') {
-    if ([1, 2].includes(postCd.substring(0, 1))) {
-      postCd = 1;
-    } else {
-      postCd = 2;
-      ims = '';
-    }
-  } else {
-    postCd = '';
-    ims = '';
   }
 
-  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd)
+  reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, '')
+}
 
+function reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, ims) {
+  let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postCd, custSubGrp)
+  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postalCodeSubgroup)
   setSortlListValues([...currentlyLoadedSORTL]);
 }
 
-function validateSBOValuesForIsuCtc() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('reqType') != 'C') {
-          return;
-        }
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
-        var sbo = FormManager.getActualValue('searchTerm');
-        var validSboList = [];
-        var qParams = null;
-        var sboDesc = ''
-        
-        if (isuCd != '') {
-          var results = null;
-          if (isuCd + clientTier != '34Q') {
-            qParams = {
-              _qall : 'Y',
-              ISSUING_CNTRY : cntry,
-              ISU : '%' + isuCd + '%',
-              CTC : '%' + clientTier + '%',
-              SALES_BO_DESC : '%' + sboDesc + '%'
-            };
-            results = cmr.query('GET.SBOLIST.BYISU', qParams);
-          }
-        }
-        if (results == null || results.length == 0) {
-          return new ValidationResult(null, true);
-        } else {
-          for (let i=0; i<results.length; i++) {
-            validSboList.push(results[i].ret1);
-          }
-          if (!validSboList.includes(sbo)) {
-            return new ValidationResult(null, false, 
-                'The SORTL provided is invalid. It should be from the list: ' + validSboList);
-          }
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+function assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postalCode, custSubGrp) {
+  if (isuCd == '27' && clientTier == 'E') {
+    if (['1', '2'].includes(postalCode.toString().substring(0, 1)) && custSubGrp != 'XCHCM') {
+      return '1';
+    } else {
+      return '2';
+    }
+  } else {
+    return '';
+  }
 }
+
 
 
 function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
@@ -1625,6 +1584,7 @@ function validateSortl() {
               name : 'searchTerm'
             }, false, 'SORTL should be alpha numeric.');
           }
+          
 
           if(!currentlyLoadedSORTL.includes(searchTerm)) {
             return new ValidationResult({
@@ -1769,17 +1729,6 @@ function setPreferredLangSwiss() {
   }
 }
 
-function setSortlBasedOnPostalCode(value) {
-  let postalCodeHead = value.substring(0, 1)
-  let match3To9Range = (v) => v.match(/[3-9]/)
-  let isPostalCodeHeadMatching3To9Range = match3To9Range(postalCodeHead)
-  if(!!isPostalCodeHeadMatching3To9Range) {
-    setSortlListValues(['T0011479'])
-  } else {
-    setSortlListValues(['T0011495'])
-  }
-}
-
 function addVatIndValidator(){
   var _vatHandler = null;
   var _vatIndHandler = null;
@@ -1886,11 +1835,11 @@ function setSortlListValues(values) {
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if(!!dropdownField) {
     dropdownField.setAttribute('values', values);
-    if(values.length == 0) {
-      FormManager.clearValue('searchTerm')
-    } else {
-      FormManager.setValue('searchTerm', values[0])
-    }
+  }
+  if(values.length == 0) {
+    FormManager.clearValue('searchTerm')
+  } else {
+    FormManager.setValue('searchTerm', values[0])
   }
 }
 
@@ -1900,7 +1849,7 @@ function loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd) {
     ISU_CD : '%' + isuCd + '%',
     CLIENT_TIER : '%' + clientTier + '%',
     IMS : '%' + ims + '%',
-    POST_CD_RANGE : postCd
+    POST_CD_RANGE : '%' + postCd + '%'
   }).map(({ret1}) => ret1);
 }
 
@@ -1984,7 +1933,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
-  GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.SWISS, null, true);
   GEOHandler.addAfterConfig(setPreferredLangAddr, GEOHandler.SWISS);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
@@ -1993,5 +1941,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+
+
+  GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
 });
