@@ -2236,8 +2236,7 @@ dojo.addOnLoad(function () {
     resetSortlValidator,
     setCTCBasedOnISUCode,
     setSBOValuesForIsuCtc,
-    getSORTLAndLoadIntoList,
-    () => FormManager.enable('isuCd')
+    getSORTLAndLoadIntoList
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
