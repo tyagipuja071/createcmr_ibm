@@ -1941,8 +1941,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(() => FormManager.enable('isuCd'), GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(() => FormManager.enable('searchTerm'), GEOHandler.SWISS);
 
 
   GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
