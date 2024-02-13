@@ -358,6 +358,7 @@ function addHandlersForAUSTRIA() {
           FormManager.removeValidator('clientTier', Validators.REQUIRED);
         // CREATCMR-4293
 
+      setCTCBasedOnISUCode()
       getSORTLAndLoadIntoList(CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0])
     });
   }
@@ -1997,7 +1998,7 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  let CTCForIsu = SORTLandCTCandISUMapping.filter(({ISUCTC}) => ISUCTC == `${isuCode}${clientTierCode}`)
+  let CTCForIsu = SORTLandCTCandISUMapping.filter(({ISUCTC}) => ISUCTC.split(',').includes(`${isuCode}${clientTierCode}`))
 
   if(CTCForIsu.length == 0) {
     return new ValidationResult({
@@ -2235,7 +2236,8 @@ dojo.addOnLoad(function () {
     resetSortlValidator,
     setCTCBasedOnISUCode,
     setSBOValuesForIsuCtc,
-    getSORTLAndLoadIntoList
+    getSORTLAndLoadIntoList,
+    () => FormManager.enable('isuCd')
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
