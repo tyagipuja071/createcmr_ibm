@@ -158,27 +158,54 @@ public class MCOPtEsHandler extends MCOHandler {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
-              for (String sofUse : sofUses) {
-                addrType = getAddressTypeByUse(sofUse);
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-                  LOG.info("Spain MCOPtEsHandler Update from CreateCMR: " + record.getCmrNum());
-                  // name3 in rdc = Address Con't on SOF
-                  addr.setCmrStreetAddressCont(record.getCmrName3());
-                  addr.setCmrName3(null);
-
-                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    String poBox = record.getCmrPOBox().trim();
-                    setPoBox(addr, poBox);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
+                for (String sofUse : sofUses) {
+                  addrType = getAddressTypeByUse(sofUse);
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+  
+                    // name3 in rdc = Address Con't on SOF
+                    addr.setCmrStreetAddressCont(record.getCmrName3());
+                    addr.setCmrName3(null);
+  
+                    addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                    
+                    if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                      String poBox = record.getCmrPOBox().trim();
+                      setPoBox(addr, poBox);
+                    }
+  
+                    if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                      addr.setCmrAddrSeq("00001");
+                    } 
+                    converted.add(addr);
+                    }
                   }
-
-                  if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-                    addr.setCmrAddrSeq("00001");
+                } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+                  record.setCmrAddrTypeCode("PG01");
+                  addrType = record.getCmrAddrTypeCode();
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+                    
+                      addr.setCmrStreetAddressCont(record.getCmrName4());
+                      addr.setCmrName3(record.getCmrName3());
+  
+                      addr.setCmrName2Plain(record.getCmrName2Plain());
+                      addr.setCmrOffice(record.getCmrOffice());                  
+  
+                    if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                      
+                        addr.setCmrPOBox(record.getCmrPOBox());                     
+                    }
+  
+                    if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                      addr.setCmrAddrSeq("00001");
+                    }
+                    converted.add(addr);
                   }
-                  converted.add(addr);
-                }
-              }
+                } 
             }
           }
           // add unmapped addresses
