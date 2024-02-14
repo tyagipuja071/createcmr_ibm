@@ -860,6 +860,10 @@ public class JPHandler extends GEOHandler {
                 continue;
               }
             }
+            if ("C".equals(reqEntry.getReqType()) && "NORML".equals(reqEntry.getCustSubGrp())
+                && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())) {
+              continue;
+            }
             if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq())) {
               record = new FindCMRRecordModel();
               record.setCmrAddrTypeCode(cmrType);
