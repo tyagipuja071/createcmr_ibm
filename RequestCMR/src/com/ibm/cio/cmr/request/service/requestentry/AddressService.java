@@ -1382,10 +1382,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     request.setId(id);
     request.setPrivate(isPrivate);
 
-    if (JPHandler.isJPIssuingCountry(issuingCountry))
-      request.setCompanyName(addr.getCustNm3());
-    else
+    if (JPHandler.isJPIssuingCountry(issuingCountry)) {
+      name = addr.getCustNm3();
       request.setCompanyName(name);
+    } else {
+      request.setCompanyName(name);
+    }
     log.debug("Performing DPL Check (service) on Request ID " + admin.getId().getReqId() + " (" + id + ")");
     log.debug(" - Name: " + name);
     String dplSystemId = SystemUtil.useKYCForDPLChecks() ? DPLCheckClient.KYC_APP_ID : DPLCheckClient.EVS_APP_ID;
