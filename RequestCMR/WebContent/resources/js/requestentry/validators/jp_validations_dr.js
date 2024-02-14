@@ -6512,6 +6512,17 @@ function findImportCMR() {
           CANCEL : 'Cancel'
         });
   }
+  if (custSubGrp == 'NORML') {
+    if (creditToCustNo != '') {
+      cmr.importcmr = creditToCustNo;
+      cmr.importcntry = cntry;
+      cmr.showConfirm('doImportCmrs()',
+          'Records with Credit Customer Number ' + creditToCustNo + ' will be imported by the system. The data will replace all the current data on the request. Continue?', null, null, {
+            OK : 'Yes',
+            CANCEL : 'Cancel'
+          });
+    }
+  }
 }
 
 function doImportCmrs(addressOnly) {
@@ -6590,7 +6601,7 @@ function disableBpBqiImport() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
-    if (custSubGrp == 'BPWPQ') {
+    if (custSubGrp == 'BPWPQ' || FormManager.getActualValue('custSubGrp') == 'NORML') {
       document.getElementById("btnImportBp").style.visibility = "visible";
     } else {
       document.getElementById("btnImportBp").style.visibility = "hidden";
