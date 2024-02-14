@@ -123,9 +123,10 @@ function afterConfigForFR() {
         if (value == undefined) {
           return;
         }
+        var reqType = FormManager.getActualValue('reqType');
         var isuCd = FormManager.getActualValue('isuCd');
         var clientTier = FormManager.getActualValue('clientTier');
-        if (isuCd == '34' || isuCd == '36' || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
+        if (reqType == 'C' && (isuCd == '34' || isuCd == '36' || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31')) {
           // ISUs have multiple value
           FormManager.setValue('salesBusOffCd', '');
         }
@@ -563,7 +564,8 @@ function addISUHandler() {
       }
       var isuCd = FormManager.getActualValue('isuCd');
       var clientTier = FormManager.getActualValue('clientTier');
-      if (isuCd == '34' || isuCd == '36' || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31') {
+      var reqType = FormManager.getActualValue('reqType');
+      if (reqType == 'C' && (isuCd == '34' || isuCd == '36' || isuCd == '3T' || isuCd == '4A' || isuCd == '04' || isuCd == '14' || isuCd == '19' || isuCd == '31')) {
         // ISUs have multiple value
         FormManager.setValue('salesBusOffCd', '');
       }
@@ -4173,7 +4175,7 @@ function sboCodeValidator() {
       type : 'text',
       name : 'salesBusOffCd'
     }, false, 'SORTL can only accept \'05F05F\'\ \'12F12F\'\ \'68T68T\'\ \'035035\'\ \'031031\'\ for ISU CTC 04.');
-  } else if (isuCtc == '14' && (sbo != '14W14W' || sbo != 'FSDFSD')) {
+  } else if (isuCtc == '14' && !(sbo == '14W14W' || sbo == 'FSDFSD')) {
     return new ValidationResult({
       id : 'salesBusOffCd',
       type : 'text',
@@ -4191,25 +4193,25 @@ function sboCodeValidator() {
       type : 'text',
       name : 'salesBusOffCd'
     }, false, 'SORTL can only accept \'FSDFSD\'\.');
-  } else if (isuCtc == '19' && (sbo != '5ES5ES' || sbo != 'FSDFSD')) {
+  } else if (isuCtc == '19' && !(sbo == '5ES5ES' || sbo == 'FSDFSD')) {
     return new ValidationResult({
       id : 'salesBusOffCd',
       type : 'text',
       name : 'salesBusOffCd'
     }, false, 'SORTL can only accept \'5ES5ES\'\ \'FSDFSD\'\  for ISU CTC 19.');
-  } else if (isuCtc == '3T' && (sbo != '4DF4DF' || sbo != 'FSDFSD')) {
+  } else if (isuCtc == '3T' && !(sbo == '4DF4DF' || sbo == 'FSDFSD')) {
     return new ValidationResult({
       id : 'salesBusOffCd',
       type : 'text',
       name : 'salesBusOffCd'
     }, false, 'SORTL can only accept \'4DF4DF\'\ \'FSDFSD\'\ for ISU CTC 3T.');
-  } else if (isuCtc == '4A' && (sbo != '5EF5EF' || sbo != 'FSDFSD')) {
+  } else if (isuCtc == '4A' && !(sbo == '5EF5EF' || sbo == 'FSDFSD')) {
     return new ValidationResult({
       id : 'salesBusOffCd',
       type : 'text',
       name : 'salesBusOffCd'
     }, false, 'SORTL can only accept \'5EF5EF\'\ \'FSDFSD\'\ for ISU CTC 4A.');
-  } else if (isuCtc == '31' && (sbo != '040040' || sbo != 'FSDFSD')) {
+  } else if (isuCtc == '31' && !(sbo == '040040' || sbo == 'FSDFSD')) {
     return new ValidationResult({
       id : 'salesBusOffCd',
       type : 'text',
