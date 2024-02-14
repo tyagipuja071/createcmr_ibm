@@ -941,7 +941,7 @@ function validateSBOValuesForIsuCtc() {
         var sbo = FormManager.getActualValue('salesBusOffCd');
           if (!currentlyLoadedSORTL.includes(sbo)) {
             return new ValidationResult(null, false,
-              'The SBO provided is invalid. It should be from the list: ' + validSboList);
+              'The SBO provided is invalid. It should be from the list: ' + currentlyLoadedSORTL);
         }
         return new ValidationResult(null, true);
       }
