@@ -10,7 +10,7 @@ function addAfterConfigForSWISS() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var impIndc = getImportedIndcForSwiss();  
+  var impIndc = getImportedIndcForSwiss();
 
   SORTLandCTCandISUMapping = loadSORTLandCTCandISUMapping(cntry)
 
@@ -55,9 +55,9 @@ function addAfterConfigForSWISS() {
   }
 
   if (reqType == 'C'
-      && role == 'REQUESTER'
-      && (custSubGrp == 'CHCOM' || custSubGrp == 'LICOM' || custSubGrp == 'CHGOV' || custSubGrp == 'LIGOV' || custSubGrp == 'CHSOF' || custSubGrp == 'LISOF' || custSubGrp == 'CH3PA'
-          || custSubGrp == 'LI3PA' || custSubGrp == 'XCHCM' || custSubGrp == 'XCHGV' || custSubGrp == 'XCHSF' || custSubGrp == 'XCH3P')) {
+    && role == 'REQUESTER'
+    && (custSubGrp == 'CHCOM' || custSubGrp == 'LICOM' || custSubGrp == 'CHGOV' || custSubGrp == 'LIGOV' || custSubGrp == 'CHSOF' || custSubGrp == 'LISOF' || custSubGrp == 'CH3PA'
+      || custSubGrp == 'LI3PA' || custSubGrp == 'XCHCM' || custSubGrp == 'XCHGV' || custSubGrp == 'XCHSF' || custSubGrp == 'XCH3P')) {
   } else if (reqType == 'C'
     && role == 'REQUESTER'
     && (custSubGrp == 'CHINT' || custSubGrp == 'XCHIN' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'XCHPR' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM'
@@ -172,7 +172,7 @@ const IS27ESCENARIO = () => {
 const FILTER_SORTL_MAPPING_BY_ISU_AND_CTC = () => {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
-  return SORTLandCTCandISUMapping.filter(({CTC, ISU}) => CTC == clientTier && ISU == isuCd)
+  return SORTLandCTCandISUMapping.filter(({ CTC, ISU }) => CTC == clientTier && ISU == isuCd)
 }
 
 function resetAddrTypeValidation() {
@@ -1586,13 +1586,13 @@ function validateSortl() {
               name: 'searchTerm'
             }, false, 'SORTL should be alpha numeric.');
           }
-          
 
-          if(!currentlyLoadedSORTL.includes(searchTerm)) {
+
+          if (!currentlyLoadedSORTL.includes(searchTerm)) {
             return new ValidationResult({
-              id : 'searchTerm',
-              type : 'text',
-              name : 'searchTerm'
+              id: 'searchTerm',
+              type: 'text',
+              name: 'searchTerm'
             }, false, `The provided SORTL does not match any one of the allowed values: ${currentlyLoadedSORTL.join(',\n')}`);
           }
         }
@@ -1740,7 +1740,7 @@ function onPostalCodeChangeHandler() {
   console.log(">>>> Preferred Language on Postal Coade change");
   dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
     setPreferredLangSwiss();
-    if(IS27ESCENARIO()){
+    if (IS27ESCENARIO()) {
       setSortlBasedOnPostalCode(value);
     }
   });
@@ -1776,25 +1776,25 @@ function setPreferredLangSwiss() {
   }
 }
 
-function addVatIndValidator(){
+function addVatIndValidator() {
   var _vatHandler = null;
   var _vatIndHandler = null;
   var vat = FormManager.getActualValue('vat');
-  var vatInd = FormManager.getActualValue('vatInd');  
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage'); 
- 
-  if (viewOnlyPage =='true'){
-   FormManager.resetValidations('vat');
-   FormManager.readOnly('vat');
- } else {
-   
-  var cntry= FormManager.getActualValue('cmrIssuingCntry');
-  var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
-    ISSUING_CNTRY : cntry
-  });
+  var vatInd = FormManager.getActualValue('vatInd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
-      
-  if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
+  if (viewOnlyPage == 'true') {
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
+  } else {
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
+      ISSUING_CNTRY: cntry
+    });
+
+
+    if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     } else if ((results != null || results != undefined || results.ret1 != '') && vat != '' && vatInd != 'E' && vatInd != 'N' && vatInd != '') {
@@ -1812,15 +1812,15 @@ function addVatIndValidator(){
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
     }
-    
-  if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null ) && vatInd == 'N'){
-    FormManager.resetValidations('vat');
+
+    if ((vat && dojo.string.trim(vat) == '') || (vat && dojo.string.trim(vat) == null) && vatInd == 'N') {
+      FormManager.resetValidations('vat');
+    }
   }
 }
-}
 
-function setIsuInitialValueBasedOnSubScenario(){
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
+function setIsuInitialValueBasedOnSubScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   // pre-select ISU 27 for commercial, government, third party and private
   // person.
   if (role == 'REQUESTER' && [
@@ -1855,21 +1855,21 @@ function setCTCInitialValueBasedOnCurrentIsu() {
 }
 
 function validateISUandCTCCombination() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
       validate: function () {
         var isuCd = FormManager.getActualValue('isuCd');
         var ctcCd = FormManager.getActualValue('clientTier');
-        let CTCForIsu = SORTLandCTCandISUMapping.filter(({ISU, CTC}) => ISU == isuCd && CTC == ctcCd)
+        let CTCForIsu = SORTLandCTCandISUMapping.filter(({ ISU, CTC }) => ISU == isuCd && CTC == ctcCd)
 
-        if(!mapping[isuCd]) {
+        if (!mapping[isuCd]) {
           return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
         }
-        if(CTCForIsu.length == 0) {
+        if (CTCForIsu.length == 0) {
           return new ValidationResult({
-            id : 'clientTier',
-            type : 'text',
-            name : 'clientTier'
+            id: 'clientTier',
+            type: 'text',
+            name: 'clientTier'
           }, false, `Client Tier ${ctcCd} not compatible with ISU ${isuCd}.`);
         }
         return new ValidationResult(null, true);
@@ -1881,10 +1881,10 @@ function validateISUandCTCCombination() {
 
 function setSortlListValues(values) {
   let dropdownField = document.getElementById('templatevalue-searchTerm')
-  if(!!dropdownField) {
+  if (!!dropdownField) {
     dropdownField.setAttribute('values', values);
   }
-  if(values.length == 0) {
+  if (values.length == 0) {
     FormManager.clearValue('searchTerm')
   } else {
     FormManager.setValue('searchTerm', values[0])
@@ -1893,28 +1893,28 @@ function setSortlListValues(values) {
 
 function loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd) {
   return cmr.query('SWISS.GET.SORTL_BY_ISUCTCIMS', {
-    _qall : 'Y',
-    ISU_CD : '%' + isuCd + '%',
-    CLIENT_TIER : '%' + clientTier + '%',
-    IMS : '%' + ims + '%',
-    POST_CD_RANGE : '%' + postCd + '%'
-  }).map(({ret1}) => ret1);
+    _qall: 'Y',
+    ISU_CD: '%' + isuCd + '%',
+    CLIENT_TIER: '%' + clientTier + '%',
+    IMS: '%' + ims + '%',
+    POST_CD_RANGE: '%' + postCd + '%'
+  }).map(({ ret1 }) => ret1);
 }
 
 function loadSORTLandCTCandISUMapping(cntry) {
   return SORTLandCTCandISUMapping = cmr.query('GET.ISU.CTC.BY_SBO.V2', {
-    _qall : 'Y',
-    ISSUING_CNTRY : cntry,
-    SALES_BO_CD : '%%'
-  }).map(({ret1, ret2, ret3}) => ({
+    _qall: 'Y',
+    ISSUING_CNTRY: cntry,
+    SALES_BO_CD: '%%'
+  }).map(({ ret1, ret2, ret3 }) => ({
     SORTL: ret1,
     ISU: ret2,
     CTC: ret3
   }));
 }
 
-dojo.addOnLoad(function() {
-  GEOHandler.SWISS = [ '848' ];
+dojo.addOnLoad(function () {
+  GEOHandler.SWISS = ['848'];
   console.log('adding SWISS functions...');
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.SWISS);
