@@ -3255,11 +3255,11 @@ function setSalesRepValues(value) {
             } else {
               FormManager.setValue('searchTerm', '');
             }
-          } else if (isuAndCtc == '21') {
+          } else if (isuCd == '21') {
             FormManager.setValue('searchTerm', 'T0000468');
-          } else if (isuAndCtc == '8B') {
+          } else if (isuCd == '8B') {
             FormManager.setValue('searchTerm', 'P0000007');
-          } else if (isuAndCtc == '5K') {
+          } else if (isuCd == '5K') {
             FormManager.setValue('searchTerm', 'A0009227');
           } else {
             FormManager.setValue('searchTerm', '');
@@ -3268,11 +3268,11 @@ function setSalesRepValues(value) {
           // Iceland
           if (isuAndCtc == '34Q') {
             FormManager.setValue('searchTerm', 'T0001376');
-          } else if (isuAndCtc == '21') {
+          } else if (isuCd == '21') {
             FormManager.setValue('searchTerm', 'T0000468');
-          } else if (isuAndCtc == '8B') {
+          } else if (isuCd == '8B') {
             FormManager.setValue('searchTerm', 'P0000007');
-          } else if (isuAndCtc == '5K') {
+          } else if (isuCd == '5K') {
             FormManager.setValue('searchTerm', 'A0009227');
           } else {
             FormManager.setValue('searchTerm', '');
@@ -3317,11 +3317,11 @@ function setSalesRepValues(value) {
             } else {
               FormManager.setValue('searchTerm', '');
             }
-          } else if (isuAndCtc == '5K') {
+          } else if (isuCd == '5K') {
             FormManager.setValue('searchTerm', 'A0009225');
-          } else if (isuAndCtc == '21') {
+          } else if (isuCd == '21') {
             FormManager.setValue('searchTerm', 'T0000471');
-          } else if (isuAndCtc == '8B') {
+          } else if (isuCd == '8B') {
             FormManager.setValue('searchTerm', 'P0000007');
           } else {
             FormManager.setValue('searchTerm', '');
@@ -3329,11 +3329,11 @@ function setSalesRepValues(value) {
         } else if (countryUse == '702EE') {
           if (isuAndCtc == '34Q') {
             FormManager.setValue('searchTerm', 'T0004422');
-          } else if (isuAndCtc == '5K') {
+          } else if (isuCd == '5K') {
             FormManager.setValue('searchTerm', 'A0009216');
-          } else if (isuAndCtc == '21') {
+          } else if (isuCd == '21') {
             FormManager.setValue('searchTerm', 'T0001661');
-          } else if (isuAndCtc == '8B') {
+          } else if (isuCd == '8B') {
             FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
@@ -3341,11 +3341,11 @@ function setSalesRepValues(value) {
         } else if (countryUse == '702LV') {
           if (isuAndCtc == '34Q') {
             FormManager.setValue('searchTerm', 'T0004390');
-          } else if (isuAndCtc == '5K') {
+          } else if (isuCd == '5K') {
             FormManager.setValue('searchTerm', 'A0009214');
-          } else if (isuAndCtc == '21') {
+          } else if (isuCd == '21') {
             FormManager.setValue('searchTerm', 'T0001661');
-          } else if (isuAndCtc == '8B') {
+          } else if (isuCd == '8B') {
             FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
@@ -3353,11 +3353,11 @@ function setSalesRepValues(value) {
         } else if (countryUse == '702LT') {
           if (isuAndCtc == '34Q') {
             FormManager.setValue('searchTerm', 'T0004394');
-          } else if (isuAndCtc == '5K') {
+          } else if (isuCd == '5K') {
             FormManager.setValue('searchTerm', 'A0009215');
-          } else if (isuAndCtc == '21') {
+          } else if (isuCd == '21') {
             FormManager.setValue('searchTerm', 'T0001661');
-          } else if (isuAndCtc == '8B') {
+          } else if (isuCd == '8B') {
             FormManager.setValue('searchTerm', 'P0000024');
           } else {
             FormManager.setValue('searchTerm', '');
@@ -3446,17 +3446,17 @@ function setSalesRepValues(value) {
           } else {
             FormManager.setValue('searchTerm', '');
           }
-        } else if (isuAndCtc == '1R') {
+        } else if (isuCd == '1R') {
           FormManager.setValue('searchTerm', 'I0000271');
-        } else if (isuAndCtc == '3T') {
+        } else if (isuCd == '3T') {
           FormManager.setValue('searchTerm', 'A0003748');
-        } else if (isuAndCtc == '5K') {
+        } else if (isuCd == '5K') {
           FormManager.setValue('searchTerm', 'A0009228');
-        } else if (isuAndCtc == '21') {
+        } else if (isuCd == '21') {
           FormManager.setValue('searchTerm', 'T0000499');
-        } else if (isuAndCtc == '8B') {
+        } else if (isuCd == '8B') {
           FormManager.setValue('searchTerm', 'P0000007');
-        } else if (isuAndCtc == '28') {
+        } else if (isuCd == '28') {
           FormManager.setValue('searchTerm', 'A0008902');
         } else {
           FormManager.setValue('searchTerm', '');
