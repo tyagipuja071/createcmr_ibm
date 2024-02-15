@@ -1483,6 +1483,22 @@ function lockLocationNo() {
   }
 }
 
+function lockISUCode() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (viewOnlyPage == 'true') {
+    FormManager.readOnly('isuCd');
+  } else {
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('isuCd');
+    }
+    if (['PRICU'].includes(custSubType)) {
+      FormManager.readOnly('isuCd');
+    }
+  }
+}
+
 function austriaCustomVATValidator(cntry, tabName, formName, aType) {
   return function () {
     FormManager.addFormValidator((function () {
@@ -2250,6 +2266,7 @@ dojo.addOnLoad(function () {
     setSBOValuesForIsuCtc,
     getSORTLAndLoadIntoList,
     setIsuInitialValueBasedOnSubScenario,
+    lockISUCode
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
