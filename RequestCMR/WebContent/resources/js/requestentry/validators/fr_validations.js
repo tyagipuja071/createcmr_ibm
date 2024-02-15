@@ -4033,6 +4033,20 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'E\'\'.');
     }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '' || clientTierCode != 'T') {
+      return new ValidationResult({
+        id : 'isuCd',
+        type : 'text',
+        name : 'isuCd'
+      }, false, 'ISU Cd 32 has been obsolete');
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'ISU Cd 32 & Client Tier T has been obsolete');
+    }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
       return new ValidationResult({
