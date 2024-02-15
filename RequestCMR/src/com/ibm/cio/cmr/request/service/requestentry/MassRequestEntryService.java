@@ -7126,13 +7126,19 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
       switch (col.getDbColumn()) {
       case "CMR_NO":
-        muaModel.setCmrNo(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setCmrNo(tempVal);
+        }
         break;
       case "ADDR_SEQUENCE_NO":
-        muaModel.setAddrSeqNo(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setAddrSeqNo(tempVal);
+        }
         break;
       case "ADDR_TYPE":
-        muaModel.setAddrType(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setAddrType(tempVal);
+        }
         break;
       case "CUST_NM1":
         if (StringUtils.isNotBlank(tempVal)) {
@@ -7149,7 +7155,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
         break;
       case "CUST_NM3":
-        muaModel.setCustNm3(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setCustNm3(tempVal);
+        }
         break;
       case "CUST_NM4":
         if (StringUtils.isNotBlank(tempVal)) {
@@ -7165,13 +7173,19 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
         break;
       case "ADDR_TXT2":
-        muaModel.setAddrTxt2(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setAddrTxt2(tempVal);
+        }
         break;
       case "CITY1":
-        muaModel.setCity1(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setCity1(tempVal);
+        }
         break;
       case "FLOOR":
-        muaModel.setFloor(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setFloor(tempVal);
+        }
         break;
       case "POST_CD":
         if (StringUtils.isNotBlank(tempVal)) {
@@ -7206,21 +7220,28 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             muaModel.setBldg(bldg);
           }
         }
-        muaModel.setBldg(tempVal);
         break;
       case "LOCN_CD":
         break;
       case "CUST_PHONE":
-        muaModel.setCustPhone(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setCustPhone(tempVal);
+        }
         break;
       case "CUST_FAX":
-        muaModel.setCustFax(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setCustFax(tempVal);
+        }
         break;
       case "CONTACT":
-        muaModel.setPoBox(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setPoBox(tempVal);
+        }
         break;
       case "LAND_CNTRY":
-        muaModel.setLandCntry(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muaModel.setLandCntry(tempVal);
+        }
         break;
       default:
         LOG.debug("Default condition was executed [nothing is saved] for DB column >> " + col.getLabel());
@@ -7302,7 +7323,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
       switch (col.getDbColumn()) {
       case "ABBREV_NM":
-        muModel.setAbbrevNm(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setAbbrevNm(tempVal);
+        }
         break;
       case "JSIC_CD":
         if (StringUtils.isNotBlank(tempVal)) {
@@ -7312,13 +7335,19 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
         break;
       case "SECONDARY_LOCN_NO":
-        muModel.setIbmBankNumber(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setIbmBankNumber(tempVal);
+        }
         break;
       case "CUST_CLASS":
-        muModel.setCustClass(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setCustClass(tempVal);
+        }
         break;
       case "COLLECTION_CD":
-        muModel.setCollectionCd(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setCollectionCd(tempVal);
+        }
         break;
       case "SALES_BO_CD":
         if (StringUtils.isNotBlank(tempVal)) {
@@ -7328,10 +7357,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
         break;
       case "INAC_CD":
-        muModel.setInacCd(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setInacCd(tempVal);
+        }
         break;
       case "BILLING_PROC_CD":
-        muModel.setCodReason(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setCodReason(tempVal);
+        }
         break;
       case "CS_BO":
         if (StringUtils.isNotBlank(tempVal)) {
@@ -7351,7 +7384,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
         break;
       case "CMR_NO":
-        muModel.setCmrNo(tempVal);
+        if (StringUtils.isNotBlank(tempVal)) {
+          muModel.setCmrNo(tempVal);
+        }
         break;
       case "OUT_CITY_LIMIT":
         if (StringUtils.isNotBlank(tempVal)) {
