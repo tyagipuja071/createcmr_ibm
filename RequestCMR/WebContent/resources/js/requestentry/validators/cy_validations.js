@@ -3087,9 +3087,9 @@ function setEntepriseCY() {
   
   var isuCtc = isuCd + clientTier;
 
-  if (custSubGrpSet21.has(custSubGrp) && isuCtc == '21') {
+  if (custSubGrpSet21.has(custSubGrp) && (isuCtc == '21' || isuCtc == '8B')) {
     FormManager.setValue('enterprise', '985999');
-  }else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '34Q') {
+  } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '34Q') {
     FormManager.setValue('enterprise', '822830');
   } else if (custSubGrpSet.has(custSubGrp) && isuCtc == '36Y') {
     FormManager.setValue('enterprise', '822840');
@@ -3186,7 +3186,7 @@ function validatorEnterpriseCY(){
       type : 'text',
       name : 'enterprise'
     }, false, 'Enterprise can only accept \'985999\'.');
-  } else if (isuCd == '34' && (enterprise != '822830' || enterprise != '822835')) {
+  } else if (isuCd == '34' && (enterprise != '822830' && enterprise != '822835')) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',
