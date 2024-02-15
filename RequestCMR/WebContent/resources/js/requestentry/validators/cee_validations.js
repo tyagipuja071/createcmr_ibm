@@ -5157,8 +5157,8 @@ function subIndustryLogicCEE(){
 	
 
 dojo.addOnLoad(function () {
- GEOHandler.CEE = ['358', '359', '363', '607', '620', '626', '651', '675', '677', '680', '694', '695', '713', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821',
-    '823', '832', '849', '865', '889'];
+ GEOHandler.CEE = ['358', '359', '363', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '707', '708', '713', '740', '741', '787', '820', '821',
+    '826','889'];
   console.log('adding CEE functions...');
   GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEE);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.CEE);
