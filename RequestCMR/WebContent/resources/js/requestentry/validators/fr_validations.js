@@ -4210,7 +4210,7 @@ function sboCodeValidator() {
       id : 'salesBusOffCd',
       type : 'text',
       name : 'salesBusOffCd'
-    }, false, 'SORTL can only accept \'040040\'\ for ISU CTC 31.');
+    }, false, 'SORTL can only accept \'040040\'\ \'FSDFSD\'\ for ISU CTC 31.');
   }
 }
 
