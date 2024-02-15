@@ -2065,8 +2065,8 @@ public class JPHandler extends GEOHandler {
       for (Addr address : addrList) {
         if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
           if ("SUBSI".equals(data.getCustGrp())) {
-            if ("BFKSC".equalsIgnoreCase(data.getCustSubGrp())) {
-              // retain value of imported ROL Flag
+            if ("U".equalsIgnoreCase(admin.getReqType()) && "BFKSC".equalsIgnoreCase(data.getCustSubGrp())) {
+              // retain value ROL Flag
             } else {
               address.setRol("");
             }
