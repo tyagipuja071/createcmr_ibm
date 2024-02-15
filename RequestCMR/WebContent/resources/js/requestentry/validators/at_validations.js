@@ -2177,6 +2177,18 @@ function setCTCBasedOnISUCode() {
   FormManager.setValue('clientTier', CTCMapping[isuCd] || '');
 }
 
+
+function setIsuInitialValueBasedOnSubScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenarios = ['COMME', 'GOVRN', 'PRICU', 'THDPT']
+
+  // pre-select ISU 27 for commercial, government, third party and private
+  // person.
+  if (scenarios.includes(custSubGrp)) {
+    FormManager.setValue('isuCd', '27');
+  }
+}
+
 dojo.addOnLoad(function () {
   console.log('adding AUSTRIA functions...');
   GEOHandler.enableCustomerNamesOnAddress([SysLoc.AUSTRIA]);
@@ -2236,7 +2248,8 @@ dojo.addOnLoad(function () {
     resetSortlValidator,
     setCTCBasedOnISUCode,
     setSBOValuesForIsuCtc,
-    getSORTLAndLoadIntoList
+    getSORTLAndLoadIntoList,
+    setIsuInitialValueBasedOnSubScenario,
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
