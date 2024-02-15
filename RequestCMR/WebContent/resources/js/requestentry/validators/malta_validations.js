@@ -68,7 +68,7 @@ function addISUHandler() {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       if (_oldIsu != FormManager.getActualValue('isuCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         setClientTierValuesMT(value);
-        setEnterpriseValues();
+        setEnterpriseValues(value);
         _oldIsu = FormManager.getActualValue('isuCd');
       }
     });
@@ -1046,10 +1046,10 @@ function setEnterpriseValues(value) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isu == '34' && ctc == 'Q') {
     FormManager.setValue('enterprise', '985204');
-  } else if (isu == '36' && ctc == 'Y') {
-    FormManager.setValue('enterprise', '985205');
-  } else if ((isu == '5K' || isu == '21' || isu == '8B') && ctc == '') {
+  } else if (isu == '5K' || isu == '21' || isu == '8B') {
     FormManager.setValue('enterprise', '985999');
+  } else {
+    FormManager.setValue('enterprise', '');
   }
 
   addRemoveEnterperiseValidator()
