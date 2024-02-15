@@ -13,6 +13,7 @@ var _subScenarioHandler = null;
 var oldVatExempt = null;
 var oldCustSubGrp = null;
 let SORTLandCTCandISUMapping  = []
+let firstTimeLoading = true;
 
 function afterConfigForDE() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -47,6 +48,8 @@ function afterConfigForDE() {
     _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
       // CREATCMR-7424_7425
       setAbbreviatedNameBasedOnAddressType();
+      if(!firstTimeLoading) setIsuInitialValueBasedOnSubScenario();
+      firstTimeLoading = false;
     });
   }
 
@@ -1431,7 +1434,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.DE);
-  GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.DE);
+  // GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setSortlDropdownValuesBasedOnIsu, GEOHandler.DE);
   // GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate,
