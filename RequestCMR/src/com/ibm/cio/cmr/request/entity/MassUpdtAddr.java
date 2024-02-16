@@ -17,7 +17,9 @@ import javax.persistence.Table;
  * @author Jeffrey Zamora
  */
 @Entity
-@Table(name = "MASS_UPDT_ADDR", schema = "CREQCMR")
+@Table(
+    name = "MASS_UPDT_ADDR",
+    schema = "CREQCMR")
 public class MassUpdtAddr extends BaseEntity<MassUpdtAddrPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -34,77 +36,105 @@ public class MassUpdtAddr extends BaseEntity<MassUpdtAddrPK> implements Serializ
     this.id = id;
   }
 
-  @Column(name = "DIVN")
+  @Column(
+      name = "DIVN")
   private String divn;
 
-  @Column(name = "DEPT")
+  @Column(
+      name = "DEPT")
   private String dept;
 
-  @Column(name = "ADDR_TXT")
+  @Column(
+      name = "ADDR_TXT")
   private String addrTxt;
 
-  @Column(name = "ADDR_TXT2")
+  @Column(
+      name = "ADDR_TXT2")
   private String addrTxt2;
 
-  @Column(name = "CITY1")
+  @Column(
+      name = "CITY1")
   private String city1;
 
-  @Column(name = "STATE_PROV")
+  @Column(
+      name = "CITY2")
+  private String city2;
+
+  @Column(
+      name = "STATE_PROV")
   private String stateProv;
 
-  @Column(name = "POST_CD")
+  @Column(
+      name = "POST_CD")
   private String postCd;
 
-  @Column(name = "COUNTY")
+  @Column(
+      name = "COUNTY")
   private String county;
 
-  @Column(name = "CUST_NM1")
+  @Column(
+      name = "CUST_NM1")
   private String custNm1;
 
-  @Column(name = "CUST_NM2")
+  @Column(
+      name = "CUST_NM2")
   private String custNm2;
 
-  @Column(name = "CUST_NM3")
+  @Column(
+      name = "CUST_NM3")
   private String custNm3;
 
-  @Column(name = "CUST_NM4")
+  @Column(
+      name = "CUST_NM4")
   private String custNm4;
 
-  @Column(name = "CMR_NO")
+  @Column(
+      name = "CMR_NO")
   private String cmrNo;
 
-  @Column(name = "ADDR_SEQUENCE_NO")
+  @Column(
+      name = "ADDR_SEQUENCE_NO")
   private String addrSeqNo;
 
-  @Column(name = "PO_BOX")
+  @Column(
+      name = "PO_BOX")
   private String poBox;
 
-  @Column(name = "LAND_CNTRY")
+  @Column(
+      name = "LAND_CNTRY")
   private String landCntry;
 
   // CH Specific
-  @Column(name = "CUST_LANG_CD")
+  @Column(
+      name = "CUST_LANG_CD")
   private String custLangCd;
 
-  @Column(name = "FLOOR")
+  @Column(
+      name = "FLOOR")
   private String floor;
 
-  @Column(name = "BLDG")
+  @Column(
+      name = "BLDG")
   private String bldg;
 
-  @Column(name = "CUST_PHONE")
+  @Column(
+      name = "CUST_PHONE")
   private String custPhone;
 
-  @Column(name = "CUST_FAX")
+  @Column(
+      name = "CUST_FAX")
   private String custFax;
 
-  @Column(name = "HW_INSTL_MSTR_FLG")
+  @Column(
+      name = "HW_INSTL_MSTR_FLG")
   private String hwInstlMstrFlg;
 
-  @Column(name = "DPL_CHK_RESULT")
+  @Column(
+      name = "DPL_CHK_RESULT")
   private String dplChkResult;
 
-  @Column(name = "DPL_CHK_TS")
+  @Column(
+      name = "DPL_CHK_TS")
   private Date dplChkTimestamp;
 
   public String getDivn() {
@@ -297,6 +327,14 @@ public class MassUpdtAddr extends BaseEntity<MassUpdtAddrPK> implements Serializ
 
   public void setDplChkTimestamp(Date dplChkTimestamp) {
     this.dplChkTimestamp = dplChkTimestamp;
+  }
+
+  public String getCity2() {
+    return city2;
+  }
+
+  public void setCity2(String city2) {
+    this.city2 = city2;
   }
 
 }
