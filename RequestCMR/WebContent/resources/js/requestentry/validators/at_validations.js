@@ -17,6 +17,7 @@ var ctcCovHandler = false;
 var _custSubTypeHandler = null;
 let currentlyLoadedSORTL = []
 let SORTLandCTCandISUMapping  = []
+let firstTimeLoading = true;
 function addAUSTRIALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -391,6 +392,14 @@ function addHandlersForAUSTRIA() {
       // CMR-2101 Austria remove ISR
       // setSalesRepValues();
       setISUCTCOnIMSChange();
+    });
+  }
+
+  if (_subScenarioHandler == null) {
+    _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+      // CREATCMR-7424_7425
+      if(!firstTimeLoading) setIsuInitialValueBasedOnSubScenario();
+      firstTimeLoading = false;
     });
   }
 
@@ -2265,7 +2274,6 @@ dojo.addOnLoad(function () {
     setCTCBasedOnISUCode,
     setSBOValuesForIsuCtc,
     getSORTLAndLoadIntoList,
-    setIsuInitialValueBasedOnSubScenario,
     lockISUCode
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
