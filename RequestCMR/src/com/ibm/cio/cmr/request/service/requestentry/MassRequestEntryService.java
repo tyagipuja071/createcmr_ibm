@@ -7167,9 +7167,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "ADDR_TXT":
         if (StringUtils.isNotBlank(tempVal)) {
-          String convertedAddrTxt = IERPRequestUtils.dbcsConversionForJP(tempVal);
-          if (StringUtils.isNotBlank(convertedAddrTxt)) {
-            muaModel.setAddrTxt(convertedAddrTxt);
+          String addr1 = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
+          String addr2 = tempVal.length() > 17 ? tempVal.substring(17) : "";
+
+          muaModel.setAddrTxt(addr1);
+          if (StringUtils.isNotBlank(addr2)) {
+            muaModel.setCity2(addr2);
           }
         }
         break;
