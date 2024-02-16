@@ -1,5 +1,6 @@
 let currentlyLoadedSORTL = []
 let SORTLandCTCandISUMapping = []
+let firstTimeLoading = true;
 
 /* Register SWISS Javascripts */
 function addAfterConfigForSWISS() {
@@ -359,6 +360,14 @@ function addHandlersForSWISS() {
       setMubotyOnPostalCodeIMS(value);
       setPreferredLangAddr(value);
       reloadSORTLList()
+    });
+  }
+
+  if (_subScenarioHandler == null) {
+    _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+      // CREATCMR-7424_7425
+      if(!firstTimeLoading) setIsuInitialValueBasedOnSubScenario();
+      firstTimeLoading = false;
     });
   }
 
@@ -1998,11 +2007,9 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
 
-  GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-  
-  
+
   GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
 });
