@@ -1,5 +1,6 @@
 let currentlyLoadedSORTL = []
 let SORTLandCTCandISUMapping = []
+let firstTimeLoading = true;
 
 /* Register SWISS Javascripts */
 function addAfterConfigForSWISS() {
@@ -337,6 +338,7 @@ function addHandlersForSWISS() {
       setClientTierValues(value);
       setMubotyOnPostalCodeIMS(value);
       setCTCInitialValueBasedOnCurrentIsu();
+      reloadSORTLList()
     });
   }
 
@@ -349,6 +351,7 @@ function addHandlersForSWISS() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
       setMubotyOnPostalCodeIMS(value);
+      reloadSORTLList()
     });
   }
 
@@ -356,6 +359,15 @@ function addHandlersForSWISS() {
     _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
       setMubotyOnPostalCodeIMS(value);
       setPreferredLangAddr(value);
+      reloadSORTLList()
+    });
+  }
+
+  if (_subScenarioHandler == null) {
+    _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+      // CREATCMR-7424_7425
+      if(!firstTimeLoading) setIsuInitialValueBasedOnSubScenario();
+      firstTimeLoading = false;
     });
   }
 
@@ -363,6 +375,7 @@ function addHandlersForSWISS() {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
       setISUCTCOnIMSChange();
       setMubotyOnPostalCodeIMS(value);
+      reloadSORTLList()
     });
   }
 
@@ -593,12 +606,16 @@ function setMubotyOnPostalCodeIMS(value) {
     // CMR-710 use 34Q to replace 32S/N
   }
 
-  reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, '')
 }
 
-function reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, ims) {
+function reloadSORTLList() {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var postCd = FormManager.getActualValue('postCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
   let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postCd, custSubGrp)
-  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postalCodeSubgroup)
+  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, '', postalCodeSubgroup)
   setSortlListValues([...currentlyLoadedSORTL]);
 }
 
@@ -1821,17 +1838,17 @@ function addVatIndValidator() {
 
 function setIsuInitialValueBasedOnSubScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenarios = ['COM', 'GOV', 'PRI', '3PA']
+
+  // ["CHCOM", "CHGOV", ...]
+  var chscenarios = scenarios.map(scn => 'CH' + scn);
+
+  // ["LICOM", "LIGOV", ...]
+  var liscenarios = scenarios.map(scn => 'LI' + scn);
+
   // pre-select ISU 27 for commercial, government, third party and private
   // person.
-  if (role == 'REQUESTER' && [
-    'COMME',
-    'GOVMT',
-    '3PA',
-    'DC',
-    'SENMS',
-    'SENSI',
-    'BROKR',
-    'PRIPE'].includes(custSubGrp)) {
+  if ([...liscenarios, ...chscenarios].includes(custSubGrp)) {
     FormManager.setValue('isuCd', '27');
   }
 }
@@ -1990,10 +2007,8 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
 
-  GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-
 
   GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
