@@ -352,7 +352,7 @@ public class MassChangeTemplate {
               currCell = (XSSFCell) row.getCell(6);
               ctc = validateColValFromCell(currCell);
               isuCd = !StringUtils.isBlank(isuCd) ? isuCd.substring(0, 2) : "";
-              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+              if ((StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
@@ -383,10 +383,6 @@ public class MassChangeTemplate {
                   error.addError((rowIndex + 1), "Client Tier",
                       ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd) || "27".equals(isuCd)))
-                  && !"@".equalsIgnoreCase(ctc)) {
-                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
               validations.add(error);
             }

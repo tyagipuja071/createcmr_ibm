@@ -17,6 +17,7 @@ var ctcCovHandler = false;
 var _custSubTypeHandler = null;
 let currentlyLoadedSORTL = []
 let SORTLandCTCandISUMapping  = []
+let firstTimeLoading = true;
 function addAUSTRIALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -391,6 +392,14 @@ function addHandlersForAUSTRIA() {
       // CMR-2101 Austria remove ISR
       // setSalesRepValues();
       setISUCTCOnIMSChange();
+    });
+  }
+
+  if (_subScenarioHandler == null) {
+    _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+      // CREATCMR-7424_7425
+      if(!firstTimeLoading) setIsuInitialValueBasedOnSubScenario();
+      firstTimeLoading = false;
     });
   }
 
@@ -1483,6 +1492,22 @@ function lockLocationNo() {
   }
 }
 
+function lockISUCode() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (viewOnlyPage == 'true') {
+    FormManager.readOnly('isuCd');
+  } else {
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('isuCd');
+    }
+    if (['PRICU'].includes(custSubType)) {
+      FormManager.readOnly('isuCd');
+    }
+  }
+}
+
 function austriaCustomVATValidator(cntry, tabName, formName, aType) {
   return function () {
     FormManager.addFormValidator((function () {
@@ -2177,6 +2202,18 @@ function setCTCBasedOnISUCode() {
   FormManager.setValue('clientTier', CTCMapping[isuCd] || '');
 }
 
+
+function setIsuInitialValueBasedOnSubScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenarios = ['COMME', 'GOVRN', 'PRICU', 'THDPT']
+
+  // pre-select ISU 27 for commercial, government, third party and private
+  // person.
+  if (scenarios.includes(custSubGrp)) {
+    FormManager.setValue('isuCd', '27');
+  }
+}
+
 dojo.addOnLoad(function () {
   console.log('adding AUSTRIA functions...');
   GEOHandler.enableCustomerNamesOnAddress([SysLoc.AUSTRIA]);
@@ -2236,7 +2273,8 @@ dojo.addOnLoad(function () {
     resetSortlValidator,
     setCTCBasedOnISUCode,
     setSBOValuesForIsuCtc,
-    getSORTLAndLoadIntoList
+    getSORTLAndLoadIntoList,
+    lockISUCode
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
