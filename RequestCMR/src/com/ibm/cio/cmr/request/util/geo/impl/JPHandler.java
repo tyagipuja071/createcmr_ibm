@@ -792,9 +792,10 @@ public class JPHandler extends GEOHandler {
             }
             LOG.debug("Adding " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
 
-            if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
-                && StringUtils.isNotBlank(reqEntry.getBillToCustNo()) && !copy.getCmrAddrTypeCode().equals("ZS01")
-                && !copy.getCmrAddrTypeCode().equals("ZS02") && !copy.getCmrAddrTypeCode().equals("ZP01")) {
+            if ("C".equals(reqEntry.getReqType()) && ("BPWPQ".equals(reqEntry.getCustSubGrp()) || "NORML".equals(reqEntry.getCustSubGrp()))
+                && StringUtils.isNotBlank(reqEntry.getCreditToCustNo()) && StringUtils.isNotBlank(reqEntry.getBillToCustNo())
+                && !copy.getCmrAddrTypeCode().equals("ZS01") && !copy.getCmrAddrTypeCode().equals("ZS02")
+                && !copy.getCmrAddrTypeCode().equals("ZP01")) {
               LOG.debug("Skip " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
             } else if ("C".equals(reqEntry.getReqType()) && isNormlCreditToImport(reqEntry) && !copy.getCmrAddrTypeCode().equals("ZS01")) {
               LOG.debug("Skip " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request for Normal with Credit to.");
@@ -860,10 +861,20 @@ public class JPHandler extends GEOHandler {
                 continue;
               }
             }
-            if ("C".equals(reqEntry.getReqType()) && "NORML".equals(reqEntry.getCustSubGrp())
-                && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())) {
+
+            if ("C".equals(reqEntry.getReqType()) && "NORML".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
+                && StringUtils.isBlank(reqEntry.getBillToCustNo())) {
               continue;
             }
+            if ("C".equals(reqEntry.getReqType()) && "NORML".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
+                && StringUtils.isNotBlank(reqEntry.getBillToCustNo())) {
+              if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq()) && "ZP01".equals(cmrType)) {
+                LOG.debug("Adding ADU2 for norml request with Credit to.");
+              } else {
+                continue;
+              }
+            }
+
             if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq())) {
               record = new FindCMRRecordModel();
               record.setCmrAddrTypeCode(cmrType);
@@ -6173,7 +6184,8 @@ public class JPHandler extends GEOHandler {
   }
   private boolean isNormlCreditToImport(RequestEntryModel reqEntry) {
     String creditToCustNo = StringUtils.isNotEmpty(reqEntry.getCreditToCustNo()) ? reqEntry.getCreditToCustNo() : "";
-    if ("NORML".equals(reqEntry.getCustSubGrp()) && !creditToCustNo.equals("")) {
+    String billToCustNo = StringUtils.isNotEmpty(reqEntry.getBillToCustNo()) ? reqEntry.getBillToCustNo() : "";
+    if ("NORML".equals(reqEntry.getCustSubGrp()) && !creditToCustNo.equals("") && billToCustNo.equals("")) {
       return true;
     }
     return false;

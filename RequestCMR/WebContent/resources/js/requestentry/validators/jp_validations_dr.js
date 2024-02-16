@@ -6513,6 +6513,10 @@ function findImportCMR() {
         });
   }
   if (custSubGrp == 'NORML') {
+    if (creditToCustNo == '' && billToCustNo != '') {
+      cmr.showAlert('Bill To Customer No. found, Please input Credit Customer No. to search for.');
+      return;
+    }
     if (creditToCustNo != '') {
       cmr.importcmr = creditToCustNo;
       cmr.importcntry = cntry;
