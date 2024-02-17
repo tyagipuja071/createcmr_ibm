@@ -3837,6 +3837,14 @@ function StcOrderBlockValidation() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function postalCodeAs36YRule() {
+  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
+
+  if(postCd.toString().match(/^[a-zA-Z]{1}[0-9]/)) return postCd.substring(0, 1)
+  if(postCd.toString().match(/^[a-zA-Z]{2}[0-9]/)) return postCd.substring(0, 2)
+  return postCd
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.UKI = [ SysLoc.UK, SysLoc.IRELAND ];
   console.log('adding EMEA functions...');
@@ -3945,4 +3953,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 
+  GEOHandler.addAfterTemplateLoad(postalCodeAs36YRule, [ SysLoc.UK ]);
 });
