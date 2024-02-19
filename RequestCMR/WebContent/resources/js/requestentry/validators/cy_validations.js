@@ -3192,7 +3192,7 @@ function validatorEnterpriseCY(){
       type : 'text',
       name : 'enterprise'
     }, false, 'Enterprise can only accept \'822830\' or \'822835\'.');
-  } else if (isuCd == '36' && enterprise36Y.includes(enterprise)) {
+  } else if (isuCd == '36' && !enterprise36Y.includes(enterprise)) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',
