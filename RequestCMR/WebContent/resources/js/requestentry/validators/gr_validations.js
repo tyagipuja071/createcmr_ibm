@@ -2626,7 +2626,7 @@ function validatorEnterpriseGR() {
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'822830\'.');
+    }, false, 'Enterprise can only accept: ' + enterprise34Q);
   } else if (isuCd == '32' && enterprise != '985985') {
     return new ValidationResult({
       id : 'enterprise',
@@ -2638,7 +2638,7 @@ function validatorEnterpriseGR() {
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'822840\',\'822850\'.');
+    }, false, 'Enterprise can only accept: ' + enterprise36Y);
   } else {
     return new ValidationResult(null, true);
   }
