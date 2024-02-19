@@ -1897,6 +1897,10 @@ function validateISUandCTCCombination() {
 
 
 function setSortlListValues(values) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if(role == 'PROCESSOR') return
+  
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if (!!dropdownField) {
     dropdownField.setAttribute('values', values);
@@ -1935,7 +1939,6 @@ dojo.addOnLoad(function () {
   console.log('adding SWISS functions...');
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.SWISS);
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.SWISS);
@@ -1960,7 +1963,6 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addCMRNumberValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addFormatForCMRNumValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addCmrNoLengthValidator, GEOHandler.SWISS, null, true);
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.SWISS, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addEmbargoCdValidator, GEOHandler.SWISS, null, true);
   // GEOHandler.registerValidator(addVatValidatorForCustLangCd,
@@ -1989,23 +1991,17 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.SWISS);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.SWISS, null, true);
 
-  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setPreferredLangAddr, GEOHandler.SWISS);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
 
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
