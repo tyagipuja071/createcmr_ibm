@@ -260,6 +260,15 @@
       }
     %>
   </cmr:row>
+  <%if("760".equalsIgnoreCase(reqentry.getCmrIssuingCntry())) {%>
+  <cmr:row addBackground="true" topPad="5">
+      <cmr:column span="2">
+      </cmr:column>
+      <cmr:column span="2">
+          <a href="https://kycdpl.ibm.com/prod/dpl/dplscreening" target="_blank">IBM KYC+</a>
+      </cmr:column>
+  </cmr:row>
+  <%} %>
   <c:if test="${reqentry.cmrIssuingCntry == '631' && reqentry.userRole == 'Processor'}">
     <cmr:row addBackground="true" topPad="5">
       <cmr:column span="1" width="120">
