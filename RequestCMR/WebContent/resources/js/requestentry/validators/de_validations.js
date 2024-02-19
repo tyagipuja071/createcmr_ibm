@@ -1381,10 +1381,8 @@ function lockISUCode() {
   } else {
     if (role == 'REQUESTER') {
       FormManager.readOnly('isuCd');
-    } else {
-      FormManager.enable('isuCd');
     }
-    if (['PRICU'].includes(custSubType)) {
+    if (['PRIPE'].includes(custSubType)) {
       FormManager.readOnly('isuCd');
     }
   }
@@ -1400,7 +1398,7 @@ function lockCTCCode() {
     if (role == 'REQUESTER') {
       FormManager.readOnly('clientTier');
     }
-    if (['PRICU'].includes(custSubType)) {
+    if (['PRIPE'].includes(custSubType)) {
       FormManager.readOnly('clientTier');
     }
   }
