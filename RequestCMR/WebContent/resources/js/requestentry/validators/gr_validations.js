@@ -8,6 +8,7 @@ var _custSubTypeHandlerGr = null;
 var _subindustryCdHandler = null;
 var _custSalesRepHandlerGr = null;
 var _isuCdHandler = null;
+var _isicCdHandler = null;
 var _ISUHandler = null;
 var _CTCHandler = null;
 var _oldIsu = null;
@@ -64,7 +65,7 @@ function addISUHandler() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       if (_oldIsu != FormManager.getActualValue('isuCd') || (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp'))) {
-        setClientTierValuesGR();
+        setClientTierValuesGR(value);
         _oldIsu = FormManager.getActualValue('isuCd');
       }
     });
@@ -76,6 +77,11 @@ function addISUHandler() {
         setValuesWRTIsuCtc(value);
         _oldClientTier = FormManager.getActualValue('clientTier');
       }
+    });
+  }
+  if (_isicCdHandler == null) {
+    _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setValuesWRTIsuCtc(value);
     });
   }
 
@@ -1328,7 +1334,7 @@ function addHandlersForSubindustryCd() {
         _subindustryChanged = true;
       }
       var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
-      setValuesWRTIsuCtc(value);
+//      setValuesWRTIsuCtc(value);
     });
   }
   if (_subindustryCdHandler && _subindustryCdHandler[0]) {
@@ -2343,7 +2349,7 @@ function setEnterpriseOnSubIndustry(value) {
   }
   const subIndustryEnterpriseMap = {
       'A' : '822800', 'K' : '822800', 'U' : '822800',
-      'B' : '822800', 'C' : '822800', 'J' : '822800', 'L' : '822800', 'M' : '822800', 'P' : '822800', 'V' : '822800',
+      'B' : '822820', 'C' : '822820', 'J' : '822820', 'L' : '822820', 'M' : '822820', 'P' : '822820', 'V' : '822820',
       'D' : '822815', 'R' : '822815', 'T' : '822815', 'W' : '822815',
       'F' : '822805', 'N' : '822810', 'S' : '822805',
       'E' : '822825', 'G' : '822825', 'H' : '822825', 'X' : '822825', 'Y' : '822825'
@@ -2475,7 +2481,7 @@ function lockUnlockFieldForGR() {
   }
 }
 
-function setClientTierValuesGR() {
+function setClientTierValuesGR(value) {
   console.log(">>>> setClientTierValuesGR");
   var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
@@ -2492,7 +2498,7 @@ function setClientTierValuesGR() {
   }
   addRemoveValidator();
 //  setEnterpriseValues();
-  setValuesWRTIsuCtc(value);
+//  setValuesWRTIsuCtc(value);
   lockUnlockField();
 }
 
