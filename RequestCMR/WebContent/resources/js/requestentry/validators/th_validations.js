@@ -3106,7 +3106,8 @@ function coverage2024ForTH() {
 		FormManager.readOnly('isicCd');
 		FormManager.setValue('isicCd', '9500');
 	} else {
-		FormManager.enable('isicCd');
+		// FormManager.enable('isicCd');
+		FormManager.readOnly('isicCd');
 	}
 	var _clusterHandlerSG = null;
 	FormManager.resetDropdownValues(FormManager.getField('clientTier'));
