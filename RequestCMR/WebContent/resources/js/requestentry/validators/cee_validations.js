@@ -4744,9 +4744,8 @@ function checkCmrUpdateBeforeImport() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-  var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36') && reqType == 'U')) {
+  if ((isuCode == '21' || isuCode == '8B' || isuCode == '5K' || isuCode == '3T' || isuCode == '28')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -4776,23 +4775,7 @@ function clientTierCodeValidator() {
         name: 'clientTier'
       }, false, 'Client Tier can only accept \'Q\'\'.');
     }
-  } else if (isuCode == '32') {
-    if (clientTierCode == '') {
-      return new ValidationResult({
-        id: 'clientTier',
-        type: 'text',
-        name: 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'T') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id: 'clientTier',
-        type: 'text',
-        name: 'clientTier'
-      }, false, 'Client Tier can only accept \'T\'\'.');
-    }
-  } else if (isuCode == '36') {
+  }else if (isuCode == '36') {
     if (clientTierCode == '') {
       return new ValidationResult({
         id: 'clientTier',
@@ -4808,7 +4791,7 @@ function clientTierCodeValidator() {
         name: 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'\'.');
     }
-  } else if (isuCode != '36' || isuCode != '34' || isuCode != '32') {
+  } else if (['36','34','27'].includes(isuCode)) {
     if (clientTierCode == '') {
       return new ValidationResult(null, true);
     } else {
@@ -4819,7 +4802,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'Y' || clientTierCode == '') {
+    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'E' || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -4831,7 +4814,7 @@ function clientTierCodeValidator() {
         id: 'clientTier',
         type: 'text',
         name: 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'E\' or blank.');
     }
   }
 }
@@ -5102,7 +5085,7 @@ function validateSboCEE() {
 			    SBO: sbo
 		};
 		var results = cmr.query('GET_SBO_CEE_VALIDATE', qParams);
-    if (results && results.length == 0 && results[0].ret1 == '') {
+    if (results && results.length == 0) {
 		return new ValidationResult(null, false, 'Please select correct ISU, CTC and SBO combination.');
     }
         return new ValidationResult(null, true);
@@ -5197,6 +5180,24 @@ function subIndustryLogicCEE(){
 	}
 	
 }	
+	
+	
+function validateISUCTC() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var isu = FormManager.getActualValue('isuCd');
+        var ctc = FormManager.getActualValue('clientTier');
+        var isuCTC = isu + ctc;
+    if (!['36Y','34Q','8B','5K','21','28','27E','3T'].includes(isuCTC)) {
+		return new ValidationResult(null, false, 'Please select correct ISU, CTC combination.');
+    }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+	
 	
 
 dojo.addOnLoad(function () {
@@ -5334,7 +5335,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addProvinceCityValidator, [SysLoc.ROMANIA], null, true);
   GEOHandler.registerValidator(validateSboCEE, GEOHandler.CEE, null, true);
-  
+
   GEOHandler.addAfterTemplateLoad(setCovValues2024CEE, GEOHandler.CEE);  
   GEOHandler.addAfterConfig(setCovValues2024CEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(addHandlersForCEE, GEOHandler.CEE);
