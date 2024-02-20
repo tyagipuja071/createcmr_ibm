@@ -87,50 +87,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -141,20 +141,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -165,20 +165,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -199,50 +199,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -253,20 +253,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -277,20 +277,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -311,50 +311,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -365,20 +365,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -389,20 +389,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -423,50 +423,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -477,20 +477,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -501,20 +501,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -535,50 +535,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -589,20 +589,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -613,20 +613,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -648,50 +648,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -702,20 +702,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -726,20 +726,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -760,50 +760,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -814,20 +814,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -838,20 +838,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -872,50 +872,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -926,20 +926,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -950,20 +950,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -984,50 +984,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -1038,20 +1038,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -1062,20 +1062,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -1096,50 +1096,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -1150,20 +1150,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -1174,20 +1174,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -1208,50 +1208,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -1262,20 +1262,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -1286,20 +1286,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -1320,50 +1320,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -1374,20 +1374,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -1398,20 +1398,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -1432,50 +1432,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -1486,20 +1486,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -1510,20 +1510,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>
@@ -1544,50 +1544,50 @@
 				<column>
 					<label>Customer Name-KANJI</label>
 					<dbColumn>CUST_NM1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>17</length>
 				</column>
 				<column>
 					<label>Name-KANJI Continue</label>
 					<dbColumn>CUST_NM2</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>13</width>
+					<length>13</length>
 				</column>
 				<column>
 					<label>Katakana</label>
 					<dbColumn>CUST_NM4</dbColumn>
-					<width>35</width>
+					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
 					<dbColumn>CUST_NM3</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>50</width>
+					<length>70</length>
 				</column>
 				<column>
 					<label>Address</label>
 					<dbColumn>ADDR_TXT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>English Street Address</label>
 					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>35</width>
-					<length>35</length>
+					<length>70</length>
 				</column>
 				<column>
 					<label>English City Name</label>
 					<dbColumn>CITY1</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>English District</label>
 					<dbColumn>FLOOR</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>22</width>
+					<length>22</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -1598,20 +1598,20 @@
 				<column>
 					<label>Branch/Office</label>
 					<dbColumn>OFFICE</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 				<column>
 					<label>Department</label>
 					<dbColumn>DEPT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Building</label>
 					<dbColumn>BLDG</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>30</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Location</label>
@@ -1622,20 +1622,20 @@
 				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>FAX</label>
 					<dbColumn>CUST_FAX</dbColumn>
-					<width>20</width>
-					<length>16</length>
+					<width>12</width>
+					<length>12</length>
 				</column>
 				<column>
 					<label>Contact</label>
 					<dbColumn>CONTACT</dbColumn>
-					<width>35</width>
-					<length>35</length>
+					<width>15</width>
+					<length>15</length>
 				</column>
 			</columns>
 		</tab>		
