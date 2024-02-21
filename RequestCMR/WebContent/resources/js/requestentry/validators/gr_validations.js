@@ -2313,7 +2313,7 @@ function setValuesWRTIsuCtc(value) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
-  if (!value) return;
+  if (value == undefined) return;
   
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isu == '34' && ctc == 'Q') {
