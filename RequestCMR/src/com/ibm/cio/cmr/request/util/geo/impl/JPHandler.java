@@ -1655,6 +1655,16 @@ public class JPHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getIdentClient(), "ROLAccount", cmrCountry));
       results.add(update);
     }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getSvcArOffice(), newData.getSvcArOffice())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "JITReqGroupId", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSvcArOffice(), "JITReqGroupId", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSvcArOffice(), "JITReqGroupId", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   @Override
