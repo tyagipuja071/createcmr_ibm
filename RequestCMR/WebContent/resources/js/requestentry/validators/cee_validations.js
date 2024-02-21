@@ -5248,8 +5248,8 @@ dojo.addOnLoad(function () {
 
   GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
+  //GEOHandler.addAfterConfig(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
+  // GEOHandler.addAfterTemplateLoad(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
   GEOHandler.addAfterConfig(lockCompanyForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(lockCompanyForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.CEE, null, true);
