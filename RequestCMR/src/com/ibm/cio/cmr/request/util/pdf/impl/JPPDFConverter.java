@@ -21,8 +21,8 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
-import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
@@ -492,6 +492,8 @@ public class JPPDFConverter extends DefaultPDFConverter {
     ibm.addCell(createValueCell(data.getAdminDeptCd()));
     ibm.addCell(createLabelCell("Admin Depart Line:"));
     ibm.addCell(createValueCell(data.getAdminDeptLine()));
+    ibm.addCell(createLabelCell("JIT Req/Group ID:"));
+    ibm.addCell(createValueCell(data.getSvcArOffice()));
   }
 
 }
