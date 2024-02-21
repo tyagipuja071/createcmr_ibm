@@ -5000,6 +5000,10 @@ function validateSboCEE() {
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
+	     var custSubGrp = FormManager.getActualValue('custSubGrp');
+	     if(!['COMME','THDPT','PRICU'].includes(custSubGrp)){
+        return new ValidationResult(null, true);
+      	}
         var isu = FormManager.getActualValue('isuCd');
         var ctc = FormManager.getActualValue('clientTier');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');

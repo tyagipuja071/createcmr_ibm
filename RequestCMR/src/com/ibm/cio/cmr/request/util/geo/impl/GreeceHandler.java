@@ -3854,27 +3854,27 @@ public class GreeceHandler extends BaseSOFHandler {
               } else if (!StringUtils.isBlank(dataIsu) && "34".equals(dataIsu)) {
                 if (StringUtils.isBlank(dataCtc) || !"Q".equals(dataCtc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
+                      + "Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                      "Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if (!StringUtils.isBlank(dataIsu) && "36".equals(dataIsu)) {
                 if (StringUtils.isBlank(dataCtc) || !"Y".equals(dataCtc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
+                      + "Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
+                      "Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isBlank(dataIsu) && "32".equals(dataIsu)) {
-                if (StringUtils.isBlank(dataCtc) || !"T".equals(dataCtc)) {
+              } else if (!StringUtils.isBlank(dataIsu) && "27".equals(dataIsu)) {
+                if (StringUtils.isBlank(dataCtc) || !"E".equals(dataCtc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + "Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      "Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(dataIsu) && !Arrays.asList("32", "34", "36").contains(dataIsu)) && !"@".equalsIgnoreCase(dataCtc)) {
+              } else if ((!StringUtils.isBlank(dataIsu) && !Arrays.asList("27", "34", "36").contains(dataIsu)) && !"@".equalsIgnoreCase(dataCtc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + dataIsu + ".<br>");
+                error.addError(row.getRowNum() + 1, "Client Tier", "Note that Client Tier should be '@' for the selected ISU code. Please fix and upload the template again.<br>");
               }
               if (error.hasErrors()) {
                 validations.add(error);
