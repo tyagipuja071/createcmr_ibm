@@ -2058,6 +2058,82 @@ function afterConfigForRussia() {
   });
 }
 
+function setSBOafterAddrConfig() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  if (FormManager.getActualValue('addrType') == 'ZS01') {
+
+    var isu = FormManager.getActualValue('isuCd');
+    var ctc = FormManager.getActualValue('clientTier');
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    
+        if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
+          if (isu == '34' && ctc == 'Q') {
+            var postalCode = FormManager.getActualValue('postCd');
+            var head3 = "";
+            if (postalCode != null && postalCode != "") {
+              head3 = postalCode.substring(0, 3);
+            }
+            var sbo = "";
+            if (WEST_INCL.has(head3)) {
+              sbo = "R02";
+            } else if (EAST_INCL.has(head3)) {
+              sbo = "R03";
+            }
+            FormManager.setValue('salesBusOffCd', sbo);
+          }
+        }
+  } else {
+    setSBOValues();
+  }
+}
+
+
+function setSBOValues() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var isu = FormManager.getActualValue('isuCd');
+  var ctc = FormManager.getActualValue('clientTier');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+ 
+      if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
+        if (isu == '34' && ctc == 'Q') {
+            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+              var record = null;
+              var type = null;
+              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                  record = _allAddressData[i];
+                }
+                type = record.addrType;
+                if (typeof (type) == 'object') {
+                  type = type[0];
+                }
+                if (type == 'ZS01') {
+                  var postalCode = "";
+                  var head3 = "";
+                  postalCode = record.postCd;
+                  if (postalCode != null && postalCode != "") {
+                    head3 = postalCode[0].substring(0, 3);
+                  }
+                  var sbo = "";
+                  if (WEST_INCL.has(head3)) {
+                    sbo = "R02";
+                  } else if (EAST_INCL.has(head3)) {
+                    sbo = "R03";
+                  }
+                  FormManager.setValue('salesBusOffCd', sbo);
+                }
+              }
+            }
+        }
+      }
+}
+
+
 function changeDupSBO() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
@@ -5191,4 +5267,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(setCovValues2024CEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(addHandlersForCEE, GEOHandler.CEE);
 	GEOHandler.addAfterConfig(addHandlersForCEE, GEOHandler.CEE);
+	GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
+	GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
+  GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
 });
