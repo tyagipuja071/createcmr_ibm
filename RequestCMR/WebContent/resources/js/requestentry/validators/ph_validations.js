@@ -283,7 +283,7 @@ function addAfterConfigAP() {
     FormManager.readOnly('apCustClusterId');
   }
 
-  (reqType == 'U' && ((cntry == '834' || cntry == '818'))) {
+  if(reqType == 'U' && ((cntry == '834' || cntry == '818'))) {
     FormManager.readOnly('isicCd');
   }
 
