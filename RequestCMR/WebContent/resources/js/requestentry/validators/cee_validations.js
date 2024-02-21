@@ -2054,13 +2054,7 @@ function afterConfigForRussia() {
       });
     }
     lockCompanyForCEE();
-    setSBOValues();
-  });
-  dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
-    setSBOValues();
-  });
-  dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
-    setSBOValues();
+    
   });
 }
 
@@ -2070,30 +2064,10 @@ function setSBOafterAddrConfig() {
   }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
-    var custType = FormManager.getActualValue('custGrp');
     var isu = FormManager.getActualValue('isuCd');
     var ctc = FormManager.getActualValue('clientTier');
     var custSubType = FormManager.getActualValue('custSubGrp');
-    if (custType == 'CROSS') {
-      if (dijit.byId('cisServiceCustIndc').get('checked')) {
-        FormManager.setValue('salesBusOffCd', 'R04');
-      } else if ((custSubType == 'XCOM' || custSubType == 'XTP') && isu == '34' && ctc == 'Q') {
-        FormManager.setValue('salesBusOffCd', 'R04');
-      } else if ((custSubType == 'XCOM' || custSubType == 'XTP') && isu == '36' && ctc == 'Y') {
-        FormManager.setValue('salesBusOffCd', 'R01');
-      } else if ((custSubType == 'XCOM' || custSubType == 'XTP') && isu == '5K') {
-        FormManager.setValue('salesBusOffCd', '999');
-      } else if (custSubType == 'XBP') {
-        FormManager.setValue('salesBusOffCd', '000');
-      } else if (custSubType == 'XINT') {
-        FormManager.setValue('salesBusOffCd', '999');
-      }
-    } else if (isu == '36' && ctc == 'Y') {
-      FormManager.setValue('salesBusOffCd', 'R01');
-    } else if (dijit.byId('cisServiceCustIndc').get('checked')) {
-      FormManager.setValue('salesBusOffCd', 'R04');
-    } else {
-      if (isu != null && ctc != null && isu != '' && ctc != '') {
+    
         if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
           if (isu == '34' && ctc == 'Q') {
             var postalCode = FormManager.getActualValue('postCd');
@@ -2109,51 +2083,23 @@ function setSBOafterAddrConfig() {
             }
             FormManager.setValue('salesBusOffCd', sbo);
           }
-        } else if (custSubType == 'BUSPR') {
-          FormManager.setValue('salesBusOffCd', '000');
-        } else if (custSubType == 'BUSPR') {
-          FormManager.setValue('salesBusOffCd', '999');
         }
-      }
-    }
   } else {
     setSBOValues();
   }
 }
 
+
 function setSBOValues() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var custSubType = FormManager.getActualValue('custSubGrp');
-  if (custType == 'CROSS') {
-    if (dijit.byId('cisServiceCustIndc').get('checked')) {
-      FormManager.setValue('salesBusOffCd', 'R04');
-    } else if ((custSubType == 'XCOM' || custSubType == 'XTP') && isu == '34' && ctc == 'Q') {
-      FormManager.setValue('salesBusOffCd', 'R04');
-    } else if ((custSubType == 'XCOM' || custSubType == 'XTP') && isu == '36' && ctc == 'Y') {
-      FormManager.setValue('salesBusOffCd', 'R01');
-    } else if ((custSubType == 'XCOM' || custSubType == 'XTP') && isu == '5K') {
-      FormManager.setValue('salesBusOffCd', '999');
-    } else if (custSubType == 'XBP') {
-      FormManager.setValue('salesBusOffCd', '000');
-    } else if (custSubType == 'XINT') {
-      FormManager.setValue('salesBusOffCd', '999');
-    }
-  } else if (isu == '36' && ctc == 'Y') {
-    FormManager.setValue('salesBusOffCd', 'R01');
-  } else if (dijit.byId('cisServiceCustIndc').get('checked')) {
-    FormManager.setValue('salesBusOffCd', 'R04');
-  } else {
-    if (isu != null && ctc != null && isu != '' && ctc != '') {
+ 
       if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
         if (isu == '34' && ctc == 'Q') {
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-            FormManager.setValue('salesBusOffCd', '');
-          } else {
             if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
               var record = null;
               var type = null;
@@ -2183,16 +2129,10 @@ function setSBOValues() {
                 }
               }
             }
-          }
         }
-      } else if (custSubType == 'BUSPR') {
-        FormManager.setValue('salesBusOffCd', '000');
-      } else if (custSubType == 'BUSPR') {
-        FormManager.setValue('salesBusOffCd', '999');
       }
-    }
-  }
 }
+
 
 function changeDupSBO() {
   if (FormManager.getActualValue('reqType') != 'C') {
@@ -4676,19 +4616,6 @@ function lockCompanyForCEE() {
       FormManager.readOnly('enterprise');
     }
   }
-  if (CEE_INCL.has(cntry) && 'C' == FormManager.getActualValue('reqType')) {
-    var lockSboScenario = ['BUSPR', 'INTER', 'XBP', 'XINT', 'IBMEM', 'XINT', 'INTER', 'CSINT', 'RSXIN', 'MEINT', 'RSINT', 'CSBP', 'MEBP', 'RSXBP', 'RSBP', 'PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC']; var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (lockSboScenario.includes(custSubGrp)) {
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-
-    } else {
-      FormManager.enable('salesBusOffCd');
-      FormManager.enable('isuCd');
-      FormManager.enable('clientTier');
-    }
-  }
 }
 
 function checkCmrUpdateBeforeImport() {
@@ -4930,7 +4857,7 @@ function addressQuotationValidatorCEMEA() {
 var subIndHandler = null;
 var isuCdHandler = null;
 
-function addHandlersForCEE(){
+function addHandlersForCEE(){	
 	if (subIndHandler == null) {
 		subIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
 			subIndustryLogicCEE();
@@ -4941,7 +4868,7 @@ function addHandlersForCEE(){
 		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
 			setClientTier(value);
 			setCovValues2024CEE();
-			setSBOFromDBMapping();
+		//	setSBOFromDBMapping();
 		});
 	}	
 }
@@ -5287,12 +5214,12 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(setEnterprise2Values, [SysLoc.RUSSIA]);// CreateCMR-811
   GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [SysLoc.RUSSIA]);// CreateCMR-811
 
-  GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
+ // GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
   GEOHandler.addAfterConfig(changeDupSBO, SysLoc.RUSSIA);
   GEOHandler.addAfterTemplateLoad(changeDupSBO, [SysLoc.RUSSIA]);
   GEOHandler.addAfterConfig(afterConfigForRussia, [SysLoc.RUSSIA]);
-  GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
-  GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
+ // GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
+ // GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
 
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [SysLoc.SLOVAKIA]);
@@ -5340,4 +5267,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(setCovValues2024CEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(addHandlersForCEE, GEOHandler.CEE);
 	GEOHandler.addAfterConfig(addHandlersForCEE, GEOHandler.CEE);
+	GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
+	GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
+  GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
 });
