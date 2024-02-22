@@ -3790,7 +3790,7 @@ function searchTermCodeValidator() {
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SearchTerm can only accept ' + accSeq_678[isuCtc]);
+                  }, false, 'SORTL can only accept ' + accSeq_678[isuCtc].join(" "));
                 }
                 if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
                   if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
@@ -3811,7 +3811,7 @@ function searchTermCodeValidator() {
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SearchTerm can only accept ' + accSeq_678IS[isuCtc]);
+                  }, false, 'SORTL can only accept ' + accSeq_678IS[isuCtc].join(" "));
                 }
                 if (accSeq_678IS.hasOwnProperty(isuCtc) && accSeq_678IS[isuCtc].includes(searchTerm)) {
                   if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
@@ -3819,7 +3819,7 @@ function searchTermCodeValidator() {
                       id : 'searchTerm',
                       type : 'text',
                       name : 'searchTerm'
-                    }, false, 'SearchTerm and SubIndustry combination mismatch.');
+                    }, false, 'SORTL and SubIndustry combination mismatch.');
                   }
                 }
               }
@@ -3830,7 +3830,7 @@ function searchTermCodeValidator() {
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SearchTerm can only accept ' + accSeq_702[isuCtc]);
+                  }, false, 'SORTL can only accept ' + accSeq_702[isuCtc].join(" "));
                 }
               } else if (countryUse == '702EE') {
                 if (accSeq_702EE.hasOwnProperty(isuCtc) && !accSeq_702EE[isuCtc].includes(searchTerm)) {
@@ -3838,7 +3838,7 @@ function searchTermCodeValidator() {
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SearchTerm can only accept ' + accSeq_702EE[isuCtc]);
+                  }, false, 'SORTL can only accept ' + accSeq_702EE[isuCtc].join(" "));
                 }
               } else if (countryUse == '702LT') {
                 if (accSeq_702LT.hasOwnProperty(isuCtc) && !accSeq_702LT[isuCtc].includes(searchTerm)) {
@@ -3846,7 +3846,7 @@ function searchTermCodeValidator() {
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SearchTerm can only accept ' + accSeq_702LT[isuCtc]);
+                  }, false, 'SORTL can only accept ' + accSeq_702LT[isuCtc].join(" "));
                 }
               } else if (countryUse == '702LV') {
                 if (accSeq_702LV.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
@@ -3854,7 +3854,7 @@ function searchTermCodeValidator() {
                     id : 'searchTerm',
                     type : 'text',
                     name : 'searchTerm'
-                  }, false, 'SearchTerm can only accept ' + accSeq_702LV[isuCtc]);
+                  }, false, 'SORTL can only accept ' + accSeq_702LV[isuCtc].join(" "));
                 }
               }
             } else if (cmrIssuingCntry == '806') {
@@ -3863,7 +3863,7 @@ function searchTermCodeValidator() {
                   id : 'searchTerm',
                   type : 'text',
                   name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_806[isuCtc]);
+                }, false, 'SORTL can only accept ' + accSeq_806[isuCtc].join(" "));
               }
             } else if (cmrIssuingCntry == '846') {
               if (accSeq_846.hasOwnProperty(isuCtc) && !accSeq_846[isuCtc].includes(searchTerm)) {
@@ -3871,7 +3871,7 @@ function searchTermCodeValidator() {
                   id : 'searchTerm',
                   type : 'text',
                   name : 'searchTerm'
-                }, false, 'SearchTerm can only accept ' + accSeq_846[isuCtc]);
+                }, false, 'SORTL can only accept ' + accSeq_846[isuCtc].join(" "));
               }
             } else {
               return new ValidationResult(null, true);
