@@ -1404,22 +1404,6 @@ public class JPHandler extends GEOHandler {
       results.add(update);
     }
     if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_CUSTOMER.equals(type)
-        && !equals(oldData.getOemInd(), newData.getOemInd())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "OEMInd", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getOemInd(), "OEMInd", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getOemInd(), "OEMInd", cmrCountry));
-      results.add(update);
-    }
-    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_CUSTOMER.equals(type)
-        && !equals(oldData.getEmail2(), newData.getEmail2())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "AbbrevLocation", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getEmail2(), "AbbrevLocation", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getEmail2(), "AbbrevLocation", cmrCountry));
-      results.add(update);
-    }
-    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_CUSTOMER.equals(type)
         && !equals(oldData.getLeasingCompanyIndc(), newData.getLeasingCompanyIndc())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "LeasingCompIndc", "-"));
@@ -1521,14 +1505,6 @@ public class JPHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "zSeriesSw", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getZseriesSw(), "zSeriesSw", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getZseriesSw(), "zSeriesSw", cmrCountry));
-      results.add(update);
-    }
-    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
-        && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
       results.add(update);
     }
     if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
