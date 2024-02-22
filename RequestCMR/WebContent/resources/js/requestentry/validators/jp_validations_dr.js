@@ -6952,7 +6952,6 @@ function setAbbrevNmReqForBFKSCScenario() {
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA') {
       FormManager.enable('abbrevNm');
-      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
     } else {
       FormManager.clearValue('abbrevNm');
       FormManager.readOnly('abbrevNm');
