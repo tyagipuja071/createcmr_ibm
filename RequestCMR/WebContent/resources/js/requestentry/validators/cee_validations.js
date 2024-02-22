@@ -4868,16 +4868,22 @@ function addHandlersForCEE(){
 		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
 			setClientTier(value);
 			setCovValues2024CEE();
-		//	setSBOFromDBMapping();
+			setSBOFromDBMapping();
 		});
 	}	
 }
+
 
 function setSBOFromDBMapping(){
 	var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var sbo = FormManager.getActualValue(salesBusOffCd);
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp)){
+	return;
+   }
+
   var sboList = [];
 	 var qParams = {
 			   _qall: 'Y',
@@ -4890,8 +4896,8 @@ function setSBOFromDBMapping(){
 		for(i = 0; i< results.length; i++){
 			sboList.push(results[i].ret1);
 		}
-		if(!sboList.includes(sbo)){
-		FormManager.setValue('salesBusOffCd',results[0].ret1);
+		if(sboList.length == 1){
+		FormManager.setValue('salesBusOffCd',sboList[0]);
 		}
 	}	
 }
@@ -5001,7 +5007,9 @@ function validateSboCEE() {
     return {
       validate: function () {
 	     var custSubGrp = FormManager.getActualValue('custSubGrp');
-	     if(!['COMME','THDPT','PRICU'].includes(custSubGrp)){
+	     var cntry = FormManager.getActualValue('cmrIssuingCntry');
+       var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
+	     if(!['COMME','THDPT','PRICU'].includes(custSubGrp) || ([SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY].includes(cntry) && isuCTC == '')){
         return new ValidationResult(null, true);
       	}
         var isu = FormManager.getActualValue('isuCd');
@@ -5113,24 +5121,6 @@ function subIndustryLogicCEE(){
 }	
 	
 	
-function validateISUCTC() {
-  FormManager.addFormValidator((function () {
-    return {
-      validate: function () {
-        var isu = FormManager.getActualValue('isuCd');
-        var ctc = FormManager.getActualValue('clientTier');
-        var isuCTC = isu + ctc;
-    if (!['36Y','34Q','8B','5K','21','28','27E','3T'].includes(isuCTC)) {
-		return new ValidationResult(null, false, 'Please select correct ISU, CTC combination.');
-    }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-	
-	
-
 dojo.addOnLoad(function () {
  GEOHandler.CEE = ['358', '359', '363', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '707', '708', '713', '740', '741', '787', '820', '821',
     '826','889'];
