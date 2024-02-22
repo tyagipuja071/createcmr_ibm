@@ -337,7 +337,7 @@ function addHwMstrInstFlgValidator() {
 function addHandlersForSWISS() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
-      if(value.length > 0) setISUValuesForUpdateRequests(value);
+      setISUDropdown()
       setClientTierValues(value);
       setMubotyOnPostalCodeIMS(value);
       setCTCInitialValueBasedOnCurrentIsu();
@@ -1759,9 +1759,6 @@ function onPostalCodeChangeHandler() {
   console.log(">>>> Preferred Language on Postal Coade change");
   dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
     setPreferredLangSwiss();
-    if (IS27ESCENARIO()) {
-      setSortlBasedOnPostalCode(value);
-    }
   });
 }
 function setPreferredLangSwiss() {
@@ -1838,25 +1835,26 @@ function addVatIndValidator() {
   }
 }
 
-function setIsuInitialValueBasedOnSubScenario() {
+function checkIfItIsScenario(scenarios) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var scenarios = ['COM', 'GOV', 'PRI', '3PA']
+    // ["CHCOM", "CHGOV", ...]
+    var chscenarios = scenarios.map(scn => 'CH' + scn);
 
-  // ["CHCOM", "CHGOV", ...]
-  var chscenarios = scenarios.map(scn => 'CH' + scn);
+    // ["LICOM", "LIGOV", ...]
+    var liscenarios = scenarios.map(scn => 'LI' + scn);
 
-  // ["LICOM", "LIGOV", ...]
-  var liscenarios = scenarios.map(scn => 'LI' + scn);
+  return [...liscenarios, ...chscenarios].includes(custSubGrp)
+}
 
-  if(!([...liscenarios, ...chscenarios].includes(currentScenario))
-  || prevScenario == currentScenario
-  || prevScenario.length == 0) return;
+function setIsuInitialValueBasedOnSubScenario() {
+  var isScenarios = checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']);
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  if(!(isScenarios) || isuCd.length > 0) return;
 
   // pre-select ISU 27 for commercial, government, third party and private
   // person.
-  if ([...liscenarios, ...chscenarios].includes(custSubGrp)) {
-    FormManager.setValue('isuCd', '27');
-  }
+  FormManager.setValue('isuCd', '27');
 }
 
 function setCTCInitialValueBasedOnCurrentIsu() {
@@ -1940,10 +1938,12 @@ function loadSORTLandCTCandISUMapping(cntry) {
   }));
 }
 
-function setISUValuesForUpdateRequests(value) {
-  if(FormManager.getActualValue('reqType') == 'C') return;
+function setISUDropdown() {
+  if (!checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA'])) return;
 
-  if(value == '32') FormManager.setValue('isuCd', '');
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  if(isuCd == '32') return;
 
   FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['27','34','36','04','18','28','31','4D','4F','5K','8C']);
 
