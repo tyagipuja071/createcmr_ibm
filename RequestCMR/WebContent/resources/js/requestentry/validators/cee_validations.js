@@ -4718,7 +4718,7 @@ function clientTierCodeValidator() {
         name: 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'\'.');
     }
-  } else if (['36','34','27'].includes(isuCode)) {
+  } else if (!['36','34','27'].includes(isuCode)) {
     if (clientTierCode == '') {
       return new ValidationResult(null, true);
     } else {
@@ -4942,7 +4942,7 @@ function setCovValues2024CEE(){
 	// applicable country viz.
 	switch (cntry){
 		case SysLoc.POLAND:
-		if(['COMME','XTP','XCOM','COMME','THDPT','PRICU'].includes(custSubGrp)){
+		if(['COMME','XTP','XCOM','COMME','THDPT'].includes(custSubGrp)){
 		FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34','36','04','28','3T','5K']);
 		FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','Y','']);
 		FormManager.enable('isuCd');
@@ -4966,7 +4966,7 @@ function setCovValues2024CEE(){
     case SysLoc.BELARUS:
     case SysLoc.RUSSIA:
 
-    if(['COMME','XTP','XCOM','COMME','THDPT','PRICU'].includes(custSubGrp)){
+    if(['COMME','XTP','XCOM','COMME','THDPT'].includes(custSubGrp)){
 		FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34','36','5K']);
 		FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','Y','']);
 		FormManager.enable('isuCd');
@@ -4984,7 +4984,7 @@ function setCovValues2024CEE(){
     case SysLoc.TAJIKISTAN:
     case SysLoc.UZBEKISTAN:
 
-    if(['COMME','XTP','XCOM','COMME','THDPT','PRICU'].includes(custSubGrp)){
+    if(['COMME','XTP','XCOM','COMME','THDPT'].includes(custSubGrp)){
 		FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['27','34','36','5K']);
 		FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['E','Q','Y','']);
 		FormManager.enable('isuCd');
