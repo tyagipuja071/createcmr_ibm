@@ -4908,8 +4908,16 @@ function setClientTier(){
 		FormManager.setValue('clientTier','Q');
 	}else if(isuCd == '36'){
 		FormManager.setValue('clientTier','Y');
+	}else if(isuCd == '27'){
+		FormManager.setValue('clientTier','E');
 	}else if(['8B','21','5K','04','3T','28'].includes(isuCd)){
 		FormManager.setValue('clientTier','');
+	}
+	
+	if(!['27','34','36'].includes(isuCd)){
+		FormManager.removeValidator('clientTier', Validators.REQUIRED);
+	}else if(['27','34','36'].includes(isuCd)){
+		FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
 	}
 }
 
@@ -4949,8 +4957,6 @@ function setCovValues2024CEE(){
 	switch (cntry){
 		case SysLoc.POLAND:
 		if(['COMME','XTP','XCOM','COMME','THDPT'].includes(custSubGrp)){
-		FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34','36','04','28','3T','5K']);
-		FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','Y','']);
 		FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('salesBusOffCd');
@@ -4973,8 +4979,6 @@ function setCovValues2024CEE(){
     case SysLoc.RUSSIA:
 
     if(['COMME','XTP','XCOM','COMME','THDPT'].includes(custSubGrp)){
-		FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34','36','5K']);
-		FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q','Y','']);
 		FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('salesBusOffCd');
@@ -4991,8 +4995,6 @@ function setCovValues2024CEE(){
     case SysLoc.UZBEKISTAN:
 
     if(['COMME','XTP','XCOM','COMME','THDPT'].includes(custSubGrp)){
-		FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['27','34','36','5K']);
-		FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['E','Q','Y','']);
 		FormManager.enable('isuCd');
     FormManager.enable('clientTier');
     FormManager.enable('salesBusOffCd');
