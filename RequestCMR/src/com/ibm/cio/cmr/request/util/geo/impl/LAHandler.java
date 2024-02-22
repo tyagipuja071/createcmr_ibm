@@ -447,7 +447,9 @@ public class LAHandler extends GEOHandler {
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     String postalCode = currentRecord.getCmrPostalCode();
-    postalCode = !StringUtils.isEmpty(postalCode) ? postalCode.replace("-", "") : "";
+    f ("U".equals(admin.getReqType()) && !"631".equals(currentRecord.getCmrIssuedBy())) {
+      postalCode = !StringUtils.isEmpty(postalCode) ? postalCode.replace("-", "") : "";
+    }
     String issuingCountry = currentRecord.getCmrIssuedBy();
     String streetAddr1 = address.getAddrTxt();
     address.setPostCd(postalCode);
