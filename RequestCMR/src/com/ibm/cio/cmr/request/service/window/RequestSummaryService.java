@@ -288,13 +288,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(getCodeAndDescription(oldData.getCmrOwner(), "CMROwner", cmrCountry));
             results.add(update);
           }
-          if (TYPE_IBM.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
-              && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Company"))) {
-            update = new UpdatedDataModel();
-            update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
-            update.setNewData(newData.getCompany());
-            update.setOldData(oldData.getCompany());
-            results.add(update);
+          if (!"760".equalsIgnoreCase(oldData.getCmrIssuingCntry())) {
+            if (TYPE_IBM.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Company"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
+              update.setNewData(newData.getCompany());
+              update.setOldData(oldData.getCompany());
+              results.add(update);
+            }
           }
           if (!"848".equals(oldData.getCmrIssuingCntry()) && !SystemLocation.GERMANY.equals(oldData.getCmrIssuingCntry())) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())
@@ -415,13 +417,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getTaxCd1());
               results.add(update);
             }
-            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "LocalTax2"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
-              update.setNewData(newData.getTaxCd2());
-              update.setOldData(oldData.getTaxCd2());
-              results.add(update);
+            if (!"760".equalsIgnoreCase(oldData.getCmrIssuingCntry())) {
+              if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())
+                  && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "LocalTax2"))) {
+                update = new UpdatedDataModel();
+                update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
+                update.setNewData(newData.getTaxCd2());
+                update.setOldData(oldData.getTaxCd2());
+                results.add(update);
+              }
             }
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getVat(), newData.getVat())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "VAT"))) {
@@ -448,13 +452,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getTaxPayerCustCd());
               results.add(update);
             }
-            if (TYPE_IBM.equals(type) && !equals(oldData.getEnterprise(), newData.getEnterprise())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Enterprise"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "Enterprise", "-"));
-              update.setNewData(newData.getEnterprise());
-              update.setOldData(oldData.getEnterprise());
-              results.add(update);
+            if (!"760".equalsIgnoreCase(oldData.getCmrIssuingCntry())) {
+              if (TYPE_IBM.equals(type) && !equals(oldData.getEnterprise(), newData.getEnterprise())
+                  && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Enterprise"))) {
+                update = new UpdatedDataModel();
+                update.setDataField(PageManager.getLabel(cmrCountry, "Enterprise", "-"));
+                update.setNewData(newData.getEnterprise());
+                update.setOldData(oldData.getEnterprise());
+                results.add(update);
+              }
             }
             if (TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getSearchTerm())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "SearchTerm"))) {
