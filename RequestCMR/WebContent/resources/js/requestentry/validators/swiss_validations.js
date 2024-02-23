@@ -1939,7 +1939,7 @@ function loadSORTLandCTCandISUMapping(cntry) {
 }
 
 function setISUDropdown() {
-  if (!checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA'])) return;
+  if (!checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']) && (FormManager.getActualValue('reqType') == 'C')) return;
 
   var isuCd = FormManager.getActualValue('isuCd');
 
@@ -2021,6 +2021,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(setISUDropdown, GEOHandler.SWISS);
 
   GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
