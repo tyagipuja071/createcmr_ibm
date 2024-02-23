@@ -5025,9 +5025,20 @@ function validateSboCEE() {
 			    CTC: ctc,
 			    SBO: sbo
 		};
+		 var qParams1 = {
+			   _qall: 'Y',
+			    CNTRY: cntry,
+			    ISU: isu,
+			    CTC: ctc,
+		};
+	  var results1 = cmr.query('GET_SBO_CEE', qParams1);
+    if(results1 != undefined && results1.length > 0){
 		var results = cmr.query('GET_SBO_CEE_VALIDATE', qParams);
-    if (results && results.length == 0) {
+    if (results == undefined || results.length == 0) {
 		return new ValidationResult(null, false, 'Please select correct ISU, CTC and SBO combination.');
+    }else{
+	  return new ValidationResult(null, true);
+}
     }
         return new ValidationResult(null, true);
       }
@@ -5266,4 +5277,7 @@ dojo.addOnLoad(function () {
 	GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
 	GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
   GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
+  GEOHandler.addAfterConfig(setClientTier, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(setClientTier,GEOHandler.CEE);
+
 });
