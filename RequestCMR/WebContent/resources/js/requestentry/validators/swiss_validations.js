@@ -2,6 +2,8 @@ let currentlyLoadedSORTL = []
 let SORTLandCTCandISUMapping = []
 var prevScenario = '';
 var currentScenario = '';
+const COMnGOVnPRIn3PAISUs = ['27','34','36','04','18','28','31','4D','4F','5K','8C']
+let initialISU = '';
 
 /* Register SWISS Javascripts */
 function addAfterConfigForSWISS() {
@@ -1544,43 +1546,6 @@ function setCTCValues() {
     }
   }
 }
-// CREATCMR-4293
-
-function clientTierValidator() {
-  FormManager.addFormValidator((function () {
-    return {
-      validate: function () {
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
-        var reqType = FormManager.getActualValue('reqType');
-        var valResult = null;
-
-        var oldClientTier = null;
-        var oldISU = null;
-        var requestId = FormManager.getActualValue('reqId');
-
-        if (reqType == 'C') {
-          valResult = validateISUandCTCCombination();
-        } else {
-          qParams = {
-            REQ_ID: requestId,
-          };
-          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-
-          if (result != null && result != '') {
-            oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU = result.ret3 != null ? result.ret3 : '';
-
-            if (clientTier != oldClientTier || isuCd != oldISU) {
-              valResult = validateISUandCTCCombination();
-            }
-          }
-        }
-        return valResult;
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
 
 function validateSortl() {
   FormManager.addFormValidator((function () {
@@ -1883,9 +1848,26 @@ function validateISUandCTCCombination() {
         var ctcCd = FormManager.getActualValue('clientTier');
         let CTCForIsu = SORTLandCTCandISUMapping.filter(({ ISU, CTC }) => ISU == isuCd && CTC == ctcCd)
 
-        if (!mapping[isuCd]) {
-          return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
-        }
+        let validISUCheck = () => (
+          checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']) && 
+          COMnGOVnPRIn3PAISUs.includes(isuCd))
+
+          if (FormManager.getActualValue('reqType') == 'C'){
+            if(FormManager.getActualValue('isuCd') == '32') {
+              return new ValidationResult(null, false, `ISU code 32 cannot be used as it is deprecated.`);
+            }
+
+            if (!validISUCheck()) {
+              return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
+            }
+          }
+
+          if (FormManager.getActualValue('reqType') != 'C'){
+            if (initialISU != '32' && isuCd == '32') {
+              return new ValidationResult(null, false, `ISU code 32 cannot be used as it is deprecated.`);
+            }
+          }
+        
         if (CTCForIsu.length == 0) {
           return new ValidationResult({
             id: 'clientTier',
@@ -1896,7 +1878,7 @@ function validateISUandCTCCombination() {
         return new ValidationResult(null, true);
       }
     }
-  }));
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 
@@ -1939,14 +1921,23 @@ function loadSORTLandCTCandISUMapping(cntry) {
 }
 
 function setISUDropdown() {
+  var dropdownValues = COMnGOVnPRIn3PAISUs;
+
   if (!checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']) && (FormManager.getActualValue('reqType') == 'C')) return;
 
   var isuCd = FormManager.getActualValue('isuCd');
 
-  if(isuCd == '32') return;
+  if(isuCd == '32') {
+    dropdownValues = [...dropdownValues, '32']
+  };
 
-  FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['27','34','36','04','18','28','31','4D','4F','5K','8C']);
+  FormManager.limitDropdownValues(FormManager.getField('isuCd'), dropdownValues );
+}
 
+function setRequestInitialState() {
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  if(isuCd != '' && initialISU == '') initialISU = isuCd;
 }
 
 dojo.addOnLoad(function () {
@@ -1964,6 +1955,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addAfterConfigForSWISS, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setRequestInitialState, GEOHandler.SWISS);
 
   // GEOHandler.addAfterTemplateLoad(setCurrencyCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCustClassCd, GEOHandler.SWISS);
@@ -2004,7 +1996,6 @@ dojo.addOnLoad(function () {
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.SWISS);
-  GEOHandler.registerValidator(clientTierValidator, GEOHandler.SWISS, null, true);
 
   GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
@@ -2017,6 +2008,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setPreferredLangAddr, GEOHandler.SWISS);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateISUandCTCCombination, GEOHandler.SWISS);
 
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
