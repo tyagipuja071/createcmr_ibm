@@ -228,7 +228,7 @@ function disableIBMTab() {
     FormManager.readOnly('cmrNo');
   } else {
     FormManager.enable('enterprise');
-    if (custSubGrp == 'LUPRI') {
+    if (!custSubGrp == 'LUPRI') {
       FormManager.enable('inacCd');
     }
     FormManager.enable('searchTerm');
