@@ -615,7 +615,7 @@ function setMubotyOnPostalCodeIMS(value) {
 function reloadSORTLList() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  var postCd = FormManager.getActualValue('postCd');
+  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postCd, custSubGrp)
