@@ -4875,12 +4875,12 @@ function addHandlersForCEE(){
 	
 	if (salBusOffCdHandler == null) {
 		salBusOffCdHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-			if( ['PRICU','RSPC','CSPC','MEPC'].includes(custSubGrp)){
+			var custSubGrp = FormManager.getActualValue('custSubGrp');
+			if (['PRICU', 'RSPC', 'CSPC', 'MEPC'].includes(custSubGrp)) {
 				FormManager.readOnly('salesBusOffCd');
 			}
 		});
-	}	
+	}
 }
 
 
