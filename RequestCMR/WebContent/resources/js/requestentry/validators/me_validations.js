@@ -2093,7 +2093,7 @@ function lockFieldsBasedOnISU() {
     if (isuCd == '5k') {
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
-    } else if (isuCd != '5k' && custSubGrp != 'PRICU') {
+    } else if (isuCd != '5k' || custSubGrp != 'PRICU') {
       FormManager.enable('clientTier');
       FormManager.enable('taxCd2');
     }
