@@ -456,7 +456,7 @@ function lockIBMtabME() {
   if (_custSubtypes.includes(custSubType)) {
     FormManager.readOnly('taxCd2');
     FormManager.setValue('taxCd2', '');
-  } else {
+  } else if (!_custSubtypes || custSubType != 'PRICU') {
     FormManager.enable('taxCd2');
   }
 
@@ -2093,7 +2093,7 @@ function lockFieldsBasedOnISU() {
     if (isuCd == '5k') {
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
-    } else {
+    } else if (isuCd != '5k' && custSubGrp != 'PRICU') {
       FormManager.enable('clientTier');
       FormManager.enable('taxCd2');
     }
