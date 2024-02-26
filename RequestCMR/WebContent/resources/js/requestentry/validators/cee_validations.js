@@ -4856,6 +4856,7 @@ function addressQuotationValidatorCEMEA() {
 
 var subIndHandler = null;
 var isuCdHandler = null;
+var salBusOffCdHandler = null;
 
 function addHandlersForCEE(){	
 	if (subIndHandler == null) {
@@ -4871,6 +4872,15 @@ function addHandlersForCEE(){
 			setSBOFromDBMapping();
 		});
 	}	
+	
+	if (salBusOffCdHandler == null) {
+		salBusOffCdHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
+			var custSubGrp = FormManager.getActualValue('custSubGrp');
+			if (['PRICU', 'RSPC', 'CSPC', 'MEPC'].includes(custSubGrp)) {
+				FormManager.readOnly('salesBusOffCd');
+			}
+		});
+	}
 }
 
 
