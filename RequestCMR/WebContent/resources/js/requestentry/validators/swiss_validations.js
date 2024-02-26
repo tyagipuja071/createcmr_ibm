@@ -615,10 +615,15 @@ function setMubotyOnPostalCodeIMS(value) {
 function reloadSORTLList() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  var postCd = FormManager.getActualValue('postCd');
+  var reqId = FormManager.getActualValue('reqId');
+  var params = {
+    REQ_ID : reqId,
+  };
+  var postalResult = cmr.query('ADD.GET_POSTAL_CD.BY_REQID', params);
+  postalResult = postalResult.ret1;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-  let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postCd, custSubGrp)
+  let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postalResult, custSubGrp)
   currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, '', postalCodeSubgroup)
   setSortlListValues([...currentlyLoadedSORTL]);
 }
