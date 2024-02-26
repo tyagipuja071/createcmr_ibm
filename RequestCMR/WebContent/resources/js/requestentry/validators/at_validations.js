@@ -264,19 +264,14 @@ if(values.length == 0) {
 }
 
 function getSORTLAndLoadIntoList() {
-  var reqId = FormManager.getActualValue('reqId');
-  var params = {
-    REQ_ID : reqId,
-  };
-  var postalResult = cmr.query('ADD.GET_POSTAL_CD.BY_REQID', params);
-  postalResult = postalResult.ret1;
+  var postCd = FormManager.getActualValue('postCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('ClientTier');
   var ims = FormManager.getActualValue('subIndustryCd');
   var isuCtc = `${isuCd}${ctc}`
 
-  setSortlListValues(getSBOListByISU(cntry, isuCtc, ims, postalResult))
+  setSortlListValues(getSBOListByISU(cntry, isuCtc, ims, postCd))
 }
 
 function loadSORTLandCTCandISUMapping(cntry) {
@@ -2182,7 +2177,6 @@ function setCTCBasedOnISUCode() {
 function setIsuInitialValueBasedOnSubScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var scenarios = ['COMME', 'GOVRN', 'THDPT']
-  var isuCd = FormManager.getActualValue('isuCd');
 
   // pre-select ISU 27 for commercial, government, third party and private
   // person.
