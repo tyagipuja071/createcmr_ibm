@@ -2182,6 +2182,7 @@ function setCTCBasedOnISUCode() {
 function setIsuInitialValueBasedOnSubScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var scenarios = ['COMME', 'GOVRN', 'THDPT']
+  var isuCd = FormManager.getActualValue('isuCd');
 
   // pre-select ISU 27 for commercial, government, third party and private
   // person.
