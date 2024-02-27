@@ -216,11 +216,6 @@ function addCmrNoValidator() {
 }
 
 function getSBOListByISU(isuCtc, ims, postCd) {
-  var isuCode = FormManager.getActualValue('isuCd');
-  var clientTierCode = FormManager.getActualValue('clientTier');
-  var postCd = FormManager.getActualValue('postCd');
-  var isuCtc = `${isuCode}${clientTierCode}`
-  var ims = FormManager.getActualValue('subIndustryCd');
   // CMR-710 use 34Q to replace 32S/32N
 checkPostCodeGroup = postCd.substring(0, 2).match(/(8[0-9])|(7[0-5]|(5[1-3])|(4[0-9])|(3[0-9])|(2[0-8])|(1[0-2]))/g)
 const getSalesBoDesc = () => {
@@ -270,14 +265,13 @@ if(values.length == 0) {
 }
 
 function getSORTLAndLoadIntoList() {
-  var postCd = FormManager.getActualValue('postCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var postCd = getCurrentPostalCode();
   var isuCd = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var ims = FormManager.getActualValue('subIndustryCd');
   var isuCtc = `${isuCd}${ctc}`
 
-  setSortlListValues(getSBOListByISU(cntry, isuCtc, ims, postCd))
+  setSortlListValues(getSBOListByISU(isuCtc, ims, postCd))
 }
 
 
@@ -376,7 +370,7 @@ function addHandlersForAUSTRIA() {
         setSalesRepValues(value);      
       }
 
-      getSORTLAndLoadIntoList()
+      getSORTLAndLoadIntoList();
     });
   }
 
@@ -2208,6 +2202,13 @@ function checkIfISUhasCorrectCTC(isuCd) {
   return true;
 }
 
+function getCurrentPostalCode() {
+  var postCd = FormManager.getActualValue('postCd');
+  if(postCd == '') {
+    postCd = getPostCode()
+  }
+  return postCd;
+}
 
 dojo.addOnLoad(function () {
   console.log('adding AUSTRIA functions...');
