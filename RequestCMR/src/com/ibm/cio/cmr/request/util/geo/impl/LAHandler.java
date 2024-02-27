@@ -126,6 +126,11 @@ public class LAHandler extends GEOHandler {
           }
           converted.add(record);
         }
+        
+        if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+          record.setCmrAddrTypeCode("PG01");
+        }
+        converted.add(record);
       }
       source.setItems(converted);
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
@@ -133,6 +138,10 @@ public class LAHandler extends GEOHandler {
         if ("ZS01".equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
           continue;
         }
+        if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+          record.setCmrAddrTypeCode("PG01");
+        }
+      
         converted.add(record);
       }
       source.setItems(converted);
