@@ -2163,6 +2163,7 @@ function setCTCBasedOnISUCode() {
 
 function setIsuInitialValueBasedOnSubScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
   var scenarios = ['COMME', 'GOVRN', 'THDPT']
 
   // pre-select ISU 27 for commercial, government, third party and private
@@ -2236,7 +2237,8 @@ dojo.addOnLoad(function () {
     validateSBO,
     setISUCTCOnIMSChange,
     setAddressDetailsForViewAT,
-    resetSortlValidator
+    resetSortlValidator,
+    setIsuInitialValueBasedOnSubScenario
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
