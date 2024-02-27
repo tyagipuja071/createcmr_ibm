@@ -126,12 +126,25 @@ public class LAHandler extends GEOHandler {
           }
           converted.add(record);
         }
+        if (SystemLocation.BRAZIL.equals(record.getCmrIssuedBy())) {
+          if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+              && StringUtils.isNotEmpty(record.getExtWalletId())) {
+            record.setCmrAddrTypeCode("PG01");
+          }
+          converted.add(record);
+        }
       }
       source.setItems(converted);
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
         if ("ZS01".equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
           continue;
+        }
+        if (SystemLocation.BRAZIL.equals(record.getCmrIssuedBy())) {
+          if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+              && StringUtils.isNotEmpty(record.getExtWalletId())) {
+            record.setCmrAddrTypeCode("PG01");
+          }
         }
         converted.add(record);
       }
