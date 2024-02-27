@@ -5043,9 +5043,13 @@ function validateSboCEE() {
 		};
 	  var results1 = cmr.query('GET_SBO_CEE', qParams1);
     if(results1 != undefined && results1.length > 0){
+	  var sboList = [];
+	  for(i =0;i<results1.length;i++){
+		sboList.push(results1[i].ret1);
+	  }
 		var results = cmr.query('GET_SBO_CEE_VALIDATE', qParams);
     if (results == undefined || results.length == 0) {
-		return new ValidationResult(null, false, 'Please select correct ISU, CTC and SBO combination.');
+		return new ValidationResult(null, false, 'Please select correct  SBO from the list ->('+ sboList +') for given  ISU , CTC combination.');
     }else{
 	  return new ValidationResult(null, true);
 }
