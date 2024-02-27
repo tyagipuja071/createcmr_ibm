@@ -2238,7 +2238,7 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     setAddressDetailsForViewAT,
     resetSortlValidator,
-    setIsuInitialValueBasedOnSubScenario
+    getSORTLAndLoadIntoList
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
