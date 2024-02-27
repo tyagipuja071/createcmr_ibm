@@ -2292,7 +2292,11 @@ public class CEMEAHandler extends BaseSOFHandler {
                   && ("B".equals(stateProv) || "@".equals(stateProv) || "".equals(stateProv))) {
                 if (!StringUtils.isBlank(city) && (city.equalsIgnoreCase("BUCHAREST") || city.equalsIgnoreCase("BUKAREST")
                     || city.equalsIgnoreCase("BUCUREŞTI") || city.equalsIgnoreCase("BUCURESTI"))) {
-                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCUREȘTI SECTORUL 'N' (N = number 1,2,3,4,5 or 6) <br>");
+                  if (!"Address in Local language".equalsIgnoreCase(sheet.getSheetName())) {
+                    error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                  } else {
+                    error.addError(row.getRowNum(), "City", "Correct format for city is BUCUREȘTI SECTORUL 'N' (N = number 1,2,3,4,5 or 6) <br>");
+                  }
                 }
 
                 String pattern = "^[a-zA-Z0-9]*$";
@@ -2307,7 +2311,11 @@ public class CEMEAHandler extends BaseSOFHandler {
 
                 if (!StringUtils.isBlank(city) && Pattern.compile("[0,7,8,9]").matcher(city.substring(city.length() - 1)).find()
                     && "BUCHAREST SECTOR".equals(city.substring(0, 16))) {
-                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCUREȘTI SECTORUL 'N' (N = number 1,2,3,4,5 or 6) <br>");
+                  if (!"Address in Local language".equalsIgnoreCase(sheet.getSheetName())) {
+                    error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
+                  } else {
+                    error.addError(row.getRowNum(), "City", "Correct format for city is BUCUREȘTI SECTORUL 'N' (N = number 1,2,3,4,5 or 6) <br>");
+                  }
                 }
 
                 if (!StringUtils.isBlank(custName1) && !custName1.equals(custName1.toUpperCase())) {
