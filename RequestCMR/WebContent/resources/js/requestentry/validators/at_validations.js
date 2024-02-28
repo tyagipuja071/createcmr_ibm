@@ -215,13 +215,18 @@ function addCmrNoValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function getSBOListByISU(isuCtc, ims, postCd) {
+function getSBOListByISU() {
+  var postCd = getCurrentPostalCode();
+  var isuCd = FormManager.getActualValue('isuCd');
+  var ctc = FormManager.getActualValue('clientTier');
+  var isuCtc = `${isuCd}${ctc}`
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   // CMR-710 use 34Q to replace 32S/32N
-checkPostCodeGroup = postCd.substring(0, 2).match(/(8[0-9])|(7[0-5]|(5[1-3])|(4[0-9])|(3[0-9])|(2[0-8])|(1[0-2]))/g)
-const getSalesBoDesc = () => {
+  checkPostCodeGroup = postCd.substring(0, 2).match(/(8[0-9])|(7[0-5]|(5[1-3])|(4[0-9])|(3[0-9])|(2[0-8])|(1[0-2]))/g)
+  const getSalesBoDesc = () => {
   if (IS27ESCENARIO()) {
-    if(checkPostCodeGroup){
-      return '1'
+    if(checkPostCodeGroup || custSubGrp == 'XCOM'){
+      return '1' 
     }
     return '2'
   }
@@ -230,33 +235,18 @@ const getSalesBoDesc = () => {
 
 var salesBoDesc = getSalesBoDesc()
 
-if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
-  qParams = {
-    _qall: 'Y',
-    ISSUING_CNTRY: '618',
-    ISU: '%' + isuCtc + '%',
-    UPDATE_BY_ID: '%' + ims.substring(0, 1) + '%',
-    SALES_BO_DESC: '%' + salesBoDesc + '%'
-  };
-  queryResult = cmr.query('GET.SBOLIST.BYISUCTC.AUSTRIA', qParams);
-} else {
-  qParams = {
-    _qall: 'Y',
-    ISSUING_CNTRY: '618',
-    ISU: '%' + isuCtc + '%',
-    SALES_BO_DESC: '%' + salesBoDesc + '%'
-  };
-  queryResult = cmr.query('GET.SBOLIST.BYISU.AUSTRIA', qParams);
-}
+qParams = {
+  _qall: 'Y',
+  ISSUING_CNTRY: '618',
+  ISU: '%' + isuCtc + '%',
+  SALES_BO_DESC: '%' + salesBoDesc + '%'
+};
+queryResult = cmr.query('GET.SBOLIST.BYISU.AUSTRIA', qParams);
 
 return queryResult.map(({ret1}) => ret1);
 }
 
-function setSortlListValues(values) {
-let dropdownField = document.getElementById('templatevalue-salesBusOffCd')
-if(!!dropdownField) {
-  dropdownField.setAttribute('values', values);
-}
+function setSBOInitialValue(values) {
 if(values.length == 0) {
   FormManager.clearValue('salesBusOffCd')
 } else {
@@ -264,14 +254,8 @@ if(values.length == 0) {
 }
 }
 
-function getSORTLAndLoadIntoList() {
-  var postCd = getCurrentPostalCode();
-  var isuCd = FormManager.getActualValue('isuCd');
-  var ctc = FormManager.getActualValue('clientTier');
-  var ims = FormManager.getActualValue('subIndustryCd');
-  var isuCtc = `${isuCd}${ctc}`
-
-  setSortlListValues(getSBOListByISU(isuCtc, ims, postCd))
+function getSBOandAssignFirstValue() {
+  setSBOInitialValue(getSBOListByISU())
 }
 
 
@@ -352,8 +336,9 @@ function addHandlersForAUSTRIA() {
           FormManager.removeValidator('clientTier', Validators.REQUIRED);
         // CREATCMR-4293
 
-      setCTCBasedOnISUCode()
-      getSORTLAndLoadIntoList()
+      setCTCBasedOnISUCode();
+      getSBOandAssignFirstValue();
+      setDropdownForScenarios();
     });
   }
 
@@ -369,8 +354,6 @@ function addHandlersForAUSTRIA() {
       if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
         setSalesRepValues(value);      
       }
-
-      getSORTLAndLoadIntoList();
     });
   }
 
@@ -888,45 +871,18 @@ function setSalesRepValues(clientTier) {
   }
 }
 
-/**
- * CMR-2101:Austria - sets SBO based on isuCtc
- */
-function setSBOValuesForIsuCtc() {
-  if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var isuCd = FormManager.getActualValue('isuCd');
-  var isuCtc = isuCd + clientTier;
-
-
-  // SBO will be based on IMS
-  if (isuCd != '') {
-
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    var lockSboScenario = ['PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC'];
-    if (isuCtc == '8B' || isuCtc == '21' || lockSboScenario.includes(custSubGrp)) {
-      FormManager.readOnly('salesBusOffCd');
-    } else if (FormManager.getActualValue('userRole') == 'Processor') {
-      FormManager.enable('salesBusOffCd');
-    }
-  }
-}
-
 function validateSBOValuesForIsuCtc() {
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
         var sbos = getSBOListByISU()
-          if (sbos.length == 0 || !sbos.includes(FormManager.getActualValue('salesBusOffCd'))) {
+        if(sbos.length == 0) {
+          return new ValidationResult(null, false,
+            'No SBO was found for the current ISU/CTC');
+        }
+          if (!sbos.includes(FormManager.getActualValue('salesBusOffCd'))) {
             return new ValidationResult(null, false,
-              'The SBO provided is invalid. It should be from the list: ' + sbos);
+              'The SBO provided is invalid. It should be from the list: ' + sbos.join(', '));
         }
         return new ValidationResult(null, true);
       }
@@ -2116,6 +2072,42 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function validateISUCTC() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var isuCd = FormManager.getActualValue('isuCd');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var scenarios = [
+          {
+            scn: ['COMME', 'GOVRN', 'THDPT', 'XCOM'],
+            isu: ['27','34','36','5K'],
+          },
+          {
+            scn: ['BUSPR', 'XBP'],
+            isu: ['8B'],
+          },
+          {
+            scn: ['INTER', 'INTSO', 'IBMEM'],
+            isu: ['21'],
+          }
+        ]
+
+        for (const scenario of scenarios) {
+          if(scenario.scn.includes(custSubGrp) && !scenario.isu.includes(isuCd)) {
+            return new ValidationResult({
+              id: 'clientTier',
+              type: 'text',
+              name: 'clientTier'
+            }, false, `ISU ${isuCd} is invalid for the current subscenario`);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 // CREATCMR-6378
 function retainVatValueAT() {
   var vat = FormManager.getActualValue('vat');
@@ -2171,11 +2163,11 @@ function setDropdownForScenarios() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var scenarios = [
     {
-      scn: ['COMME', 'GOVRN', 'THDPT'],
+      scn: ['COMME', 'GOVRN', 'THDPT', 'XCOM'],
       isus: ['27','34','36','5K'],
     },
     {
-      scn: ['BUSPR'],
+      scn: ['BUSPR', 'XBP'],
       isus: ['8B'],
     },
     {
@@ -2210,6 +2202,24 @@ function getCurrentPostalCode() {
   return postCd;
 }
 
+
+
+function lockFields() {
+  const doForThoseFieldsInSubscenarios = (fields, scenarios, action) => {
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    for (scenario of scenarios){
+      if(scenario == custSubGrp) {
+        for (field of fields) {
+          if(action == "LOCK") FormManager.readOnly(field);
+          if(action == "UNLOCK") FormManager.enable(field);
+        }
+      }
+    }
+  }
+
+  doForThoseFieldsInSubscenarios(['salesBusOffCd'], ['INTSO', 'INTER', 'BUSPR'], 'LOCK')
+}
+
 dojo.addOnLoad(function () {
   console.log('adding AUSTRIA functions...');
   GEOHandler.enableCustomerNamesOnAddress([SysLoc.AUSTRIA]);
@@ -2239,7 +2249,8 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     setAddressDetailsForViewAT,
     resetSortlValidator,
-    getSORTLAndLoadIntoList
+    setDropdownForScenarios,
+    lockFields
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
@@ -2249,7 +2260,7 @@ dojo.addOnLoad(function () {
     changeAbbrevNmLocn,
     addLatinCharValidator,
     toggleLocalCountryNameOnOpen,
-    getSORTLAndLoadIntoList
+    getSBOandAssignFirstValue
   ]) {
     GEOHandler.addAddrFunction(func, [SysLoc.AUSTRIA]);
   }
@@ -2268,14 +2279,9 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     togglePPSCeidCEE,
     resetSortlValidator,
-
-    // CREATECMR-11037
-    
-    setIsuInitialValueBasedOnSubScenario,
-    setCTCBasedOnISUCode,
     setDropdownForScenarios,
-    setSBOValuesForIsuCtc,
-    getSORTLAndLoadIntoList,
+    setCTCBasedOnISUCode,
+    lockFields
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
@@ -2289,6 +2295,7 @@ dojo.addOnLoad(function () {
     clientTierValidator,
     validateSBOValuesForIsuCtc,
     validateSortl,
+    validateISUCTC,
     austriaCustomVATValidator(SysLoc.AUSTRIA, 'MAIN_CUST_TAB', 'frmCMR', 'ZP01')
   ]) {
     GEOHandler.registerValidator(func, [SysLoc.AUSTRIA], null, true);
