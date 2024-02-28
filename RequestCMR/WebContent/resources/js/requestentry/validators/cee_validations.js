@@ -5013,12 +5013,12 @@ function setCovValues2024CEE(){
     
 	}
 	
-	  if(FormManager.getActualValue('viewOnlyPage') == 'true') {
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
 		FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('salesBusOffCd');
-    FormManager.readOnly('isicCd');
-     } 
+		FormManager.readOnly('clientTier');
+		FormManager.readOnly('salesBusOffCd');
+		FormManager.readOnly('isicCd');
+	} 
 	}
 	
 function validateSboCEE() {
