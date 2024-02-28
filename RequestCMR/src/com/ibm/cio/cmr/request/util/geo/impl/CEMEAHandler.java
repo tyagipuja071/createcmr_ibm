@@ -2338,6 +2338,9 @@ public class CEMEAHandler extends BaseSOFHandler {
                   error.addError(row.getRowNum(), "Hardware Master", "The address data must be entered in capital letters'. <br>");
                 }
               }
+              if (error.hasErrors()) {
+                validations.add(error);
+              }
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               row = sheet.getRow(0);// data field name row
               int ordBlkIndex = 12;// default index
@@ -2435,9 +2438,6 @@ public class CEMEAHandler extends BaseSOFHandler {
               }
             }
           } // end row loop
-          if (error.hasErrors()) {
-            validations.add(error);
-          }
         }
       }
     }
