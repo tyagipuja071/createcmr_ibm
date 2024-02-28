@@ -4046,9 +4046,6 @@ function StcOrderBlockValidation() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-function enableNdisableField() {
-
-}
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
