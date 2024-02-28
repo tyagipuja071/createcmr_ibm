@@ -449,18 +449,6 @@ function afterConfigForCEMEA() {
   addressQuotationValidatorCEMEA();
 }
 
-function lockIBMtabME() {
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var _custSubtypes = [ 'BUSPR', 'IBMEM', 'INTER' ];
-  if (_custSubtypes.includes(custSubType)) {
-    FormManager.readOnly('taxCd2');
-    FormManager.setValue('taxCd2', '');
-  } else if (!_custSubtypes || custSubType != 'PRICU') {
-    FormManager.enable('taxCd2');
-  }
-
-}
-
 /**
  * validates CMR number for selected scenarios only
  */
@@ -575,7 +563,7 @@ function addHandlersForCEMEA() {
         FormManager.setValue('clientTier', '');
       }
 
-      lockFieldsBasedOnISU();
+      lockFieldsBasedOnISU(value);
     });
   }
 
@@ -618,13 +606,6 @@ function addHandlersForCEMEA() {
       validateEnterpriseField(value);
     });
   }
-
-  if (_custSubGrpHandler == null) {
-    _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      custSubGrpChange();
-    });
-  }
-
 }
 
 function setVatValidatorCEMEA() {
@@ -1909,19 +1890,6 @@ function setEnterpriseValues(clientTier) {
   }
 }
 
-function custSubGrpChange() {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'PRICU') {
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('taxCd2');
-  } else {
-    FormManager.enable('isuCd');
-    FormManager.enable('clientTier');
-    FormManager.enable('taxCd2');
-  }
-}
-
 function setEnterpriseValuesME(clientTier) {
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -2081,18 +2049,18 @@ function validateEnterpriseField(taxCd2) {
   }
 }
 
-function lockFieldsBasedOnISU() {
+function lockFieldsBasedOnISU(isuCd) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntryME = [ '620', '642', '677', '680', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865', '729' ];
   var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU' ];
-  var isuCd = FormManager.getActualValue('isuCd');
+  var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ]
 
   if (cntryME.includes(cntry) && custSubGrpLocMECov.includes(custSubGrp)) {
-    if (isuCd == '5k') {
+    if (isuCd == '5K') {
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
-    } else if (isuCd != '5k' || custSubGrp != 'PRICU') {
+    } else if (isuCd != '5K' && !lockedScenarios.includes(custSubGrp)) {
       FormManager.enable('clientTier');
       FormManager.enable('taxCd2');
     }
@@ -3802,6 +3770,10 @@ function addVATAttachValidation() {
 var currentChosenScenarioME = '';
 function setIsuCtcOnScenarioChange() {
   var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU' ];
+  var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '832', '849', '850' ];
+  var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
@@ -3817,31 +3789,39 @@ function setIsuCtcOnScenarioChange() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('PC') || scenario.includes('PRI')) {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
+    FormManager.readOnly('taxCd2');
+    FormManager.setValue('taxCd2', '');
   } else if (scenario.includes('IN') || scenario.includes('IBM')) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
+    FormManager.readOnly('taxCd2');
+    FormManager.setValue('taxCd2', '');
+  } else if (custSubGrpLocMECov.includes(scenario) && cntrylist_27E.includes(cntry)) {
+    FormManager.setValue('isuCd', '27');
+    FormManager.setValue('clientTier', 'E');
+    if (scenario == 'PRICU') {
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('taxCd2');
+    }
+  } else if (custSubGrpLocMECov.includes(scenario) && cntrlist_34Q.includes(cntry)) {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
+    if (scenario == 'PRICU') {
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('taxCd2');
+    }
   } else if (scenarioChanged) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
+    FormManager.enable('taxCd2');
   }
-  // CREATCMR-816 No.3 Set company number 985518
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if ((SysLoc.UNITED_ARAB_EMIRATES == cntry || SysLoc.ABU_DHABI == cntry) && scenarioChanged) {
-    if (scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')) {
-      FormManager.setValue('enterprise', '');
-    } else {
-      // FormManager.setValue('enterprise', '985518');
-    }
-  }
+
 }
 
 function checkCmrUpdateBeforeImport() {
@@ -4181,8 +4161,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
   GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.ME, null, true);
-  GEOHandler.addAfterConfig(lockIBMtabME, GEOHandler.ME);
-  GEOHandler.addAfterTemplateLoad(lockIBMtabME, GEOHandler.ME);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.ME);
