@@ -5012,6 +5012,13 @@ function setCovValues2024CEE(){
     break; 
     
 	}
+	
+	  if(FormManager.getActualValue('viewOnlyPage') == 'true') {
+		FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('isicCd');
+     } 
 	}
 	
 function validateSboCEE() {
@@ -5021,7 +5028,7 @@ function validateSboCEE() {
 	     var custSubGrp = FormManager.getActualValue('custSubGrp');
 	     var cntry = FormManager.getActualValue('cmrIssuingCntry');
        var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
-	     if(!['COMME','THDPT','PRICU'].includes(custSubGrp) || ([SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY].includes(cntry) && isuCTC == '')){
+	     if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp) || ([SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY].includes(cntry) && isuCTC == '')){
         return new ValidationResult(null, true);
       	}
         var isu = FormManager.getActualValue('isuCd');
