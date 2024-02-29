@@ -216,6 +216,7 @@ function addCmrNoValidator() {
 }
 
 function getSBOListByISU() {
+  
   var postCd = getCurrentPostalCode();
   var isuCd = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
@@ -2196,7 +2197,7 @@ function checkIfISUhasCorrectCTC(isuCd) {
 
 function getCurrentPostalCode() {
   var postCd = FormManager.getActualValue('postCd');
-  if(postCd == '') {
+  if(postCd == '' || postCd == undefined) {
     postCd = getPostCode()
   }
   return postCd;
