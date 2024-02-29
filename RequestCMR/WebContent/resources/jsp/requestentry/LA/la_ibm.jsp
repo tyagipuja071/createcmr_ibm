@@ -79,7 +79,7 @@
   <!-- Mukesh:Story 1067140: END Sucursal/Collection Branch Office -->
   <%--DTN: START SALES BRANCH OFFICE --%>
   <cmr:row topPad="10" addBackground="false">
-    <cmr:column span="2" containerForField="SalesBusOff" exceptForCountry="631">
+    <cmr:column span="2" containerForField="SalesBusOff" exceptForCountry="631,781">
       <p>
         <cmr:label fieldId="salesBusOffCd">
           <cmr:fieldLabel fieldId="SalesBusOff" />:
@@ -89,7 +89,7 @@
       </p>
     </cmr:column>
 
-    <cmr:column span="2" containerForField="MrcCd" exceptForCountry="631">
+    <cmr:column span="2" containerForField="MrcCd" exceptForCountry="631,781">
       <p>
         <cmr:label fieldId="mrcCd">
           <cmr:fieldLabel fieldId="MrcCd" />:
