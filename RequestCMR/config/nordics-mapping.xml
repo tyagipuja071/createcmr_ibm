@@ -801,23 +801,7 @@
 			678IS
 		</country>
 		<subIndustry>
-			B,C
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0007879
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			678IS
-		</country>
-		<subIndustry>
+			B,C,D,E,F,G,H,J,L,M,N,P,R,S,T,V,W,X,Y,Z
 		</subIndustry>
 		<isuCTC>
 			34Q
