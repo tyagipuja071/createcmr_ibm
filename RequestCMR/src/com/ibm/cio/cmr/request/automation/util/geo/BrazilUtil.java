@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -206,37 +207,36 @@ public class BrazilUtil extends AutomationUtil {
       LOG.debug("GBG is BGNONE...");
       if (covId != null) {
 
-        List<String> l1=Arrays.asList("ES","MG");
-        List<String> l2=Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
-        List<String> l3=Arrays.asList("RJ");
-        List<String> l4=Arrays.asList("PR", "SC", "RS");
-        
-        List<String> l5=Arrays.asList("DF", "GO", "MT", "MS");
+        List<String> statprovCd1=Arrays.asList("ES","MG");
+        List<String> statprovCd2=Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
+        List<String> statprovCd3=Arrays.asList("RJ");
+        List<String> statprovCd4=Arrays.asList("PR", "SC", "RS");
+        List<String> statprovCd5=Arrays.asList("DF", "GO", "MT", "MS");
          
-        List<String> s1=Arrays.asList("Y","G","E");
-        List<String> s2=Arrays.asList("F","S","N","B","C","J","V","P","M","L","H","X","R","T","D","W","A","U","K");
-        List<String> s3=Arrays.asList("F","S","N");
-        List<String> s4=Arrays.asList("B","C");
-        List<String> s5=Arrays.asList("J","V","P","M","L");
-        List<String> s6=Arrays.asList("H","X");
-        List<String> s7=Arrays.asList("R","T");
-        List<String> s8=Arrays.asList("D","W");
-        List<String> s9=Arrays.asList("A","U","K");
+        List<String> indCd1=Arrays.asList("Y","G","E");
+        List<String> indCd2=Arrays.asList("F","S","N","B","C","J","V","P","M","L","H","X","R","T","D","W","A","U","K");
+        List<String> indCd3=Arrays.asList("F","S","N");
+        List<String> indCd4=Arrays.asList("B","C");
+        List<String> indCd5=Arrays.asList("J","V","P","M","L");
+        List<String> indCd6=Arrays.asList("H","X");
+        List<String> indCd7=Arrays.asList("R","T");
+        List<String> indCd8=Arrays.asList("D","W");
+        List<String> indCd9=Arrays.asList("A","U","K");
         
         if (StringUtils.isNotBlank(stateProv)) {
-         if(l1.contains(stateProv))
+         if(statprovCd1.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
          }
-         if(l2.contains(stateProv))
+         if(statprovCd2.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
          }
-         if(l3.contains(stateProv))
+         if(statprovCd3.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
          }
-         if(l4.contains(stateProv))
+         if(statprovCd4.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
          }
@@ -244,39 +244,39 @@ public class BrazilUtil extends AutomationUtil {
         
         if(StringUtils.isNotBlank(stateProv) && StringUtils.isNotBlank(firstCharSubIndustry))
         {
-          if(l5.contains(stateProv) && s1.contains(firstCharSubIndustry) )
+          if(statprovCd5.contains(stateProv) && indCd1.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if(l5.contains(stateProv) && s2.contains(firstCharSubIndustry) )
+          if(statprovCd5.contains(stateProv) && indCd2.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if("SP".contains(stateProv) && s3.contains(firstCharSubIndustry) )
+          if("SP".contains(stateProv) && indCd3.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if("SP".contains(stateProv) && s4.contains(firstCharSubIndustry) )
+          if("SP".contains(stateProv) && indCd4.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if("SP".contains(stateProv) && s5.contains(firstCharSubIndustry) )
+          if("SP".contains(stateProv) && indCd5.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if("SP".contains(stateProv) && s6.contains(firstCharSubIndustry) )
+          if("SP".contains(stateProv) && indCd6.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if("SP".contains(stateProv) && s7.contains(firstCharSubIndustry) )
+          if("SP".contains(stateProv) && indCd7.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if("SP".contains(stateProv) && s8.contains(firstCharSubIndustry) )
+          if("SP".contains(stateProv) && indCd8.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
-          if("SP".contains(stateProv) && s9.contains(firstCharSubIndustry) )
+          if("SP".contains(stateProv) && indCd9.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
           }
