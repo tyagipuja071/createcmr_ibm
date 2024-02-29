@@ -2252,7 +2252,8 @@ dojo.addOnLoad(function () {
     resetSortlValidator,
     setDropdownForScenarios,
     lockFields,
-    setIsuInitialValueBasedOnSubScenario
+    setIsuInitialValueBasedOnSubScenario,
+    getSBOandAssignFirstValue
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
@@ -2284,7 +2285,8 @@ dojo.addOnLoad(function () {
     setDropdownForScenarios,
     setCTCBasedOnISUCode,
     lockFields,
-    setIsuInitialValueBasedOnSubScenario
+    setIsuInitialValueBasedOnSubScenario,
+    getSBOandAssignFirstValue
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
