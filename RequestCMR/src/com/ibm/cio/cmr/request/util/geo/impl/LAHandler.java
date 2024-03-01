@@ -390,9 +390,7 @@ public class LAHandler extends GEOHandler {
 
           if (isBRIssuingCountry(data.getCmrIssuingCntry())) {
             if ("40".equals(taxData.getId().getTaxCd())) {
-              if (!isBRIssuingCountry(data.getCmrIssuingCntry())) {
-                setIcmsData(data, taxData.getTaxSeparationIndc());
-              }
+              setIcmsData(data, taxData.getTaxSeparationIndc());
               LOG.debug("BR ICMS ind: " + data.getIcmsInd());
 
               entityManager.merge(data);
