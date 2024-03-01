@@ -617,7 +617,8 @@ function setClientTierBasedOnIsuUKI() {
   var isuCtcVals = {
     '32' : 'T',
     '34' : 'Q',
-    '36' : 'Y'
+    '36' : 'Y',
+    '27' : 'E'
   };
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType == 'U') {
     return;
@@ -638,7 +639,8 @@ function lockIsuCtcUKI() {
   var isuCtcVals = {
     '32' : 'T',
     '34' : 'Q',
-    '36' : 'Y'
+    '36' : 'Y',
+    '27' : 'E'
   };
   if (isuCd != null && isuCd != undefined && isuCd != '') {
     // reset
@@ -4885,15 +4887,37 @@ function setSboValueBasedOnIsuCtcIE(value) {
     FormManager.setValue('salesBusOffCd', '057');
     FormManager.setValue('repTeamMemberNo', 'SPA057');
   } else if (isuCd == '34' && clientTier == 'Q') {
-    FormManager.setValue('salesBusOffCd', '090');
-    FormManager.setValue('repTeamMemberNo', 'MMIR11');
-  } else if (isuCd == '21' && clientTier == '') {
-    if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'IBMEM') {
-      FormManager.setValue('salesBusOffCd', '000');
-      FormManager.setValue('repTeamMemberNo', 'SPA000');
-    } else if (custSubGrp == 'PRICU') {
+    if (!(custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT')) {
       FormManager.setValue('salesBusOffCd', '090');
       FormManager.setValue('repTeamMemberNo', 'MMIR11');
+    } else {
+      FormManager.setValue('salesBusOffCd', '105');
+      FormManager.setValue('repTeamMemberNo', 'SPA105');
+    }
+  } else if (isuCd == '21' && clientTier == '') {
+    if (custSubGrp == 'INTER' || custSubGrp == 'IBMEM') {
+      FormManager.setValue('salesBusOffCd', '000');
+      FormManager.setValue('repTeamMemberNo', 'SPA000');
+    }
+  } else if (isuCd == '8B' && clientTier == '') {
+    if (custSubGrp == 'BUSPR') {
+      FormManager.setValue('salesBusOffCd', '114');
+      FormManager.setValue('repTeamMemberNo', 'SPA114');
+    }
+  } else if (isuCd == '27' && clientTier == 'E') {
+    if (custSubGrp == 'PRICU' || custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
+      FormManager.setValue('salesBusOffCd', '090');
+      FormManager.setValue('repTeamMemberNo', 'MMIR11');
+    }
+  } else if (isuCd == '36' && clientTier == 'Y') {
+    if (custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
+      FormManager.setValue('salesBusOffCd', '020');
+      FormManager.setValue('repTeamMemberNo', 'SPA020');
+    }
+  } else if (isuCd == '04' && clientTier == '') {
+    if (custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
+      FormManager.setValue('salesBusOffCd', '123');
+      FormManager.setValue('repTeamMemberNo', 'SPA123');
     }
   } else {
     FormManager.setValue('salesBusOffCd', '');
@@ -8351,7 +8375,7 @@ function validateSboSrForIsuCtcIE() {
         if (isSubGrpNull || reqType != 'C') {
           return new ValidationResult(null, true);
         }
-        var isuCtcList = [ '5K', '21', '32T', '34Q', '36Y' ];
+        var isuCtcList = [ '04', '5K', '21', '32T', '34Q', '36Y' ];
         if (!isuCtcList.includes(isuCTC) || isSboNull || isSrNull) {
           return new ValidationResult(null, true);
         }
@@ -10150,8 +10174,8 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var activeIsuCd = [ '32', '34', '36' ];
-  var activeCtc = [ 'Q', 'Y', 'T' ];
+  var activeIsuCd = [ '32', '34', '36', '27' ];
+  var activeCtc = [ 'Q', 'Y', 'T', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -10470,8 +10494,8 @@ function clientTierValidatorIT() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-  var activeIsuCd = [ '32', '34', '36' ];
-  var activeCtc = [ 'Q', 'Y', 'T' ];
+  var activeIsuCd = [ '32', '34', '36', '27' ];
+  var activeCtc = [ 'Q', 'Y', 'T', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
