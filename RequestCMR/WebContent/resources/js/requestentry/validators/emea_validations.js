@@ -8375,7 +8375,7 @@ function validateSboSrForIsuCtcIE() {
         if (isSubGrpNull || reqType != 'C') {
           return new ValidationResult(null, true);
         }
-        var isuCtcList = [ '04,', '5K', '21', '32T', '34Q', '36Y' ];
+        var isuCtcList = [ '04', '5K', '21', '32T', '34Q', '36Y' ];
         if (!isuCtcList.includes(isuCTC) || isSboNull || isSrNull) {
           return new ValidationResult(null, true);
         }
