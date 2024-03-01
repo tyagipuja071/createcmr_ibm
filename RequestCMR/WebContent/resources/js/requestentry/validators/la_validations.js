@@ -256,21 +256,6 @@ function autoSetISUBasedOnSubindustry() {
     }
   }
 }
-function autoSetMrcIsuCov2018() {
-  // var sboCd = FormManager.getActualValue('salesBusOffCd');
-  // console.log(">>> process SBO >> " + sboCd);
-  // FormManager.setValue('sboMrc', sboCd);
-  // var mrcCd = getDescription('sboMrc');
-  // console.log(">>> process MRC >> " + mrcCd);
-  // FormManager.setValue('mrcCd', mrcCd);
-  // FormManager.setValue('mrcIsu', FormManager.getActualValue('mrcCd'));
-  var mrcDesc = getDescription('mrcIsu');
-  console.log(">>> process ISU >> " + mrcDesc);
-
-  if (mrcDesc != "") {
-    FormManager.setValue('isuCd', mrcDesc);
-  }
-}
 
 // dtn defect 1435522
 function autoSetDataCrosTypSubTypeSSAMX() {
@@ -522,19 +507,22 @@ function afterConfigForLA() {
   // through MRC
   if (_mrcCdHandler == null) {
     _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
-      autoSetMrcIsuCov2018();
     });
   }
 
   if (_sboMrcHandler == null) {
     _sboMrcHandler = dojo.connect(FormManager.getField('mrcCd'), 'onChange', function(value) {
-      autoSetISUBasedOnSubindustry();
+      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {        
+        autoSetISUBasedOnSubindustry();
+      }
     });
   }
 
   if (_subindustryHandler == null) {
     _subindustryHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      autoSetISUBasedOnSubindustry();
+      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {        
+        autoSetISUBasedOnSubindustry();
+      }
     });
   }
 
@@ -558,7 +546,9 @@ function afterConfigForLA() {
       setMrcCdToReadOnly();
       togglePPSCeid();
       lockFieldsForLA();
-      toggleTaxRegimeForCrossMx();
+      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO) {        
+        toggleTaxRegimeForCrossMx();
+      }
     });
   }
 
@@ -2939,7 +2929,6 @@ function setIBMBankNumberBasedScenarios(fromAddress, scenario, scenarioChanged) 
   }
 }
 
-// CREATCMR-8727 requester level readonly fields
 function setSboMrcIsuToReadOnly() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -2950,16 +2939,16 @@ function setSboMrcIsuToReadOnly() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (reqType == 'C') {
-    if((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER' )) {
-      if (role == 'REQUESTER') {
-        FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('mrcCd');
-        FormManager.readOnly('isuCd');
-      } else {
-        FormManager.enable('salesBusOffCd');
-        FormManager.enable('mrcCd');
-        FormManager.enable('isuCd');
-      }
+    if(_custType.includes('IBM') || _custType.includes('PRI') || _custType.includes('BUS') || _custType.includes('IN')) {
+      FormManager.readOnly('salesBusOffCd');
+      FormManager.readOnly('mrcCd');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else {
+      FormManager.enable('salesBusOffCd');
+      FormManager.enable('mrcCd');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
     } 
   }
 }
@@ -3119,6 +3108,7 @@ function lockFieldsForLA() {
     }
   }
 }
+
 function setCtcBySBOForBrazil() {
 
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
@@ -3277,8 +3267,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setIBMBankNumberBasedScenarios, [ SysLoc.URUGUAY]);
   GEOHandler.addAfterTemplateLoad(setSboMrcIsuToReadOnly, SSAMX_COUNTRIES);
-  GEOHandler.addAfterTemplateLoad(setSortlValuesForUser, GEOHandler.LA);
-  GEOHandler.addAfterConfig(setSortlValuesForUser, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(setSortlValuesForUser, SysLoc.BRAZIL);
+  GEOHandler.addAfterConfig(setSortlValuesForUser, SysLoc.BRAZIL);
   GEOHandler.addAddrFunction(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterConfig(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);

@@ -1,338 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mappings>
+
 	<mapping>
 		<country>
-			702
+			678
 		</country>
-		<subIndustry>
-			A
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
+		<subIndustry>
+			K,U,A,F,N,S
+		</subIndustry>
 		<sortl>
-			T0007864
+			T0001375
 		</sortl>
 		<salesRep>
 			NOREP0
 		</salesRep>
 	</mapping>
+
 	<mapping>
 		<country>
-			702
+			678
 		</country>
-		<subIndustry>
-			B
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
+		<subIndustry>
+			D,W,T,R
+		</subIndustry>
 		<sortl>
-			T0006609
+			T0006880
 		</sortl>
 		<salesRep>
 			NOREP0
 		</salesRep>
 	</mapping>
+
 	<mapping>
 		<country>
-			702
+			678
 		</country>
-		<subIndustry>
-			C
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
+		<subIndustry>
+			V,J,P,L,M
+		</subIndustry>
 		<sortl>
-			T0011655
+			T0006881
 		</sortl>
 		<salesRep>
 			NOREP0
 		</salesRep>
 	</mapping>
+
 	<mapping>
 		<country>
-			702
+			678
 		</country>
-		<subIndustry>
-			D
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
+		<subIndustry>
+			G,Y,E,H,X
+		</subIndustry>
 		<sortl>
-			T0011660
+			T0006644
 		</sortl>
 		<salesRep>
 			NOREP0
 		</salesRep>
 	</mapping>
+
 	<mapping>
 		<country>
-			702
+			678
 		</country>
-		<subIndustry>
-			E
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
+		<subIndustry>
+			B,C
+		</subIndustry>
 		<sortl>
-			T0011661
+			T0006607
 		</sortl>
 		<salesRep>
 			NOREP0
 		</salesRep>
 	</mapping>
+
 	<mapping>
 		<country>
 			702
 		</country>
-		<subIndustry>
-			F
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
-		<sortl>
-			T0007561
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
 		<subIndustry>
-			G
+			D, W,T,R
 		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0006949
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			H
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011651
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			J
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011656
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			K
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011654
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			L
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011662
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			M
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0006974
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			N
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011652
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			P
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011659
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			R
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011657
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			S
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011648
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			T
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011658
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			U
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011663
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			V
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
-		<sortl>
-			T0011649
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-			W
-		</subIndustry>
-		<isuCTC>
-			34Q
-		</isuCTC>
 		<sortl>
 			T0001379
 		</sortl>
@@ -340,35 +108,401 @@
 			NOREP0
 		</salesRep>
 	</mapping>
+
+
 	<mapping>
 		<country>
 			702
 		</country>
-		<subIndustry>
-			X
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
+		<subIndustry>
+			V,J,P,L,M
+		</subIndustry>
 		<sortl>
-			T0011653
+			T0006974
 		</sortl>
 		<salesRep>
 			NOREP0
 		</salesRep>
 	</mapping>
+
 	<mapping>
 		<country>
 			702
 		</country>
-		<subIndustry>
-			Y
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
+		<subIndustry>
+			K,U,A
+		</subIndustry>
 		<sortl>
-			T0011650
+			T0007864
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			702
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			B,C
+		</subIndustry>
+		<sortl>
+			T0006609
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			702
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			G,Y,E,H,X
+		</subIndustry>
+		<sortl>
+			T0006949
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			702
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			F,N,S
+		</subIndustry>
+		<sortl>
+			T0007561
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			806
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			B,C
+		</subIndustry>
+		<sortl>
+			T0006611
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			806
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+		</subIndustry>
+		<sortl>
+			T0001383
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+		<exclude>true</exclude>
+	</mapping>
+
+	<mapping>
+		<country>
+			846
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			D,W,T,R
+		</subIndustry>
+		<sortl>
+			T0001387
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+
+	<mapping>
+		<country>
+			846
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			B,C
+		</subIndustry>
+		<sortl>
+			T0006613
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+
+	<mapping>
+		<country>
+			846
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			V,J,P,L,M,F,N,S
+		</subIndustry>
+		<sortl>
+			T0006966
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			846
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			K,U,A
+		</subIndustry>
+		<sortl>
+			T0007593
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+
+	<mapping>
+		<country>
+			846
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			G,Y,E,H,X
+		</subIndustry>
+		<sortl>
+			T0006888
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678FO
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			K,U,A,F,N,S
+		</subIndustry>
+		<sortl>
+			T0001375
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678FO
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			D,W,T,R
+		</subIndustry>
+		<sortl>
+			T0006880
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678FO
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			V,J,P,L,M
+		</subIndustry>
+		<sortl>
+			T0006881
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678FO
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			G,Y,E,H,X
+		</subIndustry>
+		<sortl>
+			T0006644
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678FO
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			B,C
+		</subIndustry>
+		<sortl>
+			T0006607
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678GL
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			K,U,A,F,N,S
+		</subIndustry>
+		<sortl>
+			T0001375
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678GL
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			D,W,T,R
+		</subIndustry>
+		<sortl>
+			T0006880
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678GL
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			V,J,P,L,M
+		</subIndustry>
+		<sortl>
+			T0006881
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678GL
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			G,Y,E,H,X
+		</subIndustry>
+		<sortl>
+			T0006644
+		</sortl>
+		<salesRep>
+			NOREP0
+		</salesRep>
+	</mapping>
+
+	<mapping>
+		<country>
+			678GL
+		</country>
+		<isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			B,C
+		</subIndustry>
+		<sortl>
+			T0006607
 		</sortl>
 		<salesRep>
 			NOREP0
@@ -376,90 +510,26 @@
 	</mapping>
 	<mapping>
 		<country>
-			702
+			678IS
 		</country>
-		<subIndustry>
-		</subIndustry>
 		<isuCTC>
-			21
+			34Q
 		</isuCTC>
+		<subIndustry>
+			B,C,D,E,F,G,H,J,L,M,N,P,R,S,T,V,W,X,Y,Z
+		</subIndustry>
 		<sortl>
-			T0000471
+			T0001376
 		</sortl>
 		<salesRep>
 			NOREP0
 		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			8B
-		</isuCTC>
-		<sortl>
-			P0000007
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			21
-		</isuCTC>
-		<sortl>
-			T0000471
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			8B
-		</isuCTC>
-		<sortl>
-			P0000007
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			5K
-		</isuCTC>
-		<sortl>
-			A0009225
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
+		<exclude>true</exclude>
 	</mapping>
 	<mapping>
 		<country>
 			702EE
 		</country>
-		<subIndustry>
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
@@ -470,76 +540,11 @@
 			NOREP0
 		</salesRep>
 	</mapping>
-	<mapping>
-		<country>
-			702EE
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			36Y
-		</isuCTC>
-		<sortl>
-			T0008052
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702EE
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			5K
-		</isuCTC>
-		<sortl>
-			A0009216
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702EE
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			21
-		</isuCTC>
-		<sortl>
-			T0001661
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702EE
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			8B
-		</isuCTC>
-		<sortl>
-			P0000024
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
+
 	<mapping>
 		<country>
 			702LV
 		</country>
-		<subIndustry>
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
@@ -550,92 +555,11 @@
 			NOREP0
 		</salesRep>
 	</mapping>
-	<mapping>
-		<country>
-			702LV
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			36Y
-		</isuCTC>
-		<sortl>
-			T0008053
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702LV
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			5K
-		</isuCTC>
-		<sortl>
-			A0009214
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702LV
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			21
-		</isuCTC>
-		<sortl>
-			T0001661
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702LV
-		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			8B
-		</isuCTC>
-		<sortl>
-			P0000024
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
+
 	<mapping>
 		<country>
 			702LT
 		</country>
-		<subIndustry>
-		</subIndustry>
-		<isuCTC>
-			8B
-		</isuCTC>
-		<sortl>
-			P0000024
-		</sortl>
-		<salesRep>
-			NOREP0
-		</salesRep>
-	</mapping>
-	<mapping>
-		<country>
-			702LT
-		</country>
-		<subIndustry>
-		</subIndustry>
 		<isuCTC>
 			34Q
 		</isuCTC>
