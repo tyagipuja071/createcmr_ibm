@@ -15,8 +15,12 @@ var isicCds = new Set(['6010', '6411', '6421', '7320', '7511', '7512', '7513', '
 var isuCovHandler = false;
 var ctcCovHandler = false;
 var _custSubTypeHandler = null;
-let currentlyLoadedSORTL = []
-let SORTLandCTCandISUMapping  = []
+let firstTimeLoading = true;
+const CTC_MAPPING = {
+  '27': 'E',
+  '34': 'Q',
+  '36': 'Y'
+}
 function addAUSTRIALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -174,8 +178,6 @@ function afterConfigForAUSTRIA() {
   setTypeOfCustomerRequiredProcessor();
   // CREATCMR-788
   addressQuotationValidatorAUSTRIA();
-
-  SORTLandCTCandISUMapping = loadSORTLandCTCandISUMapping(FormManager.getActualValue('cmrIssuingCntry'))
 }
 
 /**
@@ -213,46 +215,39 @@ function addCmrNoValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function getSBOListByISU(cntry, isuCtc, ims, postCd) {
+function getSBOListByISU() {
+  
+  var postCd = getCurrentPostalCode();
+  var isuCd = FormManager.getActualValue('isuCd');
+  var ctc = FormManager.getActualValue('clientTier');
+  var isuCtc = `${isuCd}${ctc}`
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   // CMR-710 use 34Q to replace 32S/32N
-checkPostCodeGroup = postCd.substring(0, 2).match(/(8[0-9])|(7[0-5]|(5[1-3])|(4[0-9])|(3[0-9])|(2[0-8])|(1[0-2]))/g)
-const getSalesBoDesc = () => {
+  checkPostCodeGroup = postCd.substring(0, 2).match(/(8[0-9])|(7[0-5]|(5[1-3])|(4[0-9])|(3[0-9])|(2[0-8])|(1[0-2]))/g)
+  const getSalesBoDesc = () => {
   if (IS27ESCENARIO()) {
-    if(checkPostCodeGroup){
-      return '1'
+    if(checkPostCodeGroup || custSubGrp == 'XCOM'){
+      return '1' 
     }
     return '2'
   }
   return ''
 }
 
-if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
-  qParams = {
-    _qall: 'Y',
-    ISSUING_CNTRY: cntry,
-    ISU: '%' + isuCtc + '%',
-    UPDATE_BY_ID: '%' + ims.substring(0, 1) + '%',
-    SALES_BO_DESC: '%' + getSalesBoDesc() + '%'
-  };
-  queryResult = cmr.query('GET.SBOLIST.BYISUCTC.AUSTRIA', qParams);
-} else {
-  qParams = {
-    _qall: 'Y',
-    ISSUING_CNTRY: cntry,
-    ISU: '%' + isuCtc + '%',
-    SALES_BO_DESC: '%' + getSalesBoDesc() + '%'
-  };
-  queryResult = cmr.query('GET.SBOLIST.BYISU.AUSTRIA', qParams);
-}
+var salesBoDesc = getSalesBoDesc()
+
+qParams = {
+  _qall: 'Y',
+  ISSUING_CNTRY: '618',
+  ISU: '%' + isuCtc + '%',
+  SALES_BO_DESC: '%' + salesBoDesc + '%'
+};
+queryResult = cmr.query('GET.SBOLIST.BYISU.AUSTRIA', qParams);
 
 return queryResult.map(({ret1}) => ret1);
 }
 
-function setSortlListValues(values) {
-let dropdownField = document.getElementById('templatevalue-salesBusOffCd')
-if(!!dropdownField) {
-  dropdownField.setAttribute('values', values);
-}
+function setSBOInitialValue(values) {
 if(values.length == 0) {
   FormManager.clearValue('salesBusOffCd')
 } else {
@@ -260,28 +255,10 @@ if(values.length == 0) {
 }
 }
 
-function getSORTLAndLoadIntoList(postCd) {
-  if(!(!!postCd)) postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var isuCd = FormManager.getActualValue('isuCd');
-  var ctc = FormManager.getActualValue('ClientTier');
-  var ims = FormManager.getActualValue('subIndustryCd');
-  var isuCtc = `${isuCd}${ctc}`
-
-  currentlyLoadedSORTL = getSBOListByISU(cntry, isuCtc, ims, postCd)
-  setSortlListValues(currentlyLoadedSORTL)
+function getSBOandAssignFirstValue() {
+  setSBOInitialValue(getSBOListByISU())
 }
 
-function loadSORTLandCTCandISUMapping(cntry) {
-  return cmr.query('GET.ISU.CTC.BY_SBO.V2', {
-    _qall : 'Y',
-    ISSUING_CNTRY : cntry,
-    SALES_BO_CD : '%%'
-  }).map(({ret1, ret2, ret3}) => ({
-    SORTL: ret1,
-    ISUCTC: `${ret2}${ret3}`
-  }));
-}
 
 function lockLandCntry() {
   var custType = FormManager.getActualValue('custGrp');
@@ -354,12 +331,15 @@ function addHandlersForAUSTRIA() {
         setEnterpriseValues(value);
       }
 
+      setIsuInitialValueBasedOnSubScenario();
+
       isuCovHandler = true;
           FormManager.removeValidator('clientTier', Validators.REQUIRED);
         // CREATCMR-4293
 
-      setCTCBasedOnISUCode()
-      getSORTLAndLoadIntoList(CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0])
+      setCTCBasedOnISUCode();
+      getSBOandAssignFirstValue();
+      setDropdownForScenarios();
     });
   }
 
@@ -375,8 +355,6 @@ function addHandlersForAUSTRIA() {
       if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
         setSalesRepValues(value);      
       }
-
-      getSORTLAndLoadIntoList(CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0])
     });
   }
 
@@ -894,54 +872,18 @@ function setSalesRepValues(clientTier) {
   }
 }
 
-/**
- * CMR-2101:Austria - sets SBO based on isuCtc
- */
-function setSBOValuesForIsuCtc() {
-  if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var isuCd = FormManager.getActualValue('isuCd');
-  var ims = FormManager.getActualValue('subIndustryCd');
-  var cusSubGrp = FormManager.getActualValue('custSubGrp');
-  var isuCtc = isuCd + clientTier;
-  var qParams = null;
-  var sbo = [];
-  var salesBoDesc = ''
-  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0]
-
-
-  // SBO will be based on IMS
-  if (isuCd != '') {
-
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    var lockSboScenario = ['PRICU', 'RSXPC', 'CSPC', 'MEPC', 'RSPC'];
-    if (isuCtc == '8B' || isuCtc == '21' || lockSboScenario.includes(custSubGrp)) {
-      FormManager.readOnly('salesBusOffCd');
-    } else if (FormManager.getActualValue('userRole') == 'Processor') {
-      FormManager.enable('salesBusOffCd');
-    }
-  }
-}
-
 function validateSBOValuesForIsuCtc() {
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
-        if (FormManager.getActualValue('reqType') != 'C') {
-          return;
+        var sbos = getSBOListByISU()
+        if(sbos.length == 0) {
+          return new ValidationResult(null, false,
+            'No SBO was found for the current ISU/CTC');
         }
-        var sbo = FormManager.getActualValue('salesBusOffCd');
-          if (!currentlyLoadedSORTL.includes(sbo)) {
+          if (!sbos.includes(FormManager.getActualValue('salesBusOffCd'))) {
             return new ValidationResult(null, false,
-              'The SBO provided is invalid. It should be from the list: ' + currentlyLoadedSORTL);
+              'The SBO provided is invalid. It should be from the list: ' + sbos.join(', '));
         }
         return new ValidationResult(null, true);
       }
@@ -1405,7 +1347,6 @@ function populateBundeslandercode() {
 
 function populateBundeslandercodeOnChange() {
   dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
-    getSORTLAndLoadIntoList(value);
     populateBundeslandercode();
   });
   dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
@@ -1998,9 +1939,8 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  let CTCForIsu = SORTLandCTCandISUMapping.filter(({ISUCTC}) => ISUCTC.split(',').includes(`${isuCode}${clientTierCode}`))
 
-  if(CTCForIsu.length == 0) {
+  if(!checkIfISUhasCorrectCTC(isuCode)) {
     return new ValidationResult({
       id : 'clientTier',
       type : 'text',
@@ -2133,6 +2073,42 @@ function clientTierValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function validateISUCTC() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var isuCd = FormManager.getActualValue('isuCd');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var scenarios = [
+          {
+            scn: ['COMME', 'GOVRN', 'THDPT', 'XCOM'],
+            isu: ['27','34','36','5K'],
+          },
+          {
+            scn: ['BUSPR', 'XBP'],
+            isu: ['8B'],
+          },
+          {
+            scn: ['INTER', 'INTSO', 'IBMEM'],
+            isu: ['21'],
+          }
+        ]
+
+        for (const scenario of scenarios) {
+          if(scenario.scn.includes(custSubGrp) && !scenario.isu.includes(isuCd)) {
+            return new ValidationResult({
+              id: 'clientTier',
+              type: 'text',
+              name: 'clientTier'
+            }, false, `ISU ${isuCd} is invalid for the current subscenario`);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 // CREATCMR-6378
 function retainVatValueAT() {
   var vat = FormManager.getActualValue('vat');
@@ -2167,14 +2143,82 @@ function addressQuotationValidatorAUSTRIA() {
 
 function setCTCBasedOnISUCode() {
   isuCd = FormManager.getActualValue('isuCd');
-  const CTCMapping = {
-    '27': 'E',
-    '32': 'T',
-    '34': 'Q',
-    '36': 'Y'
+
+  FormManager.setValue('clientTier', CTC_MAPPING[isuCd] || '');
+}
+
+
+function setIsuInitialValueBasedOnSubScenario() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var scenarios = ['COMME', 'GOVRN', 'THDPT']
+
+  // pre-select ISU 27 for commercial, government, third party and private
+  // person.
+  if (scenarios.includes(custSubGrp) && isuCd.length == 0) {
+    FormManager.setValue('isuCd', '27');
+  }
+}
+
+function setDropdownForScenarios() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenarios = [
+    {
+      scn: ['COMME', 'GOVRN', 'THDPT', 'XCOM'],
+      isus: ['27','34','36','5K'],
+    },
+    {
+      scn: ['BUSPR', 'XBP'],
+      isus: ['8B'],
+    },
+    {
+      scn: ['INTER', 'INTSO', 'IBMEM'],
+      isus: ['21'],
+    }
+  ]
+
+  for(const scenario of scenarios){
+    if(scenario.scn.includes(custSubGrp)){
+      FormManager.limitDropdownValues(FormManager.getField('isuCd'), scenario.isus)
+      break;
+    }
+  }
+}
+
+function checkIfISUhasCorrectCTC(isuCd) {
+  if(!(['27', '34', '36'].includes(isuCd))) return true
+
+  if(CTC_MAPPING[isuCd].length == 0) {
+    return false;
   }
 
-  FormManager.setValue('clientTier', CTCMapping[isuCd] || '');
+  return true;
+}
+
+function getCurrentPostalCode() {
+  var postCd = FormManager.getActualValue('postCd');
+  if(postCd == '' || postCd == undefined) {
+    postCd = getPostCode()
+  }
+  return postCd;
+}
+
+
+
+function lockFields() {
+  const doForThoseFieldsInSubscenarios = (fields, scenarios, action) => {
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    for (scenario of scenarios){
+      if(scenario == custSubGrp) {
+        for (field of fields) {
+          if(action == "LOCK") FormManager.readOnly(field);
+          if(action == "UNLOCK") FormManager.enable(field);
+        }
+      }
+    }
+  }
+
+  doForThoseFieldsInSubscenarios(['salesBusOffCd'], ['INTSO', 'INTER', 'BUSPR'], 'LOCK')
 }
 
 dojo.addOnLoad(function () {
@@ -2206,7 +2250,10 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     setAddressDetailsForViewAT,
     resetSortlValidator,
-    getSORTLAndLoadIntoList
+    setDropdownForScenarios,
+    lockFields,
+    setIsuInitialValueBasedOnSubScenario,
+    getSBOandAssignFirstValue
   ]) {
     GEOHandler.addAfterConfig(func, [SysLoc.AUSTRIA]);
   }
@@ -2216,6 +2263,7 @@ dojo.addOnLoad(function () {
     changeAbbrevNmLocn,
     addLatinCharValidator,
     toggleLocalCountryNameOnOpen,
+    getSBOandAssignFirstValue
   ]) {
     GEOHandler.addAddrFunction(func, [SysLoc.AUSTRIA]);
   }
@@ -2234,9 +2282,11 @@ dojo.addOnLoad(function () {
     setISUCTCOnIMSChange,
     togglePPSCeidCEE,
     resetSortlValidator,
+    setDropdownForScenarios,
     setCTCBasedOnISUCode,
-    setSBOValuesForIsuCtc,
-    getSORTLAndLoadIntoList
+    lockFields,
+    setIsuInitialValueBasedOnSubScenario,
+    getSBOandAssignFirstValue
   ]) {
     GEOHandler.addAfterTemplateLoad(func, [SysLoc.AUSTRIA]);
   }
@@ -2250,6 +2300,7 @@ dojo.addOnLoad(function () {
     clientTierValidator,
     validateSBOValuesForIsuCtc,
     validateSortl,
+    validateISUCTC,
     austriaCustomVATValidator(SysLoc.AUSTRIA, 'MAIN_CUST_TAB', 'frmCMR', 'ZP01')
   ]) {
     GEOHandler.registerValidator(func, [SysLoc.AUSTRIA], null, true);

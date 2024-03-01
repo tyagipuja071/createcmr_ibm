@@ -270,8 +270,8 @@ function addAfterConfigAP() {
 	  {
 	  // if(custSubGrp=='DUMMY' || custSubGrp=='INTER' || custSubGrp=='BUSPR' )
 	  // {
-    //   FormManager.readOnly('inacType');
-    //   FormManager.readOnly('inacCd');
+    // FormManager.readOnly('inacType');
+    // FormManager.readOnly('inacCd');
 	  // }
 	  // if(custSubGrp=='AQSTN' || custSubGrp=='NRML' || custSubGrp=='ASLOM')
 	  // {
@@ -283,7 +283,7 @@ function addAfterConfigAP() {
 	  FormManager.enable('isbuCd');
     }
 
-  if (reqType == 'U' && cntry == '834') {
+  if (reqType == 'U' && ((cntry == '834' || cntry == '643'))) {
     FormManager.readOnly('isicCd');
   }
 

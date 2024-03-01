@@ -2442,6 +2442,9 @@ public class CEMEAHandler extends BaseSOFHandler {
                       "The address data must be entered in capital letters'. <br>");
                 }
               }
+              if (error.hasErrors()) {
+                validations.add(error);
+              }
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               row = sheet.getRow(0);// data field name row
               int ordBlkIndex = 12;// default index
@@ -2525,15 +2528,15 @@ public class CEMEAHandler extends BaseSOFHandler {
                     error.addError((rowIndex + 1), "Client Tier",
                         ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                   }
-                } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-                  if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+                } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+                  if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
                     LOG.trace("The row " + (rowIndex + 1)
-                        + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                        + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                     error.addError((rowIndex + 1), "Client Tier",
-                        ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                        ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                   }
                 } else if ((!StringUtils.isBlank(isuCd)
-                    && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+                    && !("34".equals(isuCd) || "27".equals(isuCd) || "36".equals(isuCd)))
                     && !"@".equalsIgnoreCase(ctc)) {
                   LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                   error.addError((rowIndex + 1), "Client Tier",
@@ -2545,9 +2548,6 @@ public class CEMEAHandler extends BaseSOFHandler {
               }
             }
           } // end row loop
-          if (error.hasErrors()) {
-            validations.add(error);
-          }
         }
       }
     }
