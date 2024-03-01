@@ -7143,37 +7143,47 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CUST_NM1":
         if (StringUtils.isNotBlank(tempVal)) {
-          String subStrNm1 = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
-          String subStrNm2 = tempVal.length() > 17 ? tempVal.substring(17) : "";
-          muaModel.setCustNm1(subStrNm1);
-          muaModel.setCustNm2(subStrNm2);
+          String kanji = tempVal;
+          kanji = kanji.length() > 17 ? kanji.substring(0, 17) : kanji;
+          muaModel.setCustNm1(kanji);
+          if (kanji.length() < 17)
+            muaModel.setCustNm2("@");
         }
         break;
       case "CUST_NM2":
         if (StringUtils.isNotBlank(tempVal)) {
-          tempVal = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
+          tempVal = tempVal.length() > 13 ? tempVal.substring(0, 13) : tempVal;
           muaModel.setCustNm2(tempVal);
         }
         break;
       case "CUST_NM3":
         if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setCustNm3(tempVal);
+          String fullEnglish = tempVal.length() > 70 ? tempVal.substring(0, 70) : tempVal;
+          muaModel.setCustNm3(fullEnglish);
         }
         break;
       case "CUST_NM4":
         if (StringUtils.isNotBlank(tempVal)) {
-          muaModel.setCustNm4(tempVal);
+          String katakana = IERPRequestUtils.convertKatakana(tempVal.length() > 30 ? tempVal.substring(0, 30) : tempVal);
+          muaModel.setCustNm4(katakana);
         }
         break;
       case "ADDR_TXT":
         if (StringUtils.isNotBlank(tempVal)) {
+
           String addr1 = tempVal.length() > 17 ? tempVal.substring(0, 17) : tempVal;
-          String addr2 = tempVal.length() > 17 ? tempVal.substring(17) : "";
+          String addr2 = "";
+
+          if (tempVal.length() > 17) {
+            if (tempVal.length() >= 30) {
+              addr2 = tempVal.substring(17, 30);
+            } else {
+              addr2 = tempVal.substring(17);
+            }
+          }
 
           muaModel.setAddrTxt(addr1);
-          if (StringUtils.isNotBlank(addr2)) {
-            muaModel.setCity2(addr2);
-          }
+          muaModel.setCity2(addr2);
         }
         break;
       case "ADDR_TXT2":
@@ -7212,6 +7222,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "DEPT":
         if (StringUtils.isNotBlank(tempVal)) {
           String dept = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          dept = dept.length() > 30 ? dept.substring(0, 30) : dept;
+
           if (StringUtils.isNotBlank(dept)) {
             muaModel.setDept(dept);
           }
