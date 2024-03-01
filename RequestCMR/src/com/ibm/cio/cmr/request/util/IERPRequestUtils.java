@@ -701,6 +701,20 @@ public class IERPRequestUtils extends RequestUtils {
     return nameArray;
   }
 
+  public static String convertKatakana(String value) {
+    String convertedStr = "";
+    if (value != null && !value.isEmpty() && value.length() > 0) {
+      convertedStr = value.replaceAll("ィ", "イ");
+      convertedStr = value.replaceAll("ョ", "ヨ");
+      convertedStr = value.replaceAll("ュ", "ユ");
+      convertedStr = value.replaceAll("ヵ", "カ");
+      convertedStr = value.replaceAll("ャ", "ヤ");
+      convertedStr = value.replaceAll("ッ", "ツ");
+      convertedStr = value.replaceAll("ァ", "ア");
+    }
+    return convertedStr;
+  }
+
   public static String dbcsConversionForJP(String strToConvert) {
     String convertedStr = null;
     if (StringUtils.isNotBlank(strToConvert)) {
