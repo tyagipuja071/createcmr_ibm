@@ -135,6 +135,7 @@ public class USUtil extends AutomationUtil {
   public static final String SC_REST_ICC = "ICC";
   public static final String SC_REST_SVMP = "SVMP";
   public static final String SC_REST_KYN = "KYN";
+
   // IGS
   public static final String SC_IGSF = "IGSF";
   public static final String SC_IGS = "IGS";
@@ -464,10 +465,27 @@ public class USUtil extends AutomationUtil {
 
       // set ISU CTC if not found
       if (StringUtils.isBlank(data.getIsuCd())) {
-        details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 34-Q.").append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "34");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
+        if(scenarioSubType.equalsIgnoreCase("Private Household CMR"))
+        {       
+        details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-blank.").append("\n");
+        // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+        // "DATA", "ISU_CD", data.getIsuCd(), "34");
+        // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+        // "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "");
+
       }
+        else
+        {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 27-E.").append("\n");
+          // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+          // "DATA", "ISU_CD", data.getIsuCd(), "34");
+          // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+          // "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "27");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "E");
+        }
 
       if (StringUtils.isNotEmpty(data.getIsicCd())) {
         if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
