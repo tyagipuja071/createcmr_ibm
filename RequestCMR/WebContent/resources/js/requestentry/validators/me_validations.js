@@ -551,6 +551,8 @@ function addHandlersForCEMEA() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
+      FormManager.setValue('isuCd', value);
+
       if (value == '27') {
         FormManager.setValue('clientTier', 'E');
       } else if (value == '34') {
@@ -605,6 +607,15 @@ function addHandlersForCEMEA() {
   if (_enterpriseHandler == null) {
     _enterpriseHandler = dojo.connect(FormManager.getField('taxCd2'), 'onChange', function(value) {
       validateEnterpriseField(value);
+    });
+  }
+
+}
+
+function onCustSubGrpChange() {
+  if (_custSubGrpHandler == null) {
+    _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      setIsuCtcOnScenarioChange();
     });
   }
 }
@@ -2067,6 +2078,17 @@ function lockFieldsBasedOnISU(isuCd) {
     }
 
   }
+}
+
+function lockedScenarios() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ]
+  if (lockedScenarios.includes(custSubGrp)) {
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('taxCd2');
+  }
+
 }
 
 function setEnterpriseOnSubIndustryEG34Q(value) {
@@ -3781,6 +3803,7 @@ var currentChosenScenarioME = '';
 function setIsuCtcOnScenarioChange() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var isuCd = FormManager.getActualValue('isuCd');
   var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU' ];
   var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '832', '849', '850' ];
   var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
@@ -3794,6 +3817,7 @@ function setIsuCtcOnScenarioChange() {
   }
   scenarioChanged = scenarioChanged || (currentChosenScenarioME != '' && currentChosenScenarioME != scenario);
   currentChosenScenarioME = scenario;
+
   if (scenario == 'BUSPR' || scenario.includes('BP')) {
     FormManager.setValue('isuCd', '8B');
     FormManager.setValue('clientTier', '');
@@ -3824,7 +3848,7 @@ function setIsuCtcOnScenarioChange() {
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
     }
-  } else if (scenarioChanged) {
+  } else if (scenario != 'PRICU' || scenario != 'BUSPR' || !scenario.includes('BP') || !scenario.includes('IN') || !scenario.includes('IBM')) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
     FormManager.enable('isuCd');
@@ -4160,12 +4184,13 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIsicCdME, GEOHandler.ME);
   GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
-  GEOHandler.addAfterTemplateLoad(setIsuCtcOnScenarioChange, GEOHandler.ME);
   GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
 
+  GEOHandler.addAfterConfig(lockedScenarios, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(lockedScenarios, GEOHandler.ME);
   GEOHandler.addAfterConfig(omanVat, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
   GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
@@ -4173,6 +4198,7 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(onCustSubGrpChange, GEOHandler.ME);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.ME, null, true);
   GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.ME);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.ME, null, true);
