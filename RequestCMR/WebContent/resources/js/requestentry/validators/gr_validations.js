@@ -2309,6 +2309,11 @@ function clientTierValidator() {
 }
 
 function setValuesWRTIsuCtc(value) {
+  
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+  
   console.log(">>>> setValuesWRTIsuCtc ");
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var isu = FormManager.getActualValue('isuCd');
@@ -2530,14 +2535,10 @@ function setEntepriseGR() {
 
   if (custSubGrpSet21.has(custSubGrp) && isuCtc == '21') {
     FormManager.setValue('enterprise', '985999');
-  } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '34Q') {
-    FormManager.setValue('enterprise', '822830');
   } else if (custSubGrpSet.has(custSubGrp) && isuCtc == '36Y') {
     FormManager.setValue('enterprise', '');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '5K') {
     FormManager.setValue('enterprise', '985999');
-  } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '32T') {
-    FormManager.setValue('enterprise', '985985');
   } else {
     FormManager.setValue('enterprise', '');
   }
