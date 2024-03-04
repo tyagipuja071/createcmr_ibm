@@ -533,6 +533,7 @@ var _vatExempthandler = null;
 var _enterpriseHandler = null;
 var _custSubGrpHandler = null;
 function addHandlersForCEMEA() {
+
   for (var i = 0; i < _addrTypesForCEMEA.length; i++) {
     _addrTypeHandler[i] = null;
     if (_addrTypeHandler[i] == null) {
@@ -550,7 +551,6 @@ function addHandlersForCEMEA() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      FormManager.setValue('isuCd', value);
 
       if (value == '27') {
         FormManager.setValue('clientTier', 'E');
@@ -566,6 +566,7 @@ function addHandlersForCEMEA() {
       }
 
       lockFieldsBasedOnISU(value);
+
     });
   }
 
@@ -609,6 +610,21 @@ function addHandlersForCEMEA() {
     });
   }
 
+}
+
+function afterConfigME() {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+    return;
+  }
+  if (custSubGrp != "") {
+    if (isuCd == "") {
+      setIsuCtcOnScenarioChange();
+    } else {
+      return;
+    }
+  }
 }
 
 function onCustSubGrpChange() {
@@ -3838,12 +3854,14 @@ function setIsuCtcOnScenarioChange() {
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
     }
-  } else if (scenario != 'PRICU' || scenario != 'BUSPR' || !scenario.includes('BP') || !scenario.includes('IN') || !scenario.includes('IBM')) {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-    FormManager.enable('isuCd');
-    FormManager.enable('clientTier');
-    FormManager.enable('taxCd2');
+  } else if (scenario != "") {
+    if (scenario != 'PRICU' && scenario != 'BUSPR' && !scenario.includes('BP') && !scenario.includes('IN') && !scenario.includes('IBM')) {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
+      FormManager.enable('taxCd2');
+    }
   }
 
 }
@@ -4182,6 +4200,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockedScenarios, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(lockedScenarios, GEOHandler.ME);
+  GEOHandler.addAfterConfig(afterConfigME, GEOHandler.ME);
   GEOHandler.addAfterConfig(omanVat, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
   GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
