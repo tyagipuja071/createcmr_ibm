@@ -3014,9 +3014,6 @@ function setEntepriseAndSalesRepPT() {
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '34Q') {
     FormManager.setValue('enterprise', setEnterpriseOnSubIndustryPT(isuCd) || '');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
-  } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '36Y') {
-    FormManager.setValue('enterprise', '990305');
-    FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '5K') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
@@ -3435,7 +3432,7 @@ function validatorEnterpriseES() {
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept: ' + enterpriseMapping[isuCtc]);
+    }, false, 'Enterprise can only accept: ' + enterpriseMapping[isuCtc].join(" "));
   }
 }
 
@@ -3539,7 +3536,8 @@ function validatorISUCTCPT() {
 function validatorEnterprisePT() {
   var isuCd = FormManager.getActualValue('isuCd');
   var enterprise = FormManager.getActualValue('enterprise');
-  var enterpriseSet34 = [ '990310', '990330', '990355', '990345', '990335', '990325', '990315', '990320', '990350' ]
+  var enterpriseSet34 = [ '990310', '990330', '990355', '990345', '990335', '990325', '990315', '990320', '990350', '990360','990380'];
+  var enterpriseSet36 = [ '990305', '990365', '990370' ];
 
   if (isuCd == '34' && !enterpriseSet34.includes(enterprise)) {
     return new ValidationResult({
@@ -3547,12 +3545,12 @@ function validatorEnterprisePT() {
       type : 'text',
       name : 'enterprise'
     }, false, 'Enterprise can only accept : ' + enterpriseSet34);
-  } else if (isuCd == '36' && enterprise != '990305') {
+  } else if (isuCd == '36' && !enterpriseSet36.includes(enterprise)) {
     return new ValidationResult({
       id : 'enterprise',
       type : 'text',
       name : 'enterprise'
-    }, false, 'Enterprise can only accept \'990305\'.');
+    }, false, 'Enterprise can only accept : ' + enterpriseSet36);
   } else if ((isuCd == '5K' || isuCd == '21' || isuCd == '8B') && enterprise != '985999') {
     return new ValidationResult({
       id : 'enterprise',
