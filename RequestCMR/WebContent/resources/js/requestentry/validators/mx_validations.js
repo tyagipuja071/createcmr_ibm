@@ -99,6 +99,7 @@ var _custNameHandler = null;
 var _customerTypeHandler = null;
 var _subindustryHandler = null;
 var _isuCd = null;
+var _custSubTyp = null;
 var wwSubindustries = [ 'A9', 'AA', 'AW', 'B9', 'BB', 'BD', 'BG', 'BI', 'BW', 'CB', 'CC', 'CD', 'CW', 'D9', 'DI', 'DJ', 'DK', 'DL', 'DW', 'E9', 'EA', 'ER', 'EW', 'F9', 'FA', 'FW', 'GA', 'GE', 'GW',
     'H9', 'HA', 'HB', 'HE', 'HW', 'J9', 'JA', 'JB', 'JC', 'JD', 'JW', 'K9', 'KA', 'KB', 'KC', 'KD', 'KE', 'KF', 'KW', 'KZ', 'L9', 'LA', 'LB', 'LW', 'MC', 'ME', 'MH', 'MI', 'MJ', 'MK', 'ML', 'MW',
     'N9', 'NA', 'NB', 'NI', 'NW', 'NZ', 'P9', 'PC', 'PO', 'PW', 'R9', 'RA', 'RC', 'RD', 'RE', 'RF', 'RG', 'RH', 'RR', 'RW', 'S9', 'SB', 'SW', 'T9', 'TA', 'TC', 'TD', 'TE', 'TF', 'TG', 'TH', 'TJ',
@@ -302,6 +303,12 @@ function afterConfigForMX() {
   
   if (_isuCd == null) {
     _isuCd = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+       getClientSubTypForIsu();
+    });
+  }
+  
+  if (_custSubTyp == null) {
+    _custSubTyp = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
        getClientSubTypForIsu();
     });
   }
@@ -2441,7 +2448,9 @@ function getZS01LandedCountry(){
 
 function getClientSubTypForIsu(){
   var isuCd = FormManager.getActualValue('isuCd');
+  var scenarioSubTyp = FormManager.getActualValue('custSubGrp');
   var isuWithClientSubTypNonBlank = ['27', '32', '34', '36'];
+  var fixScenarioSubTyp = ['IBMEM', 'PRIPE', 'INTER', 'BUSPR'];
   var clientSubType = '';
   if(isuWithClientSubTypNonBlank.includes(isuCd)){
     if (isuCd == '27')
@@ -2454,6 +2463,9 @@ function getClientSubTypForIsu(){
       clientSubType = 'Y';
     FormManager.readOnly('clientTier');
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+  } else if (fixScenarioSubTyp.includes(scenarioSubTyp)){
+    FormManager.readOnly('clientTier');
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     FormManager.enable('clientTier');
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
