@@ -2164,6 +2164,7 @@ function setEnterpriseOnSubIndustryABU27E(value) {
     'R' : '911792',
     'T' : '911792',
     'U' : '911792',
+    'W' : '911792',
     'J' : '911793',
     'L' : '911793',
     'M' : '911793',
@@ -3862,6 +3863,11 @@ function setIsuCtcOnScenarioChange() {
       FormManager.enable('clientTier');
       FormManager.enable('taxCd2');
     }
+  }
+
+  var clientTier = FormManager.getActualValue('clientTier');
+  if (clientTier != "") {
+    setEnterpriseValuesME(clienTier);
   }
 
 }
