@@ -612,7 +612,7 @@ function addHandlersForCEMEA() {
   }
 
 }
-1`
+
 function afterConfigME() {
   var isuCd = FormManager.getActualValue('isuCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -4202,7 +4202,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIsicCdME, GEOHandler.ME);
   GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
-  GEOHandler.addAfterTemplateLoad(setClassificationCodeME, GEOHandler.ME);
   GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
