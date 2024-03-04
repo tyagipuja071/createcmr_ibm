@@ -616,7 +616,7 @@ function addHandlersForCEMEA() {
 function afterConfigME() {
   var isuCd = FormManager.getActualValue('isuCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' && reqType != 'C') {
     return;
   }
   if (custSubGrp != "") {
