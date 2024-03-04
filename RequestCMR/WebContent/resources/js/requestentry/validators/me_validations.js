@@ -4210,6 +4210,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockedScenarios, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(lockedScenarios, GEOHandler.ME);
   GEOHandler.addAfterConfig(afterConfigME, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(afterConfigME, GEOHandler.ME);
   GEOHandler.addAfterConfig(omanVat, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
   GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
