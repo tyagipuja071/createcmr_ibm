@@ -3229,12 +3229,12 @@ function setSalesRepValues(value) {
         if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL') {
           if (isuAndCtc == '34Q') {
             // Denmark, Faroe Islands, Greenland
-            var T0001375 = [ 'K', 'A', 'N' ];
+            var T0001375 = [ 'K', 'A' ];
             var T0006880 = [ 'D', 'W', 'T', 'R' ];
             var T0006881 = [ 'V', 'J', 'P', 'L', 'M' ];
             var T0006644 = [ 'G', 'Y', 'E', 'H', 'X' ];
             var T0006607 = [ 'B', 'C' ];
-            var T0011618 = [ 'U', 'S', 'F' ];
+            var T0011618 = [ 'U', 'S', 'F', 'N' ];
 
             if (ind != '') {
               if (T0001375.includes(ind)) {
