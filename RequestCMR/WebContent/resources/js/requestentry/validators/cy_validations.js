@@ -3091,8 +3091,6 @@ function setEntepriseCY() {
     FormManager.setValue('enterprise', '985999');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '34Q') {
     FormManager.setValue('enterprise', '822830');
-  } else if (custSubGrpSet.has(custSubGrp) && isuCtc == '36Y') {
-    FormManager.setValue('enterprise', '822840');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '5K') {
     FormManager.setValue('enterprise', '985999');
   } else if (custSubGrpSet34.has(custSubGrp) && isuCtc == '32T') {
