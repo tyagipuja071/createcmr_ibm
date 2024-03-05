@@ -2830,6 +2830,9 @@ function forceLockUnlock() {
   }
 }
 function lockUnlockFieldForEs() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   console.log(">>>> lockUnlockFieldForEs");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
