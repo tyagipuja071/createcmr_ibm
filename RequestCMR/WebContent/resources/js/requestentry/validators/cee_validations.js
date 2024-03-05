@@ -5072,14 +5072,14 @@ function validateSboCEESubIndLogic() {
 	FormManager.addFormValidator((function() {
 		return {
 			validate: function() {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
-	var isuCd = FormManager.getActualValue('isuCd');
-	var ctc = FormManager.getActualValue('clientTier');
-	var sbo = FormManager.getActualValue('salesBusOffCd');
-	var valid = true;
-	var validSbo = null;
-	var isuCTC = isuCd + ctc;
+				var cntry = FormManager.getActualValue('cmrIssuingCntry');
+				var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
+				var isuCd = FormManager.getActualValue('isuCd');
+				var ctc = FormManager.getActualValue('clientTier');
+				var sbo = FormManager.getActualValue('salesBusOffCd');
+				var valid = true;
+				var validSbo = null;
+				var isuCTC = isuCd + ctc;
 				if ('34Q' == isuCTC) {
 					switch (cntry) {
 						case SysLoc.CZECH_REPUBLIC:
