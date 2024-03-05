@@ -4867,7 +4867,7 @@ function addHandlersForCEE(){
 	
 	if (isuCdHandler == null) {
 		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-			setClientTier(value);
+			setClientTier();
 			setCovValues2024CEE();
 			setSBOFromDBMapping();
 		});
@@ -5028,7 +5028,7 @@ function validateSboCEE() {
 	     var custSubGrp = FormManager.getActualValue('custSubGrp');
 	     var cntry = FormManager.getActualValue('cmrIssuingCntry');
        var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
-	     if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp) || ([SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY].includes(cntry) && isuCTC == '')){
+	     if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp) || ([SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY].includes(cntry) && isuCTC == '34Q')){
         return new ValidationResult(null, true);
       	}
         var isu = FormManager.getActualValue('isuCd');
@@ -5068,10 +5068,134 @@ function validateSboCEE() {
 }
 	
 	
-	
-function subIndustryLogicCEE(){
+function validateSboCEESubIndLogic() {
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+				var cntry = FormManager.getActualValue('cmrIssuingCntry');
+				var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
+				var isuCd = FormManager.getActualValue('isuCd');
+				var ctc = FormManager.getActualValue('clientTier');
+				var sbo = FormManager.getActualValue('salesBusOffCd');
+				var valid = true;
+				var validSbo = null;
+				var isuCTC = isuCd + ctc;
+				if ('34Q' == isuCTC) {
+					switch (cntry) {
+						case SysLoc.CZECH_REPUBLIC:
+							if (['A', 'Q', 'U'].includes(subInd) && sbo != 'TW1') {
+								valid = false;
+								validSbo = 'TW1';
+							} else if (['B', 'C'].includes(subInd) && sbo != 'TW3') {
+								valid = false;
+								validSbo = 'TW3';
+							} else if (['D', 'R', 'T', 'W'].includes(subInd) && sbo != 'TW2') {
+								valid = false;
+								validSbo = 'TW2';
+							} else if (['F', 'N', 'S'].includes(subInd) && sbo != 'TW5') {
+								valid = false;
+								validSbo = 'TW5';
+							} else if (['J', 'L', 'M', 'P', 'V'].includes(subInd) && sbo != 'TW6') {
+								valid = false;
+								validSbo = 'TW6;'
+							} else if (['E', 'G', 'H', 'X', 'Y'].includes(subInd) && sbo != 'TW4') {
+								valid = false;
+								validSbo = 'TW4';
+							}
+							break;
+
+						case SysLoc.HUNGARY:
+							if (['A', 'Q', 'U'].includes(subInd) && sbo != 'TW1') {
+								valid = false;
+								validSbo = 'TW1';
+							} else if (['B', 'C'].includes(subInd) && sbo != 'TW3') {
+								valid = false;
+								validSbo = 'TW3';
+							} else if (['D', 'R', 'T', 'W'].includes(subInd) && sbo != 'TW2') {
+								valid = false;
+								validSbo = 'TW2';
+							} else if (['F', 'N', 'S'].includes(subInd) && sbo != 'TW4') {
+								valid = false;
+								validSbo = 'TW4';
+							} else if (['J', 'L', 'M', 'P', 'V'].includes(subInd) && sbo != 'TW6') {
+								valid = false;
+								validSbo = 'TW6';
+							} else if (['E', 'G', 'H', 'X', 'Y'].includes(subInd) && sbo != 'TW5') {
+								valid = false;
+								validSbo = 'TW5';
+							}
+							break;
+
+						case SysLoc.SLOVENIA:
+							if (['A', 'Q', 'U'].includes(subInd) && sbo != 'TW2') {
+								valid = false;
+								validSbo = 'TW2';
+							} else if (['B', 'C'].includes(subInd) && sbo != 'TW4') {
+								valid = false;
+								validSbo = 'TW4';
+							} else if (['D', 'R', 'T', 'W'].includes(subInd) && sbo != 'TW3') {
+								valid = false;
+								validSbo = 'TW3';
+							} else if (['F', 'N', 'S'].includes(subInd) && sbo != 'TW5') {
+								valid = false;
+								validSbo = 'TW5';
+							} else if (['J', 'L', 'M', 'P', 'V'].includes(subInd) && sbo != 'TW1') {
+								valid = false;
+								validSbo = 'TW1';
+							} else if (['E', 'G', 'H', 'X', 'Y'].includes(subInd) && sbo != 'TW6') {
+								valid = false;
+								validSbo = 'TW6';
+							}
+							break;
+
+						case SysLoc.POLAND:
+							if (['A', 'K'].includes(subInd) && sbo != 'P12') {
+								valid = false;
+								validSbo = 'P12';
+							} else if (['B', 'C'].includes(subInd) && sbo != 'P07') {
+								valid = false;
+								validSbo = 'P07';
+							} else if (['D', 'J', 'L', 'M', 'P', 'R', 'T', 'V'].includes(subInd) && sbo != 'P20') {
+								valid = false;
+								validSbo = 'P20';
+							} else if (['E', 'G', 'Y'].includes(subInd) && sbo != 'P08') {
+								valid = false;
+								validSbo = 'P08';
+							} else if (['F'].includes(subInd) && sbo != 'P05') {
+								valid = false;
+								validSbo = 'P05';
+							} else if (['X', 'H'].includes(subInd) && sbo != 'P10') {
+								valid = false;
+								validSbo = 'P10';
+							} else if (['N'].includes(subInd) && sbo != 'P09') {
+								valid = false;
+								validSbo = 'P09';
+							} else if (['S'].includes(subInd) && sbo != 'P06') {
+								valid = false;
+								validSbo = 'P06';
+							} else if (['U'].includes(subInd) && sbo != 'P24') {
+								valid = false;
+								validSbo = 'P24';
+							} else if (['W'].includes(subInd) && sbo != 'P23') {
+								valid = false;
+								validSbo = 'P23';
+							}
+							break;
+					}
+				}
+				if (valid) {
+					return new ValidationResult(null, true);
+				} else {
+					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + validSbo + ') for given  ISU , CTC , ISIC combination.');
+				}
+			}
+		};
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function subIndustryLogicCEE() {
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	var subInd = FormManager.getActualValue('subIndustryCd').substring(0,1);
+	var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
 	var isuCd = FormManager.getActualValue('isuCd');
 	var ctc = FormManager.getActualValue('clientTier');
 	
@@ -5290,6 +5414,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addProvinceCityValidator, [SysLoc.ROMANIA], null, true);
   GEOHandler.registerValidator(validateSboCEE, GEOHandler.CEE, null, true);
+  GEOHandler.registerValidator(validateSboCEESubIndLogic, [SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY], null, true);
 
   GEOHandler.addAfterTemplateLoad(setCovValues2024CEE, GEOHandler.CEE);  
   GEOHandler.addAfterConfig(setCovValues2024CEE, GEOHandler.CEE);
