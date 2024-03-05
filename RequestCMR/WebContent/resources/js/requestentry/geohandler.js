@@ -115,7 +115,20 @@ var SysLoc = (function() {
     CANADA : '649',
     KOREA : '766',
     KENYA : '764',
-    TAIWAN : '858'
+    TAIWAN : '858',
+    LIBYA : "772",
+    BAHRAIN : "620",
+    GULF : "675",
+    IRAQ : "752",
+    JORDAN : "762",
+    KUWAIT : "767",
+    LEBANON : "768",
+    OMAN : "805",
+    QATAR : "823",
+    YEMEN : "849",
+    SYRIAN_ARAB_REPUBLIC : "850",
+    TUNISIA_SOF : "729"
+
   };
 })();
 

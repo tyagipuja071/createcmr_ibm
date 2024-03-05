@@ -1982,7 +1982,7 @@ function setEnterpriseValuesME(clientTier) {
           FormManager.setValue('taxCd2', '911825');
         } else if (SysLoc.LIBYA == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '911756');
-        } else if (SysLoc.TUNISIA == cntry && isuCtc == '34Q') {
+        } else if (SysLoc.TUNISIA_SOF == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901728');
         } else if (SysLoc.MOROCCO == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901462');
@@ -2036,11 +2036,27 @@ function validateEnterpriseField(taxCd2) {
         enterprises = [ '908025', '912094', '912093' ];
       }
     } else if (SysLoc.BAHRAIN == cntry) {
-      if (isuCtc == '36Y') {
+      if (isuCtc == '27E') {
+        enterprises = [ '911825' ];
+      } else if (isuCtc == '36Y') {
         enterprises = [ '912084', '912082', '912083' ];
       }
-    } else if (SysLoc.LIBYA == cntry || SysLoc.TUNISIA == cntry || SysLoc.MOROCCO == cntry) {
-      if (isuCtc == '36Y') {
+    } else if (SysLoc.LIBYA == cntry) {
+      if (isuCtc == '34Q') {
+        enterprises = [ '911756' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+      }
+    } else if (SysLoc.TUNISIA_SOF == cntry) {
+      if (isuCtc == '34Q') {
+        enterprises = [ '901728' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+      }
+    } else if (SysLoc.MOROCCO == cntry) {
+      if (isuCtc == '34Q') {
+        enterprises = [ '901462' ];
+      } else if (isuCtc == '36Y') {
         enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
       }
     } else if (SysLoc.EGYPT == cntry) {
@@ -2058,7 +2074,9 @@ function validateEnterpriseField(taxCd2) {
         enterprises = [ '912088', '912090', '912089' ];
       }
     } else if (SysLoc.PAKISTAN == cntry) {
-      if (isuCtc == '36Y') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '901459' ];
+      } else if (isuCtc == '36Y') {
         enterprises = [ '908027', '912092', '912091' ];
       }
     }
