@@ -1621,8 +1621,7 @@ function validateCustomername() {
     return {
       validate: function () {
         var addrTxt = FormManager.getActualValue('mainCustNm1');
-        var addrTxt2 = FormManager.getActualValue('mainCustNm2');
-        
+        var addrTxt2 = FormManager.getActualValue('mainCustNm2');  
         var combinedstring = addrTxt.concat(addrTxt2)
         if (combinedstring.includes("—") || combinedstring.includes("–")) {
           return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
