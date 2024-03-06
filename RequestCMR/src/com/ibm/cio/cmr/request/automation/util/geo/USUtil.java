@@ -471,7 +471,12 @@ public class USUtil extends AutomationUtil {
             details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
-          } else {
+          }
+          if (scenarioSubType.equalsIgnoreCase("Commercial - Ecosystem")) {
+            details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
+          } else if (!scenarioSubType.equalsIgnoreCase("Private Household CMR") && (!scenarioSubType.equalsIgnoreCase("Commercial - Ecosystem"))) {
             details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 27-E.").append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "27");
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "E");
