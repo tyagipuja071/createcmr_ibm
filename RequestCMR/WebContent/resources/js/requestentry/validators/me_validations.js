@@ -1959,7 +1959,7 @@ function setEnterpriseValuesME(clientTier) {
 
   if (isuCd != '' && clientTier != '') {
     if ((custGrp == "LOCAL") || (custGrp == "CROSS" && non_mea_cross.includes(landed))) {
-      if (custSubGrp == 'COMME' || custSubGrp == "XCOM") {
+      if (custSubGrp == 'COMME' || custSubGrp == "XCOM" || custSubGrp == "THDPT" || custSubGrp == "PRICU") {
         if (SysLoc.EGYPT == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
         } else if (SysLoc.ABU_DHABI == cntry && isuCtc == '27E') {
@@ -2030,7 +2030,9 @@ function validateEnterpriseField(taxCd2) {
         enterprises = [ '908024', '912072', '912071' ];
       }
     } else if (SysLoc.SAUDI_ARABIA == cntry) {
-      if (isuCtc == '34Q') {
+      if (isuCtc == '27E') {
+        enterprises = [ '911693', '911700', '911699', '911688', '911701', '901469', '911698' ];
+      } else if (isuCtc == '34Q') {
         enterprises = [ '911695', '911692', '911696', '911690', '911685', '911691', '911702', '911687', '911697' ];
       } else if (isuCtc == '36Y') {
         enterprises = [ '908025', '912094', '912093' ];
@@ -3746,7 +3748,8 @@ function addLandCntryHandler() {
 function validatorsDIGIT() {
   // FormManager.addValidator('EngineeringBo', Validators.DIGIT, [
   // 'EngineeringBo' ]);
-  FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
+  // FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number'
+  // ]);
   FormManager.addValidator('taxCd2', validEnterpriseNumber6Length, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('enterprise', Validators.DIGIT, [ 'Company Number' ]);
   FormManager.addValidator('enterprise', validCompanyNumber6Length, [ 'Company Number' ], 'MAIN_IBM_TAB');
