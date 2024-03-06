@@ -8366,7 +8366,7 @@ function validateSboSrForIsuCtcIE() {
               type : 'text',
               name : 'salesBusOffCd'
             }, false, 'Please enter the valid combination of ISU, ClientTier, SBO and Sales Rep.');
-          } else if (zs01LandCntry != 'GB' && (sbo != '090' || salRep != 'MMIR11')) {
+          } else if (zs01LandCntry != 'GB' && (sbo != '105' || salRep != 'SPA105')) {
             return new ValidationResult({
               id : 'salesBusOffCd',
               type : 'text',
