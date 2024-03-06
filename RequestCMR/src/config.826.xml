@@ -75,19 +75,19 @@
 					<dbColumn>ENTERPRISE</dbColumn>
 					<width>15</width>
 					<length>6</length>
-				</column>	
+				</column>
 				<column>
 					<label>Order block code</label>
 					<dbColumn>EMBARGO_CD</dbColumn>
 					<width>10</width>
 					<length>1</length>
 				</column>
-                <column>
-                    <label>STC order block code</label>
-                    <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
-                    <width>15</width>
-                    <lovId>TaxExemptStatus3</lovId>
-                </column>
+				<column>
+					<label>STC order block code</label>
+					<dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+					<width>15</width>
+					<lovId>TaxExemptStatus3</lovId>
+				</column>
 				<column>
 					<label>Customer Classification Code</label>
 					<dbColumn>CUST_CLASS</dbColumn>
@@ -111,7 +111,7 @@
 					<dbColumn>COLLECTION_CD</dbColumn>
 					<width>30</width>
 					<length>6</length>
-					
+
 				</column>
 				<column>
 					<label>CoF</label>
@@ -132,7 +132,7 @@
 					<width>20</width>
 					<length>1</length>
 					<bdsId>CustLang</bdsId>
-				</column>				
+				</column>
 			</columns>
 		</tab>
 		<tab name="Sold To" type="Address" typeCode="ZS01">
@@ -191,12 +191,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
-              <column>
-                    <label>State/Province</label>
-                    <dbColumn>STATE_PROV</dbColumn>
-                    <width>40</width>
-                    <bdsId>StateProv</bdsId>      
-              </column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -268,12 +268,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
-              <column>
-                    <label>State/Province</label>
-                    <dbColumn>STATE_PROV</dbColumn>
-                    <width>40</width>
-                    <bdsId>StateProv</bdsId>      
-              </column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -345,12 +345,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
-              <column>
-                    <label>State/Province</label>
-                    <dbColumn>STATE_PROV</dbColumn>
-                    <width>40</width>
-                    <bdsId>StateProv</bdsId>      
-              </column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -422,12 +422,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
-              <column>
-                    <label>State/Province</label>
-                    <dbColumn>STATE_PROV</dbColumn>
-                    <width>40</width>
-                    <bdsId>StateProv</bdsId>      
-              </column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -499,12 +499,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
-              <column>
-                    <label>State/Province</label>
-                    <dbColumn>STATE_PROV</dbColumn>
-                    <width>40</width>
-                    <bdsId>StateProv</bdsId>      
-              </column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
@@ -577,12 +577,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
-              <column>
-                    <label>State/Province</label>
-                    <dbColumn>STATE_PROV</dbColumn>
-                    <width>40</width>
-                    <bdsId>StateProv</bdsId>      
-              </column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
 				<column>
 					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
