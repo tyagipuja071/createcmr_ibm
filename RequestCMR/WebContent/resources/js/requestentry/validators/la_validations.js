@@ -1521,6 +1521,11 @@ function addVatRequiredValidatorAddrList() {
           (function() {
             return {
               validate : function() {
+                var ssid = FormManager.getActualValue('sourceSystId');
+                var custSubGrp = FormManager.getField('custSubGrp'); 
+                if(ssid != '' && (ssid == 'PayGo-Test') && custSubGrp=='PRIPE') {
+                  return;
+                }
                 if (typeof (CmrGrid.GRIDS.ADDRESS_GRID_GRID) != 'undefined' && CmrGrid.GRIDS.ADDRESS_GRID_GRID != null) {
                   var addressStore = CmrGrid.GRIDS.ADDRESS_GRID_GRID.store, addressItems = addressStore._arrayOfAllItems, addrGridRow = 0, rowString = '', errorCount = 0, genericMsg = 'VAT #/CNPJ is required.';
                   if (addressItems != null && addressItems.length != 0) {
