@@ -7438,6 +7438,19 @@ function addJPMandatoryAddressTypesValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function checkROLFlagValue(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('rol'), 'onChange', function (value) {
+    var reqType = FormManager.getActualValue('reqType');
+    var custGrp = FormManager.getActualValue('custGrp');
+    var addrType = FormManager.getActualValue('addrType');
+    if (reqType == 'C' && (custGrp == 'IBMTP' || custGrp == 'BUSPR')) {
+      if (addrType == 'ZC01' && value == 'N') {
+        cmr.showAlert('CreateCMR will send email to CFO to get approval if ROL Flag=N. Is that OK to set ROL Flag=N?');
+      }
+    }
+  });
+}
+
 function hideNonRelevantFieldsInDRFlow() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -7637,7 +7650,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRA, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(convertEnglishFieldsToSBCS, GEOHandler.JP);
-
+  GEOHandler.addToggleAddrTypeFunction(checkROLFlagValue, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);
