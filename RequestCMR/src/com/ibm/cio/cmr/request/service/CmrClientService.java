@@ -305,8 +305,8 @@ public class CmrClientService extends BaseSimpleService<Object> {
         }
 
         if (coverageOutput == null) {
-          if (output.getCoverage().size() > 0) {
-            coverageOutput = output.getCoverage().get(0);
+          if (output.getCoverage().size() > 1) {
+            coverageOutput = output.getCoverage().get(1);
           } else {
             coverageOutput = new Coverage();
           }

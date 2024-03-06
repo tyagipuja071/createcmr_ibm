@@ -128,6 +128,10 @@ public class BrazilUtil extends AutomationUtil {
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     Data data = requestData.getData();
+   String custSubGrp= data.getCustSubGrp();
+   List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM","BUSPR");
+   if(!custArray.contains(custSubGrp))
+   {
     List<Addr> addr = requestData.getAddresses();
     String stateProv=null;  
       for(Addr address1:addr)
@@ -186,6 +190,17 @@ public class BrazilUtil extends AutomationUtil {
               isu = "32";
               ctc = "J";
         }
+        if(comment.equals("Select BPS - T"))
+        {
+              isu = "34";
+              ctc = "Q";
+        }
+        if(comment.equals("Build/Service"))
+        {
+              isu = "36";
+              ctc = "Y";
+        }
+        
         if(comment.equals("Strategic") || comment.equals("Signature"))
         {
           if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
@@ -284,6 +299,8 @@ public class BrazilUtil extends AutomationUtil {
       }
     }
     return true;
+   }
+   return false;
 
   }
   
