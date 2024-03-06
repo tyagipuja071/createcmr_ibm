@@ -1649,8 +1649,6 @@ function validateCustomeraddress() {
               var custPhone = FormManager.getActualValue('custPhone');
               var pobox = FormManager.getActualValue('pobox');
               var poBoxCity = FormManager.getActualValue('poBoxCity');
-
-
               var addrcombinedstring = addrTxt.concat(addrTxt2)
               var namecombinedstring = custNm1.concat(custNm2)
               if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
