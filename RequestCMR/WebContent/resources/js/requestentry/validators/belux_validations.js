@@ -669,6 +669,30 @@ function addHandlersForBELUX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      var isuCd = FormManager.getActualValue('isuCd');
+      var clientTier = FormManager.getActualValue('clientTier');
+      var reqType = FormManager.getActualValue('reqType');
+      var subGrp = FormManager.getActualValue('custSubGrp');
+      var countryUse = FormManager.getActualValue('countryUse');
+      var belComScenarioList = [ 'BECOM', 'BEDAT', 'GOVRN', 'BEPUB', 'BE3PA', 'CBCOM' ];
+      var luComScenarioList = [ 'LUCOM', 'LUDAT', 'LUGOV', 'LUPUB', 'LU3PA', 'CBCOM' ];
+      if (belComScenarioList.includes(subGrp) && countryUse == '624' && reqType == 'C') {
+        if (isuCd == '4F') {
+          FormManager.setValue('commercialFinanced', 'A0008874');
+        } else if (isuCd == '5B') {
+          FormManager.setValue('commercialFinanced', 'A0008873');
+        } else if (isuCd == '5K') {
+          FormManager.setValue('commercialFinanced', 'A0009209');
+        } else if (isuCd == '34' || isuCd == '36' || isuCd == '04' || isuCd == '28' || isuCd == '27') {
+          FormManager.setValue('commercialFinanced', '');
+        }
+      } else if (luComScenarioList.includes(subGrp) && countryUse == '624LU' && reqType == 'C') {
+        if (isuCd == '5K') {
+          FormManager.setValue('commercialFinanced', 'A0009229');
+        } else if (isuCd == '34' || isuCd == '36') {
+          FormManager.setValue('commercialFinanced', '');
+        }
+      }
       setClientTierValues(value);
       // setClientTierValuesForUpdate();
       setSBOValuesForIsuCtc();

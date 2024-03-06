@@ -228,10 +228,10 @@ function afterConfigForFR() {
         FormManager.setValue('isuCd', '27');
         FormManager.setValue('clientTier', 'E');
         if (landedCountry == 'TN' || landedCountry == "LY" || landedCountry == "DZ") {
-        FormManager.setValue('isuCd', '34');
-        FormManager.setValue('clientTier', 'Q');
+          FormManager.setValue('isuCd', '34');
+          FormManager.setValue('clientTier', 'Q');
+        }
       }
-    }
     }
   });
 }
@@ -3701,7 +3701,7 @@ function addVatExemptHandler() {
 function setPPSCEIDRequired() {
   var reqType = FormManager.getActualValue('reqType');
   var subGrp = FormManager.getActualValue('custSubGrp');
-  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || subGrp == undefined || subGrp == '') {
     return;
   }
   if (subGrp == 'XBUSP' || subGrp == 'BUSPR') {
@@ -4165,9 +4165,9 @@ function sboCodeValidator() {
           || sbo == 'S89S89' || sbo == 'S95S95')) {
     return new ValidationResult(
         {
-      id : 'salesBusOffCd',
-      type : 'text',
-      name : 'salesBusOffCd'
+          id : 'salesBusOffCd',
+          type : 'text',
+          name : 'salesBusOffCd'
         },
         false,
         'SORTL can only accept \'S39S39\'\  \'S62S62\'\  \'S00S00\'\  \'S85S85\'\  \'S66S66\'\  \'S04S04\'\  \'S67S67\'\  \'S31S31\'\  \'S81S81\'\  \'S29S29\'\  \'S47S47\'\  \'S52S52\'\  \'S35S35\'\  \'S79S79\'\  \'S46S46\'\  \'S63S63\'\  \'S53S53\'\  \'S08S08\'\  \'S99S99\'\  \'S78S78\'\  \'S89S89\'\  \'S95S95\'\ for ISU CTC 34Q.');
@@ -4545,7 +4545,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(clientTierValidator, [ '706' ], null, true);
   GEOHandler.registerValidator(sboValidator, [ '706' ], null, true);
   GEOHandler.addAddrFunction(set2H23CoverageChangesOnLandedCoutrychange, '706');
- // GEOHandler.addAfterTemplateLoad(set2H23CoverageChanges, '706');
+  // GEOHandler.addAfterTemplateLoad(set2H23CoverageChanges, '706');
   GEOHandler.addAfterTemplateLoad(setCoverage2H23FieldBehaviour, '706');
 
   GEOHandler.registerValidator(addVatIndValidator, [ '706' ], null, true);
