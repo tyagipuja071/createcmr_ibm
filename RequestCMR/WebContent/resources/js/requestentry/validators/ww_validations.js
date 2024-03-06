@@ -1662,7 +1662,7 @@ function validateCustomeraddress() {
       
         if(city1.includes("—") || city1.includes("–"))
         {
-      return new ValidationResult(null, false, 'city can contain only -.Long Dash not allowed in city');
+      return new ValidationResult(null, false, 'city can contain only -.Long Dash not allowed in city ');
         }
         if(dept.includes("—") || dept.includes("–"))
         {
