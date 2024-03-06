@@ -228,7 +228,7 @@ function disableIBMTab() {
   } else {
     FormManager.enable('enterprise');
     if (!custSubGrp == 'LUPRI') {
-    FormManager.enable('inacCd');
+      FormManager.enable('inacCd');
     }
     FormManager.enable('searchTerm');
     if (role == 'Processor') {
@@ -1741,7 +1741,7 @@ function setSBOValuesForIsuCtc() {
   var countryUse = FormManager.getActualValue('countryUse');
   var subGrp = FormManager.getActualValue('custSubGrp');
   var commercialFinanced = FormManager.getActualValue('commercialFinanced');
-  var isuList = [ '34', '36', '28', '32' ];
+  var isuList = [ '34', '36', '27' ];
   var beSubGrpsList = [ 'BEINT', 'BEISO', 'BEPRI', 'IBMEM' ];
   var luSubGrpsList = [ 'LUINT', 'LUISO', 'LUPRI', 'LUIBM' ]
   if (role == 'Processor') {
@@ -1755,10 +1755,10 @@ function setSBOValuesForIsuCtc() {
   if (countryUse == '624') {
     if (subGrp == 'BECOM' || subGrp == 'CBCOM' || subGrp == 'BE3PA' || subGrp == 'BEDAT' || subGrp == 'BEPUB' || subGrp == 'GOVRN') {
 
-      if (role == 'Requester') {
-        FormManager.setValue('isuCd', '27');
-        FormManager.setValue('clientTier', 'E');
-      }
+      // if (role == 'Requester') {
+      FormManager.setValue('isuCd', '27');
+      FormManager.setValue('clientTier', 'E');
+      // }
     }
 
     if (isuCd == '27' && clientTier == 'E') {
@@ -2085,6 +2085,15 @@ function clientTierCodeValidator() {
   var activeCtc = [ 'Q', 'Y', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
+
+    if (isuCode == '32' || clientTierCode == 'T') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'ISU Cd 32 & Client Tier T has been obsolete.');
+    }
+
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -2250,14 +2259,14 @@ function sortlCheckValidator() {
 
         if (countryUse == '624LU') {
           if (!sortlList.includes(commercialFinanced)) {
-          if (accSeq_624LU.hasOwnProperty(isuCtc) && !accSeq_624LU[isuCtc].includes(commercialFinanced)) {
-            return new ValidationResult({
-              id : 'commercialFinanced',
-              type : 'text',
-              name : 'commercialFinanced'
-            }, false, 'SORTL can only accept ' + accSeq_624LU[isuCtc]);
+            if (accSeq_624LU.hasOwnProperty(isuCtc) && !accSeq_624LU[isuCtc].includes(commercialFinanced)) {
+              return new ValidationResult({
+                id : 'commercialFinanced',
+                type : 'text',
+                name : 'commercialFinanced'
+              }, false, 'SORTL can only accept ' + accSeq_624LU[isuCtc]);
+            }
           }
-        }
 
           var luIsuCdList = [ '04', '05', '11', '12', '14', '15', '18', '19', '1R', '27', '28', '31', '32', '3T', '40', '4A', '4D', '4F', '5B', '5E', '60', '8C', 'XX' ];
           var luScenarioFormatMatch = [ 'LUCOM', 'LUCOM', 'LUGOV', 'LU3PA', 'LUDAT', 'LUPUB', 'CBCOM' ];
@@ -2358,7 +2367,6 @@ function addVatIndValidator() {
   }
 }
 
-
 function StcOrderBlockValidation() {
   FormManager.addFormValidator((function() {
     return {
@@ -2440,7 +2448,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
-  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, GEOHandler.BELUX);
+  // GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setPPSCEIDRequired, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(addBeIsuHandler, GEOHandler.BELUX);
