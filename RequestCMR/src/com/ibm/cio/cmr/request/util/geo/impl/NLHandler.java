@@ -2355,6 +2355,11 @@ public class NLHandler extends BaseSOFHandler {
               LOG.trace("The row " + (row.getRowNum() + 1) + ":Client Tier should be 'E' for the selected ISU code.");
               error.addError((row.getRowNum() + 1), "Client Tier", ":Client Tier should be 'E' for the selected ISU code:" + isuCd + ".<br>");
             }
+          } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
+            if (StringUtils.isBlank(ctc) || "T".contains(ctc)) {
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":ISU Cd 32 & Client Tier T has been obsolete.");
+              error.addError((row.getRowNum() + 1), "Client Tier", "ISU Cd 32 & Client Tier T has been obsolete.<br>");
+            }
           } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("27", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
