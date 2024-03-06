@@ -800,21 +800,26 @@ public class UKIUtil extends AutomationUtil {
       PostCd = PostCd.substring(0, 2);
     }
 
-    if ("27".equals(isuCd) && "E".equals(clientTier) && StringUtils.isNotBlank(isicCd)) {
-
-      String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU_CD", "%" + isuCd + "%");
-      query.setParameter("ISIC_CD", isicCd);
-      query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
-      query.setForReadOnly(true);
-      List<Object[]> results = query.getResults();
-      if (results != null && results.size() == 1) {
-        sbo = (String) results.get(0)[0];
-        salesRep = (String) results.get(0)[1];
-        container.setSbo(sbo);
-        container.setSalesRep(salesRep);
+    if ("27".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+      if ("E".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd)) {
+        container.setSbo("057");
+        container.setSalesRep("SPA057");
         return container;
+      } else {
+        String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("ISU_CD", "%" + isuCd + "%");
+        query.setParameter("ISIC_CD", isicCd);
+        query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
+        query.setForReadOnly(true);
+        List<Object[]> results = query.getResults();
+        if (results != null && results.size() == 1) {
+          sbo = (String) results.get(0)[0];
+          salesRep = (String) results.get(0)[1];
+          container.setSbo(sbo);
+          container.setSalesRep(salesRep);
+          return container;
+        }
       }
     } else {
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
