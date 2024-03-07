@@ -31,7 +31,7 @@
 			</p>
 		</cmr:column>
 
-		<cmr:column span="2" containerForField="Enterprise" forCountry="780,864">
+		<cmr:column span="2" containerForField="Enterprise" forCountry="780">
 			<p>
 				<cmr:label fieldId="enterprise">
 					<cmr:fieldLabel fieldId="Enterprise" />:
