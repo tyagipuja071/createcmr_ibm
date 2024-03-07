@@ -4184,12 +4184,6 @@ function sboCodeValidator() {
         },
         false,
         'SORTL can only accept \'S39S39\'\  \'S62S62\'\  \'S00S00\'\  \'S85S85\'\  \'S66S66\'\  \'S04S04\'\  \'S67S67\'\  \'S31S31\'\  \'S81S81\'\  \'S29S29\'\  \'S47S47\'\  \'S52S52\'\  \'S35S35\'\  \'S79S79\'\  \'S46S46\'\  \'S63S63\'\  \'S53S53\'\  \'S08S08\'\  \'S99S99\'\  \'S78S78\'\  \'S89S89\'\  \'S95S95\'\ for ISU CTC 34Q.');
-  } else if (isuCtc == '32T' || isuCd == '32') {
-    return new ValidationResult({
-      id : 'isuCd',
-      type : 'text',
-      name : 'isuCd'
-    }, false, 'ISU 32 & Client Tier T has been obsolete.');
   } else if (isuCtc == '5K' && sbo != 'FSDFSD') {
     return new ValidationResult({
       id : 'salesBusOffCd',
