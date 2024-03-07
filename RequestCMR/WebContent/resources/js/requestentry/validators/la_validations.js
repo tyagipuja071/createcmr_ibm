@@ -612,6 +612,7 @@ function afterConfigForLA() {
 
 function setClientTierValues(value) {
   var reqType = FormManager.getActualValue('reqType');
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || value == undefined) {
     return;
   }
@@ -624,6 +625,7 @@ function setClientTierValues(value) {
   if (isuCd != null && isuCd != undefined && isuCd != '') {
     if (isuCtcVals.hasOwnProperty(isuCd)) {
       FormManager.setValue('clientTier', isuCtcVals[isuCd]);
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ clientTier ], 'MAIN_IBM_TAB');
     } else {
       FormManager.setValue('clientTier', '');
     }
