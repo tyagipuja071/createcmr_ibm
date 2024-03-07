@@ -3812,6 +3812,19 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
     FormManager.setValue('salesBusOffCd', '05W05W');
   } else if (isuCd == '3T') {
     FormManager.setValue('salesBusOffCd', '4DF4DF');
+  } else if (isuCd == '34' && clientTier == 'Q') {
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (isExcludedScenario(custSubGrp)) {
+      return;
+    }
+    var landedCountry = '';
+    landedCountry = getSoldToLanded();
+    if (custGrp == 'CROSS') {
+      if (landedCountry == 'DZ' || landedCountry == 'LY') {
+        FormManager.setValue('salesBusOffCd', '710710');
+      }
+    }
   } else if (isuCd == '27' && clientTier == 'E') {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var custGrp = FormManager.getActualValue('custGrp');
