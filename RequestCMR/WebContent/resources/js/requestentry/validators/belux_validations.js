@@ -1777,14 +1777,6 @@ function setSBOValuesForIsuCtc() {
     }
   }
   if (countryUse == '624') {
-    if (subGrp == 'BECOM' || subGrp == 'CBCOM' || subGrp == 'BE3PA' || subGrp == 'BEDAT' || subGrp == 'BEPUB' || subGrp == 'GOVRN') {
-
-      // if (role == 'Requester') {
-      FormManager.setValue('isuCd', '27');
-      FormManager.setValue('clientTier', 'E');
-      // }
-    }
-
     if (isuCd == '27' && clientTier == 'E') {
       // FormManager.setValue('commercialFinanced', 'T0003601');
       if (role == 'Requester') {
