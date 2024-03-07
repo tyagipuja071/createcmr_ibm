@@ -107,17 +107,8 @@ public class KscReportsService extends BaseBatchService {
         if (fileDate.toLowerCase().contains("receive")) {
           toDelete.add(file);
         } else {
-          Date dt = format.parse(fileDate);
-          Calendar jpTime = new GregorianCalendar();
-          jpTime.setTime(this.currTimestamp);
-          // add 1 hour for processing time
-          jpTime.add(Calendar.HOUR, 1);
-          // add the days adjustment
-          jpTime.add(Calendar.DATE, daysAdjust);
-
-          if (dt.before(jpTime.getTime())) {
-            toDelete.add(file);
-          }
+          format.parse(fileDate);
+          toDelete.add(file);
         }
       } catch (Exception e) {
         // unparseable
