@@ -3879,19 +3879,9 @@ function setIsuCtcOnScenarioChange() {
   } else if (custSubGrpLocMECov.includes(scenario) && cntrylist_27E.includes(cntry)) {
     FormManager.setValue('isuCd', '27');
     FormManager.setValue('clientTier', 'E');
-    if (scenario == 'PRICU') {
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('taxCd2');
-    }
   } else if (custSubGrpLocMECov.includes(scenario) && cntrlist_34Q.includes(cntry)) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
-    if (scenario == 'PRICU') {
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('taxCd2');
-    }
   } else if (custSubGrpLocMECov.includes(scenario) && cntry == '832') {
     if (SAsubindustry27E.includes(flsubIndustryCd)) {
       FormManager.setValue('isuCd', '27');
@@ -3899,11 +3889,6 @@ function setIsuCtcOnScenarioChange() {
     } else if (SAsubindustry34Q.includes(flsubIndustryCd)) {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
-    }
-    if (scenario == 'PRICU') {
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('taxCd2');
     }
   } else if (scenario != "") {
     if (scenario != 'PRICU' && scenario != 'BUSPR' && !scenario.includes('BP') && !scenario.includes('IN') && !scenario.includes('IBM')) {
