@@ -1959,7 +1959,7 @@ function setEnterpriseValuesME(clientTier) {
 
   if (isuCd != '' && clientTier != '') {
     if ((custGrp == "LOCAL") || (custGrp == "CROSS" && non_mea_cross.includes(landed))) {
-      if (custSubGrp == 'COMME' || custSubGrp == "XCOM" || custSubGrp == "THDPT" || custSubGrp == "PRICU") {
+      if (custSubGrp == 'COMME' || custSubGrp == "XCOM" || custSubGrp == "THDPT" || custSubGrp == "PRICU" || custSubGrp == "XTP") {
         if (SysLoc.EGYPT == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
         } else if (SysLoc.ABU_DHABI == cntry && isuCtc == '27E') {
@@ -1996,7 +1996,7 @@ function setEnterpriseValuesME(clientTier) {
 
 function validateEnterpriseField(taxCd2) {
 
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XCOM' ];
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP' ];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
@@ -2100,7 +2100,7 @@ function lockFieldsBasedOnISU(isuCd) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntryME = [ '620', '642', '677', '680', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865', '729' ];
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU' ];
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XTP', 'XCOM' ];
   var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ]
 
   if (cntryME.includes(cntry) && custSubGrpLocMECov.includes(custSubGrp)) {
@@ -3832,8 +3832,9 @@ function setIsuCtcOnScenarioChange() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU' ];
-  var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '832', '849', '850' ];
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XTP', 'XCOM' ];
+  var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '849', '850' ];
   var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
@@ -3845,6 +3846,11 @@ function setIsuCtcOnScenarioChange() {
   }
   scenarioChanged = scenarioChanged || (currentChosenScenarioME != '' && currentChosenScenarioME != scenario);
   currentChosenScenarioME = scenario;
+
+  var SAsubindustry27E = [ 'A', 'K', 'B', 'C', 'D', 'L', 'R', 'W', 'F', 'S', 'J', 'T', 'M', 'P', 'U', 'N' ];
+  var SAsubindustry34Q = [ 'E', 'G', 'V', 'Y', 'H', 'X' ];
+  let
+  flsubIndustryCd = subIndustryCd.charAt(0);
 
   if (scenario == 'BUSPR' || scenario.includes('BP')) {
     FormManager.setValue('isuCd', '8B');
@@ -3863,18 +3869,16 @@ function setIsuCtcOnScenarioChange() {
   } else if (custSubGrpLocMECov.includes(scenario) && cntrylist_27E.includes(cntry)) {
     FormManager.setValue('isuCd', '27');
     FormManager.setValue('clientTier', 'E');
-    if (scenario == 'PRICU') {
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('taxCd2');
-    }
   } else if (custSubGrpLocMECov.includes(scenario) && cntrlist_34Q.includes(cntry)) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
-    if (scenario == 'PRICU') {
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('taxCd2');
+  } else if (custSubGrpLocMECov.includes(scenario) && cntry == '832') {
+    if (SAsubindustry27E.includes(flsubIndustryCd)) {
+      FormManager.setValue('isuCd', '27');
+      FormManager.setValue('clientTier', 'E');
+    } else if (SAsubindustry34Q.includes(flsubIndustryCd)) {
+      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('clientTier', 'Q');
     }
   } else if (scenario != "") {
     if (scenario != 'PRICU' && scenario != 'BUSPR' && !scenario.includes('BP') && !scenario.includes('IN') && !scenario.includes('IBM')) {
