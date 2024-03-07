@@ -531,9 +531,9 @@ public class CanadaUtil extends AutomationUtil {
       results.setDetails(details.toString());
       return true;
     }
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqType())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqType())) {
+      isPaygoUpgrade = true;
     }
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
@@ -814,9 +814,9 @@ public class CanadaUtil extends AutomationUtil {
 
       LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
       boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-      boolean isPaygoUpgrade=false; 
-      if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
-        isPaygoUpgrade=true;
+      boolean isPaygoUpgrade = false;
+      if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
+        isPaygoUpgrade = true;
       }
       if (changes.isLegalNameChanged() && !payGoAddredited) {
         engineData.addNegativeCheckStatus("_legalNameChanged", "Legal Name change should be validated.");
@@ -1273,7 +1273,7 @@ public class CanadaUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String isu = "";
     String ctc = "";
-    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO") ) {
+    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
 
       String firstChar = coverageId.substring(0, 1);
 
@@ -1331,6 +1331,14 @@ public class CanadaUtil extends AutomationUtil {
       isu = "36";
       ctc = "Y";
       setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+    } else if (!scenario.equalsIgnoreCase("ECO") && !scenario.equalsIgnoreCase("Private Household Customer") && StringUtils.isBlank(gbgId)) {
+      isu = "27";
+      ctc = "E";
+      setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+    } else if (!isPaygoUpgrade && scenario.equalsIgnoreCase("Private Household Customer")) {
+      isu = "21";
+      ctc = "";
+      setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
     }
     return true;
   }
@@ -1362,9 +1370,9 @@ public class CanadaUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    boolean isPaygoUpgrade=false;
-    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
@@ -1389,12 +1397,13 @@ public class CanadaUtil extends AutomationUtil {
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
               validation.setSuccess(true);
-            } else if (isPaygoUpgrade){
-              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+            } else if (isPaygoUpgrade) {
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
               details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
               validation.setMessage("Review needed");
-              validation.setSuccess(false);        
-            } {
+              validation.setSuccess(false);
+            }
+            {
               validation.setMessage("Rejected");
               validation.setSuccess(false);
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
@@ -1415,11 +1424,11 @@ public class CanadaUtil extends AutomationUtil {
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
             details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
             validation.setSuccess(true);
-          }else if (isPaygoUpgrade){
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+          } else if (isPaygoUpgrade) {
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
             details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
             validation.setMessage("Review needed");
-            validation.setSuccess(false);        
+            validation.setSuccess(false);
           } else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
@@ -1441,13 +1450,12 @@ public class CanadaUtil extends AutomationUtil {
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
           details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
           validation.setSuccess(true);
-        }else if (isPaygoUpgrade){
-          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+        } else if (isPaygoUpgrade) {
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
           details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
           validation.setMessage("Review needed");
-          validation.setSuccess(false);        
-        }
-        else  {
+          validation.setSuccess(false);
+        } else {
           validation.setMessage("Rejected");
           validation.setSuccess(false);
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
