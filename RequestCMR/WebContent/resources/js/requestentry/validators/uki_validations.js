@@ -1162,27 +1162,29 @@ function setSrAndSboOnIsicUK() {
       postCd = postCd.substring(0, 2);
     }
 
-    if (isuCdValue == '27' && tierValue == 'E') {
-      var qParams = {
-        ISU_CD : '%' + isuCdValue + '%',
-        CLIENT_TIER : '%' + tierValue + '%',
-        ISIC_CD : isicCdValue
-      };
-      var result = cmr.query('UK.GET.SBOSR_FOR_ISIC', qParams);
-      if (Object.keys(result).length > 0 && result.ret1 && result.ret2) {
-        var sbo = result.ret1;
-        var salesRep = result.ret2;
-        FormManager.setValue('salesBusOffCd', sbo);
-        FormManager.setValue('repTeamMemberNo', salesRep);
-        if (role == 'Requester' && reqType == 'C') {
-          FormManager.readOnly('repTeamMemberNo');
-          FormManager.readOnly('salesBusOffCd');
+    if (!(isNorthernIrelandPostCd(postCd))) {
+      if (isuCdValue == '27' && tierValue == 'E') {
+        var qParams = {
+          ISU_CD : '%' + isuCdValue + '%',
+          CLIENT_TIER : '%' + tierValue + '%',
+          ISIC_CD : isicCdValue
+        };
+        var result = cmr.query('UK.GET.SBOSR_FOR_ISIC', qParams);
+        if (Object.keys(result).length > 0 && result.ret1 && result.ret2) {
+          var sbo = result.ret1;
+          var salesRep = result.ret2;
+          FormManager.setValue('salesBusOffCd', sbo);
+          FormManager.setValue('repTeamMemberNo', salesRep);
+          if (role == 'Requester' && reqType == 'C') {
+            FormManager.readOnly('repTeamMemberNo');
+            FormManager.readOnly('salesBusOffCd');
+          }
         }
-      }
-    } else if (isicCdValue != null) {
-      if (isuCdValue == '34' && tierValue == 'Y') {
-        FormManager.setValue('salesBusOffCd', '015');
-        FormManager.setValue('repTeamMemberNo', 'SPA015');
+      } else if (isicCdValue != null) {
+        if (isuCdValue == '34' && tierValue == 'Y') {
+          FormManager.setValue('salesBusOffCd', '015');
+          FormManager.setValue('repTeamMemberNo', 'SPA015');
+        }
       }
     }
   }
@@ -2095,14 +2097,6 @@ function addPostalCodeValidator() {
     return {
       validate : function() {
         var postal_cd = FormManager.getActualValue('postCd');
-        /*
-         * DENNIS Defect 1830120: PP: Getting 'Cannot get postal code error' for
-         * postal codes for UK
-         */
-        // if (FormManager.getActualValue('landCntry')
-        // != 'GB') {
-        // return new ValidationResult(null, true);
-        // } else {
         var postcodeRegEx = /^[a-zA-Z]{1,2}([0-9]{1,2}|[0-9][a-zA-Z])\s*[0-9][a-zA-Z]{2}$/;
         if (postcodeRegEx.test(postal_cd)) {
           return new ValidationResult(null, true);
@@ -4733,10 +4727,15 @@ function setSboValueBasedOnIsuCtcUK(value) {
       FormManager.setValue('repTeamMemberNo', 'SPA114');
     }
   } else if (isuCd == '27' && clientTier == 'E') {
-    var isicCode = FormManager.getActualValue('isicCd');
-    var results = fetchSBOAndSalesRepByIsuCTC(isuCd, clientTier, isicCode);
-    FormManager.setValue('salesBusOffCd', results.ret1);
-    FormManager.setValue('repTeamMemberNo', results.ret2);
+    if(isNorthernIrelandPostCd(getUKZS01PostCd())) {
+      FormManager.setValue('salesBusOffCd', '057');
+      FormManager.setValue('repTeamMemberNo', 'SPA057');
+    } else {
+      var isicCode = FormManager.getActualValue('isicCd');
+      var results = fetchSBOAndSalesRepByIsuCTC(isuCd, clientTier, isicCode);
+      FormManager.setValue('salesBusOffCd', results.ret1);
+      FormManager.setValue('repTeamMemberNo', results.ret2);
+    }
   } else if (isuCd == '8B' && clientTier == '') {
     var results = fetchSBOAndSalesRepByIsuCTC(isuCd, clientTier, '');
     FormManager.setValue('salesBusOffCd', results.ret1);
@@ -4750,6 +4749,11 @@ function setSboValueBasedOnIsuCtcUK(value) {
   } else if (isuCd == '18' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', '117');
     FormManager.setValue('repTeamMemberNo', '031235');
+  } else if (isuCd == '36' && clientTier == 'Y') {
+    var isicCode = FormManager.getActualValue('isicCd');
+    var results = fetchSBOAndSalesRepByPostCd(isuCd, clientTier, isicCode);
+    FormManager.setValue('salesBusOffCd', results.ret2);
+    FormManager.setValue('repTeamMemberNo', results.ret3);
   } else {
     FormManager.setValue('salesBusOffCd', '');
     FormManager.setValue('repTeamMemberNo', '');
@@ -4824,71 +4828,6 @@ function setSboValueBasedOnIsuCtcIE(value) {
   }
 }
 
-/*
- * ITALY - sets Sales rep based on isuCTC
- */
-// var _importedSalesRep = '';
-// function setSalesRepValuesIT(isuCd, clientTier) {
-// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-// return;
-// }
-// if (FormManager.getActualValue('reqType') != 'C') {
-// return;
-// }
-// var checkImportIndc = getImportedIndcForItaly();
-//
-// if (checkImportIndc == 'Y' && _importedSalesRep == '') {
-// _importedSalesRep = _pagemodel.repTeamMemberNo;
-// }
-// var custSubType = FormManager.getActualValue('custSubGrp');
-// var isuCd = FormManager.getActualValue('isuCd');
-// var clientTier = FormManager.getActualValue('clientTier');
-// var cntry = FormManager.getActualValue('cmrIssuingCntry');
-// var salesRep = FormManager.getActualValue('repTeamMemberNo');
-// var role = FormManager.getActualValue('userRole').toUpperCase();
-// var salesReps = [];
-// if (clientTier != '') {
-// qParams = {
-// _qall : 'Y',
-// ISSUING_CNTRY : cntry,
-// ISU : '%' + isuCd + clientTier + '%',
-// };
-// results = cmr.query('GET.SRLIST.BYCTC', qParams);
-// if (results != null && Object.keys(results).length > 0) {
-// for (var i = 0; i < results.length; i++) {
-// salesReps.push(results[i].ret1);
-// }
-// FormManager.enable('repTeamMemberNo');
-// // FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'),
-// // salesReps);
-// if (salesReps.length == 1) {
-// FormManager.setValue('repTeamMemberNo', salesReps[0]);
-// } else if (salesRep != null && salesRep != '') {
-// FormManager.setValue('repTeamMemberNo', salesRep);
-// }
-// }
-// if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType ==
-// 'BUSVA' || custSubType == 'CROBP') {
-// FormManager.setValue('isuCd', '21');
-// FormManager.setValue('clientTier', '7');
-// FormManager.setValue('repTeamMemberNo', '09ZPA0');
-// FormManager.readOnly('repTeamMemberNo');
-// } else {
-// FormManager.enable('repTeamMemberNo');
-// }
-// if ((isuCd == '34' && clientTier == 'Q') && (role == "REQUESTER") &&
-// (checkImportIndc == 'N')) {
-// if (checkImportIndc == 'N') {
-// autoSetSBOSROnPostalCode(false, false);
-// } else {
-// FormManager.setValue('repTeamMemberNo', _importedSalesRep);
-// console.log("Kept imported sales rep value >>>" + _importedSalesRep);
-// }
-// FormManager.readOnly('repTeamMemberNo');
-// }
-// }
-// setAffiliateEnterpriseRequired();
-// }
 function showHideCityStateProvIT() {
   console.log("--->>> showHideCityStateProvIT for IT ---<<<");
   var landCntryVal = FormManager.getActualValue('landCntry');
@@ -7566,91 +7505,6 @@ function addEmbargoCodeValidatorUKI() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function autoPopulateISUClientTierUK() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (cmr.currentRequestType != 'C') {
-    return;
-  }
-  var custSubGroup = FormManager.getActualValue('custSubGrp');
-  var noScenario = new Set([ 'INTER', 'XINTR', 'BUSPR', 'XBSPR' ]);
-
-  if (custSubGroup != undefined && custSubGroup != '' && !noScenario.has(custSubGroup)) {
-
-    var addrType = FormManager.getActualValue('addrType');
-    var postCd = FormManager.getActualValue('postCd');
-    if (postCd != null && postCd.length > 2) {
-      postCd = postCd.substring(0, 2);
-    }
-    if (addrType != '' && addrType == 'ZS01') {
-      if (postCd != '' && (isNorthernIrelandPostCd(postCd))) {
-        FormManager.setValue('isuCd', "34");
-        FormManager.setValue('clientTier', "Q");
-      } else {
-        FormManager.setValue('clientTier', "Q");
-      }
-    }
-  } else {
-    FormManager.setValue('isuCd', "21");
-    FormManager.setValue('clientTier', '');
-  }
-}
-
-// function autoSetISUClientTierUK() {
-// console.log("autoSetISUClientTierUK........")
-// var custSubGroup = FormManager.getActualValue('custSubGrp');
-// var reqType = FormManager.getActualValue('reqType');
-// var noScenario = new Set([ 'INTER', 'XINTR', 'BUSPR', 'XBSPR' ]);
-// var isuCd = FormManager.getActualValue('isuCd');
-// var clientTier = FormManager.getActualValue('clientTier');
-// var isuCdList = [ '34', '36', '32' ];
-//
-// if (reqType != 'C') {
-// return;
-// }
-// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-// return;
-// }
-//
-// if ('866' == FormManager.getActualValue('cmrIssuingCntry') &&
-// isuCdList.includes(isuCd) && clientTier == '') {
-// return;
-// }
-//
-// if ('866' == FormManager.getActualValue('cmrIssuingCntry')) {
-// if (custSubGroup != undefined && custSubGroup != '' &&
-// !noScenario.has(custSubGroup)) {
-//
-// var _reqId = FormManager.getActualValue('reqId');
-// var postCdParams = {
-// REQ_ID : _reqId,
-// ADDR_TYPE : "ZS01",
-// };
-//
-// var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP',
-// postCdParams);
-// var postCd = postCdResult.ret1;
-// if (postCd != null && postCd.length > 2) {
-// postCd = postCd.substring(0, 2);
-// }
-//
-// if (postCd != '' && (isNorthernIrelandPostCd(postCd))) {
-// FormManager.setValue('isuCd', "34");
-// FormManager.setValue('clientTier', "Q");
-// } else {
-// FormManager.setValue('clientTier', "Q");
-// }
-// } else {
-// FormManager.setValue('isuCd', '21');
-//
-// // CREATCMR-4293
-// var custSubGrp = FormManager.getActualValue('custSubGrp');
-// // Business Partner OR Internal
-// if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
-// FormManager.setValue('clientTier', '');
-// }
-// }
-// }
-// }
 function disableAddrFieldsUKI() {
   var addrType = FormManager.getActualValue('addrType');
   var custGrp = FormManager.getActualValue('custGrp');
@@ -8313,7 +8167,24 @@ function validateSboSrForIsuCtcUK() {
         if (!isuCtcList.includes(isuCTC) || isSboNull || isSrNull) {
           return new ValidationResult(null, true);
         }
-        var results = fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc);
+        var results = null;
+        if(isuCTC == '27E') {
+          var isicCd = FormManager.getActualValue('isicCd');
+          results = fetchSboSrForAllParamUK(cntry, sbo, salRep, isu, ctc, isicCd);
+          if((results == null ||  results.length == 0)) {
+            if(isNorthernIrelandPostCd(getUKZS01PostCd())) {
+              results = fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc);
+            }
+          }
+        } else if(isuCTC == '36Y') {
+          results = fetchSboSrForAllParamUK(cntry, sbo, salRep, isu, ctc, getUKZS01PostCd());
+          if((results == null ||  results.length == 0) && (salRep == 'SPA015' || salRep == 'SPA019')) {
+            results = fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc);
+          }
+        } else {
+          results = fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc);
+        }
+        
         var displayInvalidMsg = true;
 
         if (results != null && results.length > 0) {
@@ -8432,6 +8303,58 @@ function fetchSBOAndSalesRepByIsuCTC(isuCdValue, tierValue, isicCd) {
     ISIC_CD : isicCd
   };
   var results = cmr.query('UK.GET.SBOSR_FOR_ISIC', qParams);
+  return results;
+}
+function fetchSBOAndSalesRepByPostCd(isuCdValue, tierValue) {
+  console.log(">>>> fetchSBOAndSalesRepByPostCd");
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var postCd = getUKZS01PostCd();
+  
+  var qParams = {
+    CNTRY: cntry,
+    ISU_CD : isuCdValue,
+    CLIENT_TIER : tierValue,
+    POST_CD : postCd
+  };
+  var results = cmr.query('UK.GET.SBOSR_BY_POSTCD', qParams);
+  return results;
+}
+
+function getUKZS01PostCd() {
+  var reqId = FormManager.getActualValue('reqId');
+  var postCdParams = {
+      REQ_ID : reqId,
+      ADDR_TYPE : "ZS01",
+    };
+  var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP', postCdParams);
+  var postCd = postCdResult.ret1;
+  if (postCd && postCd.length > 2) {
+    // Use regular expression to extract first two characters
+    var firstTwoChars = postCd.substring(0, 2);
+    // Check if the second character is a number
+    if (/^\d$/.test(postCd[1])) {
+        // If it's a number, only keep the first character
+        postCd = firstTwoChars[0];
+    } else {
+        postCd = firstTwoChars;
+    }
+  }
+  return postCd;
+}
+
+function fetchSboSrForAllParamUK(cntry, sbo, salRep, isu, ctc, isicOrPostCd) {
+  console.log(">>>> fetchSboSrForAllParamUK");
+  var results = null;
+  var qParams = {
+    _qall : 'Y',
+    CNTRY : cntry,
+    SBO : sbo,
+    SALES_REP : salRep,
+    ISU : '%' + isu + '%',
+    CTC : '%' + ctc + '%',
+    POST_CD_ISIC : isicOrPostCd
+  };
+  results = cmr.query('UK.GET.SBOSR_FOR_ALL_PARAM', qParams);
   return results;
 }
 
@@ -10803,7 +10726,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockRequireFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(addStreetPoBoxValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
-  GEOHandler.addAddrFunction(autoPopulateISUClientTierUK, [ SysLoc.UK ]);
+
   GEOHandler.addAddrFunction(disableAddrFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAddrFunction(optionalRulePostalCodeUK, [ SysLoc.UK ]);
   GEOHandler.addAddrFunction(setTaxCdBasedOnlandCntryUK, [ SysLoc.UK ]);
