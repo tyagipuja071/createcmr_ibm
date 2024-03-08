@@ -3816,7 +3816,7 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
   } else if (isuCd == '3T') {
     FormManager.setValue('salesBusOffCd', '4DF4DF');
   } else if (isuCd == '34' && clientTier == 'Q') {
-    if ('CBMME', 'CBFIN', 'CBVRN', 'CBSTC', 'CBDPT', 'XBLUM') {
+    if (custSubGrp == 'CBMME' || custSubGrp == 'CBFIN' || custSubGrp == 'CBVRN' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT' || custSubGrp == 'XBLUM') {
       if (isExcludedScenario(custSubGrp)) {
         return;
       }
