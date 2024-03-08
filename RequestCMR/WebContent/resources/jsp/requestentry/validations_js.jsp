@@ -157,7 +157,7 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 	<script src="${resourcesPath}/js/requestentry/validators/cemea_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
   </cmr:view>
-   <cmr:view forCountry="358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,713,740,741,787,820,821,826,829">
+   <cmr:view forCountry="358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,713,740,741,787,820,821,826,889">
 	<script src="${resourcesPath}/js/requestentry/validators/cee_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
   
