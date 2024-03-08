@@ -3816,15 +3816,15 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
   } else if (isuCd == '3T') {
     FormManager.setValue('salesBusOffCd', '4DF4DF');
   } else if (isuCd == '34' && clientTier == 'Q') {
-    if (custSubGrp == 'BECOM' || custSubGrp == 'CBCOM' || custSubGrp == 'BE3PA' || custSubGrp == 'BEDAT' || custSubGrp == 'BEPUB' || custSubGrp == 'GOVRN') {
+    if ('CBMME', 'CBFIN', 'CBVRN', 'CBSTC', 'CBDPT', 'XBLUM') {
       if (isExcludedScenario(custSubGrp)) {
         return;
       }
       var landedCountry = '';
       landedCountry = getSoldToLanded();
       if (custGrp == 'CROSS') {
-        if (landedCountry == 'DZ' || landedCountry == 'LY') {
-          FormManager.setValue('salesBusOffCd', '710710');
+        if (landedCountry == 'TN' || landedCountry == "LY" || landedCountry == "DZ") {
+          FormManager.setValue('salesBusOffCd', '711711');
         }
       }
     }
