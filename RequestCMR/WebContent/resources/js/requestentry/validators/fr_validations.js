@@ -133,6 +133,7 @@ function afterConfigForFR() {
         }
         setCtcByIsu(value);
         setCoverageSBOBasedOnIsuCtc();
+        setSBOOnScenarioLD();
       });
     }
 
