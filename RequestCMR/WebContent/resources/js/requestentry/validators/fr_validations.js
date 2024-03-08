@@ -4558,5 +4558,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addVatIndValidator, [ '706' ], null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, '706');
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, [ '706' ]);
+  GEOHandler.addAfterTemplateLoad(setSBOOnScenarioLD, [ '706' ]);
 
 });
