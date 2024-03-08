@@ -87,10 +87,10 @@ div.ibm-columns {
     </cmr:row>
     <cmr:row>
       <cmr:column span="1" width="150">
-        <label for="compNameAbbr">Abbreviated Name:</label>
+        <label for="compNameFullEng">Full English Name:</label>
       </cmr:column>
       <cmr:column span="2" width="350">
-        <form:input path="compNameAbbr" dojoType="dijit.form.TextBox" cssStyle="width:300px"/>
+        <form:input path="compNameFullEng" dojoType="dijit.form.TextBox" cssStyle="width:300px"/>
       </cmr:column>
       <cmr:column span="1" width="150">
         <label for="compPostCode">Postal Code:</label>
@@ -149,10 +149,10 @@ div.ibm-columns {
     </cmr:row>
     <cmr:row>
       <cmr:column span="1" width="150">
-        <label for="accountNameAbbr">Abbreviated Name:</label>
+        <label for="accountNameFullEng">Full English Name:</label>
       </cmr:column>
       <cmr:column span="2" width="350">
-        <form:input path="accountNameAbbr" dojoType="dijit.form.TextBox" cssStyle="width:300px"/>
+        <form:input path="accountNameFullEng" dojoType="dijit.form.TextBox" cssStyle="width:300px"/>
       </cmr:column>
       <cmr:column span="1" width="150">
         <label for="accountAddress">Address:</label>
