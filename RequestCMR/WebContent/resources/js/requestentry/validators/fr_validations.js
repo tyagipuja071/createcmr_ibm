@@ -4155,7 +4155,7 @@ function sboCodeValidator() {
   var landedCountry = getSoldToLanded();
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
-  } else if (role == 'Requester') {
+  } else if (role == 'Requester' || reqType != 'C') {
     return new ValidationResult(null, true);
   }
   if (isuCtc == '36Y' && !(sbo == '09A09A' || sbo == '10A10A' || sbo == '11A11A' || sbo == 'BUILD1' || sbo == 'DISTR1' || sbo == 'SRVCE1')
