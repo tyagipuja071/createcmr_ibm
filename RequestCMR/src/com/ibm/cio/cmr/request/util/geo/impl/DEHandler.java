@@ -59,13 +59,16 @@ public class DEHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("724");
-  protected static final String[] MT_MASS_UPDATE_SHEET_NAMES = { "Data", "Sold To", "Bill To", "Install-At", "Ship-To" };
-  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
+  protected static final String[] MT_MASS_UPDATE_SHEET_NAMES = { "Data", "Sold To", "Bill To", "Install-At",
+      "Ship-To" };
+  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID",
+      "Division", "POBoxCity", "CustFAX",
       "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor", "BPRelationType", "MembLevel" };
   protected LegacyDirectObjectContainer legacyObjects;
 
   @Override
-  public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
+  public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
+      ImportCMRModel searchModel)
       throws Exception {
     List<FindCMRRecordModel> recordsFromSearch = source.getItems();
     List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
@@ -81,10 +84,12 @@ public class DEHandler extends GEOHandler {
 
     // CREATCMR-6139 Prospect CMR Conversion - address sequence A
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
-      FindCMRRecordModel record = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
+      FindCMRRecordModel record = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0)
+          : null;
       if (record != null) {
         if (StringUtils.isNotBlank(reqEntry.getCmrIssuingCntry()) && "724".equals(reqEntry.getCmrIssuingCntry())
-            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P") && record.getCmrAddrSeq().equals("A")) {
+            && StringUtils.isNotBlank(record.getCmrNum()) && record.getCmrNum().startsWith("P")
+            && record.getCmrAddrSeq().equals("A")) {
           record.setCmrAddrSeq("1");
           converted.add(record);
           source.setItems(converted);
@@ -103,17 +108,21 @@ public class DEHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode()) && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
+            if ("ZS01".equalsIgnoreCase(tempRec.getCmrAddrTypeCode())
+                && ("90".equalsIgnoreCase(tempRec.getCmrOrderBlock()))) {
               tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS02.toString());
             }
-            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode()) && "598".equals(tempRec.getCmrAddrSeq())) {
+            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode())
+                && "598".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZD02");
             }
 
-            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode())
+                && "599".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZP02");
             }
-            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode())
+                && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
               tempRec.setCmrAddrTypeCode("PG01");
             }
             recordsToReturn.add(tempRec);
@@ -140,7 +149,8 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord)
+      throws Exception {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
@@ -154,8 +164,10 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    boolean doSplitForName = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo)
+      throws Exception {
+    boolean doSplitForName = (currentRecord.getCmrName1Plain() != null
+        && currentRecord.getCmrName1Plain().length() > 35)
         || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 35);
     if (doSplitForName) {
       String[] parts = null;
@@ -242,7 +254,8 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq,
+      String cmrIssuingCntry) {
     String newAddrSeq = "";
     newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
     return newAddrSeq;
@@ -268,7 +281,8 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+  public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model)
+      throws Exception {
   }
 
   @Override
@@ -276,7 +290,8 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
+  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData,
+      DataRdc oldData,
       List<UpdatedDataModel> results) {
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
       UpdatedDataModel update = new UpdatedDataModel();
@@ -285,7 +300,8 @@ public class DEHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrderBlock", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !service.equals(oldData.getCustClass(), newData.getCustClass())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type)
+        && !service.equals(oldData.getCustClass(), newData.getCustClass())) {
       UpdatedDataModel update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getCustClass(), "CustClass", cmrCountry));
@@ -295,7 +311,8 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
+  public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr,
+      RequestEntryModel data) {
   }
 
   @Override
@@ -308,7 +325,8 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry)
+      throws Exception {
     if (data.getInacCd() != null) {
       if (data.getInacCd().matches("[a-zA-Z]{1}[a-zA-Z0-9]{3}")) {
         data.setInacType("N");
@@ -324,7 +342,8 @@ public class DEHandler extends GEOHandler {
         if (data.getIbmDeptCostCenter() == null || "".equals(data.getIbmDeptCostCenter())) {
           data.setIbmDeptCostCenter(CmrConstants.DEFAULT_IBM_DEPT_COST_CENTER);
         }
-      } else if (data.getCustSubGrp() != null && !"INTAM".equals(data.getCustSubGrp()) && !"INTIN".equals(data.getCustSubGrp())) {
+      } else if (data.getCustSubGrp() != null && !"INTAM".equals(data.getCustSubGrp())
+          && !"INTIN".equals(data.getCustSubGrp())) {
         data.setIbmDeptCostCenter("");
       }
       if (data.getAbbrevNm() == null || "".equals(data.getAbbrevNm())) {
@@ -425,7 +444,8 @@ public class DEHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE", "STATE_PROV", "CITY1", "POST_CD",
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "FLOOR", "BLDG", "OFFICE",
+        "STATE_PROV", "CITY1", "POST_CD",
         "LAND_CNTRY", "PO_BOX", "ADDR_TXT", "CUST_PHONE"));
     return fields;
   }
@@ -433,8 +453,10 @@ public class DEHandler extends GEOHandler {
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     // CMR-3171 - add ORB_BLK here
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD",
+        "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID",
+        "GEO_LOC_DESC", "GEO_LOCATION_CD",
         "DUNS_NO", "ORD_BLK", "ENTERPRISE"));
     return fields;
   }
@@ -442,8 +464,10 @@ public class DEHandler extends GEOHandler {
   @Override
   public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD",
+        "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID",
+        "GEO_LOC_DESC", "GEO_LOCATION_CD",
         "DUNS_NO", "ORD_BLK"));
     return fields;
   }
@@ -570,7 +594,8 @@ public class DEHandler extends GEOHandler {
     Field trgField = null;
 
     for (Field field : Data.class.getDeclaredFields()) {
-      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+          || Modifier.isAbstract(field.getModifiers()))) {
         srcCol = field.getAnnotation(Column.class);
         if (srcCol != null) {
           srcName = srcCol.name();
@@ -634,7 +659,8 @@ public class DEHandler extends GEOHandler {
     GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
 
     for (Field field : Addr.class.getDeclaredFields()) {
-      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+          || Modifier.isAbstract(field.getModifiers()))) {
         srcCol = field.getAnnotation(Column.class);
         if (srcCol != null) {
           srcName = srcCol.name();
@@ -773,7 +799,8 @@ public class DEHandler extends GEOHandler {
   }
 
   @Override
-  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows,
+      String country) {
 
     XSSFCell currCell = null;
     for (String name : MT_MASS_UPDATE_SHEET_NAMES) {
@@ -893,18 +920,23 @@ public class DEHandler extends GEOHandler {
               }
 
               String pattern = "^[a-zA-Z0-9]*$";
-              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+              if (!StringUtils.isBlank(stateProv)
+                  && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
                 LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
                 error.addError(row.getRowNum(), "State/Province",
                     "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
               } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
                 LOG.trace("State/Province and Landed country both should be filled");
-                error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State/Province and Landed country both should be filled together.\n");
               }
 
-              if ((!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName()))
-                  || (StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName()))) {
-                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              if ((!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)
+                  && !"Data".equalsIgnoreCase(sheet.getSheetName()))
+                  || (StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo)
+                      && !"Data".equalsIgnoreCase(sheet.getSheetName()))) {
+                LOG.trace(
+                    "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Address Sequence No.",
                     "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                 // validations.add(error);
@@ -939,7 +971,8 @@ public class DEHandler extends GEOHandler {
               ctc = validateColValFromCell(currCell);
 
               if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
-                  && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
+                  && ((!"9500".equals(isic) && "60".equals(classificationCd))
+                      || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
                 LOG.trace(
                     "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Classification Code",
@@ -947,7 +980,8 @@ public class DEHandler extends GEOHandler {
                 // validations.add(error);
               }
 
-              if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
+              if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac)
+                  && !"@@@@".equals(inac)
                   && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$") && !inac.matches("^[a-zA-Z][0-9][0-9][0-9]$")) {
                 LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits or 1 letter and 3 digits in order.");
                 error.addError((row.getRowNum() + 1), "INAC/NAC",
@@ -959,17 +993,21 @@ public class DEHandler extends GEOHandler {
                 error.addError((row.getRowNum() + 1), "SBO/Search Term", "Enter valid values for SBO/Search Term");
               }
 
-              if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk) || "ST".equals(ordBlk))) {
-                LOG.trace("Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.");
+              if (!StringUtils.isBlank(ordBlk)
+                  && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk) || "ST".equals(ordBlk))) {
+                LOG.trace(
+                    "Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Order block",
                     "Note that value of Order block can only be 88 or 94 or ST or @ or blank. Please fix and upload the template again.");
                 // validations.add(error);
               }
 
               if ((StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
-                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
+                LOG.trace(
+                    "The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((row.getRowNum() + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
-              } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+              } 
+              else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
                 if (StringUtils.isBlank(ctc) || !"Q".contains(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.");
@@ -997,30 +1035,20 @@ public class DEHandler extends GEOHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
-                if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
-                }
-              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "36".equals(isuCd) || "27".equals(isuCd)))
-                  && !"@".equalsIgnoreCase(ctc)) {
-                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
               }
-              if (error.hasErrors()) {
-                validations.add(error);
-              }
-            } // end row loop
-          }
+            }
+            if (error.hasErrors()) {
+              validations.add(error);
+            }
+          } // end row loop
         }
       }
     }
   }
 
   @Override
-  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo, CmrCloningQueue cloningQueue) {
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo,
+      CmrCloningQueue cloningQueue) {
     // auto generate and store to zzkvCusNo
     String zzkvCusNo = "";
     LOG.debug("Generating Cmr no... ");
