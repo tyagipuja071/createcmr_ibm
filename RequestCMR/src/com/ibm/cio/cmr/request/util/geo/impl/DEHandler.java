@@ -1053,6 +1053,7 @@ public class DEHandler extends GEOHandler {
           } // end row loop
         }
       }
+      }
     }
   }
 
