@@ -98,13 +98,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -210,13 +210,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -322,13 +322,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -434,13 +434,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -546,13 +546,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -659,13 +659,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -771,13 +771,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -883,13 +883,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -995,13 +995,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -1107,13 +1107,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -1219,13 +1219,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -1331,13 +1331,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -1443,13 +1443,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
@@ -1555,13 +1555,13 @@
 				</column>
 				<column>
 					<label>Katakana</label>
-					<dbColumn>CUST_NM4</dbColumn>
+					<dbColumn>LOCAL_LANG_2_NAME</dbColumn>
 					<width>30</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Full English Name</label>
-					<dbColumn>CUST_NM3</dbColumn>
+					<dbColumn>LOCAL_LANG_1_NAME</dbColumn>
 					<width>50</width>
 					<length>70</length>
 				</column>
