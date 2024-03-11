@@ -2536,11 +2536,16 @@ public class CEMEAHandler extends BaseSOFHandler {
                         ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                   }
                 } else if ((!StringUtils.isBlank(isuCd)
-                    && !("34".equals(isuCd) || "27".equals(isuCd) || "36".equals(isuCd)))
+                    && !("34".equals(isuCd) || "27".equals(isuCd) || "36".equals(isuCd) || "32".equals(isuCd)))
                     && !"@".equalsIgnoreCase(ctc)) {
                   LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                   error.addError((rowIndex + 1), "Client Tier",
                       "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+                }else if (!StringUtils.isBlank(isuCd)
+                    && "32".equals(isuCd) && "T".equalsIgnoreCase(ctc)) {
+                  LOG.trace("32-T is an invalid combination.");
+                  error.addError((rowIndex + 1), "Client Tier",
+                      "32-T is an invalid combination <br>");
                 }
                 if (error.hasErrors()) {
                   validations.add(error);
