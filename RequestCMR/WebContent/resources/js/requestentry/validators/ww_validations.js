@@ -1621,7 +1621,7 @@ function validateCustomername() {
     return {
       validate: function () {
         var addrTxt = FormManager.getActualValue('mainCustNm1');
-        var addrTxt2 = FormManager.getActualValue('mainCustNm2');
+        var addrTxt2 = FormManager.getActualValue('mainCustNm2');  
         var combinedstring = addrTxt.concat(addrTxt2)
         if (combinedstring.includes("—") || combinedstring.includes("–")) {
           return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
@@ -1635,29 +1635,68 @@ function validateCustomername() {
 }
 
 function validateCustomeraddress() {
-  FormManager.addFormValidator((function () {
-    return {
-      validate: function () {
-        var addrTxt = FormManager.getActualValue('addrTxt');
-        var addrTxt2 = FormManager.getActualValue('addrTxt2');
-        var custNm1 = FormManager.getActualValue('custNm1');
-        var custNm2 = FormManager.getActualValue('custNm2');
-        var addrcombinedstring = addrTxt.concat(addrTxt2)
-        var namecombinedstring = custNm1.concat(custNm2)
-        if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
-          return new ValidationResult(null, false, 'Address can contain only -.Long Dash not allowed in Address');
-        }
-        if (namecombinedstring.includes("—") || namecombinedstring.includes("–")) {
-          return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash not allowed in Customername');
-        }
-        else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
+  FormManager.addFormValidator((function() {
+      return {
+          validate: function() {
+              var addrTxt = FormManager.getActualValue('addrTxt');
+              var addrTxt2 = FormManager.getActualValue('addrTxt2');
+              var custNm1 = FormManager.getActualValue('custNm1');
+              var custNm2 = FormManager.getActualValue('custNm2');
+              var city1 = FormManager.getActualValue('city1');
+              var dept = FormManager.getActualValue('dept');
+              var city2 = FormManager.getActualValue('city2');
+              var custPhone = FormManager.getActualValue('custPhone');
+              var pobox = FormManager.getActualValue('pobox');
+              var poBoxCity = FormManager.getActualValue('poBoxCity');
+              var postCd = FormManager.getActualValue('postCd');
+              var bldg = FormManager.getActualValue('bldg');
+              var floor = FormManager.getActualValue('floor');
+              var custFax = FormManager.getActualValue('custFax');
+              var addrcombinedstring = addrTxt.concat('addrTxt2')
+              var namecombinedstring = custNm1.concat('custNm2')
+              if (addrcombinedstring.includes("—") || addrcombinedstring.includes("–")) {
+                  return new ValidationResult(null, false, 'Address can contain only -.Long Dash is not allowed in Address');
+              }
+              if (namecombinedstring.includes("—") || namecombinedstring.includes("–")) {
+                  return new ValidationResult(null, false, 'Customer name can contain only -.Long Dash is not allowed in Customername');
+              }
+
+              if (city1.includes("—") || city1.includes("–")) {
+                  return new ValidationResult(null, false, 'City can contain only -.Long Dash is not allowed in city ');
+              }
+              if (dept.includes("—") || dept.includes("–")) {
+                      return new ValidationResult(null, false, 'Department / Attn. can contain only -.Long Dash is not allowed in Department / Attn');
+              }
+              if (city2.includes("—") || city2.includes("–")) {
+                  return new ValidationResult(null, false, 'District can contain only -.Long Dash is not allowed in District');
+              }
+              if (custPhone.includes("—") || custPhone.includes("–")) {
+                  return new ValidationResult(null, false, 'CustPhone can contain only -.Long Dash is not allowed in CustPhone');
+              }
+              if (pobox.includes("—") || pobox.includes("–")) {
+                  return new ValidationResult(null, false, 'PO Box can contain only -.Long Dash is not allowed in PO Box');
+              }
+              if (poBoxCity.includes("—") || poBoxCity.includes("–")) {
+                  return new ValidationResult(null, false, 'PO Box city can contain only -.Long Dash is not allowed in PO Box city');
+              }
+              if (postCd.includes("—") || postCd.includes("–")) {
+                  return new ValidationResult(null, false, 'Zip Code can contain only -.Long Dash is not allowed in Zip Code');
+              }
+              if (bldg.includes("—") || bldg.includes("–")) {
+                  return new ValidationResult(null, false, 'Building can contain only -.Long Dash is not allowed in Building');
+              }
+              if (floor.includes("—") || floor.includes("–")) {
+                  return new ValidationResult(null, false, 'Floor can contain only -.Long Dash is not allowed in Floor');
+              }
+              if (custFax.includes("—") || custFax.includes("–")) {
+                  return new ValidationResult(null, false, 'FAX can contain only -.Long Dash is not allowed in FAX');
+              } else {
+                  return new ValidationResult(null, true);
+              }
+          }
+      };
   })(), null, 'frmCMR_addressModal');
 }
-
 /* Register WW Validators */
 dojo.addOnLoad(function () {
   console.log('adding WW validators...');

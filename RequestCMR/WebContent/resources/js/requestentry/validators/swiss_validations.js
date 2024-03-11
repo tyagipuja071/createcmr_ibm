@@ -1,5 +1,8 @@
-let currentlyLoadedSORTL = []
 let SORTLandCTCandISUMapping = []
+var prevScenario = '';
+var currentScenario = '';
+const COMnGOVnPRIn3PAISUs = ['27','34','36','04','18','28','31','4D','4F','5K','8C']
+let initialISU = '';
 
 /* Register SWISS Javascripts */
 function addAfterConfigForSWISS() {
@@ -42,27 +45,7 @@ function addAfterConfigForSWISS() {
   }
 
   if (reqType == 'U') {
-    FormManager.readOnly('clientTier');
     FormManager.readOnly('custLangCd');
-    setClientTierValues();
-
-    // FormManager.enable('currencyCd');
-  } else {
-    // FormManager.readOnly('currencyCd');
-  }
-  if (role == 'PROCESSOR') {
-    // FormManager.enable('currencyCd');
-  }
-
-  if (reqType == 'C'
-    && role == 'REQUESTER'
-    && (custSubGrp == 'CHCOM' || custSubGrp == 'LICOM' || custSubGrp == 'CHGOV' || custSubGrp == 'LIGOV' || custSubGrp == 'CHSOF' || custSubGrp == 'LISOF' || custSubGrp == 'CH3PA'
-      || custSubGrp == 'LI3PA' || custSubGrp == 'XCHCM' || custSubGrp == 'XCHGV' || custSubGrp == 'XCHSF' || custSubGrp == 'XCH3P')) {
-  } else if (reqType == 'C'
-    && role == 'REQUESTER'
-    && (custSubGrp == 'CHINT' || custSubGrp == 'XCHIN' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'XCHPR' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM'
-      || custSubGrp == 'XCHIB' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'XCHBP' || custSubGrp == 'LIBUS')) {
-    FormManager.readOnly('clientTier');
   }
 
   if (reqType == 'C') {
@@ -138,7 +121,6 @@ function addAfterConfigForSWISS() {
   GEOHandler.disableCopyAddress();
 
   setTaxCdFrCustClass();
-  setClientTierValues();
   setVatValidatorSWISS();
   setFieldsMandtStatus();
   // setVatValueOnPrefLang();
@@ -214,6 +196,7 @@ function setTaxCdFrCustClass() {
 var _ISUHandler = null;
 var _IMSHandler = null;
 var _PostalCodeHandler = null;
+var _subScenarioHandler = null;
 var _TaxCdHandler = null;
 var _custCodeHanlder = null;
 var _CTCHandler = null;
@@ -334,9 +317,10 @@ function addHwMstrInstFlgValidator() {
 function addHandlersForSWISS() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
-      setClientTierValues(value);
+      setISUDropdown()
       setMubotyOnPostalCodeIMS(value);
-      setCTCInitialValueBasedOnCurrentIsu();
+      setCtcByIsu(value);
+      reloadSORTLList()
     });
   }
 
@@ -349,6 +333,7 @@ function addHandlersForSWISS() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
       setMubotyOnPostalCodeIMS(value);
+      reloadSORTLList()
     });
   }
 
@@ -356,6 +341,14 @@ function addHandlersForSWISS() {
     _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
       setMubotyOnPostalCodeIMS(value);
       setPreferredLangAddr(value);
+      reloadSORTLList()
+    });
+  }
+
+  if (_subScenarioHandler == null) {
+    _subScenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+      prevScenario = currentScenario;
+      currentScenario = value;
     });
   }
 
@@ -363,6 +356,7 @@ function addHandlersForSWISS() {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
       setISUCTCOnIMSChange();
       setMubotyOnPostalCodeIMS(value);
+      reloadSORTLList()
     });
   }
 
@@ -499,55 +493,6 @@ function checkEmbargoCd(value) {
 }
 
 /*
- * Swiss - sets Client_Tier based on ISU
- */
-function setClientTierValues(isuCd) {
-  var reqType = FormManager.getActualValue('reqType');
-  isuCd = FormManager.getActualValue('isuCd');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  isuCd = FormManager.getActualValue('isuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientT = FormManager.getActualValue('clientTier');// CMR-710
-  var clientTiers = [];
-  if (isuCd != '' && clientT == null) {
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      ISU: '%' + isuCd + '%'
-    };
-    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null && results.length > 0) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-    } else {
-      qParams.ISU = '%*%';
-      results = cmr.query('GET.CTCLIST.BYISU', qParams);
-      if (results != null && results.length > 0) {
-        for (var i = 0; i < results.length; i++) {
-          clientTiers.push(results[i].ret1);
-        }
-      }
-    }
-
-    if (clientTiers != null && clientTiers.length > 0) {
-      if (clientTiers.length == 1) {
-        FormManager.setValue('clientTier', clientTiers[0]);
-      }
-    } else {
-      FormManager.setValue('clientTier', '');
-    }
-  }
-}
-
-/*
  * Swiss - sets Muboty based on Postal Code and SubIndustry
  */
 var mubotyvalues = [];
@@ -593,13 +538,24 @@ function setMubotyOnPostalCodeIMS(value) {
     // CMR-710 use 34Q to replace 32S/N
   }
 
-  reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, '')
 }
 
-function reloadSORTLList(isuCd, clientTier, postCd, custSubGrp, ims) {
-  let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postCd, custSubGrp)
-  currentlyLoadedSORTL = loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postalCodeSubgroup)
-  setSortlListValues([...currentlyLoadedSORTL]);
+function reloadSORTLList() {
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var reqId = FormManager.getActualValue('reqId');
+  var params = {
+    REQ_ID : reqId,
+  };
+  var postalResult = FormManager.getActualValue('postCd').length > 0 ? FormManager.getActualValue('postCd') :  cmr.query('ADD.GET_POSTAL_CD.BY_REQID', params).ret1;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  let postalCodeSubgroup = assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postalResult, custSubGrp)
+  setSortlListValues([...loadSORTLListForCurrentScenario(isuCd, clientTier, '', postalCodeSubgroup)]);
 }
 
 function assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postalCode, custSubGrp) {
@@ -1423,6 +1379,10 @@ function lockIBMTabForSWISS() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+  }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
@@ -1525,54 +1485,41 @@ function setCTCValues() {
     }
   }
 }
-// CREATCMR-4293
-
-function clientTierValidator() {
-  FormManager.addFormValidator((function () {
-    return {
-      validate: function () {
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
-        var reqType = FormManager.getActualValue('reqType');
-        var valResult = null;
-
-        var oldClientTier = null;
-        var oldISU = null;
-        var requestId = FormManager.getActualValue('reqId');
-
-        if (reqType == 'C') {
-          valResult = validateISUandCTCCombination();
-        } else {
-          qParams = {
-            REQ_ID: requestId,
-          };
-          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-
-          if (result != null && result != '') {
-            oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU = result.ret3 != null ? result.ret3 : '';
-
-            if (clientTier != oldClientTier || isuCd != oldISU) {
-              valResult = validateISUandCTCCombination();
-            }
-          }
-        }
-        return valResult;
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
 
 function validateSortl() {
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
-        var reqId = FormManager.getActualValue('reqId');
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return;
+        } else if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER') {
+          return new ValidationResult(null, true);
+        }
+
+        var isuCd = FormManager.getActualValue('isuCd');
+        var ctcCd = FormManager.getActualValue('clientTier');
+        var isuCtc = `${isuCd}${ctcCd}`
         var searchTerm = FormManager.getActualValue('searchTerm');
         var letterNumber = /^[0-9a-zA-Z]+$/;
-        var qParams = {
-          REQ_ID: reqId,
-        };
+
+        var sortlList = {
+          '8B': ['P0000010'],
+          '21': ['T0000500'],
+          '27E': ['T0011479','T0011495'],
+          '34Q': ['T0011466','T0011472','T0011476','T0011482','T0011486','T0011492','T0011496','T0011467','T0011473','T0011477','T0011483',
+          'T0011487','T0011493','T0011497','T0011468','T0011470','T0011474','T0011478','T0011480','T0011484','T0011488','T0011490','T0011494',
+          'T0011469','T0011471','T0011475','T0011481','T0011485','T0011489','T0011491'],
+          '36Y': ['T0007971','T0010013','T0012009'],
+          '04': ['A0008918','A0008925','A0008922'],
+          '18': ['A0004577'],
+          '28': ['A0008919'],
+          '31': ['A0008923','A0008917'],
+          '4D': ['A0008916'],
+          '4F': ['I0000265'],
+          '5K': ['A0009232'],
+          '8C': ['A0005227']
+        }
+
         if (_importedSearchTerm != searchTerm) {
           console.log("validating Sortl..");
           if (searchTerm.length != 8) {
@@ -1587,13 +1534,18 @@ function validateSortl() {
             }, false, 'SORTL should be alpha numeric.');
           }
 
+          var currentlyLoadedSORTL = sortlList[isuCtc];
 
-          if (!currentlyLoadedSORTL.includes(searchTerm)) {
-            return new ValidationResult({
-              id: 'searchTerm',
-              type: 'text',
-              name: 'searchTerm'
-            }, false, `The provided SORTL does not match any one of the allowed values: ${currentlyLoadedSORTL.join(',\n')}`);
+          if(!!currentlyLoadedSORTL) {
+            if (currentlyLoadedSORTL.length > 0 && currentlyLoadedSORTL.includes(searchTerm)) {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult({
+                id: 'searchTerm',
+                type: 'text',
+                name: 'searchTerm'
+              }, false, `The provided SORTL does not match any one of the allowed values: ${currentlyLoadedSORTL.join(',\n')}`);
+            }
           }
         }
 
@@ -1740,9 +1692,6 @@ function onPostalCodeChangeHandler() {
   console.log(">>>> Preferred Language on Postal Coade change");
   dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
     setPreferredLangSwiss();
-    if (IS27ESCENARIO()) {
-      setSortlBasedOnPostalCode(value);
-    }
   });
 }
 function setPreferredLangSwiss() {
@@ -1819,35 +1768,42 @@ function addVatIndValidator() {
   }
 }
 
-function setIsuInitialValueBasedOnSubScenario() {
+function checkIfItIsScenario(scenarios) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  // pre-select ISU 27 for commercial, government, third party and private
-  // person.
-  if (role == 'REQUESTER' && [
-    'COMME',
-    'GOVMT',
-    '3PA',
-    'DC',
-    'SENMS',
-    'SENSI',
-    'BROKR',
-    'PRIPE'].includes(custSubGrp)) {
-    FormManager.setValue('isuCd', '27');
-  }
+    // ["CHCOM", "CHGOV", ...]
+    var chscenarios = scenarios.map(scn => 'CH' + scn);
+
+    // ["LICOM", "LIGOV", ...]
+    var liscenarios = scenarios.map(scn => 'LI' + scn);
+
+  return [...liscenarios, ...chscenarios].includes(custSubGrp)
 }
 
-function setCTCInitialValueBasedOnCurrentIsu() {
+function setIsuInitialValueBasedOnSubScenario() {
+  var isScenarios = checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']);
   var isuCd = FormManager.getActualValue('isuCd');
 
-  if (!isuCd) {
-    isuCd = FormManager.getActualValue('isuCd');
+  if(!(isScenarios) || isuCd.length > 0) return;
+
+  // pre-select ISU 27 for commercial, government, third party and private
+  // person.
+  FormManager.setValue('isuCd', '27');
+}
+
+function setCtcByIsu(value) {
+  if (!value) {
+    value = FormManager.getActualValue('isuCd');
   }
 
-  if (isuCd == '27') {
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+
+  if (value == '27') {
     FormManager.setValue('clientTier', 'E');
-  } else if (isuCd == '34') {
+  } else if (value == '34') {
     FormManager.setValue('clientTier', 'Q');
-  } else if (isuCd == '36') {
+  } else if (value == '36') {
     FormManager.setValue('clientTier', 'Y');
   } else {
     FormManager.setValue('clientTier', '');
@@ -1862,9 +1818,26 @@ function validateISUandCTCCombination() {
         var ctcCd = FormManager.getActualValue('clientTier');
         let CTCForIsu = SORTLandCTCandISUMapping.filter(({ ISU, CTC }) => ISU == isuCd && CTC == ctcCd)
 
-        if (!mapping[isuCd]) {
-          return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
-        }
+        let validISUCheck = () => (
+          checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']) && 
+          COMnGOVnPRIn3PAISUs.includes(isuCd))
+
+          if (FormManager.getActualValue('reqType') == 'C'){
+            if(FormManager.getActualValue('isuCd') == '32') {
+              return new ValidationResult(null, false, `ISU code 32 cannot be used as it is deprecated.`);
+            }
+
+            if (!validISUCheck()) {
+              return new ValidationResult(null, false, `ISU code ${isuCd} cannot be used`);
+            }
+          }
+
+          if (FormManager.getActualValue('reqType') != 'C'){
+            if (initialISU != '32' && isuCd == '32') {
+              return new ValidationResult(null, false, `ISU code 32 cannot be used as it is deprecated.`);
+            }
+          }
+        
         if (CTCForIsu.length == 0) {
           return new ValidationResult({
             id: 'clientTier',
@@ -1875,11 +1848,16 @@ function validateISUandCTCCombination() {
         return new ValidationResult(null, true);
       }
     }
-  }));
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 
 function setSortlListValues(values) {
+  
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+  
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if (!!dropdownField) {
     dropdownField.setAttribute('values', values);
@@ -1913,22 +1891,43 @@ function loadSORTLandCTCandISUMapping(cntry) {
   }));
 }
 
+function setISUDropdown() {
+  var dropdownValues = COMnGOVnPRIn3PAISUs;
+
+  if (!checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']) && (FormManager.getActualValue('reqType') == 'C')) return;
+
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  if(isuCd == '32') {
+    dropdownValues = [...dropdownValues, '32']
+  };
+
+  FormManager.limitDropdownValues(FormManager.getField('isuCd'), dropdownValues );
+}
+
+function setRequestInitialState() {
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  if(isuCd != '' && initialISU == '') initialISU = isuCd;
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.SWISS = ['848'];
   console.log('adding SWISS functions...');
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.SWISS);
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(displayHwMstrInstallFlag, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(checkHwMstrInstallFlag, GEOHandler.SWISS);
+  GEOHandler.addAddrFunction(reloadSORTLList, GEOHandler.SWISS);
   // GEOHandler.addAddrFunction(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 
-  GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addAfterConfigForSWISS, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setRequestInitialState, GEOHandler.SWISS);
 
   // GEOHandler.addAfterTemplateLoad(setCurrencyCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCustClassCd, GEOHandler.SWISS);
@@ -1943,7 +1942,6 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addCMRNumberValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addFormatForCMRNumValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addCmrNoLengthValidator, GEOHandler.SWISS, null, true);
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.SWISS, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addEmbargoCdValidator, GEOHandler.SWISS, null, true);
   // GEOHandler.registerValidator(addVatValidatorForCustLangCd,
@@ -1970,30 +1968,23 @@ dojo.addOnLoad(function () {
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.SWISS);
-  GEOHandler.registerValidator(clientTierValidator, GEOHandler.SWISS, null, true);
 
-  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
-  GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.SWISS);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setPreferredLangSwiss, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onScenarioChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setPreferredLangAddr, GEOHandler.SWISS);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateISUandCTCCombination, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
 
   GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
-  GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-
+  GEOHandler.addAfterTemplateLoad(setISUDropdown, GEOHandler.SWISS);
 
   GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
 

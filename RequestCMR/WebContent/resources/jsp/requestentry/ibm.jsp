@@ -271,7 +271,7 @@ dojo.addOnLoad(function(){
 
     <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848,649,858" exceptForGEO="FR,JP,MCO2,TW,KR">
     <cmr:row topPad="10" addBackground="true">
-      <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755,821,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,826,889">
+      <cmr:column span="2" containerForField="Enterprise" exceptForGEO="NORDX" exceptForCountry="755,821,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,826,889">
         <p>
           <cmr:label fieldId="enterprise">
             <cmr:fieldLabel fieldId="Enterprise" />:

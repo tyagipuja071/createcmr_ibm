@@ -3987,7 +3987,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '27' && isuCode != '36') && reqType == 'U')) {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '27' && isuCode != '36' && isuCode != '32') && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -4032,6 +4032,20 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'E\'\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '' || clientTierCode != 'T') {
+      return new ValidationResult({
+        id : 'isuCd',
+        type : 'text',
+        name : 'isuCd'
+      }, false, 'ISU Cd 32 has been obsolete');
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'ISU Cd 32 & Client Tier T has been obsolete');
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
