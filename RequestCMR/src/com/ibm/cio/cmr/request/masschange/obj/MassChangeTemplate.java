@@ -147,7 +147,7 @@ public class MassChangeTemplate {
           if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
             String isuCd = "";
             String ctc = "";
-            List<String> isuNotBlankCtc = Arrays.asList("36", "34", "32");
+            List<String> isuNotBlankCtc = Arrays.asList("36", "34", "32", "27");
             int rowIndex = 0;
             for (Row row : sheet) {
               rowIndex = row.getRowNum();
@@ -380,11 +380,11 @@ public class MassChangeTemplate {
                       ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if (!StringUtils.isBlank(isuCd) && !(isuNotBlankCtc.contains(isuCd))) {
-                if (!(StringUtils.isBlank(ctc))) {
+                if (!"@".equalsIgnoreCase(ctc)) {
                   LOG.trace("The row " + (rowIndex + 1)
-                      + ":Client Tier should be Blank for the selected ISU code. Please fix and upload the template again.");
+                      + ":Client Tier should be '@' for the selected ISU Code. Please fix and upload the template again.");
                   error.addError((rowIndex + 1), "Client Tier",
-                      ":Client Tier should be Blank for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Client Tier should be '@' for the selected ISU Code. Please fix and upload the template again.<br>");
                 }
               }
               validations.add(error);

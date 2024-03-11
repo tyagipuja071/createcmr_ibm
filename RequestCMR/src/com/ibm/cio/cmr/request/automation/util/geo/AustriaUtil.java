@@ -112,8 +112,8 @@ public class AustriaUtil extends AutomationUtil {
 
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
-      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
-          false, requestData);
+      return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details, false,
+          requestData);
     case SCENARIO_IBM_EMPLOYEE:
       return doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario), requestData);
@@ -537,14 +537,12 @@ public class AustriaUtil extends AutomationUtil {
         }
       }
     } else {
-      switch (scenario) {
-      case SCENARIO_COMMERCIAL:
-      case SCENARIO_CROSS_COMMERICAL:
-      case SCENARIO_THIRD_PARTY_DC:
-      case SCENARIO_PRIVATE_CUSTOMER:
-        sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
-        break;
-      }
+      /*
+       * switch (scenario) { case SCENARIO_COMMERCIAL: case
+       * SCENARIO_CROSS_COMMERICAL: case SCENARIO_THIRD_PARTY_DC: case
+       * SCENARIO_PRIVATE_CUSTOMER: sbo = getSBOFromIMS(entityManager,
+       * data.getSubIndustryCd(), isuCd, clientTier); break; }
+       */
 
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
           && covList.contains(coverage)) {
