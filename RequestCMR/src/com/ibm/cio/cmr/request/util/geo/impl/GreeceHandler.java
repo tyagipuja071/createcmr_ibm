@@ -1887,9 +1887,9 @@ public class GreeceHandler extends BaseSOFHandler {
           data.setSalesBusOffCd(rdcData.getSalesBusOffCd());
         }
 
-        if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
-          data.setClientTier(rdcData.getClientTier());
-        }
+//        if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
+//          data.setClientTier(rdcData.getClientTier());
+//        }
 
         if (isUserBlankOut(entityManager, data.getCollectionCd(), rdcData.getCollectionCd(), "##CollectionCd")) {
           data.setCollectionCd(data.getCollectionCd());
