@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -1004,7 +1005,7 @@ public class GreeceTransformer extends EMEATransformer {
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
-    if (!StringUtils.isEmpty(muData.getIsuCd()) && "5K".equals(muData.getIsuCd())) {
+    if (!StringUtils.isEmpty(muData.getIsuCd()) && !Arrays.asList("36", "34", "27").contains(muData.getIsuCd())) {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
       isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")

@@ -1780,14 +1780,14 @@ public class IsraelHandler extends EMEAHandler {
             error.addError((row.getRowNum() + 1), "Client Tier",
                 ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-          if (StringUtils.isBlank(ctc) || !"T".equals(ctc)) {
+        } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"E".equals(ctc)) {
             LOG.trace("The row " + (row.getRowNum() + 1)
-                + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Client Tier",
-                ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
+        } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("27", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
         }
