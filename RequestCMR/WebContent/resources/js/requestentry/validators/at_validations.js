@@ -2181,7 +2181,7 @@ function setEnterpriseValues(clientTier) {
 
   var isuCd = FormManager.getActualValue('isuCd');
   if (role != 'REQUESTER') {
-    FormManager.enable('enterprise');O
+    FormManager.enable('enterprise');
   }
   clientTier = FormManager.getActualValue('clientTier');
 
