@@ -7155,16 +7155,44 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           muaModel.setCustNm2(tempVal);
         }
         break;
-      case "CUST_NM3":
+      case "LOCAL_LANG_1_NAME":
         if (StringUtils.isNotBlank(tempVal)) {
           String fullEnglish = tempVal.length() > 70 ? tempVal.substring(0, 70) : tempVal;
-          muaModel.setCustNm3(fullEnglish);
+
+          // FULL ENGLISH
+          String full1 = fullEnglish.length() > 35 ? fullEnglish.substring(0, 35) : fullEnglish;
+          String full2 = "";
+
+          if (fullEnglish.length() > 35) {
+            if (fullEnglish.length() >= 70) {
+              full2 = fullEnglish.substring(35, 70);
+            } else {
+              full2 = fullEnglish.substring(35);
+            }
+          }
+
+          muaModel.setLocalLang1Name(full1);
+          muaModel.setLocalLang1NameCont(full2);
         }
         break;
-      case "CUST_NM4":
+      case "LOCAL_LANG_2_NAME":
         if (StringUtils.isNotBlank(tempVal)) {
-          String katakana = IERPRequestUtils.convertKatakana(tempVal.length() > 30 ? tempVal.substring(0, 30) : tempVal);
-          muaModel.setCustNm4(katakana);
+          String katakana = tempVal.length() > 30 ? tempVal.substring(0, 30) : tempVal;
+
+          // KATAKANA
+          String katakana1 = katakana.length() > 17 ? katakana.substring(0, 17) : katakana;
+          String katakana2 = "";
+
+          if (katakana.length() > 17) {
+            if (katakana.length() >= 30) {
+              katakana2 = katakana.substring(17, 30);
+            } else {
+              katakana2 = katakana.substring(17);
+            }
+          }
+
+          muaModel.setLocalLang2Name(katakana1);
+          muaModel.setLocalLang2NameCont(katakana2);
         }
         break;
       case "ADDR_TXT":
@@ -7220,20 +7248,42 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "DEPT":
         if (StringUtils.isNotBlank(tempVal)) {
-          String dept = IERPRequestUtils.dbcsConversionForJP(tempVal);
-          dept = dept.length() > 30 ? dept.substring(0, 30) : dept;
+          String department = tempVal.length() > 30 ? tempVal.substring(0, 30) : tempVal;
 
-          if (StringUtils.isNotBlank(dept)) {
-            muaModel.setDept(dept);
+          // DEPARTMENT
+          String dept1 = department.length() > 17 ? department.substring(0, 17) : department;
+          String dept2 = "";
+
+          if (department.length() > 17) {
+            if (department.length() >= 30) {
+              dept2 = department.substring(17, 30);
+            } else {
+              dept2 = department.substring(17);
+            }
           }
+
+          muaModel.setDept(dept1);
+          muaModel.setCustNm3(dept2);
         }
         break;
       case "BLDG":
         if (StringUtils.isNotBlank(tempVal)) {
-          String bldg = IERPRequestUtils.dbcsConversionForJP(tempVal);
-          if (StringUtils.isNotBlank(bldg)) {
-            muaModel.setBldg(bldg);
+          String building = tempVal.length() > 30 ? tempVal.substring(0, 30) : tempVal;
+
+          // BUILDING
+          String bldg1 = building.length() > 17 ? building.substring(0, 17) : building;
+          String bldg2 = "";
+
+          if (building.length() > 17) {
+            if (building.length() >= 30) {
+              bldg2 = building.substring(17, 30);
+            } else {
+              bldg2 = building.substring(17);
+            }
           }
+
+          muaModel.setBldg(bldg1);
+          muaModel.setCustNm4(bldg2);
         }
         break;
       case "LOCN_CD":
@@ -7250,6 +7300,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "CONTACT":
         if (StringUtils.isNotBlank(tempVal)) {
+          // String contact = IERPRequestUtils.dbcsConversionForJP(tempVal);
+          tempVal = tempVal.length() > 6 ? tempVal.substring(0, 6) : tempVal;
+
           muaModel.setPoBox(tempVal);
         }
         break;
