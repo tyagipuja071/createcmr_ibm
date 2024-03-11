@@ -2181,7 +2181,7 @@ function setEnterpriseValues(clientTier) {
 
   var isuCd = FormManager.getActualValue('isuCd');
   if (role != 'REQUESTER') {
-    FormManager.enable('enterprise');
+    FormManager.enable('enterprise');O
   }
   clientTier = FormManager.getActualValue('clientTier');
 
@@ -4729,7 +4729,8 @@ function getSBOandAssignFirstValue() {
 
 function setSBOonAddressSave() {
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType == 'ZS01') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (addrType == 'ZS01' && reqType != 'U') {
     console.log("set sbo based on postalcd");
     setSBOInitialValue(getSBOListByISU())
   }
@@ -4752,6 +4753,13 @@ function validateSBOValuesForIsuCtc() {
   FormManager.addFormValidator((function() {
     return {
       validate: function() {
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return new ValidationResult(null, true);
+        }
+        
         var sbos = getSBOListByISU()
         if (sbos.length == 0) {
           return new ValidationResult(null, false,
