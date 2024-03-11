@@ -137,6 +137,22 @@ public class MassUpdtAddr extends BaseEntity<MassUpdtAddrPK> implements Serializ
       name = "DPL_CHK_TS")
   private Date dplChkTimestamp;
 
+  @Column(
+      name = "LOCAL_LANG_1_NAME")
+  private String localLang1Name;
+
+  @Column(
+      name = "LOCAL_LANG_1_NAME_CONT")
+  private String localLang1NameCont;
+
+  @Column(
+      name = "LOCAL_LANG_2_NAME")
+  private String localLang2Name;
+
+  @Column(
+      name = "LOCAL_LANG_2_NAME_CONTINUATION")
+  private String localLang2NameCont;
+
   public String getDivn() {
     return this.divn;
   }
@@ -335,6 +351,38 @@ public class MassUpdtAddr extends BaseEntity<MassUpdtAddrPK> implements Serializ
 
   public void setCity2(String city2) {
     this.city2 = city2;
+  }
+
+  public String getLocalLang2Name() {
+    return localLang2Name;
+  }
+
+  public void setLocalLang2Name(String localLang2Name) {
+    this.localLang2Name = localLang2Name;
+  }
+
+  public String getLocalLang2NameCont() {
+    return localLang2NameCont;
+  }
+
+  public void setLocalLang2NameCont(String localLang2NameCont) {
+    this.localLang2NameCont = localLang2NameCont;
+  }
+
+  public String getLocalLang1Name() {
+    return localLang1Name;
+  }
+
+  public void setLocalLang1Name(String localLang1Name) {
+    this.localLang1Name = localLang1Name;
+  }
+
+  public String getLocalLang1NameCont() {
+    return localLang1NameCont;
+  }
+
+  public void setLocalLang1NameCont(String localLang1NameCont) {
+    this.localLang1NameCont = localLang1NameCont;
   }
 
 }
