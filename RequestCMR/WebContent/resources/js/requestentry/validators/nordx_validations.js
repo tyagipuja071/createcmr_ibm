@@ -3811,16 +3811,16 @@ function searchTermCodeValidator() {
                     name : 'searchTerm'
                   }, false, 'SORTL can only accept ' + accSeq_678[isuCtc].join(" "));
                 }
-                if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
-                  if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
-                    console.log(subIndSearchTerm[searchTerm]);
-                    return new ValidationResult({
-                      id : 'searchTerm',
-                      type : 'text',
-                      name : 'searchTerm'
-                    }, false, 'SORTL and Subindustry combination mismatch.');
-                  }
-                }
+//                if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
+//                  if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
+//                    console.log(subIndSearchTerm[searchTerm]);
+//                    return new ValidationResult({
+//                      id : 'searchTerm',
+//                      type : 'text',
+//                      name : 'searchTerm'
+//                    }, false, 'SORTL and Subindustry combination mismatch.');
+//                  }
+//                }
               } else if (countryUse == '678IS') {
                 var subIndSearchTerm = {
                   'T0007879' : [ 'B', 'C' ]
