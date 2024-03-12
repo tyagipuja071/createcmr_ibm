@@ -126,6 +126,7 @@ function getDescription(fieldId) {
 }
 
 var _taxCd1Handler = null;
+var _isuCdHandler = null;
 var _mrcCdHandler = null;
 var _custNameHandler = null;
 var _salesBranchOffHandler = null;
@@ -490,126 +491,6 @@ function resetIbmBankNumber() {
           FormManager.removeValidator('ibmBankNumber', Validators.REQUIRED);
         }
       }
-    }
-  }
-}
-
-function afterConfigForLA() {
-  var _reqType = FormManager.getActualValue('reqType');
-  // var _country = FormManager.getActualValue('cmrIssuingCntry');
-  // CREATCMR-531
-  setIERPSitePartyIDForLA()
-  
-  if (dojo.byId('isuCd')) {
-    // FormManager.disable('isuCd');
-    if(!checkForProspect()){
-      FormManager.readOnly('isuCd');
-    }
-  }
-  if (dojo.byId('collBoId' && _reqType != 'U')) {
-    dojo.byId('collBoId').readOnly = true;
-  }
-
-   if (_salesBranchOffHandler == null) {
-     _salesBranchOffHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
-       if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
-         setCtcBySBOForBrazil();
-       }
-     });
-   }
-
-  // DENNIS: This is new coverage handler where auto selecting ISU is done
-  // through MRC
-  if (_mrcCdHandler == null) {
-    _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
-      autoSetMrcIsuCov2018();
-      if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MEXICO || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.BRAZIL) {
-        setMrcCdToReadOnly();
-      }
-    });
-  }
-
-  if (_sboMrcHandler == null) {
-    _sboMrcHandler = dojo.connect(FormManager.getField('mrcCd'), 'onChange', function(value) {
-      autoSetISUBasedOnSubindustry();
-    });
-  }
-
-  if (_subindustryHandler == null) {
-    _subindustryHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      autoSetISUBasedOnSubindustry();
-    });
-  }
-
-  if (_mrcCdHandler && _mrcCdHandler[0]) {
-    _mrcCdHandler[0].onChange();
-  }
-
-  // Story :1278109- By Mukesh Kumar
-  if (_customerTypeHandler == null) {
-    window.setTimeout(autoSetSBOAndSalesTMNo, 6000);
-    window.setTimeout(autoSetIcmsFieldForCrossBR, 6000);
-    _customerTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
-      autoSetSBOAndSalesTMNo();
-      filterAddressesGridForCrossBR();
-      autoSetIcmsFieldForCrossBR();
-      resetIbmBankNumber();
-      autoSetFieldsForCustScenariosSSAMX();
-      autoSetFieldsForCustScenariosBR();
-      setCrosTypSubTypSSAMXOnSecnarios();
-      setAbbrevNameRequiredForProcessors();
-      setMrcCdToReadOnly();
-      togglePPSCeid();
-      lockFieldsForLA();
-    });
-  }
-
-  if (_customerTypeHandler && _customerTypeHandler[0]) {
-    _customerTypeHandler[0].onChange();
-  }
-
-  if (_custNameHandler == null) {
-    _custNameHandler = dojo.connect(FormManager.getField('mainCustNm1'), 'onChange', function(value) {
-      autoSetAbbrevNameForBrazil();
-    });
-  }
-  
-  // CREATCMR-6813 - AR Predefined tax info values
-  if (_taxCd1Handler == null) {
-    _taxCd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function (value) {
-      showVatNotifForArgentina();
-    });
-  }
-
-  // if(_subindustryHandler == null){
-  // _subindustryHandler = dojo.connect(FormManager.getField('custType'),
-  // 'onChange', function(value) {
-  // if(!contains.call(wwSubindustries, FormManager.getActualValue(''))){
-  //        
-  // }
-  // });
-  // }
-  //  
-  // if (_subindustryHandler && _subindustryHandler[0]){
-  // _subindustryHandler[0].onChange();
-  // }
-  checkAndRefillCollBoIdDescription();
-  resetPhoneValidationForSSA();
-
-  // if (_country == '815') {
-  // resetMrcCdValidation();
-  // }
-
-  // var _reqType = FormManager.getActualValue('reqType');
-
-  if (FormManager.getActualValue('ordBlk') == '93' && _reqType == 'U') {
-    var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    var laReactiveEnable = cmr.query('LA_REACTIVATE_COUNTRY', {
-      CNTRY_CD : cntry,
-    });
-    var suppCntryFlag = laReactiveEnable.ret1.includes("1");
-    if (suppCntryFlag) {
-      makeFieldManadatoryLAReactivate();
     }
   }
 }
@@ -1655,6 +1536,65 @@ function addLengthValidatorForCustName1() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 } // func end
 
+function afterConfigForLA() {
+var _reqType = FormManager.getActualValue('reqType'); 
+// Story :1278109- By Mukesh Kumar
+if (_customerTypeHandler == null) {
+  _customerTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
+    setIsuCtcForLA(value);
+  });
+}
+
+if (_customerTypeHandler && _customerTypeHandler[0]) {
+  _customerTypeHandler[0].onChange();
+}
+
+if (_custNameHandler == null) {
+  _custNameHandler = dojo.connect(FormManager.getField('mainCustNm1'), 'onChange', function(value) {
+    autoSetAbbrevNameForBrazil();
+  });
+}
+
+// CREATCMR-6813 - AR Predefined tax info values
+if (_taxCd1Handler == null) {
+  _taxCd1Handler = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function (value) {
+    showVatNotifForArgentina();
+  });
+}
+
+checkAndRefillCollBoIdDescription();
+resetPhoneValidationForSSA();
+
+if (FormManager.getActualValue('ordBlk') == '93' && _reqType == 'U') {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var laReactiveEnable = cmr.query('LA_REACTIVATE_COUNTRY', {
+    CNTRY_CD : cntry,
+  });
+  var suppCntryFlag = laReactiveEnable.ret1.includes("1");
+  if (suppCntryFlag) {
+    makeFieldManadatoryLAReactivate();
+  }
+}
+}
+function setIsuCtcForLA(value) {
+	  if (FormManager.getActualValue('custGrp') == 'CROSS' || value == undefined) {
+	    return;
+	  }
+	  var custType = FormManager.getActualValue('custType');
+	  if (custType.includes('IBM') || custType.includes('PRI') || custType.includes('INT')) {
+	    FormManager.setValue('isuCd', '21');
+	    FormManager.setValue('clientTier', '');
+	    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+	  } else if (custType.includes('BUS')) {
+	    FormManager.setValue('isuCd', '8B');
+	    FormManager.setValue('clientTier', '');
+	    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+	  } else {
+	    FormManager.setValue('isuCd', '27');
+	    FormManager.setValue('clientTier', 'E');    
+	  }
+	}
+
 /**
  * #1278931
  */
@@ -2426,6 +2366,14 @@ function setLocNoLockedForRequesterBR() {
   }
 }
 
+function setIsuCTCLockedForReqProcesBR() {
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  if (role == 'REQUESTER'||role == 'PROCESSOR') {
+	    FormManager.readOnly('isuCd');
+	    FormManager.readOnly('clientTier');
+	  } 
+	}
+
 function checkForProspect(){
   var ifProspect = FormManager.getActualValue('prospLegalInd');
   if (dijit.byId('prospLegalInd')) {
@@ -2808,11 +2756,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetAddress1FormValidatorAddrList, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addStreetAddress2FormValidatorAddrList, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   // addressGrid --/
-  GEOHandler.addAfterConfig(afterConfigForLA, GEOHandler.LA);
+ // GEOHandler.addAfterConfig(afterConfigForLA, GEOHandler.LA);
   GEOHandler.addAfterConfig(setMrcCdRequiredForProcessors, SSAMX_COUNTRIES);
   GEOHandler.registerValidator(addVatValidatorForOtherLACountries, [ '629', '655', '661', '663', '681', '683', '731', '735', '781', '799', '811', '813', '815', '829', '869', '871' ], null, false,
       false);
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForBR, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterConfig(afterConfigForLA, GEOHandler.LA);
   GEOHandler.registerValidator(addLengthValidatorForCustName1, GEOHandler.LA, null, true);
   GEOHandler.registerValidator(addLengthValidatorForCustName2, GEOHandler.LA, null, true);
   GEOHandler.checkRoleBeforeAddAddrFunction(removeStAddrMaxLengthsValidator, [ SysLoc.BRAZIL ], null, GEOHandler.ROLE_REQUESTER);
@@ -2845,7 +2794,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAddrFunction(setLocationNumberForBR, GEOHandler.LA);
-  GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);  
+  GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]); 
+  GEOHandler.addAfterConfig(setIsuCTCLockedForReqProcesBR, [ SysLoc.BRAZIL ]); 
+  GEOHandler.addAfterTemplateLoad(setIsuCTCLockedForReqProcesBR, GEOHandler.LA);
 
   GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
