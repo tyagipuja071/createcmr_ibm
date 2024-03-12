@@ -538,14 +538,12 @@ public class AustriaUtil extends AutomationUtil {
       }
     } else {
 
-      switch (scenario) {
-      case SCENARIO_COMMERCIAL:
-      case SCENARIO_CROSS_COMMERICAL:
-      case SCENARIO_THIRD_PARTY_DC:
-      case SCENARIO_PRIVATE_CUSTOMER:
-        sbo = getSBO(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
-        break;
-      }
+      /*
+       * switch (scenario) { case SCENARIO_COMMERCIAL: case
+       * SCENARIO_CROSS_COMMERICAL: case SCENARIO_THIRD_PARTY_DC: case
+       * SCENARIO_PRIVATE_CUSTOMER: sbo = getSBO(entityManager,
+       * data.getSubIndustryCd(), isuCd, clientTier); break; }
+       */
 
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
           && covList.contains(coverage)) {
@@ -553,12 +551,15 @@ public class AustriaUtil extends AutomationUtil {
         overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
         overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
       }
-      if (StringUtils.isNotBlank(sbo)) {
-        details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-        overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-        results.setResults("Calculated");
-      } else if (!isCoverageCalculated) {
+      /*
+       * if (StringUtils.isNotBlank(sbo)) { details.append("Setting SBO to " +
+       * sbo + " based on IMS mapping rules.");
+       * overrides.addOverride(covElement.getProcessCode(), "DATA",
+       * "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+       * engineData.addPositiveCheckStatus(AutomationEngineData.
+       * COVERAGE_CALCULATED); results.setResults("Calculated"); } else
+       */
+      if (!isCoverageCalculated) {
         String sboReq = data.getSalesBusOffCd();
         if (!StringUtils.isBlank(sboReq)) {
           String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
