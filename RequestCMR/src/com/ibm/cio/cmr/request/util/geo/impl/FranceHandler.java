@@ -1439,7 +1439,7 @@ public class FranceHandler extends GEOHandler {
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && isuCd.startsWith("32")) || (StringUtils.isBlank(ctc) || "T".contains(ctc))) {
+              } else if ((!StringUtils.isBlank(isuCd) && isuCd.startsWith("32")) || (!StringUtils.isBlank(ctc) && "T".contains(ctc))) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace(
                     "The row " + (rowIndex + 1) + ":Note that ISU 32 & Client Tier T has been obsolete.. Please fix and upload the template again.");
