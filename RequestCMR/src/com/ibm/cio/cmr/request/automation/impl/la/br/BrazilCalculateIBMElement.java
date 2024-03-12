@@ -821,17 +821,17 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Country Use = " + "Z" + "\n");
 
-        // SET ISU based on MRC
-        String isu = getISUCode(entityManager, "Z", "");
-        if (!sboToBeUnchanged) {
-          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
-        }
-        details.append("ISU = " + isu + "\n");
-
-        // SET Client Tier based on MRC and ISU
-        String clientTier = getClientTier(entityManager, "Z", isu);
-        details.append("Client Tier = " + clientTier + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+//        // SET ISU based on MRC
+//        String isu = getISUCode(entityManager, "Z", "");
+//        if (!sboToBeUnchanged) {
+//          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+//        }
+//        details.append("ISU = " + isu + "\n");
+//
+//        // SET Client Tier based on MRC and ISU
+//        String clientTier = getClientTier(entityManager, "Z", isu);
+//        details.append("Client Tier = " + clientTier + "\n");
+//        overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
 
         // SET Partnership Indicator
         details.append("Partnership Ind = " + CmrConstants.DEFAULT_BUSPR_PARTNERSHIP_IND + "\n");
