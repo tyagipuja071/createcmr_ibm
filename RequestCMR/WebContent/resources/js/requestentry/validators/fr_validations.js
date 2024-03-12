@@ -654,25 +654,22 @@ function autoSetValuesOnPostalCode(postCd, city1) {
   var PostCdList6 = [ '04', '05', '06', '11', '13', '20', '30', '34', '48', '66', '83', '84' ];
   city1 = city1.toUpperCase();
   var sboSetbyPostalCdLogic = false;
-  if (city1.includes('NIORT')) {
-    FormManager.setValue('salesBusOffCd', "8CB8CB");
-    sboSetbyPostalCdLogic = true;
-  } else if (PostCdList1.includes(postCd) && city1.includes('LILLE')) {
+  if (PostCdList1.includes(postCd)) {
     FormManager.setValue('salesBusOffCd', "FLIFLI");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList2.includes(postCd) && city1.includes('NANTES')) {
+  } else if (PostCdList2.includes(postCd)) {
     FormManager.setValue('salesBusOffCd', "INAINA");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList3.includes(postCd) && city1.includes('LYON')) {
+  } else if (PostCdList3.includes(postCd)) {
     FormManager.setValue('salesBusOffCd', "4DD4DD");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList4.includes(postCd) && city1.includes('STRASBOURG')) {
+  } else if (PostCdList4.includes(postCd)) {
     FormManager.setValue('salesBusOffCd', "FSTFST");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList5.includes(postCd) && (city1.includes('BORDEAUX') || city1.includes('TOULOUSE'))) {
+  } else if (PostCdList5.includes(postCd)) {
     FormManager.setValue('salesBusOffCd', "IBOIBO");
     sboSetbyPostalCdLogic = true;
-  } else if (PostCdList6.includes(postCd) && (city1.includes('MARSEILLE') || city1.includes('MONTPELLIER') || city1.includes('NICE'))) {
+  } else if (PostCdList6.includes(postCd)) {
     FormManager.setValue('salesBusOffCd', "18D18D");
     sboSetbyPostalCdLogic = true;
   }
