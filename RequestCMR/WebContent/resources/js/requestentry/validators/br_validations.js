@@ -1594,9 +1594,6 @@ function setIsuCtcForLA(value) {
 	    FormManager.setValue('isuCd', '8B');
 	    FormManager.setValue('clientTier', '');
 	    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-	  } else {
-	    FormManager.setValue('isuCd', '27');
-	    FormManager.setValue('clientTier', 'E');    
 	  }
 	}
 
@@ -2372,12 +2369,17 @@ function setLocNoLockedForRequesterBR() {
 }
 
 function setIsuCTCLockedForReqProcesBR() {
+	  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+	if(_custSubGrp=='BUSPR' || _custSubGrp=='INTER' || _custSubGrp=='IBMEM' || _custSubGrp=='PRIPE' )
+		{
 	  var role = FormManager.getActualValue('userRole').toUpperCase();
 	  if (role == 'REQUESTER'||role == 'PROCESSOR') {
 	    FormManager.readOnly('isuCd');
 	    FormManager.readOnly('clientTier');
 	  } 
+		}
 	}
+	
 
 function checkForProspect(){
   var ifProspect = FormManager.getActualValue('prospLegalInd');
