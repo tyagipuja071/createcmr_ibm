@@ -537,12 +537,15 @@ public class AustriaUtil extends AutomationUtil {
         }
       }
     } else {
-      /*
-       * switch (scenario) { case SCENARIO_COMMERCIAL: case
-       * SCENARIO_CROSS_COMMERICAL: case SCENARIO_THIRD_PARTY_DC: case
-       * SCENARIO_PRIVATE_CUSTOMER: sbo = getSBOFromIMS(entityManager,
-       * data.getSubIndustryCd(), isuCd, clientTier); break; }
-       */
+
+      switch (scenario) {
+      case SCENARIO_COMMERCIAL:
+      case SCENARIO_CROSS_COMMERICAL:
+      case SCENARIO_THIRD_PARTY_DC:
+      case SCENARIO_PRIVATE_CUSTOMER:
+        sbo = getSBO(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
+        break;
+      }
 
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
           && covList.contains(coverage)) {
@@ -577,25 +580,16 @@ public class AustriaUtil extends AutomationUtil {
 
   }
 
-  private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
+  private String getSBO(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    if (StringUtils.isNotBlank(subIndustryCd) && ("32S".equals(isuCtc) || "32N".equals(isuCtc) || "32T".equals(isuCtc) || "34Q".equals(isuCtc))) {
-      String ims = subIndustryCd.substring(0, 1);
-      String sql = ExternalizedQuery.getSql("AUTO.AT.GET_SBOLIST_FROM_ISUCTC");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isuCtc + "%");
-      query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
-      query.setParameter("UPDATE_BY_ID", "%" + ims + "%");
-      query.setForReadOnly(true);
-      sboValues = query.getResults(String.class);
-    } else {
-      String sql = ExternalizedQuery.getSql("AUTO.AT.GET_SBOLIST_FROM_ISU");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isuCtc + "%");
-      query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
-      sboValues = query.getResults(String.class);
-    }
+
+    String sql = ExternalizedQuery.getSql("AUTO.AT.GET_SBOLIST_FROM_ISU");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISU", "%" + isuCtc + "%");
+    query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
+    sboValues = query.getResults(String.class);
+
     if (sboValues != null) {
       return sboValues.get(0);
     } else {
