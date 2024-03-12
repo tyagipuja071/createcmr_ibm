@@ -1768,6 +1768,7 @@ function showOrHideAddrFields(cntry, addressMode, details) {
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
       removeDefaultValueTelNo();
+      setROLFlagValue(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZS02'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZS02').checked == true) {
@@ -7451,6 +7452,19 @@ function checkROLFlagValue(cntry, addressMode, details) {
   });
 }
 
+function setROLFlagValue(addrType) {
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var addrType = FormManager.getActualValue('addrType');
+  if (reqType == 'C' && (custGrp == 'IBMTP' || custGrp == 'BUSPR')) {
+    if (addrType == 'ZC01') {
+      FormManager.setValue('rol', 'Y');
+    } else {
+      FormManager.clearValue('rol');
+    }
+  }
+}
+
 function hideNonRelevantFieldsInDRFlow() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -7631,6 +7645,9 @@ dojo.addOnLoad(function() {
   // under the scenario of Subsidiary
   GEOHandler.addAfterTemplateLoad(handleIBMRelatedCMR, GEOHandler.JP);
 
+  GEOHandler.addToggleAddrTypeFunction(checkROLFlagValue, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setROLFlagValue, GEOHandler.JP);
+
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForJP, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLocnCdLogic, GEOHandler.JP);
 
@@ -7650,7 +7667,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRolUpdate, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRA, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(convertEnglishFieldsToSBCS, GEOHandler.JP);
-  GEOHandler.addToggleAddrTypeFunction(checkROLFlagValue, GEOHandler.JP);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);
