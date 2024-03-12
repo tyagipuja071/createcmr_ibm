@@ -508,8 +508,12 @@ public class AustriaUtil extends AutomationUtil {
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), queryResult.getSearchTerm());
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), queryResult.getInac());
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), queryResult.getEnterprise());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(),
+                queryResult.getSearchTerm());
+
             details.append("Data calculated based on CMR Data:").append("\n");
             details.append(" - SORTL = " + queryResult.getSearchTerm()).append("\n");
+            details.append(" - SALES_BO_CD = " + queryResult.getSearchTerm()).append("\n");
             details.append(" - INAC Code = " + queryResult.getInac()).append("\n");
             details.append(" - Enterprise = " + queryResult.getEnterprise()).append("\n");
             engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
