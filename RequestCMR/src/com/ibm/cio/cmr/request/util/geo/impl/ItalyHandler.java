@@ -1925,7 +1925,7 @@ public class ItalyHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
             }
-          } else if ((!StringUtils.isBlank(isu) && isu.startsWith("32")) || (StringUtils.isBlank(clientTier) || "T".contains(clientTier))) {
+          } else if ((!StringUtils.isBlank(isu) && isu.startsWith("32")) || (!StringUtils.isBlank(clientTier) && "T".contains(clientTier))) {
             LOG.trace(
                 "The row " + (rowIndex + 1) + ":Note that ISU 32 & Client Tier T has been obsolete.. Please fix and upload the template again.");
             error.addError((rowIndex + 1), "Client Tier",
