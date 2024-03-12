@@ -1054,6 +1054,7 @@ public class DEHandler extends GEOHandler {
         }
       }
     }
+    }
   }
 
   @Override
