@@ -1544,7 +1544,7 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
     }
     
-    if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
+    if (custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       // CREATCMR-4293
       // FormManager.setValue('clientTier', '7');
