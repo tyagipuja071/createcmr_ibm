@@ -2967,8 +2967,7 @@ function setEntepriseAndSalesRepES() {
   if (isuCtc == '8B') {
     FormManager.setValue('enterprise', '985107');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
-  }
-  if (isuCtc == '34Q' && mainLandCntry == 'MT') {
+  } else if (isuCtc == '34Q' && mainLandCntry == 'MT') {
     FormManager.setValue('enterprise', '985204');
     FormManager.setValue('repTeamMemberNo', '1FICTI');
   } else if (isuCtc == '21') {

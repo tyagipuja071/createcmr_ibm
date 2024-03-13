@@ -2239,6 +2239,7 @@ function setEnterpriseSalesRepSBO() {
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   } else if (isuCd == '36' && clientTier == 'Y') {
+    FormManager.setValue('enterprise', '');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   } else if ((isuCd == '21' || isuCd == '8B') && clientTier == '') {
@@ -2253,7 +2254,7 @@ function setEnterpriseSalesRepSBO() {
     FormManager.setValue('enterprise', '985985');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
-  }else {
+  } else {
     FormManager.setValue('enterprise', '');
     FormManager.setValue('salesBusOffCd', '');
     FormManager.setValue('repTeamMemberNo', '');
