@@ -242,18 +242,22 @@ public class BrazilUtil extends AutomationUtil {
          if(statprovCd1.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
+           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0001556");
          }
          if(statprovCd2.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
+           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006763");
          }
          if(statprovCd3.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
+           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006761");
          }
          if(statprovCd4.contains(stateProv))
          {
            setIsuAndCtc(overrides,data);
+           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006758");
          }
         }
         
@@ -262,38 +266,48 @@ public class BrazilUtil extends AutomationUtil {
           if(statprovCd5.contains(stateProv) && indCd1.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006504");
           }
           if(statprovCd5.contains(stateProv) && indCd2.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011212");
           }
           if("SP".contains(stateProv) && indCd3.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006764");
+            
           }
           if("SP".contains(stateProv) && indCd4.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011205");
           }
           if("SP".contains(stateProv) && indCd5.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011206");
           }
           if("SP".contains(stateProv) && indCd6.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011208");
           }
           if("SP".contains(stateProv) && indCd7.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011209");
           }
           if("SP".contains(stateProv) && indCd8.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011210");
           }
           if("SP".contains(stateProv) && indCd9.contains(firstCharSubIndustry) )
           {
             setIsuAndCtc(overrides,data);
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011211");
           }
         }
       }
