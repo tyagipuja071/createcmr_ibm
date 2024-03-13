@@ -7,7 +7,6 @@ var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
 var _ISUHandler = null;
 var _ISICHandler = null;
-var _CTCHandler = null;
 var _IMSHandler = null;
 var _deIsuCdHandler = null;
 var _subScenarioHandler = null;
@@ -57,13 +56,6 @@ function afterConfigForDE() {
   if (_IMSHandler == null) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
       setSboOnIMS(FormManager.getActualValue('isicCd'));
-      setSortlDropdownValuesBasedOnIsu();
-    });
-  }
-  
-  if (_CTCHandler == null) {
-    _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setSortlDropdownValuesBasedOnIsu();
     });
   }
 
@@ -1301,11 +1293,8 @@ function setCtcByIsu(value) {
 }
 
 function setSortlDropdownValuesBasedOnIsu() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
 
-  if (FormManager.getActualValue('reqType') != 'C') {
+  if (FormManager.getActualValue('reqType') == 'U') {
     return;
   }
   
@@ -1346,65 +1335,53 @@ function getSortlListBasedOnIsu() {
 }
 
 function setInitialValueFor27Eand36Y() {
-  
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var reqId = FormManager.getActualValue('reqId');
+  var subIndustry = FormManager.getActualValue('subIndustryCd');
   var params = {
     REQ_ID : reqId,
   };
   var postCd = FormManager.getActualValue('postCd').length > 0 ? FormManager.getActualValue('postCd') : cmr.query('ADD.GET_POSTAL_CD.BY_REQID', params).ret1;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
   var result = getSortlListBasedOnIsu();
 
   const postalCodeHead = postCd.substring(0, 2);
-  const IS_ISU_27_AND_CTC_E = isuCd == '27' && clientTier == 'E'
-  const IS_ISU_36_AND_CTC_Y = isuCd == '36' && clientTier == 'Y'
-  const SUBINSDUSTRY_STARTS_WITH_E = () => {
-    var subIndustry = FormManager.getActualValue('subIndustryCd')
-    return subIndustry.substring(0, 1) == 'E'
-  }
-  const IS_CROSS_BORDER_SCENARIO = () => {
-    var custSubGroup = FormManager.getActualValue('custSubGrp').toUpperCase();
-    return ['CROSS', 'XDC', 'X3PA'].includes(custSubGroup);
-  }
+  const is27E = () => isuCd == '27' && clientTier == 'E'
+  const is27notE = () => isuCd == '27' && clientTier != 'E'
+  const is36Y = () => isuCd == '36' && clientTier == 'Y'
 
-    if(IS_CROSS_BORDER_SCENARIO()) {
-      if(IS_ISU_27_AND_CTC_E) {
-        if (SUBINSDUSTRY_STARTS_WITH_E()) return result.filter((SORTL) => SORTL == 'T0011405')
-        else if (!SUBINSDUSTRY_STARTS_WITH_E()) return result.filter((SORTL) => SORTL == 'T0011415')
+  if (custGrp != 'CROSS') {
+    if (is27E()) {
+      if(subIndustry.substring(0, 1) == 'E') {
+        if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0011341')
+        else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0011357')
+        else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0011373')
+        else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0011389')
+        else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter((SORTL) => SORTL == 'T0011405')
+        else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0011421')
+      } else {
+    
+        if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0011351')
+        else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0011367')
+        else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0011383')
+        else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0011399')
+        else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter((SORTL) => SORTL == 'T0011415')
+        else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0011431')
       }
-      else if (IS_ISU_36_AND_CTC_Y) return result.filter((SORTL) => SORTL == 'T0012013')
-    }
-
-    if(IS_ISU_27_AND_CTC_E && SUBINSDUSTRY_STARTS_WITH_E()) {
-      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0011341')
-      else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0011357')
-      else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0011373')
-      else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0011389')
-      else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter((SORTL) => SORTL == 'T0011405')
-      else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0011421')
-    } else if (IS_ISU_27_AND_CTC_E && !SUBINSDUSTRY_STARTS_WITH_E()) {
-      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0011351')
-      else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0011367')
-      else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0011383')
-      else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0011399')
-      else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter((SORTL) => SORTL == 'T0011415')
-      else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0011431')
-    } else if (IS_ISU_36_AND_CTC_Y) {
+    } else if (is36Y()) {
       if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0007970')
       else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0012010')
       else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0012011')
       else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0012012')
       else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter((SORTL) => SORTL == 'T0012013')
       else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0012014')
+    }
+  } else {
+    if (is27E() && subIndustry.substring(0, 1) == 'E') return result.filter((SORTL) => SORTL == 'T0011405')
+    else if (is27E() && subIndustry.substring(0, 1) != 'E') return result.filter((SORTL) => SORTL == 'T0011415')
+    else if (is36Y()) return result.filter((SORTL) => SORTL == 'T0012013')
   }
 
   return result
@@ -1451,10 +1428,10 @@ dojo.addOnLoad(function () {
   console.log('adding DE validators...');
   GEOHandler.addAfterConfig(afterConfigForDE, GEOHandler.DE);
   // GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
+  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.DE);
-  GEOHandler.addAddrFunction(setSortlDropdownValuesBasedOnIsu, GEOHandler.DE);
   // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR
   // REGISTERED
   // ON WW
@@ -1503,6 +1480,8 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(clientTierValidator, [SysLoc.GERMANY], null, true);
   GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.DE, null, true);
 
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(validateSBOValuesForIsuCtc, GEOHandler.DE, null, true);
