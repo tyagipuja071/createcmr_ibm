@@ -1444,6 +1444,13 @@ public class FranceHandler extends GEOHandler {
                 error.addError((rowIndex + 1), "Client Tier",
                     ":Note that ISU 32 & Client Tier T has been obsolete. Please fix and upload the template again.<br>");
                 validations.add(error);
+              } else if ((!StringUtils.isBlank(isuCd) && isuCd.startsWith("32")) || (!StringUtils.isBlank(ctc) && "T".contains(ctc))) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace(
+                    "The row " + (rowIndex + 1) + ":Note that ISU 32 & Client Tier T has been obsolete.. Please fix and upload the template again.");
+                error.addError((rowIndex + 1), "Client Tier",
+                    ":Note that ISU 32 & Client Tier T has been obsolete. Please fix and upload the template again.<br>");
+                validations.add(error);
               } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("36")) {
                 if (StringUtils.isBlank(ctc) || !"Y".contains(ctc)) {
                   TemplateValidation error = new TemplateValidation(name);

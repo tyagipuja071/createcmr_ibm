@@ -627,35 +627,38 @@ public class FranceUtil extends AutomationUtil {
       String clientTier) {
     HashMap<String, String> response = new HashMap<String, String>();
     String regex = "\\s+$";
-    city = (city.toUpperCase()).replaceAll(regex, "");
+    // city = (city.toUpperCase()).replaceAll(regex, "");
+    // City Logic Removed due to CREATCMR 10681 FR COV
     response.put(MATCHING, "");
     response.put(POSTAL_CD_STARTS, "");
-    response.put(CITY, "");
+    // response.put(CITY, "");
     response.put(SBO, "");
     if (!sortlMappings.isEmpty()) {
       for (FrSboMapping mapping : sortlMappings) {
         if (countryUse.equals(mapping.getCountryUse()) && isuCd.equals(mapping.getIsu()) && clientTier.equals(mapping.getCtc())) {
-          if (StringUtils.isNotBlank(mapping.getPostalCdStarts()) && StringUtils.isNotBlank(mapping.getCity())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCdStarts())) {
             String[] postalCodeRanges = mapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
-            String[] cityRanges = mapping.getCity().replaceAll("\n", "").replaceAll(" ", "").split(",");
+            // String[] cityRanges = mapping.getCity().replaceAll("\n",
+            // "").replaceAll(" ", "").split(",");
             for (String postalCdRange : postalCodeRanges) {
-              for (String cityRange : cityRanges) {
-                if (postCd.startsWith(postalCdRange) && city.equals(cityRange)) {
+              // for (String cityRange : cityRanges) {
+              if (postCd.startsWith(postalCdRange)) {
                   response.put(MATCHING, "Exact Match");
                   response.put(SBO, mapping.getSbo());
-                  response.put(CITY, cityRange);
+                // response.put(CITY, cityRange);
                   response.put(POSTAL_CD_STARTS, postalCdRange);
                   return response;
-                } else if ("NIORT".equals(city)) {
-                  response.put(MATCHING, "Exact Match");
-                  response.put(SBO, "8CB");
-                  response.put(CITY, cityRange);
-                  response.put(POSTAL_CD_STARTS, "any postal code");
-                  return response;
                 }
+              // else if ("NIORT".equals(city)) {
+              // response.put(MATCHING, "Exact Match");
+              // response.put(SBO, "8CB");
+              // response.put(CITY, cityRange);
+              // response.put(POSTAL_CD_STARTS, "any postal code");
+              // return response;
+              // }
+              // }
               }
             }
-          }
         } else {
           response.put(MATCHING, "No Match Found");
           return response;
