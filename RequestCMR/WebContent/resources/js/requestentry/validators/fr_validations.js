@@ -4173,6 +4173,18 @@ function sboCodeValidator() {
   } else if (isuCtc == '34Q'
       && !(sbo == 'S39S39' || sbo == 'S62S62' || sbo == 'S00S00' || sbo == 'S85S85' || sbo == 'S66S66' || sbo == 'S04S04' || sbo == 'S67S67' || sbo == 'S31S31' || sbo == 'S81S81' || sbo == 'S29S29'
           || sbo == 'S47S47' || sbo == 'S52S52' || sbo == 'S35S35' || sbo == 'S79S79' || sbo == 'S46S46' || sbo == 'S63S63' || sbo == 'S53S53' || sbo == 'S08S08' || sbo == 'S99S99' || sbo == 'S78S78'
+          || sbo == 'S89S89' || sbo == 'S95S95' || sbo == '711711') && (landedCountry == 'TN' || landedCountry == "LY" || landedCountry == "DZ")) {
+    return new ValidationResult(
+        {
+          id : 'salesBusOffCd',
+          type : 'text',
+          name : 'salesBusOffCd'
+        },
+        false,
+        'SORTL can only accept \'S39S39\'\  \'S62S62\'\  \'S00S00\'\  \'S85S85\'\  \'S66S66\'\  \'S04S04\'\  \'S67S67\'\  \'S31S31\'\  \'S81S81\'\  \'S29S29\'\  \'S47S47\'\  \'S52S52\'\  \'S35S35\'\  \'S79S79\'\  \'S46S46\'\  \'S63S63\'\  \'S53S53\'\  \'S08S08\'\  \'S99S99\'\  \'S78S78\'\  \'S89S89\'\  \'S95S95\'\ \'711711\'\  for ISU CTC 34Q.');
+  } else if (isuCtc == '34Q'
+      && !(sbo == 'S39S39' || sbo == 'S62S62' || sbo == 'S00S00' || sbo == 'S85S85' || sbo == 'S66S66' || sbo == 'S04S04' || sbo == 'S67S67' || sbo == 'S31S31' || sbo == 'S81S81' || sbo == 'S29S29'
+          || sbo == 'S47S47' || sbo == 'S52S52' || sbo == 'S35S35' || sbo == 'S79S79' || sbo == 'S46S46' || sbo == 'S63S63' || sbo == 'S53S53' || sbo == 'S08S08' || sbo == 'S99S99' || sbo == 'S78S78'
           || sbo == 'S89S89' || sbo == 'S95S95')) {
     return new ValidationResult(
         {
