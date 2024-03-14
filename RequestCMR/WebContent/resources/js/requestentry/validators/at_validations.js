@@ -4645,7 +4645,7 @@ function getPostCode() {
       REQ_ID: reqId,
     };
   }
-  var results = cmr.query('ADDR.GET.POSTCD.AUSTRIA', reqParam);
+  var results = cmr.query('ADDR.GET.POSTCD.REQ', reqParam);
   if (results != null) {
     return results.ret1;
   }
