@@ -650,7 +650,7 @@ function autoSetValuesOnPostalCode(postCd, city1) {
   var PostCdList4 = [ '08', '10', '21', '25', '39', '51', '52', '54', '55', '57', '58', '67', '68', '70', '71', '88', '89', '90' ];
   var PostCdList5 = [ '09', ' 12', ' 16', ' 17', ' 19', ' 23', ' 24', ' 31', ' 32', ' 33', ' 40', ' 46', ' 47', ' 64', ' 65', ' 81', ' 82', ' 87' ];
   var PostCdList6 = [ '04', '05', '06', '11', '13', '20', '30', '34', '48', '66', '83', '84' ];
- city1 = city1.toUpperCase();
+  city1 = city1.toUpperCase();
   var sboSetbyPostalCdLogic = false;
   if (PostCdList1.includes(postCd)) {
     FormManager.setValue('salesBusOffCd', "FLIFLI");
@@ -4183,7 +4183,7 @@ function sboCodeValidator() {
   } else if (isuCtc == '34Q'
       && !(sbo == 'S39S39' || sbo == 'S62S62' || sbo == 'S00S00' || sbo == 'S85S85' || sbo == 'S66S66' || sbo == 'S04S04' || sbo == 'S67S67' || sbo == 'S31S31' || sbo == 'S81S81' || sbo == 'S29S29'
           || sbo == 'S47S47' || sbo == 'S52S52' || sbo == 'S35S35' || sbo == 'S79S79' || sbo == 'S46S46' || sbo == 'S63S63' || sbo == 'S53S53' || sbo == 'S08S08' || sbo == 'S99S99' || sbo == 'S78S78'
-          || sbo == 'S89S89' || sbo == 'S95S95')) {
+          || sbo == 'S89S89' || sbo == 'S95S95') && !(landedCountry == 'TN' || landedCountry == "LY" || landedCountry == "DZ")) {
     return new ValidationResult(
         {
           id : 'salesBusOffCd',
