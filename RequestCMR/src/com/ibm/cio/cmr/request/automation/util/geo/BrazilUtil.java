@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.util.BrazilFieldsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -129,6 +130,7 @@ public class BrazilUtil extends AutomationUtil {
       AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     Data data = requestData.getData();
    String custSubGrp= data.getCustSubGrp();
+   RequestEntryModel model = requestData.createModelFromRequest();
    List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM","BUSPR");
    if(!custArray.contains(custSubGrp))
    {
@@ -243,6 +245,7 @@ public class BrazilUtil extends AutomationUtil {
          {
            setIsuAndCtc(overrides,data);
            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0001556");
+           overrides.addOverride(AutomationElementRegistry.GBL_RETRIEVE_VALUES, "DATA", "COV_ID", model.getCovId(), "T0001556");
          }
          if(statprovCd2.contains(stateProv))
          {
