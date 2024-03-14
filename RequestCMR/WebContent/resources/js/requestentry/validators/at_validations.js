@@ -732,12 +732,13 @@ function addHandlersForCEMEA() {
     });
   }
 
-  /*if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
-    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
-         setISUCTCOnIMSChange();
-      setSBOValuesForIsuCtc(value);// CMR-2101
-    });
-  }*/
+  /*
+   * if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry') ==
+   * SysLoc.AUSTRIA) { _IMSHandler =
+   * dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function
+   * (value) { setISUCTCOnIMSChange(); setSBOValuesForIsuCtc(value);// CMR-2101
+   * }); }
+   */
 
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
@@ -1214,14 +1215,14 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm3', Validators.LATIN, ['Customer Name (3)']);
     checkAndAddValidator('addrTxt', Validators.LATIN, ['Street Address']);
     checkAndAddValidator('city1', Validators.LATIN, ['City']);
-    //    checkAndAddValidator('postCd', Validators.LATIN, ['Postal Code']);
+    // checkAndAddValidator('postCd', Validators.LATIN, ['Postal Code']);
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
     FormManager.removeValidator('custNm2', Validators.LATIN);
     FormManager.removeValidator('custNm3', Validators.LATIN);
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
-    //    FormManager.removeValidator('postCd', Validators.LATIN);
+    // FormManager.removeValidator('postCd', Validators.LATIN);
   }
 }
 
@@ -1940,7 +1941,7 @@ function proceedCIS() {
 
 function cancelCIS() {
   FormManager.setValue('cisServiceCustIndc', false);
-  //setCountryDuplicateFields();
+  // setCountryDuplicateFields();
   // cmr.showModal('addressVerificationModal');
   showAddressVerificationModal();
 }
@@ -4644,7 +4645,7 @@ function getPostCode() {
       REQ_ID: reqId,
     };
   }
-  var results = cmr.query('ADDR.GET.POSTCD.AUSTRIA', reqParam);
+  var results = cmr.query('ADDR.GET.POSTCD.REQ', reqParam);
   if (results != null) {
     return results.ret1;
   }
@@ -4670,7 +4671,8 @@ function getSBOListByISU() {
   var ctc = FormManager.getActualValue('clientTier');
   var isuCtc = `${isuCd}${ctc}`;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  //exceptional postacode which does not fit in checkPostCodeGroup logic for postal group starts with
+  // exceptional postacode which does not fit in checkPostCodeGroup logic for
+  // postal group starts with
   var exceptionPostalCode = ['5101', '5102', '5110', '5111', '5112', '5113', '5114', '5151', '5152', '5161', '5162', '5163', '5164', '5165',
     '5201', '5202', '5203', '5204', '5205', '5300', '5301', '5302', '5303', '5321', '5322', '5323', '5324', '5325', '5330', '5340', '5350'
   ];
@@ -4958,7 +4960,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, SysLoc.AUSTRIA);
 
-  //GEOHandler.addAfterConfig(getSBOandAssignFirstValue, SysLoc.AUSTRIA);
+  // GEOHandler.addAfterConfig(getSBOandAssignFirstValue, SysLoc.AUSTRIA);
   // GEOHandler.addAfterTemplateLoad(getSBOandAssignFirstValue, SysLoc.AUSTRIA);
   GEOHandler.addAddrFunction(setSBOonAddressSave, [SysLoc.AUSTRIA]);
   GEOHandler.addAfterTemplateLoad(setCTCBasedOnISUCode, [SysLoc.AUSTRIA]);
