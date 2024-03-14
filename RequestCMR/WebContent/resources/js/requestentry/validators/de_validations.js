@@ -1337,7 +1337,7 @@ function getSortlListBasedOnIsu() {
 function setInitialValueFor27Eand36Y() {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
-  var postCd = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0).postCd[0];
+  var postCd = getCurrentPostalCode();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var result = getSortlListBasedOnIsu();
@@ -1462,6 +1462,27 @@ function setSBOonAddressSave() {
     console.log("set sbo based on postalcd");
     setSortlDropdownValuesBasedOnIsu();
   }
+}
+
+function getPostCode() {
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID: reqId,
+    };
+  }
+  var results = cmr.query('ADDR.GET.POSTCD.REQ', reqParam);
+  if (results != null) {
+    return results.ret1;
+  }
+}
+
+function getCurrentPostalCode() {
+  var postCd = FormManager.getActualValue('postCd');
+  if (postCd == '' || postCd == undefined) {
+    postCd = getPostCode()
+  }
+  return postCd;
 }
 
 dojo.addOnLoad(function () {
