@@ -590,48 +590,6 @@ function assignPostalCodeSubgroupForPostalCode(isuCd, clientTier, postalCode, cu
   }
 }
 
-function validateSBOValuesForIsuCtc() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('reqType') != 'C') {
-          return;
-        }
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
-        var sbo = FormManager.getActualValue('searchTerm');
-        var validSboList = [];
-        var qParams = null;
-        
-        if (isuCd != '') {
-          var results = null;
-          if (isuCd + clientTier != '34Q') {
-            qParams = {
-              _qall : 'Y',
-              ISSUING_CNTRY : cntry,
-              ISU : '%' + isuCd + '%',
-              CTC : '%' + clientTier + '%'
-            };
-            results = cmr.query('GET.SBOLIST.BYISU', qParams);
-          }
-        }
-        if (results == null || results.length == 0) {
-          return new ValidationResult(null, true);
-        } else {
-          for (let i=0; i<results.length; i++) {
-            validSboList.push(results[i].ret1);
-          }
-          if (!validSboList.includes(sbo)) {
-            return new ValidationResult(null, false, 
-                'The SORTL provided is invalid. It should be from the list: ' + validSboList);
-          }
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
 
 function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
   console.log(">>>> onSavingAddress ");
@@ -1874,7 +1832,7 @@ function addVatIndValidator(){
     } else if (vat && dojo.string.trim(vat) != '' && vatInd != 'E' && vatInd != 'N' && vatInd == '') {
       FormManager.setValue('vatInd', 'T');
       FormManager.enable('vatInd');
-      //  FormManager.readOnly('vatInd');
+      // FormManager.readOnly('vatInd');
     } else if (vat && dojo.string.trim(vat) == '' && vatInd != 'E' && vatInd != 'T' && vatInd != '') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.setValue('vatInd', 'N');
@@ -2017,6 +1975,102 @@ function setRequestInitialState() {
 
   if(isuCd != '' && initialISU == '') initialISU = isuCd;
 }
+
+
+
+
+var _importedSearchTerm = null;
+function resetSortlValidator() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+
+  var qParams = {
+    REQ_ID: reqId,
+  };
+  var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+  if (result != null) {
+    _importedSearchTerm = result.ret1;
+  }
+
+  if (reqType == 'U' && (_importedSearchTerm == '' || _importedSearchTerm == null)) {
+    console.log('Making Sortl optinal as it is empty in RDC');
+    FormManager.resetValidations('searchTerm');
+  }
+}
+
+function validateSortl() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate: function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var letterNumber = /^[0-9a-zA-Z]+$/;
+        var qParams = {
+          REQ_ID: reqId,
+        };
+        if (_importedSearchTerm != searchTerm) {
+          console.log("validating Sortl..");
+          if (searchTerm.length != 8) {
+            return new ValidationResult(null, false, 'SearchTerm should be 8 characters long.');
+          }
+
+          if (!searchTerm.match(letterNumber)) {
+            return new ValidationResult({
+              id: 'searchTerm',
+              type: 'text',
+              name: 'searchTerm'
+            }, false, 'SearchTerm should be alpha numeric.');
+          }
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function validateSBOValuesForIsuCtc() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate: function() {
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return;
+        }
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var sbo = FormManager.getActualValue('searchTerm');
+        var isuCtc = isuCd + clientTier;
+        var validSboList = [];
+        var qParams = null;
+
+        if (isuCd != '') {
+          var results = null;
+          if (isuCtc != '34Q') {
+            qParams = {
+              _qall: 'Y',
+              ISSUING_CNTRY: cntry,
+              ISU: '%' + isuCtc + '%'
+            };
+            results = cmr.query('GET.SBOLIST.BYISU', qParams);
+          }
+        }
+        if (results == null) {
+          return new ValidationResult(null, true);
+        } else {
+          for (let i = 0; i < results.length; i++) {
+            validSboList.push(results[i].ret1);
+          }
+          if (!validSboList.includes(sbo)) {
+            return new ValidationResult(null, false,
+              'The SORTL provided is invalid. It should be from the list: ' + validSboList);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 
 dojo.addOnLoad(function () {
   GEOHandler.SWISS = ['848'];
