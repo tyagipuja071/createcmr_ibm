@@ -1160,9 +1160,9 @@ public class METransformer extends EMEATransformer {
       }
 
       if (data.getCustSubGrp().contains("CO") || data.getCustSubGrp().contains("TH") || data.getCustSubGrp().contains("TP")
-          || data.getCustSubGrp().contains("PRI") || data.getCustSubGrp().contains("PC")) {// commerical
-        if (!StringUtils.isBlank(data.getEnterprise())) {
-          legacyCust.setEnterpriseNo(data.getEnterprise());
+          || data.getCustSubGrp().contains("PRI") || data.getCustSubGrp().contains("PC")) {// commerical        
+        if (!StringUtils.isBlank(data.getTaxCd2())) {
+            legacyCust.setEnterpriseNo(data.getTaxCd2());  
         } else {
           legacyCust.setEnterpriseNo("");
         }
@@ -1206,8 +1206,8 @@ public class METransformer extends EMEATransformer {
         legacyCust.setRealCtyCd("614");
       }
 
-      if (!StringUtils.isBlank(data.getEnterprise())) {
-        legacyCust.setEnterpriseNo(data.getEnterprise());
+      if (!StringUtils.isBlank(data.getTaxCd2())) {
+        legacyCust.setEnterpriseNo(data.getTaxCd2());
       } else {
         legacyCust.setEnterpriseNo("");
       }
@@ -1522,11 +1522,11 @@ public class METransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getCompany())) {
-      if ("@".equals(muData.getCompany())) {
+    if (!StringUtils.isBlank(muData.getEnterprise())) {
+      if ("@".equals(muData.getEnterprise())) {
         cust.setEnterpriseNo("");
       } else {
-        cust.setEnterpriseNo(muData.getCompany());
+        cust.setEnterpriseNo(muData.getEnterprise());
       }
     }
 
