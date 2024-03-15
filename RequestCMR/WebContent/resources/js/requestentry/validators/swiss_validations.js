@@ -1210,7 +1210,7 @@ function setPreferredLangAddr() {
   //
   // Cross Border it is E (English)
   var reqType = FormManager.getActualValue('reqType');
-  var zs01ReqId = FormManager.getActualValue('reqId');
+  var reqId = FormManager.getActualValue('reqId');
 
   var addrType = FormManager.getActualValue('addrType');
   if (addrType == null || addrType == '' || addrType == undefined) {
@@ -1227,7 +1227,7 @@ function setPreferredLangAddr() {
   }
   if (landCntry == 'CH' || landCntry == 'LI') {
     var qParams = {
-      REQ_ID: zs01ReqId,
+      REQ_ID: reqId,
       ADDR_TYPE: addrType
     };
     var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
