@@ -239,28 +239,41 @@ public class BrazilUtil extends AutomationUtil {
         List<String> indCd7=Arrays.asList("R","T");
         List<String> indCd8=Arrays.asList("D","W");
         List<String> indCd9=Arrays.asList("A","U","K");
+        String isu27="27";
+        String ctc27="E";
         
         if (StringUtils.isNotBlank(stateProv)) {
          if(statprovCd1.contains(stateProv))
          {
-           setIsuAndCtc(overrides,data);
-           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0001556");
-           overrides.addOverride(AutomationElementRegistry.GBL_RETRIEVE_VALUES, "DATA", "COV_ID", model.getCovId(), "T0001556");
+           covType="T";
+           covId="0001556";
+           covDesc="BR - DSS MG";
+           setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+           setIsuAndCtc(overrides,data,details,isu27,ctc27);
          }
          if(statprovCd2.contains(stateProv))
          {
-           setIsuAndCtc(overrides,data);
-           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006763");
+           covType="T";
+           covId="0006763";
+           covDesc="BR - DSS N/NE";
+           setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+           setIsuAndCtc(overrides,data,details,isu27,ctc27);
          }
          if(statprovCd3.contains(stateProv))
          {
-           setIsuAndCtc(overrides,data);
-           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006761");
+           covType="T";
+           covId="0006761";
+           covDesc="BR - DSS RJ";
+           setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+           setIsuAndCtc(overrides,data,details,isu27,ctc27);
          }
          if(statprovCd4.contains(stateProv))
          {
-           setIsuAndCtc(overrides,data);
-           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006758");
+           covType="T";
+           covId="0006758";
+           covDesc="BR - DSS Sul";
+           setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+           setIsuAndCtc(overrides,data,details,isu27,ctc27);
          }
         }
         
@@ -268,49 +281,76 @@ public class BrazilUtil extends AutomationUtil {
         {
           if(statprovCd5.contains(stateProv) && indCd1.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006504");
+            covType="T";
+            covId="0006504";
+            covDesc="BR - DSS Gov/Educ. Centro Oeste";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
           if(statprovCd5.contains(stateProv) && indCd2.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011212");
+            covType="T";
+            covId="0011212";
+            covDesc="BR - DSS Multi Ind Centro Oeste";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
           if("SP".contains(stateProv) && indCd3.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0006764");
+            covType="T";
+            covId="0006764";
+            covDesc="BR - DSS SP Finance";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
             
           }
           if("SP".contains(stateProv) && indCd4.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011205");
+            covType="T";
+            covId="0011205";
+            covDesc="BR - DSS SP Computer Services";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
           if("SP".contains(stateProv) && indCd5.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011206");
+            covType="T";
+            covId="0011207";
+            covDesc="BR - DSS SP Industrial";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27); 
           }
           if("SP".contains(stateProv) && indCd6.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011208");
+            covType="T";
+            covId="0011208";
+            covDesc="BR - DSS SP HealthCare & LifeSciences";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
           if("SP".contains(stateProv) && indCd7.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011209");
+            covType="T";
+            covId="0011209";
+            covDesc="BR - DSS SP Retail";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
           if("SP".contains(stateProv) && indCd8.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011210");
+            covType="T";
+            covId="0011210";
+            covDesc="BR - DSS SP Consumer Product";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
           if("SP".contains(stateProv) && indCd9.contains(firstCharSubIndustry) )
           {
-            setIsuAndCtc(overrides,data);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), "T0011211");
+            covType="T";
+            covId="0011211";
+            covDesc="BR - DSS SP Communications";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
         }
       }
@@ -321,9 +361,18 @@ public class BrazilUtil extends AutomationUtil {
 
   }
   
-  private void setIsuAndCtc(OverrideOutput overrides, Data data) {
-    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "27");
-    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "E");
+  private void setCoverageDetails(StringBuilder details, OverrideOutput overrides, Data data,String covType, String covId, String covDesc) {
+    details.append("\n \n"+ "GBG id is not found. Covergae id, ISU & CTC will be assigned based on State Province/Industry code "+ "\n \n" +"Coverage = " + covType.trim() + covId.trim() + " (" + covDesc + ")\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_ID", data.getCovId(), covType.trim() + covId.trim());
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_DESC", data.getCovDesc(), covDesc);
+  }
+
+  private void setIsuAndCtc(OverrideOutput overrides, Data data, StringBuilder details, String isu, String ctc) {
+    details.append("ISU = " + isu +"\n");
+    details.append("CTC = " + ctc +"\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isu);
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), ctc);
+   
     
   }
 
