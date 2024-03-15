@@ -1722,14 +1722,14 @@ function validateSBOValuesForIsuCtc() {
 
         if (isuCd != '') {
           var results = null;
-          if (isuCtc != '34Q') {
+         
             qParams = {
               _qall: 'Y',
               ISSUING_CNTRY: cntry,
               ISU: '%' + isuCtc + '%'
             };
             results = cmr.query('GET.SBOLIST.BYISU', qParams);
-          }
+          
         }
         if (results == null) {
           return new ValidationResult(null, true);
