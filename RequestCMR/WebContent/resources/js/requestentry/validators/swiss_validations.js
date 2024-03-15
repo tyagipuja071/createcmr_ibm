@@ -1953,12 +1953,26 @@ function getSBOListByISU() {
 
   const getSalesBoDesc = () => {
     if (IS27ESCENARIO()) {
+      
+      var landCntry = FormManager.getActualValue('landCntry');
+      var reqId = FormManager.getActualValue('reqId');
+      if (landCntry == null || landCntry == '' || landCntry == undefined) {
+        var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
+          REQ_ID: reqId,
+          ADDR_TYPE: 'ZS01'
+        });
+        landCntry = result.ret1;
+      }
+      if (landCntry != 'LI'){
       var postalCode = getCurrentPostalCode();
      
       if (['1', '2'].includes(postalCode.toString().substring(0, 1)) && custSubGrp != 'XCHCM')
         return '1';
       else
         return '2';
+    } else {
+        return '2';
+      }
     } else {
       return '';
     }
