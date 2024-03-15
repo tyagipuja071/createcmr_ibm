@@ -225,15 +225,14 @@ function validateSBOValuesForIsuCtc() {
 
         if (isuCd != '') {
           var results = null;
-          if (isuCd + clientTier != '34Q') {
-            qParams = {
+          qParams = {
               _qall: 'Y',
               ISU_CD: isuCd,
               CLIENT_TIER: clientTier,
               IMS: '%'
             };
             results = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', qParams);
-          }
+          
         }
         if (results == null || results.length == 0) {
           return new ValidationResult(null, true);
