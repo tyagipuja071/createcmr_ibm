@@ -4758,7 +4758,7 @@ function setCTCBasedOnISUCode() {
         if (FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
-        if (FormManager.getActualValue('viewOnlyPage') == 'true') {va
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
           return new ValidationResult(null, true);
         }
         
