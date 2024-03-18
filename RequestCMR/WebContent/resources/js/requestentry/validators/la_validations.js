@@ -612,20 +612,26 @@ function afterConfigForLA() {
 
 function setClientTierValues(value) {
   var reqType = FormManager.getActualValue('reqType');
-  FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || value == undefined) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
   isuCtcVals = {
     '27' : 'E',
     '34' : 'Q',
-    '36' : 'Y'
+    '36' : 'Y',
+    '32' : 'J'
   };
   if (isuCd != null && isuCd != undefined && isuCd != '') {
     if (isuCtcVals.hasOwnProperty(isuCd)) {
-      FormManager.setValue('clientTier', isuCtcVals[isuCd]);
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ clientTier ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    }
+  }
+  if (value != undefined && value != false) {
+    if (isuCtcVals.hasOwnProperty(isuCd)) {
+      FormManager.setValue('clientTier', isuCtcVals[isuCd]);
     } else {
       FormManager.setValue('clientTier', '');
     }
@@ -636,7 +642,7 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var activeIsuCd = [ '34', '36', '27' ];
+  var activeIsuCd = [ '34', '36', '27', '32' ];
   var activeCtc = [ 'Q', 'Y', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
@@ -699,6 +705,22 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'E\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier code is Mandatory.');
+    } else if (clientTierCode == 'J') {
+      return new ValidationResult(null, true);
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept \'J\'.');
     }
   } else {
     if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
@@ -3435,6 +3457,7 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterConfig(togglePPSCeid, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(togglePPSCeid, GEOHandler.LA);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(showDeleteNotifForArgentinaIBMEM, SysLoc.ARGENTINA);
   GEOHandler.registerValidator(vatValidatorUY, [ SysLoc.URUGUAY ], null, true);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.LA, null, true);
