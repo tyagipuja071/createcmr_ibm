@@ -2510,7 +2510,7 @@ function setDeafultSBOLogicComm() {
     landCntry = result1.ret1;
   }
 
-  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || postCode == '' || postCode == undefined || postCode == null) {
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true' || postCd == '' || postCd == undefined || postCd == null) {
     return;
   }
 
@@ -5742,73 +5742,6 @@ function clientTierValidatorIT() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
-function clientTierCodeValidator() {
-  var isuCode = FormManager.getActualValue('isuCd');
-  var clientTierCode = FormManager.getActualValue('clientTier');
-  var activeIsuCd = [ '32', '34', '36' ];
-  var activeCtc = [ 'Q', 'Y', 'T' ];
-
-  if (!activeIsuCd.includes(isuCode)) {
-    if (clientTierCode == '') {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult(null, true);
-    } else {
-      $("#clientTierSpan").html('');
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-    }
-  } else if (isuCode == '34') {
-    if (clientTierCode == 'Q') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\'.');
-    }
-  } else if (isuCode == '36') {
-    if (clientTierCode == 'Y') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Y\'.');
-    }
-  } else if (isuCode == '32') {
-    if (clientTierCode == 'T') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'T\'.');
-    }
-  } else {
-    if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
-      $("#clientTierSpan").html('');
-
-      return new ValidationResult(null, true);
-    } else {
-      $("#clientTierSpan").html('');
-      $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
-
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\' , \'T\' or blank.');
-    }
-  }
 }
 
 function StcOrderBlockValidation() {
