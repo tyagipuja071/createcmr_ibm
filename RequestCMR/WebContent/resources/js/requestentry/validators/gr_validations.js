@@ -2496,8 +2496,8 @@ function setClientTierValuesGR(value) {
     FormManager.setValue('clientTier', 'Q');
   } else if (isuCd == '36') {
     FormManager.setValue('clientTier', 'Y');
-  } else if (isuCd == '32') {
-    FormManager.setValue('clientTier', 'T');
+  } else if (isuCd == '27') {
+    FormManager.setValue('clientTier', 'E');
   } else {
     FormManager.setValue('clientTier', '');
   }
@@ -2576,7 +2576,7 @@ function validatorISUCTCEntGR() {
   var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  var isuCD323436Set = new Set([ '32', '34', '36' ])
+  var isuCD323436Set = new Set([ '27', '34', '36' ])
 
   getExitingValueOfCTCAndIsuCD();
   if (reqType == 'U' && _oldIsuCd == isuCd && _oldCtc == clientTier) {
@@ -2589,12 +2589,12 @@ function validatorISUCTCEntGR() {
       type : 'text',
       name : 'clientTier'
     }, false, 'Client Tier can be blank only.');
-  } else if (isuCd == '32' && clientTier != 'T') {
+  } else if (isuCd == '27' && clientTier != 'E') {
     return new ValidationResult({
       id : 'clientTier',
       type : 'text',
       name : 'clientTier'
-    }, false, 'Client Tier can only accept \'T\'.');
+    }, false, 'Client Tier can only accept \'E\'.');
   } else if (isuCd == '34' && clientTier != 'Q') {
     return new ValidationResult({
       id : 'clientTier',
@@ -2655,7 +2655,7 @@ function addRemoveClientTierValidator() {
   console.log(">>>> addRemoveClientTierValidator");
   var isuCd = FormManager.getActualValue('isuCd');
   FormManager.resetValidations('clientTier');
-  if (isuCd != '32' && isuCd != '34' && isuCd != '36') {
+  if (isuCd != '27' && isuCd != '34' && isuCd != '36') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');

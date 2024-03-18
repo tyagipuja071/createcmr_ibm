@@ -676,7 +676,6 @@ public class FranceUtil extends AutomationUtil {
               // }
               // }
             }
-          }
         } else {
           response.put(MATCHING, "No Match Found");
           return response;

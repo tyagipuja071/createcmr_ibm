@@ -12,13 +12,13 @@ var _deIsuCdHandler = null;
 var _subScenarioHandler = null;
 var oldVatExempt = null;
 var oldCustSubGrp = null;
-let SORTLandCTCandISUMapping  = []
+let SORTLandCTCandISUMapping = []
 let firstTimeLoading = true;
 
 function afterConfigForDE() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   SORTLandCTCandISUMapping = loadSORTLandCTCandISUMapping(FormManager.getActualValue('cmrIssuingCntry'))
-  var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+  var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
     disableAutoProcForProcessor();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
@@ -49,12 +49,12 @@ function afterConfigForDE() {
       // CREATCMR-7424_7425
       setAbbreviatedNameBasedOnAddressType();
       setSortlDropdownValuesBasedOnIsu();
-     });
+    });
   }
 
   if (_IMSHandler == null) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
-     // setSboOnIMS(FormManager.getActualValue('isicCd'));
+      // setSboOnIMS(FormManager.getActualValue('isicCd'));
       setSortlDropdownValuesBasedOnIsu();
     });
   }
@@ -98,10 +98,10 @@ function afterConfigForDE() {
 
 function loadSORTLandCTCandISUMapping(cntry) {
   return cmr.query('GET.ISU.CTC.BY_SBO.V2', {
-    _qall : 'Y',
-    ISSUING_CNTRY : cntry,
-    SALES_BO_CD : '%%'
-  }).map(({ret1, ret2, ret3}) => ({
+    _qall: 'Y',
+    ISSUING_CNTRY: cntry,
+    SALES_BO_CD: '%%'
+  }).map(({ ret1, ret2, ret3 }) => ({
     SORTL: ret1,
     ISU: ret2,
     CTC: ret3
@@ -225,15 +225,14 @@ function validateSBOValuesForIsuCtc() {
 
         if (isuCd != '') {
           var results = null;
-          if (isuCd + clientTier != '34Q') {
-            qParams = {
-              _qall: 'Y',
-              ISU_CD: isuCd,
-              CLIENT_TIER: clientTier,
-              IMS: '%'
-            };
-            results = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', qParams);
-          }
+          qParams = {
+            _qall: 'Y',
+            ISU_CD: isuCd,
+            CLIENT_TIER: clientTier,
+            IMS: '%'
+          };
+          results = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', qParams);
+
         }
         if (results == null || results.length == 0) {
           return new ValidationResult(null, true);
@@ -244,10 +243,10 @@ function validateSBOValuesForIsuCtc() {
           if (!validSboList.includes(sbo)) {
             if (isuCd + clientTier == '32T') {
               return new ValidationResult(null, false,
-                'The SearchTerm provided is invalid for corresponding ISU+CTC.');
+                'The SBO provided is invalid for corresponding ISU+CTC.');
             } else {
               return new ValidationResult(null, false,
-                'The SearchTerm provided is invalid. It should be from the list: ' + validSboList);
+                'The SBO provided is invalid. It should be from the list: ' + validSboList);
             }
           }
         }
@@ -894,7 +893,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36' &&  isuCode != '27') && reqType == 'U')) {
+  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34' && isuCode != '32' && isuCode != '36' && isuCode != '27') && reqType == 'U')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -1300,7 +1299,7 @@ function setSortlDropdownValuesBasedOnIsu() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  
+
   if (['27', '36'].includes(isuCd)) {
     result = setInitialValueFor27Eand36Y()
   } else {
@@ -1346,37 +1345,37 @@ function setInitialValueFor27Eand36Y() {
   const postalCodeHead = postCd.substring(0, 2);
   const is27E = () => isuCd == '27' && clientTier == 'E';
   const is36Y = () => isuCd == '36' && clientTier == 'Y';
-  var subIndustry =  FormManager.getActualValue('subIndustryCd');
+  var subIndustry = FormManager.getActualValue('subIndustryCd');
   const isSubIndustryE = () => subIndustry.substring(0, 1) == 'E';
 
   if (custGrp != 'CROSS') {
     // check if sortl available for exact postalcode
-    if(is27E() ||  is36Y() ){
-    var sortl= getSBOForExactPostalCode(subIndustry,postCd,isuCd,clientTier);
-        console.log(sortl);
-    
-    if(sortl != '' && sortl != null ){
-      return result.filter((SORTL) => SORTL == sortl);
-    } 
+    if (is27E() || is36Y()) {
+      var sortl = getSBOForExactPostalCode(subIndustry, postCd, isuCd, clientTier);
+      console.log(sortl);
+
+      if (sortl != '' && sortl != null) {
+        return result.filter((SORTL) => SORTL == sortl);
+      }
     }
     if (is27E() && isSubIndustryE()) {
-      
-      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0011341')
+
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/)) return result.filter((SORTL) => SORTL == 'T0011341')
       else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0011357')
       else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0011373')
       else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0011389')
       else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter((SORTL) => SORTL == 'T0011405')
       else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0011421')
-    
+
     } else if (is27E() && !isSubIndustryE()) {
-      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0011351')
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/)) return result.filter((SORTL) => SORTL == 'T0011351')
       else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0011367')
       else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0011383')
       else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0011399')
       else if (postalCodeHead.match(/(6[8-9])|(7[0-57-9])|(88)/)) return result.filter((SORTL) => SORTL == 'T0011415')
       else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0011431')
     } else if (is36Y()) {
-      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/))return result.filter((SORTL) => SORTL == 'T0007970')
+      if (postalCodeHead.match(/(0[1-468-9])|(1[02-9])|(39)/)) return result.filter((SORTL) => SORTL == 'T0007970')
       else if (postalCodeHead.match(/((07)|(3[4-6])|(5[4-7])|(6[0-13-7])|(76)|(9[8-9]))/)) return result.filter((SORTL) => SORTL == 'T0012010')
       else if (postalCodeHead.match(/(2[0-9])|(3[0-17-8])|(49)/)) return result.filter((SORTL) => SORTL == 'T0012011')
       else if (postalCodeHead.match(/(8[0-79])|(9[0-7])/)) return result.filter((SORTL) => SORTL == 'T0012012')
@@ -1384,9 +1383,9 @@ function setInitialValueFor27Eand36Y() {
       else if (postalCodeHead.match(/(3[2-3])|(4[0-24-8])|(5[0-38-9])/)) return result.filter((SORTL) => SORTL == 'T0012014')
     }
   } else {
-    if (is27E() &&  isSubIndustryE()) return result.filter((SORTL) =>  SORTL == 'T0011405')
-    else if (is27E() && !isSubIndustryE()) return result.filter((SORTL) =>  SORTL == 'T0011415')
-    else if (is36Y()) return result.filter((SORTL) =>  SORTL == 'T0012013')
+    if (is27E() && isSubIndustryE()) return result.filter((SORTL) => SORTL == 'T0011405')
+    else if (is27E() && !isSubIndustryE()) return result.filter((SORTL) => SORTL == 'T0011415')
+    else if (is36Y()) return result.filter((SORTL) => SORTL == 'T0012013')
   }
 
   return result
@@ -1425,31 +1424,31 @@ function lockCTCCode() {
   }
 }
 
-function getSBOForExactPostalCode(subIndustryCd, postCd,isuCd,ctc) {
+function getSBOForExactPostalCode(subIndustryCd, postCd, isuCd, ctc) {
   console.log("getSBOForExactPostalCode..")
   var result = null;
-   dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/de/postalCode.json',
-    handleAs : 'json',
-    method : 'GET',
-    content : {
-      'subIndustryCd' : subIndustryCd,
-      'postCd' : postCd,
+  dojo.xhrGet({
+    url: cmr.CONTEXT_ROOT + '/de/postalCode.json',
+    handleAs: 'json',
+    method: 'GET',
+    content: {
+      'subIndustryCd': subIndustryCd,
+      'postCd': postCd,
       'isuCd': isuCd,
-      'clientTier':ctc      
+      'clientTier': ctc
     },
-    timeout : 60000,
-    sync : true,
-    load : function(data, ioargs) {
-       console.log(data);
+    timeout: 60000,
+    sync: true,
+    load: function (data, ioargs) {
+      console.log(data);
       if (data && data.success) {
         result = data.sortl;
       } else {
         result = '';
       }
     },
-    error : function(error, ioargs) {
-      console.log(error);      
+    error: function (error, ioargs) {
+      console.log(error);
     }
   });
   return result;
@@ -1506,9 +1505,9 @@ function resetSortlValidator() {
 }
 
 function validateSortl() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate: function() {
+      validate: function () {
         var reqId = FormManager.getActualValue('reqId');
         var searchTerm = FormManager.getActualValue('searchTerm');
         var letterNumber = /^[0-9a-zA-Z]+$/;
@@ -1560,7 +1559,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setCTCInitialValueBasedOnCurrentIsu, GEOHandler.DE);
   // GEOHandler.addAfterTemplateLoad(setSortlDropdownValuesBasedOnIsu,
   // GEOHandler.DE);
-  GEOHandler.addAddrFunction(setSBOonAddressSave,GEOHandler.DE);
+  GEOHandler.addAddrFunction(setSBOonAddressSave, GEOHandler.DE);
   // GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate,
   // GEOHandler.DE);
   GEOHandler.setRevertIsicBehavior(false);
@@ -1607,7 +1606,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
-	GEOHandler.registerValidator(validateSortl, GEOHandler.DE, null, true);
+  GEOHandler.registerValidator(validateSortl, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.DE);
 
