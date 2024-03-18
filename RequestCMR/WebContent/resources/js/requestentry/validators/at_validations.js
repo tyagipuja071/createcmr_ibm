@@ -1739,7 +1739,7 @@ function validateSBOValuesForIsuCtc() {
           }
           if (!validSboList.includes(sbo)) {
             return new ValidationResult(null, false,
-              'The SBO provided is invalid. It should be from the list: ' + validSboList);
+              'The SBO provided is invalid. It should be from the list: ' + validSboList.join(" "));
           }
         }
       }
@@ -4711,7 +4711,7 @@ function getSBOListByISU() {
 }
 
 function setSBOInitialValue(values) {
-  if (values.length == 0) {
+  if (values.length == 0 || values.length > 1) {
     FormManager.clearValue('salesBusOffCd')
   } else {
     FormManager.setValue('salesBusOffCd', values[0])
@@ -4751,14 +4751,14 @@ function setCTCBasedOnISUCode() {
   FormManager.setValue('clientTier', CTC_MAPPING[isuCd] || '');
 }
 
-function validateSBOValuesForIsuCtc() {
+/*function validateSBOValuesForIsuCtc() {
   FormManager.addFormValidator((function() {
     return {
       validate: function() {
         if (FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
-        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {va
           return new ValidationResult(null, true);
         }
         
@@ -4775,7 +4775,7 @@ function validateSBOValuesForIsuCtc() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
+}*/
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = ['358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',

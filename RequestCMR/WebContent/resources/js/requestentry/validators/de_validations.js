@@ -246,7 +246,7 @@ function validateSBOValuesForIsuCtc() {
                 'The SBO provided is invalid for corresponding ISU+CTC.');
             } else {
               return new ValidationResult(null, false,
-                'The SBO provided is invalid. It should be from the list: ' + validSboList);
+                'The SBO provided is invalid. It should be from the list: ' + validSboList.join(" "));
             }
           }
         }
@@ -1309,7 +1309,7 @@ function setSortlDropdownValuesBasedOnIsu() {
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if (!!dropdownField) dropdownField.setAttribute('values', result);
 
-  if (result != null && Object.keys(result).length > 0) {
+  if (result != null && Object.keys(result).length == 1) {
     FormManager.setValue('searchTerm', result[0]);
   } else {
     FormManager.clearValue('searchTerm');
