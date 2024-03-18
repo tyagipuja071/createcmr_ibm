@@ -5780,6 +5780,161 @@ function hasValidLicenseDate() {
   return false;
 }
 
+function sboSalesRepValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var sbo = FormManager.getActualValue('salesBusOffCd');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var reqType = FormManager.getActualValue('reqType');
+        var valResult = null;
+        var oldSbo = null;
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
+
+        if (reqType == 'C') {
+          valResult = sboSalesRepCodeValidator();
+        } else {
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.CLIENT_TIER_ISU_SBO_CD_OLD_BY_REQID', qParams);
+
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldSbo = result.ret3 != null ? result.ret3 : '';
+            oldISU = result.ret2 != null ? result.ret2 : '';
+
+            if (sbo != oldSbo) {
+              valResult = sboSalesRepCodeValidator();
+            }
+          }
+        }
+        return valResult;
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function sboSalesRepCodeValidator() {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCtc = isuCd + clientTier;
+  var sbo = FormManager.getActualValue('salesBusOffCd');
+  var subRegion = FormManager.getActualValue('countryUse');
+  var reqType = FormManager.getActualValue('reqType');
+  var salesRep = FormManager.getActualValue('repTeamMemberNo');
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  var landedCountry = getSoldToLanded();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (reqType != 'C') {
+    return new ValidationResult(null, true);
+  }
+  if (isuCtc == '8B') {
+    if (!(sbo == 'ZP' || sbo == 'VQ' || sbo == 'ZS' || sbo == 'QQ')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'ZP\'\ \'VQ\'\ \'ZS\'\ \'QQ\'\ for ISU CTC 8B.');
+    }
+    if (!(salesRep == '09ZPB0' || salesRep == '09VQB0' || salesRep == '09ZSB0' || salesRep == '09QQB0')) {
+      return new ValidationResult({
+        id : 'repTeamMemberNo',
+        type : 'text',
+        name : 'repTeamMemberNo'
+      }, false, 'salesRep can only accept \'09ZPB0\'\ \'09VQB0\'\ \'09ZSB0\'\ \'09QQB0\'\ for ISU 8B.');
+    }
+  } else if (isuCtc == '21') {
+    if (!(sbo == '99' || sbo == 'ZZ' || sbo == '1B' || sbo == '1G' || sbo == '1E' || sbo == '11' || sbo == '12' || sbo == '13' || sbo == '14')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'99\'\ \'ZZ\'\ \'1B\'\ \'1G\'\ \'1E\'\ \'11\'\  \'12\'\ \'13\'\ \'14\'\ for ISU CTC 8B.');
+    }
+  } else if (isuCtc == '34Q') {
+    if (!(sbo == 'PA' || sbo == 'PB' || sbo == 'PC' || sbo == 'PD' || sbo == 'PE' || sbo == 'PF' || sbo == 'PG' || sbo == 'PH' || sbo == 'PI' || sbo == 'PJ' || sbo == 'PK' || sbo == 'PL'
+        || sbo == 'PM' || sbo == 'PN' || sbo == 'PO' || sbo == 'PP')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'PA\'\ \'PB\'\ \'PC\'\ \'PD\'\ \'PE\'\ \'PF\'\  \'PG\'\ \'PH\'\ \'PI\'\ \'PJ\'\ \'PK\'\ \'PL\'\ \'PM\'\ \'PN\'\ \'PO\'\ \'PP\'\ for ISU CTC 34Q.');
+    }
+  } else if (isuCtc == '36Y') {
+    if (!(sbo == 'FL' || sbo == 'FM' || sbo == 'FP' || sbo == 'FQ' || sbo == 'FR' || sbo == 'FS' || sbo == 'FT' || sbo == 'FV' || sbo == 'FW' || sbo == 'FX' || sbo == 'FY' || sbo == 'FZ')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'FL\'\ \'FM\'\ \'FP\'\ \'FQ\'\ \'FR\'\ \'FS\'\  \'FT\'\ \'FV\'\ \'FW\'\ \'FX\'\ \'FY\'\ \'FZ\'\  for ISU CTC 36Y.');
+    }
+  } else if (isuCtc == '04') {
+    if (!(sbo == 'GG' || sbo == 'HG' || sbo == 'SD')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'GG\'\ \'HG\'\ \'SD\'\  for ISU 04.');
+    }
+  } else if (isuCtc == '19') {
+    if (!(sbo == 'EB' || sbo == 'SD')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'EB\'\ \'SD\'\ for ISU 19.');
+    }
+  } else if (isuCtc == '28') {
+    if (!(sbo == 'SD' || sbo == 'TQ' || sbo == 'TX')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'SD\'\ \'TQ\'\ \'TX\'\ for ISU 28.');
+    }
+  } else if (isuCtc == '12' || isuCtc == '15' || isuCtc == '31' || isuCtc == '1R' || isuCtc == '3T' || isuCtc == '4A' || isuCtc == '4F' || isuCtc == '5B' || isuCtc == '5E' || isuCtc == '5K') {
+    if (!(sbo == 'SD')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept  \'SD\'\ for ISU' + isuCtc + '.');
+    }
+  }
+  // else if(isuCtc == '34Q' || isuCtc == '36Y' || isuCtc == '04' || isuCtc ==
+  // '12' || isuCtc == '15' || isuCtc == '19' || isuCtc == '28' || isuCtc ==
+  // '31' || isuCtc == '1R'
+  // || isuCtc == '3T' || isuCtc == '4A' || isuCtc == '5B' || isuCtc == '4F' ||
+  // isuCtc == '5E' || isuCtc == '5K' ) {
+  // if (!(sbo == '99' || sbo == 'ZZ' || sbo == '1B' || sbo == '1G' || sbo ==
+  // '1E' || sbo == '11' || sbo == '12' || sbo == '13' || sbo == '14')) {
+  // return new ValidationResult({
+  // id : 'salesBusOffCd',
+  // type : 'text',
+  // name : 'salesBusOffCd'
+  // }, false, 'SORTL can only accept \'99\'\ \'ZZ\'\ \'1B\'\ \'1G\'\ \'1E\'\
+  // \'11\'\ \'12\'\ \'13\'\ \'14\'\ for ISU CTC 8B.');
+  // }
+  // }
+  else if (isuCtc == '32T' || isuCd == '32') {
+    return new ValidationResult({
+      id : 'isuCd',
+      type : 'text',
+      name : 'isuCd'
+    }, false, 'ISU 32 & Client Tier T has been obsolete.');
+  }
+}
+
 function isNewLicenseAdded() {
   if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount > 0) {
     for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
@@ -5849,5 +6004,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.EMEA);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.EMEA, null, true);
+  GEOHandler.registerValidator(sboSalesRepValidator, [ SysLoc.ITALY ], null, true);
 
 });
