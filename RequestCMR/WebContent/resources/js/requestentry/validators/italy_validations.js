@@ -2479,6 +2479,12 @@ function setDeafultSBOLogicComm() {
   if (subIndustryCd != null && subIndustryCd.length > 1) {
     subIndustryCd = subIndustryCd.substring(0, 1);
   }
+  var commSubTypes = [ 'COMME', 'COMSM', 'COMVA', 'CROCM', 'GOVST', 'LOCEN', 'GOVSM', 'LOCSM', 'GOVVA', 'LOCVA', 'CROGO', 'NGOIT', 'NGOVA', 'NGOSM', '3PAIT', 'UNIVA', 'UNIVE', 'UNISM', '3PASM',
+      '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
+  var ibmEmpCustSubTypes = [ 'IBMIT', 'XIBM' ];
+  var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
+  var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
+  var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
   var landCntry = '';
   var isuCTC = isu.concat(ctc);
 
