@@ -2428,7 +2428,7 @@ function setDeafultISUCtcChange() {
       FormManager.clearValue('collectionCd');
     } else if (bpCustTypes.includes(custSubType)) {
       FormManager.readOnly('isuCd');
-      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('isuCd', '8B');
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '');
       if (role == 'REQUESTER') {
@@ -5939,6 +5939,22 @@ function sboSalesRepCodeValidator() {
       name : 'isuCd'
     }, false, 'ISU 32 & Client Tier T has been obsolete.');
   }
+}
+
+function getSoldToLanded() {
+  var countryCd = FormManager.getActualValue('landCntry');
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var cntryCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : 'ZS01',
+  };
+  var cntryCdResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', cntryCdParams);
+
+  if (cntryCdResult.ret1 != undefined) {
+    countryCd = cntryCdResult.ret1;
+  }
+
+  return countryCd;
 }
 
 function isNewLicenseAdded() {
