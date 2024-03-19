@@ -837,13 +837,14 @@ function addISUHandlerIT() {
     }
     setClientTierValuesIT(value);
   });
+}
 
-  _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-    if (!value) {
-      value = FormManager.getActualValue('_isicHandler');
-    }
-    setDeafultSBOLogicComm();
-  });
+function addIsicCdHandler() {
+  if (_isicHandler == null) {
+    _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setDeafultSBOLogicComm();
+    });
+  }
 }
 
 function setClientTierValuesIT(isuCd) {
@@ -5833,6 +5834,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValuesIT, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(setDeafultISUCtcChange, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
+  GEOHandler.addAfterConfig(addIsicCdHandler, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(setClientTierValuesIT, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(setDeafultSBOLogicComm, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ITALY ], null, true);
