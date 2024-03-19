@@ -1500,7 +1500,7 @@ function resetSortlValidator() {
 
   if (reqType == 'U' && (_importedSearchTerm == '' || _importedSearchTerm == null)) {
     console.log('Making Sortl optinal as it is empty in RDC');
-    FormManager.resetValidations('salesBusOffCd');
+    FormManager.resetValidations('searchTerm');
   }
 }
 
