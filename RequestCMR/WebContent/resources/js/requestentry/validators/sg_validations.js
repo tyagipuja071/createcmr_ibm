@@ -347,9 +347,9 @@ function addFieldFormatValidator() {
 						addrCity1 = recordList.city1;
 
 						/*
-             * if (typeof (addrSequence) == 'object') { addrSequence =
-             * addrSequence[0]; }
-             */
+			 * if (typeof (addrSequence) == 'object') { addrSequence =
+			 * addrSequence[0]; }
+			 */
 						if (typeof (addrDept) == 'object') {
 							addrDept = addrDept[0];
 						}
@@ -1330,9 +1330,9 @@ function addDoubleCreateValidatorSG() {
 					return new ValidationResult(null, true);
 				}
 				/*
-         * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
-         * }else{ showError = false; }
-         */
+		 * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
+		 * }else{ showError = false; }
+		 */
 				if (cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF') {
 					if (FormManager.getActualValue('cmrNo') != '' && cmrNumber.length == 6) {
 						var cmrNumber = FormManager.getActualValue('cmrNo');
@@ -2677,8 +2677,8 @@ function coverage2024ForSG() {
 		FormManager.readOnly('isicCd');
 		FormManager.setValue('isicCd', '9500');
 	} else {
-	// FormManager.enable('isicCd');
-	  FormManager.readOnly('isicCd');
+		// FormManager.enable('isicCd');
+		FormManager.readOnly('isicCd');
 	}
 
 	var _clusterHandlerSG = null;

@@ -1,8 +1,8 @@
 /* Register NORDX Javascripts */
-var _addrTypesForNORDX = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
+var _addrTypesForNORDX = ['ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02'];
 var _poBOXHandler = [];
 var _MachineHandler = [];
-var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE" ];
+var EU_COUNTRIES = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
 var reqType = null;
 
@@ -42,33 +42,33 @@ function afterConfigForNORDX() {
     FormManager.readOnly('capInd');
     // FormManager.readOnly('modeOfPayment');
     FormManager.setValue('capInd', true);
-    FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'subIndustry Code' ], 'MAIN_CUST_TAB');// CMR-1993
-    FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB'); // CMR-1993
+    FormManager.addValidator('subIndustryCd', Validators.REQUIRED, ['subIndustry Code'], 'MAIN_CUST_TAB');// CMR-1993
+    FormManager.addValidator('isicCd', Validators.REQUIRED, ['ISIC'], 'MAIN_CUST_TAB'); // CMR-1993
     if (role == 'Requester') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('abbrevLocn');
-      FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, ['Abbreviated Location'], 'MAIN_CUST_TAB');
     }
     if (role == 'Processor') {
       FormManager.enable('abbrevNm');
       FormManager.enable('repTeamMemberNo');
       FormManager.enable('engineeringBo');
 
-      FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('isuCd', Validators.REQUIRED, ['ISU Code'], 'MAIN_IBM_TAB');
       // CREATCMR-4293
       // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
       // Tier' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-      FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, ['Abbreviated Name'], 'MAIN_CUST_TAB');
+      FormManager.addValidator('abbrevLocn', Validators.REQUIRED, ['Abbreviated Location'], 'MAIN_CUST_TAB');
 
     }
 
   }
 
   if (role == 'Processor' && reqType == 'C') {
-    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, ['Sales Rep'], 'MAIN_IBM_TAB');
     // CREATCMR-2674
-    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'SORTL' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('searchTerm', Validators.REQUIRED, ['SORTL'], 'MAIN_IBM_TAB');
     // FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'A/C
     // Admin DSC' ], 'MAIN_IBM_TAB'); // CMR-1903
   } else {
@@ -82,14 +82,14 @@ function afterConfigForNORDX() {
   var cntryBaltics = FormManager.getActualValue('countryUse');
   if ((role == 'Requester' || role == 'Processor') && (reqType == 'C' || reqType == 'U')) {
     if (cntryBaltics == '702EE' || cntryBaltics == '702LT' || cntryBaltics == '702LV') {
-      checkAndAddValidator('custNm1', LATINBALTICS, [ 'Customer Name' ]);
-      checkAndAddValidator('custNm2', LATINBALTICS, [ 'Customer Name Con\'t' ]);
-      checkAndAddValidator('custNm3', LATINBALTICS, [ 'Additional Info' ]);
-      checkAndAddValidator('custNm4', LATINBALTICS, [ 'Att. Person' ]);
-      checkAndAddValidator('city1', LATINBALTICS, [ 'City' ]);
-      checkAndAddValidator('addrTxt', LATINBALTICS, [ 'Street Address' ]);
-      checkAndAddValidator('addrTxt2', LATINBALTICS, [ 'Street Con\'t' ]);
-      checkAndAddValidator('custPhone', LATINBALTICS, [ 'Phone #' ]);
+      checkAndAddValidator('custNm1', LATINBALTICS, ['Customer Name']);
+      checkAndAddValidator('custNm2', LATINBALTICS, ['Customer Name Con\'t']);
+      checkAndAddValidator('custNm3', LATINBALTICS, ['Additional Info']);
+      checkAndAddValidator('custNm4', LATINBALTICS, ['Att. Person']);
+      checkAndAddValidator('city1', LATINBALTICS, ['City']);
+      checkAndAddValidator('addrTxt', LATINBALTICS, ['Street Address']);
+      checkAndAddValidator('addrTxt2', LATINBALTICS, ['Street Con\'t']);
+      checkAndAddValidator('custPhone', LATINBALTICS, ['Phone #']);
     }
   }
 
@@ -237,46 +237,46 @@ var _inacHandler = null;
 function addHandlersForNORDX() {
 
   if (_PostalCodeHandler == null) {
-    _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+    _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
       setSBO(value);
     });
   }
 
   if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function (value) {
       // setVatValidatorNORDX();
       resetVatRequired('', true);
     });
   }
 
   if (_ISICHandler == null) {
-    _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function (value) {
       FormManager.readOnly('subIndustryCd'); // CMR-1993
       setSalesRepValues(value);
     });
   }
 
   if (_inacHandler == null) {
-    _inacHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    _inacHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
       setSalesRepValues(value);
       prospectFilter();
     });
   }
 
   if (_poSteertNorwayFin == null) {
-    _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
+    _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function (value) {
       streetContControll();
     });
   }
 
   if (_ExpediteHandler == null) {
-    _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
+    _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function (value) {
       setExpediteReason();
     });
   }
 
   if (_landCntryHandler == null) {
-    _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+    _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function (value) {
       skipStateProvForFO();
     });
   }
@@ -303,7 +303,7 @@ function resetVatRequired(zs01Cntry, vatExemptChangedFlag) {
     }
     var custType = FormManager.getActualValue('custGrp');
     if (dijit.byId('vatExempt') != undefined && !dijit.byId('vatExempt').get('checked')
-        && (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && landCntry != 'GB' || (custType != '' && custType.includes('LOC')))) {
+      && (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && landCntry != 'GB' || (custType != '' && custType.includes('LOC')))) {
       // checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
       FormManager.enable('vat');
     }
@@ -330,8 +330,8 @@ function vatAndVatExemptOnScenario(value) {
     var isIBPriv = custSubType != '' && (custSubType.includes('IBM') || custSubType.includes('PRI'));
     var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
     var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-      REQID : FormManager.getActualValue('reqId'),
-      TYPE : 'ZS01'
+      REQID: FormManager.getActualValue('reqId'),
+      TYPE: 'ZS01'
     });
     if (ret && ret.ret1 && ret.ret1 != '') {
       zs01Cntry = ret.ret1;
@@ -396,9 +396,9 @@ function setClientTierValues() {
   }
   isuCd = FormManager.getActualValue('isuCd');
   isuCtcVals = {
-    '27' : 'E',
-    '34' : 'Q',
-    '36' : 'Y'
+    '27': 'E',
+    '34': 'Q',
+    '36': 'Y'
   };
   if (isuCd != null && isuCd != undefined && isuCd != '') {
     if (isuCtcVals.hasOwnProperty(isuCd)) {
@@ -421,12 +421,12 @@ function onSubIndustryChange() {
     return;
   }
 
-  _subIndCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+  _subIndCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
     if (!value) {
       return;
     }
     if (value != null && value.length > 1) {
-//      setSalesRepValues(value);
+      //      setSalesRepValues(value);
       FormManager.readOnly('subIndustryCd');// CMR-1993
     }
   });
@@ -436,7 +436,7 @@ function onSubIndustryChange() {
 }
 
 function addIsuHandler() {
-  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
     setSalesRepValues(value);
     setClientTierValues();
     lockSalesRepAndSortl();
@@ -444,7 +444,7 @@ function addIsuHandler() {
 }
 
 function addCtcHandler() {
-  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
     setSalesRepValues(value);
     lockSalesRepAndSortl();
   });
@@ -633,9 +633,9 @@ function setAdminDSCValues(repTeamMemberNo) {
  * Validate Admin DSC Values when it was filled
  */
 function addACAdminValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var acAdmin = FormManager.getActualValue('engineeringBo');
         if (acAdmin != '' && acAdmin != null) {
           if (acAdmin.length != 4) {
@@ -654,9 +654,9 @@ function addACAdminValidator() {
  * Validate ISIC Values CMR-1993
  */
 function addISICValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var isicCD = FormManager.getActualValue('isicCd');
         var custSubType = FormManager.getActualValue('custSubGrp');
@@ -668,7 +668,7 @@ function addISICValidator() {
         if (isicCD == '9500') {
           if (reqType == 'C') {
             if (((cntry == '806' || cntry == '846') && custSubType != 'PRIPE' && custSubType != 'IBMEM')
-                || ((cntry == '678' || cntry == '702') && subCntryCustType != 'IBM' && subCntryCustType != 'PRI'))
+              || ((cntry == '678' || cntry == '702') && subCntryCustType != 'IBM' && subCntryCustType != 'PRI'))
               return new ValidationResult(null, false, 'ISIC value 9500 is not allowed for other scenario than Private Person and IBM Employee');
           }
 
@@ -755,8 +755,8 @@ function setTaxCdValuesCROSS() {
   var countryUse = FormManager.getActualValue('countryUse');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var qParams = {
-    REQ_ID : reqId,
-    ADDR_TYPE : 'ZS01',
+    REQ_ID: reqId,
+    ADDR_TYPE: 'ZS01',
   };
   var _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
   var landCntry = _result.ret2;
@@ -807,7 +807,7 @@ function setAbbrevName(cntry, addressMode, saving, finalSave, force) {
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
     if (copyTypes != null && copyTypes.length > 0) {
-      copyTypes.forEach(function(input, i) {
+      copyTypes.forEach(function (input, i) {
         if (input.value == 'ZS01' && input.checked) {
           copyingToA = true;
         }
@@ -913,9 +913,9 @@ function handleMahcineModel() {
  * at) *Mailing - not flowing into RDC!!
  */
 function addNORDXAddressTypeValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
           return new ValidationResult(null, false, 'Mailing, Billing address are mandatory. Only one address for each address type should be defined when sending for processing.');
         }
@@ -971,9 +971,9 @@ function addNORDXAddressTypeValidator() {
 }
 
 function addNORDXInstallingShipping() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var shippingBool = true;
         var installBool = true;
         var eplBool = true;
@@ -1037,15 +1037,15 @@ function addNORDXInstallingShipping() {
 }
 
 function addAbbrevNmLengthValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var _abbrevName = FormManager.getActualValue('abbrevNm');
         if (reqType != 'U' && role == 'Requester' && _abbrevName.length > 22) {
           return new ValidationResult({
-            id : 'abbrevNm',
-            type : 'text',
-            name : 'abbrevNm'
+            id: 'abbrevNm',
+            type: 'text',
+            name: 'abbrevNm'
           }, false, 'The length for Abbreviated Name  should be 22 characters.');
         } else {
           return new ValidationResult(null, true);
@@ -1062,7 +1062,7 @@ function addISUClientMandatory() {
     return;
   }
   if (role == 'Processor') {
-    FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('isuCd', Validators.REQUIRED, ['ISU Code'], 'MAIN_IBM_TAB');
     // CREATCMR-4293
     // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
     // Tier' ], 'MAIN_IBM_TAB');
@@ -1116,7 +1116,7 @@ function hidePOBoxandHandleStreet() {
       if (_poBOXHandler[i] == null) {
         var poValue = FormManager.getActualValue('poBox');
         var phValue = FormManager.getActualValue('custPhone');
-        _poBOXHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function(value) {
+        _poBOXHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function (value) {
           setPOBOXandSteet(poValue);
           setPhone(phValue);
           disableLandCntry();
@@ -1131,7 +1131,7 @@ function hidePOBoxandHandleStreet() {
       var cntryRegion = FormManager.getActualValue('countryUse');
       // if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion ==
       // SysLoc.DENMARK)) {
-      FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
+      FormManager.addValidator('addrTxt', Validators.REQUIRED, ['Street'], '');
       // }
     } else {
       FormManager.show('POBox', 'poBox');
@@ -1147,21 +1147,21 @@ function hidePOBoxandHandleStreet() {
   }
   var cntryBalticsUpd = FormManager.getActualValue('countryUse')
   if (cntryBalticsUpd == '702EE' || cntryBalticsUpd == '702LT' || cntryBalticsUpd == '702LV') {
-    checkAndAddValidator('custNm1', LATINBALTICS, [ 'Customer Name' ]);
-    checkAndAddValidator('custNm2', LATINBALTICS, [ 'Customer Name Con\'t' ]);
-    checkAndAddValidator('custNm3', LATINBALTICS, [ 'Additional Info' ]);
-    checkAndAddValidator('custNm4', LATINBALTICS, [ 'Att. Person' ]);
-    checkAndAddValidator('city1', LATINBALTICS, [ 'City' ]);
-    checkAndAddValidator('addrTxt', LATINBALTICS, [ 'Street Address' ]);
-    checkAndAddValidator('addrTxt2', LATINBALTICS, [ 'Street Con\'t' ]);
-    checkAndAddValidator('custPhone', LATINBALTICS, [ 'Phone #' ]);
+    checkAndAddValidator('custNm1', LATINBALTICS, ['Customer Name']);
+    checkAndAddValidator('custNm2', LATINBALTICS, ['Customer Name Con\'t']);
+    checkAndAddValidator('custNm3', LATINBALTICS, ['Additional Info']);
+    checkAndAddValidator('custNm4', LATINBALTICS, ['Att. Person']);
+    checkAndAddValidator('city1', LATINBALTICS, ['City']);
+    checkAndAddValidator('addrTxt', LATINBALTICS, ['Street Address']);
+    checkAndAddValidator('addrTxt2', LATINBALTICS, ['Street Con\'t']);
+    checkAndAddValidator('custPhone', LATINBALTICS, ['Phone #']);
   }
 }
 
 function setPOBOXandSteet(value) {
   if ((FormManager.getField('addrType_ZI01') != undefined && FormManager.getField('addrType_ZI01').checked)
-      || (FormManager.getField('addrType_ZD01') != undefined && FormManager.getField('addrType_ZD01').checked)
-      || (FormManager.getField('addrType_ZS02') != undefined && FormManager.getField('addrType_ZS02').checked)) {
+    || (FormManager.getField('addrType_ZD01') != undefined && FormManager.getField('addrType_ZD01').checked)
+    || (FormManager.getField('addrType_ZS02') != undefined && FormManager.getField('addrType_ZS02').checked)) {
     // FormManager.disable('poBox');
     // FormManager.setValue('poBox', '');
     FormManager.hide('POBox', 'poBox');
@@ -1169,7 +1169,7 @@ function setPOBOXandSteet(value) {
     var cntryRegion = FormManager.getActualValue('countryUse');
     // if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion ==
     // SysLoc.DENMARK)) {
-    FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
+    FormManager.addValidator('addrTxt', Validators.REQUIRED, ['Street'], '');
     // }
 
   } else {
@@ -1180,14 +1180,14 @@ function setPOBOXandSteet(value) {
   }
   var cntryBalticsM = FormManager.getActualValue('countryUse')
   if (cntryBalticsM == '702EE' || cntryBalticsM == '702LT' || cntryBalticsM == '702LV') {
-    checkAndAddValidator('custNm1', LATINBALTICS, [ 'Customer Name' ]);
-    checkAndAddValidator('custNm2', LATINBALTICS, [ 'Customer Name Con\'t' ]);
-    checkAndAddValidator('custNm3', LATINBALTICS, [ 'Additional Info' ]);
-    checkAndAddValidator('custNm4', LATINBALTICS, [ 'Att. Person' ]);
-    checkAndAddValidator('city1', LATINBALTICS, [ 'City' ]);
-    checkAndAddValidator('addrTxt', LATINBALTICS, [ 'Street Address' ]);
-    checkAndAddValidator('addrTxt2', LATINBALTICS, [ 'Street Con\'t' ]);
-    checkAndAddValidator('custPhone', LATINBALTICS, [ 'Phone #' ]);
+    checkAndAddValidator('custNm1', LATINBALTICS, ['Customer Name']);
+    checkAndAddValidator('custNm2', LATINBALTICS, ['Customer Name Con\'t']);
+    checkAndAddValidator('custNm3', LATINBALTICS, ['Additional Info']);
+    checkAndAddValidator('custNm4', LATINBALTICS, ['Att. Person']);
+    checkAndAddValidator('city1', LATINBALTICS, ['City']);
+    checkAndAddValidator('addrTxt', LATINBALTICS, ['Street Address']);
+    checkAndAddValidator('addrTxt2', LATINBALTICS, ['Street Con\'t']);
+    checkAndAddValidator('custPhone', LATINBALTICS, ['Phone #']);
   }
 }
 
@@ -1206,9 +1206,9 @@ function validateNORDXCopy(addrType, arrayOfTargetTypes) {
 }
 
 function addAddressFieldValidators() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var addrTxt = FormManager.getActualValue('addrTxt');
         var addrTxt2 = FormManager.getActualValue('addrTxt2');
@@ -1235,9 +1235,9 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // city and postal code length
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var city = FormManager.getActualValue('city1');
         var postCd = FormManager.getActualValue('postCd');
 
@@ -1328,9 +1328,9 @@ function addAddressFieldValidators() {
   // }
   // };
   // })(), null, 'frmCMR_addressModal');
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var showError = false;
         var count = 0;
         if (FormManager.getActualValue('custNm2') != '') {
@@ -1400,9 +1400,9 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
   // Street and PO BOX DENMARK and FO
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if ((cntry == SysLoc.DENMARK || cntry == SysLoc.FINLAND) && (FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZP01')) {
@@ -1432,9 +1432,9 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // ALL NORDICS POBOX
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var cntry = FormManager.getActualValue('landCntry');
         if (cntry != '') {
@@ -1450,9 +1450,9 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
   // Additional info and Street Con't can't be filled at the same time
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var addrTxt2 = FormManager.getActualValue('addrTxt2');
         var additionalInfo = FormManager.getActualValue('custNm3');
@@ -1466,9 +1466,9 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
   // if both street con't and PO BOX are filled computed length must be 30
   // characters
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var addrtxt2Length = FormManager.getActualValue('addrTxt2').length;
         var poBoxLength = FormManager.getActualValue('poBox').length;
@@ -1612,9 +1612,9 @@ function updateAddrTypeList(cntry, addressMode) {
 }
 
 function addCrossBorderValidatorNORS() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var reqType = FormManager.getActualValue('reqType');
         // only Create type will be validated
         if (reqType != 'C') {
@@ -1635,7 +1635,7 @@ function addCrossBorderValidatorNORS() {
         if (cntryRegion.length > cntry.length) {
           var defaultcntry = cntryRegion.substring(3, 5);
           var result = cmr.query('VALIDATOR.CROSSBORDER', {
-            REQID : reqId
+            REQID: reqId
           });
           if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultcntry != '' && result.ret1 != defaultcntry && scenario != 'CRO') {
             return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultcntry + '\' for Non Cross-Border customers.');
@@ -1646,7 +1646,7 @@ function addCrossBorderValidatorNORS() {
         } else {
           var defaultLandCntry = FormManager.getActualValue('defaultLandedCountry');
           var result = cmr.query('VALIDATOR.CROSSBORDER', {
-            REQID : reqId
+            REQID: reqId
           });
           if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry && scenario != 'CROSS') {
             return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry + '\' for Non Cross-Border customers.');
@@ -1672,8 +1672,8 @@ function setAbbrvNmLoc() {
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
-      REQ_ID : reqId,
-      ADDR_TYPE : "ZS01",
+      REQ_ID: reqId,
+      ADDR_TYPE: "ZS01",
     };
   }
   var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
@@ -1815,7 +1815,7 @@ function doRemoveFromMachineList(machineTyp, machineSerialNo) {
 }
 
 function addPhoneValidatorNORDX() {
-  FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
+  FormManager.addValidator('custPhone', Validators.DIGIT, ['Phone #']);
 }
 
 /**
@@ -1836,10 +1836,10 @@ function setAddrDetailsForView(addrType, addrSeq) {
   var serialNo = [];
 
   var reqParam1 = {
-    _qall : 'Y',
-    REQ_ID : reqId,
-    ADDR_TYPE : addrType,
-    ADDR_SEQ : addrSeq,
+    _qall: 'Y',
+    REQ_ID: reqId,
+    ADDR_TYPE: addrType,
+    ADDR_SEQ: addrSeq,
   };
   var newResults = cmr.query('ZP02_GET_MACHINES', reqParam1);
   if (newResults != null && reqType != 'C') {
@@ -1860,9 +1860,9 @@ function addDataToAddrDetailsTbl(machType, serialNo) {
   var columnCount = 2;
   table.border = "1";
 
-  colHeader.push([ "Machine Type" ], [ "Serial Number" ]);
+  colHeader.push(["Machine Type"], ["Serial Number"]);
   for (var i = 0; i < machType.length; i++) {
-    machineDetails.push([ machType[i], serialNo[i] ]);
+    machineDetails.push([machType[i], serialNo[i]]);
   }
   var row = table.insertRow(-1);
   for (var i = 0; i < columnCount; i++) {
@@ -1893,8 +1893,8 @@ function _assignAddrDetailsValue(queryId, value) {
 }
 
 function norwayCustomVATValidator(cntry, tabName, formName, aType) {
-  return function() {
-    FormManager.addFormValidator((function() {
+  return function () {
+    FormManager.addFormValidator((function () {
       var landCntry = cntry;
       var addrType = aType;
       var role = null;
@@ -1902,7 +1902,7 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
         role = _pagemodel.userRole;
       }
       return {
-        validate : function() {
+        validate: function () {
           var reqType = FormManager.getActualValue('reqType');
           var vat = FormManager.getActualValue('vat');
 
@@ -1915,17 +1915,17 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
 
           if (role == 'Requester' && !vat.match("NO\\d{9}MVA")) {
             return new ValidationResult({
-              id : 'vat',
-              type : 'text',
-              name : 'vat'
+              id: 'vat',
+              type: 'text',
+              name: 'vat'
             }, false, 'Invalid format of VAT for NO. Format should be NO999999999MVA');
           }
 
           var zs01Cntry = landCntry;
 
           var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-            REQID : FormManager.getActualValue('reqId'),
-            TYPE : addrType ? addrType : 'ZS01'
+            REQID: FormManager.getActualValue('reqId'),
+            TYPE: addrType ? addrType : 'ZS01'
           });
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
@@ -1936,16 +1936,16 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
           if (result && !result.success) {
             if (result.errorPattern == null) {
               return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
+                id: 'vat',
+                type: 'text',
+                name: 'vat'
               }, false, result.errorMessage + '.');
             } else {
               var msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
               return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
+                id: 'vat',
+                type: 'text',
+                name: 'vat'
               }, false, msg);
             }
           } else {
@@ -1960,8 +1960,8 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
 function setPPSCEID() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
-  checkAndAddValidator('ppsceid', LATINNORDX, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-  checkAndAddValidator('ppsceid', lowercaseLatinValidatorNordx, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  checkAndAddValidator('ppsceid', LATINNORDX, ['PPS CEID'], 'MAIN_IBM_TAB');
+  checkAndAddValidator('ppsceid', lowercaseLatinValidatorNordx, ['PPS CEID'], 'MAIN_IBM_TAB');
   var role = null;
 
   if (typeof (_pagemodel) != 'undefined') {
@@ -1974,7 +1974,7 @@ function setPPSCEID() {
       } else {
         FormManager.enable('ppsceid');
       }
-      checkAndAddValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+      checkAndAddValidator('ppsceid', Validators.REQUIRED, ['PPS CEID'], 'MAIN_IBM_TAB');
     } else {
       FormManager.readOnly('ppsceid');
       FormManager.clearValue('ppsceid');
@@ -2028,7 +2028,7 @@ function filterCmrnoP() {
     FormManager.setValue('cmrNo', '');
   }
 
-  dojo.connect(FormManager.getField('cmrNo'), 'onChange', function(value) {
+  dojo.connect(FormManager.getField('cmrNo'), 'onChange', function (value) {
     if (value.length > 0 && value.substr(0, 1).toUpperCase() == 'P') {
       FormManager.setValue('cmrNo', '');
     }
@@ -2049,8 +2049,8 @@ function vatInfoBubbleShowAndHide() {
     var zs01Cntry = '';
 
     var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-      REQID : FormManager.getActualValue('reqId'),
-      TYPE : 'ZS01'
+      REQID: FormManager.getActualValue('reqId'),
+      TYPE: 'ZS01'
     });
 
     if (ret && ret.ret1 && ret.ret1 != '') {
@@ -2103,10 +2103,10 @@ function setCollectionCd() {
     if (reqType == 'C') {
       cmr.hideNode("container-CollectionCd");
       if (custSubGrp == 'CBINT' || custSubGrp == 'DKINT' || custSubGrp == 'FOINT' || custSubGrp == 'GLINT' || custSubGrp == 'ISINT' || custSubGrp == 'FIINT' || custSubGrp == 'EEINT'
-          || custSubGrp == 'LTINT' || custSubGrp == 'LVINT' || custSubGrp == 'INTER') {
+        || custSubGrp == 'LTINT' || custSubGrp == 'LVINT' || custSubGrp == 'INTER') {
         FormManager.setValue('collectionCd', '000INT');
       } else if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO' || custSubGrp == 'FIISO' || custSubGrp == 'EEISO'
-          || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+        || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
         FormManager.setValue('collectionCd', '0000SO');
       } else {
         FormManager.setValue('collectionCd', '');
@@ -2147,7 +2147,7 @@ function requestingLobOnChange() {
   }
 
   if (role == 'Requester') {
-    dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+    dojo.connect(FormManager.getField('requestingLob'), 'onChange', function (value) {
       var requestingLob = FormManager.getActualValue('requestingLob');
 
       if (requestingLob == 'AR' || requestingLob == 'SCT' || requestingLob == 'PRE') {
@@ -2182,9 +2182,9 @@ function requestingLobOnChange() {
 }
 
 function collectionCdValidation() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var collectionCd = FormManager.getActualValue('collectionCd');
         var alphanumeric = /^[0-9a-zA-Z]*$/;
         if (collectionCd == '') {
@@ -2192,9 +2192,9 @@ function collectionCdValidation() {
         } else {
           if (!collectionCd.match(alphanumeric)) {
             return new ValidationResult({
-              id : 'collectionCd',
-              type : 'text',
-              name : 'collectionCd'
+              id: 'collectionCd',
+              type: 'text',
+              name: 'collectionCd'
             }, false, 'The value of Collection Code is invalid, please use only alphanumeric characters.');
           }
           return new ValidationResult(null, true);
@@ -2224,15 +2224,15 @@ function setTaxCdValues() {
   if (cmrIssuingCntry == '678') {
     // Faroe Islands, Greenland
     if (countryUse == '678FO' || countryUse == '678GL') {
-      var taxCodeArray = [ '', '01', '14', '20', '24', '60', '61', '00', '25' ];
+      var taxCodeArray = ['', '01', '14', '20', '24', '60', '61', '00', '25'];
       FormManager.limitDropdownValues(field, taxCodeArray);
       FormManager.enable(field);
     } else if (countryUse == '678IS') { // Iceland
-      var taxCodeArray = [ '', '00', '24' ];
+      var taxCodeArray = ['', '00', '24'];
       FormManager.limitDropdownValues(field, taxCodeArray);
       FormManager.enable(field);
     } else { // Denmark
-      var taxCodeArray = [ '', '01', '14', '20', '24', '60', '61', '00', '25' ];
+      var taxCodeArray = ['', '01', '14', '20', '24', '60', '61', '00', '25'];
       FormManager.limitDropdownValues(field, taxCodeArray);
       FormManager.enable(field);
     }
@@ -2245,14 +2245,14 @@ function setTaxCdValuesByCustSubGrp() {
 
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
-  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
 
     var custSubGrp = FormManager.getActualValue('custSubGrp');
 
     // Denmark, Faroe Islands, Greenland
     if (custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS' || custSubGrp == 'DKPRI' || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'DK3PA' || custSubGrp == 'FOCOM'
-        || custSubGrp == 'FOBUS' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM' || custSubGrp == 'FOGOV' || custSubGrp == 'FO3PA' || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS'
-        || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM' || custSubGrp == 'GLGOV' || custSubGrp == 'GL3PA') {
+      || custSubGrp == 'FOBUS' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM' || custSubGrp == 'FOGOV' || custSubGrp == 'FO3PA' || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS'
+      || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM' || custSubGrp == 'GLGOV' || custSubGrp == 'GL3PA') {
       if (pageModelFlag == 'Y') {
         FormManager.setValue('taxCd1', '01');
       } else {
@@ -2270,7 +2270,7 @@ function setTaxCdValuesByCustSubGrp() {
 
     // Iceland
     if (custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISPRI' || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'IS3PA' || custSubGrp == 'ISINT'
-        || custSubGrp == 'ISISO') {
+      || custSubGrp == 'ISISO') {
       if (pageModelFlag == 'Y') {
         FormManager.setValue('taxCd1', '00');
       } else {
@@ -2298,8 +2298,8 @@ function setTaxCdValuesByCustSubGrp() {
 
     // Estonia, Lithuania, Latvia
     if (custSubGrp == 'EECOM' || custSubGrp == 'EEBUS' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'EE3PA' || custSubGrp == 'LTCOM'
-        || custSubGrp == 'LTBUS' || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV' || custSubGrp == 'LT3PA' || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS'
-        || custSubGrp == 'LVPRI' || custSubGrp == 'LVIBM' || custSubGrp == 'LVGOV' || custSubGrp == 'LV3PA') {
+      || custSubGrp == 'LTBUS' || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV' || custSubGrp == 'LT3PA' || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS'
+      || custSubGrp == 'LVPRI' || custSubGrp == 'LVIBM' || custSubGrp == 'LVGOV' || custSubGrp == 'LV3PA') {
       if (pageModelFlag == 'Y') {
         FormManager.setValue('taxCd1', '01');
       } else {
@@ -2364,8 +2364,8 @@ function setTaxCdValuesByCustSubGrp() {
 
       var reqId = FormManager.getActualValue('reqId');
       var reqParam = {
-        REQ_ID : reqId,
-        ADDR_TYPE : 'ZS01',
+        REQ_ID: reqId,
+        ADDR_TYPE: 'ZS01',
       };
       var _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', reqParam);
       var landCntry = _result.ret2;
@@ -2455,13 +2455,13 @@ function setKukalValuesByCustSubGrp() {
     FormManager.setValue('custClass', '');
 
     if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM' || custSubGrp == 'FICOM' || custSubGrp == 'EECOM'
-        || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
+      || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
       var requestingLob = FormManager.getActualValue('requestingLob');
       if (requestingLob == 'IGF' || requestingLob == 'SCT') {
         FormManager.enable('custClass');
 
         // Commercial
-        FormManager.limitDropdownValues(field, [ '11', '33', '35' ]);
+        FormManager.limitDropdownValues(field, ['11', '33', '35']);
 
         if (pageModelFlag1 == 'Y') {
           FormManager.setValue(field, '11');
@@ -2471,14 +2471,14 @@ function setKukalValuesByCustSubGrp() {
         }
       } else {
         FormManager.readOnly('custClass');
-        FormManager.limitDropdownValues(field, [ '11' ]);
+        FormManager.limitDropdownValues(field, ['11']);
         FormManager.setValue(field, '11');
       }
     } else if (custSubGrp == 'CBBUS' || custSubGrp == 'DKBUS' || custSubGrp == 'FOBUS' || custSubGrp == 'GLBUS' || custSubGrp == 'ISBUS' || custSubGrp == 'FIBUS' || custSubGrp == 'EEBUS'
-        || custSubGrp == 'LTBUS' || custSubGrp == 'LVBUS' || custSubGrp == 'BUSPR') {
+      || custSubGrp == 'LTBUS' || custSubGrp == 'LVBUS' || custSubGrp == 'BUSPR') {
 
       // Business Partner
-      FormManager.limitDropdownValues(field, [ '43', '45', '46' ]);
+      FormManager.limitDropdownValues(field, ['43', '45', '46']);
 
       if (pageModelFlag1 == 'Y') {
         FormManager.setValue(field, '45');
@@ -2487,64 +2487,64 @@ function setKukalValuesByCustSubGrp() {
         pageModelFlag1 = 'Y';
       }
     } else if (custSubGrp == 'DKGOV' || custSubGrp == 'FOGOV' || custSubGrp == 'GLGOV' || custSubGrp == 'ISGOV' || custSubGrp == 'FIGOV' || custSubGrp == 'EEGOV' || custSubGrp == 'LTGOV'
-        || custSubGrp == 'LVGOV' || custSubGrp == 'GOVRN') {
+      || custSubGrp == 'LVGOV' || custSubGrp == 'GOVRN') {
       // Government
-      FormManager.limitDropdownValues(field, [ '13' ]);
+      FormManager.limitDropdownValues(field, ['13']);
       FormManager.setValue(field, '13');
     } else if (custSubGrp == 'DKINT' || custSubGrp == 'FOINT' || custSubGrp == 'GLINT' || custSubGrp == 'ISINT' || custSubGrp == 'FIINT' || custSubGrp == 'EEINT' || custSubGrp == 'LTINT'
-        || custSubGrp == 'LVINT' || custSubGrp == 'INTER' || custSubGrp == 'CBINT') {
+      || custSubGrp == 'LVINT' || custSubGrp == 'INTER' || custSubGrp == 'CBINT') {
       // Internal
-      FormManager.limitDropdownValues(field, [ '81' ]);
+      FormManager.limitDropdownValues(field, ['81']);
       FormManager.setValue(field, '81');
     } else if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO' || custSubGrp == 'FIISO' || custSubGrp == 'EEISO'
-        || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+      || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
       // Internal SO
-      FormManager.limitDropdownValues(field, [ '85' ]);
+      FormManager.limitDropdownValues(field, ['85']);
       FormManager.setValue(field, '85');
     } else if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA' || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA'
-        || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+      || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
       // Third Party
-      FormManager.limitDropdownValues(field, [ '11' ]);
+      FormManager.limitDropdownValues(field, ['11']);
       FormManager.setValue(field, '11');
     } else if (custSubGrp == 'DKPRI' || custSubGrp == 'FOPRI' || custSubGrp == 'GLPRI' || custSubGrp == 'ISPRI' || custSubGrp == 'FIPRI' || custSubGrp == 'EEPRI' || custSubGrp == 'LTPRI'
-        || custSubGrp == 'LVPRI' || custSubGrp == 'PRIPE') {
+      || custSubGrp == 'LVPRI' || custSubGrp == 'PRIPE') {
       // Private person
-      FormManager.limitDropdownValues(field, [ '60' ]);
+      FormManager.limitDropdownValues(field, ['60']);
       FormManager.setValue(field, '60');
     } else if (custSubGrp == 'DKIBM' || custSubGrp == 'FOIBM' || custSubGrp == 'GLIBM' || custSubGrp == 'ISIBM' || custSubGrp == 'FIIBM' || custSubGrp == 'EEIBM' || custSubGrp == 'LTIBM'
-        || custSubGrp == 'LVIBM' || custSubGrp == 'IBMEM') {
+      || custSubGrp == 'LVIBM' || custSubGrp == 'IBMEM') {
       // IBM employee
-      FormManager.limitDropdownValues(field, [ '71' ]);
+      FormManager.limitDropdownValues(field, ['71']);
       FormManager.setValue(field, '71');
     } else {
       FormManager.setValue('custClass', '');
     }
 
   } else if (reqType == 'U') {
-    FormManager.limitDropdownValues(field, [ '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45',
-        '46', '47', '48', '49', '50', '51', '52', '60', '71', '72', '81', '82', '83', '84', '85', '88', '99' ]);
+    FormManager.limitDropdownValues(field, ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45',
+      '46', '47', '48', '49', '50', '51', '52', '60', '71', '72', '81', '82', '83', '84', '85', '88', '99']);
     FormManager.setValue(field, _pagemodel.custClass);
   }
 
-  dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+  dojo.connect(FormManager.getField('requestingLob'), 'onChange', function (value) {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var requestingLob = FormManager.getActualValue('requestingLob');
 
     if (requestingLob == 'IGF' || requestingLob == 'SCT') {
 
       if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM' || custSubGrp == 'FICOM' || custSubGrp == 'EECOM'
-          || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
+        || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
         FormManager.enable('custClass');
 
-        FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '11', '33', '35' ]);
+        FormManager.limitDropdownValues(FormManager.getField('custClass'), ['11', '33', '35']);
         FormManager.setValue('custClass', '11');
       }
     } else {
       if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM' || custSubGrp == 'FICOM' || custSubGrp == 'EECOM'
-          || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
+        || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
         FormManager.readOnly('custClass');
 
-        FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '11' ]);
+        FormManager.limitDropdownValues(FormManager.getField('custClass'), ['11']);
         FormManager.setValue('custClass', '11');
       }
     }
@@ -2556,19 +2556,19 @@ function setKukalValuesByCustSubGrp() {
 function setAbbreviatedNameValue() {
   var _reqId = FormManager.getActualValue('reqId');
 
-  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     kuklaShowAndHide();
 
     if (custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS' || custSubGrp == 'CBINT' || custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS' || custSubGrp == 'DKINT' || custSubGrp == 'DKPRI'
-        || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM' || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM'
-        || custSubGrp == 'FOGOV' || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLINT' || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM' || custSubGrp == 'GLGOV'
-        || custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISINT' || custSubGrp == 'ISPRI' || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'FICOM'
-        || custSubGrp == 'FIBUS' || custSubGrp == 'FIINT' || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV' || custSubGrp == 'EECOM' || custSubGrp == 'EEBUS'
-        || custSubGrp == 'EEINT' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'LTCOM' || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT'
-        || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV' || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI'
-        || custSubGrp == 'LVIBM' || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM'
-        || custSubGrp == 'GOVRN') {
+      || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM' || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM'
+      || custSubGrp == 'FOGOV' || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLINT' || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM' || custSubGrp == 'GLGOV'
+      || custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISINT' || custSubGrp == 'ISPRI' || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'FICOM'
+      || custSubGrp == 'FIBUS' || custSubGrp == 'FIINT' || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV' || custSubGrp == 'EECOM' || custSubGrp == 'EEBUS'
+      || custSubGrp == 'EEINT' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'LTCOM' || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT'
+      || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV' || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI'
+      || custSubGrp == 'LVIBM' || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM'
+      || custSubGrp == 'GOVRN') {
       var custNm = getAbbreviatedNameByAddrType(_reqId, "ZS01");
       if (custNm != "") {
         FormManager.setValue('abbrevNm', custNm.substring(0, 22));
@@ -2578,7 +2578,7 @@ function setAbbreviatedNameValue() {
     }
 
     if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA' || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA'
-        || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+      || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
       // var custNm1 = getAbbreviatedNameByAddrType(_reqId, "ZS01");
       var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
       if (custNm != "") {
@@ -2591,7 +2591,7 @@ function setAbbreviatedNameValue() {
     }
 
     if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO' || custSubGrp == 'FIISO' || custSubGrp == 'EEISO'
-        || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+      || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
       var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
       if (custNm != "") {
         FormManager.setValue('abbrevNm', "IBM c/o " + custNm.substring(0, 14));
@@ -2616,7 +2616,7 @@ function setAbbreviatedNameValue() {
   });
 
   var qParams = {
-    REQ_ID : _reqId
+    REQ_ID: _reqId
   };
 
   var role = null;
@@ -2636,8 +2636,8 @@ function setAbbreviatedNameValue() {
 function getAbbreviatedNameByAddrType(_reqId, _addrType) {
 
   var custNm1Params = {
-    REQ_ID : _reqId,
-    ADDR_TYPE : _addrType
+    REQ_ID: _reqId,
+    ADDR_TYPE: _addrType
   };
 
   var custNmResult = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', custNm1Params);
@@ -2673,26 +2673,26 @@ function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
 
       var custSubGrp = FormManager.getActualValue('custSubGrp');
       if (custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS' || custSubGrp == 'CBINT' || custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS' || custSubGrp == 'DKINT' || custSubGrp == 'DKPRI'
-          || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM' || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM'
-          || custSubGrp == 'FOGOV' || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLINT' || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM' || custSubGrp == 'GLGOV'
-          || custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISINT' || custSubGrp == 'ISPRI' || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'FICOM'
-          || custSubGrp == 'FIBUS' || custSubGrp == 'FIINT' || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV' || custSubGrp == 'EECOM' || custSubGrp == 'EEBUS'
-          || custSubGrp == 'EEINT' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'LTCOM' || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT'
-          || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV' || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI'
-          || custSubGrp == 'LVIBM' || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM'
-          || custSubGrp == 'GOVRN') {
+        || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM' || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM'
+        || custSubGrp == 'FOGOV' || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLINT' || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM' || custSubGrp == 'GLGOV'
+        || custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISINT' || custSubGrp == 'ISPRI' || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'FICOM'
+        || custSubGrp == 'FIBUS' || custSubGrp == 'FIINT' || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV' || custSubGrp == 'EECOM' || custSubGrp == 'EEBUS'
+        || custSubGrp == 'EEINT' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'LTCOM' || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT'
+        || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV' || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI'
+        || custSubGrp == 'LVIBM' || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM'
+        || custSubGrp == 'GOVRN') {
         if (addrType == 'ZS01') {
           FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
         }
       }
 
       if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA' || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA'
-          || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+        || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
         FormManager.setValue('abbrevNm', zi01CustNm.substring(0, 22));
       }
 
       if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO' || custSubGrp == 'FIISO' || custSubGrp == 'EEISO'
-          || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+        || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
         FormManager.setValue('abbrevNm', "IBM c/o " + zi01CustNm.substring(0, 14));
       }
 
@@ -2703,17 +2703,17 @@ function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
 
 // CREATCMR-1700
 function embargoCodeValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var embargoCd = FormManager.getActualValue('embargoCd');
         if (embargoCd == 'D' || embargoCd == 'J' || embargoCd == 'K' || embargoCd == '') {
           return new ValidationResult(null, true);
         } else {
           return new ValidationResult({
-            id : 'embargoCd',
-            type : 'text',
-            name : 'embargoCd'
+            id: 'embargoCd',
+            type: 'text',
+            name: 'embargoCd'
           }, false, 'Embargo Code value should be only \'D\', \'J\', \'K\' or blank.');
         }
       }
@@ -2747,7 +2747,7 @@ function setModeOfPaymentValue() {
         FormManager.readOnly('modeOfPayment');
       }
 
-      dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+      dojo.connect(FormManager.getField('requestingLob'), 'onChange', function (value) {
         var requestingLob = FormManager.getActualValue('requestingLob');
         if (requestingLob == 'AR' || requestingLob == 'IGF' || requestingLob == 'SCT') {
           FormManager.enable('modeOfPayment');
@@ -2767,22 +2767,22 @@ function setModeOfPaymentValue() {
 }
 
 function modeOfPaymentValidation() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var modeOfPayment = FormManager.getActualValue('modeOfPayment');
 
         var result = cmr.query('GET.ND.MODE_OF_PAYMENT_FOR_DATA_RDC', {
-          REQ_ID : FormManager.getActualValue('reqId')
+          REQ_ID: FormManager.getActualValue('reqId')
         });
 
         if (modeOfPayment == '') {
           // if (result.ref1 != '') {
           if (result && result.ret1) {
             return new ValidationResult({
-              id : 'modeOfPayment',
-              type : 'text',
-              name : 'modeOfPayment'
+              id: 'modeOfPayment',
+              type: 'text',
+              name: 'modeOfPayment'
             }, false, 'Payment Terms shouldn\'t be blanked.');
           }
           return;
@@ -2792,31 +2792,31 @@ function modeOfPaymentValidation() {
 
         if (!modeOfPayment.match(alphanumeric)) {
           return new ValidationResult({
-            id : 'modeOfPayment',
-            type : 'text',
-            name : 'modeOfPayment'
+            id: 'modeOfPayment',
+            type: 'text',
+            name: 'modeOfPayment'
           }, false, 'The value of Payment Terms is invalid, please use only alphanumeric characters.');
         }
 
-        var modeOfpaymentArray = [ 'A001', 'A002', 'A003', 'A004', 'A005', 'A006', 'A007', 'A008', 'A009', 'A010', 'A014', 'A015', 'A016', 'A017', 'A018', 'A019', 'A020', 'A021', 'A022', 'A023',
-            'A024', 'A025', 'A026', 'A027', 'A028', 'A029', 'A030', 'A031', 'A032', 'A033', 'A034', 'A035', 'A036', 'A037', 'A038', 'A039', 'A040', 'A043', 'A044', 'A045', 'A046', 'A047', 'A048',
-            'A049', 'A050', 'A051', 'A052', 'A053', 'A054', 'A055', 'A056', 'A075', 'A0XX', 'ACOD', 'AR15', 'AR1D', 'AR30', 'AR45', 'AR60', 'AR90', 'ARCC', 'ARPP', 'ARQT', 'AS10', 'AS11', 'AS12',
-            'AS13', 'AS14', 'AS15', 'BD00', 'BE00', 'BG00', 'BH00', 'BI00', 'BS00', 'BV00', 'CA00', 'CB00', 'CC00', 'CD00', 'CE00', 'CF00', 'CG00', 'CH00', 'CI00', 'CK00', 'CL00', 'CN00', 'CP00',
-            'CT00', 'CX00', 'CY00', 'DD00', 'DJ00', 'EB00', 'ED00', 'EF00', 'EH00', 'EJ00', 'EK00', 'EM00', 'ER00', 'FE00', 'FI00', 'FJ00', 'FK00', 'FL00', 'FV00', 'GA00', 'GC00', 'GD00', 'GE00',
-            'GF00', 'GG00', 'GH00', 'GH01', 'GI00', 'GJ00', 'GK00', 'GL00', 'GM00', 'GN00', 'GQ00', 'GR00', 'GS00', 'GT00', 'GU00', 'GV00', 'GZ00', 'HB00', 'HD00', 'IB00', 'IC00', 'ID00', 'IF00',
-            'IH00', 'IH01', 'II00', 'II30', 'IK00', 'IL00', 'IM00', 'IN00', 'IP00', 'IS00', 'IY00', 'JA00', 'JB00', 'JC00', 'KB00', 'KD00', 'KE00', 'LA01', 'LA02', 'LA03', 'LA04', 'LA05', 'LA06',
-            'MB00', 'MC00', 'MD00', 'NB00', 'NC00', 'ND00', 'NT08', 'NT30', 'NT45', 'NT60', 'P001', 'P003', 'P004', 'P015', 'P017', 'P021', 'P029', 'P037', 'P038', 'P039', 'P041', 'P042', 'P046',
-            'P100', 'P110', 'P120', 'P130', 'P140', 'P150', 'P190', 'P200', 'P210', 'P220', 'P230', 'P240', 'P250', 'P260', 'P263', 'P270', 'P300', 'P310', 'P400', 'P404', 'P700', 'P800', 'P900',
-            'P901', 'PA00', 'PA10', 'PB00', 'PC00', 'PD00', 'PE00', 'PF00', 'PG00', 'PH00', 'PI00', 'PI61', 'PI62', 'PJ00', 'PK00', 'PL00', 'PM00', 'PN00', 'PO00', 'PP00', 'PQ00', 'PR00', 'PS00',
-            'PT00', 'PU00', 'PV00', 'PW00', 'PY00', 'PZ00', 'RA65', 'RN01', 'RN03', 'T000', 'TB00', 'TC00', 'TD00', 'TE00', 'TF00', 'TG00', 'TH00', 'TI00', 'TJ00', 'TK00', 'TL00', 'TM00', 'TO00',
-            'TS00', 'TT00', 'WCFI', 'XA00', 'XC00', 'XG00', 'XK00', 'XL00', 'XM00', 'XP00', 'XR00', 'XS00', 'XT00', 'XU00', 'XV00', 'XW00', 'YA00', 'YB00', 'YB00', 'YC00', 'YC00', 'YC00', 'YD00',
-            'YD00', 'YD00', 'YE00', 'YE00', 'YE00', 'YE00', 'YG00', 'YG00', 'YG00', 'YG00', 'YG00', 'Z01S', 'ZSDD', 'ZZI1' ];
+        var modeOfpaymentArray = ['A001', 'A002', 'A003', 'A004', 'A005', 'A006', 'A007', 'A008', 'A009', 'A010', 'A014', 'A015', 'A016', 'A017', 'A018', 'A019', 'A020', 'A021', 'A022', 'A023',
+          'A024', 'A025', 'A026', 'A027', 'A028', 'A029', 'A030', 'A031', 'A032', 'A033', 'A034', 'A035', 'A036', 'A037', 'A038', 'A039', 'A040', 'A043', 'A044', 'A045', 'A046', 'A047', 'A048',
+          'A049', 'A050', 'A051', 'A052', 'A053', 'A054', 'A055', 'A056', 'A075', 'A0XX', 'ACOD', 'AR15', 'AR1D', 'AR30', 'AR45', 'AR60', 'AR90', 'ARCC', 'ARPP', 'ARQT', 'AS10', 'AS11', 'AS12',
+          'AS13', 'AS14', 'AS15', 'BD00', 'BE00', 'BG00', 'BH00', 'BI00', 'BS00', 'BV00', 'CA00', 'CB00', 'CC00', 'CD00', 'CE00', 'CF00', 'CG00', 'CH00', 'CI00', 'CK00', 'CL00', 'CN00', 'CP00',
+          'CT00', 'CX00', 'CY00', 'DD00', 'DJ00', 'EB00', 'ED00', 'EF00', 'EH00', 'EJ00', 'EK00', 'EM00', 'ER00', 'FE00', 'FI00', 'FJ00', 'FK00', 'FL00', 'FV00', 'GA00', 'GC00', 'GD00', 'GE00',
+          'GF00', 'GG00', 'GH00', 'GH01', 'GI00', 'GJ00', 'GK00', 'GL00', 'GM00', 'GN00', 'GQ00', 'GR00', 'GS00', 'GT00', 'GU00', 'GV00', 'GZ00', 'HB00', 'HD00', 'IB00', 'IC00', 'ID00', 'IF00',
+          'IH00', 'IH01', 'II00', 'II30', 'IK00', 'IL00', 'IM00', 'IN00', 'IP00', 'IS00', 'IY00', 'JA00', 'JB00', 'JC00', 'KB00', 'KD00', 'KE00', 'LA01', 'LA02', 'LA03', 'LA04', 'LA05', 'LA06',
+          'MB00', 'MC00', 'MD00', 'NB00', 'NC00', 'ND00', 'NT08', 'NT30', 'NT45', 'NT60', 'P001', 'P003', 'P004', 'P015', 'P017', 'P021', 'P029', 'P037', 'P038', 'P039', 'P041', 'P042', 'P046',
+          'P100', 'P110', 'P120', 'P130', 'P140', 'P150', 'P190', 'P200', 'P210', 'P220', 'P230', 'P240', 'P250', 'P260', 'P263', 'P270', 'P300', 'P310', 'P400', 'P404', 'P700', 'P800', 'P900',
+          'P901', 'PA00', 'PA10', 'PB00', 'PC00', 'PD00', 'PE00', 'PF00', 'PG00', 'PH00', 'PI00', 'PI61', 'PI62', 'PJ00', 'PK00', 'PL00', 'PM00', 'PN00', 'PO00', 'PP00', 'PQ00', 'PR00', 'PS00',
+          'PT00', 'PU00', 'PV00', 'PW00', 'PY00', 'PZ00', 'RA65', 'RN01', 'RN03', 'T000', 'TB00', 'TC00', 'TD00', 'TE00', 'TF00', 'TG00', 'TH00', 'TI00', 'TJ00', 'TK00', 'TL00', 'TM00', 'TO00',
+          'TS00', 'TT00', 'WCFI', 'XA00', 'XC00', 'XG00', 'XK00', 'XL00', 'XM00', 'XP00', 'XR00', 'XS00', 'XT00', 'XU00', 'XV00', 'XW00', 'YA00', 'YB00', 'YB00', 'YC00', 'YC00', 'YC00', 'YD00',
+          'YD00', 'YD00', 'YE00', 'YE00', 'YE00', 'YE00', 'YG00', 'YG00', 'YG00', 'YG00', 'YG00', 'Z01S', 'ZSDD', 'ZZI1'];
 
         if (!modeOfpaymentArray.includes(modeOfPayment)) {
           return new ValidationResult({
-            id : 'modeOfPayment',
-            type : 'text',
-            name : 'modeOfPayment'
+            id: 'modeOfPayment',
+            type: 'text',
+            name: 'modeOfPayment'
           }, false, 'The value of Payment Terms is invalid.');
         }
 
@@ -2846,9 +2846,9 @@ function settingForProcessor() {
 }
 
 function addCmrNoValidatorForNordx() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cmrNo = FormManager.getActualValue('cmrNo');
@@ -2856,92 +2856,92 @@ function addCmrNoValidatorForNordx() {
         if (cmrNo != '' && cmrNo != null) {
           if (cmrNo.length != 6) {
             return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
+              id: 'cmrNo',
+              type: 'text',
+              name: 'cmrNo'
             }, false, 'CMR Number should be exactly 6 digits long.');
           } else if (isNaN(cmrNo)) {
             return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
+              id: 'cmrNo',
+              type: 'text',
+              name: 'cmrNo'
             }, false, 'CMR Number should be only numbers.');
           } else if (cmrNo == "000000") {
             return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
+              id: 'cmrNo',
+              type: 'text',
+              name: 'cmrNo'
             }, false, 'CMR Number should not be 000000.');
           } else if (cmrNo != '' && custSubType != '') {
             if (custSubType == 'CBINT' || custSubType == 'DKINT' || custSubType == 'FOINT' || custSubType == 'GLINT' || custSubType == 'ISINT' || custSubType == 'FIINT' || custSubType == 'EEINT'
-                || custSubType == 'LTINT' || custSubType == 'LVINT' || custSubType == 'INTER') {
+              || custSubType == 'LTINT' || custSubType == 'LVINT' || custSubType == 'INTER') {
               if (!cmrNo.startsWith('99')) {
                 return new ValidationResult({
-                  id : 'cmrNo',
-                  type : 'text',
-                  name : 'cmrNo'
+                  id: 'cmrNo',
+                  type: 'text',
+                  name: 'cmrNo'
                 }, false, 'CMR Number should be in 99XXXX format for Internal scenarios.');
               }
               if (cmrNo.startsWith('997')) {
                 return new ValidationResult({
-                  id : 'cmrNo',
-                  type : 'text',
-                  name : 'cmrNo'
+                  id: 'cmrNo',
+                  type: 'text',
+                  name: 'cmrNo'
                 }, false, '997XXX range can be used only for Internal SO scenario. For Internal Scenario, please use CMR from any other 99XXXX range.');
               }
             } else if (custSubType == 'CBISO' || custSubType == 'DKISO' || custSubType == 'FOISO' || custSubType == 'GLISO' || custSubType == 'ISISO' || custSubType == 'FIISO'
-                || custSubType == 'EEISO' || custSubType == 'LTISO' || custSubType == 'LVISO' || custSubType == 'INTSO') {
+              || custSubType == 'EEISO' || custSubType == 'LTISO' || custSubType == 'LVISO' || custSubType == 'INTSO') {
               if (!cmrNo.startsWith('997')) {
                 return new ValidationResult({
-                  id : 'cmrNo',
-                  type : 'text',
-                  name : 'cmrNo'
+                  id: 'cmrNo',
+                  type: 'text',
+                  name: 'cmrNo'
                 }, false, 'CMR Number should be in 997XXX format for Internal SO scenarios.');
               }
             } else {
               if (cmrNo.startsWith('99')) {
                 return new ValidationResult({
-                  id : 'cmrNo',
-                  type : 'text',
-                  name : 'cmrNo'
+                  id: 'cmrNo',
+                  type: 'text',
+                  name: 'cmrNo'
                 }, false, 'Only Internal Scenarios can be assigned CMRs from 99XXXX range.');
               }
             }
 
             var results1 = cmr.query('GET.CMR_BY_CNTRY_CUSNO_SAPR3', {
-              CMRNO : cmrNo,
-              CNTRY : cntry,
-              MANDT : cmr.MANDT
+              CMRNO: cmrNo,
+              CNTRY: cntry,
+              MANDT: cmr.MANDT
             });
 
             var results2 = cmr.query('GET.CHECK_EXISTS_CMR_NO', {
-              CMR_NO : cmrNo,
-              CNTRY : cntry
+              CMR_NO: cmrNo,
+              CNTRY: cntry
             });
 
             if (results1.ret1 != null) {
               return new ValidationResult({
-                id : 'cmrNo',
-                type : 'text',
-                name : 'cmrNo'
+                id: 'cmrNo',
+                type: 'text',
+                name: 'cmrNo'
               }, false, 'The CMR Number already exists.');
             } else if (results2.ret1 != null) {
               return new ValidationResult({
-                id : 'cmrNo',
-                type : 'text',
-                name : 'cmrNo'
+                id: 'cmrNo',
+                type: 'text',
+                name: 'cmrNo'
               }, false, 'The CMR Number already exists.');
             } else {
               results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
-                COUNTRY : cntry,
-                CMR_NO : cmrNo,
-                MANDT : cmr.MANDT
+                COUNTRY: cntry,
+                CMR_NO: cmrNo,
+                MANDT: cmr.MANDT
               });
               if (results && results.ret1) {
                 return new ValidationResult({
-                  id : 'cmrNo',
-                  type : 'text',
-                  name : 'cmrNo'
+                  id: 'cmrNo',
+                  type: 'text',
+                  name: 'cmrNo'
                 }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
               }
             }
@@ -2958,7 +2958,7 @@ function addCmrNoValidatorForNordx() {
 // CREATCMR-1656
 function setCapRecordActivate() {
   var params = {
-    USERID : _pagemodel.requesterId
+    USERID: _pagemodel.requesterId
   };
 
   var result1 = cmr.query('GET.ND.USER_ROLE', params);
@@ -3008,7 +3008,7 @@ function setCustPrefLangByCountry() {
   var reqId = FormManager.getActualValue('reqId');
   var custPrefLang = '';
   var results = cmr.query('GET.DATA_CUST_PREF_LANG_FOR_NORDX', {
-    REQ_ID : reqId
+    REQ_ID: reqId
   });
 
   if (results != null && results != undefined && results.ret1 != '') {
@@ -3018,7 +3018,7 @@ function setCustPrefLangByCountry() {
   // Denmark, Faroe Islands, Greenland, Iceland
   if (cmrIssuingCntry == '678') {
     if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL' || countryUse == '678IS') {
-      FormManager.limitDropdownValues(field, [ 'K', 'E' ]);
+      FormManager.limitDropdownValues(field, ['K', 'E']);
       if (reqType == 'U') {
         if (typeof (_pagemodel) != 'undefined') {
           // CREATCMR-5437
@@ -3034,7 +3034,7 @@ function setCustPrefLangByCountry() {
   if (cmrIssuingCntry == '702') {
     if (countryUse == '702') {
       // Finland
-      FormManager.limitDropdownValues(field, [ 'U', 'V', 'E' ]);
+      FormManager.limitDropdownValues(field, ['U', 'V', 'E']);
 
       if (reqType == 'U') {
         if (typeof (_pagemodel) != 'undefined') {
@@ -3048,7 +3048,7 @@ function setCustPrefLangByCountry() {
       FormManager.setValue(field, _pagemodel.custPrefLang == null ? 'U' : _pagemodel.custPrefLang);
     } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
       // Estonia, Lithuania, Latvia
-      FormManager.limitDropdownValues(field, [ 'U', 'V', 'E' ]);
+      FormManager.limitDropdownValues(field, ['U', 'V', 'E']);
 
       if (reqType == 'U') {
         if (typeof (_pagemodel) != 'undefined') {
@@ -3065,7 +3065,7 @@ function setCustPrefLangByCountry() {
 
   // Norway
   if (cmrIssuingCntry == '806') {
-    FormManager.limitDropdownValues(field, [ 'O', 'E' ]);
+    FormManager.limitDropdownValues(field, ['O', 'E']);
 
     if (reqType == 'U') {
       if (typeof (_pagemodel) != 'undefined') {
@@ -3081,7 +3081,7 @@ function setCustPrefLangByCountry() {
 
   // Sweden
   if (cmrIssuingCntry == '846') {
-    FormManager.limitDropdownValues(field, [ 'V', 'E' ]);
+    FormManager.limitDropdownValues(field, ['V', 'E']);
 
     if (reqType == 'U') {
       if (typeof (_pagemodel) != 'undefined') {
@@ -3152,7 +3152,7 @@ function setSensitiveFlag() {
       FormManager.resetValidations('sensitiveFlag');
     } else if (role == 'Processor') {
       FormManager.enable('sensitiveFlag');
-      FormManager.addValidator('sensitiveFlag', Validators.REQUIRED, [ 'Sensitive Flag' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('sensitiveFlag', Validators.REQUIRED, ['Sensitive Flag'], 'MAIN_CUST_TAB');
     }
   } else if (reqType == 'U') {
     FormManager.resetValidations('sensitiveFlag');
@@ -3231,29 +3231,29 @@ function setSalesRepValues(value) {
         if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL') {
           if (isuAndCtc == '34Q') {
             // Denmark, Faroe Islands, Greenland
-            var T0001375 = [ '2211', '2212', '2213', '2219', '2221', '2222', '2230', '4010', '4020', '4030', '4100', '4888', '6420', '7413', '7430', 
+            var T0001375 = ['2211', '2212', '2213', '2219', '2221', '2222', '2230', '4010', '4020', '4030', '4100', '4888', '6420', '7413', '7430',
               '7700', '7709', '7717', '9000', '9111', '9112', '9120', '9191', '9192', '9199', '9211', '9212', '9213', '9214', '9219', '9220', '9232',
-              '9233', '9241', '9249', '9801', '9811', '9821' ];
-            var T0006880 = [ '0111', '0112', '0113', '0121', '0122', '0130', '0140', '0150', '0200', '0501', '0502', '1511', '1512', '1513', '1514',
+              '9233', '9241', '9249', '9801', '9811', '9821'];
+            var T0006880 = ['0111', '0112', '0113', '0121', '0122', '0130', '0140', '0150', '0200', '0501', '0502', '1511', '1512', '1513', '1514',
               '1520', '1531', '1532', '1533', '1541', '1542', '1543', '1544', '1549', '1551', '1552', '1553', '1554', '1600', '1721', '1730', '1810',
               '1820', '1911', '1912', '1920', '2424', '4550', '5020', '5030', '5110', '5121', '5122', '5131', '5139', '5142', '5143', '5149', '5151',
               '5152', '5159', '5190', '5211', '5219', '5220', '5231', '5232', '5233', '5234', '5239', '5240', '5251', '5252', '5259', '5260', '5510',
               '5520', '6010', '6021', '6022', '6023', '6110', '6120', '6210', '6220', '6301', '6302', '6303', '6304', '6309', '6411', '6412', '7111',
               '7112', '7113', '7121', '7122', '7129', '7130', '7310', '7422', '7491', '7492', '7493', '7494', '7495', '7499', '7703', '7714', '7716',
-              '7719', '8520', '8531', '9301', '9302', '9303', '9309', '9500', '9804', '9812', '9820' ];
-            var T0006881 = [ '1010', '1020', '1030', '1110', '1120', '1200', '1310', '1320', '1410', '1421', '1422', '1429', '1711', '1712', '1722',
+              '7719', '8520', '8531', '9301', '9302', '9303', '9309', '9500', '9804', '9812', '9820'];
+            var T0006881 = ['1010', '1020', '1030', '1110', '1120', '1200', '1310', '1320', '1410', '1421', '1422', '1429', '1711', '1712', '1722',
               '1723', '1729', '2010', '2021', '2022', '2023', '2029', '2101', '2102', '2109', '2310', '2320', '2330', '2411', '2412', '2413', '2421',
               '2422', '2429', '2430', '2511', '2519', '2520', '2610', '2691', '2692', '2693', '2694', '2695', '2696', '2699', '2710', '2720', '2731',
               '2732', '2811', '2812', '2813', '2891', '2892', '2893', '2899', '2911', '2912', '2913', '2914', '2915', '2919', '2921', '2922', '2923',
               '2924', '2925', '2926', '2927', '2929', '2930', '3000', '3110', '3120', '3130', '3140', '3150', '3190', '3210', '3220', '3230', '3311',
               '3312', '3313', '3320', '3330', '3410', '3420', '3430', '3511', '3512', '3520', '3530', '3591', '3592', '3599', '3610', '3691', '3692',
               '3693', '3694', '3699', '3710', '3720', '4510', '4520', '4530', '4540', '5010', '5040', '5050', '5141', '6030', '7421', '7708', '7710',
-              '7711', '7713', '7718', '9813', '9816', '9817', '9822' ];
-            var T0006644 = [ '2423', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '7721',
-              '8010', '8021', '8022', '8030', '8090', '8511', '8512', '8519', '8532', '9231', '9807', '9808', '9818', '9900' ];
-            var T0006607 = [ '7123', '7210', '7221', '7229', '7230', '7240', '7250', '7290', '7411', '7412', '7414', '7701', '7702', '9802' ];
-            var T0011618 = [ '6511', '6519', '6591', '6592', '6599', '6601', '6602', '6603', '6711', '6712', '6719', '6720', '7010', '7020', '7705',
-              '7712', '7715', '9806', '9814', '9819' ];
+              '7711', '7713', '7718', '9813', '9816', '9817', '9822'];
+            var T0006644 = ['2423', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '7721',
+              '8010', '8021', '8022', '8030', '8090', '8511', '8512', '8519', '8532', '9231', '9807', '9808', '9818', '9900'];
+            var T0006607 = ['7123', '7210', '7221', '7229', '7230', '7240', '7250', '7290', '7411', '7412', '7414', '7701', '7702', '9802'];
+            var T0011618 = ['6511', '6519', '6591', '6592', '6599', '6601', '6602', '6603', '6711', '6712', '6719', '6720', '7010', '7020', '7705',
+              '7712', '7715', '9806', '9814', '9819'];
 
             if (ind != '') {
               if (T0001375.includes(isicCd)) {
@@ -3307,28 +3307,28 @@ function setSalesRepValues(value) {
         if (countryUse == '702') {
           if (isuAndCtc == '34Q') {
             var searchTermDict = {
-                'A' : 'T0007864',
-                'B' : 'T0006609',
-                'C' : 'T0011655',
-                'D' : 'T0011660',
-                'E' : 'T0011661',
-                'F' : 'T0007561',
-                'G' : 'T0006949',
-                'H' : 'T0011651',
-                'J' : 'T0011656',
-                'K' : 'T0011654',
-                'L' : 'T0011662',
-                'M' : 'T0006974',
-                'N' : 'T0011652',
-                'P' : 'T0011659',
-                'R' : 'T0011657',
-                'S' : 'T0011648',
-                'T' : 'T0011658',
-                'U' : 'T0011663',
-                'V' : 'T0011649',
-                'W' : 'T0001379',
-                'X' : 'T0011653',
-                'Y' : 'T0011650'
+              'A': 'T0007864',
+              'B': 'T0006609',
+              'C': 'T0011655',
+              'D': 'T0011660',
+              'E': 'T0011661',
+              'F': 'T0007561',
+              'G': 'T0006949',
+              'H': 'T0011651',
+              'J': 'T0011656',
+              'K': 'T0011654',
+              'L': 'T0011662',
+              'M': 'T0006974',
+              'N': 'T0011652',
+              'P': 'T0011659',
+              'R': 'T0011657',
+              'S': 'T0011648',
+              'T': 'T0011658',
+              'U': 'T0011663',
+              'V': 'T0011649',
+              'W': 'T0001379',
+              'X': 'T0011653',
+              'Y': 'T0011650'
             };
 
             if (ind != '' && searchTermDict[ind] != undefined) {
@@ -3391,28 +3391,28 @@ function setSalesRepValues(value) {
 
         if (isuAndCtc == '34Q') {
           var searchTermDict = {
-              'A' : 'T0011597',
-              'B' : 'T0006611',
-              'C' : 'T0011598',
-              'D' : 'T0011599',
-              'E' : 'T0011613',
-              'F' : 'T0011603',
-              'G' : 'T0011615',
-              'H' : 'T0011616',
-              'J' : 'T0011608',
-              'K' : 'T0011596',
-              'L' : 'T0011610',
-              'M' : 'T0011611',
-              'N' : 'T0011606',
-              'P' : 'T0011609',
-              'R' : 'T0011601',
-              'S' : 'T0011604',
-              'T' : 'T0011602',
-              'U' : 'T0011595',
-              'V' : 'T0011607',
-              'W' : 'T0001383',
-              'X' : 'T0001383',
-              'Y' : 'T0011614'
+            'A': 'T0011597',
+            'B': 'T0006611',
+            'C': 'T0011598',
+            'D': 'T0011599',
+            'E': 'T0011613',
+            'F': 'T0011603',
+            'G': 'T0011615',
+            'H': 'T0011616',
+            'J': 'T0011608',
+            'K': 'T0011596',
+            'L': 'T0011610',
+            'M': 'T0011611',
+            'N': 'T0011606',
+            'P': 'T0011609',
+            'R': 'T0011601',
+            'S': 'T0011604',
+            'T': 'T0011602',
+            'U': 'T0011595',
+            'V': 'T0011607',
+            'W': 'T0001383',
+            'X': 'T0001383',
+            'Y': 'T0011614'
           };
 
           if (ind != '' && searchTermDict[ind] != undefined) {
@@ -3432,28 +3432,28 @@ function setSalesRepValues(value) {
       }
       if (cmrIssuingCntry == '846') {
         var searchTermDict = {
-            'A' : 'T0007593',
-            'B' : 'T0006613',
-            'C' : 'T0011632',
-            'D' : 'T0011638',
-            'E' : 'T0011639',
-            'F' : 'T0011636',
-            'G' : 'T0006888',
-            'H' : 'T0011627',
-            'J' : 'T0011633',
-            'K' : 'T0011631',
-            'L' : 'T0011640',
-            'M' : 'T0011628',
-            'N' : 'T0011629',
-            'P' : 'T0011637',
-            'R' : 'T0011634',
-            'S' : 'T0006966',
-            'T' : 'T0011635',
-            'U' : 'T0011641',
-            'V' : 'T0011625',
-            'W' : 'T0001387',
-            'X' : 'T0011630',
-            'Y' : 'T0011626'
+          'A': 'T0007593',
+          'B': 'T0006613',
+          'C': 'T0011632',
+          'D': 'T0011638',
+          'E': 'T0011639',
+          'F': 'T0011636',
+          'G': 'T0006888',
+          'H': 'T0011627',
+          'J': 'T0011633',
+          'K': 'T0011631',
+          'L': 'T0011640',
+          'M': 'T0011628',
+          'N': 'T0011629',
+          'P': 'T0011637',
+          'R': 'T0011634',
+          'S': 'T0006966',
+          'T': 'T0011635',
+          'U': 'T0011641',
+          'V': 'T0011625',
+          'W': 'T0001387',
+          'X': 'T0011630',
+          'Y': 'T0011626'
         };
         if (reqType == 'C') {
           FormManager.setValue('repTeamMemberNo', 'NOREP0');
@@ -3504,11 +3504,11 @@ function lockSalesRepAndSortl() {
     var clientTierCode = FormManager.getActualValue('clientTier');
     var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
     var isuCtc = isuCode.concat(clientTierCode);
-    var balticsBlockScenarios = [ 'EEBUS', 'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM' ];
+    var balticsBlockScenarios = ['EEBUS', 'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM'];
 
-    var lockCustSugGrpForProcessor = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
-        'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
-        'EEPRI' ];
+    var lockCustSugGrpForProcessor = ['CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS',
+      'EEINT', 'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT', 'PRIPE', 'DKPRI', 'FOPRI', 'GLPRI', 'ISPRI', 'FIPRI', 'LTPRI', 'LVPRI',
+      'EEPRI'];
     if (role == 'PROCESSOR') {
       if (lockCustSugGrpForProcessor.includes(custSubGrp)) {
         FormManager.readOnly('searchTerm');
@@ -3538,14 +3538,14 @@ function setSortlLength() {
 }
 
 function searchTermValidation() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var searchTerm = FormManager.getActualValue('searchTerm');
         var alphanumeric = /^[0-9a-zA-Z]*$/;
 
         if (_sortlHandler == null) {
-          _sortlHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
+          _sortlHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function (value) {
             console.log('_SortlHandler');
             sortlFlag = true;
           });
@@ -3556,9 +3556,9 @@ function searchTermValidation() {
         } else {
           if (!searchTerm.match(alphanumeric)) {
             return new ValidationResult({
-              id : 'searchTerm',
-              type : 'text',
-              name : 'searchTerm'
+              id: 'searchTerm',
+              type: 'text',
+              name: 'searchTerm'
             }, false, 'The value of SORTL is invalid, please use only alphanumeric characters.');
           }
 
@@ -3575,18 +3575,18 @@ function searchTermValidation() {
             if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
               if (searchTerm.length != 8 && sortlFlag) {
                 return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
+                  id: 'searchTerm',
+                  type: 'text',
+                  name: 'searchTerm'
                 }, false, 'SORTL should be exactly 8 digits long.');
               }
               return new ValidationResult(null, true);
             } else {
               if (searchTerm.length != 8) {
                 return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
+                  id: 'searchTerm',
+                  type: 'text',
+                  name: 'searchTerm'
                 }, false, 'SORTL should be exactly 8 digits long.');
               }
               return new ValidationResult(null, true);
@@ -3605,9 +3605,9 @@ function hideACAdminDSC() {
 // CREATCMR-2674
 
 function checkCmrUpdateBeforeImport() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var cmrNo = FormManager.getActualValue('cmrNo');
@@ -3622,9 +3622,9 @@ function checkCmrUpdateBeforeImport() {
         }
 
         var resultsCC = cmr.query('GETUPTSRDC', {
-          COUNTRY : cntry,
-          CMRNO : cmrNo,
-          MANDT : cmr.MANDT
+          COUNTRY: cntry,
+          CMRNO: cmrNo,
+          MANDT: cmr.MANDT
         });
 
         if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
@@ -3633,7 +3633,7 @@ function checkCmrUpdateBeforeImport() {
         }
 
         var results11 = cmr.query('GETUPTSADDR', {
-          REQ_ID : reqId
+          REQ_ID: reqId
         });
         if (results11 != null && results11 != undefined && results11.ret1 != '') {
           lastupts = results11.ret1;
@@ -3660,7 +3660,7 @@ function lockIBMTabFields() {
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var subGrpBPCds = [ 'BUSPR', 'CBBUS', 'DKBUS', 'ISBUS', 'FOBUS', 'GLBUS', 'FIBUS', 'LTBUS', 'LVBUS', 'EEBUS' ];
+  var subGrpBPCds = ['BUSPR', 'CBBUS', 'DKBUS', 'ISBUS', 'FOBUS', 'GLBUS', 'FIBUS', 'LTBUS', 'LVBUS', 'EEBUS'];
 
   reqType = FormManager.getActualValue('reqType');
 
@@ -3688,7 +3688,7 @@ function setCTCValues() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   // Business Partner
-  var custSubGrpForBusinessPartner = [ 'BUSPR', 'CBBUS', 'DKBUS', 'EEBUS', 'FIBUS', 'FOBUS', 'GLBUS', 'ISBUS', 'LTBUS', 'LVBUS' ];
+  var custSubGrpForBusinessPartner = ['BUSPR', 'CBBUS', 'DKBUS', 'EEBUS', 'FIBUS', 'FOBUS', 'GLBUS', 'ISBUS', 'LTBUS', 'LVBUS'];
 
   // Business Partner
   if (custSubGrpForBusinessPartner.includes(custSubGrp)) {
@@ -3700,8 +3700,8 @@ function setCTCValues() {
   }
 
   // Internal
-  var custSubGrpForInternalIbme = [ 'DKINT', 'DKIBM', 'FOINT', 'FOIBM', 'ISIBM', 'ISINT', 'GLINT', 'GLIBM', 'FIINT', 'FIIBM', 'EEINT', 'EEIBM', 'LTINT', 'LTIBM', 'LVINT', 'LVIBM', 'INTER', 'IBMEM',
-      'CBINT' ];
+  var custSubGrpForInternalIbme = ['DKINT', 'DKIBM', 'FOINT', 'FOIBM', 'ISIBM', 'ISINT', 'GLINT', 'GLIBM', 'FIINT', 'FIIBM', 'EEINT', 'EEIBM', 'LTINT', 'LTIBM', 'LVINT', 'LVIBM', 'INTER', 'IBMEM',
+    'CBINT'];
 
   // Internal
   if (custSubGrpForInternalIbme.includes(custSubGrp)) {
@@ -3714,9 +3714,9 @@ function setCTCValues() {
 }
 
 function searchTermCodeValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var reqTyp = FormManager.getActualValue('reqType');
         var isuCode = FormManager.getActualValue('isuCd');
         var clientTierCode = FormManager.getActualValue('clientTier');
@@ -3727,70 +3727,74 @@ function searchTermCodeValidator() {
         var isuCtc = isuCode.concat(clientTierCode);
         var subIndustry = FormManager.getActualValue('subIndustryCd');
         var ind = subIndustry.substring(0, 1);
-        
+
         if (!searchTerm) {
           return;
         }
 
-        var scenariosToBlock = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT',
-            'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT' ];
+        if (!searchTerm) {
+          return;
+        }
+
+        var scenariosToBlock = ['CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT',
+          'EEIBM', 'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT'];
 
         var accSeq_678 = {
-          '34Q' : [ 'T0006607', 'T0006644', 'T0006880', 'T0006881', 'T0001375', 'T0011618', 'T0001376' ],
-          '36Y' : [ 'T0011694', 'T0007973', 'T0010026' ],
-          '5K' : [ 'A0009227' ],
-          '04' : [ 'A0001243', 'A0004750', 'A0008881', 'A0008882' ],
-          '19' : [ 'A0005230', 'A0008879' ],
-          '31' : ['A0009308', 'A0008883'],
-          '18' : ['A0008878', 'A0008880']
+          '34Q': ['T0006607', 'T0006644', 'T0006880', 'T0006881', 'T0001375', 'T0011618', 'T0001376'],
+          '36Y': ['T0011694', 'T0007973', 'T0010026'],
+          '5K': ['A0009227'],
+          '04': ['A0001243', 'A0004750', 'A0008881', 'A0008882'],
+          '19': ['A0005230', 'A0008879'],
+          '31': ['A0009308', 'A0008883'],
+          '18': ['A0008878', 'A0008880']
         };
         var accSeq_678IS = {
-          '34Q' : [ 'T0001376' ],
-          '36Y' : [ 'T0007977', 'T0012158', 'T0012157' ],
-          '5K' : [ 'A0009227' ],
-          '04' : [ 'A0001243', 'A0004750', 'A0008881', 'A0008882' ],
-          '19' : [ 'A0005230', 'A0008879' ],
-          '31' : ['A0009308', 'A0008883'],
-          '18' : ['A0008878', 'A0008880']
+          '34Q': ['T0001376'],
+          '36Y': ['T0007977', 'T0012158', 'T0012157'],
+          '5K': ['A0009227'],
+          '04': ['A0001243', 'A0004750', 'A0008881', 'A0008882'],
+          '19': ['A0005230', 'A0008879'],
+          '31': ['A0009308', 'A0008883'],
+          '18': ['A0008878', 'A0008880']
         };
         var accSeq_702 = {
-          '34Q' : [ 'T0007864', 'T0006609', 'T0011655', 'T0011660', 'T0011661', 'T0007561', 'T0006949', 'T0011651', 'T0011656', 'T0011654', 'T0011662', 'T0006974', 
-            'T0011652', 'T0011659', 'T0011657', 'T0011648', 'T0011658', 'T0011663', 'T0011649', 'T0001379', 'T0011653', 'T0011650', 'T0011270' ],
-          '36Y' : [ 'T0007974', 'T0010025', 'T0011732' ],
-          '5K' : [ 'A0009225' ]
+          '34Q': ['T0007864', 'T0006609', 'T0011655', 'T0011660', 'T0011661', 'T0007561', 'T0006949', 'T0011651', 'T0011656', 'T0011654', 'T0011662', 'T0006974',
+            'T0011652', 'T0011659', 'T0011657', 'T0011648', 'T0011658', 'T0011663', 'T0011649', 'T0001379', 'T0011653', 'T0011650', 'T0011270'],
+          '36Y': ['T0007974', 'T0010025', 'T0011732'],
+          '5K': ['A0009225']
         };
         var accSeq_702EE = {
-          '34Q' : [ 'T0004422' ],
-          '36Y' : [ 'T0008052', 'T0012160', 'T0012159' ],
-          '5K' : [ 'A0009216' ]
+          '34Q': ['T0004422'],
+          '36Y': ['T0008052', 'T0012160', 'T0012159'],
+          '5K': ['A0009216']
         };
         var accSeq_702LT = {
-          '34Q' : [ 'T0004394' ],
-          '36Y' : [ 'T0008054', 'T0012162', 'T0012161' ],
-          '5K' : [ 'A0009215' ]
+          '34Q': ['T0004394'],
+          '36Y': ['T0008054', 'T0012162', 'T0012161'],
+          '5K': ['A0009215']
         };
         var accSeq_702LV = {
-          '34Q' : [ 'T0004390' ],
-          '36Y' : [ 'T0008053', 'T0012164', 'T0012163' ],
-          '5K' : [ 'A0009214' ]
+          '34Q': ['T0004390'],
+          '36Y': ['T0008053', 'T0012164', 'T0012163'],
+          '5K': ['A0009214']
         };
         var accSeq_806 = {
-          '34Q' : [ 'T0011597', 'T0006611', 'T0011598', 'T0011599', 'T0011613', 'T0011603', 'T0011615', 'T0011616', 'T0011608', 'T0011596', 'T0011610', 'T0011611', 
-              'T0011606', 'T0011609', 'T0011601', 'T0011604', 'T0011602', 'T0011595', 'T0011607', 'T0001383', 'T0001383', 'T0011614', 'T0011271' ],
-          '36Y' : [ 'T0007975', 'T0010024', 'T0011310' ],
-          '5K' : [ 'A0009226' ]
+          '34Q': ['T0011597', 'T0006611', 'T0011598', 'T0011599', 'T0011613', 'T0011603', 'T0011615', 'T0011616', 'T0011608', 'T0011596', 'T0011610', 'T0011611',
+            'T0011606', 'T0011609', 'T0011601', 'T0011604', 'T0011602', 'T0011595', 'T0011607', 'T0001383', 'T0001383', 'T0011614', 'T0011271'],
+          '36Y': ['T0007975', 'T0010024', 'T0011310'],
+          '5K': ['A0009226']
         };
         var accSeq_846 = {
-          '34Q' : [ 'T0011642', 'T0011643', 'T0011644', 'T0011645', 'T0011646', 'T0011647' ],
-          '36Y' : [ 'T0007976', 'T0010027', 'T0010028' ],
-          '5K' : [ 'A0009228' ],
-          '04' : [ 'I0000272', 'A0008903', 'A0008904', 'A0008905' ],
-          '1R' : [ 'I0000271' ],
-          '4A' : ['A0008906', 'A0008907' ],
-          '3T' : [ 'A0003748' ],
-          '28' : [ 'A0008902' ],
-          '27E' : [ 'T0007593', 'T0006613', 'T0011632', 'T0011638', 'T0011639', 'T0011636', 'T0006888', 'T0011627', 'T0011633', 'T0011631', 'T0011640', 
-            'T0011628', 'T0011629', 'T0011637', 'T0011634', 'T0006966', 'T0011635', 'T0011641', 'T0011625', 'T0001387', 'T0011630', 'T0011626' ]
+          '34Q': ['T0011642', 'T0011643', 'T0011644', 'T0011645', 'T0011646', 'T0011647'],
+          '36Y': ['T0007976', 'T0010027', 'T0010028'],
+          '5K': ['A0009228'],
+          '04': ['I0000272', 'A0008903', 'A0008904', 'A0008905'],
+          '1R': ['I0000271'],
+          '4A': ['A0008906', 'A0008907'],
+          '3T': ['A0003748'],
+          '28': ['A0008902'],
+          '27E': ['T0007593', 'T0006613', 'T0011632', 'T0011638', 'T0011639', 'T0011636', 'T0006888', 'T0011627', 'T0011633', 'T0011631', 'T0011640',
+            'T0011628', 'T0011629', 'T0011637', 'T0011634', 'T0006966', 'T0011635', 'T0011641', 'T0011625', 'T0001387', 'T0011630', 'T0011626']
         };
         if (reqTyp == 'C') {
           if (!scenariosToBlock.includes(custSubGrp) && isuCtc != '' && isuCtc != undefined && isuCtc != null) {
@@ -3798,46 +3802,46 @@ function searchTermCodeValidator() {
               if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL') {
                 // Denmark, Faroe Islands, Greenland
                 var subIndSearchTerm = {
-                  'T0001375' : [ 'K', 'U', 'A', 'F', 'N', 'S' ],
-                  'T0006880' : [ 'D', 'W', 'T', 'R' ],
-                  'T0006881' : [ 'V', 'J', 'P', 'L', 'M' ],
-                  'T0006644' : [ 'G', 'Y', 'E', 'H', 'X' ],
-                  'T0006607' : [ 'B', 'C' ]
+                  'T0001375': ['K', 'U', 'A', 'F', 'N', 'S'],
+                  'T0006880': ['D', 'W', 'T', 'R'],
+                  'T0006881': ['V', 'J', 'P', 'L', 'M'],
+                  'T0006644': ['G', 'Y', 'E', 'H', 'X'],
+                  'T0006607': ['B', 'C']
                 };
                 if (accSeq_678.hasOwnProperty(isuCtc) && !accSeq_678[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
-                    id : 'searchTerm',
-                    type : 'text',
-                    name : 'searchTerm'
+                    id: 'searchTerm',
+                    type: 'text',
+                    name: 'searchTerm'
                   }, false, 'SORTL can only accept ' + accSeq_678[isuCtc].join(" "));
                 }
-//                if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
-//                  if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
-//                    console.log(subIndSearchTerm[searchTerm]);
-//                    return new ValidationResult({
-//                      id : 'searchTerm',
-//                      type : 'text',
-//                      name : 'searchTerm'
-//                    }, false, 'SORTL and Subindustry combination mismatch.');
-//                  }
-//                }
+                //                if (accSeq_678.hasOwnProperty(isuCtc) && accSeq_678[isuCtc].includes(searchTerm)) {
+                //                  if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
+                //                    console.log(subIndSearchTerm[searchTerm]);
+                //                    return new ValidationResult({
+                //                      id : 'searchTerm',
+                //                      type : 'text',
+                //                      name : 'searchTerm'
+                //                    }, false, 'SORTL and Subindustry combination mismatch.');
+                //                  }
+                //                }
               } else if (countryUse == '678IS') {
                 var subIndSearchTerm = {
-                  'T0007879' : [ 'B', 'C' ]
+                  'T0007879': ['B', 'C']
                 };
                 if (accSeq_678IS.hasOwnProperty(isuCtc) && !accSeq_678IS[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
-                    id : 'searchTerm',
-                    type : 'text',
-                    name : 'searchTerm'
+                    id: 'searchTerm',
+                    type: 'text',
+                    name: 'searchTerm'
                   }, false, 'SORTL can only accept ' + accSeq_678IS[isuCtc].join(" "));
                 }
                 if (accSeq_678IS.hasOwnProperty(isuCtc) && accSeq_678IS[isuCtc].includes(searchTerm)) {
                   if (ind != '' && subIndSearchTerm.hasOwnProperty(searchTerm) && !subIndSearchTerm[searchTerm].includes(ind)) {
                     return new ValidationResult({
-                      id : 'searchTerm',
-                      type : 'text',
-                      name : 'searchTerm'
+                      id: 'searchTerm',
+                      type: 'text',
+                      name: 'searchTerm'
                     }, false, 'SORTL and SubIndustry combination mismatch.');
                   }
                 }
@@ -3846,50 +3850,50 @@ function searchTermCodeValidator() {
               if (countryUse == '702') {
                 if (accSeq_702.hasOwnProperty(isuCtc) && !accSeq_702[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
-                    id : 'searchTerm',
-                    type : 'text',
-                    name : 'searchTerm'
+                    id: 'searchTerm',
+                    type: 'text',
+                    name: 'searchTerm'
                   }, false, 'SORTL can only accept ' + accSeq_702[isuCtc].join(" "));
                 }
               } else if (countryUse == '702EE') {
                 if (accSeq_702EE.hasOwnProperty(isuCtc) && !accSeq_702EE[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
-                    id : 'searchTerm',
-                    type : 'text',
-                    name : 'searchTerm'
+                    id: 'searchTerm',
+                    type: 'text',
+                    name: 'searchTerm'
                   }, false, 'SORTL can only accept ' + accSeq_702EE[isuCtc].join(" "));
                 }
               } else if (countryUse == '702LT') {
                 if (accSeq_702LT.hasOwnProperty(isuCtc) && !accSeq_702LT[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
-                    id : 'searchTerm',
-                    type : 'text',
-                    name : 'searchTerm'
+                    id: 'searchTerm',
+                    type: 'text',
+                    name: 'searchTerm'
                   }, false, 'SORTL can only accept ' + accSeq_702LT[isuCtc].join(" "));
                 }
               } else if (countryUse == '702LV') {
                 if (accSeq_702LV.hasOwnProperty(isuCtc) && !accSeq_702LV[isuCtc].includes(searchTerm)) {
                   return new ValidationResult({
-                    id : 'searchTerm',
-                    type : 'text',
-                    name : 'searchTerm'
+                    id: 'searchTerm',
+                    type: 'text',
+                    name: 'searchTerm'
                   }, false, 'SORTL can only accept ' + accSeq_702LV[isuCtc].join(" "));
                 }
               }
             } else if (cmrIssuingCntry == '806') {
               if (accSeq_806.hasOwnProperty(isuCtc) && !accSeq_806[isuCtc].includes(searchTerm)) {
                 return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
+                  id: 'searchTerm',
+                  type: 'text',
+                  name: 'searchTerm'
                 }, false, 'SORTL can only accept ' + accSeq_806[isuCtc].join(" "));
               }
             } else if (cmrIssuingCntry == '846') {
               if (accSeq_846.hasOwnProperty(isuCtc) && !accSeq_846[isuCtc].includes(searchTerm)) {
                 return new ValidationResult({
-                  id : 'searchTerm',
-                  type : 'text',
-                  name : 'searchTerm'
+                  id: 'searchTerm',
+                  type: 'text',
+                  name: 'searchTerm'
                 }, false, 'SORTL can only accept ' + accSeq_846[isuCtc].join(" "));
               }
             } else {
@@ -3906,8 +3910,8 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var activeIsuCd = [ '34', '36', '27' ];
-  var activeCtc = [ 'Q', 'Y', 'E' ];
+  var activeIsuCd = ['34', '36', '27'];
+  var activeCtc = ['Q', 'Y', 'E'];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -3917,57 +3921,57 @@ function clientTierCodeValidator() {
     } else {
       $("#clientTierSpan").html('');
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
     if (clientTierCode == '') {
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
     } else if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier can only accept \'Q\'.');
     }
   } else if (isuCode == '36') {
     if (clientTierCode == '') {
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
     } else if (clientTierCode == 'Y') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'.');
     }
   } else if (isuCode == '27') {
     if (clientTierCode == '') {
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
     } else if (clientTierCode == 'E') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier can only accept \'E\'.');
     }
   } else {
@@ -3980,9 +3984,9 @@ function clientTierCodeValidator() {
       $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
 
       return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
+        id: 'clientTier',
+        type: 'text',
+        name: 'clientTier'
       }, false, 'Client Tier can only accept \'Q\', \'Y\' , \'E\' or blank.');
     }
   }
@@ -3990,9 +3994,9 @@ function clientTierCodeValidator() {
 // CREATCMR-4293
 
 function clientTierValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var clientTier = FormManager.getActualValue('clientTier');
         var isuCd = FormManager.getActualValue('isuCd');
         var reqType = FormManager.getActualValue('reqType');
@@ -4006,7 +4010,7 @@ function clientTierValidator() {
           valResult = clientTierCodeValidator();
         } else {
           qParams = {
-            REQ_ID : requestId,
+            REQ_ID: requestId,
           };
           var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
 
@@ -4038,7 +4042,7 @@ function addVatIndValidator() {
   } else {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var results = cmr.query('GET_COUNTRY_VAT_SETTINGS', {
-      ISSUING_CNTRY : cntry
+      ISSUING_CNTRY: cntry
     });
 
     if ((results != null || results != undefined || results.ret1 != '') && results.ret1 == 'O' && vat == '' && vatInd == '') {
@@ -4065,18 +4069,18 @@ function addVatIndValidator() {
 
 // CREATCMR-788
 function addressQuotationValidatorNORS() {
-  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
-  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, [ 'Additional Info' ]);
-  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, [ 'Att. Person' ]);
-  FormManager.addValidator('city1', Validators.NO_QUOTATION, [ 'City' ]);
-  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, [ 'Street Con\'t' ]);
-  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Postal Code' ]);
-  FormManager.addValidator('poBox', Validators.NO_QUOTATION, [ 'PO Box' ]);
-  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
+  FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, ['Abbreviated Name'], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, ['Abbreviated Location'], 'MAIN_CUST_TAB');
+  FormManager.addValidator('custNm1', Validators.NO_QUOTATION, ['Customer Name']);
+  FormManager.addValidator('custNm2', Validators.NO_QUOTATION, ['Customer Name Con\'t']);
+  FormManager.addValidator('custNm3', Validators.NO_QUOTATION, ['Additional Info']);
+  FormManager.addValidator('custNm4', Validators.NO_QUOTATION, ['Att. Person']);
+  FormManager.addValidator('city1', Validators.NO_QUOTATION, ['City']);
+  FormManager.addValidator('addrTxt', Validators.NO_QUOTATION, ['Street']);
+  FormManager.addValidator('addrTxt2', Validators.NO_QUOTATION, ['Street Con\'t']);
+  FormManager.addValidator('postCd', Validators.NO_QUOTATION, ['Postal Code']);
+  FormManager.addValidator('poBox', Validators.NO_QUOTATION, ['PO Box']);
+  FormManager.addValidator('custPhone', Validators.NO_QUOTATION, ['Phone #']);
 
 }
 function skipStateProvForFO() {
@@ -4095,8 +4099,8 @@ function isuCtcSortlCovBehaviour() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  var scenariosToBlock = [ 'CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT', 'EEIBM',
-      'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT' ];
+  var scenariosToBlock = ['CBBUS', 'DKBUS', 'DKINT', 'DKIBM', 'FOBUS', 'FOINT', 'FOIBM', 'ISBUS', 'ISIBM', 'ISINT', 'GLBUS', 'GLINT', 'GLIBM', 'FIBUS', 'FIINT', 'FIIBM', 'EEBUS', 'EEINT', 'EEIBM',
+    'LTBUS', 'LTINT', 'LTIBM', 'LVBUS', 'LVINT', 'LVIBM', 'BUSPR', 'INTER', 'IBMEM', 'CBBUS', 'CBINT'];
   if (reqTyp == 'C') {
     if (role == 'Requester') {
       FormManager.readOnly('clientTier');
@@ -4117,9 +4121,9 @@ function isuCtcSortlCovBehaviour() {
 
 function StcOrderBlockValidation() {
 
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         // var role = FormManager.getActualValue('userRole').toUpperCase();
         var ordBlk = FormManager.getActualValue('embargoCd');
         var stcOrdBlk = FormManager.getActualValue('taxExemptStatus3');
@@ -4138,8 +4142,8 @@ function StcOrderBlockValidation() {
 
 }
 
-dojo.addOnLoad(function() {
-  GEOHandler.NORDX = [ '846', '806', '702', '678' ];
+dojo.addOnLoad(function () {
+  GEOHandler.NORDX = ['846', '806', '702', '678'];
 
   console.log('adding NORDX functions...');
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, GEOHandler.NORDX);
@@ -4160,7 +4164,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.NORDX, null, true);
   GEOHandler.addAddrFunction(hidePOBoxandHandleStreet, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMachineType, GEOHandler.NORDX);
-  GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, [ 'ZI01', 'ZD01', 'ZP02' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, ['ZI01', 'ZD01', 'ZP02']);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.NORDX);
   GEOHandler.registerValidator(addCrossBorderValidatorNORS, GEOHandler.NORDX, null, true);
   // GEOHandler.addAfterTemplateLoad(setAdminDSCValues, GEOHandler.NORDX);
@@ -4171,7 +4175,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addNORDXAddressTypeValidator, GEOHandler.NORDX, null, true);
   // GEOHandler.registerValidator(addNORDXInstallingShipping, GEOHandler.NORDX,
   // null, true);
-  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN, SysLoc.NORWAY ], null, true);
+  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN, SysLoc.NORWAY], null, true);
   // GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB',
   // 'frmCMR', 'ZS01'), [ SysLoc.NORWAY ], null, true);
   // GEOHandler.registerValidator(addACAdminValidator, GEOHandler.NORDX, null,
@@ -4237,7 +4241,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockTaxCode, GEOHandler.NORDX);
   GEOHandler.registerValidator(searchTermCodeValidator, GEOHandler.NORDX, null, true);
 
-//  GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
+  //  GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addCtcHandler, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addIsuHandler, GEOHandler.NORDX);
 

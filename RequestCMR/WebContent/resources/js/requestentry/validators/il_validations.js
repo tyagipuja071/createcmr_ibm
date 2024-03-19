@@ -2707,7 +2707,6 @@ function validatorEnterpriseIL() {
   const isuCdSet2 = ['28', '04'];
   const enterprise34Q = ['011268', '011277', '001345', '011296', '011269', '011290'];
   const enterprise36Y = ['003290', '010023', '012170'];
-
   if (isuCdSet1.has(isuCd) && enterprise != '985999') {
     return new ValidationResult({
       id: 'enterprise',

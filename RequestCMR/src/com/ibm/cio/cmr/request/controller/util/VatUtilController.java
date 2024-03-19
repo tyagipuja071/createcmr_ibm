@@ -793,8 +793,7 @@ public class VatUtilController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/de/postalCode")
+  @RequestMapping(value = "/de/postalCode")
   public ModelMap getSBOFromPostalCode(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     try {

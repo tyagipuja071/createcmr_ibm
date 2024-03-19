@@ -605,14 +605,14 @@ function addCmrNoValidator() {
         } else if (cntry != SysLoc.AUSTRIA && cmrNo != '' && custSubType != ''
           && (custSubType == 'BUSPR' || custSubType.includes('BP') || custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP'))
           && !(cmrNo >= 002000 && cmrNo <= 009999)) {
-          return new ValidationResult(null, false, 'CMR Number should be within range: 002000 - 009999 for Business Partner scenarios');
-        } else if (cmrNo != '' && custSubType != '' && custSubType == 'XCEM' && !(cmrNo >= 500000 && cmrNo <= 799999)) {
-          return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
-        }
-        return new ValidationResult(null, true);
-      }
+    return new ValidationResult(null, false, 'CMR Number should be within range: 002000 - 009999 for Business Partner scenarios');
+  } else if (cmrNo != '' && custSubType != '' && custSubType == 'XCEM' && !(cmrNo >= 500000 && cmrNo <= 799999)) {
+    return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
+  }
+  return new ValidationResult(null, true);
+}
     };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+  }) (), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function lockLandCntry() {
@@ -1367,14 +1367,14 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm3', Validators.LATIN, ['Customer Name (3)']);
     checkAndAddValidator('addrTxt', Validators.LATIN, ['Street Address']);
     checkAndAddValidator('city1', Validators.LATIN, ['City']);
-//    checkAndAddValidator('postCd', Validators.LATIN, ['Postal Code']);
+    //    checkAndAddValidator('postCd', Validators.LATIN, ['Postal Code']);
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
     FormManager.removeValidator('custNm2', Validators.LATIN);
     FormManager.removeValidator('custNm3', Validators.LATIN);
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
-//    FormManager.removeValidator('postCd', Validators.LATIN);
+    //    FormManager.removeValidator('postCd', Validators.LATIN);
   }
 }
 function addGaddrValidatorForCEE() {
@@ -2002,7 +2002,7 @@ function setSalesRepValues(clientTier) {
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
-// setSBO();
+        // setSBO();
       }
     }
   }
@@ -5369,17 +5369,17 @@ function retainVatValueAT() {
 }
 // CREATCMR-9427
 function addProvinceCityValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var reqType = FormManager.getActualValue('reqType');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var landCntry = FormManager.getActualValue('landCntry');
         var stateProv = FormManager.getActualValue('stateProv');
         var city = FormManager.getActualValue('city1');
         var addrType = FormManager.getActualValue('addrType');
-        var variationCityList = [ 'BUCHAREST', 'BUKAREST','BUCUREŞT', 'BUCUREŞTI', 'BUCURESTI' ];
-        var cityLastDigit = [ '1', '2', '3', '4', '5', '6' ];
+        var variationCityList = ['BUCHAREST', 'BUKAREST', 'BUCUREŞT', 'BUCUREŞTI', 'BUCURESTI'];
+        var cityLastDigit = ['1', '2', '3', '4', '5', '6'];
 
         if (landCntry == 'RO' && (reqType == 'C' || reqType == 'U') && (stateProv == 'B' || stateProv == '')) {
           if (addrType == 'ZP02') {
@@ -5554,8 +5554,8 @@ dojo.addOnLoad(function () {
   // true);
   // GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA
   // ], null, true);
-  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
-      '787', '820', '821', '826', '889', '358', '359', '363' ]);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, ['603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
+    '787', '820', '821', '826', '889', '358', '359', '363']);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
   // GEOHandler.registerValidator(customCrossPostCdValidator,
   // GEOHandler.CEMEA,
