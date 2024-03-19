@@ -1484,6 +1484,57 @@ function getCurrentPostalCode() {
   return postCd;
 }
 
+var _importedSearchTerm = null;
+
+function resetSortlValidator() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+
+  var qParams = {
+    REQ_ID: reqId,
+  };
+  var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+  if (result != null) {
+    _importedSearchTerm = result.ret1;
+  }
+
+  if (reqType == 'U' && (_importedSearchTerm == '' || _importedSearchTerm == null)) {
+    console.log('Making Sortl optinal as it is empty in RDC');
+    FormManager.resetValidations('salesBusOffCd');
+  }
+}
+
+function validateSortl() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var reqId = FormManager.getActualValue('reqId');
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var letterNumber = /^[0-9a-zA-Z]+$/;
+        var qParams = {
+          REQ_ID: reqId,
+        };
+        if (_importedSearchTerm != searchTerm) {
+          console.log("validating Sortl..");
+          if (searchTerm.length != 8) {
+            return new ValidationResult(null, false, 'SearchTerm should be 8 characters long.');
+          }
+
+          if (!searchTerm.match(letterNumber)) {
+            return new ValidationResult({
+              id: 'searchTerm',
+              type: 'text',
+              name: 'searchTerm'
+            }, false, 'SearchTerm should be alpha numeric.');
+          }
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.DE = [SysLoc.GERMANY];
   console.log('adding DE validators...');
@@ -1555,5 +1606,8 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
+  GEOHandler.registerValidator(validateSortl, GEOHandler.DE, null, true);
+  GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.DE);
 
 });
