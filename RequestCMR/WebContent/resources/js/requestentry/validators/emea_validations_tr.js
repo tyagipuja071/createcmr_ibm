@@ -8519,6 +8519,7 @@ function setISUCTCBasedScenarios() {
         FormManager.readOnly('salesBusOffCd');
         FormManager.readOnly('enterprise');
       } else if (role == 'PROCESSOR') {
+        FormManager.readOnly('clientTier');
         FormManager.readOnly('isuCd');
         FormManager.enable('salesBusOffCd');
         FormManager.readOnly('enterprise');
