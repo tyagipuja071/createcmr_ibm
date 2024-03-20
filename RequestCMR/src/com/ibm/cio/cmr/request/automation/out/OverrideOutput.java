@@ -107,6 +107,22 @@ public class OverrideOutput implements AutomationOutput {
       if (fieldResult != null) {
         if ("631".equals(requestData.getData().getCmrIssuingCntry()) && "ICMS_IND".equals(fieldKey.getFieldName())) {
           // Do not override icms value if issuing country is Brazil
+        } else if ("631".equals(requestData.getData().getCmrIssuingCntry()) && "TAX_CD_1".equals(fieldKey.getFieldName())) {
+          List<Addr> addresses = requestData.getAddresses();
+          for (Addr addressEntity : addresses) {
+            String addrType = addressEntity.getId().getAddrType();
+            Addr addr = requestData.getAddress(addrType);
+            if (addr != null) {
+              setEntityValue(addr, fieldResult.getFieldName(), fieldResult.getNewValue());
+              modifiedAddresses.add(addr);
+            }
+          }
+          if (dataRecord != null) {
+            dataRecord.setImportedIndc("Y");
+            dataRecord.setLastUpdtBy(user.getIntranetId());
+            dataRecord.setLastUpdtTs(SystemUtil.getActualTimestamp());
+            entityManager.merge(dataRecord);
+          }
         } else {
           LOG.trace("Importing override data record for Request " + reqId);
 
