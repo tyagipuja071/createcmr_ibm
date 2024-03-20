@@ -1347,7 +1347,6 @@ function lockIBMTabForSWISS() {
       FormManager.enable('ibmDeptCostCenter');
     }
   }
-
 }
 
 function validateDeptAttnBldg() {
@@ -1995,7 +1994,7 @@ function getSBOListByISU() {
 }
 
 function setSBOInitialValue(values) {
-  if (values.length == 0) {
+  if (values.length == 0 || values.length > 1) {
     FormManager.clearValue('searchTerm')
   } else {
     FormManager.setValue('searchTerm', values[0])
