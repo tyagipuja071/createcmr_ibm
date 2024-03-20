@@ -132,6 +132,7 @@ function addAfterConfigAP() {
     FormManager.enable('territoryCd');
     FormManager.enable('IndustryClass');
     FormManager.enable('subIndustryCd');
+    FormManager.enable('vat');
   }
    
   var clusterId = FormManager.getActualValue('apCustClusterId');
@@ -1145,7 +1146,7 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.setValue('isicCd', isicCdInDB);
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
-  } else {
+  } else if (reqType == 'U' && role == 'REQUESTER') {
     FormManager.readOnly('isicCd');
     FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
@@ -1936,8 +1937,9 @@ function setAddressDetailsForViewAP() {
 function lockCustMainNames() {
   console.log('>>>> lockCustMainNames >>>>');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER' || FormManager.getActualValue('viewOnlyPage') == 'true')
+  if (role == 'REQUESTER' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
+  }  
   if (cmr.addressMode == 'updateAddress') {
     FormManager.readOnly('custNm1');
     FormManager.readOnly('custNm2');
@@ -2574,7 +2576,7 @@ function handleObseleteExpiredDataForUpdate() {
    return;
  }
  // lock all the coverage fields and remove validator
- if (reqType == 'U') {
+ if (reqType == 'U' && role == 'REQUESTER') {
    FormManager.readOnly('apCustClusterId');
    FormManager.readOnly('clientTier');
    FormManager.readOnly('mrcCd');
