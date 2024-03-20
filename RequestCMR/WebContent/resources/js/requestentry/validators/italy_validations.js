@@ -2045,7 +2045,10 @@ function setDeafultSBOLogicComm() {
   var subRegion = FormManager.getActualValue('countryUse');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
-  var subIndustryCd = FormManager.getActualValue('subIndustryCd')
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (subIndustryCd == '') {
+    subIndustryCd = _pagemodel.subIndustryCd;
+  }
   if (subIndustryCd != null && subIndustryCd.length > 1) {
     subIndustryCd = subIndustryCd.substring(0, 1);
   }
