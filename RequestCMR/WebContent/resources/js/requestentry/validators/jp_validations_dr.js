@@ -4500,7 +4500,7 @@ function addSoldToValidatorJP() {
         if (custType.includes('A')) {
           if (Number(zs01Reccount) > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
-          } else if (Number(zs01Reccount == 0) && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
+          } else if (Number(zs01Reccount == 0) && (custSubGrp != 'BCEXA' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
             return new ValidationResult(null, false, 'At least one Sold-To Address must be defined.');
           } else {
             return new ValidationResult(null, true);
@@ -7471,6 +7471,7 @@ function hideNonRelevantFieldsInDRFlow() {
 
   if (viewOnly != '' && viewOnly == 'true') {
     hideFieldsInViewOnlyMode(custSubType);
+    FormManager.readOnly('territoryCd');
     return;
   }
 
@@ -7556,6 +7557,11 @@ function hideFieldsInViewOnlyMode(custSubType) {
 
 function showHideSalesTeamNo() {
   var custSubType = FormManager.getActualValue('custSubGrp');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
 
   switch (custSubType) {
     case 'RACMR':
