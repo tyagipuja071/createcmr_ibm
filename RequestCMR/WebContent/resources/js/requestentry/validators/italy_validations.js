@@ -5298,42 +5298,6 @@ function addressQuotationValidatorUKI() {
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
 }
 
-function clientTierValidatorIT() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCd = FormManager.getActualValue('isuCd');
-        var reqType = FormManager.getActualValue('reqType');
-        var valResult = null;
-
-        var oldClientTier = null;
-        var oldISU = null;
-        var requestId = FormManager.getActualValue('reqId');
-
-        if (reqType == 'C') {
-          valResult = clientTierCodeValidator();
-        } else {
-          qParams = {
-            REQ_ID : requestId,
-          };
-          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-
-          if (result != null && result != '') {
-            oldClientTier = result.ret1 != null ? result.ret1 : '';
-            oldISU = result.ret3 != null ? result.ret3 : '';
-
-            if (clientTier != oldClientTier || isuCd != oldISU) {
-              valResult = clientTierCodeValidator();
-            }
-          }
-        }
-        return valResult;
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
 function StcOrderBlockValidation() {
 
   FormManager.addFormValidator((function() {
@@ -5517,7 +5481,15 @@ function sboSalesRepCodeValidator() {
         name : 'salesBusOffCd'
       }, false, 'SORTL can only accept \'SD\'\ \'TQ\'\ \'TX\'\ for ISU 28.');
     }
-  } else if (isuCtc == '12' || isuCtc == '15' || isuCtc == '31' || isuCtc == '1R' || isuCtc == '3T' || isuCtc == '4A' || isuCtc == '4F' || isuCtc == '5B' || isuCtc == '5E' || isuCtc == '5K') {
+  } else if (isuCtc == '4A') {
+    if (!sbo == 'XD') {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'XD\'\ for ISU 4A.');
+    }
+  } else if (isuCtc == '12' || isuCtc == '15' || isuCtc == '31' || isuCtc == '1R' || isuCtc == '3T' || isuCtc == '4F' || isuCtc == '5B' || isuCtc == '5E' || isuCtc == '5K') {
     if (!(sbo == 'SD')) {
       return new ValidationResult({
         id : 'salesBusOffCd',
@@ -5622,7 +5594,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateSalesRepForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(clientTierValidatorIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesIT, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(setDeafultISUCtcChange, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
