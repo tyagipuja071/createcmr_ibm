@@ -180,83 +180,83 @@ function autoSetMrcIsu() {
 /*
  * function to set ISU based on SBO 161, MRC A and Subindustry
  */
-function autoSetISUBasedOnSubindustry() {
-  var sboCd = FormManager.getActualValue('salesBusOffCd');
-  var mrcCd = FormManager.getActualValue('mrcCd');
-  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-
-  // check if SBO 161 - Dummy Segment 1 + MRC A
-  if ((sboCd && sboCd == '161') && (mrcCd && mrcCd == 'A')) {
-    if (subIndustryCd && subIndustryCd.length > 0) {
-      var subindustryStartsWith = subIndustryCd.substring(0, 1);
-
-      switch (subindustryStartsWith) {
-      case 'A':
-        FormManager.setValue('isuCd', '3T');
-        break;
-      case 'B':
-        FormManager.setValue('isuCd', '5B');
-        break;
-      case 'C':
-        FormManager.setValue('isuCd', '5B');
-        break;
-      case 'D':
-        FormManager.setValue('isuCd', '18');
-        break;
-      case 'E':
-        FormManager.setValue('isuCd', '40');
-        break;
-      case 'F':
-        FormManager.setValue('isuCd', '04');
-        break;
-      case 'G':
-        FormManager.setValue('isuCd', '28');
-        break;
-      case 'H':
-        FormManager.setValue('isuCd', '11');
-        break;
-      case 'J':
-        FormManager.setValue('isuCd', '4A');
-        break;
-      case 'K':
-        FormManager.setValue('isuCd', '05');
-        break;
-      case 'L':
-        FormManager.setValue('isuCd', '5E');
-        break;
-      case 'M':
-        FormManager.setValue('isuCd', '4D');
-        break;
-      case 'N':
-        FormManager.setValue('isuCd', '31');
-        break;
-      case 'P':
-        FormManager.setValue('isuCd', '15');
-        break;
-      case 'R':
-        FormManager.setValue('isuCd', '1R');
-        break;
-      case 'S':
-        FormManager.setValue('isuCd', '4F');
-        break;
-      case 'T':
-        FormManager.setValue('isuCd', '19');
-        break;
-      case 'U':
-        FormManager.setValue('isuCd', '12');
-        break;
-      case 'V':
-        FormManager.setValue('isuCd', '14');
-        break;
-      case 'X':
-        FormManager.setValue('isuCd', '8C');
-        break;
-      case 'Y':
-        FormManager.setValue('isuCd', '28');
-      }
-    }
-  }
-}
+//function autoSetISUBasedOnSubindustry() {
+//  var sboCd = FormManager.getActualValue('salesBusOffCd');
+//  var mrcCd = FormManager.getActualValue('mrcCd');
+//  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+//
+//  // check if SBO 161 - Dummy Segment 1 + MRC A
+//  if ((sboCd && sboCd == '161') && (mrcCd && mrcCd == 'A')) {
+//    if (subIndustryCd && subIndustryCd.length > 0) {
+//      var subindustryStartsWith = subIndustryCd.substring(0, 1);
+//
+//      switch (subindustryStartsWith) {
+//      case 'A':
+//        FormManager.setValue('isuCd', '3T');
+//        break;
+//      case 'B':
+//        FormManager.setValue('isuCd', '5B');
+//        break;
+//      case 'C':
+//        FormManager.setValue('isuCd', '5B');
+//        break;
+//      case 'D':
+//        FormManager.setValue('isuCd', '18');
+//        break;
+//      case 'E':
+//        FormManager.setValue('isuCd', '40');
+//        break;
+//      case 'F':
+//        FormManager.setValue('isuCd', '04');
+//        break;
+//      case 'G':
+//        FormManager.setValue('isuCd', '28');
+//        break;
+//      case 'H':
+//        FormManager.setValue('isuCd', '11');
+//        break;
+//      case 'J':
+//        FormManager.setValue('isuCd', '4A');
+//        break;
+//      case 'K':
+//        FormManager.setValue('isuCd', '05');
+//        break;
+//      case 'L':
+//        FormManager.setValue('isuCd', '5E');
+//        break;
+//      case 'M':
+//        FormManager.setValue('isuCd', '4D');
+//        break;
+//      case 'N':
+//        FormManager.setValue('isuCd', '31');
+//        break;
+//      case 'P':
+//        FormManager.setValue('isuCd', '15');
+//        break;
+//      case 'R':
+//        FormManager.setValue('isuCd', '1R');
+//        break;
+//      case 'S':
+//        FormManager.setValue('isuCd', '4F');
+//        break;
+//      case 'T':
+//        FormManager.setValue('isuCd', '19');
+//        break;
+//      case 'U':
+//        FormManager.setValue('isuCd', '12');
+//        break;
+//      case 'V':
+//        FormManager.setValue('isuCd', '14');
+//        break;
+//      case 'X':
+//        FormManager.setValue('isuCd', '8C');
+//        break;
+//      case 'Y':
+//        FormManager.setValue('isuCd', '28');
+//      }
+//    }
+//  }
+//}
 function autoSetMrcIsuCov2018() {
   // var sboCd = FormManager.getActualValue('salesBusOffCd');
   // console.log(">>> process SBO >> " + sboCd);
@@ -1582,18 +1582,28 @@ if (FormManager.getActualValue('ordBlk') == '93' && _reqType == 'U') {
 }
 }
 function setIsuCtcForLA(value) {
-	  if (FormManager.getActualValue('custGrp') == 'CROSS' || value == undefined) {
-	    return;
-	  }
+//	  if (FormManager.getActualValue('custGrp') == 'CROSS' || value == undefined) {
+//	    return;
+//	  }
 	  var custType = FormManager.getActualValue('custType');
-	  if (custType.includes('IBM') || custType.includes('PRI') || custType.includes('INT')) {
+	  if (custType.includes("IBMEM") || custType.includes("PRIPE") || custType.includes("INTER")) {
 	    FormManager.setValue('isuCd', '21');
 	    FormManager.setValue('clientTier', '');
-	    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+	    FormManager.readOnly('isuCd');
+	    FormManager.readOnly('clientTier');
 	  } else if (custType.includes('BUS')) {
 	    FormManager.setValue('isuCd', '8B');
 	    FormManager.setValue('clientTier', '');
-	    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+	    FormManager.readOnly('isuCd');
+	    FormManager.readOnly('clientTier');
+	  }
+	  else{
+		FormManager.setValue('isuCd', '');
+		FormManager.setValue('clientTier', '');
+		FormManager.removeValidator('clientTier', Validators.REQUIRED);
+		FormManager.enable('isuCd');
+		FormManager.enable('clientTier');
+		
 	  }
 	}
 
@@ -2618,19 +2628,19 @@ function setSboMrcIsuToReadOnly() {
   }
 }
 
-function setIsuMrcFor161A() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (reqType == 'C') {
-    if (role == 'PROCESSOR') {
-      autoSetISUBasedOnSubindustry();
-    }
-  }
-}
+//function setIsuMrcFor161A() {
+//  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+//  if (viewOnly != '' && viewOnly == 'true') {
+//    return;
+//  }
+//  var reqType = FormManager.getActualValue('reqType');
+//  var role = FormManager.getActualValue('userRole').toUpperCase();
+//  if (reqType == 'C') {
+//    if (role == 'PROCESSOR') {
+//      autoSetISUBasedOnSubindustry();
+//    }
+//  }
+//}
 
 function autoSetFieldsForCustScenariosBR() {
   console.log('autoSetFieldsForCrossScenario br : processing. . .');
@@ -2818,7 +2828,7 @@ dojo.addOnLoad(function() {
 //  GEOHandler.addAddrFunction(setSortlForStateProvince, SysLoc.BRAZIL);
 //  GEOHandler.addAfterConfig(setSortlForStateProvince, SysLoc.BRAZIL);
   GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
-  GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
+  //GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
   
   GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setCtcBySBOForBrazil, SysLoc.BRAZIL);
