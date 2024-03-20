@@ -225,15 +225,14 @@ function validateSBOValuesForIsuCtc() {
 
         if (isuCd != '') {
           var results = null;
-          if (isuCd + clientTier != '34Q') {
-            qParams = {
+          qParams = {
               _qall: 'Y',
               ISU_CD: isuCd,
               CLIENT_TIER: clientTier,
               IMS: '%'
             };
             results = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', qParams);
-          }
+          
         }
         if (results == null || results.length == 0) {
           return new ValidationResult(null, true);
@@ -244,10 +243,10 @@ function validateSBOValuesForIsuCtc() {
           if (!validSboList.includes(sbo)) {
             if (isuCd + clientTier == '32T') {
               return new ValidationResult(null, false,
-                'The SearchTerm provided is invalid for corresponding ISU+CTC.');
+                'The SBO provided is invalid for corresponding ISU+CTC.');
             } else {
               return new ValidationResult(null, false,
-                'The SearchTerm provided is invalid. It should be from the list: ' + validSboList);
+                'The SBO provided is invalid. It should be from the list: ' + validSboList.join(" "));
             }
           }
         }
@@ -1310,7 +1309,7 @@ function setSortlDropdownValuesBasedOnIsu() {
   let dropdownField = document.getElementById('templatevalue-searchTerm')
   if (!!dropdownField) dropdownField.setAttribute('values', result);
 
-  if (result != null && Object.keys(result).length > 0) {
+  if (result != null && Object.keys(result).length == 1) {
     FormManager.setValue('searchTerm', result[0]);
   } else {
     FormManager.clearValue('searchTerm');
@@ -1501,14 +1500,14 @@ function resetSortlValidator() {
 
   if (reqType == 'U' && (_importedSearchTerm == '' || _importedSearchTerm == null)) {
     console.log('Making Sortl optinal as it is empty in RDC');
-    FormManager.resetValidations('salesBusOffCd');
+    FormManager.resetValidations('searchTerm');
   }
 }
 
 function validateSortl() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate: function() {
+      validate: function () {
         var reqId = FormManager.getActualValue('reqId');
         var searchTerm = FormManager.getActualValue('searchTerm');
         var letterNumber = /^[0-9a-zA-Z]+$/;
@@ -1607,7 +1606,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setVatIndFieldsForGrp1AndNordx, GEOHandler.DE);
-	GEOHandler.registerValidator(validateSortl, GEOHandler.DE, null, true);
+  GEOHandler.registerValidator(validateSortl, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.DE);
 
