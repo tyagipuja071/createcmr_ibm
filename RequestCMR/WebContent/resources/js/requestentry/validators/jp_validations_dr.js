@@ -7471,6 +7471,7 @@ function hideNonRelevantFieldsInDRFlow() {
 
   if (viewOnly != '' && viewOnly == 'true') {
     hideFieldsInViewOnlyMode(custSubType);
+    FormManager.readOnly('territoryCd');
     return;
   }
 
@@ -7556,6 +7557,11 @@ function hideFieldsInViewOnlyMode(custSubType) {
 
 function showHideSalesTeamNo() {
   var custSubType = FormManager.getActualValue('custSubGrp');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
 
   switch (custSubType) {
     case 'RACMR':
