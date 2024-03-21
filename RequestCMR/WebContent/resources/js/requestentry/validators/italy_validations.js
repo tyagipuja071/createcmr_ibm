@@ -5380,6 +5380,7 @@ function sboSalesRepCodeValidator() {
   var subRegion = FormManager.getActualValue('countryUse');
   var reqType = FormManager.getActualValue('reqType');
   var salesRep = FormManager.getActualValue('repTeamMemberNo');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
@@ -5431,6 +5432,14 @@ function sboSalesRepCodeValidator() {
         type : 'text',
         name : 'salesBusOffCd'
       }, false, 'SORTL can only accept \'QQ\'\  for ISU CTC 8B and salesRep 09QQB0.');
+    }
+  } else if (isuCtc == '21' && (custSubGrp == 'XIBM' || custSubGrp == 'IBMIT')) {
+    if (!(sbo == '1T')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'1T\'\ for ISU CTC 8B.');
     }
   } else if (isuCtc == '21') {
     if (!(sbo == '99' || sbo == 'ZZ' || sbo == '1B' || sbo == '1G' || sbo == '1E' || sbo == '11' || sbo == '12' || sbo == '13' || sbo == '14')) {
