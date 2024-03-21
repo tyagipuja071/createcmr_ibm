@@ -2517,5 +2517,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(togglePPSCeid, SysLoc.MEXICO);
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.MEXICO);
   GEOHandler.addAfterTemplateLoad(toggleTaxRegimeForCrossMx, [ SysLoc.MEXICO ]);
+  GEOHandler.addAfterTemplateLoad(getClientSubTypForIsu, SysLoc.MEXICO);
 });
 
