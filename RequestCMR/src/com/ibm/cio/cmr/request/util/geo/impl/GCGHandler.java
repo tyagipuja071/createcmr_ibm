@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -21,6 +23,8 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasAddress;
@@ -42,6 +46,21 @@ public class GCGHandler extends APHandler {
   private static final String[] HK_SUPPORTED_ADDRESS_USES = { "1", "2", "3" };
   private static final String[] MO_SUPPORTED_ADDRESS_USES = { "1", "2", "3" };
   private static final Logger LOG = Logger.getLogger(GCGHandler.class);
+
+  private static final String SOLD_TO_ADDR_TYPE = "ZS01";
+  private static final String BILL_TO_ADDR_TYPE = "ZP01";
+  private static final String SHIP_TO_ADDR_TYPE = "ZD01";
+  private static final String INSTALL_AT_ADDR_TYPE = "MAIL"; // ZI01 in RDC
+                                                             // won't change
+                                                             // this due to
+                                                             // existing WTAAS
+                                                             // logic
+
+  private static final String SOLD_TO_FIXED_SEQ = "A";
+  private static final String INSTALL_AT_FIXED_SEQ = "E";
+  private static final String SHIP_TO_FIXED_SEQ = "F";
+  private static final List<String> BILL_TO_FIXED_SEQ = Arrays.asList("B", "C", "D");
+
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.HONG_KONG, "HK");
     LANDED_CNTRY_MAP.put(SystemLocation.MACAO, "MO");
@@ -277,4 +296,91 @@ public class GCGHandler extends APHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      newAddrSeq = getNewAddressSeq(entityManager, reqId, addrType);
+    }
+    return newAddrSeq;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
+
+  private String getNewAddressSeq(EntityManager entityManager, long reqId, String addrType) {
+    String newAddrSeq = "";
+    switch (addrType) {
+    case SOLD_TO_ADDR_TYPE:
+      newAddrSeq = SOLD_TO_FIXED_SEQ;
+      break;
+    case BILL_TO_ADDR_TYPE:
+      newAddrSeq = getNewBillToAddrSeq(entityManager, reqId, addrType);
+      break;
+    case INSTALL_AT_ADDR_TYPE:
+    case SHIP_TO_ADDR_TYPE:
+      newAddrSeq = getNewInstallOrShipToSeq(entityManager, reqId, addrType);
+      break;
+    default:
+      newAddrSeq = "";
+      break;
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewInstallOrShipToSeq(EntityManager entityManager, long reqId, String addrType) {
+    String newAddrSeq = "";
+    Set<String> existingAddrs = getAddrSeqByType(entityManager, reqId, addrType);
+    if (existingAddrs.isEmpty()) {
+      if (INSTALL_AT_ADDR_TYPE.equals(addrType)) {
+        newAddrSeq = INSTALL_AT_FIXED_SEQ;
+      } else if (SHIP_TO_ADDR_TYPE.equals(addrType)) {
+        newAddrSeq = SHIP_TO_FIXED_SEQ;
+      }
+    } else {
+      return String.valueOf(existingAddrs.size() + 1);
+    }
+
+    return newAddrSeq;
+  }
+
+  private String getNewBillToAddrSeq(EntityManager entityManager, long reqId, String addrType) {
+    Set<String> existingBillTo = getAddrSeqByType(entityManager, reqId, addrType);
+
+    if (existingBillTo.isEmpty()) {
+      return BILL_TO_FIXED_SEQ.get(0);
+    }
+
+    if (existingBillTo.size() < BILL_TO_FIXED_SEQ.size()) {
+      for (String b : BILL_TO_FIXED_SEQ) {
+        if (!existingBillTo.contains(b)) {
+          return b;
+        }
+      }
+    } else {
+      return String.valueOf(existingBillTo.size() + 1);
+
+    }
+    return "";
+  }
+
+  private Set<String> getAddrSeqByType(EntityManager entityManager, long reqId, String addrType) {
+    String sql = ExternalizedQuery.getSql("GCG.GET.ADDRSEQ.BY_ADDRTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    List<String> results = query.getResults(String.class);
+
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
 }
