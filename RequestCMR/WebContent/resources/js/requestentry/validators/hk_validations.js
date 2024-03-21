@@ -1163,6 +1163,17 @@ function addFieldFormatValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addrSeqFormatter(value, rowIndex) {
+  var rowData = this.grid.getItem(rowIndex);
+  var validSeq = ["A", "B", "C", "D", "E"];
+  var curAddrSeq = rowData.addrSeq[0];
+    
+  if (FormManager.getActualValue('reqType') == 'C' && !validSeq.includes(curAddrSeq)) {
+    return 'N/A';
+  }
+  return value;
+}
+
 function addEROAttachmentValidator() {
   FormManager.addFormValidator((function () {
     return {
