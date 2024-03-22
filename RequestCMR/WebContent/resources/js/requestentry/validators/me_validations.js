@@ -3892,7 +3892,7 @@ function setIsuCtcOnScenarioChange() {
 
   var clientTier = FormManager.getActualValue('clientTier');
   if (clientTier != "") {
-    setEnterpriseValuesME(clienTier);
+    setEnterpriseValuesME(clientTier);
   }
 
 }
