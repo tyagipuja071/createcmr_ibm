@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.BrazilFieldsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -129,7 +130,10 @@ public class BrazilUtil extends AutomationUtil {
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+   String custGrp= data.getCustGrp();
    String custSubGrp= data.getCustSubGrp();
+   String custType=admin.getCustType();
    RequestEntryModel model = requestData.createModelFromRequest();
    List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM","BUSPR");
    if(!custArray.contains(custSubGrp))
@@ -207,20 +211,30 @@ public class BrazilUtil extends AutomationUtil {
         {
           if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
             isu = industryCodeISUMap.get(firstCharSubIndustry);
+            ctc=" ";
           } 
           
         }
 
-          LOG.debug("Setting ISU CTC based on GBG. (GBG Found)");
-          details.append("Setting ISU CTC based on GBG.");
-         
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isu);
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), ctc);
-         
+          LOG.debug("\n Setting ISU CTC based on GBG. (GBG Found)");
+          details.append("\n Setting ISU CTC based on GBG. (GBG Found) \n");
+          
+          setIsuAndCtc(overrides,data,details,isu,ctc);   
+          
           LOG.debug( "ISU : " + isu + " " + "CTC : " + ctc + " ");
 
       }
     } else {
+      if("CROSS".equalsIgnoreCase(custGrp) && "BUSPR".equalsIgnoreCase(custType))
+      {
+        covType="P";
+        covId="0000077";
+        covDesc="Pool - BR";
+        setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+        
+      }
+      if(!"CROSS".equalsIgnoreCase(custGrp))
+      {
       LOG.debug("GBG is BGNONE...");
       if (covId != null) {
 
@@ -354,6 +368,7 @@ public class BrazilUtil extends AutomationUtil {
           }
         }
       }
+    }
     }
     return true;
    }

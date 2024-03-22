@@ -1582,28 +1582,19 @@ if (FormManager.getActualValue('ordBlk') == '93' && _reqType == 'U') {
 }
 }
 function setIsuCtcForLA(value) {
-//	  if (FormManager.getActualValue('custGrp') == 'CROSS' || value == undefined) {
-//	    return;
-//	  }
+	
+	  var custGrp = FormManager.getActualValue('custGrp');
 	  var custType = FormManager.getActualValue('custType');
-	  if (custType.includes("IBMEM") || custType.includes("PRIPE") || custType.includes("INTER")) {
+	  if ((custType.includes("IBMEM") || custType.includes("PRIPE") || custType.includes("INTER"))||(custGrp.includes("CROSS") && custType.includes('BUSPR'))) {
 	    FormManager.setValue('isuCd', '21');
 	    FormManager.setValue('clientTier', '');
 	    FormManager.readOnly('isuCd');
 	    FormManager.readOnly('clientTier');
-	  } else if (custType.includes('BUS')) {
+	  } else if (custGrp.includes("LOCAL") && custType.includes('BUSPR')) {
 	    FormManager.setValue('isuCd', '8B');
 	    FormManager.setValue('clientTier', '');
 	    FormManager.readOnly('isuCd');
 	    FormManager.readOnly('clientTier');
-	  }
-	  else{
-		FormManager.setValue('isuCd', '');
-		FormManager.setValue('clientTier', '');
-		FormManager.removeValidator('clientTier', Validators.REQUIRED);
-		FormManager.enable('isuCd');
-		FormManager.enable('clientTier');
-		
 	  }
 	}
 
