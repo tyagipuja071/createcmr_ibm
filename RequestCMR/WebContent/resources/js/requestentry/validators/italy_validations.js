@@ -1959,9 +1959,9 @@ function setDeafultISUCtcChange() {
         '3PAVA', 'CRO3P', 'CROUN', 'CROLC' ];
     var ibmEmpCustSubTypes = [ 'IBMIT', 'XIBM' ];
     var bpCustTypes = [ 'BUSPR', 'BUSSM', 'BUSVA', 'CROBP' ];
-    var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ]
+    var internalCustSubTypes = [ 'INTER', 'INTVA', 'INTSM', 'CROIN' ];
     var pripeCustSubTypes = [ 'CROPR', 'PRICU', 'PRISM', 'PRIVA' ];
-    var validIsuCTCs = [ '34Q', '04', '19', '28', '4A', '14', '3T', '5K', '36Y', '27E' ];
+    var validIsuCTCs = [ '27E', '34Q', '36Y', '04', '12', '15', '19', '28', '31', '1R', '3T', '4A', '4F', '5B', '5E', '5K' ];
     var isu = FormManager.getActualValue('isuCd');
     var ctc = FormManager.getActualValue('clientTier');
     if (internalCustSubTypes.includes(custSubType)) {
@@ -2061,7 +2061,7 @@ function setDeafultSBOLogicComm() {
   var landCntry = '';
   var isuCTC = isu.concat(ctc);
 
-  var result = cmr.query('VALIDATOR.COMPANY.POSTCODEIT', {
+  var result = cmr.query('VALIDATOR.POSTCODEIT', {
     REQID : reqId
   });
   var postCd = '';
@@ -2076,10 +2076,6 @@ function setDeafultSBOLogicComm() {
     postCd3 = postCd.substring(0, 3);
 
   }
-
-  var result = cmr.query('VALIDATOR.POSTCODEIT', {
-    REQID : reqId
-  });
 
   // GET LANDCNTRY in case of CB
   var result1 = cmr.query('LANDCNTRY.IT', {
@@ -2125,7 +2121,7 @@ function setDeafultSBOLogicComm() {
         FormManager.setValue('salesBusOffCd', 'NM');
       } else if (PostCdList2.includes(postCd) && !custGrp == 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'RP');
-      } else if (PostCdList3.includes(postCd) && !PostCdList8.includes(postCd3) && !custGrp == 'CROSS') {
+      } else if (PostCdList3.includes(postCd) && !(postCd3 == '200' || postCd3 == '201') && !custGrp == 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'GJ');
       } else if (PostCdList4.includes(postCd) && !custGrp == 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'GK');
@@ -5491,7 +5487,7 @@ function sboSalesRepCodeValidator() {
       }, false, 'SORTL can only accept \'SD\'\ \'TQ\'\ \'TX\'\ for ISU 28.');
     }
   } else if (isuCtc == '4A') {
-    if (!sbo == 'XD') {
+    if (sbo != 'XD') {
       return new ValidationResult({
         id : 'salesBusOffCd',
         type : 'text',
@@ -5499,7 +5495,7 @@ function sboSalesRepCodeValidator() {
       }, false, 'SORTL can only accept \'XD\'\ for ISU 4A.');
     }
   } else if (isuCtc == '12' || isuCtc == '15' || isuCtc == '31' || isuCtc == '1R' || isuCtc == '3T' || isuCtc == '4F' || isuCtc == '5B' || isuCtc == '5E' || isuCtc == '5K') {
-    if (!(sbo == 'SD')) {
+    if (sbo != 'SD') {
       return new ValidationResult({
         id : 'salesBusOffCd',
         type : 'text',
