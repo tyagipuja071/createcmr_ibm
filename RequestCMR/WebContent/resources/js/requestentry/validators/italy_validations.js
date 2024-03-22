@@ -2061,7 +2061,7 @@ function setDeafultSBOLogicComm() {
   var landCntry = '';
   var isuCTC = isu.concat(ctc);
 
-  var result = cmr.query('VALIDATOR.COMPANY.POSTCODEIT', {
+  var result = cmr.query('VALIDATOR.POSTCODEIT', {
     REQID : reqId
   });
   var postCd = '';
@@ -2076,10 +2076,6 @@ function setDeafultSBOLogicComm() {
     postCd3 = postCd.substring(0, 3);
 
   }
-
-  var result = cmr.query('VALIDATOR.POSTCODEIT', {
-    REQID : reqId
-  });
 
   // GET LANDCNTRY in case of CB
   var result1 = cmr.query('LANDCNTRY.IT', {
@@ -2125,7 +2121,7 @@ function setDeafultSBOLogicComm() {
         FormManager.setValue('salesBusOffCd', 'NM');
       } else if (PostCdList2.includes(postCd) && !custGrp == 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'RP');
-      } else if (PostCdList3.includes(postCd) && !PostCdList8.includes(postCd3) && !custGrp == 'CROSS') {
+      } else if (PostCdList3.includes(postCd) && !(postCd3 == '200' || postCd3 == '201') && !custGrp == 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'GJ');
       } else if (PostCdList4.includes(postCd) && !custGrp == 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'GK');
