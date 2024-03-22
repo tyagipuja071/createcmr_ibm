@@ -555,7 +555,6 @@ function afterConfigForLA() {
       setMrcCdToReadOnly();
       togglePPSCeid();
       lockFieldsForLA();
-      setIsuCtcForCrossLA(value);
     });
   }
 
