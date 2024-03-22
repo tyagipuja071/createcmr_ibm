@@ -872,9 +872,19 @@ function autoSetVAT(_custType, custTypeinDB) {
 
     
 
-    
+        
 
     
+
+        
+
+    
+
+        
+
+    
+
+        
 
     
 
