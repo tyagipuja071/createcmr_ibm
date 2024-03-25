@@ -92,6 +92,7 @@ function addHandlersForGCG() {
   if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
     _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function (value) {
       setAbbrvNameBPScen();
+      setKUKLAvaluesHK();
     });
   }
 
@@ -2592,6 +2593,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesHK();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -8574,6 +8576,45 @@ function validateInacValuesHK() {
       }
     };
   })(), 'IBM_REQ_TAB', 'frmCMR');
+}
+
+function setKUKLAvaluesHK() {
+  var reqType = FormManager.getActualValue('reqType');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var bpRelType = FormManager.getActualValue('bpRelType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+  console.log('setKUKLAvaluesHK() >>>> set KUKLA values for HK >>>>');
+
+  if (reqType == 'C') {
+    // Acquisition, Ecosystem(Build/Service/Distribute),
+    // Embedded Solution Agreement (ESA), Internal, Kyndryl,
+    // Market Place, Normal - Select BPS/Digital, Normal - Strategic,
+    // Foreign respectively
+    if (custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY' || custSubGrp == 'ASLOM' || custSubGrp == 'KYND' || custSubGrp == 'MKTPC' || custSubGrp == 'NRMLC' || custSubGrp == 'NRMLD' || custSubGrp == 'CROSS') {
+      if ((industryClass == 'G' || industryClass == 'H' || industryClass == 'Y')) {
+        FormManager.setValue('custClass', '19');
+      } else if (industryClass == 'E') {
+        FormManager.setValue('custClass', '11');
+      }
+    } else if (custSubGrp == 'BUSPR') { // Business Partner
+      if (bpRelType == 'DS') { // Distributor
+        FormManager.setValue('custClass', '46');
+      } else if (bpRelType == 'SP') { // Solution Provider
+        FormManager.setValue('custClass', '43');
+      } else if (bpRelType == 'RS') { // Reseller
+        FormManager.setValue('custClass', '45');
+      }
+      // Dummy, Internal respectively
+    } else if (custSubGrp == 'DUMMY' || custSubGrp == 'INTER') {
+      FormManager.setValue('custClass', '81');
+    } else if (custSubGrp == 'BLUMX') { // Private Person
+      FormManager.setValue('custClass', '60');
+    }
+  }
 }
 
 dojo.addOnLoad(function () {
