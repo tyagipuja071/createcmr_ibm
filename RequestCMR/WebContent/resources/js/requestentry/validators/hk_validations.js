@@ -8580,6 +8580,7 @@ function validateInacValuesHK() {
 
 function setKUKLAvaluesHK() {
   var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var industryClass = FormManager.getActualValue('IndustryClass');
   var bpRelType = FormManager.getActualValue('bpRelType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -8589,30 +8590,45 @@ function setKUKLAvaluesHK() {
   }
   console.log('setKUKLAvaluesHK() >>>> set KUKLA values for HK >>>>');
 
+  var kuklaHK = [];
   if (reqType == 'C') {
-    // Acquisition, Ecosystem(Build/Service/Distribute),
-    // Embedded Solution Agreement (ESA), Internal, Kyndryl,
-    // Market Place, Normal - Select BPS/Digital, Normal - Strategic,
-    // Foreign respectively
-    if (custSubGrp == 'AQSTN' || custSubGrp == 'ECOSY' || custSubGrp == 'ASLOM' || custSubGrp == 'KYND' || custSubGrp == 'MKTPC' || custSubGrp == 'NRMLC' || custSubGrp == 'NRMLD' || custSubGrp == 'CROSS') {
-      if ((industryClass == 'G' || industryClass == 'H' || industryClass == 'Y')) {
-        FormManager.setValue('custClass', '19');
-      } else if (industryClass == 'E') {
-        FormManager.setValue('custClass', '11');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.HK_MO_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaHK.push(results[i].ret1);
       }
-    } else if (custSubGrp == 'BUSPR') { // Business Partner
-      if (bpRelType == 'DS') { // Distributor
-        FormManager.setValue('custClass', '46');
-      } else if (bpRelType == 'SP') { // Solution Provider
-        FormManager.setValue('custClass', '43');
-      } else if (bpRelType == 'RS') { // Reseller
-        FormManager.setValue('custClass', '45');
+    }
+
+    if (results != null) {
+      // Acquisition, Ecosystem(Build/Service/Distribute),
+      // Embedded Solution Agreement (ESA), Kyndryl,
+      // Market Place, Normal - Select BPS/Digital, Normal - Strategic,
+      // Foreign respectively
+      var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
+      if (cond1.has(custSubGrp)) {
+        if ((industryClass == 'G' || industryClass == 'H' || industryClass == 'Y')) {
+          FormManager.setValue('custClass', kuklaHK[2]);
+        } else if (industryClass == 'E') {
+          FormManager.setValue('custClass', kuklaHK[0]);
+        }
+      } else if (custSubGrp == 'BUSPR') { // Business Partner
+        if (bpRelType == 'DS') { // Distributor
+          FormManager.setValue('custClass', kuklaHK[5]);
+        } else if (bpRelType == 'SP') { // Solution Provider
+          FormManager.setValue('custClass', kuklaHK[3]);
+        } else if (bpRelType == 'RS') { // Reseller
+          FormManager.setValue('custClass', kuklaHK[4]);
+        }
+        // Dummy, Internal respectively
+      } else if (custSubGrp == 'DUMMY' || custSubGrp == 'INTER') {
+        FormManager.setValue('custClass', kuklaHK[7]);
+      } else if (custSubGrp == 'BLUMX') { // Private Person
+        FormManager.setValue('custClass', kuklaHK[6]);
       }
-      // Dummy, Internal respectively
-    } else if (custSubGrp == 'DUMMY' || custSubGrp == 'INTER') {
-      FormManager.setValue('custClass', '81');
-    } else if (custSubGrp == 'BLUMX') { // Private Person
-      FormManager.setValue('custClass', '60');
     }
   }
 }
