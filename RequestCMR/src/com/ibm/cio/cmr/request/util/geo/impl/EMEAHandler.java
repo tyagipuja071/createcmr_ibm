@@ -4204,13 +4204,6 @@ public class EMEAHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'Y' for the selected ISU code " + isuCd + ". Please fix and upload the template again.<br>");
             }
-          } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-            if (StringUtils.isBlank(clientTier) || !"T".contains(clientTier)) {
-              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier should be 'T' for the selected ISU code " + isuCd
-                  + ". Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "Client Tier",
-                  ":Note that Client Tier should be 'T' for the selected ISU code " + isuCd + ". Please fix and upload the template again.<br>");
-            }
           } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
             if (StringUtils.isBlank(clientTier) || !"E".contains(clientTier)) {
               LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier should be 'E' for the selected ISU code " + isuCd
@@ -4218,14 +4211,14 @@ public class EMEAHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'E' for the selected ISU code " + isuCd + ". Please fix and upload the template again.<br>");
             }
-          } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36", "27").contains(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+          } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("34", "36", "27").contains(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
           } else if (!"@QYTE".contains(clientTier)) {
             LOG.trace(
-                "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y,T or E. Please fix and upload the template again.");
+                "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Client Tier",
-                ":Note that Client Tier only accept @,Q,Y,T or E. Please fix and upload the template again.<br>");
+                ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.<br>");
           }
           if (StringUtils.isNotBlank(stcOrdBlk) && StringUtils.isNotBlank(ordBlk)) {
             LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
