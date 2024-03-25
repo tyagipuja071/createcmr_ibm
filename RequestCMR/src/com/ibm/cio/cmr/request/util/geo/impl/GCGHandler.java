@@ -90,6 +90,7 @@ public class GCGHandler extends APHandler {
   @Override
   protected void handleWTAASAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel mainRecord,
       FindCMRRecordModel record, WtaasAddress address) {
+    LOG.info("Calling handleWTAASAddressImport");
     String line1 = address.get(Address.Line1);
     String line2 = address.get(Address.Line2);
     String line3 = address.get(Address.Line3);
@@ -141,15 +142,28 @@ public class GCGHandler extends APHandler {
   public void doAfterConvert(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel,
       List<FindCMRRecordModel> converted) {
     // / add extra Rdc imports
+    LOG.info("Calling doAfterConvert");
 
     LOG.info("Importing RDc records..");
     for (FindCMRRecordModel record : source.getItems()) {
+
+      LOG.info("Before Mapped Addrtype: " + record.getCmrAddrTypeCode());
+
       String addrType = getMappedAddressType(record.getCmrIssuedBy(), record.getCmrAddrTypeCode(), record.getCmrAddrSeq());
+
+      LOG.info("After Mapped Addrtype: " + addrType);
+
       if ("ZP02".equals(addrType) || "ZI01".equals(addrType)) {
         handleRDcRecordValues(record);
         record.setCmrAddrTypeCode(addrType);
         converted.add(record);
       }
+      LOG.info("GCG getCmrAddrSeq: " + record.getCmrAddrSeq());
+      LOG.info("GCG getCmrName4: " + record.getCmrName4());
+      LOG.info("GCG getCmrStreetAddress: " + record.getCmrStreetAddress());
+      LOG.info("GCG getCmrCity: " + record.getCmrCity());
+      LOG.info("GCG getCmrName4: " + record.getCmrName4());
+
     }
   }
 
