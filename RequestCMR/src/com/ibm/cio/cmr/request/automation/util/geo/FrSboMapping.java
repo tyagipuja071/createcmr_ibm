@@ -14,7 +14,7 @@ public class FrSboMapping {
   private String postalCdStarts;
   private String countryUse;
   private String countryLanded;
-  private String city;
+  // private String city;
 
   public String getIsicCds() {
     return isicCds;
@@ -72,12 +72,12 @@ public class FrSboMapping {
     this.countryLanded = countryLanded;
   }
 
-  public String getCity() {
-    return city;
-  }
+  // public String getCity() {
+  // return city;
+  // }
 
-  public void setCity(String city) {
-    this.city = city;
-  }
+  // public void setCity(String city) {
+  // this.city = city;
+  // }
 
 }

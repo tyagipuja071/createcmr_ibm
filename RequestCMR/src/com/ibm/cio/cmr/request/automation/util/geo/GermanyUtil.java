@@ -6,8 +6,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
@@ -85,6 +87,7 @@ public class GermanyUtil extends AutomationUtil {
 
       digester.addBeanPropertySetter("mappings/mapping/subIndustryCds", "subIndustryCds");
       digester.addBeanPropertySetter("mappings/mapping/postalCdRanges", "postalCdRanges");
+      digester.addBeanPropertySetter("mappings/mapping/postalCds", "postalCds");
       digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
       digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
       digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
@@ -718,13 +721,17 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
     } else {
-      sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
-      if (StringUtils.isNotBlank(sbo)) {
-        details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sbo);
-        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-        results.setResults("Calculated");
-      } else if (!isCoverageCalculated) {
+      /*
+       * sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd,
+       * clientTier); if (StringUtils.isNotBlank(sbo)) {
+       * details.append("Setting SBO to " + sbo +
+       * " based on IMS mapping rules.");
+       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+       * "SEARCH_TERM", data.getSearchTerm(), sbo);
+       * engineData.addPositiveCheckStatus(AutomationEngineData.
+       * COVERAGE_CALCULATED); results.setResults("Calculated"); } else
+       */
+      if (!isCoverageCalculated) {
         String sboReq = data.getSalesBusOffCd();
         if (!StringUtils.isBlank(sboReq)) {
           String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
@@ -1295,4 +1302,88 @@ public class GermanyUtil extends AutomationUtil {
     return false;
   }
 
+ public static HashMap<String, String> getSORTLFromPostalCodeMapping1H2024(String subIndustryCd, String postCd, String isuCd, String clientTier) {
+    HashMap<String, String> response = new HashMap<String, String>();
+    response.put(MATCHING, "");
+    response.put(POSTAL_CD_RANGE, "");
+    response.put(SORTL, "");
+    if (sortlMappings.isEmpty()) {
+      GermanyUtil.load();
+    }
+    if (!sortlMappings.isEmpty()) {
+      String sortl = null;
+
+      List<DeSortlMapping> filterIsuCtc = sortlMappings.stream().filter(map -> (map.getIsu().equals(isuCd) && map.getCtc().equals(clientTier)))
+          .collect(Collectors.toList());
+
+      for (DeSortlMapping mapping : filterIsuCtc) {
+        List<String> subIndustryCds = Arrays.asList(mapping.getSubIndustryCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        // filter subindustry E
+        if (("27".equals(mapping.getIsu()) && ("E").equals(mapping.getCtc())) && subIndustryCd.startsWith("E")
+            && StringUtils.isNotBlank(mapping.getSubIndustryCds()) && subIndustryCds.contains(subIndustryCd)) {
+          if (StringUtils.isNotBlank(mapping.getPostalCds())) {
+            List<String> postalCodes = Arrays.asList(mapping.getPostalCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+            if (postalCodes.contains(postCd)) {
+              sortl = mapping.getSortl();
+              response.put(MATCHING, "Exact Match");
+              response.put(SORTL, mapping.getSortl());
+              // response.put(POSTAL_CD_RANGE, "- No Postal Code Range Defined
+              // -");
+              return response;
+            }
+          }
+        } else if (("27".equals(mapping.getIsu()) && ("E").equals(mapping.getCtc())) && !subIndustryCd.startsWith("E")
+            && StringUtils.isBlank(mapping.getSubIndustryCds())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCds())) {
+            List<String> postalCodes = Arrays.asList(mapping.getPostalCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+            if (postalCodes.contains(postCd)) {
+              sortl = mapping.getSortl();
+              response.put(MATCHING, "Exact Match");
+              response.put(SORTL, mapping.getSortl());
+              // response.put(POSTAL_CD_RANGE, "- No Postal Code Range Defined
+              // -");
+              return response;
+            }
+          }
+        } else if (("36".equals(mapping.getIsu()) && ("Y").equals(mapping.getCtc())) && StringUtils.isBlank(mapping.getSubIndustryCds())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCds())) {
+            List<String> postalCodes = Arrays.asList(mapping.getPostalCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+            if (postalCodes.contains(postCd)) {
+              sortl = mapping.getSortl();
+              response.put(MATCHING, "Exact Match");
+              response.put(SORTL, mapping.getSortl());
+              // response.put(POSTAL_CD_RANGE, "- No Postal Code Range Defined
+              // -");
+              return response;
+            }
+          }
+        }
+      }
+    }
+    return response;
+  }
+
+  public static void load() {
+    if (GermanyUtil.sortlMappings.isEmpty()) {
+      Digester digester = new Digester();
+      digester.setValidating(false);
+      digester.addObjectCreate("mappings", ArrayList.class);
+
+      digester.addObjectCreate("mappings/mapping", DeSortlMapping.class);
+
+      digester.addBeanPropertySetter("mappings/mapping/subIndustryCds", "subIndustryCds");
+      digester.addBeanPropertySetter("mappings/mapping/postalCdRanges", "postalCdRanges");
+      digester.addBeanPropertySetter("mappings/mapping/postalCds", "postalCds");
+      digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
+      digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
+      digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
+      digester.addSetNext("mappings/mapping", "add");
+      try {
+        InputStream is = ConfigUtil.getResourceStream("de-sortl-mapping.xml");
+        GermanyUtil.sortlMappings = (ArrayList<DeSortlMapping>) digester.parse(is);
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml.", e);
+      }
+    }
+  }
 }
