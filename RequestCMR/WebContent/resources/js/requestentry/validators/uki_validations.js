@@ -595,7 +595,6 @@ function setClientTierBasedOnIsuUKI() {
   var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
   var isuCtcVals = {
-    '32' : 'T',
     '34' : 'Q',
     '36' : 'Y',
     '27' : 'E'
@@ -617,7 +616,6 @@ function lockIsuCtcUKI() {
   var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
   var isuCtcVals = {
-    '32' : 'T',
     '34' : 'Q',
     '36' : 'Y',
     '27' : 'E'
@@ -9970,8 +9968,8 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var activeIsuCd = [ '32', '34', '36', '27' ];
-  var activeCtc = [ 'Q', 'Y', 'T', 'E' ];
+  var activeIsuCd = ['34', '36', '27' ];
+  var activeCtc = [ 'Q', 'Y', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -10351,8 +10349,8 @@ function clientTierValidatorIT() {
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
-  var activeIsuCd = [ '32', '34', '36', '27' ];
-  var activeCtc = [ 'Q', 'Y', 'T', 'E' ];
+  var activeIsuCd = [ '34', '36', '27' ];
+  var activeCtc = [ 'Q', 'Y', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
