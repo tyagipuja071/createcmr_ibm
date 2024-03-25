@@ -4767,6 +4767,8 @@ function setSboValueBasedOnIsuCtcIE(value) {
   var clientTier = FormManager.getActualValue('clientTier');
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
+  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   var isuList = [ '34', '36', '32' ];
 
   if (reqType == 'U') {
@@ -4814,8 +4816,8 @@ function setSboValueBasedOnIsuCtcIE(value) {
     }
   } else if (isuCd == '36' && clientTier == 'Y') {
     if (custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
-      FormManager.setValue('salesBusOffCd', '020');
-      FormManager.setValue('repTeamMemberNo', 'SPA020');
+      FormManager.setValue('salesBusOffCd', salesBusOffCd);
+      FormManager.setValue('repTeamMemberNo', repTeamMemberNo);
     }
   } else if (isuCd == '04' && clientTier == '') {
     if (custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
@@ -7440,11 +7442,18 @@ function addSBOSRLogicIE(clientTier) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var _isuCd = FormManager.getActualValue('isuCd');
   var _clientTier = FormManager.getActualValue('clientTier');
+  var isuCtc = _isuCd + _clientTier;
+
+  // skip 36Y to avoid prefilling values since multiple combinations
+  // of Sales Rep No and SBO are available in 1H24 coverage
+  var isuCtcList = [ '36Y' ];
+  if (isuCtcList.includes(isuCtc)) {
+    return;
+  }
 
   var salesRepValue = [];
   var sboValues = [];
   if (_isuCd != '') {
-    var isuCtc = _isuCd + _clientTier;
     var qParams = null;
     var results = null;
 
@@ -8225,7 +8234,7 @@ function validateSboSrForIsuCtcIE() {
         if (isSubGrpNull || reqType != 'C') {
           return new ValidationResult(null, true);
         }
-        var isuCtcList = [ '04', '5K', '21', '32T', '34Q', '36Y' ];
+        var isuCtcList = [ '04', '5K', '21', '27E', '32T', '34Q', '36Y' ];
         if (!isuCtcList.includes(isuCTC) || isSboNull || isSrNull) {
           return new ValidationResult(null, true);
         }
