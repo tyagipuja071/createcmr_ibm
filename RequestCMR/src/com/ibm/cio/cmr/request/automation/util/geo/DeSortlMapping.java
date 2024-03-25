@@ -9,6 +9,7 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 public class DeSortlMapping {
   private String subIndustryCds;
   private String postalCdRanges;
+  private String postalCds;
   private String isu;
   private String ctc;
   private String sortl;
@@ -27,6 +28,14 @@ public class DeSortlMapping {
 
   public void setPostalCdRanges(String postalCdRanges) {
     this.postalCdRanges = postalCdRanges;
+  }
+
+  public String getPostalCds() {
+    return postalCds;
+  }
+
+  public void setPostalCds(String postalCds) {
+    this.postalCds = postalCds;
   }
 
   public String getIsu() {

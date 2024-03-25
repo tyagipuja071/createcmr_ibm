@@ -508,8 +508,12 @@ public class AustriaUtil extends AutomationUtil {
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), queryResult.getSearchTerm());
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), queryResult.getInac());
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), queryResult.getEnterprise());
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(),
+                queryResult.getSearchTerm());
+
             details.append("Data calculated based on CMR Data:").append("\n");
             details.append(" - SORTL = " + queryResult.getSearchTerm()).append("\n");
+            details.append(" - SALES_BO_CD = " + queryResult.getSearchTerm()).append("\n");
             details.append(" - INAC Code = " + queryResult.getInac()).append("\n");
             details.append(" - Enterprise = " + queryResult.getEnterprise()).append("\n");
             engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
@@ -519,14 +523,13 @@ public class AustriaUtil extends AutomationUtil {
         }
       }
     } else {
-      switch (scenario) {
-      case SCENARIO_COMMERCIAL:
-      case SCENARIO_CROSS_COMMERICAL:
-      case SCENARIO_THIRD_PARTY_DC:
-      case SCENARIO_PRIVATE_CUSTOMER:
-        sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), isuCd, clientTier);
-        break;
-      }
+
+      /*
+       * switch (scenario) { case SCENARIO_COMMERCIAL: case
+       * SCENARIO_CROSS_COMMERICAL: case SCENARIO_THIRD_PARTY_DC: case
+       * SCENARIO_PRIVATE_CUSTOMER: sbo = getSBO(entityManager,
+       * data.getSubIndustryCd(), isuCd, clientTier); break; }
+       */
 
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
           && covList.contains(coverage)) {
@@ -534,12 +537,15 @@ public class AustriaUtil extends AutomationUtil {
         overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
         overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
       }
-      if (StringUtils.isNotBlank(sbo)) {
-        details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-        overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-        results.setResults("Calculated");
-      } else if (!isCoverageCalculated) {
+      /*
+       * if (StringUtils.isNotBlank(sbo)) { details.append("Setting SBO to " +
+       * sbo + " based on IMS mapping rules.");
+       * overrides.addOverride(covElement.getProcessCode(), "DATA",
+       * "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+       * engineData.addPositiveCheckStatus(AutomationEngineData.
+       * COVERAGE_CALCULATED); results.setResults("Calculated"); } else
+       */
+      if (!isCoverageCalculated) {
         String sboReq = data.getSalesBusOffCd();
         if (!StringUtils.isBlank(sboReq)) {
           String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
@@ -561,25 +567,16 @@ public class AustriaUtil extends AutomationUtil {
 
   }
 
-  private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
+  private String getSBO(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    if (StringUtils.isNotBlank(subIndustryCd) && ("32S".equals(isuCtc) || "32N".equals(isuCtc) || "32T".equals(isuCtc) || "34Q".equals(isuCtc))) {
-      String ims = subIndustryCd.substring(0, 1);
-      String sql = ExternalizedQuery.getSql("AUTO.AT.GET_SBOLIST_FROM_ISUCTC");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isuCtc + "%");
-      query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
-      query.setParameter("UPDATE_BY_ID", "%" + ims + "%");
-      query.setForReadOnly(true);
-      sboValues = query.getResults(String.class);
-    } else {
-      String sql = ExternalizedQuery.getSql("AUTO.AT.GET_SBOLIST_FROM_ISU");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isuCtc + "%");
-      query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
-      sboValues = query.getResults(String.class);
-    }
+
+    String sql = ExternalizedQuery.getSql("AUTO.AT.GET_SBOLIST_FROM_ISU");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISU", "%" + isuCtc + "%");
+    query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
+    sboValues = query.getResults(String.class);
+
     if (sboValues != null) {
       return sboValues.get(0);
     } else {
