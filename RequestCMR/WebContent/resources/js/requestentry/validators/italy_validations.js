@@ -2039,7 +2039,7 @@ function setDeafultSBOLogicComm() {
 
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
-  var custType = FormManager.getActualValue('custGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var reqId = FormManager.getActualValue('reqId');
   var subRegion = FormManager.getActualValue('countryUse');
@@ -2072,8 +2072,8 @@ function setDeafultSBOLogicComm() {
     postCd = '';
   }
   if (postCd != null && postCd.length > 2) {
-    postCd = postCd.substring(0, 2);
     postCd3 = postCd.substring(0, 3);
+    postCd = postCd.substring(0, 2);
 
   }
 
