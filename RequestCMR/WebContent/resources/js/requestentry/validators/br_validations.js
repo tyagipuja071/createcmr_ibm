@@ -1583,13 +1583,14 @@ function setIsuCtcForBR(fromAddress, scenario, scenarioChanged) {
 
   var isucd21 = [ 'IBMEM', 'PRIPE', 'INTER' ];
   var custType = FormManager.getActualValue('custType');
+  var custGrp = FormManager.getActualValue('custGrp');
 
-  if (isucd21.includes(scenario) && scenarioChanged) {
+  if ((isucd21.includes(scenario) || (custGrp.includes('CROSS') && scenario.includes('BUSPR'))) && scenarioChanged) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('BUS') && scenarioChanged) {
+  } else if (custGrp.includes('LOCAL') && scenario.includes('BUSPR') && scenarioChanged) {
     FormManager.setValue('isuCd', '8B');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
