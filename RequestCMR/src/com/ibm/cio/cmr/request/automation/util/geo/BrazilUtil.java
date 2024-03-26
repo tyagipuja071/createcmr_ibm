@@ -135,7 +135,7 @@ public class BrazilUtil extends AutomationUtil {
    String custSubGrp= data.getCustSubGrp();
    String custType=admin.getCustType();
    RequestEntryModel model = requestData.createModelFromRequest();
-   List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM","BUSPR");
+   List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM");
    if(!custArray.contains(custSubGrp))
    {
     List<Addr> addr = requestData.getAddresses();
@@ -225,15 +225,8 @@ public class BrazilUtil extends AutomationUtil {
 
       }
     } else {
-      if("CROSS".equalsIgnoreCase(custGrp) && "BUSPR".equalsIgnoreCase(custType))
-      {
-        covType="P";
-        covId="0000077";
-        covDesc="Pool - BR";
-        setCoverageDetails(details,overrides,data,covType,covId,covDesc);
 
-      }
-      if(!"CROSS".equalsIgnoreCase(custGrp))
+      if(!"CROSS".equalsIgnoreCase(custGrp) )
       {
       LOG.debug("GBG is BGNONE...");
       if (covId != null) {
@@ -369,10 +362,26 @@ public class BrazilUtil extends AutomationUtil {
         }
       }
     }
-    }
-    return true;
+    }   
    }
-   return false;
+   
+   if("BUSPR".equalsIgnoreCase(custType))
+   
+   {
+     covType="P";
+     covId="0000077";
+     covDesc="Pool - BR";
+     setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+     
+   } else if(custArray.contains(custType)){
+     covType="T";
+     covId="0000461";
+     covDesc="DEFAULT - BR";
+     setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+     
+   } 
+   
+   return true;
 
   }
   
