@@ -1586,7 +1586,7 @@ function setIsuCtcForBR(fromAddress, scenario, scenarioChanged) {
   var custType = FormManager.getActualValue('custType');
   var custGrp = FormManager.getActualValue('custGrp');
 
-  if ((isucd21.includes(custType) || (custGrp.includes('CROSS') && scenario.includes('BUSPR'))) && scenarioChanged) {
+  if ((isucd21.includes(custType) || (custGrp.includes('CROSS') && custType.includes('BUSPR'))) && scenarioChanged) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
@@ -1596,7 +1596,7 @@ function setIsuCtcForBR(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (unlockISU.includes(scenario) && scenarioChanged) {
+  } else if (unlockISU.includes(custType) && scenarioChanged) {
     FormManager.resetDropdownValues(FormManager.getField('isuCd'));
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.enable('isuCd');
