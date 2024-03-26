@@ -33,7 +33,7 @@ function addHandlersForMCO2() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      limitClientTierValues(value);
+      setClientTierFieldMandt(value);
       setSalesRepValues(value);
     });
   }
@@ -215,7 +215,6 @@ function lockCmrOwnerPrefLang() {
   }
 }
 function afterConfigForMCO2() {
-  limitClientTierValues();
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
@@ -1654,40 +1653,17 @@ function resetNumeroRequired() {
   }
 }
 
-function limitClientTierValues(value) {
-  var reqType = FormManager.getActualValue('reqType');
-
-  if (!value) {
-    value = FormManager.getActualValue('isuCd');
-  }
-
-  var tierValues = null;
-  // tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
-
-  if (reqType == 'C') {
-    if (value == '32') {
-      tierValues = [ 'C', 'S', 'T', 'N' ];
-    } else if (value == '34') {
-      tierValues = [ 'V', 'A', 'Q', 'Y' ];
-    } else if (value == '21' || value == '8B') {
-      // CREATCMR-4293
-      // tierValues = [ '7' ];
-    } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-    }
-  }
-
-  if (tierValues != null) {
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
-    preSelectSingleValue(value, tierValues)
-  }
+function setClientTierFieldMandt() {
+	var isuCd = FormManager.getActualValue('isuCd');
+	if (['34', '27', '36'].includes(isuCd)) {
+		FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
+	} else {
+		FormManager.setValue('clientTier','');
+		FormManager.removeValidator('clientTier', Validators.REQUIRED);
+	}
 }
 
-function preSelectSingleValue(value, tierValues) {
-  if ((value == '21' || value == '8B') && tierValues.includes('7')) {
-    FormManager.setValue('clientTier', '');
-  }
-}
+
 
 function validateCollectionCd() {
   FormManager.addFormValidator((function() {
@@ -2567,7 +2543,14 @@ function setEntpValue(){
 			break;
 		}
 		FormManager.enable('enterprise');
-		FormManager.setValue('enterprise',entp);		
+		FormManager.setValue('enterprise',entp);	
+		if(custSubGrp == 'PRIPE'){			
+				FormManager.readOnly('enterprise');	
+		}	
+	}
+	if(['BUSPR','BUSPR','LLCBP','INTER','IBMEM'].includes(custSubGrp)){
+		FormManager.readOnly('enterprise');
+		FormManager.setValue('enterprise','');	
 	}
 	
 }
@@ -2798,7 +2781,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
 
