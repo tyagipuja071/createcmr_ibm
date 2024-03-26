@@ -1582,20 +1582,21 @@ function afterConfigForLA() {
 function setIsuCtcForBR(fromAddress, scenario, scenarioChanged) {
 
   var isucd21 = [ 'IBMEM', 'PRIPE', 'INTER' ];
+  var unlockISU = [ 'COMME', 'CC3CC', 'GOVDI', 'GOVIN', 'LEASI' ];
   var custType = FormManager.getActualValue('custType');
   var custGrp = FormManager.getActualValue('custGrp');
 
-  if ((isucd21.includes(scenario) || (custGrp.includes('CROSS') && scenario.includes('BUSPR'))) && scenarioChanged) {
+  if ((isucd21.includes(custType) || (custGrp.includes('CROSS') && scenario.includes('BUSPR'))) && scenarioChanged) {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (custGrp.includes('LOCAL') && scenario.includes('BUSPR') && scenarioChanged) {
+  } else if (custGrp.includes('LOCAL') && custType.includes('BUSPR') && scenarioChanged) {
     FormManager.setValue('isuCd', '8B');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (scenario.includes('COMME') && scenarioChanged) {
+  } else if (unlockISU.includes(scenario) && scenarioChanged) {
     FormManager.resetDropdownValues(FormManager.getField('isuCd'));
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.enable('isuCd');
