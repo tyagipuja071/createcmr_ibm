@@ -33,7 +33,6 @@ function addHandlersForMCO2() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValues(value);
       limitClientTierValues(value);
       setSalesRepValues(value);
     });
@@ -1525,6 +1524,8 @@ function checkIfCmrExist(cntry, requestCMR) {
   return false;
 }
 
+
+
 function getCntryCdByLanded(landed) {
   var cntryCd = cmr.query('GET_CNTRY_CD_BY_LANDED', {
     COUNTRY : landed,
@@ -1541,6 +1542,8 @@ function getCMRStatus(cntry, requestCMR) {
 
   return cmrStatus.ret1;
 }
+
+
 
 function enableCMRNOMCO2GLLC() {
   console.log('enabling/disabling cmr no...');
@@ -2476,12 +2479,13 @@ function StcOrderBlockValidation() {
 }
 
 // Coverage 1H 2024
-function setCovValues2024CEWA(){
-	console.log('----------- setCovValues2024CEE -------------');
+function setEntpValue(){
+	console.log('----------- setEntpValue -------------');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 	var entp = '';
-	if(['COMME','GOVRN','THDPT','LLC','LLCEX','PRICU'].includes(custSubGrp) && !isMEACntry){
+	if(['COMME','GOVRN','THDPT','LLC','LLCEX','PRICU'].includes(custSubGrp) || (custGrp == 'CROSS' && !isMEACntry())){
 		 switch (cntry) {
 			case '610':
 			case '669':
@@ -2562,8 +2566,8 @@ function setCovValues2024CEWA(){
 			entp = '911743';
 			break;
 		}
-		FormManager.setValue('enterprise',entp);
-		
+		FormManager.enable('enterprise');
+		FormManager.setValue('enterprise',entp);		
 	}
 	
 }
@@ -2574,14 +2578,16 @@ function isMEACntry() {
 		'MZ', 'NA', 'NE', 'NG', 'OM', 'PK', 'PS', 'QA', 'RW', 'SA', 'SC', 'SD', 'SL', 'SN', 'SO', 'ST', 'SY', 'SZ', 'TD', 'TG', 'TN',
 		'TR', 'TZ', 'UG', 'YE', 'ZA', 'ZM', 'ZW'];
 
-	var zs01landCntry = '';
+	var zs01landCntry = FormManager.getActualValue('landCntry');
+	if (zs01landCntry == ''){
 	var result1 = cmr.query('LANDCNTRY.IT', {
 		REQID: FormManager.getActualValue('reqId')
 	});
 	if (result1 != null && result1.ret1 != undefined) {
 		zs01landCntry = result1.ret1;
+	}	
 	}
-
+	
 	if (MEACntries.includes(zs01landCntry)) {
 		return true;
 	} else {
@@ -2754,6 +2760,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addAddrValidatorMCO2, GEOHandler.MCO2);
   GEOHandler.addAddrFunction(disableAddrFieldsCEWA, GEOHandler.MCO2);
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.MCO2);
+  GEOHandler.addAddrFunction(setEntpValue, GEOHandler.MCO2);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO2, GEOHandler.ROLE_PROCESSOR, true);
@@ -2773,8 +2780,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
   GEOHandler.registerValidator(addTinNumberValidationKn, [ SysLoc.KENYA ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
-  // GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
-  // GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addPpsCeidValidator, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
@@ -2818,5 +2823,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(checkChecklistButtons, [ '842' ]);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(validateISUCTCEnterprise, GEOHandler.MCO2, null, true);
-
+  GEOHandler.addAfterConfig(setEntpValue, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(setEntpValue, GEOHandler.MCO2);
 });
