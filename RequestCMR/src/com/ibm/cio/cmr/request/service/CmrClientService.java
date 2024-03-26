@@ -253,7 +253,7 @@ public class CmrClientService extends BaseSimpleService<Object> {
           .setIndustryCode(data.getSubIndustryCd() != null && data.getSubIndustryCd().length() > 0 ? data.getSubIndustryCd().substring(0, 1) : null);
       coverage.setIndustrySolutionUnit(data.getIsuCd());
       coverage.setNationalTaxID(data.getTaxCd1());
-      if("631".equalsIgnoreCase(data.getCmrIssuingCntry()))
+      if(!"631".equalsIgnoreCase(data.getCmrIssuingCntry()))
       {
       coverage.setSORTL(data.getSearchTerm());
       }
