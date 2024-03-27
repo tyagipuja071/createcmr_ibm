@@ -684,7 +684,7 @@ function addHandlersForBELUX() {
           FormManager.setValue('commercialFinanced', 'A0008873');
         } else if (isuCd == '5K') {
           FormManager.setValue('commercialFinanced', 'A0009209');
-        } else if (isuCd == '34' || isuCd == '36' || isuCd == '04' || isuCd == '28' || isuCd == '27') {
+        } else if (isuCd == '34' || isuCd == '36' || isuCd == '04' || isuCd == '28') {
           FormManager.setValue('commercialFinanced', '');
         }
       } else if (luComScenarioList.includes(subGrp) && countryUse == '624LU' && reqType == 'C') {
