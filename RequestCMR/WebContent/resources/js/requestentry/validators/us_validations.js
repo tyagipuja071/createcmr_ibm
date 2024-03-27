@@ -1509,7 +1509,8 @@ function custClassIsicValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function validateCoverageData() { FormManager.addFormValidator((function() {
+function validateCoverageData() {
+FormManager.addFormValidator((function() {
             return {
               validate : function() {
                 if (FormManager.getActualValue('reqType') != 'U') {
