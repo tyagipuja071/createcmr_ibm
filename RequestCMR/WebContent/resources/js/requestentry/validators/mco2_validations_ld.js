@@ -1659,7 +1659,17 @@ function setClientTierFieldMandt() {
 		FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
 	} else {
 		FormManager.setValue('clientTier','');
-		FormManager.removeValidator('clientTier', Validators.REQUIRED);
+		FormManager.resetValidations('clientTier');
+	}
+	
+	if(isuCd == '34'){
+	FormManager.setValue('clientTier','Q');
+	}else if(isuCd == '36'){
+	FormManager.setValue('clientTier','Y');
+	}else if(isuCd == '27'){
+	FormManager.setValue('clientTier','E');
+	}else{
+		FormManager.setValue('clientTier','');	
 	}
 }
 
@@ -2538,6 +2548,9 @@ function setEntpValue(){
 			entp = '911743';
 			break;
 		}
+		if(FormManager.getActualValue('isuCd') == '5K'){
+			entp = '';
+		}
 		FormManager.enable('enterprise');
 		FormManager.setValue('enterprise',entp);	
 		if(custSubGrp == 'PRICU'){			
@@ -2766,6 +2779,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTinNumberValidationKn, [ SysLoc.KENYA ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addPpsCeidValidator, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(setClientTierFieldMandt, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(gmllcExistingCustomerAdditionalValidations, GEOHandler.MCO2, null, true);
