@@ -27,7 +27,7 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (_landCntryHandler == null && FormManager.getField('landCntry')) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       disablePOBox();
-//      postalCodeRequired();
+// postalCodeRequired();
     });
   }
 }
@@ -2191,8 +2191,7 @@ function setEnterpriseBehaviour() {
             FormManager.readOnly('enterprise');
             FormManager.addValidator('enterprise', Validators.REQUIRED, ['Enterprise'], 'MAIN_IBM_TAB');
         } else {
-            FormManager.readOnly('enterprise');
-            FormManager.setValue('enterprise', '');
+            FormManager.enable('enterprise');
             FormManager.removeValidator('enterprise', Validators.REQUIRED);
         }
     }
@@ -2309,17 +2308,16 @@ function getExitingValueOfCTCAndIsuCD() {
 function setDefaultEnterpriseBasedOnSubInd(value) {
     // '27E' Logic
     var reqType = FormManager.getActualValue('reqType');
-    if (reqType != 'C' || !value) {
-        return;
-    }
     var countryUse = FormManager.getActualValue('countryUse');
     var subInd = FormManager.getActualValue('subIndustryCd');
     var isuCd = FormManager.getActualValue('isuCd');
     var ctc = FormManager.getActualValue('clientTier');
     var isuCtc = isuCd + ctc;
-    if (isuCtc != '27E')
-        return;
-    else {
+    var isuCtcForBlankEntp = ['04', '12', '28', '4F', '5K'];
+    if (isuCtc != '27E' && isuCtcForBlankEntp.includes(isuCtc)){
+      FormManager.setValue('enterprise', '');
+      return ; 
+    } else {
         if (subInd != null || subInd != undefined || subInd != '') {
             subInd = subInd[0];
         }
@@ -2452,6 +2450,7 @@ dojo.addOnLoad(function() {
 
     // CREATCMR-7985
     GEOHandler.addAfterTemplateLoad(setEnterpriseBehaviour, [SysLoc.SOUTH_AFRICA]);
+    GEOHandler.addAfterConfig(setEnterpriseBehaviour, [SysLoc.SOUTH_AFRICA]);
     GEOHandler.registerValidator(enterpriseValidator, [SysLoc.SOUTH_AFRICA], null, true);
     GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO1, null, true);
 
