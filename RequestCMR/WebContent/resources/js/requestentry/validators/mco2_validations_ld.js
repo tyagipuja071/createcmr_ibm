@@ -2210,7 +2210,7 @@ function clientTierCodeValidator() {
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
 
-  if (((isuCode == '21' || isuCode == '8B' || isuCode == '5K') && reqType == 'C') || ((isuCode != '34'  && isuCode != '36') && reqType == 'U')) {
+  if ((!['34','36','27'].includes(isuCode) && isuCode != '32' && reqType == 'C')) {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -2256,17 +2256,13 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'\'.');
     }
-  } else if (isuCode != '36' || isuCode != '34') {
-    if (clientTierCode == '') {
-      return new ValidationResult(null, true);
-    } else {
-      return new ValidationResult({
+  } else if(isuCode == '32' && clientTierCode == 'T' ){
+	 return new ValidationResult({
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept blank.');
-    }
-  } else {
+      }, false, 'ISU-CTC combination is obsolete.');
+   }else {
     if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -2279,7 +2275,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'T\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
     }
   }
 }
@@ -2544,7 +2540,7 @@ function setEntpValue(){
 		}
 		FormManager.enable('enterprise');
 		FormManager.setValue('enterprise',entp);	
-		if(custSubGrp == 'PRIPE'){			
+		if(custSubGrp == 'PRICU'){			
 				FormManager.readOnly('enterprise');	
 		}	
 	}
@@ -2587,6 +2583,11 @@ function validateISUCTCEnterprise() {
 				var entp = FormManager.getActualValue('enterprise');
 				var valid = false;
 				var valid_Entp = '';
+				var reqType = FormManager.getActualValue('reqType');
+				
+				if(reqType == 'U'){
+				return new ValidationResult(null, true);
+				}
 
 				if (['BUSPR', 'LLCBP'].includes(custSubGrp) && ['8B'].includes(isuCTC) && entp == '') {
 					valid = true;
@@ -2598,6 +2599,7 @@ function validateISUCTCEnterprise() {
 						valid = (entp == valid_Entp);
 					} else if (isuCTC == '36Y') {
 						valid = ['BUILD1', 'DISTR1', 'SRVCE1'].includes(entp);
+						valid_Entp = 'BUILD1,DISTR1,SRVCE1'
 					} else if (isuCTC == '5K' && entp == '') {
 						valid = true;
 					}
@@ -2606,7 +2608,7 @@ function validateISUCTCEnterprise() {
 				if (valid) {
 					return new ValidationResult(null, true);
 				} else {
-					return new ValidationResult(null, false, 'Please select correct ISU , CTC and Enterprise combination.');
+					return new ValidationResult(null, false, 'Please select correct ISU , CTC and Enterprise '+valid_Entp+' combination.');
 				}
 			}
 		};
