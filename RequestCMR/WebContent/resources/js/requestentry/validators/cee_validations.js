@@ -4687,13 +4687,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else if (isuCode == '34') {
-    if (clientTierCode == '') {
-      return new ValidationResult({
-        id: 'clientTier',
-        type: 'text',
-        name: 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Q') {
+     if (clientTierCode == 'Q') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -4703,13 +4697,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept \'Q\'\'.');
     }
   }else if (isuCode == '36') {
-    if (clientTierCode == '') {
-      return new ValidationResult({
-        id: 'clientTier',
-        type: 'text',
-        name: 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'Y') {
+    if (clientTierCode == 'Y') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -4719,13 +4707,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept \'Y\'\'.');
     }
   } else if (isuCode == '27') {
-    if (clientTierCode == '') {
-      return new ValidationResult({
-        id: 'clientTier',
-        type: 'text',
-        name: 'clientTier'
-      }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'E') {
+    if (clientTierCode == 'E') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -4905,7 +4887,8 @@ function setSBOFromDBMapping(){
   var ctc = FormManager.getActualValue('clientTier');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  
+  var sbo = FormManager.getActualValue('salesBusOffCd');
+
   if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp)){
 	return;
    }
@@ -4924,6 +4907,8 @@ function setSBOFromDBMapping(){
 		}
 		if(sboList.length == 1){
 		FormManager.setValue('salesBusOffCd',sboList[0]);
+		}else if(sboList.length > 1 && !sboList.includes(sbo)){
+	  FormManager.setValue('salesBusOffCd','');
 		}
 	}	
 }
@@ -4940,10 +4925,10 @@ function setClientTier(){
 		FormManager.setValue('clientTier','');
 	}
 	
-	if(!['27','34','36'].includes(isuCd)){
-		FormManager.removeValidator('clientTier', Validators.REQUIRED);
-	}else if(['27','34','36'].includes(isuCd)){
+	 if(['27','34','36'].includes(isuCd)){
 		FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
+	}else {
+		FormManager.removeValidator('clientTier', Validators.REQUIRED);
 	}
 }
 
