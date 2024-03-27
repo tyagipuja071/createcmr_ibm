@@ -2994,11 +2994,9 @@ function setMrcCdToReadOnly() {
       if (role == 'REQUESTER') {
         FormManager.readOnly('mrcCd');
         FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('isuCd');
       } else {
         FormManager.enable('mrcCd');
         FormManager.enable('salesBusOffCd');
-        FormManager.enable('isuCd');
       }
     }
   }
@@ -3337,7 +3335,7 @@ function lockFieldsForLA() {
   var custType =  FormManager.getActualValue('custType');
   var userRole = FormManager.getActualValue('userRole').toUpperCase();
   var custGrpSet = new Set([ 'IBMEM','PRIPE','BUSPR','INTOU','INTUS']);
-  var custTypeSet = new Set([ 'IBMEM','PRIPE','BUSPR','INTOU','INTUS']);
+  var custTypeSet = new Set([ 'IBMEM','PRIPE','BUSPR','INTOU','INTUS','INTER']);
 
   if (reqType != 'C') {
     return;
@@ -3348,7 +3346,7 @@ function lockFieldsForLA() {
       FormManager.readOnly('clientTier');
     }
   } else {
-    if (userRole == 'REQUESTER' && custTypeSet.has(custType)) {
+    if (custTypeSet.has(custType)) {
       FormManager.setValue('clientTier', '');
       FormManager.readOnly('clientTier');
     }
