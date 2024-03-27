@@ -2548,7 +2548,7 @@ function setEntpValue(){
 			entp = '911743';
 			break;
 		}
-		if(isu == '5K'){
+		if(FormManager.getActualValue('isuCd') == '5K'){
 			entp = '';
 		}
 		FormManager.enable('enterprise');
