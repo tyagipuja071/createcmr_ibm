@@ -4,29 +4,6 @@
  * Contains the specific validations and configuration adjustments for US (897)
  */
 
-function addClientTierDefaultLogic() {
-  if (_clientTierHandler == null) {
-    _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      value = FormManager.getActualValue('clientTier');
-      var cntry = FormManager.getActualValue('cmrIssuingCntry');
-      if (cntry != '766' && cntry != '897') {
-        FormManager.enable('isuCd');
-      }
-      if (PageManager.isReadOnly()) {
-        FormManager.readOnly('isuCd');
-      } else {
-        if (cntry != '766' && cntry != '897') {
-          FormManager.enable('isuCd');
-        }
-      }
-    });
-  }
-
-  if (_clientTierHandler && _clientTierHandler[0]) {
-    _clientTierHandler[0].onChange();
-  }
-}
-
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usTaxcd1Handler = null;
@@ -1611,10 +1588,7 @@ function validateCoverageData() {
                   }
 
                   if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
-                    return new ValidationResult(
-                        null,
-                        false,
-                        'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t '
+                    return new ValidationResult(null,false,'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t '
                             + 'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
                   }
                 }
