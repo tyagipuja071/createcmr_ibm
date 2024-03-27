@@ -659,12 +659,12 @@ var TemplateService = (function() {
               if (isuCd == '8B') {
                 FormManager.setValue('clientTier', '');
               }
-              if (isuCd == '21') {
+              if (isuCd == '21' && FormManager.getActualValue('cmrIssuingCntry') == '649') {
                 FormManager.setValue('clientTier', '');
                 FormManager.readOnly('isuCd');
                 FormManager.readOnly('clientTier');
               }
-              if (isuCd == '36') {
+              if (isuCd == '36' && FormManager.getActualValue('cmrIssuingCntry') == '649') {
                 FormManager.setValue('clientTier', 'Y');
                 FormManager.readOnly('isuCd');
                 FormManager.readOnly('clientTier');

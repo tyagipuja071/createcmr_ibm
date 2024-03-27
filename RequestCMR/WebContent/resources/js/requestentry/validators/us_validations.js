@@ -4,6 +4,29 @@
  * Contains the specific validations and configuration adjustments for US (897)
  */
 
+function addClientTierDefaultLogic() {
+  if (_clientTierHandler == null) {
+    _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      value = FormManager.getActualValue('clientTier');
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      if (cntry != '766' && cntry != '897') {
+        FormManager.enable('isuCd');
+      }
+      if (PageManager.isReadOnly()) {
+        FormManager.readOnly('isuCd');
+      } else {
+        if (cntry != '766' && cntry != '897') {
+          FormManager.enable('isuCd');
+        }
+      }
+    });
+  }
+
+  if (_clientTierHandler && _clientTierHandler[0]) {
+    _clientTierHandler[0].onChange();
+  }
+}
+
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
 var _usTaxcd1Handler = null;
@@ -529,12 +552,10 @@ function afterConfigForUS() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-
   } else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
   }
-
   if (_pagemodel.reqType == 'U') {
     FormManager.show('CustClass', 'custClass');
     if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
