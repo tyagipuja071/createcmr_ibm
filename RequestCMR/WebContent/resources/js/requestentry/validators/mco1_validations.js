@@ -2221,15 +2221,14 @@ function enterpriseValidator() {
                     }, false, 'Enterprise Number should be numeric only.');
                 }
 
-                if (enterprise.length >= 1 && (!checkCondition36Y(countryUse, enterprise, isuCtc) ||
-                        !checkCondition34Q(countryUse, enterprise, isuCtc) ||
-                        !checkCondition27E(countryUse, enterprise, isuCtc) ||
-                        !checkConditionIsuCtcWithBlank(enterprise, isuCtc))) {
-                    return new ValidationResult({
-                        id: 'enterprise',
-                        type: 'text',
-                        name: 'enterprise'
-                    }, false, 'Enterprise Number is not valid for given ISU, CTC combination');
+                if(isuCtc == '36Y'){
+                  return checkCondition36Y(countryUse, enterprise, isuCtc);
+                } else if (isuCtc == '34Q'){
+                  return checkCondition34Q(countryUse, enterprise, isuCtc);
+                } else if (isuCtc == '27E'){
+                  return checkCondition27E(countryUse, enterprise, isuCtc);
+                } else {
+                  return checkConditionIsuCtcWithBlank(enterprise, isuCtc);
                 }
                 return new ValidationResult(null, true);
             }
@@ -2242,32 +2241,55 @@ function checkCondition36Y(countryUse, enterprise, isuCtc) {
     var validEnterpriseIdsLS = ['012097', '012098', '012099'];
     var validEnterpriseIdsNA = ['009814', '012095', '012096'];
     var validEnterpriseIdsSZ = ['012100', '012101', '012102'];
-    var check = true;
-    if (isuCtc == '36Y' && ((!validEnterpriseIdsZA_36Y.includes(enterprise) && countryUse == '864') ||
-            (!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS') ||
-            (!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA') ||
-            (!validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ'))) {
-        check = false;
-    }
-    return check;
+      if((!validEnterpriseIdsZA_36Y.includes(enterprise) && countryUse == '864')){
+        return new ValidationResult({
+          id : 'enterprise',
+          type : 'text',
+          name : 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_36Y);
+      } else if(!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS'){
+        return new ValidationResult({
+          id : 'enterprise',
+          type : 'text',
+          name : 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsLS);
+      } else if(!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA'){
+        return new ValidationResult({
+          id : 'enterprise',
+          type : 'text',
+          name : 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsNA);
+      } else if(validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ'){
+        return new ValidationResult({
+          id : 'enterprise',
+          type : 'text',
+          name : 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsSZ);
+      }
 }
 
 function checkCondition34Q(countryUse, enterprise, isuCtc) {
     var validEnterpriseIdsZA_34Q = ['004179', '011678'];
     var check = true;
-    if (isuCtc == '34Q' && !validEnterpriseIdsZA_34Q.includes(enterprise) && countryUse == '864') {
-        check = false;
+    if (!validEnterpriseIdsZA_34Q.includes(enterprise) && countryUse == '864') {
+      return new ValidationResult({
+        id : 'enterprise',
+        type : 'text',
+        name : 'enterprise'
+      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_34Q);
     }
-    return check;
 }
 
 function checkConditionIsuCtcWithBlank(enterprise, isuCtc) {
     var isuCtcWithBlank = ['04', '12', '28', '4F', '5K'];
     var check = true;
     if (isuCtcWithBlank.includes(isuCtc) && enterprise != '') {
-        check = false;
+      return new ValidationResult({
+        id : 'enterprise',
+        type : 'text',
+        name : 'enterprise'
+      }, false, 'Enterprise can only accept Blank');
     }
-    return check;
 }
 
 function checkCondition27E(countryUse, enterprise, isuCtc) {
@@ -2275,14 +2297,31 @@ function checkCondition27E(countryUse, enterprise, isuCtc) {
     var validEnterpriseIdsLS = '910510';
     var validEnterpriseIdsNA = '909813';
     var validEnterpriseIdsSZ = '910509';
-    var check = true;
-    if (isuCtc == '27E' && ((!validEnterpriseIdsZA_27E.includes(enterprise) && countryUse == '864') ||
-            (!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS') ||
-            (!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA') ||
-            (!validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ'))) {
-        check = false;
+    if(!validEnterpriseIdsZA_27E.includes(enterprise) && countryUse == '864'){
+      return new ValidationResult({
+        id : 'enterprise',
+        type : 'text',
+        name : 'enterprise'
+      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_27E);
+    } else if(!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS'){
+      return new ValidationResult({
+        id : 'enterprise',
+        type : 'text',
+        name : 'enterprise'
+      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsLS);
+    } else if(!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA'){
+      return new ValidationResult({
+        id : 'enterprise',
+        type : 'text',
+        name : 'enterprise'
+      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsNA);
+    } else if(!validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ'){
+      return new ValidationResult({
+        id : 'enterprise',
+        type : 'text',
+        name : 'enterprise'
+      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsSZ);
     }
-    return check;
 }
 
 function getExitingValueOfCTCAndIsuCD() {
@@ -2316,7 +2355,7 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
     var isuCtcForBlankEntp = ['04', '12', '28', '4F', '5K'];
     if (isuCtc != '27E' && isuCtcForBlankEntp.includes(isuCtc)){
       FormManager.setValue('enterprise', '');
-      return ; 
+      return;
     } else {
         if (subInd != null || subInd != undefined || subInd != '') {
             subInd = subInd[0];
