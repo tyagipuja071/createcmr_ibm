@@ -1544,7 +1544,7 @@ function afterConfigForLA() {
   // Story :1278109- By Mukesh Kumar
   if (_customerTypeHandler == null) {
     _customerTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
-
+      setIsuCtconCustTypeCH(value);
     });
   }
 
@@ -1579,6 +1579,32 @@ function afterConfigForLA() {
     }
   }
 }
+
+function setIsuCtconCustTypeCH(custType) {
+  var isucd21 = [ 'IBMEM', 'PRIPE', 'INTER' ];
+  var unlockISU = [ 'COMME', 'CC3CC', 'GOVDI', 'GOVIN', 'LEASI' ];
+  var custGrp = FormManager.getActualValue('custGrp');
+
+  if ((isucd21.includes(custType) || (custGrp.includes('CROSS') && custType.includes('BUSPR')))) {
+    FormManager.setValue('isuCd', '21');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  } else if (custGrp.includes('LOCAL') && custType.includes('BUSPR')) {
+    FormManager.setValue('isuCd', '8B');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  } else if (unlockISU.includes(custType)) {
+    FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.enable('isuCd');
+    FormManager.setValue('isuCd', '');
+    FormManager.readOnly('clientTier');
+
+  }
+}
+
 function setIsuCtcForBR(fromAddress, scenario, scenarioChanged) {
 
   var isucd21 = [ 'IBMEM', 'PRIPE', 'INTER' ];
