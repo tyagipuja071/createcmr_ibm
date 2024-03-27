@@ -517,16 +517,16 @@ function updateMainCustomerNames(cntry, addressMode, saving, finalSave, force) {
 var _clientTierHandler = null;
 function addClientTierDefaultLogic() {
   if (_clientTierHandler == null) {
-    _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
+    _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       value = FormManager.getActualValue('clientTier');
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
-      if (cntry != '766') {
+      if (cntry != '766' && cntry != '897') {
         FormManager.enable('isuCd');
       }
       if (PageManager.isReadOnly()) {
         FormManager.readOnly('isuCd');
       } else {
-        if (cntry != '766') {
+        if (cntry != '766' && cntry != '897') {
           FormManager.enable('isuCd');
         }
       }

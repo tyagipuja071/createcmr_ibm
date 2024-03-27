@@ -463,26 +463,44 @@ public class USUtil extends AutomationUtil {
         }
       }
 
+      if (StringUtils.isBlank(data.getGbgId())) {
+
+        if (scenarioSubType.equalsIgnoreCase("Private Household CMR")) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
+        }
+        if (scenarioSubType.equalsIgnoreCase("ECOSYSTEM")) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
+        } else {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 27-E.").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "27");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "E");
+        }
+
+      } else {
+
+        if (scenarioSubType.equalsIgnoreCase("Private Household CMR")) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
+        }
+        if (scenarioSubType.equalsIgnoreCase("Commercial - Ecosystem")) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
+        } else {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 27-E.").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), data.getIsuCd());
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), data.getClientTier());
+        }
+
+      }
+
       // set ISU CTC if not found
       if (StringUtils.isBlank(data.getIsuCd())) {
-        if (StringUtils.isBlank(data.getIsuCd())) {
-
-          if (scenarioSubType.equalsIgnoreCase("Private Household CMR")) {
-            details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
-          }
-          if (scenarioSubType.equalsIgnoreCase("Commercial - Ecosystem")) {
-            details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
-          } else if (!scenarioSubType.equalsIgnoreCase("Private Household CMR") && (!scenarioSubType.equalsIgnoreCase("Commercial - Ecosystem"))) {
-            details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 27-E.").append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "27");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "E");
-          }
-
-        }
 
         if (StringUtils.isNotEmpty(data.getIsicCd())) {
           if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
