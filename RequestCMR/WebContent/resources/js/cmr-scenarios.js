@@ -652,11 +652,22 @@ var TemplateService = (function() {
         }
 
         if (scenarioChanged == true) {
-          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry'))) {
-            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))) {
+          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry')) || FormManager.getActualValue('cmrIssuingCntry') == '649') {
+            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))
+                || scenario == 'PRIV' || scenario == 'ECO') {
               var isuCd = FormManager.getActualValue('isuCd');
-              if (isuCd == '8B' || isuCd == '21') {
+              if (isuCd == '8B') {
                 FormManager.setValue('clientTier', '');
+              }
+              if (isuCd == '21') {
+                FormManager.setValue('clientTier', '');
+                FormManager.readOnly('isuCd');
+                FormManager.readOnly('clientTier');
+              }
+              if (isuCd == '36') {
+                FormManager.setValue('clientTier', 'Y');
+                FormManager.readOnly('isuCd');
+                FormManager.readOnly('clientTier');
               }
             }
           }
@@ -737,15 +748,18 @@ var TemplateService = (function() {
           var driver = template.driver;
           var driverFieldName = driver.fieldName;
           scenario = FormManager.getActualValue(driverFieldName);
-          var cmrCountries = [ '666', '862', '726'];
+          var cmrCountries = [ '666', '862', '726' ];
           var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) &&  !cmrCountries.includes(cmrIssuingCntry)) {
+          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) && !cmrCountries.includes(cmrIssuingCntry)) {
             scenarioChanged = true;
+          } else {
+            scenarioChanged = false; // This impl has been done for 3 countries
+            // (Greece,Cyprus,Turkey) as per
+            // CREATCMR-9532, however, it's not
+            // restricted to these only and can be
+            // used for other countries as and when
+            // required.
           }
-          else
-      	  {
-      	  scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
-      	  }
           scenarioChanged = scenarioChanged || (currentChosenScenario != '' && currentChosenScenario != scenario);
           currentChosenScenario = scenario;
 
@@ -926,14 +940,17 @@ var TemplateService = (function() {
             }
           }
         }
-        var cmrCountries = [ '666', '862', '726'];
+        var cmrCountries = [ '666', '862', '726' ];
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var scenarioChanged = false;
-        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario  &&  !cmrCountries.includes(cmrIssuingCntry)) {
+        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario && !cmrCountries.includes(cmrIssuingCntry)) {
           scenarioChanged = true;
-        }
-        else
-    	{ scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
+        } else {
+          scenarioChanged = false; // This impl has been done for 3 countries
+          // (Greece,Cyprus,Turkey) as per
+          // CREATCMR-9532, however, it's not
+          // restricted to these only and can be used
+          // for other countries as and when required.
         }
 
         if ((typeof GEOHandler) != 'undefined') {

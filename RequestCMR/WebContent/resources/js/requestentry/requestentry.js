@@ -1390,6 +1390,16 @@ function connectToCmrServices() {
         if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
+        if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+          setClusterIDAfterRetrieveAction(data.glcCode);
+        }
+        /*
+         * if (cmrCntry == SysLoc.USA && reqType == 'C' &&
+         * data.globalBuyingGroupID == null && custSubGrp != 'ECOSYSTEM' &&
+         * custSubGrp != 'PRIV') { FormManager.setValue('isuCd', '27');
+         * FormManager.setValue('clientTier', 'E');
+         * FormManager.readOnly('isuCd'); FormManager.readOnly('clientTier'); }
+         */
       }
       if (data.dunsError) {
         // errorMsg += (showError ? ', ' : '') + 'DUNS No.';

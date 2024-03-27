@@ -484,10 +484,10 @@ function afterConfigForUS() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   _usSicm = FormManager.getActualValue('usSicmen');
   _kukla = FormManager.getActualValue('custClass');
-  if (_usSicm.length > 4) {
-    _usSicm = _usSicm.substring(0, 4);
-    FormManager.setValue('usSicmen', _usSicm);
-  }
+  // if (_usSicm.length > 4) {
+  // _usSicm = _usSicm.substring(0, 4);
+  // FormManager.setValue('usSicmen', _usSicm);
+  // }
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -499,7 +499,9 @@ function afterConfigForUS() {
 
   if (reqType == 'U' && role == 'Requester') {
     FormManager.enable('isuCd');
+    FormManager.readOnly('isuCd');
     FormManager.enable('clientTier');
+    FormManager.readOnly('clientTier');
   }
   if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
     FormManager.enable('miscBillCd');
@@ -514,17 +516,20 @@ function afterConfigForUS() {
       FormManager.setValue('isuCd', '36');
       FormManager.enable('isuCd');
       FormManager.setValue('clientTier', 'Y');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
     }
   } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
     FormManager.setValue('isuCd', '28');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'IBMEM') {
+  } else if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'PRIV') {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
+
   } else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
@@ -709,9 +714,21 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
-  } else if (scenario != 'FSP POOL' && scenario != 'IBMEM') {
+  } /*
+     * else if (scenario != 'FSP POOL' && scenario != 'IBMEM' && scenario !=
+     * 'PRIV' && scenario != 'ECOSYSTEM') { FormManager.setValue('isuCd', '');
+     * FormManager.setValue('clientTier', ''); FormManager.enable('isuCd');
+     * FormManager.enable('clientTier'); }
+     */
+
+  else if (scenario != 'PRIV' && scenario != 'ECOSYSTEM') {
+    FormManager.setValue('isuCd', '');
+    FormManager.setValue('clientTier', '');
     FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+
   }
+
 }
 
 function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
@@ -1426,7 +1443,8 @@ function addressQuotationValidator() {
   FormManager.addValidator('city2', Validators.NO_QUOTATION, [ 'District' ]);
   FormManager.addValidator('bldg', Validators.NO_QUOTATION, [ 'Building' ]);
   FormManager.addValidator('floor', Validators.NO_QUOTATION, [ 'Floor' ]);
-//  FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code' ]);
+  // FormManager.addValidator('postCd', Validators.NO_QUOTATION, [ 'Zip Code'
+  // ]);
   FormManager.addValidator('custPhone', Validators.NO_QUOTATION, [ 'Phone #' ]);
   FormManager.addValidator('custFax', Validators.NO_QUOTATION, [ 'FAX' ]);
   FormManager.addValidator('transportZone', Validators.NO_QUOTATION, [ 'Transport Zone' ]);
@@ -1494,89 +1512,94 @@ function custClassIsicValidator() {
 }
 
 function validateCoverageData() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('reqType') != 'U') {
-          return new ValidationResult(null, true);
-        }
-        var installAtUpdated = false;
-        for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-          record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-          if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-            record = _allAddressData[i];
-          }
-          type = record.addrType;
-          if (typeof (type) == 'object') {
-            type = type[0];
-          }
-          if (type == 'ZS01' && record.updateInd[0] == 'U') {
-            installAtUpdated = true;
-            break;
-          }
-        }
-        if (!installAtUpdated) {
-          console.log('>>> Install At address not updated - not performing coverage change validations.');
-          return new ValidationResult(null, true);
-        }
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                if (FormManager.getActualValue('reqType') != 'U') {
+                  return new ValidationResult(null, true);
+                }
+                var installAtUpdated = false;
+                for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                  record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                  if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                    record = _allAddressData[i];
+                  }
+                  type = record.addrType;
+                  if (typeof (type) == 'object') {
+                    type = type[0];
+                  }
+                  if (type == 'ZS01' && record.updateInd[0] == 'U') {
+                    installAtUpdated = true;
+                    break;
+                  }
+                }
+                if (!installAtUpdated) {
+                  console.log('>>> Install At address not updated - not performing coverage change validations.');
+                  return new ValidationResult(null, true);
+                }
 
-        var data = CmrServices.getAll('reqentry');
-        cmr.hideProgress();
-        if (data) {
-          if (data.error && data.error == 'Y') {
-            console.log('An error was occurred while trying to verify coverage changes.');
-            return new ValidationResult(null, true);
-          } else {
-            var showError = false;
-            var covError = false;
-            var errorMsg = 'The following values cannot be verified at the moment for coverage changes: ';
-            if (data.coverageError || data.buyingGroupError || data.glcError) {
-              covError = true;
-            }
-            if (data.coverageError) {
-              errorMsg += 'Coverage Type/ID';
-              showError = true;
-            }
-            if (data.buyingGroupError) {
-              errorMsg += (showError ? ', ' : '') + 'Buying Group ID';
-              showError = true;
-            }
-            if (data.glcError) {
-              errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
-              showError = true;
-            }
-            if (showError) {
-              if (covError) {
-                errorMsg += '<br>Coverage data changes cannot be verified at this point.';
-                return new ValidationResult(null, true);
+                var data = CmrServices.getAll('reqentry');
+                cmr.hideProgress();
+                if (data) {
+                  if (data.error && data.error == 'Y') {
+                    console.log('An error was occurred while trying to verify coverage changes.');
+                    return new ValidationResult(null, true);
+                  } else {
+                    var showError = false;
+                    var covError = false;
+                    var errorMsg = 'The following values cannot be verified at the moment for coverage changes: ';
+                    if (data.coverageError || data.buyingGroupError || data.glcError) {
+                      covError = true;
+                    }
+                    if (data.coverageError) {
+                      errorMsg += 'Coverage Type/ID';
+                      showError = true;
+                    }
+                    if (data.buyingGroupError) {
+                      errorMsg += (showError ? ', ' : '') + 'Buying Group ID';
+                      showError = true;
+                    }
+                    if (data.glcError) {
+                      errorMsg += (showError ? ', ' : '') + 'GEO Location Code';
+                      showError = true;
+                    }
+                    if (showError) {
+                      if (covError) {
+                        errorMsg += '<br>Coverage data changes cannot be verified at this point.';
+                        return new ValidationResult(null, true);
+                      }
+                    }
+                  }
+                  var retrievedCovId = (data.coverageType + data.coverageID) || "";
+                  var retrievedBgId = data.buyingGroupID || "";
+                  var retrievedGbgId = data.globalBuyingGroupID || "";
+
+                  var importedData = getImportedCovData();
+                  if (importedData == undefined || importedData == null) {
+                    console.log('An error was occurred while trying to verify coverage changes.');
+                    return new ValidationResult(null, true);
+                  }
+                  var importedBgId = importedData.ret1;
+                  var importedCovId = importedData.ret3;
+                  var importedGbgId = importedData.ret5;
+
+                  if (importedBgId == undefined) {
+                    return new ValidationResult(null, true);
+                  }
+
+                  if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
+                    return new ValidationResult(
+                        null,
+                        false,
+                        'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t '
+                            + 'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
+                  }
+                }
               }
             }
-          }
-          var retrievedCovId = (data.coverageType + data.coverageID) || "";
-          var retrievedBgId = data.buyingGroupID || "";
-          var retrievedGbgId = data.globalBuyingGroupID || "";
-
-          var importedData = getImportedCovData();
-          if (importedData == undefined || importedData == null) {
-            console.log('An error was occurred while trying to verify coverage changes.');
-            return new ValidationResult(null, true);
-          }
-          var importedBgId = importedData.ret1;
-          var importedCovId = importedData.ret3;
-          var importedGbgId = importedData.ret5;
-
-          if (importedBgId == undefined) {
-            return new ValidationResult(null, true);
-          }
-
-          if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
-            return new ValidationResult(null, false, 'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t ' +
-                'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
-          }
-        }
-      }
-    }
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+          })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function getImportedCovData() {
@@ -1647,6 +1670,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
- GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
 
 });
