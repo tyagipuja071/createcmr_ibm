@@ -1510,12 +1510,12 @@ function custClassIsicValidator() {
 }
 
 function validateCoverageData() {
-FormManager.addFormValidator((function() {
-            return {
-              validate : function() {
-                if (FormManager.getActualValue('reqType') != 'U') {
-                  return new ValidationResult(null, true);
-                }
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          if (FormManager.getActualValue('reqType') != 'U') {
+            return new ValidationResult(null, true);
+              }
                 var installAtUpdated = false;
                 for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
                   record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
