@@ -1698,7 +1698,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     log.debug("*** Begin location code assignment for request ID " + address.getId().getReqId());
     if (LAHandler.isLACountry(issuingCntry)) {
       sql = ExternalizedQuery.getSql("GET_LOCATION_CD");
-      sql = sql.replace("STATE_CD", address.getStateProv());
+      sql = sql.replace("STATE_CD", address.getStateProv() != null ? address.getStateProv() : "");
       query = new PreparedQuery(entityManager, sql);
       query.setParameter("CITY_DESC", address.getCity1());
       query.setParameter("ISSUING_CNTRY", issuingCntry);
