@@ -2230,12 +2230,6 @@ function enterpriseValidator() {
                   return checkCondition27E(countryUse, enterprise, isuCtc);
                 } else if(isuCtcWithBlank.includes(isuCtc))  {
                   return checkConditionIsuCtcWithBlank(enterprise, isuCtc);
-                } else if(enterprise != ''){
-                  return new ValidationResult({
-                    id : 'enterprise',
-                    type : 'text',
-                    name : 'enterprise'
-                  }, false, 'Enterprise Number is not valid for given ISU, CTC combination');
                 }
                 return new ValidationResult(null, true);
             }
@@ -2283,12 +2277,6 @@ function checkCondition34Q(countryUse, enterprise, isuCtc) {
         type : 'text',
         name : 'enterprise'
       }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_34Q);
-    } else if(enterprise != ''){
-      return new ValidationResult({
-        id : 'enterprise',
-        type : 'text',
-        name : 'enterprise'
-      }, false, 'Enterprise Number is not valid for given ISU, CTC combination');
     }
 }
 
