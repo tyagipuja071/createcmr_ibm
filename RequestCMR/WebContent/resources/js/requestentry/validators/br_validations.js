@@ -2388,7 +2388,8 @@ function setLocNoLockedForRequesterBR() {
 
 function setIsuCTCLockedForReqProcesBR() {
   var _custType = FormManager.getActualValue('custType');
-  if (_custType == 'BUSPR' || _custType == 'INTER' || _custType == 'IBMEM' || _custType == 'PRIPE') {
+  var _custGrp = FormManager.getActualValue('custGrp');
+  if (_custGrp=='CROSS' || (_custGrp=='LOCAL' && (_custType == 'BUSPR' || _custType == 'INTER' || _custType == 'IBMEM' || _custType == 'PRIPE'))) {
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER' || role == 'PROCESSOR') {
       FormManager.readOnly('isuCd');
