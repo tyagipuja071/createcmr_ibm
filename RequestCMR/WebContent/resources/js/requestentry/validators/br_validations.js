@@ -2406,38 +2406,38 @@ function checkForProspect() {
   return ifProspect;
 }
 
-function setMrcCdToReadOnly() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubGrpList = [ 'IBMEM', 'PRIPE', 'BUSPR', 'INTER', 'INTOU', 'INIBM' ];
-  var _custType = FormManager.getActualValue('custType');
-
-  if (reqType == 'C') {
-    if (custSubGrpList.includes(custSubGrp)) {
-      if (role == 'REQUESTER') {
-        FormManager.readOnly('mrcCd');
-      } else {
-        FormManager.enable('mrcCd');
-      }
-    }
-    if ((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER')) {
-      if (role == 'REQUESTER') {
-        FormManager.readOnly('mrcCd');
-        FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('isuCd');
-      } else {
-        FormManager.enable('mrcCd');
-        FormManager.enable('salesBusOffCd');
-        FormManager.enable('isuCd');
-      }
-    }
-  }
-}
+//function setMrcCdToReadOnly() {
+//  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+//  if (viewOnly != '' && viewOnly == 'true') {
+//    return;
+//  }
+//  var custSubGrp = FormManager.getActualValue('custSubGrp');
+//  var reqType = FormManager.getActualValue('reqType');
+//  var role = FormManager.getActualValue('userRole').toUpperCase();
+//  var custSubGrpList = [ 'IBMEM', 'PRIPE', 'BUSPR', 'INTER', 'INTOU', 'INIBM' ];
+//  var _custType = FormManager.getActualValue('custType');
+//
+//  if (reqType == 'C') {
+//    if (custSubGrpList.includes(custSubGrp)) {
+//      if (role == 'REQUESTER') {
+//        FormManager.readOnly('mrcCd');
+//      } else {
+//        FormManager.enable('mrcCd');
+//      }
+//    }
+//    if ((custSubGrp == 'CROSS' || custSubGrp == 'XLEAS') && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR' || _custType == 'INTER')) {
+//      if (role == 'REQUESTER') {
+//        FormManager.readOnly('mrcCd');
+//        FormManager.readOnly('salesBusOffCd');
+//        FormManager.readOnly('isuCd');
+//      } else {
+//        FormManager.enable('mrcCd');
+//        FormManager.enable('salesBusOffCd');
+//        FormManager.enable('isuCd');
+//      }
+//    }
+//  }
+//}
 
 // CREATCMR-6813 - AR Predefined tax info values
 function showVatNotifForArgentina() {
@@ -2649,32 +2649,32 @@ function setSboMrcIsuToReadOnly() {
 // }
 // }
 
-function autoSetFieldsForCustScenariosBR() {
-  console.log('autoSetFieldsForCrossScenario br : processing. . .');
-  var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  var _reqType = FormManager.getActualValue('reqType');
-  var _cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var _custType = FormManager.getActualValue('custType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (_cmrCntry == SysLoc.BRAZIL && _reqType == 'C') {
-    if (_custSubGrp == 'CROSS' && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR')) {
-      FormManager.setValue(FormManager.getField('salesBusOffCd'), '461');
-      if (role == 'REQUESTER') {
-        FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('mrcCd');
-        FormManager.readOnly('isuCd');
-      } else {
-        FormManager.enable('salesBusOffCd');
-        FormManager.enable('mrcCd');
-        FormManager.enable('isuCd');
-      }
-    }
-  }
-}
+//function autoSetFieldsForCustScenariosBR() {
+//  console.log('autoSetFieldsForCrossScenario br : processing. . .');
+//  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+//  var _reqType = FormManager.getActualValue('reqType');
+//  var _cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+//  var _custType = FormManager.getActualValue('custType');
+//  var role = FormManager.getActualValue('userRole').toUpperCase();
+//  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+//  if (viewOnly != '' && viewOnly == 'true') {
+//    return;
+//  }
+//  if (_cmrCntry == SysLoc.BRAZIL && _reqType == 'C') {
+//    if (_custSubGrp == 'CROSS' && (_custType == 'IBMEM' || _custType == 'PRIPE' || _custType == 'BUSPR')) {
+//      FormManager.setValue(FormManager.getField('salesBusOffCd'), '461');
+//      if (role == 'REQUESTER') {
+//        FormManager.readOnly('salesBusOffCd');
+//        FormManager.readOnly('mrcCd');
+//        FormManager.readOnly('isuCd');
+//      } else {
+//        FormManager.enable('salesBusOffCd');
+//        FormManager.enable('mrcCd');
+//        FormManager.enable('isuCd');
+//      }
+//    }
+//  }
+//}
 
 function lockFieldsForLA() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
@@ -2823,7 +2823,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIsuCtcForBR, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setIsuCTCLockedForReqProcesBR, GEOHandler.LA);
 
-  GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
+  //GEOHandler.addAfterTemplateLoad(setMrcCdToReadOnly, GEOHandler.LA);
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterConfig(togglePPSCeid, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(togglePPSCeid, GEOHandler.LA);
@@ -2835,7 +2835,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSboMrcIsuToReadOnly, SSAMX_COUNTRIES);
   // GEOHandler.addAddrFunction(setSortlForStateProvince, SysLoc.BRAZIL);
   // GEOHandler.addAfterConfig(setSortlForStateProvince, SysLoc.BRAZIL);
-  GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
+  //GEOHandler.addAfterTemplateLoad(autoSetFieldsForCustScenariosBR, [ SysLoc.BRAZIL ]);
   // GEOHandler.addAfterTemplateLoad(setIsuMrcFor161A, SysLoc.BRAZIL);
 
   GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
