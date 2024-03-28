@@ -5029,13 +5029,14 @@ function validateSboCEE() {
 	     var custSubGrp = FormManager.getActualValue('custSubGrp');
 	     var cntry = FormManager.getActualValue('cmrIssuingCntry');
        var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
-	     if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp) || ([SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY].includes(cntry) && isuCTC == '34Q')){
+	     if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp) && isuCTC == '34Q'){
         return new ValidationResult(null, true);
       	}
         var isu = FormManager.getActualValue('isuCd');
         var ctc = FormManager.getActualValue('clientTier');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var sbo = FormManager.getActualValue('salesBusOffCd');
+        var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
         var qParams = {
 			   _qall: 'Y',
 			    CNTRY: cntry,
@@ -5056,31 +5057,15 @@ function validateSboCEE() {
 		sboList.push(results1[i].ret1);
 	  }
 		var results = cmr.query('GET_SBO_CEE_VALIDATE', qParams);
+		var validSBO = true;
     if (results == undefined || results.length == 0) {
-		return new ValidationResult(null, false, 'Please select correct  SBO from the list ->('+ sboList +') for given  ISU , CTC combination.');
-    }else{
-	  return new ValidationResult(null, true);
-}
+    validSBO = false; 
+       }
     }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-	
-	
-function validateSboCEESubIndLogic() {
-	FormManager.addFormValidator((function() {
-		return {
-			validate: function() {
-				var cntry = FormManager.getActualValue('cmrIssuingCntry');
-				var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
-				var isuCd = FormManager.getActualValue('isuCd');
-				var ctc = FormManager.getActualValue('clientTier');
-				var sbo = FormManager.getActualValue('salesBusOffCd');
+     
+			
 				var valid = true;
 				var validSbo = null;
-				var isuCTC = isuCd + ctc;
 				if ('34Q' == isuCTC) {
 					switch (cntry) {
 						case SysLoc.CZECH_REPUBLIC:
@@ -5184,11 +5169,21 @@ function validateSboCEESubIndLogic() {
 							break;
 					}
 				}
-				if (valid) {
+				
+				if([SysLoc.SLOVENIA,SysLoc.HUNGARY,SysLoc.CZECH_REPUBLIC,SysLoc.POLAND].includes(cntry)){
+					if (valid || validSBO) {
+					return new ValidationResult(null, true);
+				} else {
+					sboList.push(validSbo);
+					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sboList + ') for given  ISU , CTC , ISIC combination.');
+				}
+				}else{
+					if (valid) {
 					return new ValidationResult(null, true);
 				} else {
 					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + validSbo + ') for given  ISU , CTC , ISIC combination.');
 				}
+				}								
 			}
 		};
 	})(), 'MAIN_IBM_TAB', 'frmCMR');
@@ -5415,7 +5410,6 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addProvinceCityValidator, [SysLoc.ROMANIA], null, true);
   GEOHandler.registerValidator(validateSboCEE, GEOHandler.CEE, null, true);
-  GEOHandler.registerValidator(validateSboCEESubIndLogic, [SysLoc.POLAND,SysLoc.SLOVENIA,SysLoc.CZECH_REPUBLIC,SysLoc.HUNGARY], null, true);
 
   GEOHandler.addAfterTemplateLoad(setCovValues2024CEE, GEOHandler.CEE);  
   GEOHandler.addAfterConfig(setCovValues2024CEE, GEOHandler.CEE);
