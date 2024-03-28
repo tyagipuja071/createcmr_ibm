@@ -135,7 +135,7 @@ public class BrazilUtil extends AutomationUtil {
    String custSubGrp= data.getCustSubGrp();
    String custType=admin.getCustType();
    RequestEntryModel model = requestData.createModelFromRequest();
-   List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM","BUSPR");
+   List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM","BUSPR");   
    if(!custArray.contains(custType))
    {
     List<Addr> addr = requestData.getAddresses();
@@ -373,7 +373,7 @@ public class BrazilUtil extends AutomationUtil {
      covDesc="Pool - BR";
      setCoverageDetails(details,overrides,data,covType,covId,covDesc);
      
-   } else if(custArray.contains(custType) && !"BUSPR".equalsIgnoreCase(custType)){
+   } else if ("CROSS".equalsIgnoreCase(custGrp) && !"BUSPR".equalsIgnoreCase(custType)){
      covType="T";
      covId="0000461";
      covDesc="DEFAULT - BR";
