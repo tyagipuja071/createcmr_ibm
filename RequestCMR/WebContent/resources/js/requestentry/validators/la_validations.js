@@ -628,12 +628,10 @@ function setClientTierValues(value) {
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
     }
   }
-  if (value != undefined && value != false) {
-    if (isuCtcVals.hasOwnProperty(isuCd)) {
-      FormManager.setValue('clientTier', isuCtcVals[isuCd]);
-    } else {
-      FormManager.setValue('clientTier', '');
-    }
+  if (isuCtcVals.hasOwnProperty(isuCd)) {
+    FormManager.setValue('clientTier', isuCtcVals[isuCd]);
+  } else {
+    FormManager.setValue('clientTier', '');
   }
 }
 
