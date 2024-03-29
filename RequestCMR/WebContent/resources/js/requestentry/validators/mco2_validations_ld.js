@@ -2616,7 +2616,7 @@ function validateISUCTCEnterprise() {
 						valid = (entp == valid_Entp);
 					} else if (isuCTC == '36Y') {
 						valid = ['BUILD1', 'DISTR1', 'SRVCE1'].includes(entp);
-						valid_Entp = 'BUILD1,DISTR1,SRVCE1'
+						valid_Entp = 'BUILD1, DISTR1, SRVCE1';
 					} else if (isuCTC == '5K' && entp == '') {
 						valid = true;
 					}
