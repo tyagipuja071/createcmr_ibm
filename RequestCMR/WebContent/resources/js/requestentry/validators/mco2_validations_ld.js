@@ -2462,110 +2462,110 @@ function StcOrderBlockValidation() {
 }
 
 // Coverage 1H 2024
-function setEntpValue(){
+function setEntpValue() {
 	console.log('----------- setEntpValue -------------');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	var custGrp = FormManager.getActualValue('custGrp');
+	var cntry = FormManager.getActualValue('cmrIssuingCntry');
 	var entp = '';
 	var existingEntp = FormManager.getActualValue('enterprise');
 	var isuCd = FormManager.getActualValue('isuCd');
 	var ctc = FormManager.getActualValue('clientTier');
 	var isuCTC = isuCd + ctc;
-	if(['COMME','GOVRN','THDPT','LLC','LLCEX','PRICU'].includes(custSubGrp) || (custGrp == 'CROSS' && !isMEACntry())){
-		if(isuCTC == '34Q'){
-			 switch (cntry) {
-			case '610':
-			case '669':
-		  case '782':
-			case '827':
-			entp = '911741';
-			break;
-			
-			case '636':
-			case '769':
-		  case '883':
-			entp = '901441';
-			break;
-			
-			case '667':
-			case '662':
-		  case '810':
-		  case '692':
-		  case '656':
-		  case '383':
-		  case '880':
-		  case '881':
-			entp = '911757';
-			break;
-			
-			case '698':
-			entp = '911733';
-			break;
-			
-			case '725':
-			case '770':
-		  case '833':
-			entp = '901444';
-			break;
-			
-			case '764':
-			entp = '911730';
-			break;
-			
-			case '700':
-			case '373':
-		  case '876':
-			entp = '911740';
-			break;
-			
-			case '804':
-			entp = '911737';
-			break;
-			
-			case '753':
-			case '691':
-		  case '879':
-		  case '382':
-			case '717':
-		  case '635':
-			entp = '906402';
-			break;
-			
-			case '840':
-			case '841':
-		  case '637':
-		  case '718':
-			entp = '911758';
-			break;
-			
-			case '645':
-			case '670':
-		  case '745':
-		  case '831':
-		  case '835':
-		  case '842':
-		  case '851':
-		  case '857':
-			entp = '907897';
-			break;
+	if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU'].includes(custSubGrp) || (custGrp == 'CROSS' && !isMEACntry())) {
+		if (isuCTC == '34Q') {
+			switch (cntry) {
+				case '610':
+				case '669':
+				case '782':
+				case '827':
+					entp = '911741';
+					break;
 
-      case '825':
-			entp = '911743';
-			break;
-		}
-		}else if(['36Y','5K'].includes(isuCTC) && !['BUILD1','DISTR1','SVRCE1'].includes(existingEntp) && existingEntp != ''){
+				case '636':
+				case '769':
+				case '883':
+					entp = '901441';
+					break;
+
+				case '667':
+				case '662':
+				case '810':
+				case '692':
+				case '656':
+				case '383':
+				case '880':
+				case '881':
+					entp = '911757';
+					break;
+
+				case '698':
+					entp = '911733';
+					break;
+
+				case '725':
+				case '770':
+				case '833':
+					entp = '901444';
+					break;
+
+				case '764':
+					entp = '911730';
+					break;
+
+				case '700':
+				case '373':
+				case '876':
+					entp = '911740';
+					break;
+
+				case '804':
+					entp = '911737';
+					break;
+
+				case '753':
+				case '691':
+				case '879':
+				case '382':
+				case '717':
+				case '635':
+					entp = '906402';
+					break;
+
+				case '840':
+				case '841':
+				case '637':
+				case '718':
+					entp = '911758';
+					break;
+
+				case '645':
+				case '670':
+				case '745':
+				case '831':
+				case '835':
+				case '842':
+				case '851':
+				case '857':
+					entp = '907897';
+					break;
+
+				case '825':
+					entp = '911743';
+					break;
+			}
+		} else if (['36Y', '5K'].includes(isuCTC) && !['BUILD1', 'DISTR1', 'SVRCE1'].includes(existingEntp) && existingEntp != '') {
 			entp = '';
 		}
 		FormManager.enable('enterprise');
-		FormManager.setValue('enterprise',entp);	
-		if(custSubGrp == 'PRICU'){			
-		FormManager.readOnly('enterprise');	
-		}	
-	}else if(['BUSPR','LLCBP','INTER','IBMEM'].includes(custSubGrp)){
+		FormManager.setValue('enterprise', entp);
+		if (custSubGrp == 'PRICU') {
+			FormManager.readOnly('enterprise');
+		}
+	} else if (['BUSPR', 'LLCBP', 'INTER', 'IBMEM'].includes(custSubGrp)) {
 		FormManager.readOnly('enterprise');
-		FormManager.setValue('enterprise','');	
-	}	
+		FormManager.setValue('enterprise', '');
+	}
 }
 
 function isMEACntry() {
