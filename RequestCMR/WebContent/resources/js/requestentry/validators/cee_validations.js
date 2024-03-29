@@ -5183,7 +5183,7 @@ function validateSboCEE() {
 				} else {
 					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + validSbo + ') for given  ISU , CTC , ISIC combination.');
 				}
-				}								
+				}
 			}
 		};
 	})(), 'MAIN_IBM_TAB', 'frmCMR');
