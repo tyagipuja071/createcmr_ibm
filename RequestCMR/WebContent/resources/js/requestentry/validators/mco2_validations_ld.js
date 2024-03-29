@@ -2472,6 +2472,9 @@ function setEntpValue() {
 	var isuCd = FormManager.getActualValue('isuCd');
 	var ctc = FormManager.getActualValue('clientTier');
 	var isuCTC = isuCd + ctc;
+	if(existingEntp == '' && _pagemodel.enterprise != ''){
+		existingEntp = _pagemodel.enterprise;
+	}
 	if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU'].includes(custSubGrp) || (custGrp == 'CROSS' && !isMEACntry())) {
 		if (isuCTC == '34Q') {
 			switch (cntry) {
@@ -2554,8 +2557,10 @@ function setEntpValue() {
 					entp = '911743';
 					break;
 			}
-		} else if (['36Y', '5K'].includes(isuCTC) && !['BUILD1', 'DISTR1', 'SVRCE1'].includes(existingEntp) && existingEntp != '') {
+		} else if (['36Y', '5K'].includes(isuCTC) && !['BUILD1', 'DISTR1', 'SRVCE1'].includes(existingEntp) && existingEntp != '') {
 			entp = '';
+		}else if(['36Y'].includes(isuCTC) && ['BUILD1', 'DISTR1', 'SRVCE1'].includes(existingEntp) && existingEntp != ''){
+			entp = existingEntp;
 		}
 		FormManager.enable('enterprise');
 		FormManager.setValue('enterprise', entp);
@@ -2616,7 +2621,7 @@ function validateISUCTCEnterprise() {
 						valid = (entp == valid_Entp);
 					} else if (isuCTC == '36Y') {
 						valid = ['BUILD1', 'DISTR1', 'SRVCE1'].includes(entp);
-						valid_Entp = 'BUILD1,DISTR1,SRVCE1'
+						valid_Entp = 'BUILD1, DISTR1, SRVCE1';
 					} else if (isuCTC == '5K' && entp == '') {
 						valid = true;
 					}

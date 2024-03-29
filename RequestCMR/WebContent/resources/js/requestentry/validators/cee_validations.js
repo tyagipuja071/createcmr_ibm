@@ -5420,5 +5420,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
   GEOHandler.addAfterConfig(setClientTier, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(setClientTier,GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(setSBOFromDBMapping, GEOHandler.CEE);  
+  GEOHandler.addAfterConfig(setSBOFromDBMapping, GEOHandler.CEE);
 
 });
