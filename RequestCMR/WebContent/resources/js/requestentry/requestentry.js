@@ -1352,7 +1352,7 @@ function connectToCmrServices() {
         dojo.byId('covDescCont').innerHTML = data.coverageDesc != null ? data.coverageDesc : '(no description available)';
 
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp != 'PRIV' && custSubGrp != 'ECO' && FormManager.getActualValue('cmrIssuingCntry') == '649') {
+        if (custSubGrp != 'PRIV' && custSubGrp != 'ECO' && (FormManager.getActualValue('cmrIssuingCntry') == '649' || FormManager.getActualValue('cmrIssuingCntry') == '897')) {
           FormManager.setValue('clientTier', '');
           FormManager.enable('clientTier');
         }
