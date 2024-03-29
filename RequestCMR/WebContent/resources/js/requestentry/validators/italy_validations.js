@@ -2117,17 +2117,17 @@ function setDeafultSBOLogicComm() {
       var PostCdList9 = [ '29', '40', '41', '42', '43', '44', '47', '48' ];
       var PostCdList10 = [ '30', '31', '32', '35', '36', '37', '45' ];
 
-      if (PostCdList1.includes(postCd) && !custGrp == 'CROSS') {
+      if (PostCdList1.includes(postCd) && custGrp != 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'NM');
-      } else if (PostCdList2.includes(postCd) && !custGrp == 'CROSS') {
+      } else if (PostCdList2.includes(postCd) && custGrp != 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'RP');
-      } else if (PostCdList3.includes(postCd) && !(postCd3 == '200' || postCd3 == '201') && !custGrp == 'CROSS') {
+      } else if (PostCdList3.includes(postCd) && !(postCd3 == '200' || postCd3 == '201') && custGrp != 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'GJ');
-      } else if (PostCdList4.includes(postCd) && !custGrp == 'CROSS') {
+      } else if (PostCdList4.includes(postCd) && custGrp != 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'GK');
-      } else if (PostCdList5.includes(postCd) && !custGrp == 'CROSS') {
+      } else if (PostCdList5.includes(postCd) && custGrp != 'CROSS') {
         FormManager.setValue('salesBusOffCd', 'NG');
-      } else if ((PostCdList6.includes(postCd) || subRegion == '758VA') && !custGrp == 'CROSS') {
+      } else if ((PostCdList6.includes(postCd) || subRegion == '758VA') && custGrp != 'CROSS') {
 
         if ([ 'D', 'R', 'G', 'T', 'W' ].includes(subIndustryCd) || subRegion == '758VA') {
           FormManager.setValue('salesBusOffCd', 'NC');
@@ -2135,12 +2135,12 @@ function setDeafultSBOLogicComm() {
           FormManager.setValue('salesBusOffCd', 'KA');
         }
       } else if ((PostCdList7.includes(postCd) || custGrp == 'CROSS') && !(subRegion == '758VA' || subRegion == '758SM')) {
-        if ([ 'D', 'R', 'G', 'T', 'W' ].includes(subIndustryCd) || !custGrp == 'CROSS') {
+        if ([ 'D', 'R', 'G', 'T', 'W' ].includes(subIndustryCd) || custGrp != 'CROSS') {
           FormManager.setValue('salesBusOffCd', 'KF');
         } else if ([ 'A', 'B', 'C', 'E', 'F', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'S', 'U', 'V', 'X', 'Y' ].includes(subIndustryCd) || custGrp == 'CROSS') {
           FormManager.setValue('salesBusOffCd', 'NB');
         }
-      } else if (PostCdList8.includes(postCd3) && !custGrp == 'CROSS') {
+      } else if (PostCdList8.includes(postCd3) && custGrp != 'CROSS') {
         if ([ 'D', 'R', 'G', 'T', 'W' ].includes(subIndustryCd)) {
           FormManager.setValue('salesBusOffCd', 'GH');
         } else if ([ 'F', 'N', 'S' ].includes(subIndustryCd)) {
@@ -2148,13 +2148,13 @@ function setDeafultSBOLogicComm() {
         } else if ([ 'A', 'B', 'C', 'E', 'H', 'J', 'K', 'L', 'M', 'P', 'U', 'V', 'X', 'Y' ].includes(subIndustryCd)) {
           FormManager.setValue('salesBusOffCd', 'KB');
         }
-      } else if (PostCdList9.includes(postCd) && !custGrp == 'CROSS') {
+      } else if (PostCdList9.includes(postCd) && custGrp != 'CROSS') {
         if ([ 'D', 'R', 'G', 'T', 'W' ].includes(subIndustryCd)) {
           FormManager.setValue('salesBusOffCd', 'DU');
         } else if ([ 'A', 'B', 'C', 'E', 'F', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'S', 'U', 'V', 'X', 'Y' ].includes(subIndustryCd)) {
           FormManager.setValue('salesBusOffCd', 'KE');
         }
-      } else if (PostCdList10.includes(postCd) && !custGrp == 'CROSS') {
+      } else if (PostCdList10.includes(postCd) && custGrp != 'CROSS') {
         if ([ 'D', 'R', 'G', 'T', 'W' ].includes(subIndustryCd)) {
           FormManager.setValue('salesBusOffCd', 'KD');
         } else if ([ 'A', 'B', 'C', 'E', 'F', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'S', 'U', 'V', 'X', 'Y' ].includes(subIndustryCd)) {
