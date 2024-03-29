@@ -507,14 +507,8 @@ function afterConfigForUS() {
     FormManager.enable('miscBillCd');
   }
   if (reqType == 'C' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
-    if (role == 'Requester' || role == 'Viewer') {
+    if (role == 'Requester' || role == 'Viewer' || role == 'Processor') {
       FormManager.setValue('isuCd', '36');
-      FormManager.setValue('clientTier', 'Y');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-    } else if (role == 'Processor') {
-      FormManager.setValue('isuCd', '36');
-      FormManager.enable('isuCd');
       FormManager.setValue('clientTier', 'Y');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
@@ -524,9 +518,12 @@ function afterConfigForUS() {
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'PRIV') {
+  } else if (reqType == 'C' && (role == 'Requester' || role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp == 'PRIV') {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  } else if (reqType == 'C' && (role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else {
@@ -1510,12 +1507,14 @@ function custClassIsicValidator() {
 }
 
 function validateCoverageData() {
-    FormManager.addFormValidator((function() {
-      return {
-        validate : function() {
-          if (FormManager.getActualValue('reqType') != 'U') {
-            return new ValidationResult(null, true);
-              }
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                if (FormManager.getActualValue('reqType') != 'U') {
+                  return new ValidationResult(null, true);
+                }
                 var installAtUpdated = false;
                 for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
                   record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -1581,18 +1580,21 @@ function validateCoverageData() {
                   var importedCovId = importedData.ret3;
                   var importedGbgId = importedData.ret5;
 
-          if (importedBgId == undefined) {
-            return new ValidationResult(null, true);
-          }
+                  if (importedBgId == undefined) {
+                    return new ValidationResult(null, true);
+                  }
 
-          if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
-            return new ValidationResult(null,false,'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t '
-                 + 'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
-          }
-         }
-        }
-    }
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+                  if (retrievedCovId != importedCovId || retrievedBgId != importedBgId || retrievedGbgId != importedGbgId) {
+                    return new ValidationResult(
+                        null,
+                        false,
+                        'This CMR is under the US Prospect rule, address change will trigger coverage change, this isn\'t '
+                            + 'allowed to update in execution cycle, please consider to create a new CMR with this address, if not please contact CMDE via Jira for update procedure. Link: https://jsw.ibm.com/projects/CMDE/summary');
+                  }
+                }
+              }
+            }
+          })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function getImportedCovData() {
@@ -1662,6 +1664,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.USA ]);
   // CREATCMR-7213
   GEOHandler.registerValidator(federalIsicCheck, [ SysLoc.USA ], null, true);
- GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(validateCoverageData, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
 
 });
