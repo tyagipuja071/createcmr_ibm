@@ -289,6 +289,9 @@ public class ImportExternalDataElement extends OverridingElement {
     if (postalCd != null) {
       postalCd = ((!StringUtils.isEmpty(postalCd) && postalCd.length() > 10) ? postalCd.substring(0, 10) : postalCd);
       details.append(getAddressDesc(addrType) + " Postal Code = " + postalCd + "\n");
+      String postCd1= postalCd.substring(0,5);
+      String postCd2=postalCd.substring(5);
+      postalCd=postCd1+"-"+ postCd2;
       overrides.addOverride(getProcessCode(), addrType, "POST_CD", addr.getPostCd(), postalCd);
     }
 
