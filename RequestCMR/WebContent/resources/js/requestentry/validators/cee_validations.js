@@ -4928,7 +4928,7 @@ function setClientTier(){
 	 if(['27','34','36'].includes(isuCd)){
 		FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
 	}else {
-		FormManager.removeValidator('clientTier', Validators.REQUIRED);
+		FormManager.resetValidations('clientTier');
 	}
 }
 
