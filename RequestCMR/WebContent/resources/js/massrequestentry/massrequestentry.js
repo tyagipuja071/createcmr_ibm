@@ -65,8 +65,7 @@ function processRequestAction() {
   // prevent from overwriting the DB REQ_STATUS
   // if another tab is open with different UI REQ_STATUS
   if (!isReqStatusEqualBetweenUIandDB()) {
-    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." +
-      "<br><br>Please reload the page.");
+    cmr.showAlert("Unable to execute the action. Request Status mismatch from database." + "<br><br>Please reload the page.");
 
     return;
   }
@@ -86,8 +85,8 @@ function processRequestAction() {
   } else if (action == YourActions.Claim) {
     if (approvalResult == 'Cond. Approved') {
       cmr.showConfirm('doYourAction()', 'The request was conditionally approved by ERO.', 'Warning', null, {
-        OK: 'Ok',
-        CANCEL: 'Cancel'
+        OK : 'Ok',
+        CANCEL : 'Cancel'
       });
     } else {
       doYourAction();
@@ -120,7 +119,13 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      doYourAction();
+      if ('760' == cmrCntry && isDPLCheckNeeded()) {
+        MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
+      } else if ('760' == cmrCntry && isAttachmentNeeded()) {
+        MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
+      } else {
+        doYourAction();
+      }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
@@ -323,6 +328,11 @@ function isDPLCheckNeeded() {
 
   var result = cmr.query('COUNT.LD_MASS_UPDT_INC_DPL_CHECK', qParams);
 
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ('760' == cntry) {
+    result = cmr.query('COUNT.JP_MASS_UPDT_INC_DPL_CHECK', qParams);
+  }
+
   if (result != null && result.ret1 > 0) {
     return true;
   } else {
@@ -390,12 +400,17 @@ function isCompanyProofNeeded() {
  * Validate function
  */
 function doValidateRequest() {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (isDPLCheckNeeded() && _pagemodel.userRole.toUpperCase() == "PROCESSOR" && isNewMassTemplateUsed()) {
     MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
   } else if (isAttachmentNeeded() && _pagemodel.userRole.toUpperCase() == "PROCESSOR" && isNewMassTemplateUsed()) {
     MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
   } else if (isCompanyProofNeeded()) {
     MessageMgr.showErrorMessage('Proof of address is mandatory. Please attach Company Proof.');
+  } else if ('760' == cmrCntry && isDPLCheckNeeded() && _pagemodel.userRole.toUpperCase() == "REQUESTER" && isNewMassTemplateUsed()) {
+    MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
+  } else if ('760' == cmrCntry && isAttachmentNeeded() && _pagemodel.userRole.toUpperCase() == "REQUESTER" && isNewMassTemplateUsed()) {
+    MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
   } else if (FormManager.validate('frmCMR')) {
     MessageMgr.showInfoMessage('The request has no errors.', null, true);
   } else {
@@ -937,7 +952,7 @@ function isReqStatusEqualBetweenUIandDB() {
   var dbReqStatus = "";
 
   var result = cmr.query("WW.GET_REQ_STATUS", {
-    REQ_ID: reqId
+    REQ_ID : reqId
   });
   if (result != null && result.ret1 != '' && result.ret1 != null) {
     dbReqStatus = result.ret1;

@@ -71,6 +71,14 @@ public class MassUpdateAddressModel extends BaseModel {
 
   private String custNm4;
 
+  private String localLang1Name;
+
+  private String localLang1NameCont;
+
+  private String localLang2Name;
+
+  private String localLang2NameCont;
+
   public long getParReqId() {
     return parReqId;
   }
@@ -305,4 +313,35 @@ public class MassUpdateAddressModel extends BaseModel {
     this.custNm4 = custNm4;
   }
 
+  public String getLocalLang1Name() {
+    return localLang1Name;
+  }
+
+  public void setLocalLang1Name(String localLang1Name) {
+    this.localLang1Name = localLang1Name;
+  }
+
+  public String getLocalLang1NameCont() {
+    return localLang1NameCont;
+  }
+
+  public void setLocalLang1NameCont(String localLang1NameCont) {
+    this.localLang1NameCont = localLang1NameCont;
+  }
+
+  public String getLocalLang2Name() {
+    return localLang2Name;
+  }
+
+  public void setLocalLang2Name(String localLang2Name) {
+    this.localLang2Name = localLang2Name;
+  }
+
+  public String getLocalLang2NameCont() {
+    return localLang2NameCont;
+  }
+
+  public void setLocalLang2NameCont(String localLang2NameCont) {
+    this.localLang2NameCont = localLang2NameCont;
+  }
 }
