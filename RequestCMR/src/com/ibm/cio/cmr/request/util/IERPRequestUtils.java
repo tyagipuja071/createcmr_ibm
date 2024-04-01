@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -580,4 +581,315 @@ public class IERPRequestUtils extends RequestUtils {
     handler.validateMassUpdateTemplateDupFills(validations, book, maxRows, country, admin);
   }
 
+  public static String getCsboByPostal(EntityManager entityMgr, String postCd) {
+    String csbo = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.CSBO.BY.POSTAL");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("POST_CD", postCd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      csbo = result[1] != null ? (String) result[1] : "";
+    }
+    LOG.debug("getCsboByPostal() --> postCd (" + postCd + ") csbo (" + csbo + ")");
+    return csbo;
+  }
+
+  public static boolean isCsboValid(EntityManager entityMgr, String csbo) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.CSBO.EXIST");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("CS_BO", csbo);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      LOG.debug("isCsboValid() --> csbo (" + csbo + ") --> true");
+      return true;
+    } else {
+      LOG.debug("isCsboValid() --> csbo (" + csbo + ") --> false");
+      return false;
+    }
+  }
+
+  public static String getLocationByPostal(EntityManager entityMgr, String postCd) {
+    String locn = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.LOCN.BY.POSTAL");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("POST_CD", postCd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      locn = result[1] != null ? (String) result[1] : "";
+    }
+    LOG.debug("getLocationByPostal() --> postCd (" + postCd + ") locn (" + locn + ")");
+    return locn;
+  }
+
+  public static Object[] getIsicByJsic(EntityManager entityMgr, String jsic) {
+    String isic = "";
+
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.ISIC.BY.JSIC");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("JSIC_CD", jsic);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getIsicByJsic() --> jsic (" + jsic + ") isic (" + isic + ")");
+    return result;
+  }
+
+  public static Object[] getSubindustryISUByIsic(EntityManager entityMgr, String isic) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.SUBIND.ISU");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("ZZKV_SIC", isic);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getSubindustryISUByIsic() --> isic (" + isic + ") subind (" + result[1] + ") isu (" + result[2] + ")");
+    return result;
+  }
+
+  public static Object[] getIsicMrcCtcIsuSortlJP(EntityManager entityMgr, String ofcd) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.MAPPED.FIELDS.BY.OFCD");
+
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("OFFICE_CD", StringUtils.leftPad(ofcd, 3, "0"));
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+    }
+    LOG.debug("getIsicMrcCtcIsuSortlJP() --> ofcd (" + ofcd + ") isic (" + result[1] + ") mrc (" + result[2] + ") ctc (" + result[3] + ") isu ("
+        + result[4] + ") sortl (" + result[5] + ")");
+    return result;
+
+  }
+
+  public static String[] limitName1Name2(String name1, String name2) {
+    String[] nameArray = new String[2];
+    if (name1 != null && name1.length() > 17 || name1 != null && name2 != null && (name1.length() + name2.length()) > 30
+        || name2 != null && name2.length() > 17) {
+      String nameTotal = name1 + (name2 == null ? "" : name2);
+      nameArray[0] = nameTotal.substring(0, 17);
+      nameArray[1] = nameTotal.substring(17).length() > 17 ? nameTotal.substring(17, 30) : nameTotal.substring(17);
+    } else {
+      nameArray[0] = name1;
+      nameArray[1] = name2;
+    }
+    return nameArray;
+  }
+
+  public static String convertKatakana(String value) {
+    String convertedStr = "";
+    if (value != null && !value.isEmpty() && value.length() > 0) {
+      convertedStr = value.replaceAll("ィ", "イ");
+      convertedStr = value.replaceAll("ョ", "ヨ");
+      convertedStr = value.replaceAll("ュ", "ユ");
+      convertedStr = value.replaceAll("ヵ", "カ");
+      convertedStr = value.replaceAll("ャ", "ヤ");
+      convertedStr = value.replaceAll("ッ", "ツ");
+      convertedStr = value.replaceAll("ァ", "ア");
+    }
+    return convertedStr;
+  }
+
+  public static String dbcsConversionForJP(String strToConvert) {
+    String convertedStr = null;
+    if (StringUtils.isNotBlank(strToConvert)) {
+      convertedStr = strToConvert;
+      convertedStr = convertedStr.replaceAll("ィ", "イ");
+      convertedStr = convertedStr.replaceAll("ョ", "ヨ");
+      convertedStr = convertedStr.replaceAll("ュ", "ユ");
+      convertedStr = convertedStr.replaceAll("ヵ", "カ");
+      convertedStr = convertedStr.replaceAll("ャ", "ヤ");
+      convertedStr = convertedStr.replaceAll("ッ", "ツ");
+      convertedStr = convertedStr.replaceAll("ァ", "ア");
+      convertedStr = convertedStr.replaceAll("1", "１");
+      convertedStr = convertedStr.replaceAll("2", "２");
+      convertedStr = convertedStr.replaceAll("3", "３");
+      convertedStr = convertedStr.replaceAll("4", "４");
+      convertedStr = convertedStr.replaceAll("5", "５");
+      convertedStr = convertedStr.replaceAll("6", "６");
+      convertedStr = convertedStr.replaceAll("7", "７");
+      convertedStr = convertedStr.replaceAll("8", "８");
+      convertedStr = convertedStr.replaceAll("9", "９");
+      convertedStr = convertedStr.replaceAll("0", "０");
+      convertedStr = convertedStr.replaceAll("A", "Ａ");
+      convertedStr = convertedStr.replaceAll("B", "Ｂ");
+      convertedStr = convertedStr.replaceAll("C", "Ｃ");
+      convertedStr = convertedStr.replaceAll("D", "Ｄ");
+      convertedStr = convertedStr.replaceAll("E", "Ｅ");
+      convertedStr = convertedStr.replaceAll("F", "Ｆ");
+      convertedStr = convertedStr.replaceAll("G", "Ｇ");
+      convertedStr = convertedStr.replaceAll("H", "Ｈ");
+      convertedStr = convertedStr.replaceAll("I", "Ｉ");
+      convertedStr = convertedStr.replaceAll("J", "Ｊ");
+      convertedStr = convertedStr.replaceAll("K", "Ｋ");
+      convertedStr = convertedStr.replaceAll("L", "Ｌ");
+      convertedStr = convertedStr.replaceAll("M", "Ｍ");
+      convertedStr = convertedStr.replaceAll("N", "Ｎ");
+      convertedStr = convertedStr.replaceAll("O", "Ｏ");
+      convertedStr = convertedStr.replaceAll("P", "Ｐ");
+      convertedStr = convertedStr.replaceAll("Q", "Ｑ");
+      convertedStr = convertedStr.replaceAll("R", "Ｒ");
+      convertedStr = convertedStr.replaceAll("S", "Ｓ");
+      convertedStr = convertedStr.replaceAll("T", "Ｔ");
+      convertedStr = convertedStr.replaceAll("U", "Ｕ");
+      convertedStr = convertedStr.replaceAll("V", "Ｖ");
+      convertedStr = convertedStr.replaceAll("W", "Ｗ");
+      convertedStr = convertedStr.replaceAll("X", "Ｘ");
+      convertedStr = convertedStr.replaceAll("Y", "Ｙ");
+      convertedStr = convertedStr.replaceAll("Z", "Ｚ");
+      convertedStr = convertedStr.replaceAll(" ", "　");
+      convertedStr = convertedStr.replaceAll("-", "－");
+      convertedStr = convertedStr.replaceAll("−", "－");
+    }
+    return convertedStr;
+  }
+
+  public static String[] getJPCoverageFieldsValue(EntityManager entityMgr, String ofcd, String jsic, String cmrNo) {
+    // check if template has office code or jsic otherwise pull from RDC
+    List<Object[]> results = null;
+    Object[] result = null;
+
+    String[] coverageFields = new String[8];
+
+    Object[] resultByOfcd = null;
+    Object[] resultByJsic = null;
+
+    String officeCode = ofcd;
+    String jsicCode = jsic;
+
+    String mrc = null;
+    String ctc = null;
+    String sortl = null;
+
+    String isic = null;
+    String subIndustry = null;
+    String isuOverride = null;
+    String isuCd = null;
+
+    if ((StringUtils.isBlank(officeCode) || StringUtils.isBlank(jsicCode)) && StringUtils.isNotBlank(cmrNo)) {
+      String sql = ExternalizedQuery.getSql("JP.MASS.GET.RDC.OFCD.JSIC");
+      PreparedQuery query = new PreparedQuery(entityMgr, sql);
+
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("KATR6", SystemLocation.JAPAN);
+      query.setParameter("ZZKV_CUSNO", cmrNo);
+      query.setForReadOnly(true);
+
+      results = query.getResults();
+
+      if (results != null && results.size() > 0) {
+        result = results.get(0);
+
+        // if officeCode blank hence not populated from template,
+        // use officeCode from rdc
+        if (StringUtils.isBlank(officeCode)) {
+          officeCode = result[0] != null ? (String) result[0] : (String) result[1];
+        }
+        // if jsicCode blank hence not populated from template,
+        // use jsicCode from rdc
+        if (StringUtils.isBlank(jsicCode)) {
+          jsicCode = result[2] != null ? (String) result[2] : "";
+        }
+      }
+    }
+
+    resultByOfcd = getIsicMrcCtcIsuSortlJP(entityMgr, officeCode);
+
+    if (resultByOfcd != null) {
+      isic = resultByOfcd[1] != null ? (String) resultByOfcd[1] : "";
+      mrc = resultByOfcd[2] != null ? (String) resultByOfcd[2] : "";
+      ctc = resultByOfcd[3] != null ? (String) resultByOfcd[3] : "";
+      isuOverride = resultByOfcd[4] != null ? (String) resultByOfcd[4] : "";
+      sortl = resultByOfcd[5] != null ? (String) resultByOfcd[5] : "";
+
+      if (StringUtils.isBlank(isic) && StringUtils.isNotBlank(jsicCode)) {
+        resultByJsic = getIsicByJsic(entityMgr, jsicCode);
+        if (resultByJsic != null) {
+          isic = resultByJsic[1] != null ? (String) resultByJsic[1] : "";
+        } else {
+          isic = "0000";
+        }
+        String cmrNoSubstr = cmrNo != null ? cmrNo.substring(0, 2) : "";
+        if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+          subIndustry = "ZF";
+        } else {
+          if (StringUtils.isNotBlank(isic)) {
+
+            Object[] subindIsu = getSubindustryISUByIsic(entityMgr, isic);
+            if (subindIsu != null) {
+              subIndustry = subindIsu[1] != null ? (String) subindIsu[1] : "";
+              isuCd = StringUtils.isBlank(isuOverride) && subindIsu[2] != null ? (String) subindIsu[2] : isuOverride;
+
+            }
+          }
+        }
+      } else {
+        String cmrNoSubstr = cmrNo != null ? cmrNo.substring(0, 2) : "";
+        if (StringUtils.isNotBlank(cmrNoSubstr) && cmrNoSubstr.equals("99")) {
+          subIndustry = "ZF";
+        } else {
+          if (StringUtils.isNotBlank(isic)) {
+
+            Object[] subindIsu = getSubindustryISUByIsic(entityMgr, isic);
+            if (subindIsu != null) {
+              subIndustry = subindIsu[1] != null ? (String) subindIsu[1] : "";
+              isuCd = StringUtils.isBlank(isuOverride) && subindIsu[2] != null ? (String) subindIsu[2] : isuOverride;
+
+            }
+          }
+        }
+      }
+    }
+
+    coverageFields[0] = officeCode;
+    coverageFields[1] = jsicCode;
+
+    coverageFields[2] = mrc;
+    coverageFields[3] = ctc;
+    coverageFields[4] = sortl;
+
+    coverageFields[5] = isic;
+    coverageFields[6] = subIndustry;
+    coverageFields[7] = isuCd;
+
+    LOG.debug("OFFICE CODE VALUE --> " + officeCode + " JSIC CODE VALUE --> " + jsicCode + " MRC VALUE --> " + mrc + " CLIENT TIER VALUE --> " + ctc);
+    LOG.debug("SORTL VALUE --> " + sortl + " ISIC VALUE --> " + isic + " SUBINDUSTRY VALUE --> " + subIndustry + " ISU --> " + isuCd);
+
+    return coverageFields;
+  }
+
+  public static List<MassUpdtAddr> getMassUpdtAddrsForJpDPLCheck(EntityManager entityManager, String reqId, String iterId) {
+    String sql = ExternalizedQuery.getSql("GET.JP_MASS_UPDT_FOR_DPL_CHECK");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ITER_ID", iterId);
+    query.setForReadOnly(true);
+    return query.getResults(MassUpdtAddr.class);
+  }
 }

@@ -702,6 +702,9 @@ var DB_MASS_UPDT_ADDR_FIELDS = [ {
 }, {
   id : 'Rol-Company',
   name : 'HW_INSTL_MSTR_FLG'
+}, {
+  id : 'DPLCheckResult',
+  name : 'DPL_CHK_RESULT'
 } ];
 
 var DB_UPDT_BY_ENT_DATA_FIELDS = [ {
@@ -734,6 +737,9 @@ var DB_UPDT_BY_ENT_DATA_FIELDS = [ {
 }, {
   id : 'RequesterID',
   name : 'ADMIN.REQUESTER_ID'
+}, {
+  id : 'Rol-Account',
+  name : 'OUT_CITY_LIMIT'
 } ];
 
 var DB_DELETE_DATA_FIELDS = [ {
