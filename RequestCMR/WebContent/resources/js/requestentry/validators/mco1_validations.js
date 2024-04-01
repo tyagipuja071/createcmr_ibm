@@ -2330,6 +2330,9 @@ function enterpriseValidator() {
                 var clientTierCode = FormManager.getActualValue('clientTier');
                 var isuCtc = isuCode + clientTierCode;
                 var isuCtcWithBlank = ['04', '12', '28', '4F', '5K'];
+                if (reqType == 'U') {
+                  return;
+              }
                 if (enterprise.length >= 1 && enterprise.length != 6) {
                     return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
                 }
@@ -2472,6 +2475,9 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
     var ctc = FormManager.getActualValue('clientTier');
     var isuCtc = isuCd + ctc;
     var isuCtcForBlankEntp = ['04', '12', '28', '4F', '5K'];
+    if (reqType == 'U') {
+      return;
+    }
     if (isuCtc != '27E' && isuCtcForBlankEntp.includes(isuCtc)){
       FormManager.setValue('enterprise', '');
       return;
