@@ -10,7 +10,7 @@ var isPageLoad = true;
 var setFieldsRequiredCount = 0;
 function addSingleByteValidatorJP(cntry, addressMode, details) {
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'ZC01' || reqType == 'ZE01') {
+  if (reqType == 'ZC01') {
     FormManager.removeValidator('office', Validators.NO_SINGLE_BYTE);
     FormManager.removeValidator('dept', Validators.NO_SINGLE_BYTE);
     FormManager.removeValidator('contact', Validators.NO_SINGLE_BYTE);
@@ -86,7 +86,6 @@ function afterConfigForJP() {
     setDefaultValueForChargeCode();
     // setTier2Required();
     disableRequestFor();
-    disableProductType();
     showHideJSIC();
     showHideSubindustry();
     setOutsourcingServiceRequired();
@@ -110,6 +109,9 @@ function afterConfigForJP() {
 
     setAbbrevNmReqForBFKSCScenario();
     setJSICforPRCMRScenario();
+
+    // CREATCMR-10048 - Hide non relevant fields for DR flow
+    showHideSalesTeamNo();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -120,6 +122,9 @@ function afterConfigForJP() {
 
   setContractSignDate();
   setFieldsBehaviorForBPEndUserAndIGFCmr();
+
+  // CREATCMR-10048 - Hide non relevant fields for DR flow
+  hideNonRelevantFieldsInDRFlow();
 }
 
 /**
@@ -129,7 +134,7 @@ var _officeCdHandler = null;
 var _mrcCdHandler = null;
 var _subIndCdHandler = null;
 var _gtcAddrTypeHandlerJp = [];
-var _gtcAddrTypesJp = [ 'ZC01', 'ZE01', 'ZI01', 'ZI02', 'ZI03', 'ZP01', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08', 'ZP09', 'ZS01', 'ZS02' ];
+var _gtcAddrTypesJp = [ 'ZC01', 'ZI01', 'ZI03', 'ZP01', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08', 'ZP09', 'ZS01', 'ZS02' ];
 var _jsicHandler = null;
 
 function addHandlersForJP() {
@@ -169,7 +174,7 @@ function addROLFieldLogic() {
     var companyRolFlag = '';
     enableRolFlag(addrType);
 
-    if (addrType != 'ZC01' && addrType != 'ZE01') {
+    if (addrType != 'ZC01') {
 
       var qParams = {
         _qall : 'Y',
@@ -482,9 +487,7 @@ function addScenarioDriven() {
       FormManager.removeValidator('custClass', Validators.REQUIRED)
       if (addrType == 'ZC01') {
         FormManager.enable('city2', Validators.REQUIRED);
-      } else if (addrType == 'ZE01') {
-        FormManager.enable('divn', Validators.REQUIRED, [ 'Estab No.' ]);
-      } else if (addrType != 'ZC01' && addrType != 'ZE01') {
+      } else if (addrType != 'ZC01') {
         FormManager.removeValidator('postCd', Validators.REQUIRED);
         FormManager.removeValidator('custPhone', Validators.REQUIRED);
         FormManager.removeValidator('custNm4', Validators.REQUIRED);
@@ -1059,6 +1062,7 @@ function setCmrNoCmrNo2Required() {
     }
   }
 }
+
 function setAccntAbbNmOnScrnarioChange() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custTypeinDB = _pagemodel.custSubGrp;
@@ -1087,11 +1091,12 @@ function setAdminDeptOptional() {
 
 function setAccountAbbNm() {
   if (FormManager.getActualValue('reqType') == 'C') {
-    setAccountAbbNmForCreate();
+    // setAccountAbbNmForCreate();
   } else if (FormManager.getActualValue('reqType') == 'U') {
     // setAccountAbbNmForUpdate();
   }
 }
+
 function setAccountAbbNmForCreate() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1168,6 +1173,7 @@ function setAccountAbbNmForCreate() {
     FormManager.setValue('abbrevNm', accountAbbNm);
   }
 }
+
 function setAccountAbbNmForUpdate() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1234,6 +1240,7 @@ function resetAccountAbbNmOnFieldChange() {
     }
   });
 }
+
 function setAccountAbbNmRequired() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1275,8 +1282,7 @@ function setAccountAbbNmRequired() {
     break;
   case '':
   default:
-    FormManager.enable('abbrevNm');
-    FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
+    break;
   }
 }
 
@@ -1294,12 +1300,10 @@ function toggleAddrTypesForJP(cntry, addressMode) {
       case 'STOSC':
       case 'STOSI':
         cmr.hideNode('radiocont_ZC01');
-        cmr.hideNode('radiocont_ZE01');
         break;
       case '':
       default:
         cmr.showNode('radiocont_ZC01');
-        cmr.showNode('radiocont_ZE01');
         break;
       }
     }
@@ -1307,7 +1311,6 @@ function toggleAddrTypesForJP(cntry, addressMode) {
 
   if (FormManager.getActualValue('reqType') == 'C') {
     if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-      // cmr.hideNode('radiocont_ZI02');
       // cmr.hideNode('radiocont_ZI01');
       cmr.hideNode('radiocont_ZI03');
       cmr.hideNode('radiocont_ZP02');
@@ -1717,13 +1720,13 @@ function canUpdateAddress(value, rowIndex, grid) {
     } else {
       return true;
     }
-  } else if (addrType == 'ZE01' && custType.includes('E')) {
+  } else if (custType.includes('E')) {
     if (reqType == 'U' && (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER')) {
       return false;
     } else {
       return true;
     }
-  } else if (addrType != 'ZC01' && addrType != 'ZE01') {
+  } else if (addrType != 'ZC01') {
     return true;
   }
   return false;
@@ -1737,7 +1740,7 @@ function addrSeqFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   var addrType = rowData.addrType[0];
 
-  if (addrType == 'ZC01' || addrType == 'ZE01') {
+  if (addrType == 'ZC01') {
     return 'N/A';
   }
   return value;
@@ -1765,13 +1768,7 @@ function showOrHideAddrFields(cntry, addressMode, details) {
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
       removeDefaultValueTelNo();
-    });
-    dojo.connect(FormManager.getField('addrType_ZE01'), 'onClick', function(value) {
-      if (FormManager.getField('addrType_ZE01').checked == true) {
-        addrType = 'ZE01';
-      }
-      showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
-      removeDefaultValueTelNo();
+      setROLFlagValue(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZS02'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZS02').checked == true) {
@@ -1794,12 +1791,6 @@ function showOrHideAddrFields(cntry, addressMode, details) {
     dojo.connect(FormManager.getField('addrType_ZP09'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP09').checked == true) {
         addrType = 'ZP09';
-      }
-      showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
-    });
-    dojo.connect(FormManager.getField('addrType_ZI02'), 'onClick', function(value) {
-      if (FormManager.getField('addrType_ZI02').checked == true) {
-        addrType = 'ZI02';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
     });
@@ -1862,8 +1853,6 @@ function showOrHideAddrFields(cntry, addressMode, details) {
 function checkAddrType(addrType) {
   if (FormManager.getField('addrType_ZC01').checked == true) {
     addrType = 'ZC01';
-  } else if (FormManager.getField('addrType_ZE01').checked == true) {
-    addrType = 'ZE01';
   } else if (FormManager.getField('addrType_ZS02').checked == true) {
     addrType = 'ZS02';
   } else if (FormManager.getField('addrType_ZS01').checked == true) {
@@ -1872,8 +1861,6 @@ function checkAddrType(addrType) {
     addrType = 'ZP01';
   } else if (FormManager.getField('addrType_ZP09').checked == true) {
     addrType = 'ZP09';
-  } else if (FormManager.getField('addrType_ZI02').checked == true) {
-    addrType = 'ZI02';
   } else if (FormManager.getField('addrType_ZI01').checked == true) {
     addrType = 'ZI01';
   } else if (FormManager.getField('addrType_ZI03').checked == true) {
@@ -1899,6 +1886,13 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
   if (cmr.addressMode == 'updateAddress') {
     addrType = cmr.addrdetails.ret2;
   }
+  
+  if('ZS01' == addrType) {
+    setAddrFieldOptional('divn', 'Division');
+  } else {
+    setAddrFieldHide('divn', 'Division');
+  }
+  
   switch (custSubGrp) {
   case 'NORML':
   case 'BPBIL':
@@ -1919,7 +1913,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldMandatory('companySize', 'CompanySize', 'Company Size');
         setAddrFieldOptional('bldg', 'Building');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -1949,7 +1943,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -1979,7 +1973,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('companySize', 'CompanySize');
         setAddrFieldHide('rol', 'ROL');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('custFax', 'CustFAX');
         setAddrFieldHide('office', 'Office');
@@ -2026,7 +2020,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('city2', 'City2');
         setAddrFieldHide('companySize', 'CompanySize');
@@ -2045,7 +2039,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('bldg', 'Building');
         setAddrFieldHide('companySize', 'CompanySize');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -2094,7 +2088,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('city2', 'City2');
         setAddrFieldHide('companySize', 'CompanySize');
@@ -2122,7 +2116,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
 
         setAddrFieldOptional('bldg', 'Building');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -2155,7 +2149,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('custFax', 'CustFax');
         setAddrFieldOptional('postCd', 'PostalCode', 'Postal Code');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -2184,7 +2178,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('companySize', 'CompanySize');
         setAddrFieldHide('rol', 'ROL');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('custFax', 'CustFAX');
         setAddrFieldHide('office', 'Office');
@@ -2231,7 +2225,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('city2', 'City2');
         setAddrFieldHide('companySize', 'CompanySize');
@@ -2250,7 +2244,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldHide('bldg', 'Building');
         setAddrFieldHide('companySize', 'CompanySize');
 
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
         setAddrFieldHide('custFax', 'CustFAX');
@@ -2337,7 +2331,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('dept', 'Department');
       setAddrFieldHide('contact', 'Contact');
       setAddrFieldHide('custFax', 'CustFax');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('rol', 'ROL');
       setAddrFieldHide('city2', 'City2');
@@ -2349,13 +2343,13 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       } else if (role == 'PROCESSOR') {
         setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
       }
-      if (addrType == 'ZC01' || addrType == 'ZE01') {
+      if (addrType == 'ZC01') {
         setAddrFieldHide('office', 'Office');
         setAddrFieldHide('custFax', 'CustFax');
         setAddrFieldHide('dept', 'Department');
         setAddrFieldHide('contact', 'Contact');
         setAddrFieldHide('custFax', 'CustFax');
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -2366,7 +2360,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('dept', 'Department');
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
-        setAddrFieldHide('divn', 'Division');
+        
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
         setAddrFieldHide('rol', 'ROL');
         setAddrFieldHide('city2', 'City2');
@@ -2398,7 +2392,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('dept', 'Department');
       setAddrFieldHide('contact', 'Contact');
       setAddrFieldHide('custFax', 'CustFax');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('locationCode', 'LocationCode');
       setAddrFieldHide('rol', 'ROL');
@@ -2419,7 +2413,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('dept', 'Department');
       setAddrFieldHide('contact', 'Contact');
       setAddrFieldHide('custFax', 'CustFax');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('rol', 'ROL');
       setAddrFieldHide('city2', 'City2');
@@ -2466,7 +2460,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldMandatory('companySize', 'CompanySize', 'Company Size');
       setAddrFieldOptional('bldg', 'Building');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2514,7 +2508,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldOptional('custFax', 'CustFax');
 
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2538,7 +2532,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldMandatory('companySize', 'CompanySize', 'Company Size');
       setAddrFieldOptional('bldg', 'Building');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2574,7 +2568,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldOptional('custFax', 'CustFax');
 
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2598,7 +2592,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldHide('companySize', 'CompanySize');
       setAddrFieldOptional('bldg', 'Building');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2641,11 +2635,11 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('contact', 'Contact');
       setAddrFieldOptional('custFax', 'CustFax');
-      if ('ZE01' != FormManager.getActualValue('addrType') || 'newAddress' != cmr.addressMode) {
+      if ('newAddress' != cmr.addressMode) {
         setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       }
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2674,7 +2668,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
           FormManager.setValue('rol', 'Y');
         }
       }
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
       setAddrFieldHide('custFax', 'CustFAX');
@@ -2704,7 +2698,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
 
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
 
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
@@ -2769,7 +2763,7 @@ function showOrHideAddrFieldInter(addrType, custSubGrp, role) {
     setAddrFieldHide('bldg', 'Building');
     setAddrFieldHide('companySize', 'CompanySize');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
     setAddrFieldHide('custFax', 'CustFAX');
@@ -2796,7 +2790,6 @@ function showOrHideAddrFieldInter(addrType, custSubGrp, role) {
     setAddrFieldOptional('dept', 'Department');
     setAddrFieldOptional('contact', 'Contact');
     setAddrFieldOptional('rol', 'ROL');
-    setAddrFieldOptional('divn', 'Division');
   } else {
     if (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
       setAddrFieldOptional('office', 'Office');
@@ -2824,7 +2817,7 @@ function showOrHideAddrFieldInter(addrType, custSubGrp, role) {
     setAddrFieldOptional('contact', 'Contact');
     setAddrFieldOptional('custFax', 'CustFax');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('rol', 'ROL');
     setAddrFieldHide('city2', 'City2');
@@ -2848,7 +2841,7 @@ function showOrHideAddrFieldInterOld(addrType, custSubGrp, role) {
     setAddrFieldHide('bldg', 'Building');
     setAddrFieldHide('companySize', 'CompanySize');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
 
     setAddrFieldHide('custFax', 'CustFAX');
@@ -2858,9 +2851,8 @@ function showOrHideAddrFieldInterOld(addrType, custSubGrp, role) {
     setAddrFieldHide('rol', 'ROL');
   } else if (addrType == 'ZE01') {
     if (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
-      setAddrFieldOptional('divn', 'Division');
     } else if (custSubGrp == 'INTER') {
-      setAddrFieldHide('divn', 'Division');
+      
     }
     setAddrFieldHide('custNm1', 'CustomerName1');
     setAddrFieldHide('custNm2', 'CustomerName2');
@@ -2907,7 +2899,7 @@ function showOrHideAddrFieldInterOld(addrType, custSubGrp, role) {
     setAddrFieldOptional('contact', 'Contact');
     setAddrFieldOptional('custFax', 'CustFax');
 
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('rol', 'ROL');
     setAddrFieldHide('city2', 'City2');
@@ -3051,14 +3043,14 @@ function replaceBuildingChar(value) {
 
 function convertBranch(cntry, addressMode, details) {
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType == 'ZC01' || addrType == 'ZE01') {
+  if (addrType == 'ZC01') {
     return;
   } else {
     convertBranchInDetails();
   }
   dojo.connect(FormManager.getField('office'), 'onChange', function(value) {
     var _addrType = FormManager.getActualValue('addrType');
-    if (_addrType == 'ZC01' || _addrType == 'ZE01') {
+    if (_addrType == 'ZC01') {
       return;
     } else {
       convertBranchInDetails();
@@ -3093,14 +3085,14 @@ function replaceBranchChar(value) {
 
 function convertDept(cntry, addressMode, details) {
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType == 'ZC01' || addrType == 'ZE01') {
+  if (addrType == 'ZC01') {
     return;
   } else {
     convertDeptInDetails();
   }
   dojo.connect(FormManager.getField('dept'), 'onChange', function(value) {
     var _addrType = FormManager.getActualValue('addrType');
-    if (_addrType == 'ZC01' || _addrType == 'ZE01') {
+    if (_addrType == 'ZC01') {
       return;
     } else {
       convertDeptInDetails();
@@ -3284,21 +3276,6 @@ function dbcs2ascii(value) {
   return modifiedVal;
 }
 
-function showOfcdMessage() {
-  if (FormManager.getField('icmsInd').checked == true) {
-    FormManager.getField('ofcdMessage').style.display = "inline-block";
-  } else {
-    FormManager.getField('ofcdMessage').style.display = "none";
-  }
-  dojo.connect(FormManager.getField('icmsInd'), 'onClick', function(value) {
-    if (FormManager.getField('icmsInd').checked == true) {
-      FormManager.getField('ofcdMessage').style.display = "inline-block";
-    } else {
-      FormManager.getField('ofcdMessage').style.display = "none";
-    }
-  });
-}
-
 function showOrHideDirectBpZSeriesSw() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -3396,7 +3373,7 @@ function addSpaceForCustNm1(cntry, addressMode) {
     // custNm1KanJi = convertHalfToFullKatakana(custNm1KanJi);
     FormManager.setValue('custNm1', custNm1KanJi);
     // When address type is COMPANY -> ZC01 or ESTAB -> ZE01 - ignore.
-    if ('ZE01' == FormManager.getActualValue('addrType') || 'ZC01' == FormManager.getActualValue('addrType')) {
+    if ('ZC01' == FormManager.getActualValue('addrType')) {
       return;
     }
     // Defect 1676927 2 spaces between specific company type and legal name
@@ -3648,13 +3625,15 @@ function setCustNmDetailOnAddrSave() {
   FormManager.addValidator('email2', Validators.NO_SINGLE_BYTE, [ 'Customer Name_Detail' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('email2', Validators.NO_HALF_ANGLE, [ 'Customer Name_Detail' ], 'MAIN_CUST_TAB');
 }
+
 function setAccountAbbNmOnAddrSave() {
   if (cmr.currentRequestType == 'C') {
-    setAccountAbbNmOnAddrSaveCreate();
+    // setAccountAbbNmOnAddrSaveCreate();
   } else if (cmr.currentRequestType == 'U') {
-    setAccountAbbNmOnAddrSaveUpdate();
+    // setAccountAbbNmOnAddrSaveUpdate();
   }
 }
+
 function setAccountAbbNmOnAddrSaveCreate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var fullEngNm = FormManager.getActualValue('cnCustName1');
@@ -4470,58 +4449,7 @@ function disableRequestFor() {
     FormManager.disable('privIndc_3');
   }
 }
-function disableProductType() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-  if (custSubGrp == 'INTER' && reqType == 'C') {
-    document.getElementById('ast-ProdType').innerHTML = '* ';
-    document.getElementById('ast-ProdType').setAttribute('style', 'color:red');
-    document.getElementById('ast-ProdType').setAttribute('class', 'cmr-ast');
 
-    FormManager.enable('prodType_1');
-    FormManager.enable('prodType_2');
-    FormManager.enable('prodType_3');
-    FormManager.enable('prodType_4');
-    FormManager.enable('prodType_5');
-    FormManager.enable('prodType_6');
-    FormManager.enable('prodType_7');
-    FormManager.enable('prodType_8');
-  } else if (custSubGrp == '') {
-    return;
-  } else {
-    document.getElementById('ast-ProdType').innerHTML = '';
-    try {
-      FormManager.getField('prodType_1').set('checked', false);
-      FormManager.getField('prodType_2').set('checked', false);
-      FormManager.getField('prodType_3').set('checked', false);
-      FormManager.getField('prodType_4').set('checked', false);
-      FormManager.getField('prodType_5').set('checked', false);
-      FormManager.getField('prodType_6').set('checked', false);
-      FormManager.getField('prodType_7').set('checked', false);
-      FormManager.getField('prodType_8').set('checked', false);
-    } catch (e) {
-      FormManager.getField('prodType_1').checked = false;
-      FormManager.getField('prodType_2').checked = false;
-      FormManager.getField('prodType_3').checked = false;
-      FormManager.getField('prodType_4').checked = false;
-      FormManager.getField('prodType_5').checked = false;
-      FormManager.getField('prodType_6').checked = false;
-      FormManager.getField('prodType_7').checked = false;
-      FormManager.getField('prodType_8').checked = false;
-    }
-    FormManager.readOnly('prodType_1');
-    FormManager.readOnly('prodType_2');
-    FormManager.readOnly('prodType_3');
-    FormManager.readOnly('prodType_4');
-    FormManager.readOnly('prodType_5');
-    FormManager.readOnly('prodType_6');
-    FormManager.readOnly('prodType_7');
-    FormManager.readOnly('prodType_8');
-  }
-}
 function updateBillToCustomerNo() {
   var _billToCustNoHandler = dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
     if ('IBMTP' == FormManager.getActualValue('custGrp')) {
@@ -4572,7 +4500,7 @@ function addSoldToValidatorJP() {
         if (custType.includes('A')) {
           if (Number(zs01Reccount) > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
-          } else if (Number(zs01Reccount == 0) && (custSubGrp != 'BCEXA' && custSubGrp != 'BFKSC' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
+          } else if (Number(zs01Reccount == 0) && (custSubGrp != 'BCEXA' && custSubGrp != 'BPWPQ' && custSubGrp != 'ISOCU' && custSubGrp != 'RACMR')) {
             return new ValidationResult(null, false, 'At least one Sold-To Address must be defined.');
           } else {
             return new ValidationResult(null, true);
@@ -4969,71 +4897,6 @@ function checkEstabFuncCdMandatory() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
-function addRequestForValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var checked = false;
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
-          if (FormManager.getField('privIndc_1').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('privIndc_2').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('privIndc_3').checked == true) {
-            checked = true;
-          }
-          if (checked == false) {
-            return new ValidationResult(null, false, 'Requset For is required.');
-          } else {
-            return new ValidationResult(null, true, null);
-          }
-        } else {
-          return new ValidationResult(null, true, null);
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-function addProductTypeValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var checked = false;
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var reqType = FormManager.getActualValue('reqType');
-        if (reqType == 'C' && custSubGrp == 'INTER') {
-          if (FormManager.getField('prodType_1').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_1').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_2').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_3').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_4').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_5').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_6').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_7').checked == true) {
-            checked = true;
-          } else if (FormManager.getField('prodType_8').checked == true) {
-            checked = true;
-          }
-          if (checked == false) {
-            return new ValidationResult(null, false, 'Product Type is required.');
-          } else {
-            return new ValidationResult(null, true, null);
-          }
-        } else {
-          return new ValidationResult(null, true, null);
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
 
 function addDPLCheckValidatorJP() {
   FormManager.addFormValidator((function() {
@@ -5057,6 +4920,7 @@ function addDPLCheckValidatorJP() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
+
 function addFailedDPLValidatorJP() {
   FormManager.addFormValidator((function() {
     return {
@@ -5129,7 +4993,7 @@ function removeDefaultValueTelNo() {
       }
     } else if (custType == 'A' && cmr.addressMode == 'newAddress') {
       if (changed) {
-        if (addrType == 'ZC01' || addrType == 'ZE01') {
+        if (addrType == 'ZC01') {
           setAddrFieldHide('custPhone', 'CustPhone');
           FormManager.setValue('custPhone', '');
         } else {
@@ -5162,7 +5026,7 @@ function removeDefaultValueTelNo() {
       }
     } else if (custType == 'A' && cmr.addressMode == 'newAddress') {
       if (changed) {
-        if (addrType == 'ZC01' || addrType == 'ZE01') {
+        if (addrType == 'ZC01') {
           setAddrFieldHide('custPhone', 'CustPhone');
           FormManager.setValue('custPhone', '');
         } else {
@@ -5217,7 +5081,7 @@ function removeDefaultValueTelNo() {
   case 'BQICL':
     if (changed) {
       if (cmr.addressMode == 'newAddress') {
-        if (addrType == 'ZC01' || addrType == 'ZE01') {
+        if (addrType == 'ZC01') {
           setAddrFieldHide('custPhone', 'CustPhone');
           FormManager.setValue('custPhone', '');
         } else {
@@ -5246,7 +5110,7 @@ function removeDefaultValueTelNo() {
         }
       }
     } else if (custType == 'A') {
-      if (addrType == 'ZC01' || addrType == 'ZE01') {
+      if (addrType == 'ZC01') {
         setAddrFieldHide('custPhone', 'CustPhone');
         FormManager.setValue('custPhone', '');
       } else {
@@ -5336,12 +5200,8 @@ function disableFieldsForUpdateOnScenarios() {
   case 'BPBIL':
   case 'EUCMR':
   case 'WHCMR':
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
-
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5362,25 +5222,18 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     break;
   case 'OUTSC':
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
-
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5401,15 +5254,12 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5427,9 +5277,6 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('privIndc_1');
     FormManager.disable('privIndc_2');
     FormManager.disable('privIndc_3');
-
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
 
     FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
     FormManager.removeValidator('channelCd', Validators.REQUIRED);
@@ -5451,15 +5298,12 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5475,9 +5319,6 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.removeValidator('siInd', Validators.REQUIRED);
     break;
   case 'ISOCU':
-    FormManager.enable('icmsInd');
-    FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
-
     FormManager.removeValidator('leasingCompanyIndc', Validators.REQUIRED);
     FormManager.removeValidator('channelCd', Validators.REQUIRED);
     FormManager.removeValidator('govType', Validators.REQUIRED);
@@ -5502,15 +5343,12 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     // FormManager.enable('inacType');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5562,13 +5400,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('repTeamMemberNo');
     FormManager.disable('govType');
     FormManager.disable('educAllowCd');
-    FormManager.disable('iinInd');
     FormManager.disable('valueAddRem');
     FormManager.disable('channelCd');
     FormManager.disable('siInd');
     FormManager.disable('inacType');
     FormManager.disable('inacCd');
-    FormManager.disable('creditCd');
     FormManager.disable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     // FormManager.enable('zseriesSw');
@@ -5611,14 +5447,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('repTeamMemberNo');
     FormManager.disable('govType');
     FormManager.disable('educAllowCd');
-    FormManager.disable('iinInd');
     FormManager.disable('valueAddRem');
     FormManager.disable('channelCd');
     FormManager.disable('siInd');
     FormManager.disable('inacType');
     FormManager.disable('inacCd');
-    FormManager.disable('creditCd');
-    FormManager.disable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5661,13 +5494,11 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('repTeamMemberNo');
     FormManager.disable('govType');
     FormManager.disable('educAllowCd');
-    FormManager.disable('iinInd');
     FormManager.disable('valueAddRem');
     FormManager.disable('channelCd');
     FormManager.disable('siInd');
     FormManager.disable('inacType');
     FormManager.disable('inacCd');
-    FormManager.disable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -5709,14 +5540,11 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     // FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to
@@ -5762,14 +5590,11 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
 
@@ -5813,14 +5638,11 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
 
@@ -5854,7 +5676,6 @@ function disableFieldsForUpdateOnScenarios() {
 
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5876,14 +5697,11 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
 
@@ -5906,7 +5724,6 @@ function disableFieldsForUpdateOnScenarios() {
 
     FormManager.addValidator('leasingCompanyIndc', Validators.REQUIRED, [ 'Leasing' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('channelCd', Validators.REQUIRED, [ 'Channel' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('govType', Validators.REQUIRED, [ 'Government Entity' ], 'MAIN_CUST_TAB');
 
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
 
@@ -5928,14 +5745,11 @@ function disableFieldsForUpdateOnScenarios() {
     // FormManager.enable('searchTerm');
     FormManager.enable('covId');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('govType');
     FormManager.enable('educAllowCd');
-    FormManager.enable('iinInd');
     FormManager.enable('valueAddRem');
     FormManager.enable('channelCd');
     FormManager.enable('siInd');
     FormManager.enable('inacCd');
-    FormManager.enable('creditCd');
     FormManager.enable('billToCustNo');
     FormManager.removeValidator('billToCustNo', Validators.REQUIRED);
     // FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to
@@ -6699,6 +6513,21 @@ function findImportCMR() {
           CANCEL : 'Cancel'
         });
   }
+  if (custSubGrp == 'NORML') {
+    if (creditToCustNo == '' && billToCustNo != '') {
+      cmr.showAlert('Bill To Customer No. found, Please input Credit Customer No. to search for.');
+      return;
+    }
+    if (creditToCustNo != '') {
+      cmr.importcmr = creditToCustNo;
+      cmr.importcntry = cntry;
+      cmr.showConfirm('doImportCmrs()',
+          'Records with Credit Customer Number ' + creditToCustNo + ' will be imported by the system. The data will replace all the current data on the request. Continue?', null, null, {
+            OK : 'Yes',
+            CANCEL : 'Cancel'
+          });
+    }
+  }
 }
 
 function doImportCmrs(addressOnly) {
@@ -6777,7 +6606,7 @@ function disableBpBqiImport() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
-    if (custSubGrp == 'BPWPQ') {
+    if (custSubGrp == 'BPWPQ' || FormManager.getActualValue('custSubGrp') == 'NORML') {
       document.getElementById("btnImportBp").style.visibility = "visible";
     } else {
       document.getElementById("btnImportBp").style.visibility = "hidden";
@@ -6904,7 +6733,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
     setAddrFieldHide('dept', 'Department');
     setAddrFieldHide('contact', 'Contact');
     setAddrFieldHide('custFax', 'CustFax');
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('locationCode', 'LocationCode');
     setAddrFieldHide('rol', 'ROL');
@@ -6921,7 +6750,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldOptional('contact', 'Contact');
     }
   } else if ((custType == 'CEA' || custType == 'EA' || custType == 'A')
-      && (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZE01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09')) {
+      && (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09')) {
 
     if ((custType == 'CEA' || custType == 'EA') && addrType == 'ZE01') {
 
@@ -6963,12 +6792,12 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
 
       setAddrFieldHide('city2', 'City2');
       setAddrFieldHide('companySize', 'CompanySize');
-      setAddrFieldHide('divn', 'Division');
+      
       setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
       setAddrFieldHide('rol', 'ROL');
 
       // ADU 1, 2, 3, 4, 6, 7
-      if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+      if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
         setAddrFieldMandatory('locationCode', 'LocationCode');
 
         setAddrFieldOptional('bldg', 'Building');
@@ -6995,7 +6824,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
     setAddrFieldHide('dept', 'Department');
     setAddrFieldHide('contact', 'Contact');
     setAddrFieldHide('custFax', 'CustFax');
-    setAddrFieldHide('divn', 'Division');
+    
     setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
     setAddrFieldHide('rol', 'ROL');
     setAddrFieldHide('city2', 'City2');
@@ -7032,7 +6861,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
     }
 
     // ADU 1, 2, 3, 4, 6, 7
-    if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI02' || addrType == 'ZI01' || addrType == 'ZP09') {
+    if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
       setAddrFieldMandatory('locationCode', 'LocationCode');
 
       setAddrFieldOptional('bldg', 'Building');
@@ -7043,10 +6872,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
     }
 
     // Company, Establishment
-    if (addrType == 'ZC01' || addrType == 'ZE01') {
-      if (addrType == 'ZE01') {
-        setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
-      }
+    if (addrType == 'ZC01') {
       setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
       setAddrFieldMandatory('custNm4', 'Katakana');
       setAddrFieldMandatory('addrTxt', 'Address');
@@ -7067,8 +6893,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
 
 function setTelNoForBFKSCScenario(addrType) {
 
-  if (addrType == 'ZC01' || addrType == 'ZC01' || addrType == 'ZE01' || addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZE01' || addrType == 'ZP01' || addrType == 'ZI02'
-      || addrType == 'ZI01' || addrType == 'ZP09') {
+  if (addrType == 'ZC01' || addrType == 'ZC01' || addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
     setAddrFieldMandatory('custPhone', 'CustPhone', 'Phone #');
     FormManager.setValue('custPhone', '00-0000-0000');
   } else {
@@ -7128,7 +6953,6 @@ function setAbbrevNmReqForBFKSCScenario() {
   if (custSubGrp == 'BFKSC') {
     if (custType == 'CEA' || custType == 'EA') {
       FormManager.enable('abbrevNm');
-      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Account Abbreviated Name' ], 'MAIN_CUST_TAB');
     } else {
       FormManager.clearValue('abbrevNm');
       FormManager.readOnly('abbrevNm');
@@ -7161,7 +6985,7 @@ function setAddrFieldsBehavior() {
   if (reqType == 'C') {
     console.log(">>>>  setAddrFieldsBehavior");
     var addrType = FormManager.getActualValue('addrType');
-    if (addrType == 'ZC01' || addrType == 'ZE01') {
+    if (addrType == 'ZC01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
       $('#cnCustName1').attr('maxlength', '22');
@@ -7206,7 +7030,7 @@ function setAddrFieldsUpdateBehavior() {
       addrType = result.ret2;
     }
 
-    if (addrType == 'ZC01' || addrType == 'ZE01') {
+    if (addrType == 'ZC01') {
       FormManager.removeValidator('cnAddrTxt', Validators.REQUIRED);
       FormManager.removeValidator('cnDistrict', Validators.REQUIRED);
       $('#cnCustName1').attr('maxlength', '22');
@@ -7615,6 +7439,148 @@ function addJPMandatoryAddressTypesValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function checkROLFlagValue(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('rol'), 'onChange', function (value) {
+    var reqType = FormManager.getActualValue('reqType');
+    var custGrp = FormManager.getActualValue('custGrp');
+    var addrType = FormManager.getActualValue('addrType');
+    if (reqType == 'C' && (custGrp == 'IBMTP' || custGrp == 'BUSPR')) {
+      if (addrType == 'ZC01' && value == 'N') {
+        cmr.showAlert('CreateCMR will send email to CFO to get approval if ROL Flag=N. Is that OK to set ROL Flag=N?');
+      }
+    }
+  });
+}
+
+function setROLFlagValue(addrType) {
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var addrType = FormManager.getActualValue('addrType');
+  if (reqType == 'C' && (custGrp == 'IBMTP' || custGrp == 'BUSPR')) {
+    if (addrType == 'ZC01') {
+      FormManager.setValue('rol', 'Y');
+    } else {
+      FormManager.clearValue('rol');
+    }
+  }
+}
+
+function hideNonRelevantFieldsInDRFlow() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    hideFieldsInViewOnlyMode(custSubType);
+    FormManager.readOnly('territoryCd');
+    return;
+  }
+
+  console.log('>>>> DR Flow. Non-relevant fields are hidden/removed.');
+  // General Tab fields
+
+  // Customer Tab fields
+  FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+  FormManager.disable('email2');
+  FormManager.hide('AbbrevLocation', 'email2');
+  FormManager.removeValidator('email2', Validators.REQUIRED);
+  FormManager.clearValue('oemInd');
+  FormManager.disable('oemInd');
+  FormManager.hide('OEMInd', 'oemInd');
+  FormManager.removeValidator('oemInd', Validators.REQUIRED);
+  FormManager.disable('educAllowCd');
+  FormManager.hide('EducationAllowance', 'educAllowCd');
+  FormManager.disable('custAcctType');
+  FormManager.hide('CustAcctType', 'custAcctType');
+  FormManager.disable('iinInd');
+  FormManager.hide('IinInd', 'iinInd');
+  FormManager.removeValidator('iinInd', Validators.REQUIRED);
+  FormManager.disable('siInd');
+  FormManager.hide('SiInd', 'siInd');
+  FormManager.removeValidator('siInd', Validators.REQUIRED);
+  FormManager.disable('crsCd');
+  FormManager.hide('CrsCd', 'crsCd');
+  FormManager.disable('creditCd');
+  FormManager.hide('CreditCd', 'creditCd');
+  FormManager.removeValidator('creditCd', Validators.REQUIRED);
+  FormManager.disable('govType');
+  FormManager.hide('Government', 'govType');
+  FormManager.removeValidator('govType', Validators.REQUIRED);
+  FormManager.disable('outsourcingService');
+  FormManager.hide('OutsourcingServ', 'outsourcingService');
+
+  // IBM Tab fields
+  FormManager.disable('repTeamMemberNo');
+  FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
+  FormManager.disable('privIndc');
+  FormManager.hide('PrivIndc', 'privIndc');
+  FormManager.removeValidator('privIndc', Validators.REQUIRED);
+  FormManager.disable('csDiv');
+  FormManager.hide('CSDiv', 'csDiv');
+  FormManager.removeValidator('csDiv', Validators.REQUIRED);
+  FormManager.disable('tier2');
+  FormManager.hide('Tier2', 'tier2');
+  FormManager.disable('adminDeptLine');
+  FormManager.hide('AdminDeptLine', 'adminDeptLine');
+  FormManager.removeValidator('adminDeptLine', Validators.REQUIRED);
+}
+
+function hideFieldsInViewOnlyMode(custSubType) {
+  // General Tab fields
+
+  // Customer Tab fields
+  FormManager.hide('AbbrevLocation', 'email2');
+  FormManager.hide('OEMInd', 'oemInd');
+  FormManager.hide('EducationAllowance', 'educAllowCd');
+  FormManager.hide('CustAcctType', 'custAcctType');
+  FormManager.hide('IinInd', 'iinInd');
+  FormManager.hide('SiInd', 'siInd');
+  FormManager.hide('CrsCd', 'crsCd');
+  FormManager.hide('CreditCd', 'creditCd');
+  FormManager.hide('Government', 'govType');
+  FormManager.hide('OutsourcingServ', 'outsourcingService');
+
+  // IBM Tab fields
+  switch (custSubType) {
+    case 'RACMR':
+    case 'BFKSC':
+      break;
+    default:
+      FormManager.hide('SalesSR', 'salesTeamCd');
+      break;
+  }
+  FormManager.hide('SalRepNameNo', 'repTeamMemberNo');
+  FormManager.hide('PrivIndc', 'privIndc');
+  FormManager.hide('CSDiv', 'csDiv');
+  FormManager.hide('Tier2', 'tier2');
+  FormManager.hide('AdminDeptLine', 'adminDeptLine');
+}
+
+function showHideSalesTeamNo() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  switch (custSubType) {
+    case 'RACMR':
+      FormManager.show('SalesSR', 'salesTeamCd');
+      FormManager.readOnly('salesTeamCd');
+      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+      break;
+    case 'BFKSC':
+      FormManager.show('SalesSR', 'salesTeamCd');
+      FormManager.addValidator('SalesSR', Validators.REQUIRED, [ 'Sales/Team No (Dealer No.)' ], 'MAIN_IBM_TAB');
+      break;
+    default:
+      FormManager.disable('salesTeamCd');
+      FormManager.hide('SalesSR', 'salesTeamCd');
+      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+      break;
+  }
+}
+
 function addKanjiAndKanjiContLengthValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -7640,7 +7606,7 @@ function addEnglishStreetValidator() {
         var englishStreet = FormManager.getActualValue('cnAddrTxt');
         var englishRegex = /^[a-zA-Z0-9\s\-,.'"/]+$/;
         var isEnglish = englishRegex.test(englishStreet);
-        
+
         if (!isEnglish) {
           return new ValidationResult(null, false, "Invalid value for 'English Street Address'. " + englishStreet  + " Double byte character is not allowed.");
         }
@@ -7658,7 +7624,6 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterConfig(handleFields4RAOnPageLoad, GEOHandler.JP);
   GEOHandler.addAfterConfig(afterConfigForJP, GEOHandler.JP);
-  GEOHandler.addAfterConfig(showOfcdMessage, GEOHandler.JP);
   GEOHandler.addAfterConfig(addLogicOnOfficeCdChange, GEOHandler.JP);
   GEOHandler.addAfterConfig(resetAccountAbbNmOnFieldChange, GEOHandler.JP);
   GEOHandler.addAfterConfig(showConfirmForTier2, GEOHandler.JP);
@@ -7721,6 +7686,9 @@ dojo.addOnLoad(function() {
   // under the scenario of Subsidiary
   GEOHandler.addAfterTemplateLoad(handleIBMRelatedCMR, GEOHandler.JP);
 
+  GEOHandler.addToggleAddrTypeFunction(checkROLFlagValue, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(setROLFlagValue, GEOHandler.JP);
+
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForJP, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLocnCdLogic, GEOHandler.JP);
 
@@ -7741,7 +7709,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(disableAddrFieldsForRA, GEOHandler.JP);
   GEOHandler.addToggleAddrTypeFunction(convertEnglishFieldsToSBCS, GEOHandler.JP);
 
-
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.JP);
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);
   GEOHandler.addAddrFunction(showOrHideAddrFieldForBPWPQ, GEOHandler.JP);
@@ -7754,8 +7721,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addLengthValidatorForPC, [ '760' ], null, true);
   // GEOHandler.registerValidator(checkEstabFuncCdMandatory, GEOHandler.JP,
   // null, true);
-  GEOHandler.registerValidator(addRequestForValidator, GEOHandler.JP, null, true);
-  GEOHandler.registerValidator(addProductTypeValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addDPLCheckValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidatorJP, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addINACValidator, GEOHandler.JP, null, true);
@@ -7772,13 +7737,17 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.JP, null, true);
 	GEOHandler.registerValidator(addJPAddressGridValidator, [ SysLoc.JAPAN ], null, true);
 	GEOHandler.registerValidator(addJPMandatoryAddressTypesValidator, [ SysLoc.JAPAN ], null, true);
-  GEOHandler.registerValidator(addKanjiAndKanjiContLengthValidator, [ SysLoc.JAPAN ], null, true);
-	GEOHandler.registerValidator(addEnglishStreetValidator, [ SysLoc.JAPAN ], null, true);
+
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
 
   GEOHandler.addAfterConfig(disableBpBqiImport, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(disableBpBqiImport, GEOHandler.JP);
+
+  GEOHandler.addAfterConfig(hideNonRelevantFieldsInDRFlow, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(hideNonRelevantFieldsInDRFlow, GEOHandler.JP);
+  GEOHandler.addAfterConfig(showHideSalesTeamNo, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(showHideSalesTeamNo, GEOHandler.JP);
 
   GEOHandler.addAfterConfig(setFieldsForBFKSCScenario, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setFieldsForBFKSCScenario, GEOHandler.JP);
@@ -7792,5 +7761,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(setAddrFieldsUpdateBehavior, GEOHandler.JP);
 
   GEOHandler.registerValidator(contractSignDateValidator, [ SysLoc.JAPAN ], null, true);
+  GEOHandler.registerValidator(addKanjiAndKanjiContLengthValidator, [ SysLoc.JAPAN ], null, true);
+  GEOHandler.registerValidator(addEnglishStreetValidator, [ SysLoc.JAPAN ], null, true);
 
 });

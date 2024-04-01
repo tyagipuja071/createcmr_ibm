@@ -3,6 +3,8 @@
 <%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@page import="com.ibm.cio.cmr.request.util.Person"%>
+<%@page import="com.ibm.cio.cmr.request.ui.PageManager"%>
+<%@page import="com.ibm.cio.cmr.request.CmrConstants"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -32,6 +34,7 @@
   boolean isJPBlueGroupFlg = true;
   AppUser user = AppUser.getUser(request);
   isJPBlueGroupFlg = BluePagesHelper.isUserInJPBlueGroup(user.getIntranetId());
+  String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntry(), reqentry.getReqType());
   
   Person p = BluePagesHelper.getPerson(user.getIntranetId());
 
@@ -118,6 +121,7 @@
         </p>
     </cmr:column>
   </cmr:row>
+  <%  if (!CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>
   <cmr:row addBackground="false">
     <cmr:column span="4">
       <cmr:label fieldId="ibmBankNumber">
@@ -163,6 +167,7 @@
     <br>
     <br>
   </cmr:row>
+  <%  } %>
   <cmr:row addBackground="false">
     
     <cmr:column span="2" containerForField="ChargeCd">

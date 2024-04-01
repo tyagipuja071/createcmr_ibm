@@ -7,6 +7,7 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@page import="com.ibm.cio.cmr.request.util.geo.impl.LAHandler"%>
+<%@page import="com.ibm.cio.cmr.request.CmrConstants"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -20,6 +21,7 @@ RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry"
 boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
 boolean dnbPrimary = "Y".equals(request.getAttribute("dnbPrimary"));
 Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
+String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntry(), reqentry.getReqType());
 if (readOnly == null){
   readOnly = false;
 }
@@ -551,6 +553,7 @@ if (readOnly){
       </cmr:row>
       <cmr:view forGEO="JP">
         <cmr:row addBackground="false" topPad="10">
+          <%  if (!CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>
           <cmr:column span="2">
             <p>
               <cmr:label fieldId="icmsInd">
@@ -563,6 +566,7 @@ if (readOnly){
               </div>
             </p>
           </cmr:column>
+          <%  } %>
           <cmr:column span="2">
             <p>
               <cmr:label fieldId="requestDueDate">

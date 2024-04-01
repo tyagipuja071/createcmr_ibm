@@ -18,9 +18,9 @@
       </label>
       <%if ("C".equals(reqType)){%>
         <%if ("CEA".equals(custType)){ %>
-          Company, Establishment, Account
+          Company and Account
         <%} else if  ("EA".equals(custType)){%>
-          Establishment, Account
+          Account
         <%} else if  ("C".equals(custType)){%>
           Subsidiary Company
         <%} else if  ("A".equals(custType)){%>
@@ -28,9 +28,9 @@
         <%}%>
       <%} else if ("U".equals(reqType)){ %>
         <%if ("CEA".equals(custType)){ %>
-          Company, Establishment, Account
+          Company and Account
         <%} else if  ("CE".equals(custType)){%>
-          Company, Establishment
+          Company
         <%} else if  ("C".equals(custType)){%>
           Company
         <%}%>
