@@ -652,6 +652,14 @@ var TemplateService = (function() {
         }
 
         if (scenarioChanged == true) {
+          var custSubGrp = FormManager.getActualValue('custSubGrp');
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+          if ((custSubGrp != 'ECO' && custSubGrp != 'PRIV') && (role == 'Requester' || role == 'Viewer') && cmrIssuingCntry == '649') {
+            FormManager.setValue('isuCd', '');
+            FormManager.setValue('clientTier', '');
+            FormManager.enable('isuCd');
+            FormManager.enable('clientTier');
+          }
           if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry')) || FormManager.getActualValue('cmrIssuingCntry') == '649') {
             if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))
                 || scenario == 'PRIV' || scenario == 'ECO') {

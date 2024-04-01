@@ -1350,6 +1350,16 @@ function connectToCmrServices() {
         FormManager.setValue('covId', data.coverageType + data.coverageID);
         FormManager.setValue('covDesc', data.coverageDesc);
         dojo.byId('covDescCont').innerHTML = data.coverageDesc != null ? data.coverageDesc : '(no description available)';
+
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (custSubGrp != 'PRIV' && custSubGrp != 'ECO' && (FormManager.getActualValue('cmrIssuingCntry') == '649')) {
+          FormManager.setValue('clientTier', '');
+          FormManager.enable('clientTier');
+        }
+        if (custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM' && (FormManager.getActualValue('cmrIssuingCntry') == '897')) {
+          FormManager.setValue('clientTier', '');
+          FormManager.enable('clientTier');
+        }
         if (data.clientTier == null || data.clientTier.trim() == '') {
           /*
            * 1490262: Client Tier Code is set to Unassigned after Retrieving
