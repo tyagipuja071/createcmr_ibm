@@ -494,9 +494,6 @@ function afterConfigForUKI() {
         // optionalRuleForVatUK();
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
-        if (issu_cntry == SysLoc.IRELAND) {
-          setSboValueBasedOnIsuCtcIE();
-        }
       }
     });
   }
@@ -572,6 +569,7 @@ function afterConfigForUKI() {
     _isuCdHandlerIE = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierBasedOnIsuUKI();
       lockIsuCtcUKI();
+      addSBOSRLogicIE(value);
       setSboValueBasedOnIsuCtcIE(value);
     });
   }
@@ -4767,9 +4765,6 @@ function setSboValueBasedOnIsuCtcIE(value) {
   var clientTier = FormManager.getActualValue('clientTier');
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
-  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
-  var isuList = [ '34', '36', '32' ];
 
   if (reqType == 'U') {
     return;
@@ -4782,6 +4777,10 @@ function setSboValueBasedOnIsuCtcIE(value) {
     return;
   }
 
+  var custSubGrp34Q = new Set ([ 'COMME', 'GOVRN', 'IGF', 'INFSL', 'DC', 'THDPT' ]);
+  var custSubGrp27E = new Set ([ 'PRICU', 'COMME', 'GOVRN', 'IGF', 'INFSL', 'DC', 'THDPT']);
+  var custSubGroup04 = new Set ([ 'COMME', 'GOVRN', 'IGF', 'INFSL', 'DC', 'THDPT']);
+
   if (isuCd == '5K' && clientTier == '') {
     FormManager.setValue('salesBusOffCd', '000');
     FormManager.setValue('repTeamMemberNo', 'SPA000');
@@ -4792,7 +4791,7 @@ function setSboValueBasedOnIsuCtcIE(value) {
     FormManager.setValue('salesBusOffCd', '057');
     FormManager.setValue('repTeamMemberNo', 'SPA057');
   } else if (isuCd == '34' && clientTier == 'Q') {
-    if (!(custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT')) {
+    if (!(custSubGrp.has(custSubGrp34Q))) {
       FormManager.setValue('salesBusOffCd', '090');
       FormManager.setValue('repTeamMemberNo', 'MMIR11');
     } else {
@@ -4810,17 +4809,12 @@ function setSboValueBasedOnIsuCtcIE(value) {
       FormManager.setValue('repTeamMemberNo', 'SPA114');
     }
   } else if (isuCd == '27' && clientTier == 'E') {
-    if (custSubGrp == 'PRICU' || custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
+    if (custSubGrp.has(custSubGrp27E)) {
       FormManager.setValue('salesBusOffCd', '090');
       FormManager.setValue('repTeamMemberNo', 'MMIR11');
     }
-  } else if (isuCd == '36' && clientTier == 'Y') {
-    if (custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
-      FormManager.setValue('salesBusOffCd', salesBusOffCd);
-      FormManager.setValue('repTeamMemberNo', repTeamMemberNo);
-    }
   } else if (isuCd == '04' && clientTier == '') {
-    if (custSubGrp == 'COMME' || custSubGrp == 'GOVRN' || custSubGrp == 'IGF' || custSubGrp == 'INFSL' || custSubGrp == 'DC' || custSubGrp == 'THDPT') {
+    if (custSubGrp.has(custSubGroup04)) {
       FormManager.setValue('salesBusOffCd', '123');
       FormManager.setValue('repTeamMemberNo', 'SPA123');
     }
@@ -7471,7 +7465,7 @@ function addSBOSRLogicIE(clientTier) {
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesRepValue);
       FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboValues);
       if (salesRepValue != null) {
-        if (salesRepValue.length == 1) {
+        if (salesRepValue.length >= 1) {
           FormManager.setValue('repTeamMemberNo', salesRepValue[0]);
         }
       }
