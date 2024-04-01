@@ -7441,6 +7441,41 @@ function addJPAddressGridValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addKanjiAndKanjiContLengthValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var kanji = FormManager.getActualValue('custNm1');
+        var kanjiCont = FormManager.getActualValue('custNm2');
+        var kanjiLen = kanji.length + kanjiCont.length;
+
+        if (kanjiLen > 30) {
+          return new ValidationResult(null, false, "'Customer Name-KANJI'+'Name KANJI Continue' should be 30 double-byte characters max");
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addEnglishStreetValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var englishStreet = FormManager.getActualValue('cnAddrTxt');
+        var englishRegex = /^[a-zA-Z0-9\s\-,.'"/]+$/;
+        var isEnglish = englishRegex.test(englishStreet);
+        
+        if (!isEnglish) {
+          return new ValidationResult(null, false, "Invalid value for 'English Street Address'. " + englishStreet  + " Double byte character is not allowed.");
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -7559,7 +7594,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(isKSCMemberValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addBwpqCreditToValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addJPAddressGridValidator, [ SysLoc.JAPAN ], null, true);
-
+  GEOHandler.registerValidator(addKanjiAndKanjiContLengthValidator, [ SysLoc.JAPAN ], null, true);
+	GEOHandler.registerValidator(addEnglishStreetValidator, [ SysLoc.JAPAN ], null, true);
   // skip byte checks
   FormManager.skipByteChecks([ 'dept', 'office', 'custNm1', 'custNm2', 'custNm4', 'addrTxt', 'bldg', 'contact', 'postCd', 'email2' ]);
 

@@ -296,7 +296,7 @@ function addAfterConfigAP() {
     }
   }
 
-  if (reqType == 'U' && cntry == '834') {
+  if (reqType == 'U' && ((cntry == '834' || cntry == '749'))) {
     FormManager.readOnly('isicCd');
   }
 
