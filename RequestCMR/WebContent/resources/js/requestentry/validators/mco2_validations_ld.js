@@ -2611,11 +2611,11 @@ function validateISUCTCEnterprise() {
 				return new ValidationResult(null, true);
 				}
 
-				if (['BUSPR', 'LLCBP'].includes(custSubGrp) && ['8B'].includes(isuCTC) && entp == '') {
+				if (['BUSPR', 'LLCBP','XBP'].includes(custSubGrp) && ['8B'].includes(isuCTC) && entp == '') {
 					valid = true;
-				} else if (['INTER', 'IBMEM'].includes(custSubGrp) && ['21'].includes(isuCTC) && entp == '') {
+				} else if (['INTER', 'IBMEM', 'XINTE', 'XIBME'].includes(custSubGrp) && ['21'].includes(isuCTC) && entp == '') {
 					valid = true;
-				} else if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU'].includes(custSubGrp)) {
+				} else if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU', 'XCOM', 'XGOV', 'XLLCEX', 'XPRIC', 'XTP'].includes(custSubGrp)) {
 					if (isuCTC == '34Q') {
 						valid_Entp = getValidEntp();
 						valid = (entp == valid_Entp);
