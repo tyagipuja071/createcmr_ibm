@@ -2317,6 +2317,20 @@ function setIsuCtcCBMEA() {
     if (result != null && result.ret1 != undefined) {
         landCntry = result.ret1;
     }
+    var reqId = FormManager.getActualValue('reqId');
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var landCntry ='';
+    var result = cmr.query('LANDCNTRY.IT', {
+      REQID : reqId
+    });
+    if (result != null && result.ret1 != undefined) {
+      landCntry = result.ret1;
+    }
+    var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP'];
+    var  MEA_COUNTRIES_CB = ['TR','DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG','LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+    if (reqType == 'U' || !MEA_COUNTRIES_CB.includes(landCntry) || !crossSubTypes.includes(custSubType)) {
+      return;
+  }
     var subIndustryCd = FormManager.getActualValue('subIndustryCd');
     if (subIndustryCd == '') {
         subIndustryCd = _pagemodel.subIndustryCd;
@@ -2347,7 +2361,7 @@ function enterpriseValidator() {
                 var clientTierCode = FormManager.getActualValue('clientTier');
                 var isuCtc = isuCode + clientTierCode;
                 var isuCtcWithBlank = ['04', '12', '28', '4F', '5K'];
-                var reqId = FormManager.getActualValue('reId');
+                var reqId = FormManager.getActualValue('reqId');
                 var landCntry = '';
                 var result = cmr.query('LANDCNTRY.IT', {
                     REQID: reqId
@@ -3046,7 +3060,7 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
         return;
     } else {
 
-        var reqId = FormManager.getActualValue('reId');
+        var reqId = FormManager.getActualValue('reqId');
         var landCntry = '';
         var result = cmr.query('LANDCNTRY.IT', {
             REQID: reqId
