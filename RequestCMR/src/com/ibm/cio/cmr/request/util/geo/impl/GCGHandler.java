@@ -397,4 +397,11 @@ public class GCGHandler extends APHandler {
     return addrSeqSet;
   }
 
+  @Override
+  public Map<String, String> getUIFieldIdMap() {
+    Map<String, String> map = super.getUIFieldIdMap();
+    map.put("##CustClass", "custClass");
+    return map;
+  }
+
 }
