@@ -480,6 +480,10 @@ function afterConfigForCEMEA() {
   setTypeOfCustomerRequiredProcessor();
   // CREATCMR-788
   addressQuotationValidatorCEMEA();
+  
+  if(FormManager.getActualValue('salesBusOffCd') != _pagemodel.salesBusOffCd){
+	FormManager.setValue('salesBusOffCd',_pagemodel.salesBusOffCd)
+}
 }
 
 function setAustriaUIFields() {
@@ -2097,7 +2101,8 @@ function setSBOValues() {
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var custSubType = FormManager.getActualValue('custSubGrp');
- 
+  var custType = FormManager.getActualValue('custGrp');
+
       if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
         if (isu == '34' && ctc == 'Q') {
             if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
@@ -2129,8 +2134,12 @@ function setSBOValues() {
                 }
               }
             }
-        }
-      }
+        }else if(isu == '5K' && ctc == ''){
+		   FormManager.setValue('salesBusOffCd', '999');
+}
+      }else if(custType == 'CROSS'){
+	   FormManager.setValue('salesBusOffCd', 'R04');
+}
 }
 
 
@@ -4857,6 +4866,7 @@ var isuCdHandler = null;
 var salBusOffCdHandler = null;
 
 function addHandlersForCEE(){	
+	var cntry = FormManager.getActualValue('cmrIssuingCntry');
 	if (subIndHandler == null) {
 		subIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
 			subIndustryLogicCEE();
@@ -4868,6 +4878,9 @@ function addHandlersForCEE(){
 			setClientTier();
 			setCovValues2024CEE();
 			setSBOFromDBMapping();
+			if(cntry == SysLoc.RUSSIA){
+				setSBOValues();
+			}
 		});
 	}	
 	
@@ -4888,8 +4901,8 @@ function setSBOFromDBMapping(){
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var sbo = FormManager.getActualValue('salesBusOffCd');
-
-  if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp)){
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if(!['COMME','THDPT','PRICU','XCOM','XTP'].includes(custSubGrp) || cntry == SysLoc.RUSSIA){
 	return;
    }
 
@@ -5178,10 +5191,10 @@ function validateSboCEE() {
 					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sboList + ') for given  ISU , CTC , ISIC combination.');
 				}
 				}else{
-					if (valid) {
+					if (validSBO) {
 					return new ValidationResult(null, true);
 				} else {
-					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + validSbo + ') for given  ISU , CTC , ISIC combination.');
+					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sboList + ') for given  ISU , CTC , ISIC combination.');
 				}
 				}
 			}
@@ -5362,12 +5375,9 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(setEnterprise2Values, [SysLoc.RUSSIA]);// CreateCMR-811
   GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [SysLoc.RUSSIA]);// CreateCMR-811
 
- // GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
   GEOHandler.addAfterConfig(changeDupSBO, SysLoc.RUSSIA);
   GEOHandler.addAfterTemplateLoad(changeDupSBO, [SysLoc.RUSSIA]);
   GEOHandler.addAfterConfig(afterConfigForRussia, [SysLoc.RUSSIA]);
- // GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
- // GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
 
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [SysLoc.SLOVAKIA]);
@@ -5416,11 +5426,11 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(addHandlersForCEE, GEOHandler.CEE);
 	GEOHandler.addAfterConfig(addHandlersForCEE, GEOHandler.CEE);
 	GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
-	GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
-  GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
+//	GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
+//  GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
   GEOHandler.addAfterConfig(setClientTier, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(setClientTier,GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(setSBOFromDBMapping, GEOHandler.CEE);  
-  GEOHandler.addAfterConfig(setSBOFromDBMapping, GEOHandler.CEE);
+ // GEOHandler.addAfterTemplateLoad(setSBOFromDBMapping, GEOHandler.CEE);  
+ // GEOHandler.addAfterConfig(setSBOFromDBMapping, GEOHandler.CEE);
 
 });
