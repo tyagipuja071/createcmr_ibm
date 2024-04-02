@@ -2262,11 +2262,11 @@ function setDefaultEntCBMEA() {
             }
         } else if (SOUTH_AFRICA_LC.includes(landCntry)) {
             // SOUTH AFRICA MEA REGION
-            if (subRegion == '864LS') {
+            if (landCntry == 'LS') {
                 FormManager.setValue('enterprise', '910510');
-            } else if (subRegion == '864NA') {
+            } else if (landCntry == 'NA') {
                 FormManager.setValue('enterprise', '909813');
-            } else if (subRegion == '864SZ') {
+            } else if (landCntry == 'SZ') {
                 FormManager.setValue('enterprise', '910509');
             } else {
                 var qParams = {
