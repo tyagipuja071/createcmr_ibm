@@ -8590,6 +8590,9 @@ function setKUKLAvaluesHK() {
   }
   console.log('setKUKLAvaluesHK() >>>> set KUKLA values for HK >>>>');
 
+  var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
+  var cond2 = new Set(['DUMMY', 'INTER']);
+
   var kuklaHK = [];
   if (reqType == 'C') {
     var qParams = {
@@ -8604,29 +8607,25 @@ function setKUKLAvaluesHK() {
     }
 
     if (results != null) {
-      // Acquisition, Ecosystem(Build/Service/Distribute),
-      // Embedded Solution Agreement (ESA), Kyndryl,
-      // Market Place, Normal - Select BPS/Digital, Normal - Strategic,
-      // Foreign respectively
-      var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
       if (cond1.has(custSubGrp)) {
         if ((industryClass == 'G' || industryClass == 'H' || industryClass == 'Y')) {
-          FormManager.setValue('custClass', kuklaHK[2]);
+          FormManager.setValue('custClass', kuklaHK[1]);
         } else if (industryClass == 'E') {
+          FormManager.setValue('custClass', kuklaHK[2]);
+        } else {
           FormManager.setValue('custClass', kuklaHK[0]);
         }
-      } else if (custSubGrp == 'BUSPR') { // Business Partner
-        if (bpRelType == 'DS') { // Distributor
+      } else if (custSubGrp == 'BUSPR') {
+        if (bpRelType == 'DS') {
           FormManager.setValue('custClass', kuklaHK[5]);
-        } else if (bpRelType == 'SP') { // Solution Provider
+        } else if (bpRelType == 'SP') {
           FormManager.setValue('custClass', kuklaHK[3]);
-        } else if (bpRelType == 'RS') { // Reseller
+        } else if (bpRelType == 'RS') {
           FormManager.setValue('custClass', kuklaHK[4]);
         }
-        // Dummy, Internal respectively
-      } else if (custSubGrp == 'DUMMY' || custSubGrp == 'INTER') {
+      } else if (cond2.has(custSubGrp)) {
         FormManager.setValue('custClass', kuklaHK[7]);
-      } else if (custSubGrp == 'BLUMX') { // Private Person
+      } else if (custSubGrp == 'BLUMX') {
         FormManager.setValue('custClass', kuklaHK[6]);
       }
     }
