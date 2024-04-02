@@ -2564,10 +2564,10 @@ function setEntpValue() {
 		}
 		FormManager.enable('enterprise');
 		FormManager.setValue('enterprise', entp);
-		if (custSubGrp == 'PRICU') {
+		if (custSubGrp == 'PRICU','XPRIC') {
 			FormManager.readOnly('enterprise');
 		}
-	} else if (['BUSPR', 'LLCBP', 'INTER', 'IBMEM'].includes(custSubGrp)) {
+	} else if (['BUSPR', 'LLCBP', 'INTER', 'IBMEM', 'XBP', 'XINTE', 'XIBME'].includes(custSubGrp)) {
 		FormManager.readOnly('enterprise');
 		FormManager.setValue('enterprise', '');
 	}
