@@ -1086,7 +1086,7 @@ public class MEHandler extends BaseSOFHandler {
           data.setPhone1(data.getPhone1().substring(0, 15));
         }
       }
-      data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
+      //data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
       if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
         data.setPhone3(mainRecord.getCmrBusinessReg());
       }

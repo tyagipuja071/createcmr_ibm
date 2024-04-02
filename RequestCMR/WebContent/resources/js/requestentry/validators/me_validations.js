@@ -2117,7 +2117,7 @@ function lockFieldsBasedOnISU(isuCd) {
 
 function lockedScenarios() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM' ]
+  var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM', 'XBP', 'XINT', 'EXBP', 'ELBP' ]
   if (lockedScenarios.includes(custSubGrp)) {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
@@ -3653,6 +3653,11 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
 function isicCdOnChangeME() {
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     setClassificationCodeME();
+
+    var clientTier = FormManager.getActualValue('clientTier');
+    if (clientTier != "") {
+      setEnterpriseValuesME(clientTier);
+    }
   });
 }
 
