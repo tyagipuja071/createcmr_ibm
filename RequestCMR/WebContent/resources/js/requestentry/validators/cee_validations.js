@@ -4995,7 +4995,7 @@ function setCovValues2024CEE() {
 			}
 			break;
 
-		case SysLoc.SOLVENIA:
+		case SysLoc.SLOVENIA:
 		case SysLoc.HUNGARY:
 		case SysLoc.CZECH_REPUBLIC:
 		case SysLoc.SLOVAKIA:
@@ -5050,14 +5050,20 @@ function validateSboCEE() {
 				var custSubGrp = FormManager.getActualValue('custSubGrp');
 				var cntry = FormManager.getActualValue('cmrIssuingCntry');
 				var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
+				
 				if (!['COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP'].includes(custSubGrp) && isuCTC == '34Q') {
-					return new ValidationResult(null, true);
+				return new ValidationResult(null, true);
 				}
+
 				var isu = FormManager.getActualValue('isuCd');
 				var ctc = FormManager.getActualValue('clientTier');
-				var cntry = FormManager.getActualValue('cmrIssuingCntry');
-				var sbo = FormManager.getActualValue('salesBusOffCd');
 				var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
+				var sbo = FormManager.getActualValue('salesBusOffCd');
+				if (['BUSPR', 'XBP'].includes(custSubGrp) && isuCTC == '8B' && sbo != '000') {
+						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sbo + ') for given  ISU , CTC , ISIC combination.');
+				}else if(['INTER', 'IBMEM','XINT'].includes(custSubGrp) && isuCTC == '21' && sbo != '999'){
+						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sbo + ') for given  ISU , CTC , ISIC combination.');
+				}
 				var qParams = {
 					_qall: 'Y',
 					CNTRY: cntry,
@@ -5072,8 +5078,8 @@ function validateSboCEE() {
 					CTC: ctc,
 				};
 				var results1 = cmr.query('GET_SBO_CEE', qParams1);
+				var sboList = [];
 				if (results1 != undefined && results1.length > 0) {
-					var sboList = [];
 					for (i = 0; i < results1.length; i++) {
 						sboList.push(results1[i].ret1);
 					}
@@ -5085,9 +5091,10 @@ function validateSboCEE() {
 				}
 
 
-				var valid = true;
+				var valid = false;
 				var validSbo = null;
 				if ('34Q' == isuCTC) {
+					valid = true;
 					switch (cntry) {
 						case SysLoc.CZECH_REPUBLIC:
 							if (['A', 'Q', 'U'].includes(subInd) && sbo != 'TW1') {
