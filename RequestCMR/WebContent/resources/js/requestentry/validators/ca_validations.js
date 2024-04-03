@@ -406,8 +406,19 @@ function clearCATaxFields() {
     if (dijit.byId('PSTExempt')) {
       FormManager.getField('PSTExempt').set('checked', false);
     }
+
     FormManager.disable('PSTExempt');
     return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'PRIV' || custSubGrp == 'ECO') {
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.setValue('isuCd', '');
+    FormManager.setValue('clientTier', '');
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
   }
   FormManager.clearValue('PSTExempt');
   FormManager.getField('PSTExempt').set('checked', false);
