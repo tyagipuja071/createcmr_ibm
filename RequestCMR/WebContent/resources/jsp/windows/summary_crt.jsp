@@ -1237,7 +1237,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
              </c:if>
              ${summary.data.inacCd != null ? summary.data.inacCd : ""}
   				</cmr:column>
-            <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,NORDX,NL">
+            <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,NORDX,NL" exceptForCountry="631">
               <cmr:column span="1" width="130">
                 <label><cmr:fieldLabel fieldId="SearchTerm" />: </label>
               </cmr:column>
