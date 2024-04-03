@@ -4926,6 +4926,10 @@ function setSBOFromDBMapping() {
 			sboList.push(results[i].ret1);
 		}
 		
+		if(valAssgndFrmSubInd && sboValSubInd.length > 0){
+		sboList.push(sboValSubInd);	
+		}
+		
 		if (sboList.length == 1) {
 			FormManager.setValue('salesBusOffCd', sboList[0]);
 		} else if (sboList.length > 1 && !sboList.includes(sbo)) {
@@ -5225,86 +5229,93 @@ function validateSboCEE() {
 	})(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var valAssgndFrmSubInd = false;
+var sboValSubInd = [];
 function subIndustryLogicCEE() {
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
 	var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
 	var isuCd = FormManager.getActualValue('isuCd');
 	var ctc = FormManager.getActualValue('clientTier');
-
+  var sbo = '';
 	var isuCTC = isuCd + ctc;
 	if ('34Q' == isuCTC) {
 		switch (cntry) {
 			case SysLoc.CZECH_REPUBLIC:
 				if (['A', 'Q', 'U'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW1');
+					sbo = 'TW1';
 				} else if (['B', 'C'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW3');
+					sbo = 'TW3';
 				} else if (['D', 'R', 'T', 'W'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW2');
+					sbo = 'TW2';
 				} else if (['F', 'N', 'S'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW5');
+					sbo =  'TW5';
 				} else if (['J', 'L', 'M', 'P', 'V'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW6');
+					sbo =  'TW6';
 				} else if (['E', 'G', 'H', 'X', 'Y'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW4');
+					sbo =  'TW4';
 				}
 				break;
 
 			case SysLoc.HUNGARY:
 				if (['A', 'Q', 'U'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW1');
+					sbo =  'TW1';
 				} else if (['B', 'C'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW3');
+					sbo =  'TW3';
 				} else if (['D', 'R', 'T', 'W'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW2');
+					sbo =  'TW2';
 				} else if (['F', 'N', 'S'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW4');
+					sbo =  'TW4';
 				} else if (['J', 'L', 'M', 'P', 'V'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW6');
+					sbo =  'TW6';
 				} else if (['E', 'G', 'H', 'X', 'Y'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW5');
+					sbo =  'TW5';
 				}
 				break;
 
 			case SysLoc.SLOVENIA:
 				if (['A', 'Q', 'U'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW2');
+					sbo =  'TW2';
 				} else if (['B', 'C'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW4');
+					sbo =  'TW4';
 				} else if (['D', 'R', 'T', 'W'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW3');
+					sbo =  'TW3';
 				} else if (['F', 'N', 'S'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW5');
+					sbo =  'TW5';
 				} else if (['J', 'L', 'M', 'P', 'V'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW1');
+					sbo = 'TW1';
 				} else if (['E', 'G', 'H', 'X', 'Y'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'TW6');
+					sbo =  'TW6';
 				}
 				break;
 
 			case SysLoc.POLAND:
 				if (['A', 'K'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P12');
+					sbo =  'P12';
 				} else if (['B', 'C'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P07');
+					sbo =  'P07';
 				} else if (['D', 'J', 'L', 'M', 'P', 'R', 'T', 'V'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P20');
+					sbo =  'P20';
 				} else if (['E', 'G', 'Y'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P08');
+					sbo =  'P08';
 				} else if (['F'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P05');
+					sbo =  'P05';
 				} else if (['X', 'H'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P10');
+					sbo =  'P10';
 				} else if (['N'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P09');
+					sbo =  'P09';
 				} else if (['S'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P06');
+					sbo =  'P06';
 				} else if (['U'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P24');
+					sbo =  'P24';
 				} else if (['W'].includes(subInd)) {
-					FormManager.setValue('salesBusOffCd', 'P23');
+					sbo =  'P23';
 				}
 				break;
+		}
+		if(sbo != undefined && sbo != ''){
+			valAssgndFrmSubInd = true;
+	  Formmanager.setValue('salesBusOffCd',sbo);
+	  sboValSubInd.push(sbo);
 		}
 	}
 
