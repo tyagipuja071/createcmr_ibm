@@ -2511,7 +2511,7 @@ function enterpriseValidatorMea() {
                                 id: 'enterprise',
                                 type: 'text',
                                 name: 'enterprise'
-                            }, false, 'Enterprise can only accept : \'911703\'\ \'911716\'\ \'911704\'\ ');
+                            }, false, 'Enterprise can only accept : \'BUILD1\'\ \'DISTR1\'\ \'SRVCE1\'\ ');
                         }
                     } else if (isuCtc == '5k') {
                         if (enterprise != '') {
@@ -2638,20 +2638,20 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911695');
+                }, false, 'Enterprise can only accept : \'911695\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
             }
             if (['G', 'V', 'Y'].includes(subIndustryCd) && (enterprise != '911692' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911692');
+                }, false, 'Enterprise can only accept : \'911692\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
             } else if (['H', 'X'].includes(subIndustryCd) && (enterprise != '911696' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911696');
+                }, false, 'Enterprise can only accept : \'911696\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
             } else if (!enterprise34Q.includes(enterprise) && !(['E','G', 'V', 'Y', 'H', 'X'].includes(subIndustryCd))) {
                 return new ValidationResult({
                     id: 'enterprise',
