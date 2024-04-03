@@ -407,6 +407,7 @@ function StcOrderBlockValidation() {
 /**
  * After config for CEMEA
  */
+ 
 function afterConfigForCEMEA() {
 	// for all requests
 	var viewOnly = FormManager.getActualValue('viewOnlyPage');
@@ -480,10 +481,6 @@ function afterConfigForCEMEA() {
 	setTypeOfCustomerRequiredProcessor();
 	// CREATCMR-788
 	addressQuotationValidatorCEMEA();
-
-	if (FormManager.getActualValue('salesBusOffCd') != _pagemodel.salesBusOffCd) {
-		FormManager.setValue('salesBusOffCd', _pagemodel.salesBusOffCd)
-	}
 }
 
 function setAustriaUIFields() {
@@ -4864,6 +4861,7 @@ function addressQuotationValidatorCEMEA() {
 var subIndHandler = null;
 var isuCdHandler = null;
 var salBusOffCdHandler = null;
+var custSubGrpHandler = null;
 
 function addHandlersForCEE() {
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -4877,6 +4875,15 @@ function addHandlersForCEE() {
 		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
 			setClientTier();
 			setCovValues2024CEE();
+			setSBOFromDBMapping();
+			if (cntry == SysLoc.RUSSIA) {
+				setSBOValues();
+			}
+		});
+	}
+	
+	if (custSubGrpHandler == null) {
+		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
 			setSBOFromDBMapping();
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
@@ -4918,6 +4925,7 @@ function setSBOFromDBMapping() {
 		for (i = 0; i < results.length; i++) {
 			sboList.push(results[i].ret1);
 		}
+		
 		if (sboList.length == 1) {
 			FormManager.setValue('salesBusOffCd', sboList[0]);
 		} else if (sboList.length > 1 && !sboList.includes(sbo)) {
@@ -5287,6 +5295,11 @@ function subIndustryLogicCEE() {
 
 }
 
+function setSBOAfterSave(){
+	if (FormManager.getActualValue('salesBusOffCd') != _pagemodel.salesBusOffCd) {
+		FormManager.setValue('salesBusOffCd', _pagemodel.salesBusOffCd)
+	}
+}
 
 dojo.addOnLoad(function() {
 	GEOHandler.CEE = ['358', '359', '363', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '707', '708', '713', '740', '741', '787', '820', '821',
@@ -5430,6 +5443,8 @@ dojo.addOnLoad(function() {
 	//  GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
 	GEOHandler.addAfterConfig(setClientTier, GEOHandler.CEE);
 	GEOHandler.addAfterTemplateLoad(setClientTier, GEOHandler.CEE);
+	GEOHandler.addAfterConfig(setSBOAfterSave, GEOHandler.CEE);
+
 	// GEOHandler.addAfterTemplateLoad(setSBOFromDBMapping, GEOHandler.CEE);  
 	// GEOHandler.addAfterConfig(setSBOFromDBMapping, GEOHandler.CEE);
 
