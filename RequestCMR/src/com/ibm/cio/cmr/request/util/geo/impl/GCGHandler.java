@@ -176,7 +176,6 @@ public class GCGHandler extends APHandler {
                 } else {
                   LOG.debug(" - Main address, importing from FindCMR main record.");
                   // will import ZS01 from RDc directly
-                  mainRecord.setCmrAddrSeq(wtaasAddress.getAddressNo());
                   handleRDcRecordValues(mainRecord);
                   converted.add(mainRecord);
                 }
@@ -359,10 +358,11 @@ public class GCGHandler extends APHandler {
 
       LOG.info("After Mapped Addrtype: " + addrType);
 
-      if ("ZP02".equals(addrType) || "ZI01".equals(addrType)) {
+      if ("ZP01".equals(addrType) || "MAIL".equals(addrType)) {
         handleRDcRecordValues(record);
         record.setCmrAddrTypeCode(addrType);
         converted.add(record);
+        LOG.info("ADDED Addr Type: " + addrType);
       }
       LOG.info("GCG getCmrAddrSeq: " + record.getCmrAddrSeq());
       LOG.info("GCG getCmrName4: " + record.getCmrName4());
