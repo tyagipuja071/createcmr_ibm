@@ -2178,7 +2178,7 @@ function setEnterpriseBehaviour() {
 
     // hide enterprise for BP, IBM employee and Internal
     var custTypeHideList = ['LSBP', 'LSXBP', 'LSBLC', 'NABP', 'NAXBP', 'NABLC', 'SZBP', 'SZXBP', 'SZBLC', 'ZABP', 'ZAXBP', 'LSIBM', 'LSXIB', 'LSXIN', 'LSINT', 'NAIBM', 'NAXIB', 'NAXIN', 'NAINT', 'SZIBM', 'SZXIB', 'SZXIN', 'SZINT', 'ZAIBM', 'ZAXIB', 'ZAXIN', 'ZAINT'];
-    var custTypePrivList = ['LSPC', 'LSXPC', 'NAPC', 'NAXPC', 'SZPC', 'SZXPC', 'ZAPC', 'ZAXPC'];
+   var custTypePrivList = ['LSPC', 'LSXPC', 'NAPC', 'NAXPC', 'SZPC', 'SZXPC', 'ZAPC', 'ZAXPC'];
     if (custTypeHideList.includes(custType)) {
         FormManager.hide('Enterprise', 'enterprise');
     } else {
@@ -2190,7 +2190,7 @@ function setEnterpriseBehaviour() {
             FormManager.enable('enterprise');
             FormManager.removeValidator('enterprise', Validators.REQUIRED);
         } else if (isuCtc == '27E' && countryUseSubRegions.includes(countryUse)) {
-            FormManager.readOnly('enterprise');
+            // FormManager.readOnly('enterprise');
             FormManager.addValidator('enterprise', Validators.REQUIRED, ['Enterprise'], 'MAIN_IBM_TAB');
         } else {
             FormManager.enable('enterprise');
@@ -2292,6 +2292,17 @@ function setDefaultEntCBMEA() {
             FormManager.setValue('enterprise', enterprise);
 
         } else if (ME_LC.includes(landCntry)) {
+          var noSubCountriesME = ['KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'PS', 'LB', 'BH', 'LY', 'TN', 'MA', 'PK', 'AF'];
+          var enterprise='';
+          if (noSubCountriesME.includes(landCntry)) {
+            var qParams = {
+                ISSUING_CNTRY: cntry,
+                SALES_BO_DESC: '%' + landCntry + '%',
+                ISU_CD: '%' + isuCTC + '%'
+            };
+            var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
+             enterprise = results.ret1;                       
+            } else {
             // ME MEA REGION
             var qParams = {
                 ISSUING_CNTRY: cntry,
@@ -2300,7 +2311,8 @@ function setDefaultEntCBMEA() {
                 ISU_CD: '%' + isuCTC + '%'
             };
             var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
-            var enterprise = results.ret1;
+             enterprise = results.ret1;
+            }
             FormManager.setValue('enterprise', enterprise);
         }
     }
