@@ -3095,7 +3095,7 @@ function validateStreetAddrCont2() {
       validate: function () {
         var streetAddrCont1 = FormManager.getActualValue('addrTxt2');
         var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-        var streetAddrCont2 = FormManager.getActualValue('dept');
+        var streetAddrCont2 = FormManager.getActualValue('city1');
         
         if (streetAddrCont1 == '' && streetAddrCont2 != '') {
           return new ValidationResult(null, false, 'Street Address Con\'t2 cannot have a value as Street Address Con\'t1 is blank.');
