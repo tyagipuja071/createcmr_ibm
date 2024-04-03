@@ -5059,10 +5059,18 @@ function validateSboCEE() {
 				var ctc = FormManager.getActualValue('clientTier');
 				var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
 				var sbo = FormManager.getActualValue('salesBusOffCd');
-				if (['BUSPR', 'XBP'].includes(custSubGrp) && isuCTC == '8B' && sbo != '000') {
-						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sbo + ') for given  ISU , CTC , ISIC combination.');
-				}else if(['INTER', 'IBMEM','XINT'].includes(custSubGrp) && isuCTC == '21' && sbo != '999'){
-						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sbo + ') for given  ISU , CTC , ISIC combination.');
+				if (['BUSPR', 'XBP'].includes(custSubGrp)) {
+					if(isuCTC == '8B' && sbo == '000'){
+						return new ValidationResult(null, true);
+					}else{
+						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sbo + ') for given  ISU , CTC , ISIC combination.');	
+					}
+				}else if(['INTER', 'IBMEM','XINT'].includes(custSubGrp) ){
+					if(isuCTC == '21' && sbo == '999'){
+						return new ValidationResult(null, true);
+					}else{
+					return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sbo + ') for given  ISU , CTC , ISIC combination.');
+					}
 				}
 				var qParams = {
 					_qall: 'Y',
