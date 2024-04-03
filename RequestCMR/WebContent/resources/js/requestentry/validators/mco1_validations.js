@@ -2593,8 +2593,7 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : 911693');
-            }
-            if (['B', 'C'].includes(subIndustryCd) && enterprise != '911700') {
+            } else if (['B', 'C'].includes(subIndustryCd) && enterprise != '911700') {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
@@ -2634,26 +2633,26 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
         } else if (isuCtc == '34Q') {
 
             var enterprise34Q = ['911690', '911685', '911691', '911702', '911687', '911697'];
-            if (['E'].includes(subIndustryCd) && enterprise != '911695') {
+            if (['E'].includes(subIndustryCd) && (enterprise != '911695'|| !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : 911695');
             }
-            if (['G', 'V', 'Y'].includes(subIndustryCd) && enterprise != '911692') {
+            if (['G', 'V', 'Y'].includes(subIndustryCd) && (enterprise != '911692' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : 911692');
-            } else if (['H', 'X'].includes(subIndustryCd) && enterprise != '911696') {
+            } else if (['H', 'X'].includes(subIndustryCd) && (enterprise != '911696' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : 911696');
-            } else if (!enterprise34Q.includes(enterprise)) {
+            } else if (!enterprise34Q.includes(enterprise) && !(['E','G', 'V', 'Y', 'H', 'X'].includes(subIndustryCd))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
@@ -2677,7 +2676,7 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : \'908025\'\ \'911297\'\ ');
+                }, false, 'Enterprise can only accept : \'907695\'\ \'911297\'\ ');
             }
         } else if (isuCtc == '36Y') {
             var enterprise36Y = ['912087', '912085', '912086'];
@@ -2799,36 +2798,36 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
         }
     } else if (landCntry == 'QA') {
         if (isuCtc == '34Q') {
-            if (['A', 'D', 'K', 'R', 'T', 'U', 'W'].includes(subIndustryCd) && enterprise != '911818') {
+            if (['A', 'D', 'K', 'R', 'T', 'U', 'W'].includes(subIndustryCd) && (enterprise != '911818' || enterprise != '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911812');
-            } else if (['J', 'L', 'M', 'P', 'V'].includes(subIndustryCd) && enterprise != '911819') {
+                }, false, 'Enterprise can only accept : \'911818\'\ \'911817\'\ ');
+            } else if (['J', 'L', 'M', 'P', 'V'].includes(subIndustryCd) && (enterprise != '911819' || enterprise != '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911819');
-            } else if (['F', 'N', 'S'].includes(subIndustryCd) && enterprise != '911820') {
+                }, false, 'Enterprise can only accept : \'911819\'\ \'911817\'\ ');
+            } else if (['F', 'N', 'S'].includes(subIndustryCd) && (enterprise != '911820' || enterprise != '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911820');
-            } else if (['E', 'G', 'H', 'X', 'Y'].includes(subIndustryCd) && enterprise != '911821') {
+                }, false, 'Enterprise can only accept : \'911820\'\ \'911817\'\ ');
+            } else if (['E', 'G', 'H', 'X', 'Y'].includes(subIndustryCd) && (enterprise != '911821' || enterprise != '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911821');
-            } else if (['B', 'C'].includes(subIndustryCd) && enterprise != '911822') {
+                }, false, 'Enterprise can only accept :  \'911821\'\ \'911817\'\ ');
+            } else if (['B', 'C'].includes(subIndustryCd) && (enterprise != '911822' || enterprise != '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911822');
+                }, false, 'Enterprise can only accept : \'911822\'\ \'911817\'\ ');
             } else {
                 if (enterprise != '911817') {
                     return new ValidationResult({
@@ -2851,75 +2850,77 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
     }
     if (landCntry == 'EG') {
         if (isuCtc == '34Q') {
-            if (['D', 'J', 'K', 'L', 'R', 'T', 'W'].includes(subIndustryCd) && enterprise != '911836') {
+          var enterprise34Q = ['912088', '911831', '911835', '911275', '911833'];
+            if (['D', 'J', 'K', 'L', 'R', 'T', 'W'].includes(subIndustryCd) && (enterprise != '911836'|| !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911836');
-            } else if (['A'].includes(subIndustryCd) && enterprise != '911771') {
+                }, false, 'Enterprise can only accept : \'911836\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['A'].includes(subIndustryCd) && (enterprise != '911771' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911771');
-            } else if (['B', 'C'].includes(subIndustryCd) && enterprise != '911772') {
+                }, false, 'Enterprise can only accept : \'911771\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['B', 'C'].includes(subIndustryCd) && (enterprise != '911772' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911820');
-            } else if (['E'].includes(subIndustryCd) && enterprise != '911773') {
+                }, false, 'Enterprise can only accept : \'911820\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['E'].includes(subIndustryCd) && (enterprise != '911773' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911773');
-            } else if (['F'].includes(subIndustryCd) && enterprise != '911830') {
+                }, false, 'Enterprise can only accept : \'911773\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['F'].includes(subIndustryCd) && (enterprise != '911830' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911830');
-            } else if (['G', 'V', 'Y'].includes(subIndustryCd) && enterprise != '911832') {
+                }, false, 'Enterprise can only accept : \'911830\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['G', 'V', 'Y'].includes(subIndustryCd) && (enterprise != '911832' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911832');
-            } else if (['H', 'X'].includes(subIndustryCd) && enterprise != '911768') {
+                }, false, 'Enterprise can only accept : \'911832\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['H', 'X'].includes(subIndustryCd) && (enterprise != '911768' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911768');
-            } else if (['M', 'U'].includes(subIndustryCd) && enterprise != '901456') {
+                }, false, 'Enterprise can only accept : \'911768\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['M', 'U'].includes(subIndustryCd) && (enterprise != '901456' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 901456');
-            } else if (subIndustryCd == 'N' && enterprise != '911770') {
+                }, false, 'Enterprise can only accept : \'901456\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (subIndustryCd == 'N' && (enterprise != '911770' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911770');
-            } else if (subIndustryCd == 'P' && enterprise != '911834') {
+                }, false, 'Enterprise can only accept : \'911770\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (subIndustryCd == 'P' && (enterprise != '911834' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911834');
-            } else if (subIndustryCd == 'S' && enterprise != '911769') {
+                }, false, 'Enterprise can only accept : \'911834\'\  \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (subIndustryCd == 'S' && (enterprise != '911769' || !enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
-                }, false, 'Enterprise can only accept : 911769');
+                }, false, 'Enterprise can only accept : \'911769\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
             } else {
-                var enterprise34Q = ['912088', '911831', '911835', '911275', '911833'];
-                if (!enterprise34Q.includes(enterprise)) {
+                // var enterprise34Q = ['912088', '911831', '911835', '911275',
+                // '911833'];
+                if (!enterprise34Q.includes(enterprise) && !(['A','B', 'C', 'D', 'J', 'K','L','R', 'T', 'W', 'E', 'F','G', 'V', 'Y','H','X', 'M', 'U', 'N', 'P', 'S'].includes(subIndustryCd))) {
                     return new ValidationResult({
                         id: 'enterprise',
                         type: 'text',
