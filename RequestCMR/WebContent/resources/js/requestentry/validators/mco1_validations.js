@@ -2213,8 +2213,8 @@ function setDefaultEntCBMEA() {
     if (subIndustryCd != null && subIndustryCd.length > 1) {
         subIndustryCd = subIndustryCd.substring(0, 1);
     }
-    var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP'];
-    var privScenarios = ['ZAXPC', 'SZXPC', 'NAXPC', 'SZ'];
+    var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP','LSXCO', 'LSXGO', 'LSXPC', 'LSXTP'];
+    var privScenarios = ['ZAXPC', 'SZXPC', 'NAXPC', 'LSXPC'];
     var SOUTH_AFRICA_LC = ['ZA', 'NA', 'LS', 'SZ'];
     var TURKEY_LC = ['TR'];
     var CEWA_LC = ['DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG'];
