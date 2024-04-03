@@ -5314,7 +5314,7 @@ function subIndustryLogicCEE() {
 		}
 		if(sbo != undefined && sbo != ''){
 			valAssgndFrmSubInd = true;
-	  Formmanager.setValue('salesBusOffCd',sbo);
+	  FormManager.setValue('salesBusOffCd',sbo);
 	  sboValSubInd.push(sbo);
 		}
 	}
