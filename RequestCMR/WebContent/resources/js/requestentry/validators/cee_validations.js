@@ -4926,7 +4926,7 @@ function setSBOFromDBMapping() {
 			sboList.push(results[i].ret1);
 		}
 		
-		if(valAssgndFrmSubInd && sboValSubInd.length > 0){
+		if(valAssgndFrmSubInd && sboValSubInd){
 		sboList.push(sboValSubInd);	
 		}
 		
@@ -5230,7 +5230,7 @@ function validateSboCEE() {
 }
 
 var valAssgndFrmSubInd = false;
-var sboValSubInd = [];
+var sboValSubInd = '';
 function subIndustryLogicCEE() {
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
 	var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
@@ -5315,7 +5315,7 @@ function subIndustryLogicCEE() {
 		if(sbo != undefined && sbo != ''){
 			valAssgndFrmSubInd = true;
 	  FormManager.setValue('salesBusOffCd',sbo);
-	  sboValSubInd.push(sbo);
+	  sboValSubInd = sbo;
 		}
 	}
 
