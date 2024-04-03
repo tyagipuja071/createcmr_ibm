@@ -2179,12 +2179,15 @@ function setEnterpriseBehaviour() {
     // hide enterprise for BP, IBM employee and Internal
     var custTypeHideList = ['LSBP', 'LSXBP', 'LSBLC', 'NABP', 'NAXBP', 'NABLC', 'SZBP', 'SZXBP', 'SZBLC', 'ZABP', 'ZAXBP', 'LSIBM', 'LSXIB', 'LSXIN', 'LSINT', 'NAIBM', 'NAXIB', 'NAXIN', 'NAINT', 'SZIBM', 'SZXIB', 'SZXIN', 'SZINT', 'ZAIBM', 'ZAXIB', 'ZAXIN', 'ZAINT'];
    var custTypePrivList = ['LSPC', 'LSXPC', 'NAPC', 'NAXPC', 'SZPC', 'SZXPC', 'ZAPC', 'ZAXPC'];
+
     if (custTypeHideList.includes(custType)) {
         FormManager.hide('Enterprise', 'enterprise');
     } else {
         FormManager.show('Enterprise', 'enterprise');
         if (custTypePrivList.includes(custType)) {
             FormManager.readOnly('enterprise');
+            FormManager.readOnly('isuCd');
+            FormManager.readOnly('clientTier');
             FormManager.addValidator('enterprise', Validators.REQUIRED, ['Enterprise'], 'MAIN_IBM_TAB');
         } else if (isuCtc == '36Y' || ((isuCtc == '27E' || isuCtc == '34Q') && countryUse == '864')) {
             FormManager.enable('enterprise');
@@ -2338,7 +2341,7 @@ function setIsuCtcCBMEA() {
     if (result != null && result.ret1 != undefined) {
       landCntry = result.ret1;
     }
-    var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP'];
+    var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP','LSXCO', 'LSXGO', 'LSXPC', 'LSXTP'];
     var  MEA_COUNTRIES_CB = ['TR','DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG','LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
     if (reqType == 'U' || !MEA_COUNTRIES_CB.includes(landCntry) || !crossSubTypes.includes(custSubType)) {
       return;
@@ -2432,8 +2435,8 @@ function enterpriseValidatorMea() {
                 if (subIndustryCd != null && subIndustryCd.length > 1) {
                     subIndustryCd = subIndustryCd.substring(0, 1);
                 }
-                var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP'];
-                var privScenarios = ['ZAXPC', 'SZXPC', 'NAXPC', 'SZ'];
+                var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP','LSXCO', 'LSXGO', 'LSXPC', 'LSXTP'];
+                var privScenarios = ['ZAXPC', 'SZXPC', 'NAXPC', 'LSXPC'];
                 var SOUTH_AFRICA_LC = ['ZA', 'NA', 'LS', 'SZ'];
                 var TURKEY_LC = ['TR'];
                 var CEWA_LC = ['DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG'];
