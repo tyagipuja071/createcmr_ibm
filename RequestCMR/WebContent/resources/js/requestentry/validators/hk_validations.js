@@ -92,6 +92,7 @@ function addHandlersForGCG() {
   if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
     _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function (value) {
       setAbbrvNameBPScen();
+      setKUKLAvaluesHK();
     });
   }
 
@@ -2592,6 +2593,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesHK();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -8574,6 +8576,60 @@ function validateInacValuesHK() {
       }
     };
   })(), 'IBM_REQ_TAB', 'frmCMR');
+}
+
+function setKUKLAvaluesHK() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var bpRelType = FormManager.getActualValue('bpRelType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+  console.log('setKUKLAvaluesHK() >>>> set KUKLA values for HK >>>>');
+
+  var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
+  var cond2 = new Set(['DUMMY', 'INTER']);
+
+  var kuklaHK = [];
+  if (reqType == 'C') {
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.HK_MO_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaHK.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (cond1.has(custSubGrp)) {
+        if ((industryClass == 'G' || industryClass == 'H' || industryClass == 'Y')) {
+          FormManager.setValue('custClass', kuklaHK[1]);
+        } else if (industryClass == 'E') {
+          FormManager.setValue('custClass', kuklaHK[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaHK[0]);
+        }
+      } else if (custSubGrp == 'BUSPR') {
+        if (bpRelType == 'DS') {
+          FormManager.setValue('custClass', kuklaHK[5]);
+        } else if (bpRelType == 'SP') {
+          FormManager.setValue('custClass', kuklaHK[3]);
+        } else if (bpRelType == 'RS') {
+          FormManager.setValue('custClass', kuklaHK[4]);
+        }
+      } else if (cond2.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaHK[7]);
+      } else if (custSubGrp == 'BLUMX') {
+        FormManager.setValue('custClass', kuklaHK[6]);
+      }
+    }
+  }
 }
 
 dojo.addOnLoad(function () {
