@@ -5052,6 +5052,9 @@ function validateSboCEE() {
 	FormManager.addFormValidator((function() {
 		return {
 			validate: function() {
+				if(FormManager.getActualValue('reqType') == 'U'){
+				return new ValidationResult(null, true);
+				}
 				var custSubGrp = FormManager.getActualValue('custSubGrp');
 				var cntry = FormManager.getActualValue('cmrIssuingCntry');
 				var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
