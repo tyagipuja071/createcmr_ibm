@@ -4860,8 +4860,8 @@ function addressQuotationValidatorCEMEA() {
 
 var subIndHandler = null;
 var isuCdHandler = null;
-var salBusOffCdHandler = null;
 var custSubGrpHandler = null;
+var isuModified = false;
 
 function addHandlersForCEE() {
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -4873,11 +4873,16 @@ function addHandlersForCEE() {
 
 	if (isuCdHandler == null) {
 		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+			isuModified = true;
 			setClientTier();
 			setCovValues2024CEE();
 			setSBOFromDBMapping();
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
+			}
+				var custSubGrp = FormManager.getActualValue('custSubGrp');
+			if (['PRICU', 'RSPC', 'CSPC', 'MEPC'].includes(custSubGrp)) {
+				FormManager.readOnly('salesBusOffCd');
 			}
 		});
 	}
@@ -4888,12 +4893,7 @@ function addHandlersForCEE() {
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
 			}
-		});
-	}
-
-	if (salBusOffCdHandler == null) {
-		salBusOffCdHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
-			var custSubGrp = FormManager.getActualValue('custSubGrp');
+				var custSubGrp = FormManager.getActualValue('custSubGrp');
 			if (['PRICU', 'RSPC', 'CSPC', 'MEPC'].includes(custSubGrp)) {
 				FormManager.readOnly('salesBusOffCd');
 			}
@@ -4926,7 +4926,8 @@ function setSBOFromDBMapping() {
 			sboList.push(results[i].ret1);
 		}
 		
-		if(valAssgndFrmSubInd && sboValSubInd){
+		if(valAssgndFrmSubInd && sboValSubInd && !isuModified){
+		isuModified = false;
 		sboList.push(sboValSubInd);	
 		}
 		
@@ -5030,7 +5031,7 @@ function setCovValues2024CEE() {
 		case SysLoc.TAJIKISTAN:
 		case SysLoc.UZBEKISTAN:
 
-			if (['COMME', 'XTP', 'XCOM', 'COMME', 'THDPT'].includes(custSubGrp)) {
+			if (['COMME', 'XTP', 'XCOM', 'THDPT'].includes(custSubGrp)) {
 				FormManager.enable('isuCd');
 				FormManager.enable('clientTier');
 				FormManager.enable('salesBusOffCd');
@@ -5214,15 +5215,24 @@ function validateSboCEE() {
 					if (valid || validSBO) {
 						return new ValidationResult(null, true);
 					} else {
+						if(validSbo){
 						sboList.push(validSbo);
+						}
+						if(sboList.length > 0){
 						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sboList + ') for given  ISU , CTC , ISIC combination.');
+						}else{
+						return new ValidationResult(null, true);	
+						}
 					}
 				} else {
 					if (validSBO) {
 						return new ValidationResult(null, true);
 					} else {
+            if(sboList.length > 0){
 						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sboList + ') for given  ISU , CTC , ISIC combination.');
-					}
+						}else{
+						return new ValidationResult(null, true);	
+						}					}
 				}
 			}
 		};
@@ -5236,7 +5246,7 @@ function subIndustryLogicCEE() {
 	var subInd = FormManager.getActualValue('subIndustryCd').substring(0, 1);
 	var isuCd = FormManager.getActualValue('isuCd');
 	var ctc = FormManager.getActualValue('clientTier');
-  var sbo = '';
+    var sbo = '';
 	var isuCTC = isuCd + ctc;
 	if ('34Q' == isuCTC) {
 		switch (cntry) {
