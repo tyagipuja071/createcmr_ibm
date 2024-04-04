@@ -4876,6 +4876,7 @@ function addHandlersForCEE() {
 			isuModified = true;
 			setClientTier();
 			setCovValues2024CEE();
+			subIndustryLogicCEE();
 			setSBOFromDBMapping();
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
@@ -4889,7 +4890,7 @@ function addHandlersForCEE() {
 	
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-	    subIndustryLogicCEE();
+	  subIndustryLogicCEE();
 		setSBOFromDBMapping();
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
