@@ -162,7 +162,7 @@ function setClientTierValuesTR(isuCd) {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
+  if (isuCd == '5K' || isuCd == '28' || isuCd == '04' || isuCd == '21' || isuCd == '8B') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     var reqType = FormManager.getActualValue('reqType');
@@ -702,6 +702,7 @@ var _gtcAddrTypeHandler = [];
 var _gtcVatExemptHandler = null;
 
 function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
+  console.log("setVatValidatorGRCYTR=======");
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
@@ -735,6 +736,7 @@ function setVatValidatorGRCYTR(fromAddress, scenario, scenarioChanged) {
 }
 
 function setClientTierAndISR(value) {
+  console.log("setClientTierAndISR=======");
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
@@ -752,12 +754,12 @@ function setClientTierAndISR(value) {
   tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (value == '34') {
-      tierValues = [ 'V', 'Q' ];
+      tierValues = [ 'Q' ];
     } else if (value == '27') {
       tierValues = [ 'E' ];
     } else if (value == '36') {
       tierValues = [ 'Y' ];
-    } else if (value == '5B' || value == '21' || value == '8B') {
+    } else if (value == '5K' || value == '21' || value == '8B' || value == '28' || value == '04') {
       tierValues = [ '' ];
     }
   }
@@ -778,6 +780,7 @@ function setClientTierAndISR(value) {
 }
 
 function setISRValues() {
+  console.log("setISRValues=======");
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isrs = [];
@@ -804,6 +807,7 @@ function setISRValues() {
 }
 
 function updateAddrTypeList(cntry, addressMode, saving) {
+  console.log("updateAddrTypeList=======");
   if (!saving && FormManager.getActualValue('cmrIssuingCntry') != '862') {
     // hide 'additional shipping' selection for creates .
     if ((addressMode == 'newAddress' || addressMode == 'copyAddress') && cmr.currentRequestType == 'C') {
@@ -816,6 +820,7 @@ function updateAddrTypeList(cntry, addressMode, saving) {
 }
 
 function setFieldsToReadOnlyGRCYTR() {
+  console.log("setFieldsToReadOnlyGRCYTR=======");
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
@@ -826,6 +831,7 @@ function setFieldsToReadOnlyGRCYTR() {
 }
 
 function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) {
+  console.log("updateAbbrevNmLocnGRCYTR=======");
   var role = null;
   var reqType = null;
   if (typeof (_pagemodel) != 'undefined') {
@@ -879,6 +885,7 @@ function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) 
 }
 
 function addrFunctionForGRCYTR(cntry, addressMode, saving) {
+  console.log("addrFunctionForGRCYTR=======");
   if (!saving) {
     var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
     var custType = FormManager.getActualValue('custGrp');
@@ -897,6 +904,7 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
 }
 
 function setDistrictMandatoryTR() {
+  console.log("setDistrictMandatoryTR=======");
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
   if (cntryCd == SysLoc.TURKEY) {
     var landCntry = FormManager.getActualValue('landCntry');
@@ -909,6 +917,7 @@ function setDistrictMandatoryTR() {
 }
 
 function isUpdateReqCrossborder() {
+  console.log("isUpdateReqCrossborder=======");
   if (!(FormManager.getActualValue('custGrp') == 'LOCAL')) {
     for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
       recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -923,6 +932,7 @@ function isUpdateReqCrossborder() {
 }
 
 function addPostalCodeLenForTurGreCypValidator() {
+  console.log("addPostalCodeLenForTurGreCypValidator=======");
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -947,6 +957,7 @@ function addPostalCodeLenForTurGreCypValidator() {
 }
 
 function abbrvLocMandatory() {
+  console.log("abbrvLocMandatory=======");
   var interval = new Object();
   interval = setInterval(function() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -966,6 +977,7 @@ function abbrvLocMandatory() {
 }
 
 function abbrvLocMandatoryOnChange() {
+  console.log("abbrvLocMandatoryOnChange=======");
   var role = FormManager.getActualValue('userRole').toUpperCase();
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
@@ -977,6 +989,7 @@ function abbrvLocMandatoryOnChange() {
 }
 
 function setCommonCollectionCd() {
+  console.log("setCommonCollectionCd=======");
   if (FormManager.getActualValue('reqType') == 'C') {
     FormManager.readOnly('collectionCd2');
     FormManager.setValue('collectionCd2', '');
@@ -984,6 +997,7 @@ function setCommonCollectionCd() {
 }
 
 function showClassificationForTRUpd() {
+  console.log("showClassificationForTRUpd=======");
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (FormManager.getActualValue('reqType') == 'U') {
       FormManager.show('CustClass', 'custClass');
@@ -997,6 +1011,7 @@ function showClassificationForTRUpd() {
 }
 
 function viewOnlyAddressDetails() {
+  console.log("viewOnlyAddressDetails=======");
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
@@ -1020,12 +1035,14 @@ function viewOnlyAddressDetails() {
 }
 
 function salesSRforUpdate() {
+  console.log("salesSRforUpdate=======");
   if (FormManager.getActualValue('reqType') == 'U') {
     // setSalesBoSboIbo();
   }
 }
 
 function salesSRforUpdateOnChange() {
+  console.log("salesSRforUpdateOnChange=======");
   if (FormManager.getActualValue('reqType') == 'U') {
     dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
       // setSalesBoSboIbo();
@@ -1047,6 +1064,7 @@ function salesSRforUpdateOnChange() {
 }
 
 function modifyCharForTurk(field) {
+  console.log("modifyCharForTurk=======");
 
   if (field != null && field.length > 0) {
     var modifiedVal = field;
@@ -1290,7 +1308,7 @@ function enableCMRNUMForPROCESSOR() {
 }
 
 function autoPopulateAbbNameCopySoldToTR() {
-  console.log("enableCMRNUMForPROCESSOR=======");
+  console.log("autoPopulateAbbNameCopySoldToTR=======");
   var reqType = FormManager.getActualValue('reqType');
   if (cmr.currentRequestType != 'C') {
     return;
@@ -1524,6 +1542,7 @@ function setSBOLogicOnISUChange() {
 var _isuHandler = null;
 
 function onIsuChangeHandler() {
+  console.log("onIsuChangeHandler=======");
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setISUCTCBasedScenarios();
@@ -1554,21 +1573,43 @@ function setISUCTCBasedScenarios() {
         FormManager.enable('salesBusOffCd');
         FormManager.readOnly('enterprise');
       }
-    } else if ((custSubGrp == 'IBMEM' || custSubGrp == 'XINT' || custSubGrp == 'INTER' || custSubGrp == 'PRICU' || custSubGrp == 'XPC') && (role == 'REQUESTER' || role == 'PROCESSOR')) {
+    } else if ((custSubGrp == 'IBMEM' || custSubGrp == 'XINT' || custSubGrp == 'INTER' || custSubGrp == 'XPC') && (role == 'REQUESTER' || role == 'PROCESSOR')) {
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('salesBusOffCd');
+      FormManager.readOnly('enterprise');
+    } else if (custSubGrp == 'PRICU') {
+      FormManager.setValue('clientTier', 'E');
+      FormManager.setValue('salesBusOffCd', 'A20');
+      FormManager.setValue('isuCd', '27');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('salesBusOffCd');
       FormManager.readOnly('enterprise');
     } else if ((role == 'PROCESSOR' || role == 'REQUESTER') && custSubGrp == 'COMME' || custSubGrp == 'XINTS' || custSubGrp == 'GOVRN' || custSubGrp == 'THDPT' || custSubGrp == 'XGOV'
-        || custSubGrp == 'XIGF' || custSubGrp == 'XTP' || custSubGrp == 'IGF') {
+        || custSubGrp == 'XIGF' || custSubGrp == 'XTP' || custSubGrp == 'IGF' || custSubGrp == 'GOVERN') {
+      FormManager.setValue('isuCd', '27');
+      FormManager.setValue('clientTier', 'E');
+      FormManager.setValue('salesBusOffCd', 'A20');
+      FormManager.readOnly('salesBusOffCd');
+      FormManager.enable('isuCd');
+      FormManager.enable('clientTier');
+      FormManager.readOnly('enterprise');
       if (isuCd == '34' && clientTier == 'Q') {
-        FormManager.readOnly('salesBusOffCd');
-      } else if (isuCd == '36') {
-        FormManager.setValue('clientTier', 'Y');
         FormManager.enable('salesBusOffCd');
-        FormManager.setValue('salesBusOffCd', 'A20');
+        FormManager.enable('clientTier');
+        FormManager.enable('enterprise');
+      } else if (isuCd == '36' && clientTier == 'Y') {
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('clientTier');
+        FormManager.enable('enterprise');
+        // FormManager.setValue('salesBusOffCd', 'A20');
       } else if (isuCd == '34') {
         FormManager.setValue('clientTier', 'Q');
+        FormManager.enable('salesBusOffCd');
+        FormManager.setValue('salesBusOffCd', 'A20');
+      } else if (isuCd == '36') {
+        FormManager.setValue('clientTier', 'Y');
         FormManager.enable('salesBusOffCd');
         FormManager.setValue('salesBusOffCd', 'A20');
       } else if (isuCd == '27') {
@@ -1929,7 +1970,7 @@ function setValuesWRTIsuCtc(ctc) {
     var ctc = FormManager.getActualValue('clientTier');
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (isu == '34' && ctc == 'Y') {
+  if (isu == '34' && ctc == 'Q') {
     FormManager.setValue('salesBusOffCd', 'A20');
     if (role == 'REQUESTER' || role == 'PROCESSOR') {
       FormManager.enable('salesBusOffCd');
@@ -2150,8 +2191,44 @@ function StcOrderBlockValidation() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function clientTierValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var reqType = FormManager.getActualValue('reqType');
+        var valResult = null;
+
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
+
+        if (reqType == 'C') {
+          valResult = clientTierCodeValidator();
+        } else {
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldISU = result.ret3 != null ? result.ret3 : '';
+
+            if (clientTier != oldClientTier || isuCd != oldISU) {
+              valResult = clientTierCodeValidator();
+            }
+          }
+        }
+        return valResult;
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function addressQuotationValidatorTR() {
-  console.log('StcOrderBlockValidation======');
+  console.log('addressQuotationValidatorTR======');
   // CREATCMR-788
   FormManager.addValidator('abbrevNm', Validators.NO_QUOTATION, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('abbrevLocn', Validators.NO_QUOTATION, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
@@ -2307,6 +2384,7 @@ function enterpriseValidator() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
+  FormManager.enable('enterprise');
   if (isuCtc = '34Q') {
     console.log("enterpriseValidator=>34Q======");
     FormManager.addFormValidator((function() {
@@ -2408,16 +2486,73 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.TURKEY ]);
 
-  GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(setFieldsToReadOnlyGRCYTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setFieldsToReadOnlyGRCYTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAddrFunction(addrFunctionForGRCYTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(filterCmrnoForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setValuesForTurkey, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(lockSORTL, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(lockFieldsIBMEm, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(handleClassCode, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
 
+  GEOHandler.addAddrFunction(addrFunctionForGRCYTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addTurkishCharValidator, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(updateAddrTypeList, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(updateAbbrevNmLocnGRCYTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(disableTaxOfficeTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(autoPopulateAbbNameCopySoldToTR, [ SysLoc.TURKEY ]);
 
+  GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setFieldsToReadOnlyGRCYTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setClientTierValuesTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(toggleTypeOfCustomerForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(filterCmrnoForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(abbrvLocMandatory, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(abbrvLocMandatoryOnChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setCommonCollectionCd, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(viewOnlyAddressDetails, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setVatValidatorGRCYTR, [ SysLoc.TURKEY, ]);
+  GEOHandler.addAfterConfig(defaultCapIndicator, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setSORTL, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(lockSORTL, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(showCommercialFinanced, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(hideCollectionCode, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setEconomicCode, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(onIsuChangeHandler, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setValuesForTurkey, [ SysLoc.TURKEY ]);
+
+  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(enterpriseValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(vatValidatorTR, [ SysLoc.TURKEY ], null, true);
@@ -2426,87 +2561,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addALPHANUMValidatorForTypeOfCustomer, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addCustNm4ValidatorForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addTRLandedCountryValidtor, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(setClientTierValuesTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesTR, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(toggleTypeOfCustomerForTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(filterCmrnoForTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(filterCmrnoForTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addEmbargoCdValidatorForTR, [ SysLoc.TURKEY ], null, true);
-
-  GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAddrFunction(updateAddrTypeList, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAddrFunction(updateAbbrevNmLocnGRCYTR, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(abbrvLocMandatory, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(abbrvLocMandatoryOnChange, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(setCommonCollectionCd, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(viewOnlyAddressDetails, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setVatValidatorGRCYTR, [ SysLoc.TURKEY, ]);
-
-  GEOHandler.addAfterConfig(defaultCapIndicator, [ SysLoc.TURKEY ]);
-
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
-
-  GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(setSORTL, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(lockSORTL, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(lockSORTL, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
-  GEOHandler.addAddrFunction(disableTaxOfficeTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAddrFunction(autoPopulateAbbNameCopySoldToTR, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(showCommercialFinanced, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(handleClassCode, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(hideCollectionCode, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(lockFieldsIBMEm, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.addAfterConfig(setEconomicCode, [ SysLoc.TURKEY ]);
-
-  GEOHandler.addAfterConfig(onIsuChangeHandler, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.TURKEY ], null, true);
-
-  GEOHandler.addAfterConfig(setValuesForTurkey, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setValuesForTurkey, [ SysLoc.TURKEY ]);
 
 });
