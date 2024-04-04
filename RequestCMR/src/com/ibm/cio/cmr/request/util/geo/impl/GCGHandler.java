@@ -5,7 +5,6 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -16,7 +15,6 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -105,101 +103,26 @@ public class GCGHandler extends APHandler {
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
-    LOG.debug("Converting search results to WTAAS equivalent..");
+    List<FindCMRRecordModel> converted = new ArrayList<>();
+    List<FindCMRRecordModel> records = source.getItems();
     FindCMRRecordModel mainRecord = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
     if (mainRecord != null) {
-      boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
-      if (!prospectCmrChosen) {
-        this.currentRecord = retrieveWTAASValues(mainRecord);
-        if (this.currentRecord != null) {
+      this.currentRecord = retrieveWTAASValues(mainRecord);
+      LOG.info("After retrieveWTAASValues()");
+    }
 
-          List<WtaasAddress> wtaasAddresses = this.currentRecord.uniqueAddresses();
-          LOG.info("GCG WTAAS address count: " + wtaasAddresses.size());
-          if (wtaasAddresses != null && !wtaasAddresses.isEmpty()) {
-
-            String zs01AddressUse = getZS01AddressUse(mainRecord.getCmrIssuedBy());
-            FindCMRRecordModel record = null;
-            List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
-            // import only ZS01 from RDC for Create request
-            if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
-              LOG.debug(" - Main address, importing from FindCMR main record.");
-              // will import ZS01 from RDc directly
-              record = mainRecord;
-              if ("ZS01".equals(record.getCmrAddrTypeCode())) {
-                handleRDcRecordValues(record);
-                record.setCmrAddrSeq(SOLD_TO_FIXED_SEQ);
-                converted.add(record);
-              }
-
-            } else {
-              // only create the actual number of addresses in wtaas
-              for (WtaasAddress wtaasAddress : wtaasAddresses) {
-                LOG.debug("WTAAS Addr No: " + wtaasAddress.getAddressNo() + " Use: " + wtaasAddress.getAddressUse());
-                if (!wtaasAddress.getAddressUse().contains(zs01AddressUse)) {
-                  LOG.debug(" - Additional address, checking RDC equivalent..");
-                  record = locateRdcRecord(source, wtaasAddress);
-
-                  if (record != null) {
-                    LOG.debug(" - RDC equivalent found with type = " + record.getCmrAddrTypeCode() + " seq = " + record.getCmrAddrSeq()
-                        + ", using directly");
-                    handleRDcRecordValues(record);
-                  } else {
-                    // create a copy of the main record, to preserve data fields
-                    LOG.debug(" - not found. parsing WTAAS data..");
-                    record = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(record, mainRecord);
-
-                    // clear the address values
-                    record.setCmrName1Plain(null);
-                    record.setCmrName2Plain(null);
-                    record.setCmrName3(null);
-                    record.setCmrName4(null);
-                    record.setCmrDept(null);
-                    record.setCmrCity(null);
-                    record.setCmrState(null);
-                    record.setCmrCountryLanded(null);
-                    record.setCmrStreetAddress(null);
-                    record.setCmrStreetAddressCont(null);
-                    record.setCmrSapNumber(null);
-
-                    // handle here the different mappings
-                    handleWTAASAddressImport(entityManager, record.getCmrIssuedBy(), mainRecord, record, wtaasAddress);
-                    String supportedAddrType = getAddrTypeForWTAASAddrUse(record.getCmrIssuedBy(), wtaasAddress.getAddressUse());
-                    if (supportedAddrType != null)
-                      record.setCmrAddrTypeCode(supportedAddrType);
-                  }
-                  record.setCmrAddrSeq(wtaasAddress.getAddressNo());
-
-                  if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
-                    converted.add(record);
-                  }
-                } else {
-                  LOG.debug(" - Main address, importing from FindCMR main record.");
-                  // will import ZS01 from RDc directly
-                  handleRDcRecordValues(mainRecord);
-                  converted.add(mainRecord);
-                }
-              }
-            }
-
-            doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
-            Collections.sort(converted);
-            source.setItems(converted);
-          }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : records) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode())) {
+          converted.add(record);
         }
-      } else {
-        FindCMRRecordModel record = null;
-        List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
-        LOG.debug(" - Main address, importing from FindCMR main record.");
-        // will import ZS01 from RDc directly
-        record = mainRecord;
-        handleRDcRecordValues(record);
-        converted.add(record);
-        doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
-        Collections.sort(converted);
-        source.setItems(converted);
       }
-
+      source.setItems(converted);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : records) {
+        converted.add(record);
+      }
+      source.setItems(converted);
     }
   }
 
@@ -242,135 +165,16 @@ public class GCGHandler extends APHandler {
 
   }
 
-  /**
-   * static mapping of the ZS01 RDc address with the corresponding WTAAS address
-   * use
-   * 
-   * @param country
-   * @return
-   */
-  private String getZS01AddressUse(String country) {
-    switch (country) {
-
-    case SystemLocation.MACAO:
-      return "3"; // installing
-    case SystemLocation.HONG_KONG:
-      return "3"; // installing
-
-    default:
-      return null;
-    }
-
-  }
-
-  /**
-   * Checks the equivalent RDc record from FindCMR of the {@link WtaasAddress}
-   * record. The method uses a combination of address type mapping and mapped
-   * address uses to locate the equivalent
-   * 
-   * @param source
-   * @param address
-   * @return
-   */
-  private FindCMRRecordModel locateRdcRecord(FindCMRResultModel source, WtaasAddress address) {
-    String addrType = null;
-    String addrUse = null;
-    for (FindCMRRecordModel record : source.getItems()) {
-      addrType = getMappedAddressType(record.getCmrIssuedBy(), record.getCmrAddrTypeCode(), record.getCmrAddrSeq());
-      if (!StringUtils.isEmpty(addrType)) {
-        // it's mapped in createcmr, check equivalent address use if the wtaas
-        // address has this use
-        addrUse = getMappedAddressUse(record.getCmrIssuedBy(), addrType);
-        if (!StringUtils.isEmpty(addrUse) && address.getAddressUse().contains(addrUse)) {
-          record.setCmrAddrTypeCode(addrType);
-          return record;
-        }
-      }
-    }
-    return null;
-  }
-
   // END -- Override parent methods
 
   @Override
   protected void handleWTAASAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel mainRecord,
       FindCMRRecordModel record, WtaasAddress address) {
-    LOG.info("Calling handleWTAASAddressImport");
-    String line1 = address.get(Address.Line1);
-    String line2 = address.get(Address.Line2);
-    String line3 = address.get(Address.Line3);
-    String line4 = address.get(Address.Line4);
-    String line5 = address.get(Address.Line5);
-    String line6 = address.get(Address.Line6);
-
-    // always name1
-    record.setCmrName1Plain(line1.trim());
-
-    // always name2
-    record.setCmrName2Plain(line2 != null ? line2.trim() : null);
-
-    // always street
-    record.setCmrStreetAddress(line3 != null ? line3.trim() : null);
-
-    List<String> lines = new ArrayList<String>();
-    for (String line : Arrays.asList(line4, line5, line6)) {
-      if (!StringUtils.isEmpty(line)) {
-        lines.add(line.trim());
-      }
-    }
-
-    String city = null;
-    String streetCont = null;
-    // start backwards
-    Collections.reverse(lines);
-    for (String line : lines) {
-      if (line.toUpperCase().replaceAll(" ", "").contains("HONGKONG") || line.toUpperCase().replaceAll(" ", "").contains("MACAU")
-          || line.toUpperCase().replaceAll(" ", "").contains("MACAO")) {
-        // ignore country
-        continue;
-      }
-      if (city == null) {
-        city = line;
-      } else {
-        streetCont = line;
-      }
-    }
-
-    record.setCmrStreetAddressCont(streetCont);
-    record.setCmrCity(city);
-    record.setCmrCountryLanded(LANDED_CNTRY_MAP.get(cmrIssuingCntry));
-    logExtracts(record);
-
   }
 
   @Override
   public void doAfterConvert(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel,
       List<FindCMRRecordModel> converted) {
-    // / add extra Rdc imports
-    LOG.info("Calling doAfterConvert");
-
-    LOG.info("Importing RDc records..");
-    for (FindCMRRecordModel record : source.getItems()) {
-
-      LOG.info("Before Mapped Addrtype: " + record.getCmrAddrTypeCode());
-
-      String addrType = getMappedAddressType(record.getCmrIssuedBy(), record.getCmrAddrTypeCode(), record.getCmrAddrSeq());
-
-      LOG.info("After Mapped Addrtype: " + addrType);
-
-      if ("ZP01".equals(addrType) || "MAIL".equals(addrType)) {
-        handleRDcRecordValues(record);
-        record.setCmrAddrTypeCode(addrType);
-        converted.add(record);
-        LOG.info("ADDED Addr Type: " + addrType);
-      }
-      LOG.info("GCG getCmrAddrSeq: " + record.getCmrAddrSeq());
-      LOG.info("GCG getCmrName4: " + record.getCmrName4());
-      LOG.info("GCG getCmrStreetAddress: " + record.getCmrStreetAddress());
-      LOG.info("GCG getCmrCity: " + record.getCmrCity());
-      LOG.info("GCG getCmrName4: " + record.getCmrName4());
-
-    }
   }
 
   @Override
@@ -623,16 +427,19 @@ public class GCGHandler extends APHandler {
 
         switch (countAddressLines(currentRecord)) {
         case 1:
+          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 1");
           address.setAddrTxt(currentRecord.getCmrStreetAddress());
           address.setAddrTxt2("");
           address.setCity1("");
           break;
         case 2:
+          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 2");
           address.setAddrTxt(currentRecord.getCmrStreetAddress());
           address.setAddrTxt2(currentRecord.getCmrCity());
           address.setCity1("");
           break;
         case 3:
+          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 3");
           address.setAddrTxt(currentRecord.getCmrName4());
           address.setAddrTxt2(currentRecord.getCmrStreetAddress());
           address.setCity1(currentRecord.getCmrCity());
