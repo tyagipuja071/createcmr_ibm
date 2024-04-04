@@ -1352,14 +1352,6 @@ function connectToCmrServices() {
         dojo.byId('covDescCont').innerHTML = data.coverageDesc != null ? data.coverageDesc : '(no description available)';
 
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp != 'PRIV' && custSubGrp != 'ECO' && (FormManager.getActualValue('cmrIssuingCntry') == '649')) {
-          FormManager.setValue('clientTier', '');
-          FormManager.enable('clientTier');
-        }
-        if (custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM' && (FormManager.getActualValue('cmrIssuingCntry') == '897')) {
-          FormManager.setValue('clientTier', '');
-          FormManager.enable('clientTier');
-        }
         if (data.clientTier == null || data.clientTier.trim() == '') {
           /*
            * 1490262: Client Tier Code is set to Unassigned after Retrieving
@@ -1368,7 +1360,14 @@ function connectToCmrServices() {
           /* jz: do not set anything */
           // FormManager.setValue('clientTier', '');
         } else {
-          FormManager.setValue('clientTier', data.clientTier);
+          if (custSubGrp != 'PRIV' && custSubGrp != 'ECO' && (FormManager.getActualValue('cmrIssuingCntry') == '649')) {
+            FormManager.setValue('clientTier', '');
+            FormManager.enable('clientTier');
+          }
+          if (custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM' && (FormManager.getActualValue('cmrIssuingCntry') == '897')) {
+            FormManager.setValue('clientTier', '');
+            FormManager.enable('clientTier');
+          }
         }
       }
       if (data.buyingGroupError) {

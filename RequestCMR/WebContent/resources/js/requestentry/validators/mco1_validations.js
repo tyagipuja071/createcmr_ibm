@@ -6,30 +6,30 @@ var _landCntryHandler = null;
 var scenarioToSkipCMRValidationZA = ['LSELC', 'SZELC', 'NAELC', 'LSLLC', 'NALLC', 'SZLLC', 'LSBLC', 'SZBLC', 'NABLC'];
 
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
-  var cntryRegion = FormManager.getActualValue('countryUse');
-  if (!saving) {
-    if (addressMode == 'newAddress') {
-      FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
-      if (cntryRegion != '' && cntryRegion == '864') {
-        FormManager.setValue('landCntry', 'ZA');
-      } else if (cntryRegion != '' && cntryRegion == '864LS') {
-        FormManager.setValue('landCntry', 'LS');
-      } else if (cntryRegion != '' && cntryRegion == '864NA') {
-        FormManager.setValue('landCntry', 'NA');
-      } else if (cntryRegion != '' && cntryRegion == '864SZ') {
-        FormManager.setValue('landCntry', 'SZ');
-      }
-    } else {
-      FilteringDropdown['val_landCntry'] = null;
+    var cntryRegion = FormManager.getActualValue('countryUse');
+    if (!saving) {
+        if (addressMode == 'newAddress') {
+            FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
+            if (cntryRegion != '' && cntryRegion == '864') {
+                FormManager.setValue('landCntry', 'ZA');
+            } else if (cntryRegion != '' && cntryRegion == '864LS') {
+                FormManager.setValue('landCntry', 'LS');
+            } else if (cntryRegion != '' && cntryRegion == '864NA') {
+                FormManager.setValue('landCntry', 'NA');
+            } else if (cntryRegion != '' && cntryRegion == '864SZ') {
+                FormManager.setValue('landCntry', 'SZ');
+            }
+        } else {
+            FilteringDropdown['val_landCntry'] = null;
+        }
     }
-  }
 
-  if (_landCntryHandler == null && FormManager.getField('landCntry')) {
-    _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
-      disablePOBox();
-// postalCodeRequired();
-    });
-  }
+    if (_landCntryHandler == null && FormManager.getField('landCntry')) {
+        _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+            disablePOBox();
+            // postalCodeRequired();
+        });
+    }
 }
 
 /*
@@ -95,6 +95,7 @@ function addHandlersForZA() {
         _subIndustryCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
             if (_oldSubInd != FormManager.getActualValue('subIndustryCd') || typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
                 setDefaultEnterpriseBasedOnSubInd(value);
+                setDefaultEntCBMEA();
                 _oldSubInd = FormManager.getActualValue('subIndustryCd');
             }
         });
@@ -107,6 +108,7 @@ function addHandlersForZA() {
                 calledByCtcHandler = false;
                 setCtcSalesRepSBO(value);
                 setEnterpriseBehaviour();
+                setDefaultEntCBMEA();
             }
             if (_oldIsuCd != FormManager.getActualValue('isuCd') || typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
                 setDefaultEnterpriseBasedOnSubInd(value);
@@ -2176,19 +2178,22 @@ function setEnterpriseBehaviour() {
 
     // hide enterprise for BP, IBM employee and Internal
     var custTypeHideList = ['LSBP', 'LSXBP', 'LSBLC', 'NABP', 'NAXBP', 'NABLC', 'SZBP', 'SZXBP', 'SZBLC', 'ZABP', 'ZAXBP', 'LSIBM', 'LSXIB', 'LSXIN', 'LSINT', 'NAIBM', 'NAXIB', 'NAXIN', 'NAINT', 'SZIBM', 'SZXIB', 'SZXIN', 'SZINT', 'ZAIBM', 'ZAXIB', 'ZAXIN', 'ZAINT'];
-    var custTypePrivList = ['LSPC', 'LSXPC', 'NAPC', 'NAXPC', 'SZPC', 'SZXPC', 'ZAPC', 'ZAXPC'];
+   var custTypePrivList = ['LSPC', 'LSXPC', 'NAPC', 'NAXPC', 'SZPC', 'SZXPC', 'ZAPC', 'ZAXPC'];
+
     if (custTypeHideList.includes(custType)) {
         FormManager.hide('Enterprise', 'enterprise');
     } else {
         FormManager.show('Enterprise', 'enterprise');
         if (custTypePrivList.includes(custType)) {
             FormManager.readOnly('enterprise');
+            FormManager.readOnly('isuCd');
+            FormManager.readOnly('clientTier');
             FormManager.addValidator('enterprise', Validators.REQUIRED, ['Enterprise'], 'MAIN_IBM_TAB');
         } else if (isuCtc == '36Y' || ((isuCtc == '27E' || isuCtc == '34Q') && countryUse == '864')) {
             FormManager.enable('enterprise');
             FormManager.removeValidator('enterprise', Validators.REQUIRED);
         } else if (isuCtc == '27E' && countryUseSubRegions.includes(countryUse)) {
-            FormManager.readOnly('enterprise');
+            // FormManager.readOnly('enterprise');
             FormManager.addValidator('enterprise', Validators.REQUIRED, ['Enterprise'], 'MAIN_IBM_TAB');
         } else {
             FormManager.enable('enterprise');
@@ -2197,125 +2202,166 @@ function setEnterpriseBehaviour() {
     }
 }
 
-function setDefaultCovCBMEA() {
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var reqType = FormManager.getActualValue('reqType');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var reqId = FormManager.getActualValue('reqId');
-  var subRegion = FormManager.getActualValue('countryUse');
-  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  if (subIndustryCd == '') {
-    subIndustryCd = _pagemodel.subIndustryCd;
-  }
-  if (subIndustryCd != null && subIndustryCd.length > 1) {
-    subIndustryCd = subIndustryCd.substring(0, 1);
-  }
-var crossSubTypes = [ 'ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP' ];
-var  privScenarios = ['ZAXPC','SZXPC','NAXPC','SZ'];
-var  SOUTH_AFRICA_LC = ['ZA','NA','LS','SZ'];
-var  TURKEY_LC = ['TR'];
-var  CEWA_LC = ['DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG'];
-var  ME_LC = ['LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+function setDefaultEntCBMEA() {
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    var reqType = FormManager.getActualValue('reqType');
+    var custGrp = FormManager.getActualValue('custGrp');
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var reqId = FormManager.getActualValue('reqId');
+    var subRegion = FormManager.getActualValue('countryUse');
+    var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+    if (subIndustryCd == '') {
+        subIndustryCd = _pagemodel.subIndustryCd;
+    }
+    if (subIndustryCd != null && subIndustryCd.length > 1) {
+        subIndustryCd = subIndustryCd.substring(0, 1);
+    }
+    var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP','LSXCO', 'LSXGO', 'LSXPC', 'LSXTP'];
+    var privScenarios = ['ZAXPC', 'SZXPC', 'NAXPC', 'LSXPC'];
+    var SOUTH_AFRICA_LC = ['ZA', 'NA', 'LS', 'SZ'];
+    var TURKEY_LC = ['TR'];
+    var CEWA_LC = ['DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG'];
+    var ME_LC = ['LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
 
-  var landCntry = '';
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  // GET LANDCNTRY in case of CB
-  var result = cmr.query('LANDCNTRY.IT', {
-    REQID : reqId
-  });
-  if (result != null && result.ret1 != undefined) {
-    landCntry = result.ret1;
+    var landCntry = '';
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    // GET LANDCNTRY in case of CB
+    var result = cmr.query('LANDCNTRY.IT', {
+        REQID: reqId
+    });
+    if (result != null && result.ret1 != undefined) {
+        landCntry = result.ret1;
+    }
+
+    if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubType) || landCntry == '' || !(CEWA_LC.includes(landCntry) || ME_LC.includes(landCntry) || TURKEY_LC.includes(landCntry) || SOUTH_AFRICA_LC.includes(landCntry))) {
+        return;
+    }
+
+    var isu = FormManager.getActualValue('isuCd');
+    var ctc = FormManager.getActualValue('clientTier');
+    var isuCTC = isu.concat(ctc);
+
+    if (crossSubTypes.includes(custSubType)) {
+        if (TURKEY_LC.includes(landCntry)) {
+            // TURKEY MEA REGION
+
+            if (subIndustryCd == 'G') {
+                ims = _pagemodel.subIndustryCd;
+                if (ims != '' && !(ims.endsWith('B') || ims.endsWith('F') || ims.endsWith('J') || ims.endsWith('N'))) {
+                    FormManager.setValue('enterprise', '911715');
+                } else {
+                    FormManager.setValue('enterprise', '911718');
+                }
+            } else {
+                var qParams = {
+                    ISSUING_CNTRY: cntry,
+                    SALES_BO_CD: '%' + subIndustryCd + '%',
+                    SALES_BO_DESC: '%' + landCntry + '%',
+                    ISU_CD: '%' + isuCTC + '%'
+                };
+                var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
+                var enterprise = results.ret1;
+                FormManager.setValue('enterprise', enterprise);
+            }
+        } else if (SOUTH_AFRICA_LC.includes(landCntry)) {
+            // SOUTH AFRICA MEA REGION
+            if (landCntry == 'LS') {
+                FormManager.setValue('enterprise', '910510');
+            } else if (landCntry == 'NA') {
+                FormManager.setValue('enterprise', '909813');
+            } else if (landCntry == 'SZ') {
+                FormManager.setValue('enterprise', '910509');
+            } else {
+                var qParams = {
+                    ISSUING_CNTRY: cntry,
+                    SALES_BO_CD: '%' + subIndustryCd + '%',
+                    SALES_BO_DESC: '%' + landCntry + '%',
+                    ISU_CD: '%' + isuCTC + '%'
+                };
+                var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
+                var enterprise = results.ret1;
+                FormManager.setValue('enterprise', enterprise);
+            }
+
+        } else if (CEWA_LC.includes(landCntry)) {
+            // CEWA MEA REGION
+            var qParams = {
+                ISSUING_CNTRY: cntry,
+                SALES_BO_DESC: '%' + landCntry + '%',
+                ISU_CD: '%' + isuCTC + '%'
+            };
+            var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
+            var enterprise = results.ret1;
+            FormManager.setValue('enterprise', enterprise);
+
+        } else if (ME_LC.includes(landCntry)) {
+          var noSubCountriesME = ['KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'PS', 'LB', 'BH', 'LY', 'TN', 'MA', 'PK', 'AF'];
+          var enterprise='';
+          if (noSubCountriesME.includes(landCntry)) {
+            var qParams = {
+                ISSUING_CNTRY: cntry,
+                SALES_BO_DESC: '%' + landCntry + '%',
+                ISU_CD: '%' + isuCTC + '%'
+            };
+            var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
+             enterprise = results.ret1;                       
+            } else {
+            // ME MEA REGION
+            var qParams = {
+                ISSUING_CNTRY: cntry,
+                SALES_BO_CD: '%' + subIndustryCd + '%',
+                SALES_BO_DESC: '%' + landCntry + '%',
+                ISU_CD: '%' + isuCTC + '%'
+            };
+            var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
+             enterprise = results.ret1;
+            }
+            FormManager.setValue('enterprise', enterprise);
+        }
+    }
+}
+
+
+function setIsuCtcCBMEA() {
+    var landCntry = '';
+    var reqId = FormManager.getActualValue('reqId');
+    // GET LANDCNTRY in case of CB
+    var result = cmr.query('LANDCNTRY.IT', {
+        REQID: reqId
+    });
+    if (result != null && result.ret1 != undefined) {
+        landCntry = result.ret1;
+    }
+    var reqId = FormManager.getActualValue('reqId');
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var landCntry ='';
+    var result = cmr.query('LANDCNTRY.IT', {
+      REQID : reqId
+    });
+    if (result != null && result.ret1 != undefined) {
+      landCntry = result.ret1;
+    }
+    var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP','LSXCO', 'LSXGO', 'LSXPC', 'LSXTP'];
+    var  MEA_COUNTRIES_CB = ['TR','DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG','LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+    if (reqType == 'U' || !MEA_COUNTRIES_CB.includes(landCntry) || !crossSubTypes.includes(custSubType)) {
+      return;
   }
-
-  if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubType) || landCntry == '' || !(CEWA_LC.includes(landCntry) || ME_LC.includes(landCntry) || TURKEY_LC.includes(landCntry) || SOUTH_AFRICA_LC.includes(landCntry))) {
-    return;
-  }
-  
-  // Set Defualt ISU CTC for CROSS MEA REGION
-  var MEA34Q = ['PK','AF' ,'MA','TN','LY','QA','EG'];
-  var MEAsubIndustry34Q =['E','G','V','Y','H','X'];
-  if( CEWA_LC.includes(landCntry) || MEA34Q.includes(landCntry) || (landCntry == 'SA' && MEAsubIndustry34Q.includes(subIndustryCd))) {
-      // CEWA MEA REGION
-          FormManager.setValue('isuCd', '34');
-          FormManager.setValue('clientTier', 'Q');
-      }
-  var isu = FormManager.getActualValue('isuCd');
-  var ctc = FormManager.getActualValue('clientTier');
-  var isuCTC = isu.concat(ctc);
-
-    if(crossSubTypes.includes(custSubType)) {     
-     if( TURKEY_LC.includes(landCntry)) {
-       // TURKEY MEA REGION
-
-      if(subIndustryCd == 'G') {
-        ims = _pagemodel.subIndustryCd;
-       if(ims != '' && !(ims.endsWith('B') || ims.endsWith('F') || ims.endsWith('J') || ims.endsWith('N'))) {
-         FormManager.setValue('enterprise', '911715');
-       } else {
-         FormManager.setValue('enterprise', '911718');
-       }
-      } else {
-          var qParams = {
-          _qall : 'Y',
-          ISSUING_CNTRY : cntry,
-          SALES_BO_CD : '%' + subIndustryCd + '%',
-          SALES_BO_DESC : '%' + landCntry + '%',
-          ISU_CD : '%' + isuCTC + '%'
-        };
-        var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
-        var enterprise = results.ret1;
-    FormManager.setValue('enterprise', enterprise);
-      }
-     }      
-    else if( SOUTH_AFRICA_LC.includes(landCntry)) {
-    // SOUTH AFRICA MEA REGION
-    if (subRegion == '864LS') {
-      FormManager.setValue('enterprise', '910510');
-    } else if (subRegion  == '864NA') {
-      FormManager.setValue('enterprise', '909813');
-    } else if (subRegion == '864SZ') {
-      FormManager.setValue('enterprise', '910509');
+    var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+    if (subIndustryCd == '') {
+        subIndustryCd = _pagemodel.subIndustryCd;
+    }
+    var CEWA_LC = ['DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG'];
+    var MEA34Q = ['PK', 'AF', 'MA', 'TN', 'LY', 'QA', 'EG'];
+    var MEAsubIndustry34Q = ['E', 'G', 'V', 'Y', 'H', 'X'];
+    if (CEWA_LC.includes(landCntry) || MEA34Q.includes(landCntry) || (landCntry == 'SA' && MEAsubIndustry34Q.includes(subIndustryCd))) {
+        // CEWA MEA REGION
+        FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Q');
     } else {
-       var qParams = {
-          _qall : 'Y',
-          ISSUING_CNTRY : cntry,
-          SALES_BO_CD : '%' + subIndustryCd + '%',
-          SALES_BO_DESC : '%' + landCntry + '%',
-          ISU_CD : '%' + isuCTC + '%'
-        };
-        var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
-        var enterprise = results.ret1;
-    FormManager.setValue('enterprise', enterprise);
+        FormManager.setValue('isuCd', '27');
+        FormManager.setValue('clientTier', 'E');
     }
-
-     } else if( CEWA_LC.includes(landCntry)) {
-    // CEWA MEA REGION
-    var qParams = {
-          _qall : 'Y',
-          ISSUING_CNTRY : cntry,
-          SALES_BO_DESC : '%' + landCntry + '%',
-          ISU_CD : '%' + isuCTC + '%'
-        };
-        var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
-        var enterprise = results.ret1;
-    FormManager.setValue('enterprise', enterprise);
-     
-     } else if( ME_LC.includes(landCntry)) {
-    // ME MEA REGION
-        var qParams = {
-          _qall : 'Y',
-          ISSUING_CNTRY : cntry,
-          SALES_BO_CD : '%' + subIndustryCd + '%',
-          SALES_BO_DESC : '%' + landCntry + '%',
-          ISU_CD : '%' + isuCTC + '%'
-        };
-        var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
-        var enterprise = results.ret1;
-    FormManager.setValue('enterprise', enterprise);
-     }     
-    }  
-    }
+}
 
 function enterpriseValidator() {
     FormManager.addFormValidator((function() {
@@ -2330,9 +2376,18 @@ function enterpriseValidator() {
                 var clientTierCode = FormManager.getActualValue('clientTier');
                 var isuCtc = isuCode + clientTierCode;
                 var isuCtcWithBlank = ['04', '12', '28', '4F', '5K'];
-                if (reqType == 'U') {
-                  return;
-              }
+                var reqId = FormManager.getActualValue('reqId');
+                var landCntry = '';
+                var result = cmr.query('LANDCNTRY.IT', {
+                    REQID: reqId
+                });
+                if (result != null && result.ret1 != undefined) {
+                    landCntry = result.ret1;
+                }
+                var MEA_COUNTRIES_CB = ['TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+                if (reqType == 'U' || MEA_COUNTRIES_CB.includes(landCntry)) {
+                    return;
+                }
                 if (enterprise.length >= 1 && enterprise.length != 6) {
                     return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
                 }
@@ -2345,14 +2400,14 @@ function enterpriseValidator() {
                     }, false, 'Enterprise Number should be numeric only.');
                 }
 
-                if(isuCtc == '36Y'){
-                  return checkCondition36Y(countryUse, enterprise, isuCtc);
-                } else if (isuCtc == '34Q'){
-                  return checkCondition34Q(countryUse, enterprise, isuCtc);
-                } else if (isuCtc == '27E'){
-                  return checkCondition27E(countryUse, enterprise, isuCtc);
-                } else if(isuCtcWithBlank.includes(isuCtc))  {
-                  return checkConditionIsuCtcWithBlank(enterprise, isuCtc);
+                if (isuCtc == '36Y') {
+                    return checkCondition36Y(countryUse, enterprise, isuCtc);
+                } else if (isuCtc == '34Q') {
+                    return checkCondition34Q(countryUse, enterprise, isuCtc);
+                } else if (isuCtc == '27E') {
+                    return checkCondition27E(countryUse, enterprise, isuCtc);
+                } else if (isuCtcWithBlank.includes(isuCtc)) {
+                    return checkConditionIsuCtcWithBlank(enterprise, isuCtc);
                 }
                 return new ValidationResult(null, true);
             }
@@ -2360,57 +2415,595 @@ function enterpriseValidator() {
     })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function enterpriseValidatorMea() {
+    FormManager.addFormValidator((function() {
+        return {
+            validate: function() {
+                var reqType = FormManager.getActualValue('reqType');
+                var custSubGrp = FormManager.getActualValue('custSubGrp');
+                var enterprise = FormManager.getActualValue('enterprise');
+                var countryUse = FormManager.getActualValue('countryUse');
+                var isuCode = FormManager.getActualValue('isuCd');
+                var clientTierCode = FormManager.getActualValue('clientTier');
+                var reqId = FormManager.getActualValue('reqId');
+                var isuCtc = isuCode + clientTierCode;
+                // var isuCtcWithBlank = ['04', '12', '28', '4F', '5K'];
+                var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+                if (subIndustryCd == '') {
+                    subIndustryCd = _pagemodel.subIndustryCd;
+                }
+                if (subIndustryCd != null && subIndustryCd.length > 1) {
+                    subIndustryCd = subIndustryCd.substring(0, 1);
+                }
+                var crossSubTypes = ['ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP','LSXCO', 'LSXGO', 'LSXPC', 'LSXTP'];
+                var privScenarios = ['ZAXPC', 'SZXPC', 'NAXPC', 'LSXPC'];
+                var SOUTH_AFRICA_LC = ['ZA', 'NA', 'LS', 'SZ'];
+                var TURKEY_LC = ['TR'];
+                var CEWA_LC = ['DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG'];
+                var ME_LC = ['LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+
+                var landCntry = '';
+                var cntry = FormManager.getActualValue('cmrIssuingCntry');
+                // GET LANDCNTRY in case of CB
+                var result = cmr.query('LANDCNTRY.IT', {
+                    REQID: reqId
+                });
+                if (result != null && result.ret1 != undefined) {
+                    landCntry = result.ret1;
+                }
+                if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || enterprise == '' || !(CEWA_LC.includes(landCntry) || ME_LC.includes(landCntry) || TURKEY_LC.includes(landCntry) || SOUTH_AFRICA_LC.includes(landCntry))) {
+                    return;
+                }
+                if (TURKEY_LC.includes(landCntry)) {
+                    // TURKEY MEA REGION
+                    if (isuCtc == '27E') {
+                        var qParams = {
+                            ISSUING_CNTRY: cntry,
+                            SALES_BO_CD: '%' + subIndustryCd + '%',
+                            SALES_BO_DESC: '%' + landCntry + '%',
+                            ISU_CD: '%' + isuCTC + '%'
+                        };
+                        var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
+                        var validEnterprise = results.ret1;
+                        if (enterprise != validEnterprise) {
+                            return new ValidationResult({
+                                id: 'enterprise',
+                                type: 'text',
+                                name: 'enterprise'
+                            }, false, 'Enterprise can only accept : ' + validEnterprise);
+                        }
+                    } else if (isuCtc == '34Q') {
+                        var enterprise34Q = ['911703', '911716', '911704'];
+                        if (!enterprise34Q.includes(enterprise)) {
+                            return new ValidationResult({
+                                id: 'enterprise',
+                                type: 'text',
+                                name: 'enterprise'
+                            }, false, 'Enterprise can only accept : \'911703\'\ \'911716\'\ \'911704\'\ ');
+                        }
+                    } else if (isuCtc == '5k' || isuCtc == '04' || isuCtc == '28') {
+                        if (enterprise != '') {
+                            return new ValidationResult({
+                                id: 'enterprise',
+                                type: 'text',
+                                name: 'enterprise'
+                            }, false, 'Enterprise can only accept Blank ');
+                        }
+                    }
+                } else if (CEWA_LC.includes(landCntry)) {
+                    // CEWA CB MEA REGION
+                    if (isuCtc == '34Q') {
+                        var qParams = {
+                            ISSUING_CNTRY: cntry,
+                            SALES_BO_DESC: '%' + landCntry + '%',
+                            ISU_CD: '%' + isuCTC + '%'
+                        };
+                        var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
+                        var validEnterprise = results.ret1;
+                        if (enterprise != validEnterprise) {
+                            return new ValidationResult({
+                                id: 'enterprise',
+                                type: 'text',
+                                name: 'enterprise'
+                            }, false, 'Enterprise can only accept : ' + validEnterprise);
+                        }
+                    } else if (isuCtc == '36Y') {
+                        var enterprise34Q = ['BUILD1', 'DISTR1', 'SRVCE1'];
+                        if (!enterprise34Q.includes(enterprise)) {
+                            return new ValidationResult({
+                                id: 'enterprise',
+                                type: 'text',
+                                name: 'enterprise'
+                            }, false, 'Enterprise can only accept : \'BUILD1\'\ \'DISTR1\'\ \'SRVCE1\'\ ');
+                        }
+                    } else if (isuCtc == '5k') {
+                        if (enterprise != '') {
+                            return new ValidationResult({
+                                id: 'enterprise',
+                                type: 'text',
+                                name: 'enterprise'
+                            }, false, 'Enterprise can only accept Blank ');
+                        }
+                    }
+                } else if (ME_LC.includes(landCntry)) {
+                    return enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise);
+                }
+                return new ValidationResult(null, true);
+            }
+        };
+    })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
+    // ME MEA REGION
+    if (landCntry == 'AE') {
+        if (isuCtc == '27E') {
+            if (['E', 'G', 'H', 'X', 'Y'].includes(subIndustryCd) && enterprise != '911812') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911812');
+            } else if (['F', 'N', 'S'].includes(subIndustryCd) && enterprise != '911813') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911813');
+            } else if (['A', 'D', 'K', 'R', 'T', 'U', 'W'].includes(subIndustryCd) && enterprise != '911814') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911814');
+            } else if (['J', 'L', 'M', 'V', 'P'].includes(subIndustryCd) && enterprise != '911815') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911815');
+            } else if (['B', 'C'].includes(subIndustryCd) && enterprise != '911816') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911816');
+            }
+        } else if (isuCtc == '34Q') {
+            var enterprise34Q = ['911811', '911810'];
+            if (!enterprise34Q.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911811\'\ \'911810\'\ ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise34Q = ['912073', '912075', '912074'];
+            if (!enterprise34Q.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'912073\'\ \'912075\'\ \'912074\'\ ');
+            }
+        }
+    } else if (landCntry == 'SA') {
+        if (isuCtc == '27E') {
+            if (['A', 'K'].includes(subIndustryCd) && enterprise != '911693') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911693');
+            } else if (['B', 'C'].includes(subIndustryCd) && enterprise != '911700') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911700');
+            } else if (['D', 'L', 'R', 'W'].includes(subIndustryCd) && enterprise != '911699') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911699');
+            } else if (['F', 'S'].includes(subIndustryCd) && enterprise != '911688') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911688');
+            } else if (['J', 'T'].includes(subIndustryCd) && enterprise != '911701') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911701');
+            } else if (['M', 'P', 'U'].includes(subIndustryCd) && enterprise != '901469') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 901469');
+            } else if (['N'].includes(subIndustryCd) && enterprise != '911698') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : 911698');
+            }
+        } else if (isuCtc == '34Q') {
+
+            var enterprise34Q = ['911690', '911685', '911691', '911702', '911687', '911697'];
+            if (['E'].includes(subIndustryCd) && (enterprise != '911695'|| !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911695\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
+            }
+            if (['G', 'V', 'Y'].includes(subIndustryCd) && (enterprise != '911692' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911692\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
+            } else if (['H', 'X'].includes(subIndustryCd) && (enterprise != '911696' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911696\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
+            } else if (!enterprise34Q.includes(enterprise) && !(['E','G', 'V', 'Y', 'H', 'X'].includes(subIndustryCd))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise36Y = ['908025', '912094', '912093'];
+            if (!enterprise36Y.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'908025\'\ \'912094\'\ \'912093\'\ ');
+            }
+        }
+    } else if (landCntry == 'KW') {
+        if (isuCtc == '27E') {
+            if (!(enterprise == '907695' || enterprise == '911297')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'907695\'\ \'911297\'\ ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise36Y = ['912087', '912085', '912086'];
+            if (!enterprise36Y.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'912085\'\ \'912086\'\ \'912087\'\ ');
+            }
+        }
+    } else if (landCntry == 'OM') {
+        if (isuCtc == '27E') {
+            if (!(enterprise == '911824' || enterprise == '911823')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911824\'\ \'911823\'\ ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise36Y = ['912080', '912079', '912081'];
+            if (!enterprise36Y.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'912080\'\ \'912079\'\ \'912081\'\ ');
+            }
+        }
+    } else if (landCntry == 'IQ' || landCntry == 'SY' || landCntry == 'YE' || landCntry == 'JO' || landCntry == 'PS' || landCntry == 'LB') {
+        if (isuCtc == '27E') {
+            if (!(enterprise == '911827' || enterprise == '911826')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911827\'\ \'911826\'\ ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise36Y = ['908024', '912072', '912071'];
+            if (!enterprise36Y.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'908024\'\ \'912072\'\ \'912071\'\ ');
+            }
+        }
+    } else if (landCntry == 'BH') {
+        if (isuCtc == '27E') {
+            if (!(enterprise == '911825')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911825\'\  ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise36Y = ['912084', '912082', '912083'];
+            if (!enterprise36Y.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'912084\'\ \'912082\'\ \'912083\'\ ');
+            }
+        }
+    } else if (landCntry == 'LY' || landCntry == 'TN' || landCntry == 'MA') {
+        if (isuCtc == '34Q') {
+            if (enterprise != '911756' && landCntry == 'LY') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911756\'\  ');
+            } else if (enterprise != '901728' && landCntry == 'TN') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'901728\'\  ');
+            }
+            if (enterprise != '901462' && landCntry == 'MA') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'901462\'\  ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise36Y = ['BUILD1', 'DISTR1', 'SRVCE1'];
+            if (!enterprise36Y.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'BUILD1\'\ \'DISTR1\'\ \'SRVCE1\'\ ');
+            }
+        }
+    } else if (landCntry == 'PK' || landCntry == 'AF') {
+        if (isuCtc == '34Q') {
+            if (enterprise != '901459') {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'901459\'\  ');
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise36Y = ['908027', '912092', '912091'];
+            if (!enterprise36Y.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'908027\'\ \'912092\'\ \'912091\'\ ');
+            }
+        }
+    } else if (landCntry == 'QA') {
+        if (isuCtc == '34Q') {
+            if (['A', 'D', 'K', 'R', 'T', 'U', 'W'].includes(subIndustryCd) && (enterprise != '911818' || enterprise != '911817')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911818\'\ \'911817\'\ ');
+            } else if (['J', 'L', 'M', 'P', 'V'].includes(subIndustryCd) && (enterprise != '911819' || enterprise != '911817')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911819\'\ \'911817\'\ ');
+            } else if (['F', 'N', 'S'].includes(subIndustryCd) && (enterprise != '911820' || enterprise != '911817')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911820\'\ \'911817\'\ ');
+            } else if (['E', 'G', 'H', 'X', 'Y'].includes(subIndustryCd) && (enterprise != '911821' || enterprise != '911817')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept :  \'911821\'\ \'911817\'\ ');
+            } else if (['B', 'C'].includes(subIndustryCd) && (enterprise != '911822' || enterprise != '911817')) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911822\'\ \'911817\'\ ');
+            } else {
+                if (enterprise != '911817') {
+                    return new ValidationResult({
+                        id: 'enterprise',
+                        type: 'text',
+                        name: 'enterprise'
+                    }, false, 'Enterprise can only accept : \'911817\'\ ');
+                }
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise34Q = ['912088', '912090', '912089'];
+            if (!enterprise34Q.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'912088\'\ \'912090\'\ \'912089\'\ ');
+            }
+        }
+    }
+    if (landCntry == 'EG') {
+        if (isuCtc == '34Q') {
+          var enterprise34Q = ['912088', '911831', '911835', '911275', '911833'];
+            if (['D', 'J', 'K', 'L', 'R', 'T', 'W'].includes(subIndustryCd) && (enterprise != '911836'|| !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911836\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['A'].includes(subIndustryCd) && (enterprise != '911771' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911771\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['B', 'C'].includes(subIndustryCd) && (enterprise != '911772' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911820\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['E'].includes(subIndustryCd) && (enterprise != '911773' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911773\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['F'].includes(subIndustryCd) && (enterprise != '911830' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911830\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['G', 'V', 'Y'].includes(subIndustryCd) && (enterprise != '911832' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911832\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['H', 'X'].includes(subIndustryCd) && (enterprise != '911768' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911768\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (['M', 'U'].includes(subIndustryCd) && (enterprise != '901456' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'901456\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (subIndustryCd == 'N' && (enterprise != '911770' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911770\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (subIndustryCd == 'P' && (enterprise != '911834' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911834\'\  \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else if (subIndustryCd == 'S' && (enterprise != '911769' || !enterprise34Q.includes(enterprise))) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'911769\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+            } else {
+                // var enterprise34Q = ['912088', '911831', '911835', '911275',
+                // '911833'];
+                if (!enterprise34Q.includes(enterprise) && !(['A','B', 'C', 'D', 'J', 'K','L','R', 'T', 'W', 'E', 'F','G', 'V', 'Y','H','X', 'M', 'U', 'N', 'P', 'S'].includes(subIndustryCd))) {
+                    return new ValidationResult({
+                        id: 'enterprise',
+                        type: 'text',
+                        name: 'enterprise'
+                    }, false, 'Enterprise can only accept : \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
+                }
+            }
+        } else if (isuCtc == '36Y') {
+            var enterprise34Q = ['908023', '912070', '912069'];
+            if (!enterprise34Q.includes(enterprise)) {
+                return new ValidationResult({
+                    id: 'enterprise',
+                    type: 'text',
+                    name: 'enterprise'
+                }, false, 'Enterprise can only accept : \'908023\'\ \'912070\'\ \'912069\'\ ');
+            }
+        }
+    }
+    if (isuCtc == '5k') {
+        if (enterprise != '') {
+            return new ValidationResult({
+                id: 'enterprise',
+                type: 'text',
+                name: 'enterprise'
+            }, false, 'Enterprise can only accept Blank ');
+        }
+    }
+}
+
 function checkCondition36Y(countryUse, enterprise, isuCtc) {
     var validEnterpriseIdsZA_36Y = ['008028', '010032', '012430'];
     var validEnterpriseIdsLS = ['012097', '012098', '012099'];
     var validEnterpriseIdsNA = ['009814', '012095', '012096'];
     var validEnterpriseIdsSZ = ['012100', '012101', '012102'];
-      if((!validEnterpriseIdsZA_36Y.includes(enterprise) && countryUse == '864')){
+    if ((!validEnterpriseIdsZA_36Y.includes(enterprise) && countryUse == '864')) {
         return new ValidationResult({
-          id : 'enterprise',
-          type : 'text',
-          name : 'enterprise'
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
         }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_36Y);
-      } else if(!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS'){
+    } else if (!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS') {
         return new ValidationResult({
-          id : 'enterprise',
-          type : 'text',
-          name : 'enterprise'
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
         }, false, 'Enterprise can only accept : ' + validEnterpriseIdsLS);
-      } else if(!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA'){
+    } else if (!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA') {
         return new ValidationResult({
-          id : 'enterprise',
-          type : 'text',
-          name : 'enterprise'
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
         }, false, 'Enterprise can only accept : ' + validEnterpriseIdsNA);
-      } else if(!validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ'){
+    } else if (!validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ') {
         return new ValidationResult({
-          id : 'enterprise',
-          type : 'text',
-          name : 'enterprise'
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
         }, false, 'Enterprise can only accept : ' + validEnterpriseIdsSZ);
-      }
+    }
 }
 
 function checkCondition34Q(countryUse, enterprise, isuCtc) {
     var validEnterpriseIdsZA_34Q = ['004179', '011678'];
     if (!validEnterpriseIdsZA_34Q.includes(enterprise) && countryUse == '864') {
-      return new ValidationResult({
-        id : 'enterprise',
-        type : 'text',
-        name : 'enterprise'
-      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_34Q);
+        return new ValidationResult({
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_34Q);
     }
 }
 
 function checkConditionIsuCtcWithBlank(enterprise, isuCtc) {
     var isuCtcWithBlank = ['04', '12', '28', '4F', '5K'];
     if (isuCtcWithBlank.includes(isuCtc) && enterprise != '') {
-      return new ValidationResult({
-        id : 'enterprise',
-        type : 'text',
-        name : 'enterprise'
-      }, false, 'Enterprise can only accept Blank');
+        return new ValidationResult({
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
+        }, false, 'Enterprise can only accept Blank');
     }
 }
 
@@ -2419,30 +3012,30 @@ function checkCondition27E(countryUse, enterprise, isuCtc) {
     var validEnterpriseIdsLS = '910510';
     var validEnterpriseIdsNA = '909813';
     var validEnterpriseIdsSZ = '910509';
-    if(!validEnterpriseIdsZA_27E.includes(enterprise) && countryUse == '864'){
-      return new ValidationResult({
-        id : 'enterprise',
-        type : 'text',
-        name : 'enterprise'
-      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_27E);
-    } else if(!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS'){
-      return new ValidationResult({
-        id : 'enterprise',
-        type : 'text',
-        name : 'enterprise'
-      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsLS);
-    } else if(!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA'){
-      return new ValidationResult({
-        id : 'enterprise',
-        type : 'text',
-        name : 'enterprise'
-      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsNA);
-    } else if(!validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ'){
-      return new ValidationResult({
-        id : 'enterprise',
-        type : 'text',
-        name : 'enterprise'
-      }, false, 'Enterprise can only accept : ' + validEnterpriseIdsSZ);
+    if (!validEnterpriseIdsZA_27E.includes(enterprise) && countryUse == '864') {
+        return new ValidationResult({
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsZA_27E);
+    } else if (!validEnterpriseIdsLS.includes(enterprise) && countryUse == '864LS') {
+        return new ValidationResult({
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsLS);
+    } else if (!validEnterpriseIdsNA.includes(enterprise) && countryUse == '864NA') {
+        return new ValidationResult({
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsNA);
+    } else if (!validEnterpriseIdsSZ.includes(enterprise) && countryUse == '864SZ') {
+        return new ValidationResult({
+            id: 'enterprise',
+            type: 'text',
+            name: 'enterprise'
+        }, false, 'Enterprise can only accept : ' + validEnterpriseIdsSZ);
     }
 }
 
@@ -2476,12 +3069,25 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
     var isuCtc = isuCd + ctc;
     var isuCtcForBlankEntp = ['04', '12', '28', '4F', '5K'];
     if (reqType == 'U') {
-      return;
+        return;
     }
-    if (isuCtc != '27E' && isuCtcForBlankEntp.includes(isuCtc)){
-      FormManager.setValue('enterprise', '');
-      return;
+    if (isuCtc != '27E' && isuCtcForBlankEntp.includes(isuCtc)) {
+        FormManager.setValue('enterprise', '');
+        return;
     } else {
+
+        var reqId = FormManager.getActualValue('reqId');
+        var landCntry = '';
+        var result = cmr.query('LANDCNTRY.IT', {
+            REQID: reqId
+        });
+        if (result != null && result.ret1 != undefined) {
+            landCntry = result.ret1;
+        }
+        var MEA_COUNTRIES_CB = ['TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+        if (MEA_COUNTRIES_CB.includes(landCntry)) {
+            return;
+        }
         if (subInd != null || subInd != undefined || subInd != '') {
             subInd = subInd[0];
         }
@@ -2615,8 +3221,11 @@ dojo.addOnLoad(function() {
     // CREATCMR-7985
     GEOHandler.addAfterTemplateLoad(setEnterpriseBehaviour, [SysLoc.SOUTH_AFRICA]);
     GEOHandler.addAfterConfig(setEnterpriseBehaviour, [SysLoc.SOUTH_AFRICA]);
-    GEOHandler.addAfterTemplateLoad(setDefaultCovCBMEA, [SysLoc.SOUTH_AFRICA]);
+    GEOHandler.addAfterTemplateLoad(setIsuCtcCBMEA, [SysLoc.SOUTH_AFRICA]);
+    GEOHandler.addAfterTemplateLoad(setDefaultEntCBMEA, [SysLoc.SOUTH_AFRICA]);
+
     GEOHandler.registerValidator(enterpriseValidator, [SysLoc.SOUTH_AFRICA], null, true);
     GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO1, null, true);
+    GEOHandler.registerValidator(enterpriseValidatorMea, GEOHandler.MCO1, null, true);
 
 });
