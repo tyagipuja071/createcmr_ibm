@@ -1544,7 +1544,7 @@ function afterConfigForLA() {
   // Story :1278109- By Mukesh Kumar
   if (_customerTypeHandler == null) {
     _customerTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
-
+      resetIbmBankNumber();
     });
   }
 
