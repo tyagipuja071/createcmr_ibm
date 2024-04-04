@@ -4928,7 +4928,7 @@ function setSBOFromDBMapping() {
 			sboList.push(results[i].ret1);
 		}
 		
-		if(valAssgndFrmSubInd && sboValSubInd && isuModified){
+		if(valAssgndFrmSubInd && sboValSubInd && !isuModified){
 		isuModified = false;
 		sboList.push(sboValSubInd);	
 		}
