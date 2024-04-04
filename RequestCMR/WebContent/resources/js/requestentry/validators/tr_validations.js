@@ -2481,6 +2481,93 @@ function getSoldToLanded() {
   }
   return countryCd;
 }
+function sboSalesRepCodeValidator() {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCtc = isuCd + clientTier;
+  var sbo = FormManager.getActualValue('salesBusOffCd');
+  var subRegion = FormManager.getActualValue('countryUse');
+  var reqType = FormManager.getActualValue('reqType');
+  var salesRep = FormManager.getActualValue('repTeamMemberNo');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  var landedCountry = getSoldToLanded();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (reqType != 'C') {
+    return new ValidationResult(null, true);
+  }
+  if (isuCtc == '8B') {
+    if (!(sbo == '140')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept \'140\'\  for ISU CTC 8B.');
+    }
+  } else if (isuCtc == '21') {
+    if (!(sbo == 'A10')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept \'A10\'\ for ISU CTC 21.');
+    }
+  } else if (isuCtc == '27E') {
+    if (!(sbo == 'A20')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept \'A20\'\ for ISU CTC 27.');
+    }
+  } else if (isuCtc == '34Q') {
+    if (!(sbo == 'A20')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept \'A20\'\ for ISU CTC 34Q.');
+    }
+  } else if (isuCtc == '36Y') {
+    if (!(sbo == '')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept \'A20\'\  for ISU CTC 36Y.');
+    }
+  } else if (isuCtc == '04') {
+    if (!(sbo == '')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept blank for ISU 04.');
+    }
+  } else if (isuCtc == '28') {
+    if (!(sbo == '')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept blank for ISU 28.');
+    }
+  } else if (isuCtc == '5K') {
+    if (!(sbo == '')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SBO can only accept blank for ISU 5K.');
+    }
+  }
+}
 
 dojo.addOnLoad(function() {
 
@@ -2495,7 +2582,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setFieldsToReadOnlyGRCYTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesTR, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterTemplateLoad(setClientTierValuesTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.TURKEY ]);
@@ -2526,7 +2613,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setFieldsToReadOnlyGRCYTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setClientTierValuesTR, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterConfig(setClientTierValuesTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
@@ -2573,5 +2660,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.TURKEY ], null, true);
-
+  GEOHandler.registerValidator(sboSalesRepCodeValidator, [ SysLoc.TURKEY ], null, true);
 });
