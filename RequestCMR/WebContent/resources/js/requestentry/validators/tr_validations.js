@@ -2344,9 +2344,11 @@ function setValuesForTurkey() {
             }
           } else {
             FormManager.setValue('enterprise', '');
+            FormManager.enable('enterprise');
           }
         } else {
           FormManager.setValue('enterprise', '');
+          FormManager.enable('enterprise');
         }
       }
     }
@@ -2501,7 +2503,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(filterCmrnoForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setValuesForTurkey, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterTemplateLoad(setValuesForTurkey, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(lockSORTL, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
@@ -2553,8 +2555,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setEconomicCode, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(onIsuChangeHandler, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setValuesForTurkey, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterConfig(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterConfig(setValuesForTurkey, [ SysLoc.TURKEY ]);
 
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY ], null, true);
