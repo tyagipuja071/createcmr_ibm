@@ -4862,6 +4862,7 @@ var subIndHandler = null;
 var isuCdHandler = null;
 var salBusOffCdHandler = null;
 var custSubGrpHandler = null;
+var isuModified = false;
 
 function addHandlersForCEE() {
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -4873,6 +4874,7 @@ function addHandlersForCEE() {
 
 	if (isuCdHandler == null) {
 		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+			isuModified = true;
 			setClientTier();
 			setCovValues2024CEE();
 			setSBOFromDBMapping();
@@ -4926,7 +4928,8 @@ function setSBOFromDBMapping() {
 			sboList.push(results[i].ret1);
 		}
 		
-		if(valAssgndFrmSubInd && sboValSubInd){
+		if(valAssgndFrmSubInd && sboValSubInd && isuModified){
+		isuModified = false;
 		sboList.push(sboValSubInd);	
 		}
 		
