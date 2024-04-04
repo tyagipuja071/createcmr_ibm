@@ -253,7 +253,6 @@
       </cmr:column>  
     </cmr:row> 
   <cmr:row addBackground="false"> 
-  
       <cmr:column span="2" containerForField="AdminDeptLine">
         <p>
       <cmr:label fieldId="adminDeptLine">
