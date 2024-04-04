@@ -4889,7 +4889,8 @@ function addHandlersForCEE() {
 	
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-			setSBOFromDBMapping();
+	    subIndustryLogicCEE();
+		setSBOFromDBMapping();
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
 			}
@@ -4933,7 +4934,7 @@ function setSBOFromDBMapping() {
 		
 		if (sboList.length == 1) {
 			FormManager.setValue('salesBusOffCd', sboList[0]);
-		} else if (sboList.length > 1 && !sboList.includes(sbo)) {
+		} else if (sboList.length > 1 && !sboList.includes(sbo) && !valAssgndFrmSubInd) {
 			FormManager.setValue('salesBusOffCd', '');
 		}
 	}
@@ -4963,8 +4964,6 @@ function setCovValues2024CEE() {
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-	// call subind logic
-	subIndustryLogicCEE();
 	// applicable for all CEE countries
 	switch (custSubGrp) {
 		case 'BUSPR':
@@ -5476,7 +5475,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterTemplateLoad(setCovValues2024CEE, GEOHandler.CEE);
 	GEOHandler.addAfterConfig(setCovValues2024CEE, GEOHandler.CEE);
 	GEOHandler.addAfterTemplateLoad(addHandlersForCEE, GEOHandler.CEE);
-	GEOHandler.addAfterConfig(addHandlersForCEE, GEOHandler.CEE);
+	//GEOHandler.addAfterConfig(addHandlersForCEE, GEOHandler.CEE);
 	GEOHandler.addAddrFunction(setSBOafterAddrConfig, [SysLoc.RUSSIA]);
 	//	GEOHandler.addAfterConfig(setSBOValues, [SysLoc.RUSSIA]);
 	//  GEOHandler.addAfterTemplateLoad(setSBOValues, [SysLoc.RUSSIA]);
