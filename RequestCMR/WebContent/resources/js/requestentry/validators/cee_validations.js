@@ -5215,15 +5215,24 @@ function validateSboCEE() {
 					if (valid || validSBO) {
 						return new ValidationResult(null, true);
 					} else {
+						if(validSbo){
 						sboList.push(validSbo);
+						}
+						if(sboList.length > 0){
 						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sboList + ') for given  ISU , CTC , ISIC combination.');
+						}else{
+						return new ValidationResult(null, true);	
+						}
 					}
 				} else {
 					if (validSBO) {
 						return new ValidationResult(null, true);
 					} else {
+            if(sboList.length > 0){
 						return new ValidationResult(null, false, 'Please select correct  SBO value ->(' + sboList + ') for given  ISU , CTC , ISIC combination.');
-					}
+						}else{
+						return new ValidationResult(null, true);	
+						}					}
 				}
 			}
 		};
