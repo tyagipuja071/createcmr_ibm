@@ -1997,7 +1997,7 @@ function setCTCValues() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   // Business Partner
-  if (custSubGrp == 'XBP' || custSubGrp == 'BUSPR') {
+  if (custSubGrp == 'XBP') {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '8B') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
@@ -2007,7 +2007,7 @@ function setCTCValues() {
   }
 
   // Internal
-  if (custSubGrp == 'XINT' || custSubGrp == 'INTER') {
+  if (custSubGrp == 'XINT') {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '21') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
@@ -2045,7 +2045,7 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier code is Mandatory.');
-    } else if (clientTierCode == 'T') {
+    } else if (clientTierCode == 'E') {
       return new ValidationResult(null, true);
     } else {
       return new ValidationResult({
@@ -2196,6 +2196,7 @@ function StcOrderBlockValidation() {
 }
 
 function clientTierValidator() {
+  console.log('clientTierValidator======');
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2388,6 +2389,7 @@ function setValuesForTurkey() {
 
 function enterpriseValidator() {
   console.log("enterpriseValidator=======");
+  var valResult = null;
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
@@ -2463,6 +2465,8 @@ function enterpriseValidator() {
       };
     })(), 'MAIN_IBM_TAB', 'frmCMR');
 
+  } else {
+    return new ValidationResult(null, true, null);
   }
 }
 
