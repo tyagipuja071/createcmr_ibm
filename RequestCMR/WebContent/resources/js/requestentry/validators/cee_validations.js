@@ -708,6 +708,11 @@ function addAfterConfigCEE() {
 	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
 		return;
 	}
+	if (isuCdHandler == null) {
+		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+			setClientTier();
+		});
+	}
 }
 
 // CREATCMR- 2440 FiscalCd and FiscalCd Exempt for ROMANIA
