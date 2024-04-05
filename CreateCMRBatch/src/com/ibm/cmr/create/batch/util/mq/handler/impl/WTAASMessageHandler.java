@@ -130,6 +130,9 @@ public class WTAASMessageHandler extends MQMessageHandler {
       this.messageHash.put("TransCode", "N");
     } else if ("U".equals(this.mqIntfReqQueue.getReqType()) && "Y".equals(this.addrData.getImportInd())) {
       // put the AddrNo
+      LOG.info("HKMO - Issuing Country: " + this.mqIntfReqQueue.getCmrIssuingCntry());
+      LOG.info("HKMO - Orig sequence: " + this.addrData.getId().getAddrSeq());
+      LOG.info("HKMO - Sending Addr No. " + StringUtils.leftPad(this.addrData.getId().getAddrSeq().trim(), 5, '0'));
       this.messageHash.put("AddressNo", StringUtils.leftPad(this.addrData.getId().getAddrSeq().trim(), 5, '0'));
     }
 
