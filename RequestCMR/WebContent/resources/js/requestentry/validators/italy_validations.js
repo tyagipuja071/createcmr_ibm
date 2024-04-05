@@ -1444,7 +1444,9 @@ function afterConfigForIT() {
   if (_landCntryHandler == null) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       showHideCityStateProvIT();
-      setDeafultSBOLogicComm();
+      if (FormManager.getActualValue('addrType') == 'ZS01') {
+        setDeafultSBOLogicComm(FormManager.getActualValue('postCd'));
+      }
     });
   }
 
@@ -2081,6 +2083,9 @@ function setDeafultSBOLogicComm(postalCd) {
   });
   var postCd = '';
   var postCd3 = '';
+  if (postalCd == undefined || postalCd == '') {
+    postalCd = FormManager.getActualValue('postCd')
+  }
   if (postalCd != null && postalCd != undefined && postalCd != '') {
     postCd = postalCd;
   } else if (result != null && result.ret1 != undefined) {
