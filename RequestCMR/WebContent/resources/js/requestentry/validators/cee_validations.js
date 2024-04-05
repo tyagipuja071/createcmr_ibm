@@ -708,6 +708,11 @@ function addAfterConfigCEE() {
 	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
 		return;
 	}
+	if (isuCdHandler == null) {
+		isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+			setClientTier();
+		});
+	}
 }
 
 // CREATCMR- 2440 FiscalCd and FiscalCd Exempt for ROMANIA
@@ -4876,6 +4881,7 @@ function addHandlersForCEE() {
 			isuModified = true;
 			setClientTier();
 			setCovValues2024CEE();
+			subIndustryLogicCEE();
 			setSBOFromDBMapping();
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
@@ -4889,7 +4895,7 @@ function addHandlersForCEE() {
 	
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-	    subIndustryLogicCEE();
+	  subIndustryLogicCEE();
 		setSBOFromDBMapping();
 			if (cntry == SysLoc.RUSSIA) {
 				setSBOValues();
