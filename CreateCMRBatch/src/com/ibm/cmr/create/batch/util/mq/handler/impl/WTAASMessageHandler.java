@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasRecord;
 import com.ibm.cmr.create.batch.util.AttributesPerLineOutputter;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -132,8 +133,15 @@ public class WTAASMessageHandler extends MQMessageHandler {
       // put the AddrNo
       LOG.info("HKMO - Issuing Country: " + this.mqIntfReqQueue.getCmrIssuingCntry());
       LOG.info("HKMO - Orig sequence: " + this.addrData.getId().getAddrSeq());
-      LOG.info("HKMO - Sending Addr No. " + StringUtils.leftPad(this.addrData.getId().getAddrSeq().trim(), 5, '0'));
-      this.messageHash.put("AddressNo", StringUtils.leftPad(this.addrData.getId().getAddrSeq().trim(), 5, '0'));
+
+      if (SystemLocation.HONG_KONG.equals(this.mqIntfReqQueue.getCmrIssuingCntry())
+          || SystemLocation.MACAO.equals(this.mqIntfReqQueue.getCmrIssuingCntry())) {
+        this.messageHash.put("AddressNo", this.addrData.getId().getAddrSeq());
+        LOG.info("HKMO - sending orig seq. no left pad: " + this.addrData.getId().getAddrSeq());
+      } else {
+        this.messageHash.put("AddressNo", StringUtils.leftPad(this.addrData.getId().getAddrSeq().trim(), 5, '0'));
+      }
+
     }
 
     Document document = new Document();
