@@ -592,10 +592,11 @@ public class AustraliaUtil extends AutomationUtil {
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
+    Addr soldTo = requestData.getAddress("ZS01")
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
-          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+          addresses = requestData.getAddresses();
         } else {
           addresses = requestData.getAddresses(addrType);
         }
