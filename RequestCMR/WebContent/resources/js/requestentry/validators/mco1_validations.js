@@ -3,6 +3,7 @@ var localScenarios = ["LSLOC", "NALOC", "SZLOC", "ZALOC"];
 var crossScenarios = ["LSCRO", "NACRO", "SZCRO", "ZACRO"];
 var _fstCntryCds = ['MU', 'ML', 'GQ', 'SN', 'CI', 'GA', 'CD', 'CG', 'DJ', 'GN', 'CM', 'MG', 'MR', 'TG', 'GM', 'CF', 'BJ', 'BF', 'SC', 'GW', 'NE', 'TD'];
 var _landCntryHandler = null;
+var _custSubTypeHandler = null;
 var scenarioToSkipCMRValidationZA = ['LSELC', 'SZELC', 'NAELC', 'LSLLC', 'NALLC', 'SZLLC', 'LSBLC', 'SZBLC', 'NABLC'];
 
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -99,6 +100,15 @@ function addHandlersForZA() {
                 _oldSubInd = FormManager.getActualValue('subIndustryCd');
             }
         });
+    }
+    
+    if (_custSubTypeHandler == null) {
+      _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+   if (typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
+        setIsuCtcCBMEA();
+        setDefaultEntCBMEA();
+    }
+      });
     }
 
     if (_isuHandler == null) {
@@ -2239,7 +2249,7 @@ function setDefaultEntCBMEA() {
 
     var isu = FormManager.getActualValue('isuCd');
     var ctc = FormManager.getActualValue('clientTier');
-    var isuCTC = isu.concat(ctc);
+    var isuCtc = isu.concat(ctc);
 
     if (crossSubTypes.includes(custSubType)) {
         if (TURKEY_LC.includes(landCntry)) {
@@ -2257,7 +2267,7 @@ function setDefaultEntCBMEA() {
                     ISSUING_CNTRY: cntry,
                     SALES_BO_CD: '%' + subIndustryCd + '%',
                     SALES_BO_DESC: '%' + landCntry + '%',
-                    ISU_CD: '%' + isuCTC + '%'
+                    ISU_CD: '%' + isuCtc + '%'
                 };
                 var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
                 var enterprise = results.ret1;
@@ -2276,7 +2286,7 @@ function setDefaultEntCBMEA() {
                     ISSUING_CNTRY: cntry,
                     SALES_BO_CD: '%' + subIndustryCd + '%',
                     SALES_BO_DESC: '%' + landCntry + '%',
-                    ISU_CD: '%' + isuCTC + '%'
+                    ISU_CD: '%' + isuCtc + '%'
                 };
                 var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
                 var enterprise = results.ret1;
@@ -2288,7 +2298,7 @@ function setDefaultEntCBMEA() {
             var qParams = {
                 ISSUING_CNTRY: cntry,
                 SALES_BO_DESC: '%' + landCntry + '%',
-                ISU_CD: '%' + isuCTC + '%'
+                ISU_CD: '%' + isuCtc + '%'
             };
             var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
             var enterprise = results.ret1;
@@ -2301,7 +2311,7 @@ function setDefaultEntCBMEA() {
             var qParams = {
                 ISSUING_CNTRY: cntry,
                 SALES_BO_DESC: '%' + landCntry + '%',
-                ISU_CD: '%' + isuCTC + '%'
+                ISU_CD: '%' + isuCtc + '%'
             };
             var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
              enterprise = results.ret1;                       
@@ -2311,7 +2321,7 @@ function setDefaultEntCBMEA() {
                 ISSUING_CNTRY: cntry,
                 SALES_BO_CD: '%' + subIndustryCd + '%',
                 SALES_BO_DESC: '%' + landCntry + '%',
-                ISU_CD: '%' + isuCTC + '%'
+                ISU_CD: '%' + isuCtc + '%'
             };
             var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
              enterprise = results.ret1;
@@ -2461,7 +2471,7 @@ function enterpriseValidatorMea() {
                             ISSUING_CNTRY: cntry,
                             SALES_BO_CD: '%' + subIndustryCd + '%',
                             SALES_BO_DESC: '%' + landCntry + '%',
-                            ISU_CD: '%' + isuCTC + '%'
+                            ISU_CD: '%' + isuCtc + '%'
                         };
                         var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
                         var validEnterprise = results.ret1;
@@ -2496,7 +2506,7 @@ function enterpriseValidatorMea() {
                         var qParams = {
                             ISSUING_CNTRY: cntry,
                             SALES_BO_DESC: '%' + landCntry + '%',
-                            ISU_CD: '%' + isuCTC + '%'
+                            ISU_CD: '%' + isuCtc + '%'
                         };
                         var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
                         var validEnterprise = results.ret1;
@@ -2514,7 +2524,7 @@ function enterpriseValidatorMea() {
                                 id: 'enterprise',
                                 type: 'text',
                                 name: 'enterprise'
-                            }, false, 'Enterprise can only accept : \'BUILD1\'\ \'DISTR1\'\ \'SRVCE1\'\ ');
+                            }, false, 'Enterprise can only accept : \'BUILD1\'\, \'DISTR1\'\ , \'SRVCE1\'\ ');
                         }
                     } else if (isuCtc == '5k') {
                         if (enterprise != '') {
@@ -2636,20 +2646,20 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
         } else if (isuCtc == '34Q') {
 
             var enterprise34Q = ['911690', '911685', '911691', '911702', '911687', '911697'];
-            if (['E'].includes(subIndustryCd) && (enterprise != '911695'|| !enterprise34Q.includes(enterprise))) {
+            if (['E'].includes(subIndustryCd) && !(enterprise == '911695'|| enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911695\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
             }
-            if (['G', 'V', 'Y'].includes(subIndustryCd) && (enterprise != '911692' || !enterprise34Q.includes(enterprise))) {
+            if (['G', 'V', 'Y'].includes(subIndustryCd) && !(enterprise == '911692' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911692\'\ \'911690\'\ \'911685\'\ \'911691\'\ \'911702\'\ \'911687\'\ \'911797\'\ ');
-            } else if (['H', 'X'].includes(subIndustryCd) && (enterprise != '911696' || !enterprise34Q.includes(enterprise))) {
+            } else if (['H', 'X'].includes(subIndustryCd) && !(enterprise == '911696' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
@@ -2801,31 +2811,31 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
         }
     } else if (landCntry == 'QA') {
         if (isuCtc == '34Q') {
-            if (['A', 'D', 'K', 'R', 'T', 'U', 'W'].includes(subIndustryCd) && (enterprise != '911818' || enterprise != '911817')) {
+            if (['A', 'D', 'K', 'R', 'T', 'U', 'W'].includes(subIndustryCd) && !(enterprise == '911818' || enterprise == '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911818\'\ \'911817\'\ ');
-            } else if (['J', 'L', 'M', 'P', 'V'].includes(subIndustryCd) && (enterprise != '911819' || enterprise != '911817')) {
+            } else if (['J', 'L', 'M', 'P', 'V'].includes(subIndustryCd) && !(enterprise == '911819' || enterprise == '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911819\'\ \'911817\'\ ');
-            } else if (['F', 'N', 'S'].includes(subIndustryCd) && (enterprise != '911820' || enterprise != '911817')) {
+            } else if (['F', 'N', 'S'].includes(subIndustryCd) && !(enterprise == '911820' || enterprise == '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911820\'\ \'911817\'\ ');
-            } else if (['E', 'G', 'H', 'X', 'Y'].includes(subIndustryCd) && (enterprise != '911821' || enterprise != '911817')) {
+            } else if (['E', 'G', 'H', 'X', 'Y'].includes(subIndustryCd) && !(enterprise == '911821' || enterprise == '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept :  \'911821\'\ \'911817\'\ ');
-            } else if (['B', 'C'].includes(subIndustryCd) && (enterprise != '911822' || enterprise != '911817')) {
+            } else if (['B', 'C'].includes(subIndustryCd) && !(enterprise == '911822' || enterprise == '911817')) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
@@ -2854,67 +2864,67 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
     if (landCntry == 'EG') {
         if (isuCtc == '34Q') {
           var enterprise34Q = ['912088', '911831', '911835', '911275', '911833'];
-            if (['D', 'J', 'K', 'L', 'R', 'T', 'W'].includes(subIndustryCd) && (enterprise != '911836'|| !enterprise34Q.includes(enterprise))) {
+            if (['D', 'J', 'K', 'L', 'R', 'T', 'W'].includes(subIndustryCd) && !(enterprise == '911836'|| enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911836\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (['A'].includes(subIndustryCd) && (enterprise != '911771' || !enterprise34Q.includes(enterprise))) {
+            } else if (['A'].includes(subIndustryCd) && !(enterprise == '911771' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911771\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (['B', 'C'].includes(subIndustryCd) && (enterprise != '911772' || !enterprise34Q.includes(enterprise))) {
+            } else if (['B', 'C'].includes(subIndustryCd) && !(enterprise == '911772' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911820\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (['E'].includes(subIndustryCd) && (enterprise != '911773' || !enterprise34Q.includes(enterprise))) {
+            } else if (['E'].includes(subIndustryCd) && !(enterprise == '911773' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911773\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (['F'].includes(subIndustryCd) && (enterprise != '911830' || !enterprise34Q.includes(enterprise))) {
+            } else if (['F'].includes(subIndustryCd) && !(enterprise == '911830' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911830\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (['G', 'V', 'Y'].includes(subIndustryCd) && (enterprise != '911832' || !enterprise34Q.includes(enterprise))) {
+            } else if (['G', 'V', 'Y'].includes(subIndustryCd) && !(enterprise == '911832' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911832\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (['H', 'X'].includes(subIndustryCd) && (enterprise != '911768' || !enterprise34Q.includes(enterprise))) {
+            } else if (['H', 'X'].includes(subIndustryCd) && !(enterprise == '911768' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911768\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (['M', 'U'].includes(subIndustryCd) && (enterprise != '901456' || !enterprise34Q.includes(enterprise))) {
+            } else if (['M', 'U'].includes(subIndustryCd) && !(enterprise == '901456' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'901456\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (subIndustryCd == 'N' && (enterprise != '911770' || !enterprise34Q.includes(enterprise))) {
+            } else if (subIndustryCd == 'N' && !(enterprise == '911770' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911770\'\ \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (subIndustryCd == 'P' && (enterprise != '911834' || !enterprise34Q.includes(enterprise))) {
+            } else if (subIndustryCd == 'P' && !(enterprise == '911834' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911834\'\  \'912088\'\ \'911831\'\ \'911835\'\ \'911275\'\ \'911833\'\ ');
-            } else if (subIndustryCd == 'S' && (enterprise != '911769' || !enterprise34Q.includes(enterprise))) {
+            } else if (subIndustryCd == 'S' && !(enterprise == '911769' || enterprise34Q.includes(enterprise))) {
                 return new ValidationResult({
                     id: 'enterprise',
                     type: 'text',
@@ -3221,8 +3231,9 @@ dojo.addOnLoad(function() {
     // CREATCMR-7985
     GEOHandler.addAfterTemplateLoad(setEnterpriseBehaviour, [SysLoc.SOUTH_AFRICA]);
     GEOHandler.addAfterConfig(setEnterpriseBehaviour, [SysLoc.SOUTH_AFRICA]);
-    GEOHandler.addAfterTemplateLoad(setIsuCtcCBMEA, [SysLoc.SOUTH_AFRICA]);
-    GEOHandler.addAfterTemplateLoad(setDefaultEntCBMEA, [SysLoc.SOUTH_AFRICA]);
+    // GEOHandler.addAfterTemplateLoad(setIsuCtcCBMEA, [SysLoc.SOUTH_AFRICA]);
+    // GEOHandler.addAfterTemplateLoad(setDefaultEntCBMEA,
+    // [SysLoc.SOUTH_AFRICA]);
 
     GEOHandler.registerValidator(enterpriseValidator, [SysLoc.SOUTH_AFRICA], null, true);
     GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO1, null, true);
