@@ -125,7 +125,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
           $scope.recordsCmrL = [];
           $scope.recordsCmrP = [];
           $scope.prospectCmr = false;
-          if (subCntry.length > 3) {
+          if (subCntry.length >= 3) {
             mainCntry = subCntry.substr(0, 3);
           }
           var byModel = cmr.query('CREATE_BY_MODEL_DISABLED', {
