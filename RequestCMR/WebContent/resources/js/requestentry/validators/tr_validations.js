@@ -54,14 +54,15 @@ function addISUHandler() {
   console.log('addISUHandler=====');
   var _CTCHandler = null;
   _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    // setClientTierValuesTR(value);
-    // setValuesWRTIsuCtc();
+    var value = FormManager.getField('isuCd');
+    // setSBOValuesForIsuCtc(value);
     setClientTierAndISR(value);
-    setValuesForTurkey();
+    setValuesForTurkey(value);
+
   });
   _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-    // setClientTierValuesTR();
-    // setValuesWRTIsuCtc(value);
+    var value = FormManager.getField('clientTier');
+    // setSBOValuesForIsuCtc(value);
     setClientTierAndISR(value);
     setValuesForTurkey();
   });
@@ -1454,16 +1455,6 @@ function setSBOValuesForIsuCtc(value) {
   if (reqType != 'C') {
     return;
   }
-
-  /*
-   * if (role == "REQUESTER") { if (custSubGrp == 'INTER' || custSubGrp == 'XINT ') {
-   * FormManager.setValue('salesBusOffCd', "A10");
-   * FormManager.disable("salesBusOffCd"); } else if (custSubGrp == 'BUSPR' ||
-   * custSubGrp == 'XBP') { FormManager.setValue('salesBusOffCd', "140");
-   * FormManager.disable("salesBusOffCd"); } } else {
-   * FormManager.enable("salesBusOffCd"); }
-   */
-
   var qParams = null;
   console.log("begin setSBO:" + '%' + isuCtc + '%');
   if (isuCd != '') {
@@ -2314,38 +2305,38 @@ function setValuesForTurkey() {
 
           if (ind != '') {
             if (T911727.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911727');
+              FormManager.setValue('enterprise', '911727');
             } else if (T911710.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911710');
+              FormManager.setValue('enterprise', '911710');
             } else if (T911725.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911725');
+              FormManager.setValue('enterprise', '911725');
             } else if (T911711.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911711');
+              FormManager.setValue('enterprise', '911711');
             } else if (T911712.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911712');
+              FormManager.setValue('enterprise', '911712');
             } else if (T911708.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911708');
+              FormManager.setValue('enterprise', '911708');
             } else if (T911715.includes(indG)) {
               // landed country- TR 06- first fetch address then fetch code
-              FormManager.setValue('enterprise', 'T911715');
+              FormManager.setValue('enterprise', '911715');
             } else if (T911717.includes(indG)) {
-              FormManager.setValue('enterprise', 'T911717');
+              FormManager.setValue('enterprise', '911717');
             } else if (T911718.includes(indG)) {
-              FormManager.setValue('enterprise', 'T911718');
+              FormManager.setValue('enterprise', '911718');
             } else if (T911719.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911719');
+              FormManager.setValue('enterprise', '911719');
             } else if (T911706.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911706');
+              FormManager.setValue('enterprise', '911706');
             } else if (T911724.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911724');
+              FormManager.setValue('enterprise', '911724');
             } else if (T911713.includes(ind)) {
-              FormManager.setValue('enterprise', 'T911713');
+              FormManager.setValue('enterprise', '911713');
             } else {
               FormManager.setValue('enterprise', '911727');
             }
           } else {
-            FormManager.setValue('enterprise', '');
-            FormManager.enable('enterprise');
+            FormManager.setValue('enterprise', '911727');
+            FormManager.readOnly('enterprise');
           }
         } else {
           FormManager.setValue('enterprise', '');
@@ -2394,7 +2385,7 @@ function enterpriseValidator() {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
   FormManager.enable('enterprise');
-  if (isuCtc = '34Q') {
+  if (isuCtc == '34Q') {
     console.log("enterpriseValidator=>34Q======");
     FormManager.addFormValidator((function() {
       return {
@@ -2407,7 +2398,7 @@ function enterpriseValidator() {
         }
       };
     })(), 'MAIN_IBM_TAB', 'frmCMR');
-  } else if (isuCtc = '36Y') {
+  } else if (isuCtc == '36Y') {
     console.log("enterpriseValidator=>36Y======");
     FormManager.addFormValidator((function() {
       return {
@@ -2485,7 +2476,7 @@ function getSoldToLanded() {
   }
   return countryCd;
 }
-function sboSalesRepCodeValidator() {
+function sboValidator() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
@@ -2664,5 +2655,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.registerValidator(sboSalesRepCodeValidator, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(sboValidator, [ SysLoc.TURKEY ], null, true);
 });
