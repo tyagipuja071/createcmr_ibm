@@ -312,7 +312,7 @@ public class JPHandler extends GEOHandler {
           // data.setCsBo(company.getSBO()== null ? company.getSBO() :
           // company.getSBO().trim());
           if (admin != null && admin.getReqType() != null && admin.getReqType().equals("U")) {
-            data.setDunsNo(company != null ? company.getDunsNo() : null);
+            data.setDunsNo(currentAccount != null ? currentAccount.getAccountDunsNo() : "");
           }
           PropertyUtils.copyProperties(dataRdc, data);
           entityManager.merge(data);
@@ -337,7 +337,7 @@ public class JPHandler extends GEOHandler {
             }
           }
           if (admin != null && admin.getReqType() != null && admin.getReqType().equals("U")) {
-            data.setDunsNo(company != null ? company.getDunsNo() : null);
+            data.setDunsNo(currentAccount != null ? currentAccount.getAccountDunsNo() : "");
           }
           PropertyUtils.copyProperties(dataRdc, data);
           entityManager.merge(data);
@@ -676,7 +676,7 @@ public class JPHandler extends GEOHandler {
     }
 
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
-      mainRecord.setCmrDuns(company.getDunsNo());
+      mainRecord.setCmrDuns(currentAccount.getAccountDunsNo());
     }
     mainRecord.setJsic(this.currentAccount.getJSIC());
     mainRecord.setSbo(this.currentAccount.getSBO());
