@@ -3653,7 +3653,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
 function isicCdOnChangeME() {
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     setClassificationCodeME();
-
+    setIsuCtcOnScenarioChange();
     var clientTier = FormManager.getActualValue('clientTier');
     if (clientTier != "") {
       setEnterpriseValuesME(clientTier);
