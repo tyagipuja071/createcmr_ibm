@@ -1924,11 +1924,6 @@ public class ItalyHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
             }
-          } else if ((!StringUtils.isBlank(isu) && isu.startsWith("32")) || (!StringUtils.isBlank(clientTier) && "T".contains(clientTier))) {
-            LOG.trace(
-                "The row " + (rowIndex + 1) + ":Note that ISU 32 & Client Tier T has been obsolete.. Please fix and upload the template again.");
-            error.addError((rowIndex + 1), "Client Tier",
-                ":Note that ISU 32 & Client Tier T has been obsolete. Please fix and upload the template again.<br>");
           } else if (!StringUtils.isBlank(isu) && "36".equals(isu)) {
             if (!"Y".contains(clientTier) || StringUtils.isBlank(clientTier)) {
               LOG.trace("The row " + (row.getRowNum() + 1)
@@ -1936,10 +1931,10 @@ public class ItalyHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
             }
-          } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(clientTier)) {
+          } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("27", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
-          } else if (!"@QYT".contains(clientTier)) {
+          } else if (!"@QYE".contains(clientTier)) {
             LOG.trace(
                 "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Client Tier",
