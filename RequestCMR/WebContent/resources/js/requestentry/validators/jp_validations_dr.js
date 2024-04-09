@@ -6741,7 +6741,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('bldg', 'Building');
     }
     if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
-      setAddrFieldMandatory('locationCode', 'LocationCode');
+      setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
 
       setAddrFieldOptional('contact', 'Contact');
       setAddrFieldOptional('dept', 'Department');
@@ -6763,7 +6763,7 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('custPhone', 'custPhone');
-      setAddrFieldMandatory('locationCode', 'LocationCode');
+      setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
 
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldOptional('bldg', 'Building');
@@ -6776,14 +6776,14 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('companySize', 'CompanySize');
     } else {
       setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
+      setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('addrTxt', 'AddressTxt', 'Address');
       setAddrFieldMandatory('custPhone', 'CustPhone');
-      setAddrFieldMandatory('locationCode', 'LocationCode');
+      setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
 
       setAddrFieldOptional('custNm2', 'CustomerName2');
-      setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
@@ -6798,8 +6798,6 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
 
       // ADU 1, 2, 3, 4, 6, 7
       if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
-        setAddrFieldMandatory('locationCode', 'LocationCode');
-
         setAddrFieldOptional('bldg', 'Building');
         setAddrFieldOptional('dept', 'Department');
         setAddrFieldOptional('office', 'Office');
@@ -6851,7 +6849,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
       setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
 
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
-      setAddrFieldMandatory('locationCode', 'LocationCode');
+      setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
 
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
@@ -6862,8 +6860,6 @@ function setAddrFieldsBFKSCScenario(addrType) {
 
     // ADU 1, 2, 3, 4, 6, 7
     if (addrType == 'ZS02' || addrType == 'ZS01' || addrType == 'ZP01' || addrType == 'ZI01' || addrType == 'ZP09') {
-      setAddrFieldMandatory('locationCode', 'LocationCode');
-
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
@@ -6873,15 +6869,10 @@ function setAddrFieldsBFKSCScenario(addrType) {
 
     // Company, Establishment
     if (addrType == 'ZC01') {
-      setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
-      setAddrFieldMandatory('custNm4', 'Katakana');
-      setAddrFieldMandatory('addrTxt', 'Address');
+      setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
+      setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
 
       setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
-
-      setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
-      setAddrFieldMandatory('locationCode', 'LocationCode');
-
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
