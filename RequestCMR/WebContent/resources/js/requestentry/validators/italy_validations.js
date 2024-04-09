@@ -1383,7 +1383,7 @@ function addFieldValidationForProcessorItaly() {
             || custSubType == 'CROCM' || custSubType == 'NGOIT' || custSubType == 'NGOSM' || custSubType == 'NGOVA' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
       FormManager.resetValidations('enterprise');
       FormManager.resetValidations('affiliate');
-      if ("" != FormManager.getActualValue('isuCd') && ("34" != FormManager.getActualValue('isuCd') || "21" != FormManager.getActualValue('isuCd'))) {
+      if ("" != FormManager.getActualValue('isuCd') && ("34" != FormManager.getActualValue('isuCd') || "21" != FormManager.getActualValue('isuCd') || "27" != FormManager.getActualValue('isuCd'))) {
         FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
         FormManager.enable('enterprise');
@@ -2862,7 +2862,7 @@ function setAffiliateEnterpriseRequired() {
           FormManager.enable('enterprise');
           FormManager.readOnly('affiliate');
           FormManager.readOnly('inacCd');
-        } else if (isu == '34') {
+        } else if (isu == '34' || isu == '27') {
           FormManager.enable('enterprise');
           FormManager.enable('affiliate');
           FormManager.enable('inacCd');
@@ -4807,6 +4807,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     // }
 
     if ((isuCd == '34' && clientTier == 'Q')
+        || (isuCd == '27' && clientTier == 'E')
         || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
             || custSubGrp == 'CROIN' || custSubGrp == 'IBMIT' || custSubGrp == 'XIBM')) {
       FormManager.removeValidator('affiliate', Validators.REQUIRED);
@@ -5130,8 +5131,8 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var activeIsuCd = [ '27', '34', '36', '32' ];
-  var activeCtc = [ 'Q', 'Y', 'E', 'T' ];
+  var activeIsuCd = [ '27', '34', '36' ];
+  var activeCtc = [ 'Q', 'Y', 'E' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -5192,20 +5193,6 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'.');
-    }
-  } else if (isuCode == '32') {
-    if (clientTierCode == '' || clientTierCode != 'T') {
-      return new ValidationResult({
-        id : 'isuCd',
-        type : 'text',
-        name : 'isuCd'
-      }, false, 'ISU Cd 32 has been obsolete');
-    } else {
-      return new ValidationResult({
-        id : 'clientTier',
-        type : 'text',
-        name : 'clientTier'
-      }, false, 'ISU Cd 32 & Client Tier T has been obsolete');
     }
   } else {
     if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
@@ -5534,13 +5521,6 @@ function sboSalesRepCodeValidator() {
   // \'11\'\ \'12\'\ \'13\'\ \'14\'\ for ISU CTC 8B.');
   // }
   // }
-  else if (isuCtc == '32T' || isuCd == '32') {
-    return new ValidationResult({
-      id : 'isuCd',
-      type : 'text',
-      name : 'isuCd'
-    }, false, 'ISU 32 & Client Tier T has been obsolete.');
-  }
 }
 
 function getSoldToLanded() {
