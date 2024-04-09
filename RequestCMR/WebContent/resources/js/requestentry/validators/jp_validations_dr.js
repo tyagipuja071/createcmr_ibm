@@ -6719,11 +6719,11 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
     FormManager.setValue('city2', getCompanyNo(addrType) != null ? getCompanyNo(addrType) : '');
     setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
     setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-    setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
     setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
     setAddrFieldMandatory('addrTxt', 'AddressTxt', 'Address');
     setAddrFieldMandatory('companySize', 'CompanySize');
 
+    setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
     setAddrFieldOptional('city2', 'City2');
     setAddrFieldOptional('custNm2', 'CustomerName2');
     setAddrFieldOptional('bldg', 'Building');
@@ -6758,13 +6758,13 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
         setAddrFieldMandatory('divn', 'Division');
       }
       setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
-      setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
       setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('custPhone', 'custPhone');
       setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
 
+      setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
@@ -6776,13 +6776,14 @@ function setMandtAndOptAddrFieldsForBFKSCScenario(custType, addrType, role) {
       setAddrFieldHide('companySize', 'CompanySize');
     } else {
       setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
-      setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
+
       setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('addrTxt', 'AddressTxt', 'Address');
       setAddrFieldMandatory('custPhone', 'CustPhone');
       setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
 
+      setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
@@ -6843,7 +6844,6 @@ function setAddrFieldsBFKSCScenario(addrType) {
     // ADU A, B, C, D, E, F, G, H
     if (addrType == 'ZI03' || addrType == 'ZP02' || addrType == 'ZP03' || addrType == 'ZP04' || addrType == 'ZP05' || addrType == 'ZP06' || addrType == 'ZP07' || addrType == 'ZP08') {
       setAddrFieldMandatory('custNm1', 'Customer Name-KANJI');
-      setAddrFieldMandatory('custNm4', 'Katakana');
       setAddrFieldMandatory('addrTxt', 'Address');
 
       setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
@@ -6851,6 +6851,7 @@ function setAddrFieldsBFKSCScenario(addrType) {
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       setAddrFieldMandatory('locationCode', 'LocationCode', 'Location');
 
+      setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
       setAddrFieldOptional('office', 'Office');
@@ -6869,9 +6870,9 @@ function setAddrFieldsBFKSCScenario(addrType) {
 
     // Company, Establishment
     if (addrType == 'ZC01') {
-      setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
 
+      setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldOptional('custNm2', 'Name-KANJI Continue');
       setAddrFieldOptional('bldg', 'Building');
       setAddrFieldOptional('dept', 'Department');
@@ -7330,9 +7331,10 @@ function isIGFCMR() {
 
 function addJPAddressGridValidator() {
   console.log(">>>> addJPAddressGridValidator ");
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
+        var custSubType = FormManager.getActualValue('custSubGrp');
         if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.JAPAN) {
           return new ValidationResult(null, true);
         }
@@ -7375,7 +7377,7 @@ function addJPAddressGridValidator() {
 
           if (custNm1 != '') {
             return new ValidationResult(null, false, 'Please fill out Customer Name-KANJI for the following address: ' + custNm1);
-          } else if (custNm4 != '') {
+          } else if (custNm4 != '' && !(custSubType == 'BFKSC')) {
             return new ValidationResult(null, false, 'Please fill out Katakana for the following address: ' + custNm4);
           }
 
