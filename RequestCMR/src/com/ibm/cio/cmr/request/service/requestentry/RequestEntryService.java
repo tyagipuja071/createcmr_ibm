@@ -561,11 +561,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setProcessedTs(null);
       if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
-        boolean crosCompleted = reqIsCrosCompleted(entityManager, admin.getId().getReqId());
-        if (crosCompleted) {
+  //      boolean crosCompleted = reqIsCrosCompleted(entityManager, admin.getId().getReqId());
+   //     if (crosCompleted) {
           this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
           admin.setReqStatus("PCO");
-        }
+    //    }
       }
     }
 
