@@ -256,7 +256,7 @@ public class LAPDFConverter extends DefaultPDFConverter {
     ibm.addCell(createLabelCell("Affiliate No.:"));
     ibm.addCell(createValueCell(data.getAffiliate(), 1, 3));
 
-    if(!"631".equalsIgnoreCase(data.getCmrIssuingCntry()))
+    if(!"631".equalsIgnoreCase(data.getCmrIssuingCntry().substring(0, 3)))
     {
     ibm.addCell(createLabelCell("Search Term (SORTL):"));
     ibm.addCell(createValueCell(data.getSearchTerm()));
