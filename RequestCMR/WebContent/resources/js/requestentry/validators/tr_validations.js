@@ -1477,6 +1477,9 @@ function setSBOValuesForIsuCtc(value) {
       // if (sboList.length == 1) {
       if (sboList.length == 1 || (sboList.length > 1 && _isScenarioChanged)) {
         FormManager.setValue('salesBusOffCd', sboList[0]);
+        if (isuCtc == '27E') {
+          FormManager.readOnly('salesBusOffCd');
+        }
       } else if (!_isScenarioChanged) {
         var oldSbo = null;
         qParams = {
@@ -1490,9 +1493,15 @@ function setSBOValuesForIsuCtc(value) {
         }
       }
     } else {
-      // FormManager.setValue('salesBusOffCd', "");
-      console.log("Reset sbo as no list available for " + isuCtc);
-      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+      console.log("setting sbo=====" + isuCtc);
+      if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
+        FormManager.setValue('salesBusOffCd', 'A00');
+        FormManager.enable('salesBusOffCd');
+      } else if (isuCtc == '34Q' || isuCtc == '36Y') {
+        FormManager.setValue('salesBusOffCd', 'A20');
+        FormManager.enable('salesBusOffCd');
+      } else
+        FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
@@ -2477,6 +2486,7 @@ function getSoldToLanded() {
   return countryCd;
 }
 function sboValidator() {
+  console.log('sboValidator=====');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
