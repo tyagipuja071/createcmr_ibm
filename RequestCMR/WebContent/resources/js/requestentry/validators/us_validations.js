@@ -482,6 +482,7 @@ function afterConfigForUS() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var gbgId = FormManager.getActualValue('gbgId');
   _usSicm = FormManager.getActualValue('usSicmen');
   _kukla = FormManager.getActualValue('custClass');
   // if (_usSicm.length > 4) {
@@ -521,6 +522,11 @@ function afterConfigForUS() {
   } else if (reqType == 'C' && (role == 'Requester' || role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp == 'PRIV') {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  } else if (reqType == 'C' && (role == 'Viewer' || role == 'Processor') && (gbgId == '' || gbgId == null)) {
+    FormManager.setValue('isuCd', '27');
+    FormManager.setValue('clientTier', 'E');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else if (reqType == 'C' && (role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM') {
