@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.reports.DBCSReportField;
 import com.ibm.cio.cmr.request.util.reports.DateRangeContainer;
 import com.ibm.cio.cmr.request.util.reports.DateTimeReportField;
+import com.ibm.cio.cmr.request.util.reports.PostalCodeField;
 import com.ibm.cio.cmr.request.util.reports.ReportField;
 import com.ibm.cio.cmr.request.util.reports.ReportSpec;
 import com.ibm.cmr.create.batch.util.reports.KscReportTrailer;
@@ -196,7 +197,7 @@ public class KscReportsService extends BaseBatchService {
     LOG.debug("Configuring " + (daily ? "daily" : "monthly") + " address report..");
     ReportSpec spec = new ReportSpec("KSC.RPT.ADDR", "ABFAD" + (daily ? "D" : "M") + "1." + this.timestampString);
     spec.configureFields(new DateTimeReportField("DRXCN", 8, "yyyyMMdd"), new ReportField("RASXA", 5), new ReportField("RCUXA", 6),
-        new ReportField("CZIPA", 8), new DBCSReportField("TXTBA01", 62), new DBCSReportField("TXTBA02", 62), new DBCSReportField("TXTBA03", 62),
+        new PostalCodeField("CZIPA", 8), new DBCSReportField("TXTBA01", 62), new DBCSReportField("TXTBA02", 62), new DBCSReportField("TXTBA03", 62),
         new DBCSReportField("TXTBA06", 62), new DBCSReportField("TXTBA04", 62), new DBCSReportField("TXTBA05", 62), new DBCSReportField("NRPAA", 32),
         new ReportField("RPHAS", 17), new ReportField("RFAX", 17), new ReportField("UADUX", 16));
     if (daily) {

@@ -1937,10 +1937,10 @@ public class ItalyHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
             }
-          } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("32", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(clientTier)) {
+          } else if ((!StringUtils.isBlank(isu) && !Arrays.asList("27", "34", "36").contains(isu)) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu + ".<br>");
-          } else if (!"@QYT".contains(clientTier)) {
+          } else if (!"@QYE".contains(clientTier)) {
             LOG.trace(
                 "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y or E. Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Client Tier",
