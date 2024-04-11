@@ -914,6 +914,28 @@ public class IERPProcessService extends BaseBatchService {
                       addr.setSapNo(red.getSapNo());
                       addr.setIerpSitePrtyId(red.getIerpSitePartyId());
                     }
+                    if ((SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) || SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()))
+                        && !StringUtils.isEmpty(response.getCmrNo()) && !StringUtils.isEmpty(addr.getId().getAddrSeq())) {
+                      if("ZP01".equals(red.getAddressType()) && "H".equals(addrSeqs[1]) && "CTYH".equals(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())){
+                        LOG.debug("Address matched");
+                        addr.setPairedAddrSeq(addrSeqs[0]);
+                        addr.setSapNo(red.getSapNo());
+                        addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                      }
+                      if("ZI01".equals(red.getAddressType()) && "G".equals(addrSeqs[1]) && "CTYG".equals(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())){
+                        LOG.debug("Address matched");
+                        addr.setPairedAddrSeq(addrSeqs[0]);
+                        addr.setSapNo(red.getSapNo());
+                        addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                      } 
+                      if("ZI01".equals(red.getAddressType()) && "03".equals(addrSeqs[1]) && "ZF01".equals(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())){
+                        LOG.debug("Address matched");
+                        addr.setPairedAddrSeq(addrSeqs[0]);
+                        addr.setSapNo(red.getSapNo());
+                        addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                      }
+                    }
+                    
                     if (("ZP01").equalsIgnoreCase(red.getAddressType()) && "PG01".equals(addr.getId().getAddrType())
                         && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                       LOG.debug("ZP01 matched");
