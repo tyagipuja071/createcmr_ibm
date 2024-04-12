@@ -2245,6 +2245,42 @@ function addALPHANUMValidatorForTypeOfCustomer() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function sboCodeValidator() {
+  console.log('sboCodeValidator======');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCd = FormManager.getActualValue('isuCd');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCtc = isuCd + clientTier;
+        var sbo = FormManager.getActualValue('salesBusOffCd');
+        if (isuCtc == '8B') {
+          if (sbo != '140') {
+            return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'140\'\  for ISU CTC 8B.');
+          } else
+            return new ValidationResult(null, true, null);
+        } else if (isuCtc == '21') {
+          if (sbo != 'A10') {
+            return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'A10\'\ for ISU CTC 21.');
+          } else
+            return new ValidationResult(null, true, null);
+        } else if (isuCtc == '27E' || isuCtc == '34Q' || isuCtc == '36Y') {
+          if (sbo != 'A20') {
+            return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'A20\'\ for ISU CTC ' + isuCtc);
+          } else
+            return new ValidationResult(null, true, null);
+        } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
+          if (sbo != '') {
+            return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept blank for ISU ' + isuCtc);
+          } else
+            return new ValidationResult(null, true, null);
+        } else
+          return new ValidationResult(null, true, null);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function entValidator() {
   console.log('entValidator======');
   FormManager.addFormValidator((function() {
@@ -2274,95 +2310,6 @@ function entValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
-function sboValidator() {
-  console.log('sboValidator=====');
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var isuCtc = isuCd + clientTier;
-  var sbo = FormManager.getActualValue('salesBusOffCd');
-  var subRegion = FormManager.getActualValue('countryUse');
-  var reqType = FormManager.getActualValue('reqType');
-  var salesRep = FormManager.getActualValue('repTeamMemberNo');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  var role = null;
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
-  }
-  var landedCountry = getSoldToLanded();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (reqType != 'C') {
-    return new ValidationResult(null, true);
-  }
-  if (isuCtc == '8B') {
-    if (!(sbo == '140')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept \'140\'\  for ISU CTC 8B.');
-    }
-  } else if (isuCtc == '21') {
-    if (!(sbo == 'A10')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept \'A10\'\ for ISU CTC 21.');
-    }
-  } else if (isuCtc == '27E') {
-    if (!(sbo == 'A20')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept \'A20\'\ for ISU CTC 27.');
-    }
-  } else if (isuCtc == '34Q') {
-    if (!(sbo == 'A20')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept \'A20\'\ for ISU CTC 34Q.');
-    }
-  } else if (isuCtc == '36Y') {
-    if (!(sbo == '')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept \'A20\'\  for ISU CTC 36Y.');
-    }
-  } else if (isuCtc == '04') {
-    if (!(sbo == '')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept blank for ISU 04.');
-    }
-  } else if (isuCtc == '28') {
-    if (!(sbo == '')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept blank for ISU 28.');
-    }
-  } else if (isuCtc == '5K') {
-    if (!(sbo == '')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SBO can only accept blank for ISU 5K.');
-    }
-  }
 }
 
 function addTRLandedCountryValidtor() {
@@ -3174,6 +3121,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(entValidator, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(sboCodeValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
@@ -3186,7 +3134,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(StcOrderBlockValidation, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.registerValidator(sboValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addTRLandedCountryValidtor, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(enterpriseValidatorMea, [ SysLoc.TURKEY ], null, true);
 
