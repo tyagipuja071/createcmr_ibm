@@ -469,8 +469,7 @@ public class USUtil extends AutomationUtil {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
-        }
-        if (scenarioSubType.equalsIgnoreCase("ECOSYSTEM")) {
+        } else if (scenarioSubType.equalsIgnoreCase("ECOSYSTEM")) {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
@@ -486,15 +485,71 @@ public class USUtil extends AutomationUtil {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
-        }
-        if (scenarioSubType.equalsIgnoreCase("ECOSYSTEM")) {
+        } else if (scenarioSubType.equalsIgnoreCase("ECOSYSTEM")) {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
         } else {
-          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to " + data.getIsuCd() + "-" + data.getClientTier()).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), data.getIsuCd());
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), data.getClientTier());
+
+          String coverageId = data.getCovId();
+          String firstChar = coverageId.substring(0, 1);
+
+          if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
+            Map<String, String> industryCodeISUMap = new HashMap<String, String>();
+            String isu = ""; // apply logic to set isu based on sub industry
+                             // code
+            String ctc = "";
+            String subIndustryCd = data != null && data.getSubIndustryCd() != null ? data.getSubIndustryCd() : "";
+            String firstCharSubIndustry = StringUtils.isNotEmpty(subIndustryCd) ? subIndustryCd.substring(0, 1) : "";
+            industryCodeISUMap.put("A", "3T");
+            industryCodeISUMap.put("U", "12");
+            industryCodeISUMap.put("K", "05");
+            industryCodeISUMap.put("R", "1R");
+            industryCodeISUMap.put("D", "18");
+
+            industryCodeISUMap.put("W", "18");
+            industryCodeISUMap.put("T", "19");
+            industryCodeISUMap.put("F", "04");
+            industryCodeISUMap.put("S", "4F");
+            industryCodeISUMap.put("N", "31");
+
+            industryCodeISUMap.put("J", "4A");
+            industryCodeISUMap.put("V", "14");
+            industryCodeISUMap.put("L", "5E");
+            industryCodeISUMap.put("P", "15");
+            industryCodeISUMap.put("M", "4D");
+
+            industryCodeISUMap.put("Y", "28");
+            industryCodeISUMap.put("G", "28");
+            industryCodeISUMap.put("E", "40");
+            industryCodeISUMap.put("H", "11");
+            industryCodeISUMap.put("X", "8C");
+
+            industryCodeISUMap.put("B", "5B");
+            industryCodeISUMap.put("C", "5B");
+
+            if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
+              isu = industryCodeISUMap.get(firstCharSubIndustry);
+            }
+            if (StringUtils.isBlank(ctc)) {
+              details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to " + isu + "- blank").append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", ctc, ctc);
+
+            } else {
+              details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to " + isu + "-" + ctc).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", ctc, ctc);
+            }
+
+          }
+
+          else if (("T").equalsIgnoreCase(firstChar)) {
+            details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 34-Q.").append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "34");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
+
+          }
         }
 
       }
