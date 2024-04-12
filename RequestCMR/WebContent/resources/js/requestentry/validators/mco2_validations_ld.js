@@ -2596,7 +2596,7 @@ function setEntpValue() {
 			entp = existingEntp;
 		}
 		FormManager.enable('enterprise');
-		if(enpt != undefined)
+		if(entp != undefined)
 		FormManager.setValue('enterprise', entp);
 		if (['PRICU', 'XPRIC'].includes(custSubGrp)) {
 			FormManager.readOnly('enterprise');
@@ -2942,7 +2942,7 @@ function getMEAPreSelectedCBLogicEntp() {
 	if (landCntry == '') {
 		landCntry = getZS01LandCntry();
 	}
-	if (landCntry == '' || landCntry == undefined) {
+	if ((landCntry && !isMEACntry(landCntry)) || (landCntry == '' || landCntry == undefined)) {
 		return;
 	}
 	var cmrCntryCd = getCntryCd();
@@ -3209,9 +3209,10 @@ function setEnterpriseAfterSave() {
 	}
 }
 
-function callEntpLogicFrCB() {
+function callEntpLogic() {
 	console.log('CALLED ON TEMPLATE LOAD......');
 	getMEAPreSelectedCBLogicEntp();
+	setEntpValue();
 }
 dojo.addOnLoad(function() {
 	GEOHandler.MCO2 = ['373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -3326,7 +3327,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrCROSS, GEOHandler.MCO2, null, true);
 	// GEOHandler.addAfterConfig(setEntpValue, GEOHandler.MCO2);
 	// GEOHandler.addAfterTemplateLoad(setEntpValue, GEOHandler.MCO2);
-	GEOHandler.addAfterTemplateLoad(callEntpLogicFrCB, GEOHandler.MCO2);
+	GEOHandler.addAfterTemplateLoad(callEntpLogic, GEOHandler.MCO2);
 	GEOHandler.addAfterConfig(setEnterpriseAfterSave, GEOHandler.MCO2);
 
 });
