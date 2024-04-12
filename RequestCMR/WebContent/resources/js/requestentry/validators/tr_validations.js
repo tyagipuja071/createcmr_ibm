@@ -55,14 +55,12 @@ function addISUHandler() {
   var _CTCHandler = null;
   _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
     var value = FormManager.getField('isuCd');
-    // setSBOValuesForIsuCtc(value);
     setClientTierAndISR(value);
     setValuesForTurkey(value);
 
   });
   _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
     var value = FormManager.getField('clientTier');
-    // setSBOValuesForIsuCtc(value);
     setClientTierAndISR(value);
     setValuesForTurkey();
   });
@@ -162,27 +160,6 @@ function disableTaxOfficeTR() {
     }
   }
 }
-
-// function setClientTierValuesTR(isuCd) {
-// console.log('setClientTierValuesTR=====');
-// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-// return;
-// }
-// isuCd = FormManager.getActualValue('isuCd');
-// if (isuCd == '5K' || isuCd == '28' || isuCd == '04' || isuCd == '21' || isuCd
-// == '8B') {
-// FormManager.removeValidator('clientTier', Validators.REQUIRED);
-// } else {
-// var reqType = FormManager.getActualValue('reqType');
-// var custSubGrp = FormManager.getActualValue('custSubGrp');
-// if (reqType != 'U') {
-// if (custSubGrp == 'XINT' || custSubGrp == 'INTER' || custSubGrp == 'XBP' ||
-// custSubGrp == 'BUSPR') {
-// FormManager.removeValidator('clientTier', Validators.REQUIRED);
-// }
-// }
-// }
-// }
 
 function addDistrictPostCodeCityValidator() {
   console.log('addDistrictPostCodeCityValidator=====');
@@ -2044,10 +2021,10 @@ function setSBOValuesForIsuCtc(value) {
       if (results.length != 0) {
         FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
       }
-      // if (sboList.length == 1) {
       if (sboList.length == 1 || (sboList.length > 1 && _isScenarioChanged)) {
         FormManager.setValue('salesBusOffCd', sboList[0]);
         if (isuCtc == '27E') {
+          FormManager.setValue('salesBusOffCd', 'A20');
           FormManager.readOnly('salesBusOffCd');
         } else if (isuCtc == '34Q' || isuCtc == '36Y') {
           FormManager.setValue('salesBusOffCd', 'A20');
@@ -2271,7 +2248,7 @@ function sboCodeValidator() {
             return new ValidationResult(null, true, null);
         } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
           if (sbo != '') {
-            return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept blank for ISU ' + isuCtc);
+            return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'A00\'\ for ISU ' + isuCtc);
           } else
             return new ValidationResult(null, true, null);
         } else
@@ -2803,6 +2780,7 @@ function clientTierValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
