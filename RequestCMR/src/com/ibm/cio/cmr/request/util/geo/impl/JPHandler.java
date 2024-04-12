@@ -1044,8 +1044,8 @@ public class JPHandler extends GEOHandler {
     data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
 
     data.setSvcArOffice(mainRecord.getCmrCustGrpId());
-    data.setAgreementSignDate(mainRecord.getCmrContractSignDt() != null && mainRecord.getCmrContractSignDt().length() == 8
-        ? mainRecord.getCmrContractSignDt().trim().substring(2) : mainRecord.getCmrContractSignDt().trim());
+    data.setAgreementSignDate(mainRecord.getCmrContractSignDt() != null && mainRecord.getCmrContractSignDt().trim().length() == 8
+        ? mainRecord.getCmrContractSignDt().substring(2) : mainRecord.getCmrContractSignDt().trim());
 
     if (mainRecord.getCompanyCd() != null) {
       if (mainRecord.getCompanyCd().equals("AA")) {
