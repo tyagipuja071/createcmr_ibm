@@ -2088,9 +2088,10 @@ function setSBOLogicOnISUChange() {
 }
 
 var _isuHandler = null;
-
+var _oldSubInd = null;
 function onIsuChangeHandler() {
   console.log("onIsuChangeHandler=======");
+  _oldSubInd = FormManager.getActualValue('subIndustryCd');
   if (_isuHandler == null) {
     _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       // setISUCTCBasedScenarios();
