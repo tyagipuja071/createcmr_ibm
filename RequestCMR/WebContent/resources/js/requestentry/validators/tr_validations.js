@@ -2248,7 +2248,7 @@ function sboCodeValidator() {
           } else
             return new ValidationResult(null, true, null);
         } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
-          if (sbo != '') {
+          if (sbo != 'A00') {
             return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'A00\'\ for ISU ' + isuCtc);
           } else
             return new ValidationResult(null, true, null);
