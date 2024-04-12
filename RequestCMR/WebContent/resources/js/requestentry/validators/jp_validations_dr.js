@@ -7062,7 +7062,7 @@ function setCreditToCustNoOptional4ISOCU() {
 }
 
 function convertEnglishFieldsToSBCS(cntry, addressMode, details) {
-  convertFieldsToSBCS(['cnCustName1', 'cnAddrTxt', 'cnCity', 'cnDistrict', 'postCd']);
+  convertFieldsToSBCS(['cnCustName1', 'cnAddrTxt', 'cnCity', 'cnDistrict']);
 }
 
 function convertFieldsToSBCS(fields) {
