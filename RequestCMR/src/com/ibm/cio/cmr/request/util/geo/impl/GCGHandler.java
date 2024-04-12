@@ -114,6 +114,7 @@ public class GCGHandler extends APHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
         if ("ZS01".equals(record.getCmrAddrTypeCode())) {
+          record.setCmrAddrSeq(SOLD_TO_FIXED_SEQ);
           converted.add(record);
         }
       }
@@ -417,7 +418,7 @@ public class GCGHandler extends APHandler {
     LOG.info("setAddressValuesOnImport");
     if (currentRecord != null) {
       // add condition for ABCDE sequence only or for ZD01
-      List<String> rdcSeqValues = Arrays.asList("A", "B", "C", "D", "E");
+      List<String> rdcSeqValues = Arrays.asList("A", "B", "C", "D", "E", "1");
       if (rdcSeqValues.contains(currentRecord.getCmrAddrSeq()) || "ZD01".equals(currentRecord.getCmrAddrTypeCode())) {
         address.setCustNm1(currentRecord.getCmrName1Plain());
         address.setCustNm2(currentRecord.getCmrName2Plain());
@@ -487,6 +488,7 @@ public class GCGHandler extends APHandler {
     String correctAddrType = "";
     switch (seq) {
     case "A":
+    case "1":
       correctAddrType = SOLD_TO_ADDR_TYPE;
       break;
     case "E":
