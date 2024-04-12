@@ -139,7 +139,6 @@ public class JPHandler extends GEOHandler {
       put("7", "ZI01");
       put("2", "ZP01");
       put("1", "ZS02");
-      put("6", "ZI02");
       put("E", "ZI03");
       put("A", "ZP02");
       put("B", "ZP03");
