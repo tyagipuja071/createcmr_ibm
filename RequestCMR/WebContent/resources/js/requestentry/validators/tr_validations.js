@@ -4,6 +4,7 @@ var _vatExemptHandler = null;
 var _isuCdHandler = null;
 var _isicCdHandler = null;
 var _requestingLOBHandler = null;
+var _subIndustryCdHandler = null;
 var _economicCdHandler = null;
 var _custSubTypeHandler = null;
 var _custSubTypeHandlerGr = null;
