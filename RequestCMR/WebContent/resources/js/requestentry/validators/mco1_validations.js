@@ -2842,7 +2842,8 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
                     name: 'enterprise'
                 }, false, 'Enterprise can only accept : \'911822\'\ \'911817\'\ ');
             } else {
-                if (enterprise != '911817') {
+              var imsList = ['A', 'D', 'K', 'R', 'T', 'U', 'W', 'J', 'L', 'M', 'P', 'V', 'F', 'N', 'S', 'E', 'G', 'H', 'X', 'Y', 'B', 'C']
+                if (enterprise != '911817' && !imsList.includes(subIndustryCd)) {
                     return new ValidationResult({
                         id: 'enterprise',
                         type: 'text',
