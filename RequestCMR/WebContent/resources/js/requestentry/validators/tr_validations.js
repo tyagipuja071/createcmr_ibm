@@ -2102,7 +2102,6 @@ function onIsuChangeHandler() {
 
   if (_subIndustryCdHandler == null) {
     _subIndustryCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-
       if (_oldSubInd != FormManager.getActualValue('subIndustryCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         console.log("On subIndustryCdHandler=======");
         setDefaultEntCBMEA();
