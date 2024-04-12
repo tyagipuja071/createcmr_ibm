@@ -3028,7 +3028,8 @@ function getSouthAfricaEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 	var isuCTC = isuCd + ctc;
 	var entp = undefined;
 	if (isuCTC == '27E') {
-		if (landCntry == 'ZA') {
+		if (landCntry == 'ZA' && subInd) {
+			subInd = subInd.substr(0,1);
 			if (['A', 'K', 'U'].includes(subInd)) {
 				entp = '011675';
 			} else if (['B', 'C'].includes(subInd)) {
@@ -3103,7 +3104,8 @@ function getMEEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 	var isuCTC = isuCd + ctc;
 	var entp = undefined;
 	if (isuCTC == '27E') {
-		if (landCntry == 'AE') {
+		if (landCntry == 'AE' && subInd) {
+			subInd = subInd.substr(0,1);
 			if (['E', 'G', 'H', 'X', 'Y'].includes(subInd)) {
 				entp = '911812';
 			} else if (['F', 'N', 'S'].includes(subInd)) {
@@ -3115,7 +3117,8 @@ function getMEEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 			} else if (['B', 'C'].includes(subInd)) {
 				entp = '911816';
 			}
-		} else if (landCntry == 'SA') {
+		} else if (landCntry == 'SA' && subInd) {
+			subInd = subInd.substr(0,1);
 			if (['A', 'K'].includes(subInd)) {
 				entp = '911693';
 			} else if (['B', 'C'].includes(subInd)) {
@@ -3142,7 +3145,8 @@ function getMEEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 		}
 
 	} else if (isuCTC == '34Q') {
-		if (landCntry == 'SA') {
+		if (landCntry == 'SA' && subInd) {
+			subInd = subInd.substr(0,1);
 			if (['E'].includes(subInd)) {
 				entp = '911695';
 			} else if (['G', 'V', 'Y'].includes(subInd)) {
@@ -3150,7 +3154,8 @@ function getMEEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 			} else if (['H', 'X'].includes(subInd)) {
 				entp = '911696';
 			}
-		} else if (landCntry == 'EG') {
+		} else if (landCntry == 'EG' && subInd) {
+		  subInd = subInd.substr(0,1);
 			if (['A'].includes(subInd)) {
 				entp = '911771';
 			} else if (['B', 'C'].includes(subInd)) {
@@ -3174,7 +3179,8 @@ function getMEEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 			} else if (['S'].includes(subInd)) {
 				entp = '911769';
 			}
-		} else if (landCntry == 'QA') {
+		} else if (landCntry == 'QA' && subInd) {
+			subInd = subInd.substr(0,1);
 			if (['A', 'D', 'K', 'R', 'T', 'U', 'W'].includes(subInd)) {
 				entp = '911818';
 			} else if (['J', 'L', 'M', 'P', 'V'].includes(subInd)) {
