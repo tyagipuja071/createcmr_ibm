@@ -82,6 +82,11 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       "670", "831", "827", "832", "635", "876", "833", "835", "864", "842", "850", "851", "718", "729", "862", "857", "677", "849", "883", "825",
       "678", "702", "806", "846", "726", "755", "822", "838", "666", "866", "754");
   public static final List<String> EMEA_RDC_COUNTRIES = Arrays.asList("618", "724", "848", "706", "780");
+  
+  private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
+      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
+      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF);
 
   @Autowired
   RequestEntryService reqEntryService;
@@ -668,6 +673,12 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       data.setMemLvl(record.getCmrMembLevel());
       data.setBpRelType(record.getCmrBPRelType());
     }
+    
+    if (ME_COUNTRY_LIST.contains(data.getCmrIssuingCntry())){
+      data.setEnterprise(record.getCmrCompanyNo());
+      data.setTaxCd2(record.getCmrEnterpriseNumber());
+    }
+
     data.setCovId(record.getCmrCoverage());
     data.setBgId(record.getCmrBuyingGroup());
     data.setGeoLocationCd(record.getCmrGeoLocCd());
