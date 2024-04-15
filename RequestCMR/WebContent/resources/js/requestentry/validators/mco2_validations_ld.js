@@ -296,6 +296,7 @@ function lockRequireFieldsMCO2() {
 		setCodFieldBehavior();
 		setCofFieldBehavior();
 	}
+		FormManager.removeValidator('enterprise', Validators.DIGIT);
 }
 
 function disableAddrFieldsCEWA() {
@@ -2250,7 +2251,7 @@ function clientTierCodeValidator() {
 	var clientTierCode = FormManager.getActualValue('clientTier');
 	var reqType = FormManager.getActualValue('reqType');
 
-	if ((!['34', '36', '27'].includes(isuCode) && isuCode != '32' && reqType == 'C')) {
+	if ((!['34', '36', '27','32'].includes(isuCode) && reqType == 'C')) {
 		if (clientTierCode == '') {
 			$("#clientTierSpan").html('');
 
@@ -2303,7 +2304,7 @@ function clientTierCodeValidator() {
 			name: 'clientTier'
 		}, false, 'ISU-CTC combination is obsolete.');
 	} else {
-		if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+		if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'E' || clientTierCode == '') {
 			$("#clientTierSpan").html('');
 
 			return new ValidationResult(null, true);
@@ -2707,8 +2708,6 @@ function validateISUCTCEnterprisefrCROSS() {
 				}
 				if (valid_EntpList.length > 0)
 					valid = valid_EntpList.includes(req_entp);
-
-
 
 				if (valid) {
 					return new ValidationResult(null, true);
