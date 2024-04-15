@@ -179,7 +179,7 @@ public class GCGHandler extends APHandler {
                   LOG.debug(" - Main address, importing from FindCMR main record.");
                   if ("1234567ABCDEFGH".equals(wtaasAddress.getAddressUse())) {
                     LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
-                    record.setTransAddrNo(wtaasAddress.getAddressNo());
+                    mainRecord.setTransAddrNo(wtaasAddress.getAddressNo());
                   }
 
                   // will import ZS01 from RDc directly
