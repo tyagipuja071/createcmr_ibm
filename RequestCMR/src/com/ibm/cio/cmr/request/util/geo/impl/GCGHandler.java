@@ -8,10 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -179,6 +177,11 @@ public class GCGHandler extends APHandler {
                   }
                 } else {
                   LOG.debug(" - Main address, importing from FindCMR main record.");
+                  if ("1234567ABCDEFGH".equals(wtaasAddress.getAddressUse())) {
+                    LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
+                    record.setTransAddrNo(wtaasAddress.getAddressNo());
+                  }
+
                   // will import ZS01 from RDc directly
                   handleRDcRecordValues(mainRecord);
                   converted.add(mainRecord);
@@ -495,30 +498,34 @@ public class GCGHandler extends APHandler {
   @Override
   protected void handleRDcRecordValues(FindCMRRecordModel record) {
 
-    String[] inputs = { record.getCmrName3(), record.getCmrName4(), record.getCmrStreetAddress(), record.getCmrCity(), record.getCmrCity2() };
-    List<String> currentFields = Arrays.asList(record.getCmrDept() != null ? record.getCmrDept().toUpperCase().trim() : "XXXX");
-    record.setCmrName3(null);
-    record.setCmrName4(null);
-    record.setCmrCity(null);
-    record.setCmrCity2(null);
-    record.setCmrDept(null);
-    Queue<String> streets = new LinkedList<>();
-    for (String street : inputs) {
-      if (!StringUtils.isBlank(street) && !currentFields.contains(street.toUpperCase().trim())) {
-        streets.add(street);
-      }
-    }
-    String current = streets.peek() != null ? streets.remove() : null;
-    record.setCmrStreetAddress(current);
-
-    current = streets.peek() != null ? streets.remove() : null;
-    record.setCmrStreetAddressCont(current);
-
-    current = streets.peek() != null ? streets.remove() : null;
-    record.setCmrCity(current);
-
-    current = streets.peek() != null ? streets.remove() : null;
-    record.setCmrCity2(current);
+    // String[] inputs = { record.getCmrName3(), record.getCmrName4(),
+    // record.getCmrStreetAddress(), record.getCmrCity(), record.getCmrCity2()
+    // };
+    // List<String> currentFields = Arrays.asList(record.getCmrDept() != null ?
+    // record.getCmrDept().toUpperCase().trim() : "XXXX");
+    // record.setCmrName3(null);
+    // record.setCmrName4(null);
+    // record.setCmrCity(null);
+    // record.setCmrCity2(null);
+    // record.setCmrDept(null);
+    // Queue<String> streets = new LinkedList<>();
+    // for (String street : inputs) {
+    // if (!StringUtils.isBlank(street) &&
+    // !currentFields.contains(street.toUpperCase().trim())) {
+    // streets.add(street);
+    // }
+    // }
+    // String current = streets.peek() != null ? streets.remove() : null;
+    // record.setCmrStreetAddress(current);
+    //
+    // current = streets.peek() != null ? streets.remove() : null;
+    // record.setCmrStreetAddressCont(current);
+    //
+    // current = streets.peek() != null ? streets.remove() : null;
+    // record.setCmrCity(current);
+    //
+    // current = streets.peek() != null ? streets.remove() : null;
+    // record.setCmrCity2(current);
 
   }
 
@@ -637,16 +644,19 @@ public class GCGHandler extends APHandler {
 
         switch (countAddressLines(currentRecord)) {
         case 1:
+          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 1");
           address.setAddrTxt(currentRecord.getCmrStreetAddress());
           address.setAddrTxt2("");
           address.setCity1("");
           break;
         case 2:
+          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 2");
           address.setAddrTxt(currentRecord.getCmrStreetAddress());
           address.setAddrTxt2(currentRecord.getCmrCity());
           address.setCity1("");
           break;
         case 3:
+          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 3");
           address.setAddrTxt(currentRecord.getCmrName4());
           address.setAddrTxt2(currentRecord.getCmrStreetAddress());
           address.setCity1(currentRecord.getCmrCity());
