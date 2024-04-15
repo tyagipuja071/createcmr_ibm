@@ -1641,6 +1641,31 @@ public class JPHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getClientTier(), newData.getClientTier())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ClientTier", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getClientTier(), "ClientTier", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getClientTier(), "ClientTier", cmrCountry));
+      results.add(update);
+    }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getAgreementSignDate(), newData.getAgreementSignDate())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "AECISubDate", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getAgreementSignDate(), "AECISubDate", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getAgreementSignDate(), "AECISubDate", cmrCountry));
+      results.add(update);
+    }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getMrcCd(), newData.getMrcCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "MrcCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
