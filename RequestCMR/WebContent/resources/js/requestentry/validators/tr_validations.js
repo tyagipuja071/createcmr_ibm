@@ -1047,6 +1047,7 @@ function salesSRforUpdateOnChange() {
 
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     setIsicClassificationCodeTR(value);
+    setValuesForTurkey();
   });
 }
 
@@ -2089,6 +2090,7 @@ function setSBOLogicOnISUChange() {
 
 var _isuHandler = null;
 var _oldSubInd = null;
+
 function onIsuChangeHandler() {
   console.log("onIsuChangeHandler=======");
   _oldSubInd = FormManager.getActualValue('subIndustryCd');
@@ -2269,6 +2271,21 @@ function entValidator() {
         var clientTier = FormManager.getActualValue('clientTier');
         var isuCtc = isuCd + clientTier;
         var enterprise = FormManager.getActualValue('enterprise');
+        var ME_LC = [ 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var landCntry = '';
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        // GET LANDCNTRY in case of CB
+        var result = cmr.query('LANDCNTRY.IT', {
+          REQID : reqId
+        });
+        if (result != null && result.ret1 != undefined) {
+          landCntry = result.ret1;
+        }
+        var crossSubTypes = [ 'ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP', 'LSXCO', 'LSXGO', 'LSXPC', 'LSXTP' ];
+        if (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry)) {
+          return;
+        }
         if (isuCtc == '34Q') {
           if (!(enterprise == '911703' || enterprise == '911716' || enterprise == '911704')) {
             return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'911703\'\ \'911716\'\ \'911704\'\ for ISU CTC 34Q.');
@@ -2933,6 +2950,17 @@ function setValuesForTurkey() {
           var T911706 = 'J';
           var T911724 = 'K';
           var T911713 = 'L';
+          var T911721 = 'M';
+          var T911722 = 'N';
+          var T911709 = 'P';
+          var T911726 = 'R';
+          var T911707 = 'S';
+          var T911728 = 'T';
+          var T911714 = 'U';
+          var T911705 = 'V';
+          var T911720 = 'W';
+          var T911723 = 'X';
+          var T911716 = 'Y';
 
           if (ind != '') {
             if (T911727.includes(ind)) {
@@ -2962,6 +2990,28 @@ function setValuesForTurkey() {
               FormManager.setValue('enterprise', '911724');
             } else if (T911713.includes(ind)) {
               FormManager.setValue('enterprise', '911713');
+            } else if (T911721.includes(indG)) {
+              FormManager.setValue('enterprise', '911721');
+            } else if (T911718.includes(indG)) {
+              FormManager.setValue('enterprise', '911722');
+            } else if (T911709.includes(ind)) {
+              FormManager.setValue('enterprise', '911709');
+            } else if (T911726.includes(ind)) {
+              FormManager.setValue('enterprise', '911726');
+            } else if (T911707.includes(ind)) {
+              FormManager.setValue('enterprise', '911707');
+            } else if (T911728.includes(ind)) {
+              FormManager.setValue('enterprise', '911728');
+            } else if (T911714.includes(indG)) {
+              FormManager.setValue('enterprise', '911714');
+            } else if (T911705.includes(ind)) {
+              FormManager.setValue('enterprise', '911705');
+            } else if (T911720.includes(ind)) {
+              FormManager.setValue('enterprise', '911720');
+            } else if (T911723.includes(ind)) {
+              FormManager.setValue('enterprise', '911723');
+            } else if (T911716.includes(ind)) {
+              FormManager.setValue('enterprise', '911716');
             } else {
               FormManager.setValue('enterprise', '911727');
             }
@@ -2985,7 +3035,7 @@ function setValuesForTurkey() {
           var T011672 = [ 'E', 'G', 'H', 'X', 'Y' ];
           var T011673 = [ 'F', 'N', 'S' ];
           var T011674 = [ 'J', 'L', 'M', 'P', 'V' ];
-          FormManager.setValue('enterprise', 'T911713');
+          FormManager.setValue('enterprise', '911713');
           FormManager.enable('enterprise');
         }
       }
