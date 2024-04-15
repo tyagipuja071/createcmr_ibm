@@ -3082,7 +3082,7 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
     if (reqType == 'U') {
         return;
     }
-    if (isuCtc != '27E' && isuCtcForBlankEntp.includes(isuCtc)) {
+    if (isuCtc != '27E') {
         FormManager.setValue('enterprise', '');
         return;
     } else {
@@ -3117,11 +3117,11 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
                 if (subIndTyp.includes(subInd))
                     FormManager.setValue('enterprise', entp);
             });
-        } else if (countryUse == '864LS') {
+        } else if (countryUse == '864LS' && isuCtc == '27E' ) {
             FormManager.setValue('enterprise', '910510');
-        } else if (countryUse == '864NA') {
+        } else if (countryUse == '864NA' && isuCtc == '27E') {
             FormManager.setValue('enterprise', '909813');
-        } else if (countryUse == '864SZ') {
+        } else if (countryUse == '864SZ' && isuCtc == '27E') {
             FormManager.setValue('enterprise', '910509');
         }
     }
