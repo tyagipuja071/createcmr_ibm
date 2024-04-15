@@ -2269,6 +2269,21 @@ function entValidator() {
         var clientTier = FormManager.getActualValue('clientTier');
         var isuCtc = isuCd + clientTier;
         var enterprise = FormManager.getActualValue('enterprise');
+        var ME_LC = [ 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var landCntry = '';
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        // GET LANDCNTRY in case of CB
+        var result = cmr.query('LANDCNTRY.IT', {
+          REQID : reqId
+        });
+        if (result != null && result.ret1 != undefined) {
+          landCntry = result.ret1;
+        }
+        var crossSubTypes = [ 'ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP', 'LSXCO', 'LSXGO', 'LSXPC', 'LSXTP' ];
+        if (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry)) {
+          return;
+        }
         if (isuCtc == '34Q') {
           if (!(enterprise == '911703' || enterprise == '911716' || enterprise == '911704')) {
             return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'911703\'\ \'911716\'\ \'911704\'\ for ISU CTC 34Q.');
