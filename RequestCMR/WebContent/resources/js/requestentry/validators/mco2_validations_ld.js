@@ -135,7 +135,10 @@ function addNewHandlersForMCO2() {
 function setISUCTCFrCROSSOnLanded(){
 	var zs01Landed = getZS01LandCntry();
 	var subInd = FormManager.getActualValue('subIndustryCd');
-	if(!['XCOM','XTP','XLLCX','XPRIC','XGOV'].includes(FormManager.getActualValue('custSubGrp'))){
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	if((['XCOM','XLLCX','XTP','XGOV','XPRIC'].includes(custSubGrp) && !isMEACntry(zs01Landed))){
+		FormManager.setValue('isuCd','34');
+		FormManager.setValue('clientTier','Q');
 		return;
 	}
 	if(zs01Landed == 'TR' || landCntrySA.includes(zs01Landed)){
@@ -2529,7 +2532,6 @@ function StcOrderBlockValidation() {
 function setEntpValue() {
 	console.log('----------- setEntpValue -------------');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
-	var custGrp = FormManager.getActualValue('custGrp');
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
 	var entp = undefined;
 	var existingEntp = FormManager.getActualValue('enterprise');
@@ -2543,7 +2545,7 @@ function setEntpValue() {
 	if (existingEntp == '' && _pagemodel.enterprise != '') {
 		existingEntp = _pagemodel.enterprise;
 	}
-	if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU'].includes(custSubGrp) || (custGrp == 'CROSS' && !isMEACntry(landCntry) && (landCntry != '' && landCntry != undefined))) {
+	if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU'].includes(custSubGrp) || (['XCOM','XTP','XLLCX','XGOV','XPRIC'].includes(custSubGrp) && !isMEACntry(landCntry) && (landCntry != '' && landCntry != undefined))) {
 		if (isuCTC == '34Q') {
 			switch (cntry) {
 				case '610':
