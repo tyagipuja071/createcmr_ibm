@@ -1047,6 +1047,7 @@ function salesSRforUpdateOnChange() {
 
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     setIsicClassificationCodeTR(value);
+    setValuesForTurkey();
   });
 }
 
@@ -1517,7 +1518,7 @@ function enterpriseValidatorMea() {
           subIndustryCd = _pagemodel.subIndustryCd;
         }
         if (subIndustryCd != null && subIndustryCd.length > 1) {
-          subIndustryCd = subIndustryCd.substring(0, 1)
+          subIndustryCd = subIndustryCd.substring(0, 1);
         }
         var crossSubTypes = [ 'XINTS', 'XGOV', 'XIGF', 'XPC', 'XTP' ];
         var privScenarios = [ 'ZAXPC', 'SZXPC', 'NAXPC', 'LSXPC' ];
