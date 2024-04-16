@@ -105,7 +105,7 @@ function addHandlersForMCO2() {
 	}
 }
 
-var ISUHandler = null;
+var ctcHandler = null;
 var custSubGrpHandler = null;
 var subIndHandler = null;
 function addNewHandlersForMCO2() {
@@ -116,8 +116,8 @@ function addNewHandlersForMCO2() {
 		});
 	}
 
-	if (ISUHandler == null) {
-		ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+	if (ctcHandler == null) {
+		ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
 			setEntpValue();
 			getMEAPreSelectedCBLogicEntp();
 		});
@@ -2533,7 +2533,7 @@ function setEntpValue() {
 	console.log('----------- setEntpValue -------------');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	var entp = undefined;
+	var entp = 'noPreSelect';
 	var existingEntp = FormManager.getActualValue('enterprise');
 	var isuCd = FormManager.getActualValue('isuCd');
 	var ctc = FormManager.getActualValue('clientTier');
@@ -2633,7 +2633,7 @@ function setEntpValue() {
 			entp = existingEntp;
 		}
 		FormManager.enable('enterprise');
-		if(entp != undefined)
+		if(entp != 'noPreSelect')
 		FormManager.setValue('enterprise', entp);
 		if (['PRICU', 'XPRIC'].includes(custSubGrp)) {
 			FormManager.readOnly('enterprise');
@@ -3001,7 +3001,7 @@ function getMEAPreSelectedCBLogicEntp() {
 		entp = getTurkeyEntpPreSelected(landCntry, isuCd, ctc, subInd);
 	}
 
-	if (!validateLogicCalled && entp != undefined)
+	if (entp != 'noPreSelect')
 		FormManager.setValue('enterprise', entp);
 
 	if ((entp == '' && ['XBP', 'XIBME', 'XINTE'].includes(custSubGrp)) || custSubGrp == 'XPRIC') {
@@ -3010,7 +3010,7 @@ function getMEAPreSelectedCBLogicEntp() {
 	  FormManager.enable('enterprise');	
 	}
 	
-	if(entp == undefined){
+	if(entp == 'noPreSelect'){
 	arr.push(...getMEAEntpUserAdded());
 	if(arr.length > 0 && !arr.includes(FormManager.getActualValue('enterprise')))
 	FormManager.setValue('enterprise', '');
@@ -3063,7 +3063,7 @@ function getTurkeyEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 
 function getSouthAfricaEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 	var isuCTC = isuCd + ctc;
-	var entp = undefined;
+	var entp = 'noPreSelect';
 	if (isuCTC == '27E') {
 		if (landCntry == 'ZA' && subInd) {
 			subInd = subInd.substr(0,1);
@@ -3098,7 +3098,7 @@ function getSouthAfricaEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 
 function getCEWAEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 	var isuCTC = isuCd + ctc;
-	var entp = undefined;
+	var entp = 'noPreSelect';
 	if (isuCTC == '34Q') {
 		if (['AO', 'CV', 'MZ', 'ST'].includes(landCntry)) {
 			entp = '911741';
@@ -3139,7 +3139,7 @@ function getCEWAEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 
 function getMEEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 	var isuCTC = isuCd + ctc;
-	var entp = undefined;
+	var entp = 'noPreSelect';
 	if (isuCTC == '27E') {
 		if (landCntry == 'AE' && subInd) {
 			subInd = subInd.substr(0,1);
@@ -3238,7 +3238,7 @@ function getMEEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 		} else if (['PK', 'AF'].includes(landCntry)) {
 			entp = '901459';
 		}
-	} else if (isuCTC = '5K') {
+	} else if (isuCTC == '5K') {
 		entp = '';
 	}
 
