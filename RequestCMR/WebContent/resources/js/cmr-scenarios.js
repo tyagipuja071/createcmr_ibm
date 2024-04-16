@@ -626,8 +626,8 @@ var TemplateService = (function() {
             }
           }
 
-          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755')
-              && name == 'enterprise') {
+          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755' 
+          || FormManager.getActualValue('cmrIssuingCntry') == '864') && name == 'enterprise') {
             // SKIP for CMR-2617 Germany
             // SKIP for CMR-2001 Austria
           } else if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
@@ -737,15 +737,18 @@ var TemplateService = (function() {
           var driver = template.driver;
           var driverFieldName = driver.fieldName;
           scenario = FormManager.getActualValue(driverFieldName);
-          var cmrCountries = [ '666', '862', '726'];
+          var cmrCountries = [ '666', '862', '726' ];
           var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) &&  !cmrCountries.includes(cmrIssuingCntry)) {
+          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) && !cmrCountries.includes(cmrIssuingCntry)) {
             scenarioChanged = true;
+          } else {
+            scenarioChanged = false; // This impl has been done for 3 countries
+            // (Greece,Cyprus,Turkey) as per
+            // CREATCMR-9532, however, it's not
+            // restricted to these only and can be
+            // used for other countries as and when
+            // required.
           }
-          else
-      	  {
-      	  scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
-      	  }
           scenarioChanged = scenarioChanged || (currentChosenScenario != '' && currentChosenScenario != scenario);
           currentChosenScenario = scenario;
 
@@ -926,14 +929,17 @@ var TemplateService = (function() {
             }
           }
         }
-        var cmrCountries = [ '666', '862', '726'];
+        var cmrCountries = [ '666', '862', '726' ];
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var scenarioChanged = false;
-        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario  &&  !cmrCountries.includes(cmrIssuingCntry)) {
+        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario && !cmrCountries.includes(cmrIssuingCntry)) {
           scenarioChanged = true;
-        }
-        else
-    	{ scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
+        } else {
+          scenarioChanged = false; // This impl has been done for 3 countries
+          // (Greece,Cyprus,Turkey) as per
+          // CREATCMR-9532, however, it's not
+          // restricted to these only and can be used
+          // for other countries as and when required.
         }
 
         if ((typeof GEOHandler) != 'undefined') {
