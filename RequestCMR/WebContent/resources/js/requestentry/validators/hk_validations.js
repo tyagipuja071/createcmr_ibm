@@ -1166,10 +1166,12 @@ function addFieldFormatValidator() {
 
 function addrSeqFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
-  var validSeq = ["A", "B", "C", "D", "E"];
   var curAddrSeq = rowData.addrSeq[0];
-    
-  if (FormManager.getActualValue('reqType') == 'C' && !validSeq.includes(curAddrSeq)) {
+  var importInd = rowData.importInd[0];
+  var validSeq = ["A", "B", "C", "D", "E"];
+  var reqType = FormManager.getActualValue('reqType');
+  var newAddressInUpdate = ('U' == reqType && importInd == 'N') ;
+  if ((reqType == 'C' || newAddressInUpdate ) && !validSeq.includes(curAddrSeq)) {
     return 'N/A';
   }
   return value;
