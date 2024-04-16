@@ -1756,11 +1756,13 @@ function showOrHideAddrFields(cntry, addressMode, details) {
     showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
     showOrHideAddrFieldForBPWPQ(custSubGrp, custType, addrType, role);
     showOrHideAddrFieldForLocationCode(custSubGrp, custType, addrType, role);
+    setDefaultContact(addrType);
 
   } else if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
     var addrType = 'ZS01';
     checkAddrType(addrType);
     showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+    setDefaultContact(addrType);
 
     dojo.connect(FormManager.getField('addrType_ZC01'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZC01').checked == true) {
@@ -1769,84 +1771,98 @@ function showOrHideAddrFields(cntry, addressMode, details) {
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
       removeDefaultValueTelNo();
       setROLFlagValue(addrType);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZS02'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZS02').checked == true) {
         addrType = 'ZS02';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZS01'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZS01').checked == true) {
         addrType = 'ZS01';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP01'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP01').checked == true) {
         addrType = 'ZP01';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP09'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP09').checked == true) {
         addrType = 'ZP09';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZI01'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZI01').checked == true) {
         addrType = 'ZI01';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZI03'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZI03').checked == true) {
         addrType = 'ZI03';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP02'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP02').checked == true) {
         addrType = 'ZP02';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP03'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP03').checked == true) {
         addrType = 'ZP03';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP04'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP04').checked == true) {
         addrType = 'ZP04';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP05'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP05').checked == true) {
         addrType = 'ZP05';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP06'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP06').checked == true) {
         addrType = 'ZP06';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP07'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP07').checked == true) {
         addrType = 'ZP07';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
     dojo.connect(FormManager.getField('addrType_ZP08'), 'onClick', function(value) {
       if (FormManager.getField('addrType_ZP08').checked == true) {
         addrType = 'ZP08';
       }
       showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role);
+      setDefaultContact(addrType);
     });
   }
 }
@@ -7607,6 +7623,33 @@ function addEnglishStreetValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
+
+function setDefaultContact(addrType) {
+  var contact = FormManager.getActualValue('contact');
+  var aduAddrTypes = new Set(['ZS02', 'ZS01', 'ZP01', 'ZI01', 'ZP09', 'ZI03', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08']);
+
+  if (cmr.addressMode == 'newAddress') {
+    if (aduAddrTypes.has(addrType)) {
+      setAddrFieldMandatory('contact', 'Contact', 'Contact');
+      if (contact == '' || contact == null) {
+        FormManager.setValue('contact', 'ご担当者');
+      }
+    } else {
+      FormManager.clearValue('contact');
+    }
+  } else if (cmr.addressMode == 'updateAddress') {
+    addrType = cmr.addrdetails.ret2;
+    contact = cmr.addrdetails.ret71;
+    if (aduAddrTypes.has(addrType)) {
+      setAddrFieldMandatory('contact', 'Contact', 'Contact');
+      if (contact == '' || contact == null) {
+        FormManager.setValue('contact', 'ご担当者');
+      }
+    } else {
+      FormManager.clearValue('contact');
+    }
+  }
 }
 
 dojo.addOnLoad(function() {
