@@ -2465,7 +2465,7 @@ function enterpriseValidatorMea() {
                 if (result != null && result.ret1 != undefined) {
                     landCntry = result.ret1;
                 }
-                if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || enterprise == '' || !(CEWA_LC.includes(landCntry) || ME_LC.includes(landCntry) || TURKEY_LC.includes(landCntry) || SOUTH_AFRICA_LC.includes(landCntry))) {
+                if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || !(CEWA_LC.includes(landCntry) || ME_LC.includes(landCntry) || TURKEY_LC.includes(landCntry) || SOUTH_AFRICA_LC.includes(landCntry))) {
                     return;
                 }
                 if (TURKEY_LC.includes(landCntry)) {
