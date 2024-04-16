@@ -28,6 +28,10 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
     if (_landCntryHandler == null && FormManager.getField('landCntry')) {
         _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
             disablePOBox();
+            if (FormManager.getActualValue('addrType') == 'ZS01') {
+              setIsuCtcCBMEA();
+              setDefaultEntCBMEA();           
+              }     
             // postalCodeRequired();
         });
     }
@@ -118,13 +122,13 @@ function addHandlersForZA() {
                 calledByCtcHandler = false;
                 setCtcSalesRepSBO(value);
                 setEnterpriseBehaviour();
-                setDefaultEntCBMEA();
             }
             if (_oldIsuCd != FormManager.getActualValue('isuCd') || typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
                 setDefaultEnterpriseBasedOnSubInd(value);
                 _oldIsuCd = FormManager.getActualValue('isuCd');
             }
             setClientTierValues(value);
+            setDefaultEntCBMEA();
         });
     }
     if (_ctcHandler == null) {
@@ -2181,7 +2185,7 @@ function setEnterpriseBehaviour() {
     var countryUse = FormManager.getActualValue('countryUse');
     var countryUseSubRegions = ['864NA', '864LS', '864SZ'];
 
-    if (reqType == 'U') {
+    if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
         FormManager.removeValidator('enterprise', Validators.REQUIRED);
         return;
     }
