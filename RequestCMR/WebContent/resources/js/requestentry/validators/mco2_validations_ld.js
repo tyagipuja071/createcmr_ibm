@@ -125,12 +125,46 @@ function addNewHandlersForMCO2() {
 
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+			setISUCTCFrCROSSOnLanded();
 			setEntpValue();
 			getMEAPreSelectedCBLogicEntp();
 		});
 	}
 }
 
+function setISUCTCFrCROSSOnLanded(){
+	var zs01Landed = getZS01LandCntry();
+	var subInd = FormManager.getActualValue('subIndustryCd');
+	if(!['XCOM','XTP','XLLCX','XPRIC','XGOV'].includes(FormManager.getActualValue('custSubGrp'))){
+		return;
+	}
+	if(zs01Landed == 'TR' || landCntrySA.includes(zs01Landed)){
+		FormManager.setValue('isuCd','27');
+		FormManager.setValue('clientTier','E');
+	}else if(landCntryCEWA.includes(zs01Landed)){
+		FormManager.setValue('isuCd','34');
+		FormManager.setValue('clientTier','Q');
+	}else if(landCntryMEA.includes(zs01Landed)){
+		if(['EG','QA','LY','TN','MA','PK','AF'].includes(zs01Landed)){
+		FormManager.setValue('isuCd','34');
+		FormManager.setValue('clientTier','Q');
+		}else if(['KW','OM','SY','IQ','YE','JO','PS','LB','BH'].includes(zs01Landed)){
+		FormManager.setValue('isuCd','27');
+		FormManager.setValue('clientTier','E');
+		}else if(zs01Landed == 'SA' && subInd){
+			if(['E','G','V','Y','H','X'].includes(subInd)){
+		FormManager.setValue('isuCd','34');
+		FormManager.setValue('clientTier','Q');	
+			}else{
+		FormManager.setValue('isuCd','27');
+		FormManager.setValue('clientTier','E');
+			}
+		}		
+	}
+	
+	
+	
+}
 
 function setStreetContBehavior() {
 	var viewOnly = FormManager.getActualValue('viewOnlyPage');
@@ -2968,8 +3002,10 @@ function getMEAPreSelectedCBLogicEntp() {
 	if (!validateLogicCalled && entp != undefined)
 		FormManager.setValue('enterprise', entp);
 
-	if (entp == '' && !['XBP', 'XIBME', 'XINTE'].includes(custSubGrp)) {
-		FormManager.enable('enterprise');
+	if ((entp == '' && ['XBP', 'XIBME', 'XINTE'].includes(custSubGrp)) || custSubGrp == 'XPRIC') {
+		FormManager.readOnly('enterprise');
+	}else{
+	  FormManager.enable('enterprise');	
 	}
 	
 	if(entp == undefined){
