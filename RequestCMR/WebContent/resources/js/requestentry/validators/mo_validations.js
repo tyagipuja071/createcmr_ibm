@@ -4528,10 +4528,6 @@ function setKUKLAvaluesMO() {
     return
   }
 
-  if (role == 'REQUESTER') {
-    FormManager.readOnly('custClass');
-  }
-
   console.log('setKUKLAvaluesMO() >>>> set KUKLA values for MO >>>>');
 
   var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
