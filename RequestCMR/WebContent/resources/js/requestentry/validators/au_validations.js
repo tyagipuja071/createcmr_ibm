@@ -2021,6 +2021,9 @@ function addAddressInstancesValidator() {
                   if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02')) {
                     continue;
                   }
+                  if ((cmrCntry == SysLoc.NEW_ZEALAND) && (record.addrType == 'PG01')) {
+                    continue;
+                  }
                   addrCnt++;
                   if (addrCnt > 1)
                     duplicatesAddr.push(results[j].ret2);
