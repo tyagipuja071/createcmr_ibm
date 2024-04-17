@@ -2737,6 +2737,7 @@ function validateISUCTCEnterprisefrCROSS() {
 					return new ValidationResult(null, true);
 				}
 				var preSelValidEntp = getMEAPreSelectedCBLogicEntp(validateLogicCalled);
+				if (preSelValidEntp)
 				valid_EntpList.push(preSelValidEntp);
 				var arr = getMEAEntpUserAdded();
 				if (arr.length > 0) {
@@ -3014,6 +3015,7 @@ function getMEAPreSelectedCBLogicEntp() {
 	arr.push(...getMEAEntpUserAdded());
 	if(arr.length > 0 && !arr.includes(FormManager.getActualValue('enterprise')))
 	FormManager.setValue('enterprise', '');
+	entp = '';
 	}
 	return entp;
 }
