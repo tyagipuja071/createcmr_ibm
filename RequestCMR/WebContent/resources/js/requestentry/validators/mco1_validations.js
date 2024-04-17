@@ -110,6 +110,7 @@ function addHandlersForZA() {
       _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
    if (typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         setIsuCtcCBMEA();
+        setSalesRepSORTL();
         setDefaultEntCBMEA();
     }
       });
