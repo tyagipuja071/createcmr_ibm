@@ -4521,7 +4521,6 @@ function setKUKLAvaluesMO() {
   var industryClass = FormManager.getActualValue('IndustryClass');
   var bpRelType = FormManager.getActualValue('bpRelType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
 
   if (FormManager.getActualValue('reqType') == 'U') {
     return
