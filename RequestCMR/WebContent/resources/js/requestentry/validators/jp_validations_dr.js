@@ -7640,14 +7640,8 @@ function setDefaultContact(addrType) {
     }
   } else if (cmr.addressMode == 'updateAddress') {
     addrType = cmr.addrdetails.ret2;
-    contact = cmr.addrdetails.ret71;
     if (aduAddrTypes.has(addrType)) {
       setAddrFieldMandatory('contact', 'Contact', 'Contact');
-      if (contact == '' || contact == null) {
-        FormManager.setValue('contact', 'ご担当者');
-      }
-    } else {
-      FormManager.clearValue('contact');
     }
   }
 }

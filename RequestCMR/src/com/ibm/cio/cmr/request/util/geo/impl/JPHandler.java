@@ -1225,7 +1225,7 @@ public class JPHandler extends GEOHandler {
         address.setRol(currentRecord.getInspbydebi());
       }
     } else {
-      address.setContact(currentRecord.getCmrName4() == null ? currentRecord.getCmrName4()
+      address.setContact(currentRecord.getCmrName4() == null ? "ご担当者"
           : currentRecord.getCmrName4().trim().length() > 15 ? currentRecord.getCmrName4().trim().substring(0, 15)
               : currentRecord.getCmrName4().trim());
     }
