@@ -1988,14 +1988,13 @@ function lockFieldsBasedOnISU(isuCd) {
 
 function lockedScenarios() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var lockedScenarios = [ 'BUSPR', 'INTER', 'IBMEM', 'XBP', 'XINT', 'EXBP', 'ELBP' ]
+  var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM', 'XBP', 'XINT', 'EXBP', 'ELBP' ]
   if (lockedScenarios.includes(custSubGrp)) {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('taxCd2');
-  } else if (custSubGrp == 'PRICU') {
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('taxCd2');
   }
 
 }
