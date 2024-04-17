@@ -3241,13 +3241,13 @@ function setCBEnterprise() {
       }
     }
 
-    if (currentLandedCountry == 'NM' && issuingCntry == SysLoc.TURKEY && custGrp == 'CROSS') {
+    if (currentLandedCountry == 'NA' && issuingCntry == SysLoc.TURKEY && custGrp == 'CROSS') {
       if (isuCtc == '27E') {
         FormManager.setValue('enterprise', '909813');
       }
     } else if (currentLandedCountry == 'LS' && issuingCntry == SysLoc.TURKEY && custGrp == 'CROSS') {
       FormManager.setValue('enterprise', '910510');
-    } else if (currentLandedCountry == 'EW' && issuingCntry == SysLoc.TURKEY && custGrp == 'CROSS') {
+    } else if (currentLandedCountry == 'SZ' && issuingCntry == SysLoc.TURKEY && custGrp == 'CROSS') {
       FormManager.setValue('enterprise', '910509');
     } else {
       FormManager.setValue('enterprise', '');
