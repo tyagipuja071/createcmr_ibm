@@ -536,10 +536,6 @@ public class USUtil extends AutomationUtil {
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", ctc, ctc);
 
-            } else {
-              details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to " + isu + "-" + ctc).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", ctc, ctc);
             }
 
           }
