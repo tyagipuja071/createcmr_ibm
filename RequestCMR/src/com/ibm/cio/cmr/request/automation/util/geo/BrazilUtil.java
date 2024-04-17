@@ -211,6 +211,7 @@ public class BrazilUtil extends AutomationUtil {
         {
               isu = "5K";
               ctc = "";
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_DESC", data.getCovDesc(), "KYNDRYL - BR");
         }
         
         if(comment.equals("Strategic") || comment.equals("Signature"))
