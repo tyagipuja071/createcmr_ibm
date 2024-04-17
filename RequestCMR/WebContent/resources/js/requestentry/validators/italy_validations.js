@@ -657,12 +657,12 @@ function addISUHandlerIT() {
       }
     });
   }
-}
 
-function addIsicCdHandler() {
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      setDeafultSBOLogicComm();
+      if (typeof (_pagemodel) != 'undefined' && _pagemodel['isicCd'] != FormManager.getActualValue('isicCd')) {
+        setDeafultSBOLogicComm();
+      }
     });
   }
 }
@@ -5607,7 +5607,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValuesIT, [ SysLoc.ITALY ]);
   // GEOHandler.addAfterTemplateLoad(setDeafultISUCtcChange, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
-  GEOHandler.addAfterConfig(addIsicCdHandler, [ SysLoc.ITALY ]);
   // GEOHandler.addAfterConfig(setClientTierValuesIT, [ SysLoc.ITALY ]);
   // GEOHandler.addAfterConfig(setDeafultSBOLogicComm, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ITALY ], null, true);
