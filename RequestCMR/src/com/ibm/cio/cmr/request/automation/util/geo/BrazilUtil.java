@@ -207,6 +207,12 @@ public class BrazilUtil extends AutomationUtil {
               ctc = "Y";
         }
         
+        if(comment.equals("Kyndryl"))
+        {
+              isu = "5K";
+              ctc = "";
+        }
+        
         if(comment.equals("Strategic") || comment.equals("Signature"))
         {
           if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
