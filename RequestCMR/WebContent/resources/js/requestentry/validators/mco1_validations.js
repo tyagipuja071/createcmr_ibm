@@ -110,6 +110,7 @@ function addHandlersForZA() {
       _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
    if (typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         setIsuCtcCBMEA();
+        setSalesRepSORTL();
         setDefaultEntCBMEA();
     }
       });
@@ -120,7 +121,8 @@ function addHandlersForZA() {
             if (FormManager.getActualValue('reqType') == 'C') {
                 calledByIsuHandler = true;
                 calledByCtcHandler = false;
-                setCtcSalesRepSBO(value);
+                // setCtcSalesRepSBO(value);
+                setSalesRepSORTL();
                 setEnterpriseBehaviour();
             }
             if (_oldIsuCd != FormManager.getActualValue('isuCd') || typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
@@ -136,7 +138,7 @@ function addHandlersForZA() {
             if (FormManager.getActualValue('reqType') == 'C') {
                 calledByIsuHandler = false;
                 calledByCtcHandler = true;
-                setCtcSalesRepSBO(FormManager.getField('isuCd'));
+                // setCtcSalesRepSBO(FormManager.getField('isuCd'));
                 setSalesRepSORTL();
                 setEnterpriseBehaviour();
             } else if (FormManager.getActualValue('reqType') == 'U') {
@@ -254,7 +256,7 @@ function setSalesRepSORTL() {
     var isu = FormManager.getActualValue('isuCd');
     var cntryRegion = FormManager.getActualValue('countryUse');
     var isuCtc = isu.concat(clientTier)
-    if (isuCtc == '34Q' || isuCtc == '36Y' || isuCtc == '27E' && reqType == 'C') {
+    if (reqType == 'C') {
         if (cntryRegion == '864') {
             FormManager.setValue('repTeamMemberNo', 'SALES9');
             FormManager.setValue('salesBusOffCd', '4961');
@@ -1892,7 +1894,7 @@ var _isScenarioChanged = false;
 function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
     _isScenarioChanged = scenarioChanged;
     scenarioChangeSalesRepSBO = scenarioChanged;
-    setCtcSalesRepSBO(FormManager.getActualValue('isuCd'));
+    // setCtcSalesRepSBO(FormManager.getActualValue('isuCd'));
 }
 
 function resetVatRequired(value) {
