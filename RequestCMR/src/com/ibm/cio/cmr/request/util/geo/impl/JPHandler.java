@@ -1205,15 +1205,27 @@ public class JPHandler extends GEOHandler {
     address.setCustFax(currentRecord.getCmrCustFax());
     address.setDept(currentRecord.getCmrDept());
 
-    String addrTxt = null;
-    if (currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().trim().length() > 23) {
-      addrTxt = currentRecord.getCmrStreetAddress().trim().substring(23);
+    String addrTxt = "";
+    String addrTxt2 = "";
+
+    if (currentRecord.getCmrStreetAddress() != null) {
+      if (currentRecord.getCmrStreetAddress().trim().length() > 17) {
+        addrTxt = currentRecord.getCmrStreetAddress().trim().substring(0, 17);
+        addrTxt2 = currentRecord.getCmrStreetAddress().trim().substring(17);
+      } else {
+        addrTxt = currentRecord.getCmrStreetAddress().trim();
+      }
     }
-    address.setAddrTxt(currentRecord.getCmrStreetAddress() == null ? currentRecord.getCmrStreetAddress()
-        : currentRecord.getCmrStreetAddress().trim().length() > 23 ? currentRecord.getCmrStreetAddress().trim().substring(0, 23)
-            : currentRecord.getCmrStreetAddress().trim());
-    address.setAddrTxt(convert2DBCS(address.getAddrTxt()));
-    address.setAddrTxt2(addrTxt);
+
+    if (!StringUtils.isEmpty(addrTxt)) {
+      address.setAddrTxt(convert2DBCS(addrTxt));
+    }
+    if (!StringUtils.isEmpty(addrTxt2)) {
+      if (addrTxt2.length() > 13)
+        addrTxt2 = addrTxt2.substring(0, 13);
+      address.setAddrTxt2(convert2DBCS(addrTxt2));
+    }
+
     // 1652081
     convertKATAKANA(currentRecord.getCmrName2Plain(), address);
     String custNm4 = null;
