@@ -688,7 +688,7 @@ function setClientTierValuesIT(isuCd) {
   } else {
     FormManager.setValue('clientTier', '');
   }
-  setDeafultSBOLogicComm();
+  // setDeafultSBOLogicComm();
 }
 
 var _addrTypesIL = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ];
@@ -5456,6 +5456,15 @@ function sboSalesRepCodeValidator() {
         type : 'text',
         name : 'salesBusOffCd'
       }, false, 'SORTL can only accept \'PA\'\ \'PB\'\ \'PC\'\ \'PD\'\ \'PE\'\ \'PF\'\  \'PG\'\ \'PH\'\ \'PI\'\ \'PJ\'\ \'PK\'\ \'PL\'\ \'PM\'\ \'PN\'\ \'PO\'\ \'PP\'\ for ISU CTC 34Q.');
+    }
+  } else if (isuCtc == '27E') {
+    if (!(sbo == 'NM' || sbo == 'RP' || sbo == 'GJ' || sbo == 'GK' || sbo == 'NG' || sbo == 'NC' || sbo == 'KA' || sbo == 'KF' || sbo == 'NB' || sbo == 'GH' || sbo == 'KC' || sbo == 'KB'
+        || sbo == 'DU' || sbo == 'KE' || sbo == 'KD' || sbo == 'NI')) {
+      return new ValidationResult({
+        id : 'salesBusOffCd',
+        type : 'text',
+        name : 'salesBusOffCd'
+      }, false, 'SORTL can only accept \'NM\'\ \'RP\'\ \'GJ\'\ \'GK\'\ \'NG\'\ \'NC\'\ \'KA\'\ \'KF\'\ \'NB\'\ \'GH\'\ \'KC\'\ \'KB\'\ \'DU\'\ \'KE\'\ \'KD\'\ \'NI\'\ for ISU CTC 27E.');
     }
   } else if (isuCtc == '36Y') {
     if (!(sbo == 'FL' || sbo == 'FM' || sbo == 'FP' || sbo == 'FQ' || sbo == 'FR' || sbo == 'FS' || sbo == 'FT' || sbo == 'FV' || sbo == 'FW' || sbo == 'FX' || sbo == 'FY' || sbo == 'FZ')) {
