@@ -465,11 +465,11 @@ public class USUtil extends AutomationUtil {
 
       if (StringUtils.isBlank(data.getGbgId())) {
 
-        if (scenarioSubType.equalsIgnoreCase("PRIV")) {
+        if ("PRIV".equalsIgnoreCase(scenarioSubType)) {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
-        } else if (scenarioSubType.equalsIgnoreCase("ECOSYSTEM")) {
+        } else if ("ECOSYSTEM".equalsIgnoreCase(scenarioSubType)) {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
@@ -481,11 +481,11 @@ public class USUtil extends AutomationUtil {
 
       } else {
 
-        if (scenarioSubType.equalsIgnoreCase("PRIV")) {
+        if ("PRIV".equalsIgnoreCase(scenarioSubType)) {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
-        } else if (scenarioSubType.equalsIgnoreCase("ECOSYSTEM")) {
+        } else if ("ECOSYSTEM".equalsIgnoreCase(scenarioSubType)) {
           details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");

@@ -536,6 +536,121 @@ function afterConfigForUS() {
   } else if (reqType == 'C' && (role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
+  } else if ((covId.str.charAt(0).toUpperCase() == 'A' || covId.str.charAt(0).toUpperCase() == 'I') && role == 'Processor' && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+    if (subIndustryCd.charAt(0).toUpperCase() == 'A') {
+      FormManager.setValue('isuCd', '3T');
+
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'U') {
+      FormManager.setValue('isuCd', '12');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'K') {
+      FormManager.setValue('isuCd', '05');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'R') {
+      FormManager.setValue('isuCd', '1R');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'D') {
+      FormManager.setValue('isuCd', '18');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'W') {
+      FormManager.setValue('isuCd', '18');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'T') {
+      FormManager.setValue('isuCd', '19');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'F') {
+      FormManager.setValue('isuCd', '04');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'S') {
+      FormManager.setValue('isuCd', '4F');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'N') {
+      FormManager.setValue('isuCd', '31');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'J') {
+      FormManager.setValue('isuCd', '4A');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'V') {
+      FormManager.setValue('isuCd', '14');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'L') {
+      FormManager.setValue('isuCd', '5E');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'P') {
+      FormManager.setValue('isuCd', '15');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'M') {
+      FormManager.setValue('isuCd', '4D');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'Y') {
+      FormManager.setValue('isuCd', '28');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'G') {
+      FormManager.setValue('isuCd', '28');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'E') {
+      FormManager.setValue('isuCd', '40');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'H') {
+      FormManager.setValue('isuCd', '11');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'X') {
+      FormManager.setValue('isuCd', '8C');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'B') {
+      FormManager.setValue('isuCd', '5B');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if (subIndustryCd.charAt(0).toUpperCase() == 'C') {
+      FormManager.setValue('isuCd', '5B');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    }
+  } else if (covId.str.charAt(0).toUpperCase() == 'T' && role == 'Processor' && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
   }
 
   else {
