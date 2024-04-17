@@ -427,7 +427,7 @@ public class ANZHandler extends GEOHandler {
             if ("03".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
               tempRec.setCmrAddrTypeCode("ZF01");
             }
-            if (CmrConstants.ANZ_COUNTRIES.equals(cmrIssuingCntry)) {
+            if (CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
               if (StringUtils.isNotBlank(addrSeq) && "ZP01".equals(tempRec.getCmrAddrTypeCode())
                   && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
                 tempRec.setCmrAddrTypeCode("PG01");
