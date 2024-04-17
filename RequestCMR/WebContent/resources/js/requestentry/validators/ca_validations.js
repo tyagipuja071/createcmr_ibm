@@ -414,11 +414,6 @@ function clearCATaxFields() {
   if (custSubGrp == 'PRIV' || custSubGrp == 'ECO') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else {
-    FormManager.setValue('isuCd', '');
-    FormManager.setValue('clientTier', '');
-    FormManager.enable('isuCd');
-    FormManager.enable('clientTier');
   }
   FormManager.clearValue('PSTExempt');
   FormManager.getField('PSTExempt').set('checked', false);
