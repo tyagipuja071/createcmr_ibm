@@ -485,6 +485,10 @@ function afterConfigForUS() {
   var gbgId = FormManager.getActualValue('gbgId');
   _usSicm = FormManager.getActualValue('usSicmen');
   _kukla = FormManager.getActualValue('custClass');
+
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  var covId = FormManager.getActualValue('covId');
+
   // if (_usSicm.length > 4) {
   // _usSicm = _usSicm.substring(0, 4);
   // FormManager.setValue('usSicmen', _usSicm);
@@ -532,7 +536,52 @@ function afterConfigForUS() {
   } else if (reqType == 'C' && (role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  } else {
+  }
+  if ((covId.str.charAt(0).toUpperCase() == 'A' || covId.str.charAt(0).toUpperCase() == 'I') && (role == 'Processor' || role == 'Viewer') && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+    const
+    subIndustryMappings = {
+      'A' : '3T',
+      'U' : '12',
+      'K' : '05',
+      'R' : '1R',
+      'D' : '18',
+      'W' : '18',
+      'T' : '19',
+      'F' : '04',
+      'S' : '4F',
+      'N' : '31',
+      'J' : '4A',
+      'V' : '14',
+      'L' : '5E',
+      'P' : '15',
+      'M' : '4D',
+      'Y' : '28',
+      'G' : '28',
+      'E' : '40',
+      'H' : '11',
+      'X' : '8C',
+      'B' : '5B',
+      'C' : '5B'
+    };
+
+    const
+    subIndustryCdUpperCase = subIndustryCd.charAt(0).toUpperCase();
+    const
+    isuCdValue = subIndustryMappings[subIndustryCdUpperCase];
+    if (isuCdValue) {
+      FormManager.setValue('isuCd', isuCdValue);
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    }
+  } else if (covId.str.charAt(0).toUpperCase() == 'T' && role == 'Processor' && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }
+
+  else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
   }
