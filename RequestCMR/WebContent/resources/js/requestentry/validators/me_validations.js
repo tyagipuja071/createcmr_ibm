@@ -1854,6 +1854,36 @@ function setEnterpriseValuesME(clientTier) {
           FormManager.setValue('taxCd2', '901459');
         }
       }
+    } else if (custGrp == "CROSS" && !non_mea_cross.includes(landed)) {
+      if (custSubGrp == "XCOM" || custSubGrp == "XTP") {
+        if (landed == 'EG' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
+        } else if (landed == 'QA' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryQA34Q(isuCd) || '');
+        } else if (landed == 'SA' && isuCtc == '27E') {
+          FormManager.setValue('taxCd2', setEnterpriseOnSubIndustrySA27E(isuCd) || '');
+        } else if (landed == 'SA' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', setEnterpriseOnSubIndustrySA34Q(isuCd) || '');
+        } else if (landed == 'AE' && isuCtc == '27E') {
+          FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryAE27E(isuCd) || '');
+        } else if (landed == 'KW' && isuCtc == '27E') {
+          FormManager.setValue('taxCd2', '907695');
+        } else if (landed == 'OM' && isuCtc == '27E') {
+          FormManager.setValue('taxCd2', '911824');
+        } else if ((landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB') && isuCtc == '27E') {
+          FormManager.setValue('taxCd2', '911827');
+        } else if (landed == 'BH' && isuCtc == '27E') {
+          FormManager.setValue('taxCd2', '911825');
+        } else if (landed == 'LY' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', '911756');
+        } else if (landed == 'TN' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', '901728');
+        } else if (landed == 'MA' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', '901462');
+        } else if (landed == 'PK' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', '901459');
+        }
+      }
     }
   }
 }
@@ -3710,12 +3740,32 @@ function setIsuCtcOnScenarioChange() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XTP', 'XCOM' ];
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'EXCOM', 'ELCOM' ];
   var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '849', '850' ];
   var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
+  var cntrycode_27E = [ 'BH', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'YE', 'SY' ];
+  var cntrcode_34Q = [ 'MA', 'LY', 'AF', 'QA', 'EG', 'TN' ];
+  var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
+
+  var landed = FormManager.getActualValue('landCntry');
+  var addrType = "ZS01";
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
+
+  if (landed == '') {
+    if (addrType != null && addrType != '') {
+      var addrResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', {
+        REQ_ID : FormManager.getActualValue('reqId'),
+        ADDR_TYPE : addrType
+      });
+      if (addrResult && addrResult.ret1 && addrResult.ret1 != '') {
+        landed = addrResult.ret1;
+      }
+    }
+  }
+
+  var custGrp = FormManager.getActualValue('custGrp');
   var scenario = FormManager.getActualValue('custSubGrp');
   var scenarioChanged = false;
   if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
@@ -3728,42 +3778,73 @@ function setIsuCtcOnScenarioChange() {
   var SAsubindustry34Q = [ 'E', 'G', 'V', 'Y', 'H', 'X' ];
   let
   flsubIndustryCd = subIndustryCd.charAt(0);
-
-  if (scenario == 'BUSPR' || scenario.includes('BP')) {
-    FormManager.setValue('isuCd', '8B');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('taxCd2');
-    FormManager.setValue('taxCd2', '');
-  } else if (scenario.includes('IN') || scenario.includes('IBM')) {
-    FormManager.setValue('isuCd', '21');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('taxCd2');
-    FormManager.setValue('taxCd2', '');
-  } else if (custSubGrpLocMECov.includes(scenario) && cntrylist_27E.includes(cntry)) {
-    FormManager.setValue('isuCd', '27');
-    FormManager.setValue('clientTier', 'E');
-  } else if (custSubGrpLocMECov.includes(scenario) && cntrlist_34Q.includes(cntry)) {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-  } else if (custSubGrpLocMECov.includes(scenario) && cntry == '832') {
-    if (SAsubindustry27E.includes(flsubIndustryCd)) {
+  if (custGrp == 'LOCAL' || custGrp == 'SBM' || (custGrp == 'CROSS' && !MEA_COUNTRIES.includes(landed))) {
+    if (scenario == 'BUSPR' || scenario.includes('BP')) {
+      FormManager.setValue('isuCd', '8B');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('taxCd2');
+      FormManager.setValue('taxCd2', '');
+    } else if (scenario.includes('IN') || scenario.includes('IBM')) {
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('taxCd2');
+      FormManager.setValue('taxCd2', '');
+    } else if (custSubGrpLocMECov.includes(scenario) && cntrylist_27E.includes(cntry)) {
       FormManager.setValue('isuCd', '27');
       FormManager.setValue('clientTier', 'E');
-    } else if (SAsubindustry34Q.includes(flsubIndustryCd)) {
+    } else if (custSubGrpLocMECov.includes(scenario) && cntrlist_34Q.includes(cntry)) {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
+    } else if (custSubGrpLocMECov.includes(scenario) && cntry == '832') {
+      if (SAsubindustry27E.includes(flsubIndustryCd)) {
+        FormManager.setValue('isuCd', '27');
+        FormManager.setValue('clientTier', 'E');
+      } else if (SAsubindustry34Q.includes(flsubIndustryCd)) {
+        FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Q');
+      }
+    } else if (scenario != "") {
+      if (scenario != 'PRICU' && scenario != 'BUSPR' && !scenario.includes('BP') && !scenario.includes('IN') && !scenario.includes('IBM')) {
+        FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Q');
+        FormManager.enable('isuCd');
+        FormManager.enable('clientTier');
+        FormManager.enable('taxCd2');
+      }
     }
-  } else if (scenario != "") {
-    if (scenario != 'PRICU' && scenario != 'BUSPR' && !scenario.includes('BP') && !scenario.includes('IN') && !scenario.includes('IBM')) {
+  } else if (custGrp == 'CROSS' && MEA_COUNTRIES.includes(landed)) {
+    if (scenario.includes('XBP')) {
+      FormManager.setValue('isuCd', '8B');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('taxCd2');
+      FormManager.setValue('taxCd2', '');
+    } else if (scenario.includes('XINT')) {
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('taxCd2');
+      FormManager.setValue('taxCd2', '');
+    } else if ((scenario == 'XCOM' || scenario == 'XTP') && cntrycode_27E.includes(landed)) {
+      FormManager.setValue('isuCd', '27');
+      FormManager.setValue('clientTier', 'E');
+    } else if ((scenario == 'XCOM' || scenario == 'XTP') && cntrcode_34Q.includes(landed)) {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
-      FormManager.enable('isuCd');
-      FormManager.enable('clientTier');
-      FormManager.enable('taxCd2');
+    } else if ((scenario == 'XCOM' || scenario == 'XTP') && landed == '832') {
+      if (SAsubindustry27E.includes(flsubIndustryCd)) {
+        FormManager.setValue('isuCd', '27');
+        FormManager.setValue('clientTier', 'E');
+      } else if (SAsubindustry34Q.includes(flsubIndustryCd)) {
+        FormManager.setValue('isuCd', '34');
+        FormManager.setValue('clientTier', 'Q');
+      }
     }
   }
 
