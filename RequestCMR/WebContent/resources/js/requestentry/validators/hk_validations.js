@@ -8580,6 +8580,14 @@ function validateInacValuesHK() {
   })(), 'IBM_REQ_TAB', 'frmCMR');
 }
 
+function setFieldToReadyOnly() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  }
+}
+
 function setKUKLAvaluesHK() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -8590,6 +8598,7 @@ function setKUKLAvaluesHK() {
   if (FormManager.getActualValue('reqType') == 'U') {
     return
   }
+
   console.log('setKUKLAvaluesHK() >>>> set KUKLA values for HK >>>>');
 
   var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
@@ -8908,4 +8917,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.registerValidator(validateInacValuesHK, [SysLoc.HONG_KONG]);
+
+  GEOHandler.addAfterTemplateLoad(setFieldToReadyOnly, SysLoc.HONG_KONG);
+  GEOHandler.addAfterConfig(setFieldToReadyOnly, SysLoc.HONG_KONG);
 });

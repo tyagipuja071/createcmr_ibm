@@ -78,7 +78,6 @@ function addHandlersForGCG() {
   if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
     _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function (value) {
       setAbbrvNameBPScen();
-      setKUKLAvaluesMO();
     });
   }
 
@@ -4501,16 +4500,38 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setFieldToReadyOnly() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  }
+}
+
+function setKuklaAfterConfigMO() {
+  if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
+    _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function (value) {
+      setKUKLAvaluesMO();
+    });
+  }
+}
+
 function setKUKLAvaluesMO() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var industryClass = FormManager.getActualValue('IndustryClass');
   var bpRelType = FormManager.getActualValue('bpRelType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
 
   if (FormManager.getActualValue('reqType') == 'U') {
     return
   }
+
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  }
+
   console.log('setKUKLAvaluesMO() >>>> set KUKLA values for MO >>>>');
 
   var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
@@ -4570,7 +4591,7 @@ function afterConfigMO() {
   reqReasonHandler();
   defaultCMRNumberPrefix();
   filterInacCdBasedInacTypeChange();
-  addHandlersForGCG();
+  setKuklaAfterConfigMO();
 }
 
 function afterTemplateLoadMO() {
@@ -4615,4 +4636,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addEROAttachmentValidator, [SysLoc.MACAO], GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(validateStreetAddrCont2, [SysLoc.MACAO], null, true);
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
+
+  GEOHandler.addAfterTemplateLoad(setFieldToReadyOnly, SysLoc.MACAO);
+  GEOHandler.addAfterConfig(setFieldToReadyOnly, SysLoc.MACAO);
 });
