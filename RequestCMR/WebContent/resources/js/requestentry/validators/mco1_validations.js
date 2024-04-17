@@ -2275,7 +2275,9 @@ function setDefaultEntCBMEA() {
                 };
                 var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
                 var enterprise = results.ret1;
+                if(enterprise != null && enterprise != undefined) {
                 FormManager.setValue('enterprise', enterprise);
+                }
             }
         } else if (SOUTH_AFRICA_LC.includes(landCntry)) {
             // SOUTH AFRICA MEA REGION
@@ -2294,7 +2296,9 @@ function setDefaultEntCBMEA() {
                 };
                 var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
                 var enterprise = results.ret1;
+                if(enterprise != null && enterprise != undefined) {
                 FormManager.setValue('enterprise', enterprise);
+                }
             }
 
         } else if (CEWA_LC.includes(landCntry)) {
@@ -2306,7 +2310,9 @@ function setDefaultEntCBMEA() {
             };
             var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
             var enterprise = results.ret1;
-            FormManager.setValue('enterprise', enterprise);
+            if(enterprise != null && enterprise != undefined) {
+              FormManager.setValue('enterprise', enterprise);
+            }
 
         } else if (ME_LC.includes(landCntry)) {
           var noSubCountriesME = ['KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'PS', 'LB', 'BH', 'LY', 'TN', 'MA', 'PK', 'AF'];
@@ -2330,7 +2336,9 @@ function setDefaultEntCBMEA() {
             var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
              enterprise = results.ret1;
             }
+          if(enterprise != null && enterprise != undefined) {
             FormManager.setValue('enterprise', enterprise);
+          }
         }
     }
 }
@@ -3083,26 +3091,22 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
     var ctc = FormManager.getActualValue('clientTier');
     var isuCtc = isuCd + ctc;
     var isuCtcForBlankEntp = ['04', '12', '28', '4F', '5K'];
-    if (reqType == 'U') {
+    var reqId = FormManager.getActualValue('reqId');
+    var landCntry = '';
+    var result = cmr.query('LANDCNTRY.IT', {
+        REQID: reqId
+    });
+    if (result != null && result.ret1 != undefined) {
+        landCntry = result.ret1;
+    }
+    var MEA_COUNTRIES_CB = ['TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+    if (reqType == 'U' || MEA_COUNTRIES_CB.includes(landCntry)) {
         return;
     }
     if (isuCtc != '27E') {
         FormManager.setValue('enterprise', '');
         return;
     } else {
-
-        var reqId = FormManager.getActualValue('reqId');
-        var landCntry = '';
-        var result = cmr.query('LANDCNTRY.IT', {
-            REQID: reqId
-        });
-        if (result != null && result.ret1 != undefined) {
-            landCntry = result.ret1;
-        }
-        var MEA_COUNTRIES_CB = ['TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
-        if (MEA_COUNTRIES_CB.includes(landCntry)) {
-            return;
-        }
         if (subInd != null || subInd != undefined || subInd != '') {
             subInd = subInd[0];
         }
