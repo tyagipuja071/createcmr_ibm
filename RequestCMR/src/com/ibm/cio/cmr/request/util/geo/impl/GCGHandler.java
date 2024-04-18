@@ -397,6 +397,11 @@ public class GCGHandler extends APHandler {
     if ("ZI01".equals(rdcType) && "E".equals(addressSeq)) {
       return "MAIL"; // address E, install-at
     }
+
+    if (SHIP_TO_ADDR_TYPE.equals(rdcType)) {
+      return SHIP_TO_ADDR_TYPE; // Ship To
+    }
+
     return null;
   }
 
@@ -497,36 +502,6 @@ public class GCGHandler extends APHandler {
 
   @Override
   protected void handleRDcRecordValues(FindCMRRecordModel record) {
-
-    // String[] inputs = { record.getCmrName3(), record.getCmrName4(),
-    // record.getCmrStreetAddress(), record.getCmrCity(), record.getCmrCity2()
-    // };
-    // List<String> currentFields = Arrays.asList(record.getCmrDept() != null ?
-    // record.getCmrDept().toUpperCase().trim() : "XXXX");
-    // record.setCmrName3(null);
-    // record.setCmrName4(null);
-    // record.setCmrCity(null);
-    // record.setCmrCity2(null);
-    // record.setCmrDept(null);
-    // Queue<String> streets = new LinkedList<>();
-    // for (String street : inputs) {
-    // if (!StringUtils.isBlank(street) &&
-    // !currentFields.contains(street.toUpperCase().trim())) {
-    // streets.add(street);
-    // }
-    // }
-    // String current = streets.peek() != null ? streets.remove() : null;
-    // record.setCmrStreetAddress(current);
-    //
-    // current = streets.peek() != null ? streets.remove() : null;
-    // record.setCmrStreetAddressCont(current);
-    //
-    // current = streets.peek() != null ? streets.remove() : null;
-    // record.setCmrCity(current);
-    //
-    // current = streets.peek() != null ? streets.remove() : null;
-    // record.setCmrCity2(current);
-
   }
 
   @Override
