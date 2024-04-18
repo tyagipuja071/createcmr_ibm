@@ -2505,7 +2505,16 @@ function enterpriseValidatorMea() {
                                 name: 'enterprise'
                             }, false, 'Enterprise can only accept : \'911703\'\ \'911716\'\ \'911704\'\ ');
                         }
-                    } else if (isuCtc == '5k' || isuCtc == '04' || isuCtc == '28') {
+                    } else if (isuCtc == '36Y') {
+                      var enterprise34Q = ['908030', '912103', '912104'];
+                      if (!enterprise34Q.includes(enterprise)) {
+                          return new ValidationResult({
+                              id: 'enterprise',
+                              type: 'text',
+                              name: 'enterprise'
+                          }, false, 'Enterprise can only accept : \'908030\'\ \'912103\'\ \'912104\'\ ');
+                      }
+                  }  else if (isuCtc == '5k' || isuCtc == '04' || isuCtc == '28') {
                         if (enterprise != '') {
                             return new ValidationResult({
                                 id: 'enterprise',
