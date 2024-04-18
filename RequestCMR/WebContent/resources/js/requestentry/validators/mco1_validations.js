@@ -2281,6 +2281,9 @@ function setDefaultEntCBMEA() {
                 FormManager.setValue('enterprise', enterprise);
                 }
             }
+            if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '34Q' || isuCtc == '28') {
+              FormManager.setValue('enterprise', '');
+            }
         } else if (SOUTH_AFRICA_LC.includes(landCntry)) {
             // SOUTH AFRICA MEA REGION
             if (landCntry == 'LS') {
@@ -2302,7 +2305,9 @@ function setDefaultEntCBMEA() {
                 FormManager.setValue('enterprise', enterprise);
                 }
             }
-
+            if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '12' || isuCtc == '28' || isuCtc == '4F' || isuCtc == '34Q') {
+              FormManager.setValue('enterprise', '');
+            }
         } else if (CEWA_LC.includes(landCntry)) {
             // CEWA MEA REGION
             var qParams = {
@@ -2315,7 +2320,9 @@ function setDefaultEntCBMEA() {
             if(enterprise != null && enterprise != undefined) {
               FormManager.setValue('enterprise', enterprise);
             }
-
+            if(isuCtc == '5K' || isuCtc == '36Y') {
+              FormManager.setValue('enterprise', '');
+            }
         } else if (ME_LC.includes(landCntry)) {
           var noSubCountriesME = ['KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'PS', 'LB', 'BH', 'LY', 'TN', 'MA', 'PK', 'AF'];
           var enterprise='';
@@ -2341,6 +2348,12 @@ function setDefaultEntCBMEA() {
           if(enterprise != null && enterprise != undefined) {
             FormManager.setValue('enterprise', enterprise);
           }
+          if(isuCtc == '5K' || isuCtc == '36Y') {
+            FormManager.setValue('enterprise', '');
+          }
+        }
+        if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '12' || isuCtc == '28' || isuCtc == '4F') {
+          FormManager.setValue('enterprise', '');
         }
     }
 }
@@ -2514,7 +2527,7 @@ function enterpriseValidatorMea() {
                               name: 'enterprise'
                           }, false, 'Enterprise can only accept : \'908030\'\ \'912103\'\ \'912104\'\ ');
                       }
-                  }  else if (isuCtc == '5k' || isuCtc == '04' || isuCtc == '28') {
+                  }  else if (isuCtc == '5K' || isuCtc == '04' || isuCtc == '28') {
                         if (enterprise != '') {
                             return new ValidationResult({
                                 id: 'enterprise',
@@ -2549,7 +2562,7 @@ function enterpriseValidatorMea() {
                                 name: 'enterprise'
                             }, false, 'Enterprise can only accept : \'BUILD1\'\, \'DISTR1\'\ , \'SRVCE1\'\ ');
                         }
-                    } else if (isuCtc == '5k') {
+                    } else if (isuCtc == '5K') {
                         if (enterprise != '') {
                             return new ValidationResult({
                                 id: 'enterprise',
@@ -2884,8 +2897,7 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
                 }, false, 'Enterprise can only accept : \'912088\'\ \'912090\'\ \'912089\'\ ');
             }
         }
-    }
-    if (landCntry == 'EG') {
+    } else if (landCntry == 'EG') {
         if (isuCtc == '34Q') {
           var enterprise34Q = ['912088', '911831', '911835', '911275', '911833'];
             if (['D', 'J', 'K', 'L', 'R', 'T', 'W'].includes(subIndustryCd) && !(enterprise == '911836'|| enterprise34Q.includes(enterprise))) {
@@ -2976,7 +2988,7 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
             }
         }
     }
-    if (isuCtc == '5k') {
+    if (isuCtc == '5K') {
         if (enterprise != '') {
             return new ValidationResult({
                 id: 'enterprise',
