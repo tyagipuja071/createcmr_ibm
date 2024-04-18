@@ -2279,6 +2279,9 @@ function setDefaultEntCBMEA() {
                 FormManager.setValue('enterprise', enterprise);
                 }
             }
+            if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '34Q' || isuCtc == '28') {
+              FormManager.setValue('enterprise', '');
+            }
         } else if (SOUTH_AFRICA_LC.includes(landCntry)) {
             // SOUTH AFRICA MEA REGION
             if (landCntry == 'LS') {
@@ -2300,7 +2303,9 @@ function setDefaultEntCBMEA() {
                 FormManager.setValue('enterprise', enterprise);
                 }
             }
-
+            if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '12' || isuCtc == '28' || isuCtc == '4F' || isuCtc == '34Q') {
+              FormManager.setValue('enterprise', '');
+            }
         } else if (CEWA_LC.includes(landCntry)) {
             // CEWA MEA REGION
             var qParams = {
@@ -2313,7 +2318,9 @@ function setDefaultEntCBMEA() {
             if(enterprise != null && enterprise != undefined) {
               FormManager.setValue('enterprise', enterprise);
             }
-
+            if(isuCtc == '5K' || isuCtc == '36Y') {
+              FormManager.setValue('enterprise', '');
+            }
         } else if (ME_LC.includes(landCntry)) {
           var noSubCountriesME = ['KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'PS', 'LB', 'BH', 'LY', 'TN', 'MA', 'PK', 'AF'];
           var enterprise='';
@@ -2339,6 +2346,12 @@ function setDefaultEntCBMEA() {
           if(enterprise != null && enterprise != undefined) {
             FormManager.setValue('enterprise', enterprise);
           }
+          if(isuCtc == '5K' || isuCtc == '36Y') {
+            FormManager.setValue('enterprise', '');
+          }
+        }
+        if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '12' || isuCtc == '28' || isuCtc == '4F') {
+          FormManager.setValue('enterprise', '');
         }
     }
 }
