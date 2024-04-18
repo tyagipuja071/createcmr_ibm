@@ -371,7 +371,10 @@ public class GCGHandler extends APHandler {
 
       LOG.info("After Mapped Addrtype: " + addrType);
 
-      if ("ZP01".equals(addrType) || "MAIL".equals(addrType) || "ZD01".equals(addrType)) {
+      boolean isShipToInUpdate = CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType()) && "ZD01".equals(addrType);
+      LOG.info("Is Ship to in Update: " + isShipToInUpdate);
+
+      if ("ZP01".equals(addrType) || "MAIL".equals(addrType) || isShipToInUpdate) {
         handleRDcRecordValues(record);
         record.setCmrAddrTypeCode(addrType);
         converted.add(record);
