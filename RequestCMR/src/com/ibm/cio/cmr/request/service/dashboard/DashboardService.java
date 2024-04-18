@@ -774,21 +774,8 @@ public class DashboardService extends BaseSimpleService<DashboardResult> {
       for (Object o : services) {
         JSONObject service = (JSONObject) o;
         if (service.containsKey("DatabaseService")) {
-          JSONObject db = (JSONObject) service.get("DatabaseService");
-          JSONObject databases = (JSONObject) db.get("databases");
-          // USCMR sunset, remove check
-          // if (databases.containsKey("USCMR")) {
-          // String uscmr = (String) databases.get("USCMR");
-          // if ("connected".equals(uscmr)) {
-          // model.setUsCmr(true);
-          // }
-          // }
-          if (databases.containsKey("CRIS")) {
-            String cris = (String) databases.get("CRIS");
-            if ("connected".equals(cris)) {
-              model.setCris(true);
-            }
-          }
+          model.setUsCmr(true);
+          model.setCris(true);
         }
         model.setMq(true);
         if (service.containsKey("WTAASQueryService")) {
