@@ -371,7 +371,7 @@ public class GCGHandler extends APHandler {
 
       LOG.info("After Mapped Addrtype: " + addrType);
 
-      if ("ZP01".equals(addrType) || "MAIL".equals(addrType)) {
+      if ("ZP01".equals(addrType) || "MAIL".equals(addrType) || "ZD01".equals(addrType)) {
         handleRDcRecordValues(record);
         record.setCmrAddrTypeCode(addrType);
         converted.add(record);
