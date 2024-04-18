@@ -7130,14 +7130,14 @@ function contractSignDateValidator() {
       validate : function() {
         console.log('Checking requested Contract Sign Date...');
         var agreementSignDate = FormManager.getActualValue('agreementSignDate');
-        var datePatternYYMMDD = /^\d{2}((0|[1-9]|[10-12]){2})((0|[1-9]|[10-31]){2})$/g;
+        var datePatternYYMMDD = /^(\d{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/g;
 
         if (agreementSignDate != '' && agreementSignDate != null) {
           if (agreementSignDate.length >= 1 && agreementSignDate.length != 6) {
-            return new ValidationResult(null, false, 'Contract Sign Date length should be 6 characters long.');
+            return new ValidationResult(null, false, 'Contract Sign Date should be 6 characters long and in date format like YYMMDD.');
           }
           if (!agreementSignDate.match(datePatternYYMMDD)) {
-            return new ValidationResult(null, false, 'Contract Sign Date format should be YYMMDD.');
+            return new ValidationResult(null, false, 'Contract Sign Date should be in date format like YYMMDD.');
           }
         }
 
