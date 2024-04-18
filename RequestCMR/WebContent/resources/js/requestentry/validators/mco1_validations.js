@@ -110,7 +110,7 @@ function addHandlersForZA() {
       _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
    if (typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         setIsuCtcCBMEA();
-        setSalesRepSORTL();
+        retainImportedValues();
         setDefaultEntCBMEA();
     }
       });
@@ -122,7 +122,7 @@ function addHandlersForZA() {
                 calledByIsuHandler = true;
                 calledByCtcHandler = false;
                 // setCtcSalesRepSBO(value);
-                setSalesRepSORTL();
+                retainImportedValues();
                 setEnterpriseBehaviour();
             }
             if (_oldIsuCd != FormManager.getActualValue('isuCd') || typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
@@ -139,7 +139,7 @@ function addHandlersForZA() {
                 calledByIsuHandler = false;
                 calledByCtcHandler = true;
                 // setCtcSalesRepSBO(FormManager.getField('isuCd'));
-                setSalesRepSORTL();
+                retainImportedValues();
                 setEnterpriseBehaviour();
             } else if (FormManager.getActualValue('reqType') == 'U') {
                 calledByIsuHandler = false;
@@ -1194,6 +1194,11 @@ function retainImportedValues(fromAddress, scenario, scenarioChanged) {
         } else {
             FormManager.setValue('inacCd', '');
         }
+    }
+    var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
+    var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
+    if(salesBusOffCd == null || salesBusOffCd == '' || repTeamMemberNo == null || repTeamMemberNo == ''){
+      setCtcSalesRepSBO();
     }
 }
 
