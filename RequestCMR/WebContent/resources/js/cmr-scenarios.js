@@ -456,6 +456,7 @@ var TemplateService = (function() {
 
                       // CREATCMR-4293
                       var ctc = '';
+                      var enterprise = '';
                       var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
                       if (CMR_ISSUING_CNTRY_ARRAY.includes(cmrIssuingCntry)) {
@@ -472,6 +473,14 @@ var TemplateService = (function() {
                             ctc = '';
                           }
                           FormManager.setValue(name, ctc);
+                        }
+                      }
+                      if (cmrIssuingCntry == '864') {
+                        if (name == 'enterprise') {
+                          if (_pagemodel.enterprise == null) {
+                            enterprise = '';
+                          }
+                          FormManager.setValue(name, enterprise);
                         }
                       }
                       // CREATCMR-4293
@@ -626,8 +635,9 @@ var TemplateService = (function() {
             }
           }
 
-          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755' 
-          || FormManager.getActualValue('cmrIssuingCntry') == '864') && name == 'enterprise') {
+          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755' || FormManager
+              .getActualValue('cmrIssuingCntry') == '864')
+              && name == 'enterprise') {
             // SKIP for CMR-2617 Germany
             // SKIP for CMR-2001 Austria
           } else if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
