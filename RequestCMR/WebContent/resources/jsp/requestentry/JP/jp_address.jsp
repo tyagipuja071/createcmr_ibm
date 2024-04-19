@@ -263,7 +263,7 @@
   <cmr:column span="2" containerForField="Contact">
     <p>
       <cmr:label fieldId="contact">
-        <cmr:fieldLabel fieldId="Contact" />:
+        <cmr:fieldLabel fieldId="Contact" />:<cmr:info text="${ui.info.contact}" />
              <cmr:delta text="-" id="delta-contact" />
       </cmr:label>
       <cmr:field fieldId="Contact" id="contact" path="contact" />
