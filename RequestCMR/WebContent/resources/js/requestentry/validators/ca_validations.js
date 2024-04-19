@@ -342,6 +342,12 @@ function toggleCATaxFields() {
 }
 
 function toggleCATaxFieldsByProvCd(provCd) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'PRIV' || custSubGrp == 'ECO') {
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }
+
   if (provCd == 'QC') {
     // Show QST
     FormManager.clearValue('PSTExempt');
