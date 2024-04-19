@@ -71,6 +71,7 @@ public class GCGHandler extends APHandler {
   private static final List<String> BILL_TO_FIXED_SEQ = Arrays.asList("B", "C", "D");
   private static final String HK_FULLNAME = "Hong Kong";
   private static final String MO_FULLNAME = "Macao";
+  private static final String MO_FULLNAME2 = "Macau";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.HONG_KONG, "HK");
@@ -673,8 +674,8 @@ public class GCGHandler extends APHandler {
 
   }
 
-  private boolean isHKMOFullname(String val) {
-    return HK_FULLNAME.equals(val) || MO_FULLNAME.equals(val);
+  private static boolean isHKMOFullname(String val) {
+    return HK_FULLNAME.equalsIgnoreCase(val) || MO_FULLNAME.equalsIgnoreCase(val) || MO_FULLNAME2.equalsIgnoreCase(val);
   }
 
   private String getCorrectAddressTypeBySequence(String seq) {
