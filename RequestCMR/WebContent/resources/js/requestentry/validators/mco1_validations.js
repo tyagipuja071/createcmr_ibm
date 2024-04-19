@@ -2291,11 +2291,11 @@ function setDefaultEntCBMEA() {
             }
         } else if (SOUTH_AFRICA_LC.includes(landCntry)) {
             // SOUTH AFRICA MEA REGION
-            if (landCntry == 'LS') {
+            if (landCntry == 'LS' && isuCtc == '27E') {
                 FormManager.setValue('enterprise', '910510');
-            } else if (landCntry == 'NA') {
+            } else if (landCntry == 'NA' && isuCtc == '27E') {
                 FormManager.setValue('enterprise', '909813');
-            } else if (landCntry == 'SZ') {
+            } else if (landCntry == 'SZ' && isuCtc == '27E') {
                 FormManager.setValue('enterprise', '910509');
             } else {
                 var qParams = {
@@ -3128,7 +3128,7 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
         landCntry = result.ret1;
     }
     var MEA_COUNTRIES_CB = ['TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
-    if (reqType == 'U' || MEA_COUNTRIES_CB.includes(landCntry)) {
+    if (reqType == 'U' || MEA_COUNTRIES_CB.includes(landCntry) || landCntry == '' || landCntry == undefined) {
         return;
     }
     if (isuCtc != '27E') {
