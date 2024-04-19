@@ -342,6 +342,12 @@ function toggleCATaxFields() {
 }
 
 function toggleCATaxFieldsByProvCd(provCd) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'PRIV' || custSubGrp == 'ECO') {
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }
+
   if (provCd == 'QC') {
     // Show QST
     FormManager.clearValue('PSTExempt');
@@ -1449,6 +1455,8 @@ function addressQuotationValidator() {
   FormManager.addValidator('poBoxCity', Validators.NO_QUOTATION, [ 'PostBox City' ]);
   FormManager.addValidator('mainCustNm1', Validators.NO_QUOTATION, [ 'Customer Name' ]);
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
+  var gisucd = FormManager.getActualValue('isuCd');
+  var gctccd = FormManager.getActualValue('clientTier');
 
 }
 
