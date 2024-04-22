@@ -79,7 +79,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
             result.setDetails("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
             result.setOnError(true);
             result.setResults("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
-            engineData.addRejectionComment("DUPD", "Request should be re-submitted as a company or private Indivuduals", "",
+            engineData.addRejectionComment("DUPD", "The request should be re-submitted as a company or private individual.", "",
                 "");
             log.debug("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
             return result;
