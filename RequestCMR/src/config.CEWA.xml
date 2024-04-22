@@ -63,6 +63,12 @@
 					<length>1</length>
 					<lovId>EmbargoCode</lovId>
 				</column>
+					<column>
+					<label>Enterprise Number</label>
+					<dbColumn>ENTERPRISE</dbColumn>
+					<width>15</width>
+					<length>6</length>
+				</column>		
                 <column>
                     <label>STC order block code</label>
                     <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
