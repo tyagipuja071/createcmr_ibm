@@ -573,6 +573,11 @@ function afterConfigForUS() {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
     }
+  } else if (covId.str.charAt(0).toUpperCase() == 'T' && role == 'Processor' && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
   }
 
   else {
