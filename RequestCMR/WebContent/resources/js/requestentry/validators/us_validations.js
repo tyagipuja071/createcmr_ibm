@@ -536,8 +536,7 @@ function afterConfigForUS() {
   } else if (reqType == 'C' && (role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  }
-  if ((covId == 'A' || covId == 'I') && (role == 'Processor' || role == 'Viewer') && reqType == 'C') {
+  } else if ((covId == 'A' || covId == 'I') && (role == 'Processor' || role == 'Viewer') && reqType == 'C') {
     const
     subIndustryMappings = {
       'A' : '3T',
