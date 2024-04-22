@@ -4529,7 +4529,7 @@ function setKUKLAvaluesMO() {
 
   console.log('setKUKLAvaluesMO() >>>> set KUKLA values for MO >>>>');
 
-  var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
+  var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRML', 'CROSS']);
   var cond2 = new Set(['DUMMY', 'INTER']);
 
   var kuklaMO = [];
