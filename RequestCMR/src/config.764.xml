@@ -64,11 +64,17 @@
 					<lovId>EmbargoCode</lovId>
 				</column>
 				<column>
-                    <label>STC order block code</label>
-                    <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
-                    <width>15</width>
-                    <lovId>TaxExemptStatus3</lovId>
-                </column>
+					<label>Enterprise Number</label>
+					<dbColumn>ENTERPRISE</dbColumn>
+					<width>15</width>
+					<length>6</length>
+				</column>
+				<column>
+					<label>STC order block code</label>
+					<dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+					<width>15</width>
+					<lovId>TaxExemptStatus3</lovId>
+				</column>
 				<column>
 					<label>CoF</label>
 					<dbColumn>OUT_CITY_LIMIT</dbColumn>
@@ -81,30 +87,30 @@
 					<dbColumn>ENTP_UPDT_TYP</dbColumn>
 					<width>15</width>
 					<lovId>CodFlag</lovId>
-				</column>				
+				</column>
 				<column number="false">
-          			<label>VAT</label>
-          			<dbColumn>VAT</dbColumn>
-          			<width>20</width>
-          			<length>20</length>
-        		</column>
-        		<column>
-          			<label>Phone #</label>
-          			<dbColumn>RESTRICT_TO</dbColumn>
-          			<length>16</length>
-        		</column>
-        		<column exactLength="true">
+					<label>VAT</label>
+					<dbColumn>VAT</dbColumn>
+					<width>20</width>
+					<length>20</length>
+				</column>
+				<column>
+					<label>Phone #</label>
+					<dbColumn>RESTRICT_TO</dbColumn>
+					<length>16</length>
+				</column>
+				<column exactLength="true">
 					<label>Internal Department Number</label>
 					<dbColumn>AFFILIATE</dbColumn>
 					<width>20</width>
 					<length>6</length>
 				</column>
-					<column>
+				<column>
 					<label>TIN/PIN Number (local identifier)</label>
 					<dbColumn>TAX_CD1</dbColumn>
 					<width>20</width>
 					<length>11</length>
-				</column>						
+				</column>
 			</columns>
 		</tab>
 		<tab name="Mailing Address" type="Address" typeCode="ZS01">
@@ -152,6 +158,12 @@
 					<length>21</length>
 				</column>
 				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
@@ -174,8 +186,8 @@
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
 					<length>20</length>
-				</column>				
-				
+				</column>
+
 			</columns>
 		</tab>
 		<tab name="Billing Address" type="Address" typeCode="ZP01">
@@ -223,6 +235,12 @@
 					<length>24</length>
 				</column>
 				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
@@ -233,7 +251,7 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>				
+				</column>
 				<column>
 					<label>Additional Name/Address Information</label>
 					<dbColumn>COUNTY</dbColumn>
@@ -245,7 +263,7 @@
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
 					<length>20</length>
-				</column>				
+				</column>
 			</columns>
 		</tab>
 		<tab name="Installing Address" type="Address" typeCode="ZI01">
@@ -293,6 +311,12 @@
 					<length>21</length>
 				</column>
 				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
@@ -309,7 +333,7 @@
 					<dbColumn>COUNTY</dbColumn>
 					<width>25</width>
 					<length>30</length>
-				</column>				
+				</column>
 			</columns>
 		</tab>
 		<tab name="Shipping Address" type="Address" typeCode="ZD01">
@@ -355,7 +379,13 @@
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
 					<length>21</length>
-				</column>			
+				</column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -375,13 +405,14 @@
 					<length>30</length>
 				</column>
 				<column>
-          			<label>Phone #</label>
-          			<dbColumn>CUST_PHONE</dbColumn>
-          			<length>16</length>
-        		</column>
+					<label>Phone #</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<length>16</length>
+				</column>
 			</columns>
 		</tab>
-		<tab name="EPL Address" data="false" type="Address" typeCode="ZS02">
+		<tab name="EPL Address" data="false" type="Address"
+			typeCode="ZS02">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -426,6 +457,12 @@
 					<length>21</length>
 				</column>
 				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
@@ -442,7 +479,7 @@
 					<dbColumn>COUNTY</dbColumn>
 					<width>25</width>
 					<length>30</length>
-				</column>		
+				</column>
 			</columns>
 		</tab>
 	</tabs>
