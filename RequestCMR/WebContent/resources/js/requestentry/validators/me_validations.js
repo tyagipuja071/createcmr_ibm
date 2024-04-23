@@ -3837,7 +3837,7 @@ function setIsuCtcOnScenarioChange() {
     } else if ((scenario == 'XCOM' || scenario == 'XTP') && cntrcode_34Q.includes(landed)) {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
-    } else if ((scenario == 'XCOM' || scenario == 'XTP') && landed == '832') {
+    } else if ((scenario == 'XCOM' || scenario == 'XTP') && landed == 'SA') {
       if (SAsubindustry27E.includes(flsubIndustryCd)) {
         FormManager.setValue('isuCd', '27');
         FormManager.setValue('clientTier', 'E');
