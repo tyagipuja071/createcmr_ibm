@@ -3883,7 +3883,7 @@ function setIsuCtcOnScenarioChange() {
   var SAsubindustry34Q = [ 'E', 'G', 'V', 'Y', 'H', 'X' ];
   let
   flsubIndustryCd = subIndustryCd.charAt(0);
-  if (custGrp == 'LOCAL' || custGrp == 'SBM' || (custGrp == 'CROSS' && !MEA_COUNTRIES.includes(landed))) {
+  if (custGrp == 'LOCAL' || custGrp == 'SBM' || custGrp == 'GBM' || (custGrp == 'CROSS' && !MEA_COUNTRIES.includes(landed))) {
     if (scenario == 'BUSPR' || scenario.includes('BP')) {
       FormManager.setValue('isuCd', '8B');
       FormManager.setValue('clientTier', '');
