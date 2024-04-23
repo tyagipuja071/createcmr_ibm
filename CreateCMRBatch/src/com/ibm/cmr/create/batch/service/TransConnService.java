@@ -159,6 +159,10 @@ public class TransConnService extends BaseBatchService {
       records = gatherMQInterfaceRequests(entityManager);
       monitorMQInterfaceRequests(entityManager, records);
 
+      LOG.info("Reprocess MQ Interface records Reprocess...");
+      records = gatherMQInterfaceRequestsReprocess(entityManager);
+      monitorMQInterfaceRequestsReprocess(entityManager, records);
+
       LOG.info("Processing Completed Manual records...");
       records = gatherDisAutoProcRecords(entityManager);
       monitorDisAutoProcRec(entityManager, records);
@@ -190,7 +194,7 @@ public class TransConnService extends BaseBatchService {
     // List<Admin> reprocessRecords = query.getResults(Admin.class);
     LOG.debug("Size of LA Reprocess Rdc Records : " + 0);
     LOG.info("gatherLAReprocessRdcRecords -- removed");
-    
+
     List<Long> queue = new ArrayList<>();
     // for (Admin admin : reprocessRecords) {
     // queue.add(admin.getId().getReqId());
@@ -424,6 +428,30 @@ public class TransConnService extends BaseBatchService {
   }
 
   /**
+   * Prepares a list of request IDs to reprocess for the mq flow
+   * 
+   * @param entityManager
+   * @return
+   */
+  protected List<Long> gatherMQInterfaceRequestsReprocess(EntityManager entityManager) {
+    LOG.info("gatherMQInterfaceRequestsReprocess...");
+    long start = new Date().getTime();
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_MQ_INTF_REQ_QUEUE_REPROCESS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+
+    List<MqIntfReqQueue> mqIntfList = query.getResults(MqIntfReqQueue.class);
+    LOG.debug("Size of MQ Intf List to Reprocess : " + mqIntfList.size());
+
+    List<Long> queue = new ArrayList<>();
+    for (MqIntfReqQueue mq : mqIntfList) {
+      queue.add(mq.getId().getQueryReqId());
+    }
+    ProfilerLogger.LOG.trace("After gatherMQInterfaceRequests " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
+    return queue;
+
+  }
+
+  /**
    * Monitor records from the CREQCMR.MQ_INTF_REQ_QUEUE
    * 
    * @param entityManager
@@ -516,6 +544,104 @@ public class TransConnService extends BaseBatchService {
 
         } else {
           LOG.warn("Request ID " + admin.getId().getReqId() + " cannot be processed. Improper Type or not completed.");
+        }
+
+        partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorMQInterfaceRequests for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
+      } catch (Exception e) {
+        SlackAlertsUtil.recordException("TransConn", "Query ID " + mqIntfReq.getId().getQueryReqId(), e);
+        LOG.error("Error in processing TransConn Record " + mqIntfReq.getId().getQueryReqId() + " for Request ID " + mqIntfReq.getReqId() + " ["
+            + e.getMessage() + "]", e);
+      }
+    }
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
+
+  }
+
+  /**
+   * Monitor records from the CREQCMR.MQ_INTF_REQ_QUEUE
+   * 
+   * @param entityManager
+   * @throws JsonGenerationException
+   * @throws JsonMappingException
+   * @throws IOException
+   * @throws Exception
+   */
+  public void monitorMQInterfaceRequestsReprocess(EntityManager entityManager, List<Long> mqIntfList)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
+
+    LOG.info("HKMO -- monitorMQInterfaceRequestsReprocess");
+    boolean isError = false;
+    for (Long id : mqIntfList) {
+      Thread.currentThread().setName("REQ-" + id);
+
+      long start = new Date().getTime();
+      MqIntfReqQueuePK pk = new MqIntfReqQueuePK();
+      pk.setQueryReqId(id);
+      MqIntfReqQueue mqIntfReq = entityManager.find(MqIntfReqQueue.class, pk);
+
+      isError = mqIntfReq.getReqStatus() != null && mqIntfReq.getReqStatus().contains(MQMsgConstants.REQ_STATUS_SER);
+      try {
+        LOG.info("Processing MQ Intf Req " + mqIntfReq.getId().getQueryReqId() + " [Request ID: " + mqIntfReq.getReqId() + "]");
+        MQIntfReqQueueModel mqIntfReqModel = new MQIntfReqQueueModel();
+        copyValuesFromEntity(mqIntfReq, mqIntfReqModel);
+
+        // create a entry in request's comment log re_cmt_log table
+        if (isError) {
+          createMQIntfReqCommentLog(entityManager, mqIntfReqModel);
+        }
+        // update the MQ_IND of NOTIFY_REQ Table for each record
+        // processed
+        mqIntfReq.setMqInd(CmrConstants.MQ_IND_YES);
+        updateEntity(mqIntfReq, entityManager);
+
+        partialCommit(entityManager); // commit the MQ_INTF_REQ_QUEUE
+        // changes so
+        // that
+        // they won't be on the next run
+
+        // retrieve the mail contents and needed entities
+        String sqlMail = "BATCH.GET_MAIL_CONTENTS";
+        String mapping = Admin.BATCH_SERVICE_MAPPING;
+        PreparedQuery requestQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql(sqlMail));
+        requestQuery.setParameter("REQ_ID", mqIntfReq.getReqId());
+        requestQuery.setParameter("REQ_STATUS", isError ? CmrConstants.REQUEST_STATUS.PPN.toString() : CmrConstants.REQUEST_STATUS.COM.toString());
+        requestQuery.setParameter("CHANGED_BY_ID", mqIntfReq.getLastUpdtBy());
+        List<CompoundEntity> records = requestQuery.getCompundResults(1, Admin.class, mapping);
+
+        CompoundEntity entities = records.get(0);
+        Admin admin = entities.getEntity(Admin.class);
+        Data data = entities.getEntity(Data.class);
+        WfHist wfHist = entities.getEntity(WfHist.class);
+
+        if (data != null) {
+          entityManager.detach(data);
+        }
+        if (wfHist != null) {
+          entityManager.detach(wfHist);
+        } else {
+          // create generic wf hist, will be removed once all
+          // functions e2e are
+          // tested
+          wfHist = new WfHist();
+          wfHist.setReqId(mqIntfReq.getReqId());
+          wfHist.setCmt(isError ? MQMsgConstants.WH_COMMENT_REJECT : MQMsgConstants.WH_HIST_CMT_COM + data.getCmrNo());
+          wfHist.setCreateById(MQMsgConstants.MQ_APP_USER);
+          wfHist.setCreateTs(SystemUtil.getCurrentTimestamp());
+          wfHist.setCreateByNm(MQMsgConstants.MQ_APP_USER);
+          wfHist.setReqStatus(isError ? CmrConstants.REQUEST_STATUS.PPN.toString() : CmrConstants.REQUEST_STATUS.COM.toString());
+          wfHist.setRejReason("");
+        }
+
+        if (wfHist != null) {
+          RequestUtils.sendEmailNotifications(entityManager, admin, wfHist);
+        }
+        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
+          processSingleRequest(entityManager, admin, data);
+
+        } else {
+          LOG.warn("Request ID " + admin.getId().getReqId() + " cannot be processed. Improper Type or not for reprocess.");
         }
 
         partialCommit(entityManager);
@@ -1574,7 +1700,8 @@ public class TransConnService extends BaseBatchService {
       // request
       if (isCompletedSuccessfully(resultCode)) {
 
-        setLAAdminToCompleted(admin, data);
+        setCountryAdminToCompleted(admin, data);
+
         if (response.isCmrNoGenerated() && !StringUtils.isEmpty(response.getCmrNo())) {
           LOG.debug("CMR No. " + response.getCmrNo() + " generated. Updating DATA for Request " + data.getId().getReqId());
           data.setCmrNo(response.getCmrNo());
@@ -1612,7 +1739,7 @@ public class TransConnService extends BaseBatchService {
           comment = comment.append("RDc create processing for CMR No " + request.getCmrNo() + " failed. Error: " + response.getMessage()
               + " System will retry processing once.");
         } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
-          setLAAdminToPending(admin, data);
+          setCountryAdminToPending(admin, data);
           comment = comment.append("RDc create processing for CMR No " + request.getCmrNo() + " failed. Error: " + response.getMessage());
         } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
           comment = comment.append("Create processing in RDc skipped: " + response.getMessage());
@@ -3194,14 +3321,16 @@ public class TransConnService extends BaseBatchService {
     Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
   }
 
-  private void setLAAdminToCompleted(Admin admin, Data data) {
-    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+  private void setCountryAdminToCompleted(Admin admin, Data data) {
+    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) || SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry())
+        || SystemLocation.MACAO.equals(data.getCmrIssuingCntry())) {
       admin.setReqStatus("COM");
     }
   }
 
-  private void setLAAdminToPending(Admin admin, Data data) {
-    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+  private void setCountryAdminToPending(Admin admin, Data data) {
+    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())
+        || (SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(data.getCmrIssuingCntry()))) {
       admin.setReqStatus("PPN");
       admin.setProcessedFlag("E"); // set request status to error.
     }

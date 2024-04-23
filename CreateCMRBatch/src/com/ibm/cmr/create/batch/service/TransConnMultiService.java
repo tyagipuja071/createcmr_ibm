@@ -22,7 +22,7 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
   private TransConnService service = new TransConnService();
 
   public enum Mode {
-    Aborted, Pending, MQ, Manual, Pool, LAReprocess
+    Aborted, Pending, MQ, Manual, Pool, LAReprocess, HKMOReprocess
   };
 
   private Mode mode = Mode.Pending;
@@ -52,6 +52,9 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
     case LAReprocess:
       this.service.monitorLAReprocessRdcRecords(entityManager, requests);
       break;
+    case HKMOReprocess:
+      this.service.monitorMQInterfaceRequestsReprocess(entityManager, requests);
+      break;
     default:
       break;
     }
@@ -80,6 +83,9 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
       break;
     case LAReprocess:
       records = this.service.gatherLAReprocessRdcRecords(entityManager);
+      break;
+    case HKMOReprocess:
+      records = this.service.gatherMQInterfaceRequestsReprocess(entityManager);
       break;
     default:
       break;
