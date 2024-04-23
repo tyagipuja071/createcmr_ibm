@@ -134,59 +134,63 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     } else {
       this.log.debug("Processing Approval " + approval.getApprovalId() + " " + approval.getType());
       ApprovalReq req = getApprovalRecord(entityManager, approval.getApprovalId());
-      Admin admin = fillApprovalInformation(req, approval, entityManager);
-      switch (approval.getType()) {
-      case "A":
-        updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_APPROVED, approval, admin);
-        if (!"REP".equals(admin.getReqStatus())) {
-          moveToNextStep(entityManager, admin);
+      if (req == null || req.getReqId() == 0) {
+        approval.setProcessed(false);
+      } else {
+        Admin admin = fillApprovalInformation(req, approval, entityManager);
+        switch (approval.getType()) {
+        case "A":
+          updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_APPROVED, approval, admin);
+          if (!"REP".equals(admin.getReqStatus())) {
+            moveToNextStep(entityManager, admin);
 
-          // CREATCMR-3377 - CN 2.0
-          String cmrIssuingCntry = getCmrIssuingCntry(entityManager, req.getReqId());
-          if (SystemLocation.CHINA.equals(cmrIssuingCntry)) {
-            GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
-            geoHandler.setReqStatusAfterApprove(entityManager, approval, req, admin);
-            log.debug("Updating Approval Request ID " + req.getId().getApprovalId() + " to " + admin.getReqStatus());
-            updateEntity(admin, entityManager);
+            // CREATCMR-3377 - CN 2.0
+            String cmrIssuingCntry = getCmrIssuingCntry(entityManager, req.getReqId());
+            if (SystemLocation.CHINA.equals(cmrIssuingCntry)) {
+              GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+              geoHandler.setReqStatusAfterApprove(entityManager, approval, req, admin);
+              log.debug("Updating Approval Request ID " + req.getId().getApprovalId() + " to " + admin.getReqStatus());
+              updateEntity(admin, entityManager);
+            }
           }
-        }
-        approval.setProcessed(true);
-        approval.setActionDone(CmrConstants.YES_NO.Y.toString());
-        break;
-      case "R":
-        updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_REJECTED, approval, admin);
-        // moveBackToRequester(entityManager, admin);
-        // defunctCurrentApprovals(entityManager, approval, req);
-        approval.setProcessed(true);
-        approval.setActionDone(CmrConstants.YES_NO.Y.toString());
-        break;
-      case "C":
-        updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_CONDITIONALLY_APPROVED, approval, admin);
-        if (admin != null && admin.getId() != null && dataService != null) {
-          Data data = dataService.getCurrentRecordById(admin.getId().getReqId(), entityManager);
-          if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
-            GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-            geoHandler.handleMEUCondApproval(entityManager, approval, data);
-          }
-        }
-        if (!"REP".equals(admin.getReqStatus())) {
-          moveToNextStep(entityManager, admin);
-        }
-        approval.setProcessed(true);
-        approval.setActionDone(CmrConstants.YES_NO.Y.toString());
-        break;
-      case "L":
-        // test status if still valid
-        if (!CmrConstants.APPROVAL_PENDING_APPROVAL.equals(req.getStatus()) && !CmrConstants.APPROVAL_PENDING_REMINDER.equals(req.getStatus())) {
-          approval.setProcessed(false);
-        } else {
           approval.setProcessed(true);
+          approval.setActionDone(CmrConstants.YES_NO.Y.toString());
+          break;
+        case "R":
+          updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_REJECTED, approval, admin);
+          // moveBackToRequester(entityManager, admin);
+          // defunctCurrentApprovals(entityManager, approval, req);
+          approval.setProcessed(true);
+          approval.setActionDone(CmrConstants.YES_NO.Y.toString());
+          break;
+        case "C":
+          updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_CONDITIONALLY_APPROVED, approval, admin);
+          if (admin != null && admin.getId() != null && dataService != null) {
+            Data data = dataService.getCurrentRecordById(admin.getId().getReqId(), entityManager);
+            if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+              GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+              geoHandler.handleMEUCondApproval(entityManager, approval, data);
+            }
+          }
+          if (!"REP".equals(admin.getReqStatus())) {
+            moveToNextStep(entityManager, admin);
+          }
+          approval.setProcessed(true);
+          approval.setActionDone(CmrConstants.YES_NO.Y.toString());
+          break;
+        case "L":
+          // test status if still valid
+          if (!CmrConstants.APPROVAL_PENDING_APPROVAL.equals(req.getStatus()) && !CmrConstants.APPROVAL_PENDING_REMINDER.equals(req.getStatus())) {
+            approval.setProcessed(false);
+          } else {
+            approval.setProcessed(true);
+          }
+          ApprovalReq a = getApprovalRecord(entityManager, approval.getApprovalId());
+          entityManager.detach(a);
+          approval.setReqId(a != null ? a.getReqId() : 0);
+          getLogicalStatus(req, approval, entityManager);
+          break;
         }
-        ApprovalReq a = getApprovalRecord(entityManager, approval.getApprovalId());
-        entityManager.detach(a);
-        approval.setReqId(a != null ? a.getReqId() : 0);
-        getLogicalStatus(req, approval, entityManager);
-        break;
       }
     }
   }
