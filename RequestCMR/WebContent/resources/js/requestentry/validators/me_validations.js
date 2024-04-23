@@ -1891,15 +1891,32 @@ function setEnterpriseValuesME(clientTier) {
 
 function validateEnterpriseField(taxCd2) {
 
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP' ];
+  var custSubGrpLocal = [ 'COMME', 'THDPT', 'PRICU' ];
+  var custSubGrpComm = [ 'XCOM', 'XTP' ];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var landed = FormManager.getActualValue('landCntry');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var isuCtc = isuCd + clientTier;
   taxCd2 = FormManager.getActualValue('taxCd2');
   var enterprises = [];
-  if (custSubGrpLocMECov.includes(custSubGrp)) {
+  var addrType = "ZS01";
+
+  if (landed == '') {
+    if (addrType != null && addrType != '') {
+      var addrResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', {
+        REQ_ID : FormManager.getActualValue('reqId'),
+        ADDR_TYPE : addrType
+      });
+      if (addrResult && addrResult.ret1 && addrResult.ret1 != '') {
+        landed = addrResult.ret1;
+      }
+    }
+  }
+  console.log('ZS01 Landed Country: ' + landed);
+
+  if (custSubGrpLocal.includes(custSubGrp)) {
     if (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry) {
       if (isuCtc == '34Q') {
         enterprises = [ '911775', '911774', '911811', '911810' ];
@@ -1978,15 +1995,93 @@ function validateEnterpriseField(taxCd2) {
       }
     }
 
-    var message = "";
-    for (var i = 0; i < enterprises.length; i++) {
-      message += enterprises[i] + "\n";
-    }
-
-    if (enterprises != null && enterprises != '') {
-      if (!enterprises.includes(taxCd2)) {
-        cmr.showAlert('Please enter the valid Enterprise number: \n' + message);
+  } else if (custSubGrpComm.includes(custSubGrp)) {
+    if (landed == 'AE') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '911775', '911774', '911811', '911810' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '912073', '912075', '912074' ];
       }
+    } else if (landed == 'KW') {
+      if (isuCtc == '27E') {
+        enterprises = [ '907695', '911297' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '912085', '912087', '912086' ];
+      }
+    } else if (landed == 'OM') {
+      if (isuCtc == '27E') {
+        enterprises = [ '911824', '911823' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '912080', '912079', '912081' ];
+      }
+    } else if (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB') {
+      if (isuCtc == '27E') {
+        enterprises = [ '911827', '911826' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '908024', '912072', '912071' ];
+      }
+    } else if (landed == 'SA') {
+      if (isuCtc == '27E') {
+        enterprises = [ '911693', '911700', '911699', '911688', '911701', '901469', '911698' ];
+      } else if (isuCtc == '34Q') {
+        enterprises = [ '911695', '911692', '911696', '911690', '911685', '911691', '911702', '911687', '911697' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '908025', '912094', '912093' ];
+      }
+    } else if (landed == 'BH') {
+      if (isuCtc == '27E') {
+        enterprises = [ '911825' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '912084', '912082', '912083' ];
+      }
+    } else if (landed == 'LY') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '911756' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+      }
+    } else if (landed == 'TN') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '901728' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+      }
+    } else if (landed == 'MA') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '901462' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+      }
+    } else if (landed == 'EG') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '911771', '911772', '911836', '911773', '911830', '911832', '911768', '901456', '911770', '911834', '911769', '911829', '911831', '911835', '911275', '911833' ];
+
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '908023', '912070', '912069' ];
+      }
+    } else if (landed == 'QA') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '911818', '911819', '911820', '911821', '911822', '911817' ];
+
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '912088', '912090', '912089' ];
+      }
+    } else if (landed == 'PK') {
+      if (isuCtc == '34Q') {
+        enterprises = [ '901459' ];
+      } else if (isuCtc == '36Y') {
+        enterprises = [ '908027', '912092', '912091' ];
+      }
+    }
+  }
+  var message = "";
+  for (var i = 0; i < enterprises.length; i++) {
+    message += enterprises[i] + "\n";
+  }
+
+  if (enterprises != null && enterprises != '') {
+    if (!enterprises.includes(taxCd2)) {
+      cmr.showAlert('Please enter the valid Enterprise number: \n' + message);
     }
   }
 
