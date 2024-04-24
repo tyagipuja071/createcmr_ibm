@@ -579,6 +579,15 @@ public class TransConnService extends BaseBatchService {
 
         LOG.info("Processing HKMO RDC Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
 
+        admin.setLockInd("Y");
+        admin.setLockBy(BATCH_USER_ID);
+        admin.setLockByNm(BATCH_USER_ID);
+        admin.setLockTs(SystemUtil.getCurrentTimestamp());
+
+        LOG.info("Locking admin... Req Id: " + admin.getId().getReqId());
+
+        updateEntity(admin, entityManager);
+
         // get the data
         String sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -3277,8 +3286,13 @@ public class TransConnService extends BaseBatchService {
   private void setCountryAdminToPending(Admin admin, Data data) {
     if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())
         || (SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(data.getCmrIssuingCntry()))) {
-      admin.setReqStatus("PPN");
-      admin.setProcessedFlag("E"); // set request status to error.
+      LOG.debug("Unlocking request due to error..");
+      admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+      admin.setLockBy(null);
+      admin.setLockByNm(null);
+      admin.setLockTs(null);
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
+      admin.setProcessedFlag("E");
     }
   }
 
