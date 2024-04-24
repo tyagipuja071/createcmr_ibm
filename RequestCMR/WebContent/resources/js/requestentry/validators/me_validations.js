@@ -3845,7 +3845,7 @@ function setIsuCtcOnScenarioChange() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'EXCOM', 'ELCOM' ];
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'EXCOM', 'ELCOM', 'XCOM', 'XTP' ];
   var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '849', '850' ];
   var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
   var cntrycode_27E = [ 'BH', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'YE', 'SY' ];
