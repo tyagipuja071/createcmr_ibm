@@ -579,15 +579,6 @@ public class TransConnService extends BaseBatchService {
 
         LOG.info("Processing HKMO RDC Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
 
-        admin.setLockInd("Y");
-        admin.setLockBy(BATCH_USER_ID);
-        admin.setLockByNm(BATCH_USER_ID);
-        admin.setLockTs(SystemUtil.getCurrentTimestamp());
-
-        LOG.info("Locking admin... Req Id: " + admin.getId().getReqId());
-
-        updateEntity(admin, entityManager);
-
         // get the data
         String sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -596,7 +587,20 @@ public class TransConnService extends BaseBatchService {
         Data data = query.getSingleResult(Data.class);
         entityManager.detach(data);
 
-        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
+        LOG.info("[" + "REQ-" + id + "]" + "Is Request Locked? " + "Y".equals(admin.getLockInd()));
+        LOG.info("[" + "REQ-" + id + "]" + "Req Status: " + admin.getReqStatus());
+
+        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())
+            && !"Y".equals(admin.getLockInd())) {
+          admin.setLockInd("Y");
+          admin.setLockBy(BATCH_USER_ID);
+          admin.setLockByNm(BATCH_USER_ID);
+          admin.setLockTs(SystemUtil.getCurrentTimestamp());
+
+          LOG.info("Locking admin... Req Id: " + admin.getId().getReqId());
+
+          updateEntity(admin, entityManager);
+
           processSingleRequest(entityManager, admin, data);
         } else {
           LOG.warn("Request ID " + admin.getId().getReqId() + " cannot be processed. Improper Type or not completed.");
