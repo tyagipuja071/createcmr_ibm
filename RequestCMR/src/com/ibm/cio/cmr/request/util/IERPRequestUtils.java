@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.util;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
@@ -890,5 +891,17 @@ public class IERPRequestUtils extends RequestUtils {
     query.setParameter("ITER_ID", iterId);
     query.setForReadOnly(true);
     return query.getResults(MassUpdtAddr.class);
+  }
+
+  public static boolean containsSingleByte(String str) {
+    Charset charset = Charset.forName("UTF-8");
+    byte[] bytes = str.getBytes(charset);
+    return bytes.length == str.length();
+  }
+
+  public static boolean containsDoubleByte(String str) {
+    Charset charset = Charset.forName("UTF-8");
+    byte[] bytes = str.getBytes(charset);
+    return bytes.length != str.length();
   }
 }
