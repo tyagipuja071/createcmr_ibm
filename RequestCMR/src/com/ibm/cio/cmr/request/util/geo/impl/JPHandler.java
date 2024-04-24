@@ -78,6 +78,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
@@ -4298,6 +4299,16 @@ public class JPHandler extends GEOHandler {
     return rol;
   }
 
+  private void logValidationErrorSingleByte(TemplateValidation error, Row row, String templateColumn) {
+    LOG.trace(templateColumn + " should be single byte character only.");
+    error.addError((row.getRowNum() + 1), "<br>" + templateColumn, templateColumn + " should be single byte character only.");
+  }
+
+  private void logValidationErrorDoubleByte(TemplateValidation error, Row row, String templateColumn) {
+    LOG.trace(templateColumn + " should be double byte character only.");
+    error.addError((row.getRowNum() + 1), "<br>" + templateColumn, templateColumn + " should be double byte character only.");
+  }
+
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     LOG.debug("inside JP validateMassUpdateTemplateDupFills handler...");
@@ -4343,6 +4354,7 @@ public class JPHandler extends GEOHandler {
             String billingProcessCd = "";
             String postalForCsbo = "";
             String csbo = "";
+            String rolFlag = "";
 
             // ADDRESS SHEET
             String addrSeq = "";
@@ -4398,6 +4410,9 @@ public class JPHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(9);
               csbo = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(10);
+              rolFlag = validateColValFromCell(currCell);
+
               // Data Sheet
               if (StringUtils.isNotBlank(accountAbbrevName) || StringUtils.isNotBlank(jsic) || StringUtils.isNotBlank(custClass)
                   || StringUtils.isNotBlank(custGrp) || StringUtils.isNotBlank(officeCd) || StringUtils.isNotBlank(inacCd)
@@ -4411,28 +4426,102 @@ public class JPHandler extends GEOHandler {
               } else if (mapCmrSeq.containsKey(cmrNo)) {
                 error.addError(row.getRowNum() + 1, "<br>CMR No.", "Duplicate CMR No. It should be entered only once.");
               } else {
-                mapCmrSeq.put(cmrNo, new HashSet<String>());
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "CMR No.");
+                } else {
+                  mapCmrSeq.put(cmrNo, new HashSet<String>());
+                }
               }
 
               // Account Abbreviated Name
-              if (isDataFilled && "@".equals(accountAbbrevName)) {
-                error.addError((row.getRowNum() + 1), "<br>Account Abbreviated Name", "@ value for Account Abbreviated Name is not allowed.");
+              if (isDataFilled && StringUtils.isNotBlank(accountAbbrevName)) {
+                if ("@".equals(accountAbbrevName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Account Abbreviated Name", "@ value for Account Abbreviated Name is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(accountAbbrevName);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Account Abbreviated Name");
+                  }
+                }
               }
 
               // JSIC
-              if (isDataFilled && "@".equals(jsic)) {
-                error.addError((row.getRowNum() + 1), "<br>JSIC", "@ value for JSIC is not allowed.");
+              if (isDataFilled && StringUtils.isNotBlank(jsic)) {
+                if ("@".equals(jsic)) {
+                  error.addError((row.getRowNum() + 1), "<br>JSIC", "@ value for JSIC is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(jsic);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "JSIC");
+                  }
+                }
               }
 
               // Customer Class
-              if (isDataFilled && "@".equals(custClass)) {
-                error.addError((row.getRowNum() + 1), "<br>Customer Class", "@ value for Customer Class is not allowed.");
+              if (isDataFilled && StringUtils.isNotBlank(custClass)) {
+                if ("@".equals(custClass)) {
+                  error.addError((row.getRowNum() + 1), "<br>Customer Class", "@ value for Customer Class is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(custClass);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Customer Class");
+                  }
+                }
+              }
+
+              // Customer Group
+              if (isDataFilled && StringUtils.isNotBlank(custGrp)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(custGrp);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Customer Group");
+                }
               }
 
               // Office Code
-              if (isDataFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Office Code", "@ value for Office Code is not allowed.");
+              if (isDataFilled && StringUtils.isNotBlank(officeCd)) {
+                if ("@".equals(officeCd)) {
+                  error.addError((row.getRowNum() + 1), "<br>Office Code", "@ value for Office Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(officeCd);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Office Code");
+                  }
+                }
               }
+
+              // INAC/NAC Code
+              if (isDataFilled && StringUtils.isNotBlank(inacCd)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(inacCd);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "INAC Code");
+                }
+              }
+
+              // Billing Process Code
+              if (isDataFilled && StringUtils.isNotBlank(billingProcessCd)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(billingProcessCd);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Billing Process Code");
+                }
+              }
+
+              // CSBO
+              if (isDataFilled && StringUtils.isNotBlank(csbo)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(csbo);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "CSBO");
+                }
+              }
+
+              // ROL Flag
+              if (isDataFilled && StringUtils.isNotBlank(rolFlag)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(rolFlag);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "ROL Flag");
+                }
+              }
+
             }
 
             if ("Company".equalsIgnoreCase(sheet.getSheetName())) {
@@ -4506,13 +4595,24 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
+
                 }
               }
 
               if ((isCompanyFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isCompanyFilled && addrSeq.contains("@")) {
@@ -4520,20 +4620,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isCompanyFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isCompanyFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isCompanyFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isCompanyFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isCompanyFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isCompanyFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isCompanyFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -4544,18 +4666,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isCompanyFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isCompanyFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isCompanyFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isCompanyFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isCompanyFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isCompanyFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isCompanyFilled && StringUtils.isNotBlank(postalCode)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isCompanyFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isCompanyFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isCompanyFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isCompanyFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isCompanyFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isCompanyFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isCompanyFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -4631,6 +4848,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -4638,6 +4860,11 @@ public class JPHandler extends GEOHandler {
               if ((isADU3Filled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADU3Filled && addrSeq.contains("@")) {
@@ -4645,20 +4872,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADU3Filled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADU3Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU3Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADU3Filled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADU3Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADU3Filled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADU3Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -4669,18 +4918,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADU3Filled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADU3Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU3Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU3Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU3Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADU3Filled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADU3Filled && StringUtils.isNotBlank(postalCode)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU3Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU3Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU3Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADU3Filled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADU3Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU3Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU3Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -4756,6 +5100,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -4763,6 +5112,11 @@ public class JPHandler extends GEOHandler {
               if ((isADU1Filled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADU1Filled && addrSeq.contains("@")) {
@@ -4770,20 +5124,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADU1Filled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADU1Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU1Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADU1Filled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADU1Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADU1Filled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADU1Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -4794,18 +5170,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADU1Filled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADU1Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU1Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU1Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU1Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADU1Filled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADU1Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU1Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU1Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU1Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADU1Filled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADU1Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU1Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU1Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -4881,6 +5352,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -4888,6 +5364,11 @@ public class JPHandler extends GEOHandler {
               if ((isADU2Filled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADU2Filled && addrSeq.contains("@")) {
@@ -4895,20 +5376,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADU2Filled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADU2Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU2Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADU2Filled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADU2Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADU2Filled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADU2Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -4919,18 +5422,112 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADU2Filled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADU2Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU2Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU2Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU2Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADU2Filled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADU2Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
               }
 
+              // Branch/Office
+              if (isADU2Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU2Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU2Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
               // Tel No
-              if (isADU2Filled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADU2Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU2Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU2Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5006,6 +5603,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5013,6 +5615,11 @@ public class JPHandler extends GEOHandler {
               if ((isADU7Filled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADU7Filled && addrSeq.contains("@")) {
@@ -5020,20 +5627,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADU7Filled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADU7Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU7Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADU7Filled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADU7Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADU7Filled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADU7Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5044,18 +5673,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADU7Filled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADU7Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU7Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU7Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU7Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADU7Filled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADU7Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU7Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU7Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU7Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADU7Filled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADU7Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU7Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU7Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5131,6 +5855,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5138,6 +5867,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUAFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUAFilled && addrSeq.contains("@")) {
@@ -5145,20 +5879,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUAFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUAFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUAFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUAFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUAFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUAFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUAFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5169,18 +5925,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUAFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUAFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUAFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUAFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUAFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUAFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUAFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUAFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUAFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUAFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUAFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUAFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUAFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUAFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5256,6 +6107,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5263,6 +6119,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUBFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUBFilled && addrSeq.contains("@")) {
@@ -5270,20 +6131,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUBFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUBFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUBFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUBFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUBFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUBFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUBFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5294,18 +6177,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUBFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUBFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUBFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUBFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUBFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUBFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUBFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUBFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUBFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUBFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUBFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUBFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUBFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUBFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5381,6 +6359,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5388,6 +6371,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUCFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUCFilled && addrSeq.contains("@")) {
@@ -5395,20 +6383,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUCFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUCFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUCFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUCFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUCFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUCFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUCFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5419,18 +6429,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUCFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUCFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUCFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUCFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUCFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUCFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUCFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUCFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUCFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUCFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUCFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUCFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUCFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUCFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5506,6 +6611,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5513,6 +6623,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUDFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUDFilled && addrSeq.contains("@")) {
@@ -5520,20 +6635,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUDFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUDFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUDFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUDFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUDFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUDFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUDFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5544,18 +6681,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUDFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUDFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUDFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUDFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUDFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUDFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUDFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUDFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUDFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUDFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUDFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUDFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUDFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUDFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5631,6 +6863,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5638,6 +6875,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUEFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUEFilled && addrSeq.contains("@")) {
@@ -5645,20 +6887,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUEFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUEFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUEFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUEFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUEFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUEFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUEFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5669,18 +6933,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUEFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUEFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUEFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUEFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUEFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUEFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUEFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUEFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUEFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUEFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUEFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUEFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUEFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUEFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5756,6 +7115,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5763,6 +7127,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUFFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUFFilled && addrSeq.contains("@")) {
@@ -5770,20 +7139,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUFFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUFFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUFFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUFFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUFFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUFFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUFFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5794,18 +7185,112 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUFFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUFFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUFFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUFFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUFFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUFFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUFFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUFFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUFFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+              }
+
+              // Building
+              if (isADUFFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUFFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUFFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUFFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUFFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -5881,6 +7366,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -5888,6 +7378,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUGFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUGFilled && addrSeq.contains("@")) {
@@ -5895,20 +7390,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUGFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUGFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUGFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUGFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUGFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUGFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUGFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -5919,18 +7436,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUGFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUGFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUGFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUGFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUGFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUGFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUGFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUGFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUGFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUGFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUGFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUGFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUGFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUGFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -6006,6 +7618,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -6013,6 +7630,11 @@ public class JPHandler extends GEOHandler {
               if ((isADUHFilled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADUHFilled && addrSeq.contains("@")) {
@@ -6020,20 +7642,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADUHFilled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADUHFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUHFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADUHFilled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADUHFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADUHFilled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADUHFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -6044,18 +7688,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADUHFilled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADUHFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUHFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUHFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUHFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADUHFilled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADUHFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUHFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUHFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUHFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADUHFilled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADUHFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUHFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUHFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
@@ -6131,6 +7870,11 @@ public class JPHandler extends GEOHandler {
                 } else if (StringUtils.isNotBlank(cmrNo)) {
                   if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
                     error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
                   }
                 }
               }
@@ -6138,6 +7882,11 @@ public class JPHandler extends GEOHandler {
               if ((isADU4Filled) && StringUtils.isBlank(addrSeq)) {
                 LOG.trace("Address Sequence No is required.");
                 error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
               }
 
               if (isADU4Filled && addrSeq.contains("@")) {
@@ -6145,20 +7894,42 @@ public class JPHandler extends GEOHandler {
               }
 
               // Customer Name-KANJI
-              // if (isADU4Filled && "@".equals(custNameKanji)) {
-              // error.addError((row.getRowNum() + 1), "<br>Customer
-              // Name-KANJI", "@ value for Customer Name-KANJI is not
-              // allowed.");
-              // }
+              if (isADU4Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU4Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
 
               // Katakana
-              if (isADU4Filled && "@".equals(katakana)) {
-                error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+              if (isADU4Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
               }
 
               // Full English Name
-              if (isADU4Filled && "@".equals(fullEnglishName)) {
-                error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+              if (isADU4Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
               }
 
               if (StringUtils.isNotBlank(custNameKanji)) {
@@ -6169,18 +7940,113 @@ public class JPHandler extends GEOHandler {
               }
 
               // Address
-              if (isADU4Filled && "@".equals(address)) {
-                error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+              if (isADU4Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU4Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU4Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU4Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
               }
 
               // Postal Code
-              if (isADU4Filled && "@".equals(postalCode)) {
-                error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+              if (isADU4Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU4Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU4Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU4Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
               }
 
               // Tel No
-              if (isADU4Filled && "@".equals(officeCd)) {
-                error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+              if (isADU4Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU4Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU4Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
               }
 
             }
