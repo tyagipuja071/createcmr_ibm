@@ -1823,8 +1823,8 @@ function setEnterpriseValuesME(clientTier) {
   console.log('ZS01 Landed Country: ' + landed);
 
   if (isuCd != '' && clientTier != '') {
-    if ((custGrp == "LOCAL") || (custGrp == "CROSS" && non_mea_cross.includes(landed))) {
-      if (custSubGrp == 'COMME' || custSubGrp == "XCOM" || custSubGrp == "THDPT" || custSubGrp == "PRICU" || custSubGrp == "XTP") {
+    if ((custGrp == "LOCAL") || (custGrp == "SBM") || (custGrp == "GBM") || (custGrp == "CROSS" && non_mea_cross.includes(landed))) {
+      if (custSubGrp == 'COMME' || custSubGrp == "XCOM" || custSubGrp == "THDPT" || custSubGrp == "PRICU" || custSubGrp == "XTP" || custSubGrp == "EXCOM" || custSubGrp == "ELCOM") {
         if (SysLoc.EGYPT == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
         } else if (SysLoc.ABU_DHABI == cntry && isuCtc == '27E') {
