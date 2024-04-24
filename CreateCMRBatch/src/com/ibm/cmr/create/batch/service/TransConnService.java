@@ -1562,7 +1562,8 @@ public class TransConnService extends BaseBatchService {
     // try to convert the request to Legal CMR conversion
 
     if (this.deleteRDcTargets) {
-      deleteRDcTargetRecords(entityManager, data.getCmrNo(), data.getCmrIssuingCntry());
+      // deleteRDcTargetRecords(entityManager, data.getCmrNo(),
+      // data.getCmrIssuingCntry());
     }
     convertToProspectToLegalCMRInput(request, entityManager, request.getReqId());
 
@@ -3279,7 +3280,12 @@ public class TransConnService extends BaseBatchService {
   private void setCountryAdminToCompleted(Admin admin, Data data) {
     if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) || SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry())
         || SystemLocation.MACAO.equals(data.getCmrIssuingCntry())) {
+      LOG.debug("Setting country to COM..");
+      admin.setLockBy(null);
+      admin.setLockByNm(null);
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
       admin.setReqStatus("COM");
+      admin.setProcessedFlag("Y");
     }
   }
 
