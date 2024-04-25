@@ -115,21 +115,6 @@ var currentSelection = null;
 var previousISIC = null;
 var currentISIC = null;
 function addNewHandlersForMCO2() {
-
-	if (subIndHandler == null) {
-		subIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-			if ((FormManager.getActualValue('subIndustryCd') != _pagemodel['subIndustryCd']) || (previousISIC != null && value != currentISIC)) {
-				isicChanged = true;
-			} else {
-				isicChanged = false;
-			}
-			if (isicChanged) {
-				setISUCTC();
-				getMEAPreSelectedCBLogicEntp();
-			}
-		});
-	}
-
 	if (ctcHandler == null) {
 		ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
 			setEntpValue();
@@ -140,7 +125,8 @@ function addNewHandlersForMCO2() {
 
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-			if ((FormManager.getActualValue('custSubGrp') != _pagemodel['custSubGrp']) || (previousSelection != null && value != previousSelection)) {
+			currentSelection	= FormManager.getActualValue('custSubGrp');
+			if ((FormManager.getActualValue('custSubGrp') != _pagemodel['custSubGrp']) || (previousSelection != null && value != previousSelection) || (previousSelection == null && currentSelection)) {
 				scenarioChanged = true;
 			} else {
 				scenarioChanged = false;
@@ -153,6 +139,23 @@ function addNewHandlersForMCO2() {
 			}
 		});
 	}
+	
+	if (subIndHandler == null) {
+		subIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+		currentISIC	= FormManager.getActualValue('subIndustryCd');
+			if ((currentISIC != _pagemodel['subIndustryCd']) || (previousISIC != null && value != previousISIC) || (previousISIC == null && currentISIC)) {
+				isicChanged = true;
+			} else {
+				isicChanged = false;
+			}
+			if (isicChanged) {
+				setISUCTC();
+				getMEAPreSelectedCBLogicEntp();
+			  previousISIC = FormManager.getActualValue('subIndustryCd');
+			}
+		});
+	}
+
 }
 
 function setISUCTC() {
