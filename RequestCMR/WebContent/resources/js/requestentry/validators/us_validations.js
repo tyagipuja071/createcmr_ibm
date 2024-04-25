@@ -771,13 +771,12 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
      * FormManager.enable('clientT ; }
      */
 
-  else if (scenario != 'PRIV' && scenario != 'ECOSYSTEM') {
-    FormManager.setValue('isuCd', '');
-    FormManager.setValue('clientTier', '');
-    FormManager.enable('isuCd');
-    FormManager.enable('clientTier');
-
-  }
+  /*
+   * else if (scenario != 'PRIV' && scenario != 'ECOSYSTEM') {
+   * FormManager.setValue('isuCd', ''); FormManager.setValue('clientTier', '');
+   * FormManager.enable('isuCd'); FormManager.enable('clientTier');
+   *  }
+   */
 
 }
 
