@@ -487,7 +487,7 @@ function afterConfigForUS() {
   _kukla = FormManager.getActualValue('custClass');
 
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  var covId = FormManager.getActualValue('covId');
+  var covId = FormManager.getActualValue('covId').slice(0, 1)
 
   // if (_usSicm.length > 4) {
   // _usSicm = _usSicm.substring(0, 4);
@@ -536,8 +536,7 @@ function afterConfigForUS() {
   } else if (reqType == 'C' && (role == 'Viewer' || role == 'Processor') && custGrp == '1' && custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM') {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
-  }
-  if ((covId.str.charAt(0).toUpperCase() == 'A' || covId.str.charAt(0).toUpperCase() == 'I') && (role == 'Processor' || role == 'Viewer') && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+  } else if ((covId == 'A' || covId == 'I') && (role == 'Processor' || role == 'Viewer') && reqType == 'C') {
     const
     subIndustryMappings = {
       'A' : '3T',
@@ -574,7 +573,7 @@ function afterConfigForUS() {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
     }
-  } else if (covId.str.charAt(0).toUpperCase() == 'T' && role == 'Processor' && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+  } else if (covId == 'T' && (role == 'Processor' || role == 'Viewer') && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
     FormManager.readOnly('isuCd');
@@ -765,10 +764,11 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('clientTier', 'N');
     FormManager.readOnly('isuCd');
   } /*
-     * else if (scenario != 'FSP POOL' && scenario != 'IBMEM' && scenario !=
-     * 'PRIV' && scenario != 'ECOSYSTEM') { FormManager.setValue('isuCd', '');
-     * FormManager.setValue('clientTier', ''); FormManager.enable('isuCd');
-     * FormManager.enable('clientTier'); }
+     * else if (scenario != 'FSP POOL' && scenario != 'IBMEM' && scenario 'PRIV' &&
+     * scenario != 'ECOSYSTEM') { FormManager.setValue('isuCd',
+     * 
+     * FormManager.setValue('clientTier', ''); FormManager.enable('is ;
+     * FormManager.enable('clientT ; }
      */
 
   else if (scenario != 'PRIV' && scenario != 'ECOSYSTEM') {
