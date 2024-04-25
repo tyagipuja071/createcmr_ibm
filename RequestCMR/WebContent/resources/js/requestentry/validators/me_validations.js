@@ -1787,6 +1787,9 @@ function setEnterpriseValuesME(clientTier) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var landed = FormManager.getActualValue('landCntry');
   var enterprise = FormManager.getActualValue('taxCd2');
+  var csgGRP1 = [ 'COMME', 'XCOM', 'THDPT', 'PRICU', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
   var non_mea_cross = [ 'AZ', 'TM', 'TJ', 'MU', 'EE', 'AL', 'AM', 'LV', 'AQ', 'AR', 'AF', 'BD', 'AU', 'AT', 'BS', 'BB', 'BE', 'LU', 'BY', 'BM', 'BO', 'BR', 'LT', 'GY', 'CN', 'MN', 'BN', 'BG', 'MM',
       'KY', 'CA', 'GE', 'LK', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'SK', 'KZ', 'KG', 'BA', 'MG', 'FI', 'HR', 'MK', 'RS', 'SI', 'LS', 'ME', 'DE', 'GR', 'GT', 'HT', 'HN', 'MO', 'HK', 'HU',
       'UZ', 'IS', 'IN', 'ID', 'IR', 'IE', 'IL', 'IT', 'JM', 'JP', 'KR', 'MY', 'MT', 'MX', 'MD', 'NL', 'NZ', 'NI', 'NO', 'PA', 'PY', 'PE', 'PH', 'PL', 'RU', 'PT', 'RO', 'SV', 'RW', 'SG', 'ES', 'LC',
@@ -1822,8 +1825,8 @@ function setEnterpriseValuesME(clientTier) {
   console.log('ZS01 Landed Country: ' + landed);
 
   if (isuCd != '' && clientTier != '') {
-    if ((custGrp == "LOCAL") || (custGrp == "SBM") || (custGrp == "GBM") || (custGrp == "CROSS" && non_mea_cross.includes(landed))) {
-      if (custSubGrp == 'COMME' || custSubGrp == "XCOM" || custSubGrp == "THDPT" || custSubGrp == "PRICU" || custSubGrp == "XTP" || custSubGrp == "EXCOM" || custSubGrp == "ELCOM") {
+    if ((custGrp == "LOCAL") || (csgrpAllowCross.includes(custGrp) && non_mea_cross.includes(landed))) {
+      if (csgGRP1.includes(custSubGrp)) {
         if (SysLoc.EGYPT == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
         } else if (SysLoc.ABU_DHABI == cntry && isuCtc == '27E') {
@@ -1854,8 +1857,8 @@ function setEnterpriseValuesME(clientTier) {
           FormManager.setValue('taxCd2', '901459');
         }
       }
-    } else if (custGrp == "CROSS" && !non_mea_cross.includes(landed)) {
-      if (custSubGrp == "XCOM" || custSubGrp == "XTP") {
+    } else if (csgrpAllowCross.includes(custGrp) && !non_mea_cross.includes(landed)) {
+      if (csgGRP2.includes(custSubGrp)) {
         if (landed == 'EG' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
         } else if (landed == 'QA' && isuCtc == '34Q') {
@@ -3840,6 +3843,7 @@ function setIsuCtcOnScenarioChange() {
   var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
   var cntrycode_27E = [ 'BH', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'YE', 'SY' ];
   var cntrcode_34Q = [ 'MA', 'LY', 'AF', 'QA', 'EG', 'TN' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
   var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
 
   var landed = FormManager.getActualValue('landCntry');
@@ -3873,7 +3877,7 @@ function setIsuCtcOnScenarioChange() {
   var SAsubindustry34Q = [ 'E', 'G', 'V', 'Y', 'H', 'X' ];
   let
   flsubIndustryCd = subIndustryCd.charAt(0);
-  if (custGrp == 'LOCAL' || custGrp == 'SBM' || custGrp == 'GBM' || (custGrp == 'CROSS' && !MEA_COUNTRIES.includes(landed))) {
+  if (custGrp == 'LOCAL' || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
     if (scenario == 'BUSPR' || scenario.includes('BP')) {
       FormManager.setValue('isuCd', '8B');
       FormManager.setValue('clientTier', '');
@@ -3911,7 +3915,7 @@ function setIsuCtcOnScenarioChange() {
         FormManager.enable('taxCd2');
       }
     }
-  } else if (custGrp == 'CROSS' && MEA_COUNTRIES.includes(landed)) {
+  } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
     if (scenario.includes('XBP')) {
       FormManager.setValue('isuCd', '8B');
       FormManager.setValue('clientTier', '');
@@ -3926,13 +3930,13 @@ function setIsuCtcOnScenarioChange() {
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
       FormManager.setValue('taxCd2', '');
-    } else if ((scenario == 'XCOM' || scenario == 'XTP') && cntrycode_27E.includes(landed)) {
+    } else if ((scenario == 'XCOM' || scenario == 'XTP' || scenario == 'EXCOM' || scenario == 'ELCOM') && cntrycode_27E.includes(landed)) {
       FormManager.setValue('isuCd', '27');
       FormManager.setValue('clientTier', 'E');
-    } else if ((scenario == 'XCOM' || scenario == 'XTP') && cntrcode_34Q.includes(landed)) {
+    } else if ((scenario == 'XCOM' || scenario == 'XTP' || scenario == 'EXCOM' || scenario == 'ELCOM') && cntrcode_34Q.includes(landed)) {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
-    } else if ((scenario == 'XCOM' || scenario == 'XTP') && landed == 'SA') {
+    } else if ((scenario == 'XCOM' || scenario == 'XTP' || scenario == 'EXCOM' || scenario == 'ELCOM') && landed == 'SA') {
       if (SAsubindustry27E.includes(flsubIndustryCd)) {
         FormManager.setValue('isuCd', '27');
         FormManager.setValue('clientTier', 'E');
