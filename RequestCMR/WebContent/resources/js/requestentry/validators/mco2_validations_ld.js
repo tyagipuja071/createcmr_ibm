@@ -8,7 +8,7 @@ var landCntrySA = ['SZ', 'ZA', 'LS', 'NA'];
 var landCntryCEWA = ['AO', 'CV', 'MZ', 'ST', 'BW', 'MW', 'ZM', 'CG', 'CD', 'CF', 'CM', 'GA', 'GQ', 'NE', 'TD', 'ET', 'GH', 'LR', 'SL', 'KE',
 	'LY', 'MG', 'MU', 'SC', 'NG', 'GM', 'GN', 'GW', 'ML', 'MR', 'SN', 'BF', 'BJ', 'TG', 'CI', 'TN', 'BI', 'DJ', 'ER', 'RW',
 	'SO', 'SD', 'TZ', 'UG', 'ZW', 'DZ'];
-var landCntryMEA = ['AE', 'SA', 'KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'LB', 'PS', 'EG', 'QA', 'LY', 'TN', 'MA', 'PK', 'AF'];
+var landCntryMEA = ['AE', 'SA', 'KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'LB', 'PS','BH', 'EG', 'QA', 'LY', 'TN', 'MA', 'PK', 'AF'];
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
 	if (!saving) {
 		if (addressMode == 'newAddress') {
