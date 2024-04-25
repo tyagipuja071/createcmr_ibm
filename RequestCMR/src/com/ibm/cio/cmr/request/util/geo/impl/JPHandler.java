@@ -3033,7 +3033,12 @@ public class JPHandler extends GEOHandler {
           intlAddr.setIntlCustNm1(fullEnglish.length() > 22 ? fullEnglish.substring(0, 22) : fullEnglish);
         }
       } else {
-        intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
+        String[] parts = null;
+        String name1 = kna1.getName1();
+        String name2 = kna1.getName2();
+        parts = doSplitName(name1, name2, 35, 35);
+        intlAddr.setIntlCustNm1(parts[0]);
+        intlAddr.setIntlCustNm2(parts[1]);
       }
       intlAddr.setAddrTxt(kna1.getStras());
       intlAddr.setCity1(kna1.getOrt01());
