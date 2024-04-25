@@ -573,6 +573,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         boolean wtaasCompleted = reqIsWtaasCompleted(entityManager, admin.getId().getReqId());
         if (wtaasCompleted) {
           this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
+          updateMQRequestForReprocess(entityManager, admin.getId().getReqId());
           admin.setReqStatus("PCO");
         }
       }
@@ -2086,6 +2087,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       return true;
     }
     return false;
+  }
+
+  private void updateMQRequestForReprocess(EntityManager entityManager, long requestID) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GCG.UPDATE_FOR_REPROCESS"));
+    query.setParameter("REQ_ID", requestID);
+    query.executeSql();
   }
 
   /**
