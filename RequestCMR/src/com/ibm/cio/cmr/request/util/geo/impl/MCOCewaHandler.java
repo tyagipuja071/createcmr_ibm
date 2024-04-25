@@ -872,12 +872,12 @@ public class MCOCewaHandler extends MCOHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-                if (StringUtils.isBlank(clientTier) || !"T".contains(clientTier)) {
+              } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"E".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd) || "27".equals(isuCd)))
                   && !"@".equalsIgnoreCase(clientTier)) {

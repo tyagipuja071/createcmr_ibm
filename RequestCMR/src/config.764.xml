@@ -63,7 +63,7 @@
 					<length>1</length>
 					<lovId>EmbargoCode</lovId>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>Enterprise Number</label>
 					<dbColumn>ENTERPRISE</dbColumn>
 					<width>15</width>
