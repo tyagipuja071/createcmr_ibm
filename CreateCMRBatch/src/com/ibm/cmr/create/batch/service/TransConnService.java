@@ -1606,8 +1606,16 @@ public class TransConnService extends BaseBatchService {
       response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
     } else {
       try {
+        LOG.info("processCreateRequest -- Sending request to service START");
+        DebugUtil.printObjectAsJson(LOG, request);
+
+        LOG.info("applicationId: " + applicationId);
         this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
         response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+        LOG.info("processCreateRequest -- Sending request to service END");
+
+        DebugUtil.printObjectAsJson(LOG, response);
+
       } catch (Exception e) {
         LOG.error("Error when connecting to the service.", e);
         response = new ProcessResponse();
