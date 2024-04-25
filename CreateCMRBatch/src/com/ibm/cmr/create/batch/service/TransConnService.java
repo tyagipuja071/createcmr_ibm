@@ -566,13 +566,17 @@ public class TransConnService extends BaseBatchService {
    * @throws IOException
    * @throws Exception
    */
-  public void monitorMQInterfaceRequestsReprocess(EntityManager entityManager, List<Long> mqIntfList)
+  public synchronized void monitorMQInterfaceRequestsReprocess(EntityManager entityManager, List<Long> mqIntfList)
       throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     LOG.info("HKMO -- monitorMQInterfaceRequestsReprocess");
     for (Long id : mqIntfList) {
       try {
         Thread.currentThread().setName("REQ-" + id);
+
+        String currentThreadName = Thread.currentThread().getName();
+        LOG.info("Current Thread: " + currentThreadName);
+
         AdminPK pk = new AdminPK();
         pk.setReqId(id);
         Admin admin = entityManager.find(Admin.class, pk);
@@ -600,6 +604,7 @@ public class TransConnService extends BaseBatchService {
           LOG.info("Locking admin... Req Id: " + admin.getId().getReqId());
 
           updateEntity(admin, entityManager);
+          partialCommit(entityManager);
 
           processSingleRequest(entityManager, admin, data);
         } else {
