@@ -160,8 +160,8 @@ public class TransConnService extends BaseBatchService {
       monitorMQInterfaceRequests(entityManager, records);
 
       LOG.info("Reprocess MQ Interface records Reprocess...");
-      records = gatherMQInterfaceRequestsReprocess(entityManager);
-      monitorMQInterfaceRequestsReprocess(entityManager, records);
+      // records = gatherMQInterfaceRequestsReprocess(entityManager);
+      // monitorMQInterfaceRequestsReprocess(entityManager, records);
 
       LOG.info("Processing Completed Manual records...");
       records = gatherDisAutoProcRecords(entityManager);
@@ -534,7 +534,8 @@ public class TransConnService extends BaseBatchService {
         // record.");
         // }
 
-        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.COM.toString().equals(admin.getReqStatus())) {
+        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.COM.toString().equals(admin.getReqStatus())
+            || CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
           processSingleRequest(entityManager, admin, data);
 
         } else if (MASS_REQUEST_TYPES.contains(admin.getReqType())) {

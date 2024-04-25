@@ -53,7 +53,8 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
       this.service.monitorLAReprocessRdcRecords(entityManager, requests);
       break;
     case HKMOReprocess:
-      this.service.monitorMQInterfaceRequestsReprocess(entityManager, requests);
+      // this.service.monitorMQInterfaceRequestsReprocess(entityManager,
+      // requests);
       break;
     default:
       break;
@@ -85,7 +86,8 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
       records = this.service.gatherLAReprocessRdcRecords(entityManager);
       break;
     case HKMOReprocess:
-      records = this.service.gatherMQInterfaceRequestsReprocess(entityManager);
+      // records =
+      // this.service.gatherMQInterfaceRequestsReprocess(entityManager);
       break;
     default:
       break;
