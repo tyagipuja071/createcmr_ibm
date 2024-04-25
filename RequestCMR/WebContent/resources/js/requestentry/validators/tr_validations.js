@@ -10,6 +10,7 @@ var _custSubTypeHandler = null;
 var _custSubTypeHandlerGr = null;
 var _custSalesRepHandlerGr = null;
 var _landCntryHandler = null;
+var _landCntryHandlerTR = null;
 var _stateProvITHandler = null;
 var _internalDeptHandler = null;
 var addrTypeHandler = [];
@@ -876,6 +877,14 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
   if (!saving) {
     var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
     var custType = FormManager.getActualValue('custGrp');
+    if (_landCntryHandlerTR == null) {
+      _landCntryHandlerTR = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+        if (FormManager.getActualValue('addrType') == 'ZS01') {
+          setIsuCtcCBMEA();
+          setDefaultEntCBMEA();
+        }
+      });
+    }
 
     if ((addressMode == 'updateAddress' || addressMode == 'copyAddress') && FormManager.getActualValue('landCntry') == '') {
       FormManager.setValue('landCntry', cmr.oldlandcntry);
@@ -1497,7 +1506,15 @@ function setDefaultEntCBMEA() {
         var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
         enterprise = results.ret1;
       }
-      FormManager.setValue('enterprise', enterprise);
+      if (enterprise != null && enterprise != undefined) {
+        FormManager.setValue('enterprise', enterprise);
+      }
+      if (isuCtc == '5K' || isuCtc == '36Y') {
+        FormManager.setValue('enterprise', '');
+      }
+    }
+    if (isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '12' || isuCtc == '28' || isuCtc == '4F') {
+      FormManager.setValue('enterprise', '');
     }
   }
 }
@@ -1535,7 +1552,8 @@ function enterpriseValidatorMea() {
         if (result != null && result.ret1 != undefined) {
           landCntry = result.ret1;
         }
-        if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || enterprise == '' || !(ME_LC.includes(landCntry))) {
+        if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || enterprise == '' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || enterprise == ''
+            || !(ME_LC.includes(landCntry))) {
           return;
         }
         if (ME_LC.includes(landCntry)) {
@@ -1956,7 +1974,7 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
       }
     }
   }
-  if (isuCtc == '5k') {
+  if (isuCtc == '5K') {
     if (enterprise != '') {
       return new ValidationResult({
         id : 'enterprise',
@@ -2148,6 +2166,7 @@ function onIsuChangeHandler() {
     _subIndustryCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       if (_oldSubInd != FormManager.getActualValue('subIndustryCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         console.log("On subIndustryCdHandler=======");
+        setIsuCtcCBMEA();
         setDefaultEntCBMEA();
       }
     });
