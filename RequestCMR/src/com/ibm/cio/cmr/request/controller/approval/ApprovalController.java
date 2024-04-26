@@ -9,7 +9,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,8 +39,6 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
-import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
-import com.ibm.cio.cmr.request.util.oauth.UserHelper;
 import com.ibm.cmr.services.client.auth.Authorization;
 
 /**
@@ -92,15 +89,21 @@ public class ApprovalController extends BaseController {
       }
 
       if (!processing) {
-        if (OAuthUtils.isSSOActivated()) {
-          Optional<ApprovalResponseModel> optionalAppr = authorizeFromSSO(request, response, approvalCode, approval);
-          if (optionalAppr.isPresent()) {
-            approval = optionalAppr.get();
-          }
+        if (!authorize(request)) {
+          // only show this when not yet processing
+          tagUnauthorized(response);
         } else {
-          Optional<ApprovalResponseModel> optionalAppr = authorizeFromLDAP(request, response, approvalCode, approval);
-          if (optionalAppr.isPresent()) {
-            approval = optionalAppr.get();
+          LOG.debug("Approval Code: " + approvalCode);
+          String user = getUserIdFromAuth(request);
+          approval = decodeUrlParam(approvalCode);
+          if (approval != null && approval.getApproverId() != null && !approval.getApproverId().toUpperCase().equals(user.toUpperCase())) {
+            // if the approver on the request is not the same as the one who
+            // accessed
+            // the URL
+            // set to not authorized
+            approval = null;
+          } else {
+            LOG.debug("Approval Details: " + approval.getApproverId() + " | " + approval.getApprovalId() + " | " + approval.getType());
           }
         }
       }
@@ -161,50 +164,6 @@ public class ApprovalController extends BaseController {
     return mv;
   }
 
-  public Optional<ApprovalResponseModel> authorizeFromSSO(HttpServletRequest request, HttpServletResponse response, String approvalCode,
-      ApprovalResponseModel approval) throws NoSuchAlgorithmException {
-
-    UserHelper userHelper = new UserHelper();
-    String ibmUniqueId = userHelper.getUNID();
-
-    if (ibmUniqueId == null || ibmUniqueId.trim().isEmpty()) {
-      tagUnauthorized(response);
-    } else {
-      LOG.debug("Approval Code: " + approvalCode);
-      String userId = userHelper.getRegistrationId();
-      approval = decodeUrlParam(approvalCode);
-      if (approval != null && approval.getApproverId() != null && !approval.getApproverId().toUpperCase().equals(userId.toUpperCase())) {
-        approval = null;
-      } else {
-        LOG.debug("Approval Details: " + approval.getApproverId() + " | " + approval.getApprovalId() + " | " + approval.getType());
-      }
-      return Optional.of(approval);
-    }
-
-    return Optional.empty();
-
-  }
-
-  private Optional<ApprovalResponseModel> authorizeFromLDAP(HttpServletRequest request, HttpServletResponse response, String approvalCode,
-      ApprovalResponseModel approval) throws NoSuchAlgorithmException, Exception {
-
-    if (!authorize(request)) {
-      tagUnauthorized(response);
-    } else {
-      LOG.debug("Approval Code: " + approvalCode);
-      String user = getUserIdFromAuth(request);
-      approval = decodeUrlParam(approvalCode);
-      if (approval != null && approval.getApproverId() != null && !approval.getApproverId().toUpperCase().equals(user.toUpperCase())) {
-        approval = null;
-      } else {
-        LOG.debug("Approval Details: " + approval.getApproverId() + " | " + approval.getApprovalId() + " | " + approval.getType());
-      }
-      return Optional.of(approval);
-    }
-
-    return Optional.empty();
-  }
-
   private void createAppUser(ApprovalResponseModel approval, HttpServletRequest request) throws CmrException {
 
     AppUser user = AppUser.getUser(request);
@@ -250,8 +209,7 @@ public class ApprovalController extends BaseController {
       return false;
     }
     try {
-      boolean authenticated = true;// userService.authenticateUser(credentials[0],
-                                   // credentials[1]);
+      boolean authenticated = userService.authenticateUser(credentials[0], credentials[1]);
       return authenticated;
     } catch (Exception e) {
       return false;
