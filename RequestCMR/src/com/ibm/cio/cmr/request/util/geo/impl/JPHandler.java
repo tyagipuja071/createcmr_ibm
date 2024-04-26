@@ -2907,7 +2907,8 @@ public class JPHandler extends GEOHandler {
     Map<String, String> intlAddrTypeToEngNameMap = new HashMap<>();
     if (intlAddrs != null) {
       for (IntlAddr intlAddr : intlAddrs) {
-        intlAddrTypeToEngNameMap.put(intlAddr.getId().getAddrType(), intlAddr.getIntlCustNm1());
+        intlAddrTypeToEngNameMap.put(intlAddr.getId().getAddrType(),
+            intlAddr.getIntlCustNm1().concat(" ").concat(intlAddr.getIntlCustNm2() == null ? "" : intlAddr.getIntlCustNm2()));
       }
     }
     return intlAddrTypeToEngNameMap;
