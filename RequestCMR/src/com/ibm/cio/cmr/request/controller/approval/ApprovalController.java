@@ -64,14 +64,12 @@ public class ApprovalController extends BaseController {
     A, C, R
   }
 
-  @RequestMapping(
-      value = "/approval")
+  @RequestMapping(value = "/approval")
   public ModelAndView showErrorPage(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws Exception {
     return null;
   }
 
-  @RequestMapping(
-      value = "/approval/{approvalCode1}")
+  @RequestMapping(value = "/approval/{approvalCode1}")
   public ModelAndView showApprovalPage(@PathVariable("approvalCode1") String approvalCode, HttpServletRequest request, HttpServletResponse response,
       ApprovalResponseModel modelFromRequest) throws Exception {
     boolean processing = CmrConstants.YES_NO.Y.toString().equals(request.getParameter("processing"));
@@ -332,9 +330,7 @@ public class ApprovalController extends BaseController {
     }
   }
 
-  @RequestMapping(
-      value = "/approval/list",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/list", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getApprovalList(HttpServletRequest request, HttpServletResponse response, ApprovalResponseModel model) throws CmrException {
 
     if (StringUtils.isNotEmpty(request.getParameter("reqId"))) {
@@ -351,9 +347,7 @@ public class ApprovalController extends BaseController {
     return wrapAsSearchResult(results);
   }
 
-  @RequestMapping(
-      value = "/approval/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/process", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processApprovals(HttpServletRequest request, HttpServletResponse response, ApprovalResponseModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -383,9 +377,7 @@ public class ApprovalController extends BaseController {
    * @return
    * @throws CmrException
    */
-  @RequestMapping(
-      value = "/approval/comments",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/comments", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getApprovalComments(HttpServletRequest request, HttpServletResponse response) throws CmrException {
 
     ApprovalResponseModel model = new ApprovalResponseModel();
@@ -414,9 +406,7 @@ public class ApprovalController extends BaseController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/approval/action",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/action", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processActions(HttpServletRequest request, HttpServletResponse response, ApprovalResponseModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -434,9 +424,7 @@ public class ApprovalController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/approval/status",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/status", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getApprovalStatus(HttpServletRequest request, HttpServletResponse response) throws CmrException {
     ModelMap map = new ModelMap();
     String reqIdStr = request.getParameter("reqId");
