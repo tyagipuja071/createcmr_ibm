@@ -3364,6 +3364,9 @@ function setEnterpriseAfterSave() {
 	if (FormManager.getActualValue('enterprise') != _pagemodel.enterprise) {
 		FormManager.setValue('enterprise', _pagemodel.enterprise)
 	}
+	if (FormManager.getActualValue('custSubGrp') == '' ) {
+			localStorage.setItem("oldCustGrp",'');
+			}
 }
 
 function callEntpLogic() {
