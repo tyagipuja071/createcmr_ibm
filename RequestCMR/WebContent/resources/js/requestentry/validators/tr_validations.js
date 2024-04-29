@@ -2094,6 +2094,8 @@ function setSBOValuesForIsuCtc(value) {
         } else if (isuCtc == '34Q' || isuCtc == '36Y') {
           FormManager.setValue('salesBusOffCd', 'A20');
           FormManager.enable('salesBusOffCd');
+        } else if (isuCtc == '8B' || isuCtc == '21') {
+          FormManager.readOnly('salesBusOffCd');
         }
       } else if (!_isScenarioChanged) {
         var oldSbo = null;
@@ -2115,8 +2117,11 @@ function setSBOValuesForIsuCtc(value) {
       } else if (isuCtc == '34Q' || isuCtc == '36Y') {
         FormManager.setValue('salesBusOffCd', 'A20');
         FormManager.enable('salesBusOffCd');
-      } else
-        FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+      } else if (isuCtc == '8B' || isuCtc == '21') {
+        FormManager.readOnly('salesBusOffCd');
+      }
+      selse
+      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
@@ -3077,6 +3082,12 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept blank.');
     }
+  } else {
+    return new ValidationResult({
+      id : 'clientTier',
+      type : 'text',
+      name : 'clientTier'
+    }, false, 'Please select valid ISU and CTC.');
   }
 }
 
@@ -3140,8 +3151,8 @@ function setValuesForTurkey() {
       FormManager.setValue('repTeamMemberNo', 'NOREP0');
     }
 
-    if (issuingCntry == '862' && custType == 'LOCAL') {
-      if (custSubType == 'PRICU') {
+    if (issuingCntry == '862') {
+      if (custSubType == 'PRICU' || custSubType == 'XBP') {
         FormManager.setValue('enterprise', '911720');
         FormManager.readOnly('enterprise');
       } else if (custSubType == 'BUSPR' || custSubType == 'INTER' || custSubType == "IBMEM") {
@@ -3202,9 +3213,9 @@ function setValuesForTurkey() {
               FormManager.setValue('enterprise', '911724');
             } else if (T911713.includes(ind)) {
               FormManager.setValue('enterprise', '911713');
-            } else if (T911721.includes(indG)) {
+            } else if (T911721.includes(ind)) {
               FormManager.setValue('enterprise', '911721');
-            } else if (T911718.includes(indG)) {
+            } else if (T911718.includes(ind)) {
               FormManager.setValue('enterprise', '911722');
             } else if (T911709.includes(ind)) {
               FormManager.setValue('enterprise', '911709');
@@ -3274,6 +3285,10 @@ function setCBEnterpriseSA(isuCtc, currentLandedCountry, ind, issuingCntry) {
         } else
           FormManager.setValue('enterprise', '911713');
       }
+    } else if (isuCtc == '34Q') {
+      FormManager.setValue('enterprise', '');
+    } else if (isuCtc == '36Y') {
+      FormManager.setValue('enterprise', '');
     }
   } else if (currentLandedCountry == 'NA' && issuingCntry == SysLoc.TURKEY) {
     if (isuCtc == '27E') {
