@@ -246,7 +246,7 @@ public class JPPDFConverter extends DefaultPDFConverter {
       address.addCell(createLabelCell("Katakana:"));
       address.addCell(createValueCell(addr.getCustNm4()));
       address.addCell(createLabelCell("Address:"));
-      address.addCell(createValueCell(addr.getAddrTxt()));
+      address.addCell(createValueCell(addr.getAddrTxt().concat(addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2())));
       address.addCell(createLabelCell("Postal Code:"));
       address.addCell(createValueCell(addr.getPostCd()));
       address.addCell(createLabelCell("Department:"));
