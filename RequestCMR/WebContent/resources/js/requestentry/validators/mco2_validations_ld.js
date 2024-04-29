@@ -128,7 +128,7 @@ function addNewHandlersForMCO2() {
 
 
    // first change to custSubGrp
-   if(FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && localStorage.getItem("oldCustGrp") == ''){	
+   if(FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)){	
     setISUCTC();
 		setEntpValue();
 		getMEAPreSelectedCBLogicEntp();    
@@ -2967,7 +2967,7 @@ function getMEEntpList(landCntry, isuCd, ctc) {
 		if (isuCTC == '36Y') {
 			list.push('BUILD1', 'DISTR1', 'SRVCE1');
 		}
-	} else if (['PK', 'AF'].includes(landCnry)) {
+	} else if (['PK', 'AF'].includes(landCntry)) {
 		if (isuCTC == '36Y') {
 			list.push('908027', '912092', '912091');
 		}
@@ -3364,6 +3364,9 @@ function setEnterpriseAfterSave() {
 	if (FormManager.getActualValue('enterprise') != _pagemodel.enterprise) {
 		FormManager.setValue('enterprise', _pagemodel.enterprise)
 	}
+	if (FormManager.getActualValue('custSubGrp') == '' ) {
+			localStorage.setItem("oldCustGrp",'');
+			}
 }
 
 function callEntpLogic() {
