@@ -1437,7 +1437,10 @@ function setIsuCtcCBMEA() {
   }
   var MEA34Q = [ 'PK', 'AF', 'MA', 'TN', 'LY', 'QA', 'EG' ];
   var MEAsubIndustry34Q = [ 'E', 'G', 'V', 'Y', 'H', 'X' ];
-  if (MEA34Q.includes(landCntry) || (landCntry == 'SA' && MEAsubIndustry34Q.includes(subIndustryCd))) {
+  var CEWA_LC = [ 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ',
+      'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG' ];
+
+  if (CEWA_LC.includes(landCntry) || MEA34Q.includes(landCntry) || (landCntry == 'SA' && MEAsubIndustry34Q.includes(subIndustryCd))) {
     // CEWA MEA REGION
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
@@ -2334,6 +2337,7 @@ function entValidator() {
         var enterprise = FormManager.getActualValue('enterprise');
         var custType = FormManager.getActualValue('custGrp');
         var countryUse = FormManager.getActualValue('countryUse');
+        var reqId = FormManager.getActualValue('reqId');
         validEnt27E = [ '011675', '011677', '011676', '011672', '011673', '011674', '909813', '909813', '910510', '910509' ];
         var SOUTH_AFRICA_LC = [ 'ZA', 'NA', 'LS', 'ZS' ];
         var ME_LC = [ 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
