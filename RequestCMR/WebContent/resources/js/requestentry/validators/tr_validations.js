@@ -2119,9 +2119,8 @@ function setSBOValuesForIsuCtc(value) {
         FormManager.enable('salesBusOffCd');
       } else if (isuCtc == '8B' || isuCtc == '21') {
         FormManager.readOnly('salesBusOffCd');
-      }
-      selse
-      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+      } else
+        FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
