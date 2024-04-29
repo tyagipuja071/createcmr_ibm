@@ -114,6 +114,10 @@ var previousSelection = null;
 var currentSelection = null;
 var previousISIC = null;
 var currentISIC = null;
+var isPrvsSlctnBlank = true;
+var isPrvsISICBlank = true;
+
+
 function addNewHandlersForMCO2() {
 	if (ctcHandler == null) {
 		ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
@@ -123,36 +127,53 @@ function addNewHandlersForMCO2() {
 	}
 
 
+   // first change to custSubGrp
+   if(FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && localStorage.getItem("oldCustGrp") == ''){	
+    setISUCTC();
+		setEntpValue();
+		getMEAPreSelectedCBLogicEntp();    
+    }
+   
+
 	if (custSubGrpHandler == null) {
-		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+		  custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
 			currentSelection	= FormManager.getActualValue('custSubGrp');
-			if ((FormManager.getActualValue('custSubGrp') != _pagemodel['custSubGrp']) || (previousSelection != null && value != previousSelection) || (previousSelection == null && currentSelection)) {
+			previousSelection = localStorage.getItem("oldCustGrp");
+			if(previousSelection != null && previousSelection != '' && previousSelection != undefined){
+				isPrvsSlctnBlank = false;
+			}
+			if ((!isPrvsSlctnBlank && previousSelection != currentSelection && _pagemodel['custSubGrp'] == null) || (!isPrvsSlctnBlank && previousSelection == _pagemodel['custSubGrp'] && previousSelection != currentSelection)) {
 				scenarioChanged = true;
-			} else {
+			} else if((!isPrvsSlctnBlank && (previousSelection == currentSelection && currentSelection == _pagemodel['custSubGrp']))){
 				scenarioChanged = false;
 			}
-			if (scenarioChanged) {
+			if(scenarioChanged) {
 				setISUCTC();
 				setEntpValue();
 				getMEAPreSelectedCBLogicEntp();
-				previousSelection = FormManager.getActualValue('custSubGrp');
 			}
+			localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
 		});
 	}
 	
 	if (subIndHandler == null) {
 		subIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-		currentISIC	= FormManager.getActualValue('subIndustryCd');
-			if ((currentISIC != _pagemodel['subIndustryCd']) || (previousISIC != null && value != previousISIC) || (previousISIC == null && currentISIC)) {
+		currentISIC	= FormManager.getActualValue('subIndustryCd').substr(0,2);
+		previousISIC = localStorage.getItem("oldISIC").substr(0,2);
+		if(previousISIC != null && previousISIC != '' && previousISIC != undefined){
+				isPrvsISICBlank = false;
+			}
+		
+			if ((!isPrvsISICBlank && previousISIC != currentISIC && _pagemodel['subIndustryCd'] == null)  || (!isPrvsISICBlank && previousISIC == _pagemodel['subIndustryCd'] && previousISIC != currentISIC)) {
 				isicChanged = true;
-			} else {
+			} else if((!isPrvsISICBlank && (previousISIC == currentISIC && currentISIC == _pagemodel['subIndustryCd'])) || (previousISIC == null && currentISIC == _pagemodel['subIndustryCd'])){
 				isicChanged = false;
 			}
 			if (isicChanged) {
 				setISUCTC();
 				getMEAPreSelectedCBLogicEntp();
-			  previousISIC = FormManager.getActualValue('subIndustryCd');
 			}
+			localStorage.setItem("oldISIC", FormManager.getActualValue('subIndustryCd'));
 		});
 	}
 
@@ -160,7 +181,7 @@ function addNewHandlersForMCO2() {
 
 function setISUCTC() {
 	var zs01Landed = getZS01LandCntry();
-	var subInd = FormManager.getActualValue('subIndustryCd');
+	var subInd = FormManager.getActualValue('subIndustryCd') ? FormManager.getActualValue('subIndustryCd') : localStorage.oldISIC;
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
 	if ((['XCOM', 'XLLCX', 'XTP', 'XGOV', 'XPRIC'].includes(custSubGrp) && !isMEACntry(zs01Landed)) || ['COMME', 'LLCEX', 'GOVRN', 'PRICU', 'THDPT'].includes(custSubGrp)) {
 		FormManager.setValue('isuCd', '34');
@@ -196,6 +217,7 @@ function setISUCTC() {
 			FormManager.setValue('isuCd', '27');
 			FormManager.setValue('clientTier', 'E');
 		} else if (zs01Landed == 'SA' && subInd) {
+			subInd = subInd.substr(0,1);
 			if (['E', 'G', 'V', 'Y', 'H', 'X'].includes(subInd)) {
 				FormManager.setValue('isuCd', '34');
 				FormManager.setValue('clientTier', 'Q');
@@ -3075,12 +3097,13 @@ function getMEAPreSelectedCBLogicEntp() {
 	var cmrCntryCd = getCntryCd();
 	var isuCd = FormManager.getActualValue('isuCd');
 	var ctc = FormManager.getActualValue('clientTier');
-	var subInd = FormManager.getActualValue('subIndustryCd');
+	var subInd = FormManager.getActualValue('subIndustryCd') ? FormManager.getActualValue('subIndustryCd') : localStorage.getItem("oldISIC");
 	var arr = [];
 
 	if (FormManager.getActualValue('custGrp') != 'CROSS' || (cmrCntryCd == landCntry)) {
 		return;
 	}
+	
 	if (landCntrySA.includes(landCntry)) {
 		entp = getSouthAfricaEntpPreSelected(landCntry, isuCd, ctc, subInd);
 	} else if (landCntryCEWA.includes(landCntry)) {
