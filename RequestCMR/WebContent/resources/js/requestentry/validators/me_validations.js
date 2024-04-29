@@ -1787,13 +1787,11 @@ function setEnterpriseValuesME(clientTier) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var landed = FormManager.getActualValue('landCntry');
   var enterprise = FormManager.getActualValue('taxCd2');
-  var csgGRP1 = [ 'COMME', 'XCOM', 'THDPT', 'PRICU', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
   var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
   var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
-  var non_mea_cross = [ 'AZ', 'TM', 'TJ', 'MU', 'EE', 'AL', 'AM', 'LV', 'AQ', 'AR', 'AF', 'BD', 'AU', 'AT', 'BS', 'BB', 'BE', 'LU', 'BY', 'BM', 'BO', 'BR', 'LT', 'GY', 'CN', 'MN', 'BN', 'BG', 'MM',
-      'KY', 'CA', 'GE', 'LK', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'SK', 'KZ', 'KG', 'BA', 'MG', 'FI', 'HR', 'MK', 'RS', 'SI', 'LS', 'ME', 'DE', 'GR', 'GT', 'HT', 'HN', 'MO', 'HK', 'HU',
-      'UZ', 'IS', 'IN', 'ID', 'IR', 'IE', 'IL', 'IT', 'JM', 'JP', 'KR', 'MY', 'MT', 'MX', 'MD', 'NL', 'NZ', 'NI', 'NO', 'PA', 'PY', 'PE', 'PH', 'PL', 'RU', 'PT', 'RO', 'SV', 'RW', 'SG', 'ES', 'LC',
-      'SR', 'SE', 'CH', 'VN', 'SZ', 'TH', 'TW', 'TT', 'GB', 'UY', 'VE', 'UA', 'US', 'LA', 'KH', 'NP' ];
+  var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'XINT' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER') {
     return;
@@ -1825,7 +1823,7 @@ function setEnterpriseValuesME(clientTier) {
   console.log('ZS01 Landed Country: ' + landed);
 
   if (isuCd != '' && clientTier != '') {
-    if ((custGrp == "LOCAL") || (csgrpAllowCross.includes(custGrp) && non_mea_cross.includes(landed))) {
+    if (csgrpAllowLocal.includes(custGrp) || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
       if (csgGRP1.includes(custSubGrp)) {
         if (SysLoc.EGYPT == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
@@ -1857,7 +1855,7 @@ function setEnterpriseValuesME(clientTier) {
           FormManager.setValue('taxCd2', '901459');
         }
       }
-    } else if (csgrpAllowCross.includes(custGrp) && !non_mea_cross.includes(landed)) {
+    } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
       if (csgGRP2.includes(custSubGrp)) {
         if (landed == 'EG' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
@@ -1895,6 +1893,13 @@ function validateEnterpriseField(taxCd2) {
 
   var custSubGrpLocal = [ 'COMME', 'THDPT', 'PRICU' ];
   var custSubGrpComm = [ 'XCOM', 'XTP' ];
+  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
+  var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
+
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var landed = FormManager.getActualValue('landCntry');
@@ -1918,161 +1923,164 @@ function validateEnterpriseField(taxCd2) {
   }
   console.log('ZS01 Landed Country: ' + landed);
 
-  if (custSubGrpLocal.includes(custSubGrp)) {
-    if (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry) {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911775', '911774', '911811', '911810' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912073', '912075', '912074' ];
-      }
-    } else if (SysLoc.KUWAIT == cntry) {
-      if (isuCtc == '27E') {
-        enterprises = [ '907695', '911297' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912085', '912087', '912086' ];
-      }
-    } else if (SysLoc.OMAN == cntry) {
-      if (isuCtc == '27E') {
-        enterprises = [ '911824', '911823' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912080', '912079', '912081' ];
-      }
-    } else if (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry) {
-      if (isuCtc == '27E') {
-        enterprises = [ '911827', '911826' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908024', '912072', '912071' ];
-      }
-    } else if (SysLoc.SAUDI_ARABIA == cntry) {
-      if (isuCtc == '27E') {
-        enterprises = [ '911693', '911700', '911699', '911688', '911701', '901469', '911698' ];
-      } else if (isuCtc == '34Q') {
-        enterprises = [ '911695', '911692', '911696', '911690', '911685', '911691', '911702', '911687', '911697' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908025', '912094', '912093' ];
-      }
-    } else if (SysLoc.BAHRAIN == cntry) {
-      if (isuCtc == '27E') {
-        enterprises = [ '911825' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912084', '912082', '912083' ];
-      }
-    } else if (SysLoc.LIBYA == cntry) {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911756' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
-      }
-    } else if (SysLoc.TUNISIA_SOF == cntry) {
-      if (isuCtc == '34Q') {
-        enterprises = [ '901728' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
-      }
-    } else if (SysLoc.MOROCCO == cntry) {
-      if (isuCtc == '34Q') {
-        enterprises = [ '901462' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
-      }
-    } else if (SysLoc.EGYPT == cntry) {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911771', '911772', '911836', '911773', '911830', '911832', '911768', '901456', '911770', '911834', '911769', '911829', '911831', '911835', '911275', '911833' ];
+  if (csgrpAllowLocal.includes(custGrp) || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
+    if (csgGRP1.includes(custSubGrp)) {
+      if (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry) {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911775', '911774', '911811', '911810' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912073', '912075', '912074' ];
+        }
+      } else if (SysLoc.KUWAIT == cntry) {
+        if (isuCtc == '27E') {
+          enterprises = [ '907695', '911297' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912085', '912087', '912086' ];
+        }
+      } else if (SysLoc.OMAN == cntry) {
+        if (isuCtc == '27E') {
+          enterprises = [ '911824', '911823' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912080', '912079', '912081' ];
+        }
+      } else if (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry) {
+        if (isuCtc == '27E') {
+          enterprises = [ '911827', '911826' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908024', '912072', '912071' ];
+        }
+      } else if (SysLoc.SAUDI_ARABIA == cntry) {
+        if (isuCtc == '27E') {
+          enterprises = [ '911693', '911700', '911699', '911688', '911701', '901469', '911698' ];
+        } else if (isuCtc == '34Q') {
+          enterprises = [ '911695', '911692', '911696', '911690', '911685', '911691', '911702', '911687', '911697' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908025', '912094', '912093' ];
+        }
+      } else if (SysLoc.BAHRAIN == cntry) {
+        if (isuCtc == '27E') {
+          enterprises = [ '911825' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912084', '912082', '912083' ];
+        }
+      } else if (SysLoc.LIBYA == cntry) {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911756' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+        }
+      } else if (SysLoc.TUNISIA_SOF == cntry) {
+        if (isuCtc == '34Q') {
+          enterprises = [ '901728' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+        }
+      } else if (SysLoc.MOROCCO == cntry) {
+        if (isuCtc == '34Q') {
+          enterprises = [ '901462' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+        }
+      } else if (SysLoc.EGYPT == cntry) {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911771', '911772', '911836', '911773', '911830', '911832', '911768', '901456', '911770', '911834', '911769', '911829', '911831', '911835', '911275', '911833' ];
 
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908023', '912070', '912069' ];
-      }
-    } else if (SysLoc.QATAR == cntry) {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911818', '911819', '911820', '911821', '911822', '911817' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908023', '912070', '912069' ];
+        }
+      } else if (SysLoc.QATAR == cntry) {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911818', '911819', '911820', '911821', '911822', '911817' ];
 
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912088', '912090', '912089' ];
-      }
-    } else if (SysLoc.PAKISTAN == cntry) {
-      if (isuCtc == '34Q') {
-        enterprises = [ '901459' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908027', '912092', '912091' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912088', '912090', '912089' ];
+        }
+      } else if (SysLoc.PAKISTAN == cntry) {
+        if (isuCtc == '34Q') {
+          enterprises = [ '901459' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908027', '912092', '912091' ];
+        }
       }
     }
+  } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
+    if (csgGRP2.includes(custSubGrp)) {
+      if (landed == 'AE') {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911775', '911774', '911811', '911810' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912073', '912075', '912074' ];
+        }
+      } else if (landed == 'KW') {
+        if (isuCtc == '27E') {
+          enterprises = [ '907695', '911297' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912085', '912087', '912086' ];
+        }
+      } else if (landed == 'OM') {
+        if (isuCtc == '27E') {
+          enterprises = [ '911824', '911823' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912080', '912079', '912081' ];
+        }
+      } else if (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB') {
+        if (isuCtc == '27E') {
+          enterprises = [ '911827', '911826' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908024', '912072', '912071' ];
+        }
+      } else if (landed == 'SA') {
+        if (isuCtc == '27E') {
+          enterprises = [ '911693', '911700', '911699', '911688', '911701', '901469', '911698' ];
+        } else if (isuCtc == '34Q') {
+          enterprises = [ '911695', '911692', '911696', '911690', '911685', '911691', '911702', '911687', '911697' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908025', '912094', '912093' ];
+        }
+      } else if (landed == 'BH') {
+        if (isuCtc == '27E') {
+          enterprises = [ '911825' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912084', '912082', '912083' ];
+        }
+      } else if (landed == 'LY') {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911756' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+        }
+      } else if (landed == 'TN') {
+        if (isuCtc == '34Q') {
+          enterprises = [ '901728' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+        }
+      } else if (landed == 'MA') {
+        if (isuCtc == '34Q') {
+          enterprises = [ '901462' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+        }
+      } else if (landed == 'EG') {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911771', '911772', '911836', '911773', '911830', '911832', '911768', '901456', '911770', '911834', '911769', '911829', '911831', '911835', '911275', '911833' ];
 
-  } else if (custSubGrpComm.includes(custSubGrp)) {
-    if (landed == 'AE') {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911775', '911774', '911811', '911810' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912073', '912075', '912074' ];
-      }
-    } else if (landed == 'KW') {
-      if (isuCtc == '27E') {
-        enterprises = [ '907695', '911297' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912085', '912087', '912086' ];
-      }
-    } else if (landed == 'OM') {
-      if (isuCtc == '27E') {
-        enterprises = [ '911824', '911823' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912080', '912079', '912081' ];
-      }
-    } else if (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB') {
-      if (isuCtc == '27E') {
-        enterprises = [ '911827', '911826' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908024', '912072', '912071' ];
-      }
-    } else if (landed == 'SA') {
-      if (isuCtc == '27E') {
-        enterprises = [ '911693', '911700', '911699', '911688', '911701', '901469', '911698' ];
-      } else if (isuCtc == '34Q') {
-        enterprises = [ '911695', '911692', '911696', '911690', '911685', '911691', '911702', '911687', '911697' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908025', '912094', '912093' ];
-      }
-    } else if (landed == 'BH') {
-      if (isuCtc == '27E') {
-        enterprises = [ '911825' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912084', '912082', '912083' ];
-      }
-    } else if (landed == 'LY') {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911756' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
-      }
-    } else if (landed == 'TN') {
-      if (isuCtc == '34Q') {
-        enterprises = [ '901728' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
-      }
-    } else if (landed == 'MA') {
-      if (isuCtc == '34Q') {
-        enterprises = [ '901462' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
-      }
-    } else if (landed == 'EG') {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911771', '911772', '911836', '911773', '911830', '911832', '911768', '901456', '911770', '911834', '911769', '911829', '911831', '911835', '911275', '911833' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908023', '912070', '912069' ];
+        }
+      } else if (landed == 'QA') {
+        if (isuCtc == '34Q') {
+          enterprises = [ '911818', '911819', '911820', '911821', '911822', '911817' ];
 
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908023', '912070', '912069' ];
-      }
-    } else if (landed == 'QA') {
-      if (isuCtc == '34Q') {
-        enterprises = [ '911818', '911819', '911820', '911821', '911822', '911817' ];
-
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '912088', '912090', '912089' ];
-      }
-    } else if (landed == 'PK') {
-      if (isuCtc == '34Q') {
-        enterprises = [ '901459' ];
-      } else if (isuCtc == '36Y') {
-        enterprises = [ '908027', '912092', '912091' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912088', '912090', '912089' ];
+        }
+      } else if (landed == 'PK') {
+        if (isuCtc == '34Q') {
+          enterprises = [ '901459' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '908027', '912092', '912091' ];
+        }
       }
     }
   }
@@ -3838,11 +3846,12 @@ function setIsuCtcOnScenarioChange() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'EXCOM', 'ELCOM', 'XCOM', 'XTP' ];
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
   var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '849', '850' ];
   var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
   var cntrycode_27E = [ 'BH', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'YE', 'SY' ];
   var cntrcode_34Q = [ 'MA', 'LY', 'AF', 'QA', 'EG', 'TN' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
   var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
   var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
 
@@ -3877,7 +3886,8 @@ function setIsuCtcOnScenarioChange() {
   var SAsubindustry34Q = [ 'E', 'G', 'V', 'Y', 'H', 'X' ];
   let
   flsubIndustryCd = subIndustryCd.charAt(0);
-  if (custGrp == 'LOCAL' || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
+  if (csgrpAllowLocal.includes(custGrp) || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
+
     if (scenario == 'BUSPR' || scenario.includes('BP')) {
       FormManager.setValue('isuCd', '8B');
       FormManager.setValue('clientTier', '');
