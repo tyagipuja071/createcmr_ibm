@@ -6135,6 +6135,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   // 4. then for every sheet, get the fields
                   model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
 
+                  if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+                    models.add(model);
+                    modelList.add(model);
+                  }
+                  
                   for (MassUpdateModel dataModel : modelList) {
                     if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0
                         && dataModel.getSeqNo() >= model.getSeqNo()) {
