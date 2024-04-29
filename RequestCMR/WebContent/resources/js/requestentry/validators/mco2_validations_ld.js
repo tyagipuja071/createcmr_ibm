@@ -128,7 +128,8 @@ function addNewHandlersForMCO2() {
 
 
    // first change to custSubGrp
- if(FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)){	    setISUCTC();
+ if(FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)){	
+	  setISUCTC();
 		setEntpValue();
 		getMEAPreSelectedCBLogicEntp();    
     }
@@ -3363,6 +3364,11 @@ function setEnterpriseAfterSave() {
 	if (FormManager.getActualValue('enterprise') != _pagemodel.enterprise) {
 		FormManager.setValue('enterprise', _pagemodel.enterprise)
 	}
+	
+		if (FormManager.getActualValue('custSubGrp') == '' ) {
+			localStorage.setItem("oldCustGrp",'');
+			}
+
 }
 
 function callEntpLogic() {
