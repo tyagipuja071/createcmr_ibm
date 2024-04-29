@@ -435,7 +435,9 @@ public class LAHandler extends GEOHandler {
     if ("N".equals(taxSepIndc)) {
       data.setIcmsInd("1");
     } else if ("Y".equals(taxSepIndc)) {
-      data.setIcmsInd("2");
+      if (data.getIcmsInd() != null && !"631".equals(data.getCmrIssuingCntry())) {
+        data.setIcmsInd("2");
+      }
     }
   }
 
