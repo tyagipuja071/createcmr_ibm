@@ -3121,6 +3121,7 @@ function setValuesForTurkey() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   var enterprise = FormManager.getActualValue('enterprise');
   var reqType = FormManager.getActualValue('reqType');
+  var post = FormManager.getActualValue('postCd');
   var CEWA_LC = [ 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ',
       'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG' ];
   var role = null;
@@ -3151,10 +3152,10 @@ function setValuesForTurkey() {
     }
 
     if (issuingCntry == '862') {
-      if (custSubType == 'PRICU' || custSubType == 'XBP') {
+      if (custSubType == 'PRICU' || custSubType == 'XPC') {
         FormManager.setValue('enterprise', '911720');
         FormManager.readOnly('enterprise');
-      } else if (custSubType == 'BUSPR' || custSubType == 'INTER' || custSubType == "IBMEM") {
+      } else if (custSubType == 'BUSPR' || custSubType == 'INTER' || custSubType == "IBMEM" || custSubType == 'XBP' || custSubType == 'XINT') {
         FormManager.setValue('enterprise', '');
         FormManager.readOnly('enterprise');
       } else if (custSubType == 'COMME' || custSubType == 'GOVRN' || custSubType == 'THDPT' || custSubType == 'IGF') {
@@ -3198,12 +3199,13 @@ function setValuesForTurkey() {
             } else if (T911708.includes(ind)) {
               FormManager.setValue('enterprise', '911708');
             } else if (T911715.includes(indG)) {
-              // landed country- TR 06- first fetch address then fetch code
               FormManager.setValue('enterprise', '911715');
             } else if (T911717.includes(indG)) {
-              FormManager.setValue('enterprise', '911717');
-            } else if (T911718.includes(indG)) {
-              FormManager.setValue('enterprise', '911718');
+              if (post == null) {
+                FormManager.setValue('enterprise', '911718');
+              } else {
+                FormManager.setValue('enterprise', '911717');
+              }
             } else if (T911719.includes(ind)) {
               FormManager.setValue('enterprise', '911719');
             } else if (T911706.includes(ind)) {
@@ -3248,7 +3250,7 @@ function setValuesForTurkey() {
       }
     }
 
-    if (custSubType == 'XINTS' || custSubType == 'XGOV' || custSubType == 'XIGF' || custSubType == 'XPC' || custSubType == 'XTP') {
+    if (custSubType == 'XINTS' || custSubType == 'XGOV' || custSubType == 'XIGF' || custSubType == 'XTP') {
       // FormManager.enable('enterprise');
       if (issuingCntry == '862' && SA_LC.includes(currentLandedCountry) && custType == 'CROSS') {
         setCBEnterpriseSA(isuCtc, currentLandedCountry, ind, issuingCntry);
