@@ -2071,14 +2071,25 @@ public class JPHandler extends GEOHandler {
     addr.setCustNm4(addr.getCustNm4() == null ? addr.getCustNm4()
         : addr.getCustNm4().trim().length() > 23 ? addr.getCustNm4().trim().substring(0, 23) : addr.getCustNm4().trim());
 
-    String addrTemp = null;
-    if (addr.getAddrTxt() != null && addr.getAddrTxt().trim().length() > 23) {
-      addrTemp = addr.getAddrTxt().trim().substring(23);
-      addr.setAddrTxt2(addrTemp);
+    String addrTxt = "";
+    String addrTxt2 = "";
+    if (addr.getAddrTxt() != null) {
+      if (addr.getAddrTxt().trim().length() > 17) {
+        addrTxt = addr.getAddrTxt().trim().substring(0, 17);
+        addrTxt2 = addr.getAddrTxt().trim().substring(17);
+      } else {
+        addrTxt = addr.getAddrTxt().trim();
+      }
     }
-    addr.setAddrTxt(addr.getAddrTxt() == null ? addr.getAddrTxt()
-        : addr.getAddrTxt().trim().length() > 23 ? addr.getAddrTxt().trim().substring(0, 23) : addr.getAddrTxt().trim());
-    addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
+
+    if (!StringUtils.isEmpty(addrTxt)) {
+      addr.setAddrTxt(convert2DBCS(addrTxt));
+    }
+    if (!StringUtils.isEmpty(addrTxt2)) {
+      if (addrTxt2.length() > 13)
+        addrTxt2 = addrTxt2.substring(0, 13);
+      addr.setAddrTxt2(convert2DBCS(addrTxt2));
+    }
 
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
