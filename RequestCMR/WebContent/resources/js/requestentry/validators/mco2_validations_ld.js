@@ -131,7 +131,8 @@ function addNewHandlersForMCO2() {
  if(FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)){	
 	  setISUCTC();
 		setEntpValue();
-		getMEAPreSelectedCBLogicEntp();    
+		getMEAPreSelectedCBLogicEntp();  
+		localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));  
     }
    
 
@@ -158,7 +159,10 @@ function addNewHandlersForMCO2() {
 	
 	if (subIndHandler == null) {
 		subIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+		if(FormManager.getActualValue('subIndustryCd'))
 		currentISIC	= FormManager.getActualValue('subIndustryCd').substr(0,2);
+		
+		if(localStorage.getItem("oldISIC"))
 		previousISIC = localStorage.getItem("oldISIC").substr(0,2);
 		if(previousISIC != null && previousISIC != '' && previousISIC != undefined){
 				isPrvsISICBlank = false;
@@ -213,7 +217,7 @@ function setISUCTC() {
 		if (['EG', 'QA', 'LY', 'TN', 'MA', 'PK', 'AF'].includes(zs01Landed)) {
 			FormManager.setValue('isuCd', '34');
 			FormManager.setValue('clientTier', 'Q');
-		} else if (['KW', 'OM', 'SY', 'IQ', 'YE', 'JO', 'PS', 'LB', 'BH'].includes(zs01Landed)) {
+		} else if (['AE','KW', 'OM', 'SY', 'IQ', 'YE', 'JO', 'PS', 'LB', 'BH'].includes(zs01Landed)) {
 			FormManager.setValue('isuCd', '27');
 			FormManager.setValue('clientTier', 'E');
 		} else if (zs01Landed == 'SA' && subInd) {
@@ -2787,7 +2791,6 @@ function validateISUCTCEnterprisefrLOCAL() {
 	})(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-var validateLogicCalled = false;
 function validateISUCTCEnterprisefrCROSS() {
 	FormManager.addFormValidator((function() {
 		return {
@@ -2798,13 +2801,14 @@ function validateISUCTCEnterprisefrCROSS() {
 				var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
 				var valid = false;
 				var valid_EntpList = [];
-				validateLogicCalled = true;
+				localStorage.setItem("validateLogicCalled",true);
 				var reqType = FormManager.getActualValue('reqType');
 				var landCntry = getZS01LandCntry();
 				if (reqType == 'U' || custGrp != 'CROSS' || landCntry == '' || landCntry == undefined) {
 					return new ValidationResult(null, true);
 				}
-				var preSelValidEntp = getMEAPreSelectedCBLogicEntp(validateLogicCalled);
+				var preSelValidEntp = getMEAPreSelectedCBLogicEntp();
+				localStorage.setItem("validateLogicCalled",false);
 				if (preSelValidEntp)
 					valid_EntpList.push(preSelValidEntp);
 				var arr = getMEAEntpUserAdded();
@@ -3090,8 +3094,11 @@ function getMEAPreSelectedCBLogicEntp() {
 	} else if (landCntry == 'TR') {
 		entp = getTurkeyEntpPreSelected(landCntry, isuCd, ctc, subInd);
 	}
-
-	if (entp != 'noPreSelect')
+  var toSetEntp = true;
+  if(localStorage.getItem("validateLogicCalled") === 'true'){
+	toSetEntp = false;
+   }
+	if (entp != 'noPreSelect' && toSetEntp)
 		FormManager.setValue('enterprise', entp);
 
 	if ((entp == '' && ['XBP', 'XIBME', 'XINTE'].includes(custSubGrp)) || custSubGrp == 'XPRIC') {
@@ -3467,9 +3474,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrLOCAL, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrCROSS, GEOHandler.MCO2, null, true);
-	// GEOHandler.addAfterConfig(setEntpValue, GEOHandler.MCO2);
-	// GEOHandler.addAfterTemplateLoad(setEntpValue, GEOHandler.MCO2);
-	GEOHandler.addAfterTemplateLoad(callEntpLogic, GEOHandler.MCO2);
+//	GEOHandler.addAfterTemplateLoad(callEntpLogic, GEOHandler.MCO2);
 	GEOHandler.addAfterConfig(setEnterpriseAfterSave, GEOHandler.MCO2);
 
 });
