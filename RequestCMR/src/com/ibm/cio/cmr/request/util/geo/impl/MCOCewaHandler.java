@@ -37,8 +37,10 @@ import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -66,8 +68,8 @@ public class MCOCewaHandler extends MCOHandler {
       "EPL Address", "Data" };
 
   private static final String[] MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "Company", "CustClassCode", "LocalTax2",
-      "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel", "ModeOfPayment", "CodFlag", "SalRepNameNo" };
+      "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County",
+      "City2", "INACType", "BPRelationType", "MembLevel", "ModeOfPayment", "CodFlag", "SalRepNameNo" };
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
@@ -98,10 +100,6 @@ public class MCOCewaHandler extends MCOHandler {
 
           if (legacyCust.getTaxCd() != null)
             data.setSpecialTaxCd(legacyCust.getTaxCd());
-
-          if (legacyCust.getEnterpriseNo() != null)
-            data.setEnterprise(legacyCust.getEnterpriseNo());
-
         }
 
         data.setDunsNo(mainRecord.getCmrDuns());
@@ -126,6 +124,35 @@ public class MCOCewaHandler extends MCOHandler {
         data.setPpsceid("");
       }
     }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      String enterprise = "";
+      enterprise = getRdcNode2(data.getCmrNo(), data.getCmrIssuingCntry());
+      data.setEnterprise(enterprise);
+    }
+  }
+
+  private String getRdcNode2(String cmrNo, String cntry) {
+    String zzkvNode2 = "";
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String sql = ExternalizedQuery.getSql("CEWA.GET.KNA1.ZZKVNODE2");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("KATR6", cntry);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("ZZKV_CUSNO", cmrNo);
+      query.setForReadOnly(true);
+      String result = query.getSingleResult(String.class);
+      if (result != null) {
+        zzkvNode2 = result;
+      }
+      return zzkvNode2;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+
   }
 
   private String getKunnrSapr3Kna1(String cmrNo, String cntry) throws Exception {
