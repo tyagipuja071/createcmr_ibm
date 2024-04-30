@@ -2332,107 +2332,117 @@ function sboCodeValidator() {
 
 function entValidator() {
   console.log('entValidator======');
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var isuCd = FormManager.getActualValue('isuCd');
-        var clientTier = FormManager.getActualValue('clientTier');
-        var isuCtc = isuCd + clientTier;
-        var enterprise = FormManager.getActualValue('enterprise');
-        var custType = FormManager.getActualValue('custGrp');
-        var countryUse = FormManager.getActualValue('countryUse');
-        var reqId = FormManager.getActualValue('reqId');
-        validEnt27E = [ '011675', '011677', '011676', '011672', '011673', '011674', '909813', '909813', '910510', '910509' ];
-        var SOUTH_AFRICA_LC = [ 'ZA', 'NA', 'LS', 'ZS' ];
-        var ME_LC = [ 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
-        var TURKEY_LC = [ 'TR' ];
-        var CEWA_LC = [ 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG',
-            'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG' ];
-        var custSubType = FormManager.getActualValue('custSubGrp');
-        var landCntry = '';
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        // GET LANDCNTRY in case of CB
-        var result = cmr.query('LANDCNTRY.IT', {
-          REQID : reqId
-        });
-        if (result != null && result.ret1 != undefined) {
-          landCntry = result.ret1;
-        }
-        var crossSubTypes = [ 'ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP', 'LSXCO', 'LSXGO', 'LSXPC', 'LSXTP' ];
-        if (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry)) {
-          return;
-        }
-        if (custType == 'LOCAL') {
-          if (isuCtc == '34Q') {
-            if (!(enterprise == '911703' || enterprise == '911716' || enterprise == '911704')) {
-              return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'911703\'\ \'911716\'\ \'911704\'\ for ISU CTC 34Q.');
-            } else
-              return new ValidationResult(null, true, null);
-          } else if (isuCtc == '36Y') {
-            if (!(enterprise == '908030' || enterprise == '912103' || enterprise == '912104')) {
-              return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'908030\'\ \'912103\'\ \'912104\'\ for ISU CTC 36Y.');
-            } else
-              return new ValidationResult(null, true, null);
-          } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
-            if (!(enterprise == '')) {
-              return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank for ISU CTC ' + isuCtc);
-            } else
-              return new ValidationResult(null, true, null);
-          } else
-            return new ValidationResult(null, true, null);
-        } else {
-          if (SOUTH_AFRICA_LC.includes(landCntry)) {
-            if (isuCtc == '27E') {
-              if (!((enterprise == '011680' || enterprise == '011684' || enterprise == '011679' || enterprise == '011681' || enterprise == '011682' || enterprise == '011683') || (validEnt27E
-                  .includes(enterprise)))) {
-                return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + ' for ISU CTC 27E.');
-                // 'Enterprise can only accept \'011680\'\ \'911716\'\
-                // \'011684\'\ \'011681\'\ \'011682\'\ \'011683\'\ for
-                // ISU CTC 27E.');
-              } else
-                return new ValidationResult(null, true, null);
-            } else if (isuCtc == '34Q') {
-              if (!(enterprise == '004179' || enterprise == '011678')) {
-                return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + '  for ISU CTC 34Q.');
-                // 'Enterprise can only accept \'004179\'\ \'011678\'\
-                // for ISU CTC 34Q.');
-              } else
-                return new ValidationResult(null, true, null);
-            } else if (isuCtc == '36Y') {
-              if (!(enterprise == '008028' || enterprise == '010032' || enterprise == '012430' || enterprise == '009814' || enterprise == '012095' || enterprise == '012096' || enterprise == '012097'
-                  || enterprise == '012098' || enterprise == '012100' || enterprise == '012101' || enterprise == '012102')) {
-                return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + 'for ISU CTC 36Y.');
-                // 'Enterprise can only accept \'008028\'\ \'010032\'\
-                // \'012430\'\ \'009814\'\ \'010032\'\ \'009814\'\ \'012095\'\
-                // \'012096\'\ \'012097\'\ \'012098\'\ \'012099\'\ \'012100\'\
-                // \'012101\'\ \'012102\'\ for ISU CTC 36Y.');
-              } else
-                return new ValidationResult(null, true, null);
-            } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '12' || isuCtc == '4K' || isuCtc == '5K') {
-              if (!(enterprise == '')) {
-                return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank for ISU CTC ' + isuCtc);
-              } else
-                return new ValidationResult(null, true, null);
-            } else
-              return new ValidationResult(null, true, null);
-          } else if (CEWA_LC.includes(landCntry)) {
-            if (isuCtc == '36Y') {
-              if (!(enterprise == 'BUILD1' || enterprise == 'DISTR1' || enterprise == 'SRVCE1')) {
-                return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + '  for ISU CTC 36Y.');
-              } else
-                return new ValidationResult(null, true, null);
-            } else if (isuCtc == '5K') {
-              if (!(enterprise == '')) {
-                return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank value for ISU CTC 5K.');
-              } else
-                return new ValidationResult(null, true, null);
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            var isuCd = FormManager.getActualValue('isuCd');
+            var clientTier = FormManager.getActualValue('clientTier');
+            var isuCtc = isuCd + clientTier;
+            var enterprise = FormManager.getActualValue('enterprise');
+            var custType = FormManager.getActualValue('custGrp');
+            var countryUse = FormManager.getActualValue('countryUse');
+            var reqId = FormManager.getActualValue('reqId');
+            validEnt27E = [ '011675', '011677', '011676', '011672', '011673', '011674', '909813', '909813', '910510', '910509' ];
+            var SOUTH_AFRICA_LC = [ 'ZA', 'NA', 'LS', 'ZS' ];
+            var ME_LC = [ 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
+            var TURKEY_LC = [ 'TR' ];
+            var CEWA_LC = [ 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ',
+                'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG' ];
+            var custSubType = FormManager.getActualValue('custSubGrp');
+            var landCntry = '';
+            var cntry = FormManager.getActualValue('cmrIssuingCntry');
+            // GET LANDCNTRY in case of CB
+            var result = cmr.query('LANDCNTRY.IT', {
+              REQID : reqId
+            });
+            if (result != null && result.ret1 != undefined) {
+              landCntry = result.ret1;
             }
+            var crossSubTypes = [ 'ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP', 'LSXCO', 'LSXGO', 'LSXPC', 'LSXTP' ];
+            if (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry)) {
+              return;
+            }
+            if (custType == 'LOCAL') {
+              if (isuCtc == '34Q') {
+                if (!(enterprise == '911703' || enterprise == '911716' || enterprise == '911704')) {
+                  return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'911703\'\ \'911716\'\ \'911704\'\ for ISU CTC 34Q.');
+                } else
+                  return new ValidationResult(null, true, null);
+              } else if (isuCtc == '36Y') {
+                if (!(enterprise == '908030' || enterprise == '912103' || enterprise == '912104')) {
+                  return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'908030\'\ \'912103\'\ \'912104\'\ for ISU CTC 36Y.');
+                } else
+                  return new ValidationResult(null, true, null);
+              } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
+                if (!(enterprise == '')) {
+                  return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank for ISU CTC ' + isuCtc);
+                } else
+                  return new ValidationResult(null, true, null);
+              } else
+                return new ValidationResult(null, true, null);
+            } else {
+              if (SOUTH_AFRICA_LC.includes(landCntry)) {
+                if (isuCtc == '27E') {
+                  if (!((enterprise == '011680' || enterprise == '011684' || enterprise == '011679' || enterprise == '011681' || enterprise == '011682' || enterprise == '011683') || (validEnt27E
+                      .includes(enterprise)))) {
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + ' for ISU CTC 27E.');
+                    // 'Enterprise can only accept \'011680\'\ \'911716\'\
+                    // \'011684\'\ \'011681\'\ \'011682\'\ \'011683\'\ for
+                    // ISU CTC 27E.');
+                  } else
+                    return new ValidationResult(null, true, null);
+                } else if (isuCtc == '34Q') {
+                  if (!(enterprise == '004179' || enterprise == '011678')) {
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + '  for ISU CTC 34Q.');
+                    // 'Enterprise can only accept \'004179\'\ \'011678\'\
+                    // for ISU CTC 34Q.');
+                  } else
+                    return new ValidationResult(null, true, null);
+                } else if (isuCtc == '36Y') {
+                  if (!(enterprise == '008028' || enterprise == '010032' || enterprise == '012430' || enterprise == '009814' || enterprise == '012095' || enterprise == '012096'
+                      || enterprise == '012097' || enterprise == '012098' || enterprise == '012100' || enterprise == '012101' || enterprise == '012102')) {
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + 'for ISU CTC 36Y.');
+                    // 'Enterprise can only accept \'008028\'\ \'010032\'\
+                    // \'012430\'\ \'009814\'\ \'010032\'\ \'009814\'\
+                    // \'012095\'\
+                    // \'012096\'\ \'012097\'\ \'012098\'\ \'012099\'\
+                    // \'012100\'\
+                    // \'012101\'\ \'012102\'\ for ISU CTC 36Y.');
+                  } else
+                    return new ValidationResult(null, true, null);
+                } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '12' || isuCtc == '4K' || isuCtc == '5K') {
+                  if (!(enterprise == '')) {
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank for ISU CTC ' + isuCtc);
+                  } else
+                    return new ValidationResult(null, true, null);
+                } else
+                  return new ValidationResult(null, true, null);
+              } else if (CEWA_LC.includes(landCntry)) {
+                if (isuCtc == '36Y') {
+                  if (!(enterprise == 'BUILD1' || enterprise == 'DISTR1' || enterprise == 'SRVCE1')) {
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + '  for ISU CTC 36Y.');
+                  } else
+                    return new ValidationResult(null, true, null);
+                } else if (isuCtc == '5K') {
+                  if (!(enterprise == '')) {
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank value for ISU CTC 5K.');
+                  } else
+                    return new ValidationResult(null, true, null);
+                } else if (isuCtc == '34Q') {
+                  if (!(enterprise == '911741' || enterprise == '901441' || enterprise == '911757' || enterprise == '911733' || enterprise == '901444' || enterprise == '911730'
+                      || enterprise == '911756' || enterprise == '911740' || enterprise == '911737' || enterprise == '906402' || enterprise == '911758' || enterprise == '901728'
+                      || enterprise == '907897' || enterprise == '911743' || enterprise == '911755')) {
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank value for ISU CTC 34Q.');
+                  } else
+                    return new ValidationResult(null, true, null);
+                }
 
+              }
+            }
           }
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+        };
+      })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function entValidatorSA() {
