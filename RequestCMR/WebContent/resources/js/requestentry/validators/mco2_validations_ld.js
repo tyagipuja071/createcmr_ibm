@@ -2361,7 +2361,7 @@ function clientTierCodeValidator() {
 	var clientTierCode = FormManager.getActualValue('clientTier');
 	var reqType = FormManager.getActualValue('reqType');
 
-	if ((!['34', '36', '27', '32'].includes(isuCode) && reqType == 'C')) {
+	if (!['34', '36', '27', '32'].includes(isuCode)) {
 		if (clientTierCode == '') {
 			$("#clientTierSpan").html('');
 
@@ -2453,32 +2453,9 @@ function clientTierValidator() {
 	FormManager.addFormValidator((function() {
 		return {
 			validate: function() {
-				var clientTier = FormManager.getActualValue('clientTier');
-				var isuCd = FormManager.getActualValue('isuCd');
-				var reqType = FormManager.getActualValue('reqType');
 				var valResult = null;
-
-				var oldClientTier = null;
-				var oldISU = null;
-				var requestId = FormManager.getActualValue('reqId');
-
-				if (reqType == 'C') {
-					valResult = clientTierCodeValidator();
-				} else {
-					qParams = {
-						REQ_ID: requestId,
-					};
-					var result = cmr.query('GET.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
-
-					if (result != null && result != '') {
-						oldClientTier = result.ret1 != null ? result.ret1 : '';
-						oldISU = result.ret3 != null ? result.ret3 : '';
-
-						if (clientTier != oldClientTier || isuCd != oldISU) {
-							valResult = clientTierCodeValidator();
-						}
-					}
-				}
+				valResult = clientTierCodeValidator();
+				
 				return valResult;
 			}
 		};
@@ -3162,13 +3139,15 @@ function getTurkeyEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 	if (isuCTC == '27E') {
 		if (['GB', 'GF', 'GJ', 'GN'].includes(subInd)) {
 			entp = '911715';
+			return entp;
 		} else if (['GA', 'GC', 'GD', 'GE', 'GG', 'GH', 'GK', 'GL', 'GM', 'GP', 'GR', 'GW'].includes(subInd)) {
 			entp = '911718';
+			return entp;
 		}
-
-		subInd = subInd.substring(0, 1);
+    if(subInd){
+	  subInd = subInd.substring(0, 1);
 		entp = subIndEntpTRMapping[subInd];
-
+}
 	}
 	return entp;
 
