@@ -2908,7 +2908,9 @@ public class JPHandler extends GEOHandler {
     Map<String, String> intlAddrTypeToEngNameMap = new HashMap<>();
     if (intlAddrs != null) {
       for (IntlAddr intlAddr : intlAddrs) {
-        intlAddrTypeToEngNameMap.put(intlAddr.getId().getAddrType(), intlAddr.getIntlCustNm1());
+        String name1 = intlAddr.getIntlCustNm1() == null ? "" : intlAddr.getIntlCustNm1();
+        String name2 = intlAddr.getIntlCustNm2() == null ? "" : " ".concat(intlAddr.getIntlCustNm2());
+        intlAddrTypeToEngNameMap.put(intlAddr.getId().getAddrType(), name1 + name2);
       }
     }
     return intlAddrTypeToEngNameMap;
@@ -3028,7 +3030,12 @@ public class JPHandler extends GEOHandler {
           intlAddr.setIntlCustNm1(fullEnglish.length() > 22 ? fullEnglish.substring(0, 22) : fullEnglish);
         }
       } else {
-        intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
+        String[] parts = null;
+        String name1 = kna1.getName1();
+        String name2 = kna1.getName2();
+        parts = doSplitName(name1, name2, 35, 35);
+        intlAddr.setIntlCustNm1(parts[0]);
+        intlAddr.setIntlCustNm2(parts[1]);
       }
       intlAddr.setAddrTxt(kna1.getStras());
       intlAddr.setCity1(kna1.getOrt01());
