@@ -8,7 +8,7 @@ var landCntrySA = ['SZ', 'ZA', 'LS', 'NA'];
 var landCntryCEWA = ['AO', 'CV', 'MZ', 'ST', 'BW', 'MW', 'ZM', 'CG', 'CD', 'CF', 'CM', 'GA', 'GQ', 'NE', 'TD', 'ET', 'GH', 'LR', 'SL', 'KE',
 	'LY', 'MG', 'MU', 'SC', 'NG', 'GM', 'GN', 'GW', 'ML', 'MR', 'SN', 'BF', 'BJ', 'TG', 'CI', 'TN', 'BI', 'DJ', 'ER', 'RW',
 	'SO', 'SD', 'TZ', 'UG', 'ZW', 'DZ'];
-var landCntryMEA = ['AE', 'SA', 'KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'LB', 'PS','BH', 'EG', 'QA', 'LY', 'TN', 'MA', 'PK', 'AF'];
+var landCntryMEA = ['AE', 'SA', 'KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'LB', 'PS', 'BH', 'EG', 'QA', 'LY', 'TN', 'MA', 'PK', 'AF'];
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
 	if (!saving) {
 		if (addressMode == 'newAddress') {
@@ -127,28 +127,28 @@ function addNewHandlersForMCO2() {
 	}
 
 
-   // first change to custSubGrp
- if(FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)){	
-	  setISUCTC();
+	// first change to custSubGrp
+	if (FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)) {
+		setISUCTC();
 		setEntpValue();
-		getMEAPreSelectedCBLogicEntp();  
-		localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));  
-    }
-   
+		getMEAPreSelectedCBLogicEntp();
+		localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
+	}
+
 
 	if (custSubGrpHandler == null) {
-		  custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-			currentSelection	= FormManager.getActualValue('custSubGrp');
+		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+			currentSelection = FormManager.getActualValue('custSubGrp');
 			previousSelection = localStorage.getItem("oldCustGrp");
-			if(previousSelection != null && previousSelection != '' && previousSelection != undefined){
+			if (previousSelection != null && previousSelection != '' && previousSelection != undefined) {
 				isPrvsSlctnBlank = false;
 			}
 			if ((!isPrvsSlctnBlank && previousSelection != currentSelection && _pagemodel['custSubGrp'] == null) || (!isPrvsSlctnBlank && previousSelection == _pagemodel['custSubGrp'] && previousSelection != currentSelection)) {
 				scenarioChanged = true;
-			} else if((!isPrvsSlctnBlank && (previousSelection == currentSelection && currentSelection == _pagemodel['custSubGrp']))){
+			} else if ((!isPrvsSlctnBlank && (previousSelection == currentSelection && currentSelection == _pagemodel['custSubGrp']))) {
 				scenarioChanged = false;
 			}
-			if(scenarioChanged) {
+			if (scenarioChanged) {
 				setISUCTC();
 				setEntpValue();
 				getMEAPreSelectedCBLogicEntp();
@@ -156,21 +156,21 @@ function addNewHandlersForMCO2() {
 			localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
 		});
 	}
-	
+
 	if (subIndHandler == null) {
 		subIndHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-		if(FormManager.getActualValue('subIndustryCd'))
-		currentISIC	= FormManager.getActualValue('subIndustryCd').substr(0,2);
-		
-		if(localStorage.getItem("oldISIC"))
-		previousISIC = localStorage.getItem("oldISIC").substr(0,2);
-		if(previousISIC != null && previousISIC != '' && previousISIC != undefined){
+			if (FormManager.getActualValue('subIndustryCd'))
+				currentISIC = FormManager.getActualValue('subIndustryCd').substr(0, 2);
+
+			if (localStorage.getItem("oldISIC"))
+				previousISIC = localStorage.getItem("oldISIC").substr(0, 2);
+			if (previousISIC != null && previousISIC != '' && previousISIC != undefined) {
 				isPrvsISICBlank = false;
 			}
-		
-			if ((!isPrvsISICBlank && previousISIC != currentISIC && _pagemodel['subIndustryCd'] == null)  || (!isPrvsISICBlank && previousISIC == _pagemodel['subIndustryCd'] && previousISIC != currentISIC)) {
+
+			if ((!isPrvsISICBlank && previousISIC != currentISIC && _pagemodel['subIndustryCd'] == null) || (!isPrvsISICBlank && previousISIC == _pagemodel['subIndustryCd'] && previousISIC != currentISIC)) {
 				isicChanged = true;
-			} else if((!isPrvsISICBlank && (previousISIC == currentISIC && currentISIC == _pagemodel['subIndustryCd'])) || (previousISIC == null && currentISIC == _pagemodel['subIndustryCd'])){
+			} else if ((!isPrvsISICBlank && (previousISIC == currentISIC && currentISIC == _pagemodel['subIndustryCd'])) || (previousISIC == null && currentISIC == _pagemodel['subIndustryCd'])) {
 				isicChanged = false;
 			}
 			if (isicChanged) {
@@ -217,11 +217,11 @@ function setISUCTC() {
 		if (['EG', 'QA', 'LY', 'TN', 'MA', 'PK', 'AF'].includes(zs01Landed)) {
 			FormManager.setValue('isuCd', '34');
 			FormManager.setValue('clientTier', 'Q');
-		} else if (['AE','KW', 'OM', 'SY', 'IQ', 'YE', 'JO', 'PS', 'LB', 'BH'].includes(zs01Landed)) {
+		} else if (['AE', 'KW', 'OM', 'SY', 'IQ', 'YE', 'JO', 'PS', 'LB', 'BH'].includes(zs01Landed)) {
 			FormManager.setValue('isuCd', '27');
 			FormManager.setValue('clientTier', 'E');
 		} else if (zs01Landed == 'SA' && subInd) {
-			subInd = subInd.substr(0,1);
+			subInd = subInd.substr(0, 1);
 			if (['E', 'G', 'V', 'Y', 'H', 'X'].includes(subInd)) {
 				FormManager.setValue('isuCd', '34');
 				FormManager.setValue('clientTier', 'Q');
@@ -2459,7 +2459,7 @@ function clientTierValidator() {
 			validate: function() {
 				var valResult = null;
 				valResult = clientTierCodeValidator();
-				
+
 				return valResult;
 			}
 		};
@@ -2801,14 +2801,14 @@ function validateISUCTCEnterprisefrCROSS() {
 				var isuCTC = FormManager.getActualValue('isuCd') + FormManager.getActualValue('clientTier');
 				var valid = false;
 				var valid_EntpList = [];
-				localStorage.setItem("validateLogicCalled",true);
+				localStorage.setItem("validateLogicCalled", true);
 				var reqType = FormManager.getActualValue('reqType');
 				var landCntry = getZS01LandCntry();
 				if (reqType == 'U' || custGrp != 'CROSS' || landCntry == '' || landCntry == undefined) {
 					return new ValidationResult(null, true);
 				}
 				var preSelValidEntp = getMEAPreSelectedCBLogicEntp();
-				localStorage.setItem("validateLogicCalled",false);
+				localStorage.setItem("validateLogicCalled", false);
 				if (preSelValidEntp)
 					valid_EntpList.push(preSelValidEntp);
 				var arr = getMEAEntpUserAdded();
@@ -3084,7 +3084,7 @@ function getMEAPreSelectedCBLogicEntp() {
 	if (FormManager.getActualValue('custGrp') != 'CROSS' || (cmrCntryCd == landCntry)) {
 		return;
 	}
-	
+
 	if (landCntrySA.includes(landCntry)) {
 		entp = getSouthAfricaEntpPreSelected(landCntry, isuCd, ctc, subInd);
 	} else if (landCntryCEWA.includes(landCntry)) {
@@ -3094,10 +3094,10 @@ function getMEAPreSelectedCBLogicEntp() {
 	} else if (landCntry == 'TR') {
 		entp = getTurkeyEntpPreSelected(landCntry, isuCd, ctc, subInd);
 	}
-  var toSetEntp = true;
-  if(localStorage.getItem("validateLogicCalled") === 'true'){
-	toSetEntp = false;
-   }
+	var toSetEntp = true;
+	if (localStorage.getItem("validateLogicCalled") === 'true') {
+		toSetEntp = false;
+	}
 	if (entp != 'noPreSelect' && toSetEntp)
 		FormManager.setValue('enterprise', entp);
 
@@ -3151,10 +3151,10 @@ function getTurkeyEntpPreSelected(landCntry, isuCd, ctc, subInd) {
 			entp = '911718';
 			return entp;
 		}
-    if(subInd){
-	  subInd = subInd.substring(0, 1);
-		entp = subIndEntpTRMapping[subInd];
-}
+		if (subInd) {
+			subInd = subInd.substring(0, 1);
+			entp = subIndEntpTRMapping[subInd];
+		}
 	}
 	return entp;
 
@@ -3350,10 +3350,10 @@ function setEnterpriseAfterSave() {
 	if (FormManager.getActualValue('enterprise') != _pagemodel.enterprise) {
 		FormManager.setValue('enterprise', _pagemodel.enterprise)
 	}
-	
-		if (FormManager.getActualValue('custSubGrp') == '' ) {
-			localStorage.setItem("oldCustGrp",'');
-			}
+
+	if (FormManager.getActualValue('custSubGrp') == '') {
+		localStorage.setItem("oldCustGrp", '');
+	}
 
 }
 
@@ -3474,7 +3474,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrLOCAL, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrCROSS, GEOHandler.MCO2, null, true);
-//	GEOHandler.addAfterTemplateLoad(callEntpLogic, GEOHandler.MCO2);
+	//	GEOHandler.addAfterTemplateLoad(callEntpLogic, GEOHandler.MCO2);
 	GEOHandler.addAfterConfig(setEnterpriseAfterSave, GEOHandler.MCO2);
 
 });
