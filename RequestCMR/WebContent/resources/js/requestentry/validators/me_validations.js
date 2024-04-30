@@ -566,6 +566,10 @@ function addHandlersForCEMEA() {
       }
 
       lockFieldsBasedOnISU(value);
+      var clientTier = FormManager.getActualValue('clientTier');
+      if (clientTier != "") {
+        setEnterpriseValuesME(clientTier);
+      }
 
     });
   }
