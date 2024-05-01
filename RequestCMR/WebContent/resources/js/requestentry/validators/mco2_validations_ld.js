@@ -116,7 +116,7 @@ var previousISIC = null;
 var currentISIC = null;
 var isPrvsSlctnBlank = true;
 var isPrvsISICBlank = true;
-
+var _landCntryHandler = null;
 
 function addNewHandlersForMCO2() {
 	if (ctcHandler == null) {
@@ -181,6 +181,13 @@ function addNewHandlersForMCO2() {
 		});
 	}
 
+
+	if (_landCntryHandler == null) {
+		_landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+        setISUCTC();
+				getMEAPreSelectedCBLogicEntp();	
+					});
+	}
 }
 
 function setISUCTC() {
