@@ -2873,7 +2873,7 @@ function setCTCValues() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '21') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      FormManager.enable('clientTier');
+      // FormManager.enable('clientTier');
     }
   }
 
