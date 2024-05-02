@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USSosRpaCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -2343,6 +2344,145 @@ public class USUtil extends AutomationUtil {
       }
     }
     return false;
+  }
+
+  public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
+    LOG.debug("Performing USA final fillCoverageAttributes...");
+    Data data = requestData.getData();
+    String coverageId = covType + covId;
+    String sbo = "";
+
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
+    // ISU CTC Based on Coverage
+    String scenario = data.getCustSubGrp();
+    String isu = "";
+    String ctc = "";
+    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
+
+      String firstChar = coverageId.substring(0, 1);
+
+      // List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993",
+      // "T0007994", "T0008059");
+
+      if (("T").equalsIgnoreCase(firstChar)) {
+        if (StringUtils.isBlank(data.getGbgId())) {
+          if (scenario.equalsIgnoreCase("ECOSYSTEM")) {
+            isu = "36";
+            ctc = "Y";
+          } else if (scenario.equalsIgnoreCase("PRIV")) {
+            isu = "21";
+            ctc = " ";
+          } else if (!scenario.equalsIgnoreCase("ECOSYSTEM") && !scenario.equalsIgnoreCase("PRIV")) {
+            isu = "27";
+            ctc = "E";
+          }
+
+        } else {
+          if (scenario.equalsIgnoreCase("ECOSYSTEM")) {
+            isu = "36";
+            ctc = "Y";
+          } else if (scenario.equalsIgnoreCase("PRIV")) {
+            isu = "21";
+            ctc = " ";
+          } else {
+            isu = "34";
+            ctc = "Q";
+          }
+        }
+
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+      } /*
+         * else if (ECOSYSTEM_LIST.contains(coverageId)) { if
+         * (StringUtils.isBlank(data.getGbgId())) { if
+         * (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc = "Y"; } else if
+         * (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc = " "; } else
+         * if (!scenario.equalsIgnoreCase("ECO") &&
+         * !scenario.equalsIgnoreCase("PRIV")) { isu = "27"; ctc = "E"; }
+         * 
+         * } else { if (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc =
+         * "Y"; } else if (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc
+         * = " "; } else if (!scenario.equalsIgnoreCase("ECO") &&
+         * !scenario.equalsIgnoreCase("PRIV")) { isu = data.getIsuCd(); ctc =
+         * data.getClientTier(); } } setISUCTCBasedOnCoverage(details,
+         * overrides, coverageId, data, isu, ctc); }
+         */
+      else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
+        if (scenario.equalsIgnoreCase("ECO")) {
+          isu = "36";
+          ctc = "Y";
+        } else if (scenario.equalsIgnoreCase("PRIV")) {
+          isu = "21";
+          ctc = " ";
+        } else {
+          // isu = ""; // apply logic to set isu based on sub industry code
+          // ctc = "";
+          String subIndustryCd = data != null && data.getSubIndustryCd() != null ? data.getSubIndustryCd() : "";
+          String firstCharSubIndustry = StringUtils.isNotEmpty(subIndustryCd) ? subIndustryCd.substring(0, 1) : "";
+
+          Map<String, String> industryCodeISUMap = new HashMap<String, String>();
+
+          industryCodeISUMap.put("A", "3T");
+          industryCodeISUMap.put("U", "12");
+          industryCodeISUMap.put("K", "05");
+          industryCodeISUMap.put("R", "1R");
+          industryCodeISUMap.put("D", "18");
+
+          industryCodeISUMap.put("W", "18");
+          industryCodeISUMap.put("T", "19");
+          industryCodeISUMap.put("F", "04");
+          industryCodeISUMap.put("S", "4F");
+          industryCodeISUMap.put("N", "31");
+
+          industryCodeISUMap.put("J", "4A");
+          industryCodeISUMap.put("V", "14");
+          industryCodeISUMap.put("L", "5E");
+          industryCodeISUMap.put("P", "15");
+          industryCodeISUMap.put("M", "4D");
+
+          industryCodeISUMap.put("Y", "28");
+          industryCodeISUMap.put("G", "28");
+          industryCodeISUMap.put("E", "40");
+          industryCodeISUMap.put("H", "11");
+          industryCodeISUMap.put("X", "8C");
+
+          industryCodeISUMap.put("B", "5B");
+          industryCodeISUMap.put("C", "5B");
+
+          if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
+            isu = industryCodeISUMap.get(firstCharSubIndustry);
+            ctc = "";
+          }
+        }
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+      }
+    } /*
+       * else if (!isPaygoUpgrade && scenario.equalsIgnoreCase("ECO")) { isu =
+       * "36"; ctc = "Y"; setISUCTCBasedOnCoverage(details, overrides,
+       * coverageId, data, isu, ctc); } else if
+       * (!scenario.equalsIgnoreCase("ECO") &&
+       * !scenario.equalsIgnoreCase("Private Household Customer") &&
+       * StringUtils.isBlank(gbgId)) { isu = "27"; ctc = "E";
+       * setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu,
+       * ctc); } else if (!isPaygoUpgrade &&
+       * scenario.equalsIgnoreCase("Private Household Customer")) { isu = "21";
+       * ctc = ""; setISUCTCBasedOnCoverage(details, overrides, coverageId,
+       * data, isu, ctc); }
+       */
+    return true;
+  }
+
+  private void setISUCTCBasedOnCoverage(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String isu, String ctc) {
+    LOG.debug("Setting ISU CTC based on coverage...");
+    details.append("Setting ISU based on Coverage ").append(coverageId).append(" to ").append(isu).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
+
+    details.append("Setting CTC based on Coverage ").append(coverageId).append(" to ").append(ctc).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", isu, ctc);
   }
 
   @Override
