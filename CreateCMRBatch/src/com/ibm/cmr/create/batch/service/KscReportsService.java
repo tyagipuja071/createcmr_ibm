@@ -54,11 +54,13 @@ public class KscReportsService extends BaseBatchService {
    * Mode of the batch. D - Daily, M - Monthly
    */
   private String mode = DAILY;
+  private boolean manualExecution = false;
 
   private static final String DEFAULT_OUTPUT_DIR = "/ci/shared/data/jp/ksc";
 
   private String timestampString;
   private Timestamp currTimestamp;
+  private Timestamp serverTimestamp;
 
   private File outputDir;
 
@@ -78,6 +80,15 @@ public class KscReportsService extends BaseBatchService {
 
     cleanup(this.outputDir);
 
+    if (!isManualExecution()) {
+      if (!setModeAndGenerate(entityManager)) {
+        LOG.info("KSC Reports generation skipped for today.");
+        return true;
+      }
+    } else {
+      LOG.info("Manual mode parameter supplied. Forcing to run");
+    }
+
     DateRangeContainer dateRange = initDateRange(entityManager, this.mode);
     LOG.debug("Using date range " + dateRange.getFromDate() + " - " + dateRange.getToDate());
     generateReports(entityManager, dateRange, !MONTHLY.equals(this.mode));
@@ -91,15 +102,6 @@ public class KscReportsService extends BaseBatchService {
   private void cleanup(File outputDir) {
 
     LOG.debug("Cleaning up old files...");
-    int daysAdjust = -1;
-    Calendar curr = new GregorianCalendar();
-    curr.setTime(this.currTimestamp);
-    if (curr.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-      // for monday, go back 3 days
-      daysAdjust = -3;
-    }
-
-    LOG.debug("Current Japan Time: " + this.currTimestamp + ", Days Adjust: " + daysAdjust);
     SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
     List<File> toDelete = new ArrayList<File>();
     for (File file : outputDir.listFiles()) {
@@ -306,6 +308,7 @@ public class KscReportsService extends BaseBatchService {
   private void setTimestamp() {
     SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
     this.currTimestamp = SystemUtil.getActualTimestamp();
+    this.serverTimestamp = new Timestamp(this.currTimestamp.getTime());
     this.currTimestamp = adjustTime(this.currTimestamp, +9);
     this.timestampString = format.format(this.currTimestamp);
   }
@@ -324,6 +327,47 @@ public class KscReportsService extends BaseBatchService {
     entityManager.flush();
   }
 
+  private boolean setModeAndGenerate(EntityManager entityManager) {
+    boolean generate = true;
+    Calendar curr = new GregorianCalendar();
+    curr.setTime(this.currTimestamp);
+    LOG.info("Current Server Time: " + this.serverTimestamp);
+    LOG.info("Current Japan Time: " + new Timestamp(curr.getTimeInMillis()) + ", Date: " + curr.get(Calendar.DATE) + ", Day: "
+        + curr.get(Calendar.DAY_OF_WEEK));
+
+    if (curr.get(Calendar.DATE) == 1 && curr.get(Calendar.DAY_OF_WEEK) < 3 && curr.get(Calendar.DAY_OF_WEEK) > 0) {
+      this.mode = MONTHLY;
+      LOG.info("Setting mode to MONTHLY (regular business day)");
+    } else if ((curr.get(Calendar.DATE) == 2 || curr.get(Calendar.DATE) == 3) && curr.get(Calendar.DAY_OF_WEEK) == 2) {
+      this.mode = MONTHLY;
+      LOG.info("Setting mode to MONTHLY (first monday of month, Day 1 = Saturday/Sunday)");
+    } else {
+      if (curr.get(Calendar.DAY_OF_WEEK) < 3 && curr.get(Calendar.DAY_OF_WEEK) > 0) {
+        LOG.info("Skipping report generation for day " + curr.get(Calendar.DAY_OF_WEEK));
+        generate = false;
+      } else {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        String currentJpDate = formatter.format(curr.getTime());
+        LOG.debug("Checking holiday for " + currentJpDate);
+        String holidayCheck = "select 1 from creqcmr.lov where field_id = '##JPHolidays' and cmr_issuing_cntry = '760' and cd = :HOLIDAY";
+        PreparedQuery query = new PreparedQuery(entityManager, holidayCheck);
+        query.setParameter("HOLIDAY", currentJpDate);
+        query.setForReadOnly(true);
+        boolean holiday = query.exists();
+        LOG.debug("Date is " + (holiday ? "" : "NOT ") + "a holiday.");
+        if (holiday) {
+          LOG.info("Date " + currentJpDate + " is a holiday. Skipping report generation.");
+          generate = false;
+        } else {
+          LOG.info("Setting mode to DAILY");
+          this.mode = DAILY;
+
+        }
+      }
+    }
+    return generate;
+  }
+
   @Override
   protected boolean isTransactional() {
     return true;
@@ -339,6 +383,14 @@ public class KscReportsService extends BaseBatchService {
 
   public void setReferenceDate(Date referenceDate) {
     this.referenceDate = referenceDate;
+  }
+
+  public boolean isManualExecution() {
+    return manualExecution;
+  }
+
+  public void setManualExecution(boolean manualExecution) {
+    this.manualExecution = manualExecution;
   }
 
 }
