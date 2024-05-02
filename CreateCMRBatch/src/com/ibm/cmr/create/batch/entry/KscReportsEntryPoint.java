@@ -23,6 +23,7 @@ public class KscReportsEntryPoint extends BatchEntryPoint {
     BatchEntryPoint.initContext("KSC", false);
     KscReportsService service = new KscReportsService();
     if (args != null && args.length > 0) {
+      service.setManualExecution(true);
       service.setMode(args[0]);
     }
     if (args != null && args.length > 1) {
