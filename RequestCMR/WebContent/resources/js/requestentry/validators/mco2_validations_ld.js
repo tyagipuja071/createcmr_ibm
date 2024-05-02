@@ -18,10 +18,10 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
 			FilteringDropdown['val_landCntry'] = null;
 		}
 	}
-	
+
 	var landCntry = FormManager.getActualValue('landCntry');
 	var addrType = FormManager.getActualValue('addrType');
-	if(finalSave == true && (cmr.addressMode == 'updateAddress' &&  cmr.addrdetails.ret2 == 'ZS01' && cmr.oldlandcntry && cmr.oldlandcntry != landCntry) || (cmr.addressMode == 'newAddress' && addrType == 'ZS01' && landCntry)){
+	if (finalSave == true && (cmr.addressMode == 'updateAddress' && cmr.addrdetails.ret2 == 'ZS01' && cmr.oldlandcntry && cmr.oldlandcntry != landCntry) || (cmr.addressMode == 'newAddress' && addrType == 'ZS01' && landCntry)) {
 		setISUCTC();
 		getMEAPreSelectedCBLogicEntp();
 	}
@@ -192,8 +192,8 @@ function addNewHandlersForMCO2() {
 
 function setISUCTC() {
 	var zs01Landed = FormManager.getActualValue('landCntry');
-	if(zs01Landed == '' || zs01Landed == undefined || zs01Landed == null){
-		zs01Landed = 	getZS01LandCntry();
+	if (zs01Landed == '' || zs01Landed == undefined || zs01Landed == null) {
+		zs01Landed = getZS01LandCntry();
 	}
 	var subInd = FormManager.getActualValue('subIndustryCd') ? FormManager.getActualValue('subIndustryCd') : localStorage.oldISIC;
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -2776,11 +2776,11 @@ function validateISUCTCEnterprisefrLOCALAndNonMEA() {
 					return new ValidationResult(null, true);
 				}
 
-				if (['BUSPR', 'LLCBP','XBP'].includes(custSubGrp) && ['8B'].includes(isuCTC) && entp == '') {
+				if (['BUSPR', 'LLCBP', 'XBP'].includes(custSubGrp) && ['8B'].includes(isuCTC) && entp == '') {
 					valid = true;
-				} else if (['INTER', 'IBMEM','XINTE','XIBME'].includes(custSubGrp) && ['21'].includes(isuCTC) && entp == '') {
+				} else if (['INTER', 'IBMEM', 'XINTE', 'XIBME'].includes(custSubGrp) && ['21'].includes(isuCTC) && entp == '') {
 					valid = true;
-				} else if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU','XCOM','XGOV','XTP','XPRIC'].includes(custSubGrp)) {
+				} else if (['COMME', 'GOVRN', 'THDPT', 'LLC', 'LLCEX', 'PRICU', 'XCOM', 'XGOV', 'XTP', 'XPRIC'].includes(custSubGrp)) {
 					if (!['34Q', '36Y', '5K'].includes(isuCTC)) {
 						valid = true;
 					} else if (isuCTC == '34Q') {
@@ -2817,7 +2817,7 @@ function validateISUCTCEnterprisefrCROSS() {
 				localStorage.setItem("validateLogicCalled", true);
 				var reqType = FormManager.getActualValue('reqType');
 				var landCntry = getZS01LandCntry();
-				
+
 				if (reqType == 'U' || custGrp == 'LOCAL' || landCntry == '' || landCntry == undefined || (custGrp == 'CROSS' && !isMEACntry(landCntry))) {
 					return new ValidationResult(null, true);
 				}
