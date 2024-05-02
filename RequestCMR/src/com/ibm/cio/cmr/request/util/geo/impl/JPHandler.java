@@ -2308,6 +2308,10 @@ public class JPHandler extends GEOHandler {
       data.setCsDiv(""); // CS DIV
       data.setTier2(""); // TIER-2
       data.setAdminDeptLine(""); // Admin Depart Line
+
+      if ("BPWPQ".equals(data.getCustSubGrp()) && (!"WZ".equals(data.getSalesBusOffCd()) && !"WP".equals(data.getSalesBusOffCd()))) {
+        data.setSalesBusOffCd("WP");
+      }
     }
   }
 
