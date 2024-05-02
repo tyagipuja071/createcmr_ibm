@@ -20,7 +20,7 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
 	}
 	
 	var landCntry = FormManager.getActualValue('landCntry');
-	if(finalSave == true && cmr.addressMode && cmr.addrdetails.ret2 == 'ZS01' && cmr.oldlandcntry && cmr.oldlandcntry != landCntry){
+	if(finalSave == true && cmr.addressMode && cmr.addrdetails != undefined && cmr.addrdetails.ret2 == 'ZS01' && cmr.oldlandcntry && cmr.oldlandcntry != landCntry){
 		setISUCTC();
 		getMEAPreSelectedCBLogicEntp();
 
