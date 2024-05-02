@@ -75,15 +75,19 @@ public class ApprovalController extends BaseController {
     boolean processing = CmrConstants.YES_NO.Y.toString().equals(request.getParameter("processing"));
     String view = "approve";
     String title = UIMgr.getText("title.approval");
+    LOG.debug("Approval being processed = code: " + approvalCode);
     ApprovalResponseModel approval = new ApprovalResponseModel();
     try {
       approval = decodeUrlParam(approvalCode);
       if (approval == null) {
         approval = modelFromRequest;
       }
+      LOG.debug("Approval specs = id: " + approval.getApprovalId() + ", approver: " + approval.getApproverId() + ", type: " + approval.getType());
       if (approval.getApprovalId() > 0) {
         Thread.currentThread()
             .setName("APPR-" + approval.getApprovalId() + (approval.getApproverId() != null ? "-" + approval.getApproverId() : "-unknown"));
+      } else if (approval.getApproverId() != null) {
+        Thread.currentThread().setName("APPR-000-" + approval.getApproverId());
       }
       if (!processing) {
         if (!authorize(request)) {
