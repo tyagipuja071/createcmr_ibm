@@ -200,8 +200,7 @@ public class ApprovalController extends BaseController {
       return false;
     }
     try {
-      boolean authenticated = true;// userService.authenticateUser(credentials[0],
-                                   // credentials[1]);
+      boolean authenticated = userService.authenticateUser(credentials[0], credentials[1]);
       return authenticated;
     } catch (Exception e) {
       return false;
