@@ -681,11 +681,10 @@ public class IERPRequestUtils extends RequestUtils {
     Object[] result = null;
     if (results != null && results.size() > 0) {
       result = results.get(0);
+      LOG.debug("getIsicMrcCtcIsuSortlJP() --> ofcd (" + ofcd + ") isic (" + result[1] + ") mrc (" + result[2] + ") ctc (" + result[3] + ") isu ("
+          + result[4] + ") sortl (" + result[5] + ")");
     }
-    LOG.debug("getIsicMrcCtcIsuSortlJP() --> ofcd (" + ofcd + ") isic (" + result[1] + ") mrc (" + result[2] + ") ctc (" + result[3] + ") isu ("
-        + result[4] + ") sortl (" + result[5] + ")");
     return result;
-
   }
 
   public static String[] limitName1Name2(String name1, String name2) {
@@ -891,5 +890,22 @@ public class IERPRequestUtils extends RequestUtils {
     query.setParameter("ITER_ID", iterId);
     query.setForReadOnly(true);
     return query.getResults(MassUpdtAddr.class);
+  }
+
+  public static Object[] geLocnCsboByPostal(EntityManager entityMgr, String postCd) {
+    String sql = ExternalizedQuery.getSql("JP.MASS.GET.LOCN.CSBO.BY.POSTAL");
+    PreparedQuery query = new PreparedQuery(entityMgr, sql);
+    query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
+    query.setParameter("POST_CD", postCd);
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+    Object[] result = null;
+
+    if (results != null && results.size() > 0) {
+      result = results.get(0);
+      LOG.debug("geLocnCsboByPostal() --> postCd (" + postCd + ") locn (" + result[1] + ") csbo (" + result[2] + ")");
+    }
+    return result;
   }
 }
