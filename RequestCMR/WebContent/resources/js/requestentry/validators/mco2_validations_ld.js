@@ -20,10 +20,10 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
 	}
 	
 	var landCntry = FormManager.getActualValue('landCntry');
-	if(finalSave == true && cmr.addressMode && cmr.addrdetails.ret2 == 'ZS01' && cmr.oldlandcntry && cmr.oldlandcntry != landCntry){
+	var addrType = FormManager.getActualValue('addrType');
+	if(finalSave == true && (cmr.addressMode == 'updateAddress' &&  cmr.addrdetails.ret2 == 'ZS01' && cmr.oldlandcntry && cmr.oldlandcntry != landCntry) || (cmr.addressMode == 'newAddress' && addrType == 'ZS01' && landCntry)){
 		setISUCTC();
 		getMEAPreSelectedCBLogicEntp();
-
 	}
 }
 
