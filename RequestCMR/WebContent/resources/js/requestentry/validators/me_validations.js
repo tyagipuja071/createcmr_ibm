@@ -582,7 +582,6 @@ function addHandlersForCEMEA() {
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      // setEnterpriseValues(value);
       setEnterpriseValuesME(value);
 
       // CMR-2101 Austria remove ISR
@@ -1791,10 +1790,10 @@ function setEnterpriseValuesME(clientTier) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var landed = FormManager.getActualValue('landCntry');
   var enterprise = FormManager.getActualValue('taxCd2');
-  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
-  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
-  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
-  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
+  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKCOM', 'PKTP', 'PKPC', 'PKXCO', 'PKXTP', 'JOCOM', 'JOPC', 'JOTP', 'PSCOM', 'PSPC', 'PSTP' ];
+  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKXCO', 'PKXTP', 'JOXCO', 'JOXTP' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM', 'PKLOC', 'JOLOC', 'PSLOC' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM', 'PKCRO', 'JOCRO' ];
   var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'XINT' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER') {
@@ -1831,62 +1830,118 @@ function setEnterpriseValuesME(clientTier) {
       if (csgGRP1.includes(custSubGrp)) {
         if (SysLoc.EGYPT == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
+        } else if (SysLoc.EGYPT == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908023');
         } else if (SysLoc.ABU_DHABI == cntry && isuCtc == '27E') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryABU27E(isuCd) || '');
+        } else if (SysLoc.ABU_DHABI == cntry && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', '911775');
+        } else if (SysLoc.ABU_DHABI == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912073');
         } else if (SysLoc.QATAR == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryQA34Q(isuCd) || '');
+        } else if (SysLoc.QATAR == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912088');
         } else if (SysLoc.SAUDI_ARABIA == cntry && isuCtc == '27E') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustrySA27E(isuCd) || '');
+        } else if (SysLoc.SAUDI_ARABIA == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908025');
         } else if (SysLoc.SAUDI_ARABIA == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustrySA34Q(isuCd) || '');
         } else if (SysLoc.UNITED_ARAB_EMIRATES == cntry && isuCtc == '27E') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryAE27E(isuCd) || '');
+        } else if (SysLoc.UNITED_ARAB_EMIRATES == cntry && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', '911775');
+        } else if (SysLoc.UNITED_ARAB_EMIRATES == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912073');
         } else if (SysLoc.KUWAIT == cntry && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '907695');
+        } else if (SysLoc.KUWAIT == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912085');
         } else if (SysLoc.OMAN == cntry && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '911824');
+        } else if (SysLoc.OMAN == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912080');
         } else if ((SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry) && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '911827');
+        } else if ((SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry) && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908024');
         } else if (SysLoc.BAHRAIN == cntry && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '911825');
+        } else if (SysLoc.BAHRAIN == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912084');
         } else if (SysLoc.LIBYA == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '911756');
+        } else if (SysLoc.LIBYA == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', 'BUILD1');
         } else if (SysLoc.TUNISIA_SOF == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901728');
+        } else if (SysLoc.TUNISIA_SOF == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', 'BUILD1');
         } else if (SysLoc.MOROCCO == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901462');
+        } else if (SysLoc.MOROCCO == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', 'BUILD1');
         } else if (SysLoc.PAKISTAN == cntry && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901459');
+        } else if (SysLoc.PAKISTAN == cntry && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908027');
         }
       }
     } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
       if (csgGRP2.includes(custSubGrp)) {
         if (landed == 'EG' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryEG34Q(isuCd) || '');
+        } else if (landed == 'EG' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908023');
         } else if (landed == 'QA' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryQA34Q(isuCd) || '');
+        } else if (landed == 'QA' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912088');
         } else if (landed == 'SA' && isuCtc == '27E') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustrySA27E(isuCd) || '');
         } else if (landed == 'SA' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustrySA34Q(isuCd) || '');
+        } else if (landed == 'SA' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908025');
         } else if (landed == 'AE' && isuCtc == '27E') {
           FormManager.setValue('taxCd2', setEnterpriseOnSubIndustryAE27E(isuCd) || '');
+        } else if (landed == 'AE' && isuCtc == '34Q') {
+          FormManager.setValue('taxCd2', '911775');
+        } else if (landed == 'AE' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912073');
         } else if (landed == 'KW' && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '907695');
+        } else if (landed == 'KW' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912085');
         } else if (landed == 'OM' && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '911824');
+        } else if (landed == 'OM' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912080');
         } else if ((landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB') && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '911827');
+        } else if ((landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB') && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908024');
         } else if (landed == 'BH' && isuCtc == '27E') {
           FormManager.setValue('taxCd2', '911825');
+        } else if (landed == 'BH' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '912084');
         } else if (landed == 'LY' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '911756');
+        } else if (landed == 'LY' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', 'BUILD1');
         } else if (landed == 'TN' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901728');
+        } else if (landed == 'TN' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', 'BUILD1');
         } else if (landed == 'MA' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901462');
+        } else if (landed == 'MA' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', 'BUILD1');
         } else if (landed == 'PK' && isuCtc == '34Q') {
           FormManager.setValue('taxCd2', '901459');
+        } else if (landed == 'PK' && isuCtc == '36Y') {
+          FormManager.setValue('taxCd2', '908027');
         }
       }
     }
@@ -1895,12 +1950,10 @@ function setEnterpriseValuesME(clientTier) {
 
 function validateEnterpriseField(taxCd2) {
 
-  var custSubGrpLocal = [ 'COMME', 'THDPT', 'PRICU' ];
-  var custSubGrpComm = [ 'XCOM', 'XTP' ];
-  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
-  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
-  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
-  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
+  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKCOM', 'PKTP', 'PKPC', 'PKXCO', 'PKXTP', 'JOCOM', 'JOPC', 'JOTP', 'PSCOM', 'PSPC', 'PSTP' ];
+  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKXCO', 'PKXTP', 'JOXCO', 'JOXTP' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM', 'PKLOC', 'JOLOC', 'PSLOC' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM', 'PKCRO', 'JOCRO' ];
   var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
 
   var custGrp = FormManager.getActualValue('custGrp');
@@ -1929,7 +1982,15 @@ function validateEnterpriseField(taxCd2) {
 
   if (csgrpAllowLocal.includes(custGrp) || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
     if (csgGRP1.includes(custSubGrp)) {
-      if (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry) {
+      if (SysLoc.ABU_DHABI == cntry) {
+        if (isuCtc == '27E') {
+          enterprises = [ '911790', '911791', '911792', '911793', '911794' ];
+        }
+      } else if (SysLoc.UNITED_ARAB_EMIRATES == cntry) {
+        if (isuCtc == '27E') {
+          enterprises = [ '911812', '911813', '911814', '911815', '911816' ];
+        }
+      } else if (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry) {
         if (isuCtc == '34Q') {
           enterprises = [ '911775', '911774', '911811', '911810' ];
         } else if (isuCtc == '36Y') {
@@ -2010,6 +2071,10 @@ function validateEnterpriseField(taxCd2) {
   } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
     if (csgGRP2.includes(custSubGrp)) {
       if (landed == 'AE') {
+        if (isuCtc == '27E') {
+          enterprises = [ '911812', '911813', '911814', '911815', '911816' ];
+        }
+      } else if (landed == 'AE') {
         if (isuCtc == '34Q') {
           enterprises = [ '911775', '911774', '911811', '911810' ];
         } else if (isuCtc == '36Y') {
@@ -2127,7 +2192,8 @@ function lockFieldsBasedOnISU(isuCd) {
 
 function lockedScenarios() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM', 'XBP', 'XINT', 'EXBP', 'ELBP' ]
+  var lockedScenarios = [ 'PRICU', 'BUSPR', 'INTER', 'IBMEM', 'XBP', 'XINT', 'EXBP', 'ELBP', 'PKIBM', 'PSIBM', 'JOIBM', 'AFBP', 'JOBP', 'JOXBP', 'PKBP', 'PKXBP', 'PSBP', 'AFINT', 'JOINT', 'JOXIN',
+      'PKINT', 'PKXIN', 'PSINT' ]
   if (lockedScenarios.includes(custSubGrp)) {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
@@ -2318,6 +2384,7 @@ function setEnterpriseOnSubIndustryAE27E(value) {
     'R' : '911814',
     'T' : '911814',
     'U' : '911814',
+    'W' : '911814',
     'J' : '911815',
     'L' : '911815',
     'M' : '911815',
@@ -3850,14 +3917,22 @@ function setIsuCtcOnScenarioChange() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
+  var custSubGrpLocMECov = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKCOM', 'PKTP', 'PKPC', 'PKXCO', 'PKXTP', 'JOCOM', 'JOPC', 'JOTP', 'PSCOM', 'PSPC', 'PSTP' ];
+  var custSubGrpCROSSMECov = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKXCO', 'PKXTP', 'JOXCO', 'JOXTP' ];
   var cntrylist_27E = [ '620', '677', '680', '752', '762', '767', '768', '805', '849', '850' ];
   var cntrlist_34Q = [ '642', '772', '808', '823', '865', '729' ];
   var cntrycode_27E = [ 'BH', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'YE', 'SY' ];
   var cntrcode_34Q = [ 'MA', 'LY', 'AF', 'QA', 'EG', 'TN' ];
-  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
-  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM', 'PKLOC', 'JOLOC', 'PSLOC' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM', 'PKCRO', 'JOCRO' ];
   var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
+
+  // Business Partner
+  var custSubGrpForBusinessPartner = [ 'AFBP', 'BUSPR', 'ELBP', 'EXBP', 'JOBP', 'JOXBP', 'PKBP', 'PKXBP', 'PSBP', 'XBP' ];
+  var crossBP = [ 'EXBP', 'JOXBP', 'PKXBP', 'XBP' ];
+  // Internal
+  var custSubGrpForInternal = [ 'AFINT', 'INTER', 'JOINT', 'JOXIN', 'PKINT', 'PKXIN', 'PSINT', 'XINT' ];
+  var crossINT = [ 'JOXIN', 'PKXIN', 'XINT' ];
 
   var landed = FormManager.getActualValue('landCntry');
   var addrType = "ZS01";
@@ -3892,14 +3967,14 @@ function setIsuCtcOnScenarioChange() {
   flsubIndustryCd = subIndustryCd.charAt(0);
   if (csgrpAllowLocal.includes(custGrp) || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
 
-    if (scenario == 'BUSPR' || scenario.includes('BP')) {
+    if (scenario == 'BUSPR' || scenario.includes('BP') || custSubGrpForBusinessPartner.includes(scenario)) {
       FormManager.setValue('isuCd', '8B');
       FormManager.setValue('clientTier', '');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
       FormManager.setValue('taxCd2', '');
-    } else if (scenario.includes('IN') || scenario.includes('IBM')) {
+    } else if (scenario.includes('IN') || scenario.includes('IBM') || custSubGrpForInternal.includes(scenario)) {
       FormManager.setValue('isuCd', '21');
       FormManager.setValue('clientTier', '');
       FormManager.readOnly('isuCd');
@@ -3921,7 +3996,8 @@ function setIsuCtcOnScenarioChange() {
         FormManager.setValue('clientTier', 'Q');
       }
     } else if (scenario != "") {
-      if (scenario != 'PRICU' && scenario != 'BUSPR' && !scenario.includes('BP') && !scenario.includes('IN') && !scenario.includes('IBM')) {
+      if (scenario != 'PRICU' && scenario != 'BUSPR' && !scenario.includes('BP') && !scenario.includes('IN') && !scenario.includes('IBM') && !custSubGrpForBusinessPartner.includes(scenario)
+          && custSubGrpForInternal.includes(scenario)) {
         FormManager.setValue('isuCd', '34');
         FormManager.setValue('clientTier', 'Q');
         FormManager.enable('isuCd');
@@ -3930,24 +4006,24 @@ function setIsuCtcOnScenarioChange() {
       }
     }
   } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
-    if (scenario.includes('XBP')) {
+    if (crossBP.includes(scenario)) {
       FormManager.setValue('isuCd', '8B');
       FormManager.setValue('clientTier', '');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
       FormManager.setValue('taxCd2', '');
-    } else if (scenario.includes('XINT')) {
+    } else if (crossINT.includes(scenario)) {
       FormManager.setValue('isuCd', '21');
       FormManager.setValue('clientTier', '');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('taxCd2');
       FormManager.setValue('taxCd2', '');
-    } else if ((scenario == 'XCOM' || scenario == 'XTP' || scenario == 'EXCOM' || scenario == 'ELCOM') && cntrycode_27E.includes(landed)) {
+    } else if ((custSubGrpCROSSMECov.includes(scenario)) && cntrycode_27E.includes(landed)) {
       FormManager.setValue('isuCd', '27');
       FormManager.setValue('clientTier', 'E');
-    } else if ((scenario == 'XCOM' || scenario == 'XTP' || scenario == 'EXCOM' || scenario == 'ELCOM') && cntrcode_34Q.includes(landed)) {
+    } else if ((custSubGrpCROSSMECov.includes(scenario)) && cntrcode_34Q.includes(landed)) {
       FormManager.setValue('isuCd', '34');
       FormManager.setValue('clientTier', 'Q');
     } else if ((scenario == 'XCOM' || scenario == 'XTP' || scenario == 'EXCOM' || scenario == 'ELCOM') && landed == 'SA') {
@@ -4090,6 +4166,8 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier can only accept value \'Y\'.');
+    } else if (reqType == 'C' && FormManager.getActualValue('taxCd2') != '') {
+      return validatorEnterprise();
     }
   } else {
     if (ctcValues.includes(clientTierCode) || clientTierCode == '') {
@@ -4108,6 +4186,273 @@ function clientTierCodeValidator() {
     }
   }
 }
+
+function validatorEnterprise() {
+  console.log(">>>> validatorEnterprise");
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var isuCtc = isuCd + clientTier;
+  var enterprise = FormManager.getActualValue('taxCd2');
+
+  var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
+  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var landed = FormManager.getActualValue('landCntry');
+  var addrType = "ZS01";
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+    return;
+  }
+
+  if (landed == '') {
+    if (addrType != null && addrType != '') {
+      var addrResult = cmr.query('ADDR.GET.LANDEDCNTRY.BY_REQID_ADDRTYPE', {
+        REQ_ID : FormManager.getActualValue('reqId'),
+        ADDR_TYPE : addrType
+      });
+      if (addrResult && addrResult.ret1 && addrResult.ret1 != '') {
+        landed = addrResult.ret1;
+      }
+    }
+  }
+
+  if (isuCd != '' && clientTier != '') {
+    if (csgrpAllowLocal.includes(custGrp) || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
+      if (csgGRP1.includes(custSubGrp)) {
+        var condForAbu27E = isuCtc == '27E' && SysLoc.ABU_DHABI == cntry;
+        var condForAE27E = isuCtc == '27E' && SysLoc.UNITED_ARAB_EMIRATES == cntry;
+        var condForAbuAE34Q = isuCtc == '34Q' && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry);
+        var condForAbuAE36Y = isuCtc == '36Y' && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry);
+        var condForKW27E = isuCtc == '27E' && SysLoc.KUWAIT == cntry;
+        var condForKW36Y = isuCtc == '36Y' && SysLoc.KUWAIT == cntry;
+        var condForOM27E = isuCtc == '27E' && SysLoc.OMAN == cntry;
+        var condForOM36Y = isuCtc == '36Y' && SysLoc.OMAN == cntry;
+        var condForYEJOIQSYLE27E = isuCtc == '27E' && (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry);
+        var condForYEJOIQSYLE36Y = isuCtc == '36Y' && (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry);
+        var condForSA27E = isuCtc == '27E' && SysLoc.SAUDI_ARABIA == cntry;
+        var condForSA34Q = isuCtc == '34Q' && SysLoc.SAUDI_ARABIA == cntry;
+        var condForSA36Y = isuCtc == '36Y' && SysLoc.SAUDI_ARABIA == cntry;
+        var condForBH27E = isuCtc == '27E' && SysLoc.BAHRAIN == cntry;
+        var condForBH36Y = isuCtc == '36Y' && SysLoc.BAHRAIN == cntry;
+        var condForLY34Q = isuCtc == '34Q' && SysLoc.LIBYA == cntry;
+        var condForLY36Y = isuCtc == '36Y' && SysLoc.LIBYA == cntry;
+        var condForTN34Q = isuCtc == '34Q' && SysLoc.TUNISIA_SOF == cntry;
+        var condForTN36Y = isuCtc == '36Y' && SysLoc.TUNISIA_SOF == cntry;
+        var condForMA34Q = isuCtc == '34Q' && SysLoc.MOROCCO == cntry;
+        var condForMA36Y = isuCtc == '36Y' && SysLoc.MOROCCO == cntry;
+        var condForEG34Q = isuCtc == '34Q' && SysLoc.EGYPT == cntry;
+        var condForEG36Y = isuCtc == '36Y' && SysLoc.EGYPT == cntry;
+        var condForQA34Q = isuCtc == '34Q' && SysLoc.QATAR == cntry;
+        var condForQA36Y = isuCtc == '36Y' && SysLoc.QATAR == cntry;
+        var condForPK34Q = isuCtc == '34Q' && SysLoc.PAKISTAN == cntry;
+        var condForPK36Y = isuCtc == '36Y' && SysLoc.PAKISTAN == cntry;
+      }
+    } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
+      if (csgGRP2.includes(custSubGrp)) {
+        var condForAE27E = isuCtc == '27E' && landed == 'AE';
+        var condForAbuAE34Q = isuCtc == '34Q' && landed == 'AE';
+        var condForAbuAE36Y = isuCtc == '36Y' && landed == 'AE';
+        var condForKW27E = isuCtc == '27E' && landed == 'KW';
+        var condForKW36Y = isuCtc == '36Y' && landed == 'KW';
+        var condForOM27E = isuCtc == '27E' && landed == 'OM';
+        var condForOM36Y = isuCtc == '36Y' && landed == 'OM';
+        var condForYEJOIQSYLE27E = isuCtc == '27E' && (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB');
+        var condForYEJOIQSYLE36Y = isuCtc == '36Y' && (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB');
+        var condForSA27E = isuCtc == '27E' && landed == 'SA';
+        var condForSA34Q = isuCtc == '34Q' && landed == 'SA';
+        var condForSA36Y = isuCtc == '36Y' && landed == 'SA';
+        var condForBH27E = isuCtc == '27E' && landed == 'BH';
+        var condForBH36Y = isuCtc == '36Y' && landed == 'BH';
+        var condForLY34Q = isuCtc == '34Q' && landed == 'LY';
+        var condForLY36Y = isuCtc == '36Y' && landed == 'LY';
+        var condForTN34Q = isuCtc == '34Q' && landed == 'TN';
+        var condForTN36Y = isuCtc == '36Y' && landed == 'TN';
+        var condForMA34Q = isuCtc == '34Q' && landed == 'MA';
+        var condForMA36Y = isuCtc == '36Y' && landed == 'MA';
+        var condForEG34Q = isuCtc == '34Q' && landed == 'EG';
+        var condForEG36Y = isuCtc == '36Y' && landed == 'EG';
+        var condForQA34Q = isuCtc == '34Q' && landed == 'QA';
+        var condForQA36Y = isuCtc == '36Y' && landed == 'QA';
+        var condForPK34Q = isuCtc == '34Q' && landed == 'PK';
+        var condForPK36Y = isuCtc == '36Y' && landed == 'PK';
+      }
+    }
+  }
+
+  if (condForAbu27E != undefined || condForAE27E != undefined || condForAbuAE34Q != undefined || condForAbuAE36Y != undefined || condForKW27E != undefined || condForOM27E != undefined
+      || condForOM36Y != undefined || condForYEJOIQSYLE27E != undefined || condForYEJOIQSYLE36Y != undefined || condForSA27E != undefined || condForSA34Q != undefined || condForSA36Y != undefined
+      || condForBH27E != undefined || condForBH36Y != undefined || condForLY34Q != undefined || condForLY36Y != undefined || condForTN34Q != undefined || condForTN36Y != undefined
+      || condForMA34Q != undefined || condForMA36Y != undefined || condForEG34Q != undefined || condForEG36Y != undefined || condForQA34Q != undefined || condForQA36Y != undefined
+      || condForPK34Q != undefined || condForPK36Y != undefined) {
+    if (condForAbu27E) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911790\', \'911791\', \'911792\', \'911793\', \'911794\'.');
+    } else if (condForAE27E) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911812\', \'911813\', \'911814\', \'911815\', \'911816\'.');
+    } else if (condForAbuAE34Q) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911775\', \'911774\', \'911811\', \'911810\'.');
+    } else if (condForAbuAE36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'912073\', \'912075\', \'912074\'.');
+    } else if (condForKW27E) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'907695\', \'911297\'.');
+    } else if (condForOM27E) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911824\', \'911823\'.');
+    } else if (condForOM36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'912080\', \'912079\', \'912081\'.');
+    } else if (condForYEJOIQSYLE27E) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911827\', \'911826\'.');
+    } else if (condForYEJOIQSYLE36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'908024\', \'912072\', \'912071\'.');
+    } else if (condForSA27E) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911693\', \'911700\', \'911699\', \'911688\', \'911701\', \'901469\', \'911698\'.');
+    } else if (condForSA34Q) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911695\', \'911692\', \'911696\', \'911690\', \'911685\', \'911691\', \'911702\', \'911687\', \'911697\'.');
+    } else if (condForSA36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'908025\', \'912094\', \'912093\'.');
+    } else if (condForBH27E) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911825\'.');
+    } else if (condForBH36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'912084\', \'912082\', \'912083\'.');
+    } else if (condForLY34Q) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911756\'.');
+    } else if (condForLY36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'BUILD1\', \'DISTR1\', \'SRVCE1\'.');
+    } else if (condForTN34Q) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'901728\'.');
+    } else if (condForTN36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'BUILD1\', \'DISTR1\', \'SRVCE1\'.');
+    } else if (condForMA34Q) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept  \'901462\'.');
+    } else if (condForMA36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'BUILD1\', \'DISTR1\', \'SRVCE1\'.');
+    } else if (condForEG34Q) {
+      return new ValidationResult(
+          {
+            id : 'taxCd2',
+            type : 'text',
+            name : 'taxCd2'
+          },
+          false,
+          'Enterprise can only accept \'911771\', \'911772\', \'911836\', \'911773\', \'911830\', \'911832\', \'911768\', \'901456\', \'911770\', \'911834\', \'911769\', \'911829\', \'911831\', \'911835\', \'911275\', \'911833\'.');
+    } else if (condForEG36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'908023\', \'912070\', \'912069\'.');
+    } else if (condForQA34Q) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'911818\', \'911819\', \'911820\', \'911821\', \'911822\', \'911817\'.');
+    } else if (condForQA36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'912088\', \'912090\', \'912089\'.');
+    } else if (condForPK34Q) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'901459\'.');
+    } else if (condForPK36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'908027\', \'912092\', \'912091\'.');
+    }
+  }
+}
+
 // CREATCMR-4293
 // CREATCMR-788
 function addressQuotationValidatorCEMEA() {
