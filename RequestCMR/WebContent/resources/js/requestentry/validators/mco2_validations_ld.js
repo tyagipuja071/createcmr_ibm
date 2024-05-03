@@ -3368,8 +3368,15 @@ function setEnterpriseAfterSave() {
 	if (FormManager.getActualValue('custSubGrp') == '') {
 		localStorage.setItem("oldCustGrp", '');
 	}
+	 if (['BUSPR', 'LLCBP', 'INTER', 'IBMEM', 'XBP', 'XIBME', 'XINTE'].includes(FormManager.getActualValue('custSubGrp'))) {
+		FormManager.readOnly('enterprise');
+	}else{
+		FormManager.enable('enterprise');
+	}
 
-}
+	} 
+
+
 
 dojo.addOnLoad(function() {
 	GEOHandler.MCO2 = ['373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
