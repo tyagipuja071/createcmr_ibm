@@ -3368,13 +3368,13 @@ function setEnterpriseAfterSave() {
 	if (FormManager.getActualValue('custSubGrp') == '') {
 		localStorage.setItem("oldCustGrp", '');
 	}
-	 if (['BUSPR', 'LLCBP', 'INTER', 'IBMEM', 'XBP', 'XIBME', 'XINTE'].includes(FormManager.getActualValue('custSubGrp'))) {
+	if (['BUSPR', 'LLCBP', 'INTER', 'IBMEM', 'XBP', 'XIBME', 'XINTE'].includes(FormManager.getActualValue('custSubGrp'))) {
 		FormManager.readOnly('enterprise');
-	}else{
+	} else {
 		FormManager.enable('enterprise');
 	}
 
-	} 
+}
 
 
 
