@@ -573,12 +573,12 @@ function afterConfigForUS() {
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
     }
-  } else if (covId == 'T' && (role == 'Processor' || role == 'Viewer') && reqType == 'C' && !(gbgId == '' || gbgId == null)) {
-    FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier', 'Q');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-  }
+  } /*
+     * else if (covId == 'T' && (role == 'Processor' || role == 'Viewer') &&
+     * reqType == 'C' && !(gbgId == '' || gbgId == null)) {
+     * FormManager.setValue('isuCd', '34'); FormManager.setValue('clientTier',
+     * 'Q'); FormManager.readOnly('isuCd'); FormManager.readOnly('clientTier'); }
+     */
 
   else {
     FormManager.enable('isuCd');
@@ -774,8 +774,7 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
   /*
    * else if (scenario != 'PRIV' && scenario != 'ECOSYSTEM') {
    * FormManager.setValue('isuCd', ''); FormManager.setValue('clientTier', '');
-   * FormManager.enable('isuCd'); FormManager.enable('clientTier');
-   *  }
+   * FormManager.enable('isuCd'); FormManager.enable('clientTier'); }
    */
 
 }

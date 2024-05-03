@@ -52,6 +52,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
@@ -2390,9 +2391,26 @@ public class USUtil extends AutomationUtil {
             isu = "21";
             ctc = " ";
           } else {
-            isu = "34";
-            ctc = "Q";
+            String sql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("KEY", data.getBgId());
+            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            query.setParameter("COUNTRY", data.getCmrIssuingCntry());
+            String isoCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
+            System.err.println("ISO: " + isoCntry);
+            query.setParameter("ISO_CNTRY", isoCntry);
+            query.setForReadOnly(true);
+            List<Object[]> qresults = query.getResults(1);
+            if (qresults != null && !qresults.isEmpty()) {
+              for (Object[] coverage : qresults) {
+                isu = (String) coverage[2];
+                ctc = (String) coverage[3];
+              }
+            }
           }
+          // isu = "34";
+          // ctc = "Q";
+
         }
 
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
@@ -2461,19 +2479,20 @@ public class USUtil extends AutomationUtil {
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       }
     } /*
-       * else if (!isPaygoUpgrade && scenario.equalsIgnoreCase("ECO")) { isu =
-       * "36"; ctc = "Y"; setISUCTCBasedOnCoverage(details, overrides,
-       * coverageId, data, isu, ctc); } else if
-       * (!scenario.equalsIgnoreCase("ECO") &&
-       * !scenario.equalsIgnoreCase("Private Household Customer") &&
-       * StringUtils.isBlank(gbgId)) { isu = "27"; ctc = "E";
-       * setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu,
-       * ctc); } else if (!isPaygoUpgrade &&
-       * scenario.equalsIgnoreCase("Private Household Customer")) { isu = "21";
-       * ctc = ""; setISUCTCBasedOnCoverage(details, overrides, coverageId,
-       * data, isu, ctc); }
+       * else if ( ! isPaygoUpgrade && scenario . equalsIgnoreCase ( "ECO" ) ) {
+       * isu = "36"; ctc = "Y"; setISUCTCBasedOnCoverage ( details, overrides,
+       * coverageId, data, isu, ctc ) ; } else if ( ! scenario .
+       * equalsIgnoreCase ( "ECO") && !scenario .
+       * equalsIgnoreCase("Private Household Customer" ) && StringUtils .
+       * isBlank ( gbgId ) ) { isu = "27"; ctc = "E"; setISUCTCBasedOnCoverage (
+       * details, overrides, coverageId, data, isu, ctc ) ; } else if ( !
+       * isPaygoUpgrade && scenario .
+       * equalsIgnoreCase("Private Household Customer" )) { isu = "21"; ctc =
+       * ""; setISUCTCBasedOnCoverage ( details, overrides, coverageId, data,
+       * isu, ctc ) ; }
        */
     return true;
+
   }
 
   private void setISUCTCBasedOnCoverage(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String isu, String ctc) {
