@@ -4232,65 +4232,95 @@ function validatorEnterprise() {
     }
   }
 
+  var entForAbu27E = [ '911790', '911791', '911792', '911793', '911794' ];
+  var entForAE27E = [ '911812', '911813', '911814', '911815', '911816' ];
+  var entForAbuAE34Q = [ '911775', '911774', '911811', '911810' ];
+  var entForAbuAE36Y = [ '912073', '912075', '912074' ];
+  var entForKW27E = [ '907695', '911297' ];
+  var entForKW36Y = [ '912085', '912087', '912086' ];
+  var entForOM27E = [ '911824', '911823' ];
+  var entForOM36Y = [ '912080', '912079', '912081' ];
+  var entForYEJOIQSYLE27E = [ '911827', '911826' ];
+  var entForYEJOIQSYLE36Y = [ '908024', '912072', '912071' ];
+  var entForSA27E = [ '911693', '911700', '911699', '911688', '911701', '901469', '911698' ];
+  var entForSA34Q = [ '911695', '911692', '911696', '911690', '911685', '911691', '911702', '911687', '911697' ];
+  var entForSA36Y = [ '908025', '912094', '912093' ];
+  var entForBH27E = [ '911825' ];
+  var entForBH36Y = [ '912084', '912082', '912083' ];
+  var entForLY34Q = [ '911756' ];
+  var entForLY36Y = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+  var entForTN34Q = [ '901728' ];
+  var entForTN36Y = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+  var entForMA34Q = [ '901462' ];
+  var entForMA36Y = [ 'BUILD1', 'DISTR1', 'SRVCE1' ];
+  var entForEG34Q = [ '911771', '911772', '911836', '911773', '911830', '911832', '911768', '901456', '911770', '911834', '911769', '911829', '911831', '911835', '911275', '911833' ];
+  var entForEG36Y = [ '908023', '912070', '912069' ];
+  var entForQA34Q = [ '911818', '911819', '911820', '911821', '911822', '911817' ];
+  var entForQA36Y = [ '912088', '912090', '912089' ];
+  var entForPK34Q = [ '901459' ];
+  var entForPK36Y = [ '908027', '912092', '912091' ];
+
   if (isuCd != '' && clientTier != '') {
     if (csgrpAllowLocal.includes(custGrp) || (csgrpAllowCross.includes(custGrp) && !MEA_COUNTRIES.includes(landed))) {
       if (csgGRP1.includes(custSubGrp)) {
-        var condForAbu27E = isuCtc == '27E' && SysLoc.ABU_DHABI == cntry;
-        var condForAE27E = isuCtc == '27E' && SysLoc.UNITED_ARAB_EMIRATES == cntry;
-        var condForAbuAE34Q = isuCtc == '34Q' && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry);
-        var condForAbuAE36Y = isuCtc == '36Y' && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry);
-        var condForKW27E = isuCtc == '27E' && SysLoc.KUWAIT == cntry;
-        var condForKW36Y = isuCtc == '36Y' && SysLoc.KUWAIT == cntry;
-        var condForOM27E = isuCtc == '27E' && SysLoc.OMAN == cntry;
-        var condForOM36Y = isuCtc == '36Y' && SysLoc.OMAN == cntry;
-        var condForYEJOIQSYLE27E = isuCtc == '27E' && (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry);
-        var condForYEJOIQSYLE36Y = isuCtc == '36Y' && (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry);
-        var condForSA27E = isuCtc == '27E' && SysLoc.SAUDI_ARABIA == cntry;
-        var condForSA34Q = isuCtc == '34Q' && SysLoc.SAUDI_ARABIA == cntry;
-        var condForSA36Y = isuCtc == '36Y' && SysLoc.SAUDI_ARABIA == cntry;
-        var condForBH27E = isuCtc == '27E' && SysLoc.BAHRAIN == cntry;
-        var condForBH36Y = isuCtc == '36Y' && SysLoc.BAHRAIN == cntry;
-        var condForLY34Q = isuCtc == '34Q' && SysLoc.LIBYA == cntry;
-        var condForLY36Y = isuCtc == '36Y' && SysLoc.LIBYA == cntry;
-        var condForTN34Q = isuCtc == '34Q' && SysLoc.TUNISIA_SOF == cntry;
-        var condForTN36Y = isuCtc == '36Y' && SysLoc.TUNISIA_SOF == cntry;
-        var condForMA34Q = isuCtc == '34Q' && SysLoc.MOROCCO == cntry;
-        var condForMA36Y = isuCtc == '36Y' && SysLoc.MOROCCO == cntry;
-        var condForEG34Q = isuCtc == '34Q' && SysLoc.EGYPT == cntry;
-        var condForEG36Y = isuCtc == '36Y' && SysLoc.EGYPT == cntry;
-        var condForQA34Q = isuCtc == '34Q' && SysLoc.QATAR == cntry;
-        var condForQA36Y = isuCtc == '36Y' && SysLoc.QATAR == cntry;
-        var condForPK34Q = isuCtc == '34Q' && SysLoc.PAKISTAN == cntry;
-        var condForPK36Y = isuCtc == '36Y' && SysLoc.PAKISTAN == cntry;
+        var condForAbu27E = isuCtc == '27E' && !entForAbu27E.includes(enterprise) && SysLoc.ABU_DHABI == cntry;
+        var condForAE27E = isuCtc == '27E' && !entForAE27E.includes(enterprise) && SysLoc.UNITED_ARAB_EMIRATES == cntry;
+        var condForAbuAE34Q = isuCtc == '34Q' && !entForAbuAE34Q.includes(enterprise) && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry);
+        var condForAbuAE36Y = isuCtc == '36Y' && !entForAbuAE36Y.includes(enterprise) && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry);
+        var condForKW27E = isuCtc == '27E' && !entForKW27E.includes(enterprise) && SysLoc.KUWAIT == cntry;
+        var condForKW36Y = isuCtc == '36Y' && !entForKW36Y.includes(enterprise) && SysLoc.KUWAIT == cntry;
+        var condForOM27E = isuCtc == '27E' && !entForOM27E.includes(enterprise) && SysLoc.OMAN == cntry;
+        var condForOM36Y = isuCtc == '36Y' && !entForOM36Y.includes(enterprise) && SysLoc.OMAN == cntry;
+        var condForYEJOIQSYLE27E = isuCtc == '27E' && !entForYEJOIQSYLE27E.includes(enterprise)
+            && (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry);
+        var condForYEJOIQSYLE36Y = isuCtc == '36Y' && !entForYEJOIQSYLE36Y.includes(enterprise)
+            && (SysLoc.YEMEN == cntry || SysLoc.JORDAN == cntry || SysLoc.IRAQ == cntry || SysLoc.SYRIAN_ARAB_REPUBLIC == cntry || SysLoc.LEBANON == cntry);
+        var condForSA27E = isuCtc == '27E' && !entForSA27E.includes(enterprise) && SysLoc.SAUDI_ARABIA == cntry;
+        var condForSA34Q = isuCtc == '34Q' && !entForSA34Q.includes(enterprise) && SysLoc.SAUDI_ARABIA == cntry;
+        var condForSA36Y = isuCtc == '36Y' && !entForSA36Y.includes(enterprise) && SysLoc.SAUDI_ARABIA == cntry;
+        var condForBH27E = isuCtc == '27E' && !entForBH27E.includes(enterprise) && SysLoc.BAHRAIN == cntry;
+        var condForBH36Y = isuCtc == '36Y' && !entForBH36Y.includes(enterprise) && SysLoc.BAHRAIN == cntry;
+        var condForLY34Q = isuCtc == '34Q' && !entForLY34Q.includes(enterprise) && SysLoc.LIBYA == cntry;
+        var condForLY36Y = isuCtc == '36Y' && !entForLY36Y.includes(enterprise) && SysLoc.LIBYA == cntry;
+        var condForTN34Q = isuCtc == '34Q' && !entForTN34Q.includes(enterprise) && SysLoc.TUNISIA_SOF == cntry;
+        var condForTN36Y = isuCtc == '36Y' && !entForTN36Y.includes(enterprise) && SysLoc.TUNISIA_SOF == cntry;
+        var condForMA34Q = isuCtc == '34Q' && !entForMA34Q.includes(enterprise) && SysLoc.MOROCCO == cntry;
+        var condForMA36Y = isuCtc == '36Y' && !entForMA36Y.includes(enterprise) && SysLoc.MOROCCO == cntry;
+        var condForEG34Q = isuCtc == '34Q' && !entForEG34Q.includes(enterprise) && SysLoc.EGYPT == cntry;
+        var condForEG36Y = isuCtc == '36Y' && !entForEG36Y.includes(enterprise) && SysLoc.EGYPT == cntry;
+        var condForQA34Q = isuCtc == '34Q' && !entForQA34Q.includes(enterprise) && SysLoc.QATAR == cntry;
+        var condForQA36Y = isuCtc == '36Y' && !entForQA36Y.includes(enterprise) && SysLoc.QATAR == cntry;
+        var condForPK34Q = isuCtc == '34Q' && !entForPK34Q.incldues(enterprise) && SysLoc.PAKISTAN == cntry;
+        var condForPK36Y = isuCtc == '36Y' && !entForPK36Y.includes(enterprise) && SysLoc.PAKISTAN == cntry;
       }
     } else if (csgrpAllowCross.includes(custGrp) && MEA_COUNTRIES.includes(landed)) {
       if (csgGRP2.includes(custSubGrp)) {
-        var condForAE27E = isuCtc == '27E' && landed == 'AE';
-        var condForAbuAE34Q = isuCtc == '34Q' && landed == 'AE';
-        var condForAbuAE36Y = isuCtc == '36Y' && landed == 'AE';
-        var condForKW27E = isuCtc == '27E' && landed == 'KW';
-        var condForKW36Y = isuCtc == '36Y' && landed == 'KW';
-        var condForOM27E = isuCtc == '27E' && landed == 'OM';
-        var condForOM36Y = isuCtc == '36Y' && landed == 'OM';
-        var condForYEJOIQSYLE27E = isuCtc == '27E' && (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB');
-        var condForYEJOIQSYLE36Y = isuCtc == '36Y' && (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB');
-        var condForSA27E = isuCtc == '27E' && landed == 'SA';
-        var condForSA34Q = isuCtc == '34Q' && landed == 'SA';
-        var condForSA36Y = isuCtc == '36Y' && landed == 'SA';
-        var condForBH27E = isuCtc == '27E' && landed == 'BH';
-        var condForBH36Y = isuCtc == '36Y' && landed == 'BH';
-        var condForLY34Q = isuCtc == '34Q' && landed == 'LY';
-        var condForLY36Y = isuCtc == '36Y' && landed == 'LY';
-        var condForTN34Q = isuCtc == '34Q' && landed == 'TN';
-        var condForTN36Y = isuCtc == '36Y' && landed == 'TN';
-        var condForMA34Q = isuCtc == '34Q' && landed == 'MA';
-        var condForMA36Y = isuCtc == '36Y' && landed == 'MA';
-        var condForEG34Q = isuCtc == '34Q' && landed == 'EG';
-        var condForEG36Y = isuCtc == '36Y' && landed == 'EG';
-        var condForQA34Q = isuCtc == '34Q' && landed == 'QA';
-        var condForQA36Y = isuCtc == '36Y' && landed == 'QA';
-        var condForPK34Q = isuCtc == '34Q' && landed == 'PK';
-        var condForPK36Y = isuCtc == '36Y' && landed == 'PK';
+        var condForAE27E = isuCtc == '27E' && !entForAE27E.includes(enterprise) && landed == 'AE';
+        var condForAbuAE34Q = isuCtc == '34Q' && !entForAbuAE34Q.includes(enterprise) && landed == 'AE';
+        var condForAbuAE36Y = isuCtc == '36Y' && !entForAbuAE36Y.includes(enterprise) && landed == 'AE';
+        var condForKW27E = isuCtc == '27E' && !entForKW27E.includes(enterprise) && landed == 'KW';
+        var condForKW36Y = isuCtc == '36Y' && !entForKW36Y.includes(enterprise) && landed == 'KW';
+        var condForOM27E = isuCtc == '27E' && !entForOM27E.includes(enterprise) && landed == 'OM';
+        var condForOM36Y = isuCtc == '36Y' && !entForOM36Y.includes(enterprise) && landed == 'OM';
+        var condForYEJOIQSYLE27E = isuCtc == '27E' && !entForYEJOIQSYLE27E.includes(enterprise) && (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB');
+        var condForYEJOIQSYLE36Y = isuCtc == '36Y' && !entForYEJOIQSYLE36Y.includes(enterprise) && (landed == 'YE' || landed == 'JO' || landed == 'IQ' || landed == 'SY' || landed == 'LB');
+        var condForSA27E = isuCtc == '27E' && !entForSA27E.includes(enterprise) && landed == 'SA';
+        var condForSA34Q = isuCtc == '34Q' && !entForSA34Q.includes(enterprise) && landed == 'SA';
+        var condForSA36Y = isuCtc == '36Y' && !entForSA36Y.includes(enterprise) && landed == 'SA';
+        var condForBH27E = isuCtc == '27E' && !entForBH27E.includes(enterprise) && landed == 'BH';
+        var condForBH36Y = isuCtc == '36Y' && !entForBH36Y.includes(enterprise) && landed == 'BH';
+        var condForLY34Q = isuCtc == '34Q' && !entForLY34Q.includes(enterprise) && landed == 'LY';
+        var condForLY36Y = isuCtc == '36Y' && !entForLY36Y.includes(enterprise) && landed == 'LY';
+        var condForTN34Q = isuCtc == '34Q' && !entForTN34Q.includes(enterprise) && landed == 'TN';
+        var condForTN36Y = isuCtc == '36Y' && !entForTN36Y.includes(enterprise) && landed == 'TN';
+        var condForMA34Q = isuCtc == '34Q' && !entForMA34Q.includes(enterprise) && landed == 'MA';
+        var condForMA36Y = isuCtc == '36Y' && !entForMA36Y.includes(enterprise) && landed == 'MA';
+        var condForEG34Q = isuCtc == '34Q' && !entForEG34Q.includes(enterprise) && landed == 'EG';
+        var condForEG36Y = isuCtc == '36Y' && !entForEG36Y.includes(enterprise) && landed == 'EG';
+        var condForQA34Q = isuCtc == '34Q' && !entForQA34Q.includes(enterprise) && landed == 'QA';
+        var condForQA36Y = isuCtc == '36Y' && !entForQA36Y.includes(enterprise) && landed == 'QA';
+        var condForPK34Q = isuCtc == '34Q' && !entForPK34Q.incldues(enterprise) && landed == 'PK';
+        var condForPK36Y = isuCtc == '36Y' && !entForPK36Y.includes(enterprise) && landed == 'PK';
       }
     }
   }
@@ -4330,6 +4360,12 @@ function validatorEnterprise() {
         type : 'text',
         name : 'taxCd2'
       }, false, 'Enterprise can only accept \'907695\', \'911297\'.');
+    } else if (condForKW36Y) {
+      return new ValidationResult({
+        id : 'taxCd2',
+        type : 'text',
+        name : 'taxCd2'
+      }, false, 'Enterprise can only accept \'912085\', \'912087\', \'912086\'.');
     } else if (condForOM27E) {
       return new ValidationResult({
         id : 'taxCd2',
