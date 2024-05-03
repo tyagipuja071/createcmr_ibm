@@ -54,6 +54,7 @@ var _importedIndc = null;
 
 function addISUHandler() {
   console.log('addISUHandler=====');
+  _oldSubInd = FormManager.getActualValue('subIndustryCd');
   var _CTCHandler = null;
   _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
     var value = FormManager.getField('isuCd');
@@ -138,6 +139,7 @@ function setISUDefaultValueOnSubTypeChange() {
         controlFieldsBySubScenarioTR(value);
         setIsuCtcCBMEA();
         setDefaultEntCBMEA();
+        setValuesForTurkey();
       }
     });
   }
@@ -1054,10 +1056,6 @@ function salesSRforUpdateOnChange() {
     setTypeOfCustomerClassificationCodeTR();
   });
 
-  dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-    setIsicClassificationCodeTR(value);
-    setValuesForTurkey();
-  });
 }
 
 function modifyCharForTurk(field) {
@@ -2174,6 +2172,7 @@ function onIsuChangeHandler() {
       if (_oldSubInd != FormManager.getActualValue('subIndustryCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         console.log("On subIndustryCdHandler=======");
         setIsuCtcCBMEA();
+        setValuesForTurkey();
         setDefaultEntCBMEA();
       }
     });
@@ -2741,7 +2740,7 @@ function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
   console.log("checkScenarioChanged=======");
   _isScenarioChanged = scenarioChanged;
   setSBOValuesForIsuCtc(FormManager.getActualValue('isuCd'));
-  setValuesForTurkey();
+  // setValuesForTurkey();
   // if (_isScenarioChanged) {
   // setCustSubTypeBpGRTRCY();
   // }
