@@ -5,8 +5,6 @@ var _isuCdHandler = null;
 var _isicCdHandler = null;
 var _requestingLOBHandler = null;
 var _subIndustryCdHandler = null;
-var _oldSubInd = null;
-var _subIndustryCdHandler = null;
 var _economicCdHandler = null;
 var _custSubTypeHandler = null;
 var _custSubTypeHandlerGr = null;
@@ -69,13 +67,6 @@ function addISUHandler() {
     setClientTierAndISR(value);
     setValuesForTurkey();
   });
-  if (_subIndustryCdHandler == null) {
-    _subIndustryCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      if (_oldSubInd != FormManager.getActualValue('subIndustryCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
-        setValuesForTurkey();
-      }
-    });
-  }
 }
 
 // CREATCMR-2657 for TURKEY
@@ -1065,10 +1056,6 @@ function salesSRforUpdateOnChange() {
     setTypeOfCustomerClassificationCodeTR();
   });
 
-  dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-    setIsicClassificationCodeTR(value);
-    setValuesForTurkey();
-  });
 }
 
 function modifyCharForTurk(field) {
@@ -2185,6 +2172,7 @@ function onIsuChangeHandler() {
       if (_oldSubInd != FormManager.getActualValue('subIndustryCd') || typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         console.log("On subIndustryCdHandler=======");
         setIsuCtcCBMEA();
+        setValuesForTurkey();
         setDefaultEntCBMEA();
       }
     });
