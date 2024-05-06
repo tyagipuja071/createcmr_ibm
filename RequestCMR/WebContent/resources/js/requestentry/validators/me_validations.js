@@ -1988,15 +1988,15 @@ function validateEnterpriseField(taxCd2) {
           enterprises = [ '911790', '911791', '911792', '911793', '911794' ];
         } else if (isuCtc == '34Q') {
           enterprises = [ '911775', '911774' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912073', '912075', '912074' ];
         }
       } else if (SysLoc.UNITED_ARAB_EMIRATES == cntry) {
         if (isuCtc == '27E') {
           enterprises = [ '911812', '911813', '911814', '911815', '911816' ];
         } else if (isuCtc == '34Q') {
           enterprises = [ '911811', '911810' ];
-        }
-      } else if (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry) {
-        if (isuCtc == '36Y') {
+        } else if (isuCtc == '36Y') {
           enterprises = [ '912073', '912075', '912074' ];
         }
       } else if (SysLoc.KUWAIT == cntry) {
