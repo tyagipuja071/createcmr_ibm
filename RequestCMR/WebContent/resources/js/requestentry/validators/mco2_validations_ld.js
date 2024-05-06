@@ -2373,7 +2373,7 @@ function clientTierCodeValidator() {
 	var clientTierCode = FormManager.getActualValue('clientTier');
 	var reqType = FormManager.getActualValue('reqType');
 
-	if (!['34', '36', '27', '32'].includes(isuCode)) {
+	if (!['34', '36', '27'].includes(isuCode)) {
 		if (clientTierCode == '') {
 			$("#clientTierSpan").html('');
 
