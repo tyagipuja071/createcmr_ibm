@@ -4199,11 +4199,10 @@ function validatorEnterprise() {
   var enterprise = FormManager.getActualValue('taxCd2');
 
   var MEA_COUNTRIES = [ 'BH', 'MA', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'LY', 'OM', 'PK', 'AF', 'QA', 'SA', 'YE', 'SY', 'EG', 'TN' ];
-  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
-  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM' ];
-  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM' ];
-  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM' ];
-
+  var csgGRP1 = [ 'COMME', 'THDPT', 'PRICU', 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKCOM', 'PKTP', 'PKPC', 'PKXCO', 'PKXTP', 'JOCOM', 'JOPC', 'JOTP', 'PSCOM', 'PSPC', 'PSTP' ];
+  var csgGRP2 = [ 'XCOM', 'XTP', 'EXCOM', 'ELCOM', 'PKXCO', 'PKXTP', 'JOXCO', 'JOXTP' ];
+  var csgrpAllowLocal = [ 'LOCAL', 'SBM', 'GBM', 'PKLOC', 'JOLOC', 'PSLOC' ];
+  var csgrpAllowCross = [ 'CROSS', 'SBM', 'GBM', 'PKCRO', 'JOCRO' ];
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var landed = FormManager.getActualValue('landCntry');
   var addrType = "ZS01";
