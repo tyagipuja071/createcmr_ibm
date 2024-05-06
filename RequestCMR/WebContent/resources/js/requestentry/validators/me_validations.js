@@ -1985,14 +1985,16 @@ function validateEnterpriseField(taxCd2) {
       if (SysLoc.ABU_DHABI == cntry) {
         if (isuCtc == '27E') {
           enterprises = [ '911790', '911791', '911792', '911793', '911794' ];
+        } else if (isuCtc == '34Q') {
+          enterprises = [ '911775', '911774' ];
+        } else if (isuCtc == '36Y') {
+          enterprises = [ '912073', '912075', '912074' ];
         }
       } else if (SysLoc.UNITED_ARAB_EMIRATES == cntry) {
         if (isuCtc == '27E') {
           enterprises = [ '911812', '911813', '911814', '911815', '911816' ];
-        }
-      } else if (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry) {
-        if (isuCtc == '34Q') {
-          enterprises = [ '911775', '911774', '911811', '911810' ];
+        } else if (isuCtc == '34Q') {
+          enterprises = [ '911811', '911810' ];
         } else if (isuCtc == '36Y') {
           enterprises = [ '912073', '912075', '912074' ];
         }
@@ -2073,10 +2075,8 @@ function validateEnterpriseField(taxCd2) {
       if (landed == 'AE') {
         if (isuCtc == '27E') {
           enterprises = [ '911812', '911813', '911814', '911815', '911816' ];
-        }
-      } else if (landed == 'AE') {
-        if (isuCtc == '34Q') {
-          enterprises = [ '911775', '911774', '911811', '911810' ];
+        } else if (isuCtc == '34Q') {
+          enterprises = [ '911811', '911810' ];
         } else if (isuCtc == '36Y') {
           enterprises = [ '912073', '912075', '912074' ];
         }
@@ -4224,7 +4224,8 @@ function validatorEnterprise() {
 
   var entForAbu27E = [ '911790', '911791', '911792', '911793', '911794' ];
   var entForAE27E = [ '911812', '911813', '911814', '911815', '911816' ];
-  var entForAbuAE34Q = [ '911775', '911774', '911811', '911810' ];
+  var entForAbu34Q = [ '911775', '911774' ];
+  var entForAE34Q = [ '911811', '911810' ];
   var entForAbuAE36Y = [ '912073', '912075', '912074' ];
   var entForKW27E = [ '907695', '911297' ];
   var entForKW36Y = [ '912085', '912087', '912086' ];
@@ -4265,12 +4266,18 @@ function validatorEnterprise() {
             type : 'text',
             name : 'taxCd2'
           }, false, 'Enterprise can only accept \'911812\', \'911813\', \'911814\', \'911815\', \'911816\'.');
-        } else if (isuCtc == '34Q' && !entForAbuAE34Q.includes(enterprise) && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry)) {
+        } else if (isuCtc == '34Q' && !entForAbu34Q.includes(enterprise) && (SysLoc.ABU_DHABI == cntry)) {
           return new ValidationResult({
             id : 'taxCd2',
             type : 'text',
             name : 'taxCd2'
-          }, false, 'Enterprise can only accept \'911775\', \'911774\', \'911811\', \'911810\'.');
+          }, false, 'Enterprise can only accept \'911775\', \'911774\'.');
+        } else if (isuCtc == '34Q' && !entForAE34Q.includes(enterprise) && (SysLoc.UNITED_ARAB_EMIRATES == cntry)) {
+          return new ValidationResult({
+            id : 'taxCd2',
+            type : 'text',
+            name : 'taxCd2'
+          }, false, 'Enterprise can only accept \'911811\', \'911810\'.');
         } else if (isuCtc == '36Y' && !entForAbuAE36Y.includes(enterprise) && (SysLoc.ABU_DHABI == cntry || SysLoc.UNITED_ARAB_EMIRATES == cntry)) {
           return new ValidationResult({
             id : 'taxCd2',
@@ -4435,7 +4442,7 @@ function validatorEnterprise() {
             id : 'taxCd2',
             type : 'text',
             name : 'taxCd2'
-          }, false, 'Enterprise can only accept \'911775\', \'911774\', \'911811\', \'911810\'.');
+          }, false, 'Enterprise can only accept \'911811\', \'911810\'.');
         } else if (isuCtc == '36Y' && !entForAbuAE36Y.includes(enterprise) && landed == 'AE') {
           return new ValidationResult({
             id : 'taxCd2',
