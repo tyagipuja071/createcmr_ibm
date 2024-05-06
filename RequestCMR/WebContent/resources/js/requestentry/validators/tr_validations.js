@@ -4,6 +4,8 @@ var _vatExemptHandler = null;
 var _isuCdHandler = null;
 var _isicCdHandler = null;
 var _requestingLOBHandler = null;
+var _isuHandler = null;
+var _oldSubInd = null;
 var _subIndustryCdHandler = null;
 var _economicCdHandler = null;
 var _custSubTypeHandler = null;
@@ -54,7 +56,7 @@ var _importedIndc = null;
 
 function addISUHandler() {
   console.log('addISUHandler=====');
-  _oldSubInd = FormManager.getActualValue('subIndustryCd');
+  // _oldSubInd = FormManager.getActualValue('subIndustryCd');
   var _CTCHandler = null;
   _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
     var value = FormManager.getField('isuCd');
@@ -1422,7 +1424,7 @@ function setIsuCtcCBMEA() {
   if (result != null && result.ret1 != undefined) {
     landCntry = result.ret1;
   }
-  var crossSubTypes = [ 'XINTS', 'XGOV', 'XIGF', 'XPC', 'XTP' ];
+  var crossSubTypes = [ 'XINTS', 'XGOV', 'XIGF', 'XTP' ];
   var MEA_COUNTRIES_CB = [ 'TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD',
       'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW',
       'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
@@ -1462,7 +1464,7 @@ function setDefaultEntCBMEA() {
   if (subIndustryCd != null && subIndustryCd.length > 1) {
     subIndustryCd = subIndustryCd.substring(0, 1);
   }
-  var crossSubTypes = [ 'XINTS', 'XGOV', 'XIGF', 'XPC', 'XTP' ];
+  var crossSubTypes = [ 'XINTS', 'XGOV', 'XIGF', 'XTP' ];
   var privScenarios = [ 'ZAXPC', 'SZXPC', 'NAXPC', 'LSXPC' ];
   var ME_LC = [ 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
 
@@ -1540,7 +1542,7 @@ function enterpriseValidatorMea() {
         if (subIndustryCd != null && subIndustryCd.length > 1) {
           subIndustryCd = subIndustryCd.substring(0, 1);
         }
-        var crossSubTypes = [ 'XINTS', 'XGOV', 'XIGF', 'XPC', 'XTP' ];
+        var crossSubTypes = [ 'XINTS', 'XGOV', 'XIGF', 'XTP' ];
         var privScenarios = [ 'ZAXPC', 'SZXPC', 'NAXPC', 'LSXPC' ];
         var ME_LC = [ 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
 
@@ -1553,8 +1555,7 @@ function enterpriseValidatorMea() {
         if (result != null && result.ret1 != undefined) {
           landCntry = result.ret1;
         }
-        if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || enterprise == '' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || enterprise == ''
-            || !(ME_LC.includes(landCntry))) {
+        if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || !(ME_LC.includes(landCntry))) {
           return;
         }
         if (ME_LC.includes(landCntry)) {
@@ -2153,9 +2154,6 @@ function setSBOLogicOnISUChange() {
   }
 }
 
-var _isuHandler = null;
-var _oldSubInd = null;
-
 function onIsuChangeHandler() {
   console.log("onIsuChangeHandler=======");
   _oldSubInd = FormManager.getActualValue('subIndustryCd');
@@ -2174,6 +2172,7 @@ function onIsuChangeHandler() {
         setIsuCtcCBMEA();
         setValuesForTurkey();
         setDefaultEntCBMEA();
+        _oldSubInd = FormManager.getActualValue('subIndustryCd');
       }
     });
   }
@@ -2432,7 +2431,7 @@ function entValidator() {
                   if (!(enterprise == '911741' || enterprise == '901441' || enterprise == '911757' || enterprise == '911733' || enterprise == '901444' || enterprise == '911730'
                       || enterprise == '911756' || enterprise == '911740' || enterprise == '911737' || enterprise == '906402' || enterprise == '911758' || enterprise == '901728'
                       || enterprise == '907897' || enterprise == '911743' || enterprise == '911755')) {
-                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank value for ISU CTC 34Q.');
+                    return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise cannot accept ' + enterprise + '  for ISU CTC 34Q.');
                   } else
                     return new ValidationResult(null, true, null);
                 }
