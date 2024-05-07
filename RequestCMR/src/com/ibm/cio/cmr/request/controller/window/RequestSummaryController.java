@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.GeoContactInfoModel;
 import com.ibm.cio.cmr.request.model.requestentry.GeoTaxInfoModel;
+import com.ibm.cio.cmr.request.model.requestentry.LicenseModel;
 import com.ibm.cio.cmr.request.model.window.MassDataSummaryModel;
 import com.ibm.cio.cmr.request.model.window.RequestSummaryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
@@ -205,5 +206,14 @@ public class RequestSummaryController extends BaseWindowController {
     List<GeoTaxInfoModel> currTax = new ArrayList<>();
     currTax = service.getCurrentTaxInfoDetails(reqId, issuingCntry);
     return wrapAsPlainSearchResult(currTax);
+  }
+
+  @RequestMapping(
+      value = "/summary/newlicenses",
+      method = { RequestMethod.GET, RequestMethod.POST })
+  public ModelMap showNewLicenses(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId) throws CmrException {
+    List<LicenseModel> newLicenses = new ArrayList<>();
+    newLicenses = service.getNewLicenses(request, reqId);
+    return wrapAsPlainSearchResult(newLicenses);
   }
 }

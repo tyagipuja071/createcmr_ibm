@@ -375,4 +375,8 @@ public class MessageUtil {
   public static final int ERROR_MASS_FILE_TAX_TEAM_STATUS = 9056;
   public static final int ERROR_MASS_FILE_CMR_IS_NOT_IBM = 9057;
 
+  // Licenses
+  public static final int INFO_LICENSE_ADD_LIST = 9059;
+  public static final int INFO_LICENSE_REMOVE_LIST = 9060;
+  public static final int INFO_LICENSE_UPDATE_LIST = 9061;
 }
