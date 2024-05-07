@@ -303,7 +303,7 @@ public class UpdateSwitchElement extends ValidatingElement {
         String details = output.getDetails() + "\n" + "Legal Name changes made on request.";
         output.setDetails(details);
         log.debug("Legal Name changes made on request.");
-      } else if (!isPaygoUpgrade && !changes.hasDataChanges() && !changes.hasAddressChanges()) {
+      } else if (!isPaygoUpgrade && !changes.hasDataChanges() && !changes.hasAddressChanges() && !changes.hasNewLicenses()) {
         // no updates/changes at all on the request
         validation.setSuccess(false);
         validation.setMessage("Not Validated");

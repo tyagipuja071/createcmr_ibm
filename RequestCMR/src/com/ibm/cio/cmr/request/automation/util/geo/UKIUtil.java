@@ -27,10 +27,12 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
@@ -484,6 +486,21 @@ public class UKIUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+
+    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      if ("Z".equals(data.getSpecialTaxCd())) {
+        LicenseService service = new LicenseService();
+        List<Licenses> newLicenses = service.getLicensesByIndc(entityManager, data.getId().getReqId(), LicenseService.NEW_LICENSE_INDC);
+        if (newLicenses.size() > 0) {
+          details.append("A new license has been added, so the request will now be placed in CMDE's queue.\n");
+          engineData.addNegativeCheckStatus("_updatedToZTaxCode", "A new license has been added, so the request will now be placed in CMDE's queue.");
+          results.setResults("Review Required");
+          results.setDetails(details.toString());
+          return results;
+        }
+      }
+    }
+
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");

@@ -504,6 +504,12 @@ public class RequestEntryModel extends BaseModel {
   // new JP fields
   private String marketingContCd;
 
+  // license number fields
+  private String licenseNumber;
+  private String licenseValidFrom;
+  private String licenseValidTo;
+  private String oldLicenseNumber;
+
   public String getMexicoBillingName() {
     return mexicoBillingName;
   }
@@ -3251,6 +3257,30 @@ public class RequestEntryModel extends BaseModel {
 
   public void setVatAcknowledge(String vatAcknowledge) {
     this.vatAcknowledge = vatAcknowledge;
+  }
+
+  public String getLicenseNumber() {
+    return licenseNumber;
+  }
+
+  public void setLicenseNumber(String licenseNumber) {
+    this.licenseNumber = licenseNumber;
+  }
+
+  public String getLicenseValidFrom() {
+    return licenseValidFrom;
+  }
+
+  public void setLicenseValidFrom(String licenseValidFrom) {
+    this.licenseValidFrom = licenseValidFrom;
+  }
+
+  public String getLicenseValidTo() {
+    return licenseValidTo;
+  }
+
+  public void setLicenseValidTo(String licenseValidTo) {
+    this.licenseValidTo = licenseValidTo;
   }
 
   public String getJpCloseDays() {
