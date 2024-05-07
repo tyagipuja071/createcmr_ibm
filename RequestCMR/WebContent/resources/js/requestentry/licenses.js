@@ -18,18 +18,18 @@ function doAddLicense() {
     return;
   }
   
-  if(hasDuplicateLicenseNumber()) {
+  if (hasDuplicateLicenseNumber()) {
     cmr.showAlert('The license number entered is a duplicate. Please provide a unique license number.');
     return;
   }
   
   var fromDateIsValidFormat = isValidDate(licenseValidFrom);
   var toDateIsValidFormat = isValidDate(licenseValidTo);
-  if(!fromDateIsValidFormat || !toDateIsValidFormat) {
+  if (!fromDateIsValidFormat || !toDateIsValidFormat) {
     var invalidDateStr = '';
-    if(!fromDateIsValidFormat && !toDateIsValidFormat) {
+    if (!fromDateIsValidFormat && !toDateIsValidFormat) {
       invalidDateStr = `Invalid dates for 'Date Valid From' and 'Valid To Date'`
-    } else if(!fromDateIsValidFormat) {
+    } else if (!fromDateIsValidFormat) {
       invalidDateStr = `Invalid date for 'Date Valid From'`
     } else if (!toDateIsValidFormat) {
       invalidDateStr = `Invalid date for 'Valid To Date'`
@@ -38,7 +38,7 @@ function doAddLicense() {
     return;
   }
   
-  if(licenseValidFrom > licenseValidTo) {
+  if (licenseValidFrom > licenseValidTo) {
     cmr.showAlert(`'Date Valid From' must be on or before 'Valid To Date'.`);
     return;
   }
@@ -66,18 +66,18 @@ function doUpdateLicense() {
     return;
   }
   
-  if(hasDuplicateLicenseNumber()) {
+  if (hasDuplicateLicenseNumber()) {
     cmr.showAlert('The license number entered is a duplicate. Please provide a unique license number.');
     return;
   }
   
   var fromDateIsValidFormat = isValidDate(licenseValidFrom);
   var toDateIsValidFormat = isValidDate(licenseValidTo);
-  if(!fromDateIsValidFormat || !toDateIsValidFormat) {
+  if (!fromDateIsValidFormat || !toDateIsValidFormat) {
     var invalidDateStr = '';
-    if(!fromDateIsValidFormat && !toDateIsValidFormat) {
+    if (!fromDateIsValidFormat && !toDateIsValidFormat) {
       invalidDateStr = `Invalid dates for 'Date Valid From' and 'Valid To Date'`
-    } else if(!fromDateIsValidFormat) {
+    } else if (!fromDateIsValidFormat) {
       invalidDateStr = `Invalid date for 'Date Valid From'`
     } else if (!toDateIsValidFormat) {
       invalidDateStr = `Invalid date for 'Valid To Date'`
@@ -86,7 +86,7 @@ function doUpdateLicense() {
     return;
   }
   
-  if(licenseValidFrom > licenseValidTo) {
+  if (licenseValidFrom > licenseValidTo) {
     cmr.showAlert(`'Date Valid From' must be on or before 'Valid To Date'.`);
     return;
   }
@@ -131,10 +131,10 @@ function showAddLicenseModal() {
 function hasDuplicateLicenseNumber() {
   var licenseNumber = FormManager.getActualValue('licenseNum');
 
-  if(CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID .rowCount > 0) {
+  if (CmrGrid.GRIDS.LICENSES_GRID_GRID && CmrGrid.GRIDS.LICENSES_GRID_GRID .rowCount > 0) {
     for (var i = 0; i < CmrGrid.GRIDS.LICENSES_GRID_GRID.rowCount; i++) {
       var record = CmrGrid.GRIDS.LICENSES_GRID_GRID.getItem(i);
-      if(licenseNumber == record.licenseNum[0]) {
+      if (licenseNumber == record.licenseNum[0]) {
         return true;
       }
     }
@@ -244,7 +244,7 @@ function licenseImportIndFormatter(value, rowIndex) {
 
 function isValidDate(dateString) {
   var regex = /^(19|20)\d\d(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$/;
-  if(!regex.test(dateString)) return false;
+  if (!regex.test(dateString)) return false;
 
   var year = Number(dateString.slice(0,4));
   var month = Number(dateString.slice(4,6)) - 1; // months are 0-based in
