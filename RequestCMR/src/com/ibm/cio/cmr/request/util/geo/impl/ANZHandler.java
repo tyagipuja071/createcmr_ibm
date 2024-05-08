@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
@@ -425,6 +426,13 @@ public class ANZHandler extends GEOHandler {
               }
               if( "03".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
                 tempRec.setCmrAddrTypeCode("ZF01");
+              }
+              if (CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
+                if (StringUtils.isNotBlank(addrSeq) && "ZP01".equals(tempRec.getCmrAddrTypeCode())
+                    && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
+                  tempRec.setCmrAddrTypeCode("PG01");
+                }
+              
               }
             }
 
