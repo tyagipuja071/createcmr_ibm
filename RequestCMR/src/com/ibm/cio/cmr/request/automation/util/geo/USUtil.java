@@ -2363,7 +2363,7 @@ public class USUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String isu = "";
     String ctc = "";
-    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
+    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !("ECO").equalsIgnoreCase(scenario)) {
 
       String firstChar = coverageId.substring(0, 1);
 
