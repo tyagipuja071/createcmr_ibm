@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USSosRpaCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -51,6 +52,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
@@ -689,9 +691,9 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
+      isPaygoUpgrade = true;
     }
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK")) && !isPaygoUpgrade) {
       // skip checks if requester is from USCMDE team
@@ -909,7 +911,7 @@ public class USUtil extends AutomationUtil {
         } else if (changes.isLegalNameChanged() && isPaygoUpgrade) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         }
-     } finally {
+      } finally {
         cedpManager.clear();
         cedpManager.close();
       }
@@ -1352,9 +1354,9 @@ public class USUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    boolean isPaygoUpgrade=false;
-    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
@@ -1379,8 +1381,8 @@ public class USUtil extends AutomationUtil {
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
               validation.setSuccess(true);
-            }else if (isPaygoUpgrade){
-              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+            } else if (isPaygoUpgrade) {
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
               details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
               validation.setMessage("Review needed");
               validation.setSuccess(false);
@@ -1405,12 +1407,12 @@ public class USUtil extends AutomationUtil {
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
             details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
             validation.setSuccess(true);
-          } else if (isPaygoUpgrade){
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+          } else if (isPaygoUpgrade) {
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
             details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
             validation.setMessage("Review needed");
             validation.setSuccess(false);
-          }else {
+          } else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -1431,12 +1433,12 @@ public class USUtil extends AutomationUtil {
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
           details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
           validation.setSuccess(true);
-        } else if (isPaygoUpgrade){
-          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+        } else if (isPaygoUpgrade) {
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
           details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
           validation.setMessage("Review needed");
           validation.setSuccess(false);
-        }else {
+        } else {
           validation.setMessage("Rejected");
           validation.setSuccess(false);
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -2368,6 +2370,163 @@ public class USUtil extends AutomationUtil {
 
     return flag;
 
+  }
+
+  public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
+    LOG.debug("Performing USA final fillCoverageAttributes...");
+    Data data = requestData.getData();
+    String coverageId = covType + covId;
+    String sbo = "";
+
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
+    // ISU CTC Based on Coverage
+    String scenario = data.getCustSubGrp();
+    String isu = "";
+    String ctc = "";
+    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
+
+      String firstChar = coverageId.substring(0, 1);
+
+      // List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993",
+      // "T0007994", "T0008059");
+
+      if (("T").equalsIgnoreCase(firstChar)) {
+        if (StringUtils.isBlank(data.getGbgId())) {
+          if (scenario.equalsIgnoreCase("ECOSYSTEM")) {
+            isu = "36";
+            ctc = "Y";
+          } else if (scenario.equalsIgnoreCase("PRIV")) {
+            isu = "21";
+            ctc = " ";
+          } else if (!scenario.equalsIgnoreCase("ECOSYSTEM") && !scenario.equalsIgnoreCase("PRIV")) {
+            isu = "27";
+            ctc = "E";
+          }
+
+        } else {
+          if (scenario.equalsIgnoreCase("ECOSYSTEM")) {
+            isu = "36";
+            ctc = "Y";
+          } else if (scenario.equalsIgnoreCase("PRIV")) {
+            isu = "21";
+            ctc = " ";
+          } else {
+            String sql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("KEY", data.getBgId());
+            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            query.setParameter("COUNTRY", data.getCmrIssuingCntry());
+            String isoCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
+            System.err.println("ISO: " + isoCntry);
+            query.setParameter("ISO_CNTRY", isoCntry);
+            query.setForReadOnly(true);
+            List<Object[]> qresults = query.getResults(1);
+            if (qresults != null && !qresults.isEmpty()) {
+              for (Object[] coverage : qresults) {
+                isu = (String) coverage[2];
+                ctc = (String) coverage[3];
+              }
+            }
+          }
+          // isu = "34";
+          // ctc = "Q";
+
+        }
+
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+      } /*
+         * else if (ECOSYSTEM_LIST.contains(coverageId)) { if
+         * (StringUtils.isBlank(data.getGbgId())) { if
+         * (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc = "Y"; } else if
+         * (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc = " "; } else
+         * if (!scenario.equalsIgnoreCase("ECO") &&
+         * !scenario.equalsIgnoreCase("PRIV")) { isu = "27"; ctc = "E"; }
+         * 
+         * } else { if (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc =
+         * "Y"; } else if (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc
+         * = " "; } else if (!scenario.equalsIgnoreCase("ECO") &&
+         * !scenario.equalsIgnoreCase("PRIV")) { isu = data.getIsuCd(); ctc =
+         * data.getClientTier(); } } setISUCTCBasedOnCoverage(details,
+         * overrides, coverageId, data, isu, ctc); }
+         */
+      else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
+        if (scenario.equalsIgnoreCase("ECO")) {
+          isu = "36";
+          ctc = "Y";
+        } else if (scenario.equalsIgnoreCase("PRIV")) {
+          isu = "21";
+          ctc = " ";
+        } else {
+          // isu = ""; // apply logic to set isu based on sub industry code
+          // ctc = "";
+          String subIndustryCd = data != null && data.getSubIndustryCd() != null ? data.getSubIndustryCd() : "";
+          String firstCharSubIndustry = StringUtils.isNotEmpty(subIndustryCd) ? subIndustryCd.substring(0, 1) : "";
+
+          Map<String, String> industryCodeISUMap = new HashMap<String, String>();
+
+          industryCodeISUMap.put("A", "3T");
+          industryCodeISUMap.put("U", "12");
+          industryCodeISUMap.put("K", "05");
+          industryCodeISUMap.put("R", "1R");
+          industryCodeISUMap.put("D", "18");
+
+          industryCodeISUMap.put("W", "18");
+          industryCodeISUMap.put("T", "19");
+          industryCodeISUMap.put("F", "04");
+          industryCodeISUMap.put("S", "4F");
+          industryCodeISUMap.put("N", "31");
+
+          industryCodeISUMap.put("J", "4A");
+          industryCodeISUMap.put("V", "14");
+          industryCodeISUMap.put("L", "5E");
+          industryCodeISUMap.put("P", "15");
+          industryCodeISUMap.put("M", "4D");
+
+          industryCodeISUMap.put("Y", "28");
+          industryCodeISUMap.put("G", "28");
+          industryCodeISUMap.put("E", "40");
+          industryCodeISUMap.put("H", "11");
+          industryCodeISUMap.put("X", "8C");
+
+          industryCodeISUMap.put("B", "5B");
+          industryCodeISUMap.put("C", "5B");
+
+          if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
+            isu = industryCodeISUMap.get(firstCharSubIndustry);
+            ctc = "";
+          }
+        }
+        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
+      }
+    } /*
+       * else if ( ! isPaygoUpgrade && scenario . equalsIgnoreCase ( "ECO" ) ) {
+       * isu = "36"; ctc = "Y"; setISUCTCBasedOnCoverage ( details, overrides,
+       * coverageId, data, isu, ctc ) ; } else if ( ! scenario .
+       * equalsIgnoreCase ( "ECO") && !scenario .
+       * equalsIgnoreCase("Private Household Customer" ) && StringUtils .
+       * isBlank ( gbgId ) ) { isu = "27"; ctc = "E"; setISUCTCBasedOnCoverage (
+       * details, overrides, coverageId, data, isu, ctc ) ; } else if ( !
+       * isPaygoUpgrade && scenario .
+       * equalsIgnoreCase("Private Household Customer" )) { isu = "21"; ctc =
+       * ""; setISUCTCBasedOnCoverage ( details, overrides, coverageId, data,
+       * isu, ctc ) ; }
+       */
+    return true;
+
+  }
+
+  private void setISUCTCBasedOnCoverage(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String isu, String ctc) {
+    LOG.debug("Setting ISU CTC based on coverage...");
+    details.append("Setting ISU based on Coverage ").append(coverageId).append(" to ").append(isu).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isu);
+
+    details.append("Setting CTC based on Coverage ").append(coverageId).append(" to ").append(ctc).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), ctc);
   }
 
   public static String getcGem(EntityManager entityManager, String cmrNo) {

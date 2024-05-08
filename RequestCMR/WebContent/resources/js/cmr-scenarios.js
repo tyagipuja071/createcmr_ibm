@@ -662,11 +662,22 @@ var TemplateService = (function() {
         }
 
         if (scenarioChanged == true) {
-          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry'))) {
-            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))) {
+          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry')) || FormManager.getActualValue('cmrIssuingCntry') == '649') {
+            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))
+                || scenario == 'PRIV' || scenario == 'ECO') {
               var isuCd = FormManager.getActualValue('isuCd');
               if (isuCd == '8B' || isuCd == '21') {
                 FormManager.setValue('clientTier', '');
+              }
+              if (isuCd == '21') {
+                FormManager.setValue('clientTier', '');
+                FormManager.readOnly('isuCd');
+                FormManager.readOnly('clientTier');
+              }
+              if (isuCd == '36') {
+                FormManager.setValue('clientTier', 'Y');
+                FormManager.readOnly('isuCd');
+                FormManager.readOnly('clientTier');
               }
             }
           }
