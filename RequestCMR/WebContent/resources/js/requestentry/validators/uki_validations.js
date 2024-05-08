@@ -32,6 +32,8 @@ var _gtcAddrTypeHandlerIL = [];
 var _gtcVatExemptHandler = null;
 var _postCdHandlerUK = null;
 var _oldIsicCd = null;
+var _oldIsicCdUK = null;
+
 
 var _CTCHandlerIL = null;
 var _isuCdHandlerIL = null;
@@ -652,16 +654,18 @@ function addHandlersForUK() {
    * _clientTierHandler[0].onChange(); }
    */
   if (_isicCdHandler == null && FormManager.getField('isicCd')) {
-    _oldIsicCd = FormManager.getActualValue('isicCd');
     _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       var currentIsicCd = FormManager.getActualValue('isicCd');
       var isIsicNull = currentIsicCd == '' || currentIsicCd == null || currentIsicCd == undefined;
-      if (_oldIsicCd != currentIsicCd) {
-        if (isIsicNull) {
-          FormManager.setValue('isicCd', _oldIsicCd);
-        }
+      if (_oldIsicCdUK != currentIsicCd) {        
+        
         autoSetSBO(value, _pagemodel.isicCd);
         setSrAndSboOnIsicUK(value, _pagemodel.isicCd);
+        
+        _oldIsicCdUK = FormManager.getActualValue('isicCd');
+        if (isIsicNull) {
+          FormManager.setValue('isicCd', _oldIsicCdUK);
+        }
       }
     });
   }
@@ -1175,6 +1179,9 @@ function setSrAndSboOnIsicUK() {
             FormManager.readOnly('repTeamMemberNo');
             FormManager.readOnly('salesBusOffCd');
           }
+        } else {
+          FormManager.setValue('salesBusOffCd', '');
+          FormManager.setValue('repTeamMemberNo', '');
         }
       } else if (isicCdValue != null) {
         if (isuCdValue == '34' && tierValue == 'Y') {
@@ -8171,7 +8178,7 @@ function validateSboSrForIsuCtcUK() {
         var results = null;
         if(isuCTC == '27E') {
           var isicCd = FormManager.getActualValue('isicCd');
-          results = fetchSboSrForAllParamUK(cntry, sbo, salRep, isu, ctc, isicCd);
+          results = fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc);
           if((results == null ||  results.length == 0)) {
             if(isNorthernIrelandPostCd(getUKZS01PostCd())) {
               results = fetchSboSrForIsuCtcUK(cntry, sbo, salRep, isu, ctc);
