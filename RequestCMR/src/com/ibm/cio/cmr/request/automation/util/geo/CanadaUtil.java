@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -504,11 +505,11 @@ public class CanadaUtil extends AutomationUtil {
       results.setDetails(details.toString());
       return true;
     }
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqType())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqType())) {
+      isPaygoUpgrade = true;
     }
-    
+
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
@@ -789,11 +790,11 @@ public class CanadaUtil extends AutomationUtil {
       LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
       boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
 
-      boolean isPaygoUpgrade=false; 
-      if("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())){
-        isPaygoUpgrade=true;
+      boolean isPaygoUpgrade = false;
+      if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
+        isPaygoUpgrade = true;
       }
-      
+
       if (changes.isLegalNameChanged() && !payGoAddredited) {
         engineData.addNegativeCheckStatus("_legalNameChanged", "Legal Name change should be validated.");
         details.append("Legal Name change should be validated.\n");
@@ -807,7 +808,7 @@ public class CanadaUtil extends AutomationUtil {
         validation.setSuccess(false);
         validation.setMessage("Not Validated");
       }
-      
+
       if (cmdeReview) {
         engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
         details.append("Updates to one or more fields cannot be validated.\n");
@@ -1222,28 +1223,25 @@ public class CanadaUtil extends AutomationUtil {
     Data data = requestData.getData();
     String coverageId = covType + covId;
     String sbo = "";
-    if (StringUtils.isBlank(data.getSalesBusOffCd())) {
-      if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0007992")) {
-        sbo = "458";
-        setDefaultSBO(details, overrides, coverageId, data, sbo);
-      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0008059")) {
-        sbo = "570";
-        setDefaultSBO(details, overrides, coverageId, data, sbo);
-      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000604")) {
-        sbo = "486";
-        setDefaultSBO(details, overrides, coverageId, data, sbo);
-      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000549")) {
-        sbo = "481";
-        setDefaultSBO(details, overrides, coverageId, data, sbo);
-      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000595")) {
-        sbo = "457";
-        setDefaultSBO(details, overrides, coverageId, data, sbo);
-      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000597")) {
-        sbo = "460";
-        setDefaultSBO(details, overrides, coverageId, data, sbo);
-      }
-    }
-  boolean isPaygoUpgrade = false;
+    /*
+     * if (StringUtils.isBlank(data.getSalesBusOffCd())) { if
+     * (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0007992")) {
+     * sbo = "458"; setDefaultSBO(details, overrides, coverageId, data, sbo); }
+     * else if (StringUtils.isNotBlank(coverageId) &&
+     * coverageId.equals("T0008059")) { sbo = "570"; setDefaultSBO(details,
+     * overrides, coverageId, data, sbo); } else if
+     * (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000604")) {
+     * sbo = "486"; setDefaultSBO(details, overrides, coverageId, data, sbo); }
+     * else if (StringUtils.isNotBlank(coverageId) &&
+     * coverageId.equals("T0000549")) { sbo = "481"; setDefaultSBO(details,
+     * overrides, coverageId, data, sbo); } else if
+     * (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000595")) {
+     * sbo = "457"; setDefaultSBO(details, overrides, coverageId, data, sbo); }
+     * else if (StringUtils.isNotBlank(coverageId) &&
+     * coverageId.equals("T0000597")) { sbo = "460"; setDefaultSBO(details,
+     * overrides, coverageId, data, sbo); } }
+     */
+    boolean isPaygoUpgrade = false;
     if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
       isPaygoUpgrade = true;
     }
@@ -1255,61 +1253,129 @@ public class CanadaUtil extends AutomationUtil {
 
       String firstChar = coverageId.substring(0, 1);
 
-      List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993", "T0007994", "T0008059");
+      // List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993",
+      // "T0007994", "T0008059");
 
-      if (("T").equalsIgnoreCase(firstChar) && !ECOSYSTEM_LIST.contains(coverageId)) {
-        isu = "34";
-        ctc = "Q";
+      if (("T").equalsIgnoreCase(firstChar)) {
+        if (StringUtils.isBlank(data.getGbgId())) {
+          if (scenario.equalsIgnoreCase("ECO")) {
+            isu = "36";
+            ctc = "Y";
+          } else if (scenario.equalsIgnoreCase("PRIV")) {
+            isu = "21";
+            ctc = " ";
+          } else if (!scenario.equalsIgnoreCase("ECO") && !scenario.equalsIgnoreCase("PRIV")) {
+            isu = "27";
+            ctc = "E";
+          }
+
+        } else {
+          if (scenario.equalsIgnoreCase("ECO")) {
+            isu = "36";
+            ctc = "Y";
+          } else if (scenario.equalsIgnoreCase("PRIV")) {
+            isu = "21";
+            ctc = " ";
+          } else {
+
+            String sql = ExternalizedQuery.getSql("AUTO.COV.GET_COV_FROM_BG");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("KEY", data.getBgId());
+            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            query.setParameter("COUNTRY", data.getCmrIssuingCntry());
+            String isoCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
+            System.err.println("ISO: " + isoCntry);
+            query.setParameter("ISO_CNTRY", isoCntry);
+            query.setForReadOnly(true);
+            List<Object[]> qresults = query.getResults(1);
+            if (qresults != null && !qresults.isEmpty()) {
+              for (Object[] coverage : qresults) {
+                isu = (String) coverage[2];
+                ctc = (String) coverage[3];
+              }
+            }
+
+          }
+        }
+
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
-      } else if (ECOSYSTEM_LIST.contains(coverageId)) {
-        isu = "34";
-        ctc = "Y";
-        setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
-      } else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
-        isu = ""; // apply logic to set isu based on sub industry code
-        ctc = "";
-        String subIndustryCd = data != null && data.getSubIndustryCd() != null ? data.getSubIndustryCd() : "";
-        String firstCharSubIndustry = StringUtils.isNotEmpty(subIndustryCd) ? subIndustryCd.substring(0, 1) : "";
+      } /*
+         * else if (ECOSYSTEM_LIST.contains(coverageId)) { if
+         * (StringUtils.isBlank(data.getGbgId())) { if
+         * (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc = "Y"; } else if
+         * (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc = " "; } else
+         * if (!scenario.equalsIgnoreCase("ECO") &&
+         * !scenario.equalsIgnoreCase("PRIV")) { isu = "27"; ctc = "E"; }
+         * 
+         * } else { if (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc =
+         * "Y"; } else if (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc
+         * = " "; } else if (!scenario.equalsIgnoreCase("ECO") &&
+         * !scenario.equalsIgnoreCase("PRIV")) { isu = data.getIsuCd(); ctc =
+         * data.getClientTier(); } } setISUCTCBasedOnCoverage(details,
+         * overrides, coverageId, data, isu, ctc); }
+         */
+      else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
+        if (scenario.equalsIgnoreCase("ECO")) {
+          isu = "36";
+          ctc = "Y";
+        } else if (scenario.equalsIgnoreCase("PRIV")) {
+          isu = "21";
+          ctc = " ";
+        } else {
+          // isu = ""; // apply logic to set isu based on sub industry code
+          // ctc = "";
+          String subIndustryCd = data != null && data.getSubIndustryCd() != null ? data.getSubIndustryCd() : "";
+          String firstCharSubIndustry = StringUtils.isNotEmpty(subIndustryCd) ? subIndustryCd.substring(0, 1) : "";
 
-        Map<String, String> industryCodeISUMap = new HashMap<String, String>();
+          Map<String, String> industryCodeISUMap = new HashMap<String, String>();
 
-        industryCodeISUMap.put("A", "3T");
-        industryCodeISUMap.put("U", "12");
-        industryCodeISUMap.put("K", "05");
-        industryCodeISUMap.put("R", "1R");
-        industryCodeISUMap.put("D", "18");
+          industryCodeISUMap.put("A", "3T");
+          industryCodeISUMap.put("U", "12");
+          industryCodeISUMap.put("K", "05");
+          industryCodeISUMap.put("R", "1R");
+          industryCodeISUMap.put("D", "18");
 
-        industryCodeISUMap.put("W", "18");
-        industryCodeISUMap.put("T", "19");
-        industryCodeISUMap.put("F", "04");
-        industryCodeISUMap.put("S", "4F");
-        industryCodeISUMap.put("N", "31");
+          industryCodeISUMap.put("W", "18");
+          industryCodeISUMap.put("T", "19");
+          industryCodeISUMap.put("F", "04");
+          industryCodeISUMap.put("S", "4F");
+          industryCodeISUMap.put("N", "31");
 
-        industryCodeISUMap.put("J", "4A");
-        industryCodeISUMap.put("V", "14");
-        industryCodeISUMap.put("L", "5E");
-        industryCodeISUMap.put("P", "15");
-        industryCodeISUMap.put("M", "4D");
+          industryCodeISUMap.put("J", "4A");
+          industryCodeISUMap.put("V", "14");
+          industryCodeISUMap.put("L", "5E");
+          industryCodeISUMap.put("P", "15");
+          industryCodeISUMap.put("M", "4D");
 
-        industryCodeISUMap.put("Y", "28");
-        industryCodeISUMap.put("G", "28");
-        industryCodeISUMap.put("E", "40");
-        industryCodeISUMap.put("H", "11");
-        industryCodeISUMap.put("X", "8C");
+          industryCodeISUMap.put("Y", "28");
+          industryCodeISUMap.put("G", "28");
+          industryCodeISUMap.put("E", "40");
+          industryCodeISUMap.put("H", "11");
+          industryCodeISUMap.put("X", "8C");
 
-        industryCodeISUMap.put("B", "5B");
-        industryCodeISUMap.put("C", "5B");
+          industryCodeISUMap.put("B", "5B");
+          industryCodeISUMap.put("C", "5B");
 
-        if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
-          isu = industryCodeISUMap.get(firstCharSubIndustry);
+          if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
+            isu = industryCodeISUMap.get(firstCharSubIndustry);
+            ctc = "";
+          }
         }
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       }
-    } else if (!isPaygoUpgrade && scenario.equalsIgnoreCase("ECO")) {
-      isu = "36";
-      ctc = "Y";
-      setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
-    }
+    } /*
+       * else if (!isPaygoUpgrade && scenario.equalsIgnoreCase("ECO")) { isu =
+       * "36"; ctc = "Y"; setISUCTCBasedOnCoverage(details, overrides,
+       * coverageId, data, isu, ctc); } else if
+       * (!scenario.equalsIgnoreCase("ECO") &&
+       * !scenario.equalsIgnoreCase("Private Household Customer") &&
+       * StringUtils.isBlank(gbgId)) { isu = "27"; ctc = "E";
+       * setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu,
+       * ctc); } else if (!isPaygoUpgrade &&
+       * scenario.equalsIgnoreCase("Private Household Customer")) { isu = "21";
+       * ctc = ""; setISUCTCBasedOnCoverage(details, overrides, coverageId,
+       * data, isu, ctc); }
+       */
     return true;
   }
 
@@ -1340,9 +1406,9 @@ public class CanadaUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    boolean isPaygoUpgrade=false;
-    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
@@ -1367,12 +1433,12 @@ public class CanadaUtil extends AutomationUtil {
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
               validation.setSuccess(true);
-            } else if (isPaygoUpgrade){
-              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+            } else if (isPaygoUpgrade) {
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
               details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
               validation.setMessage("Review needed");
               validation.setSuccess(false);
-            }else {
+            } else {
               validation.setMessage("Rejected");
               validation.setSuccess(false);
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
@@ -1393,12 +1459,12 @@ public class CanadaUtil extends AutomationUtil {
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
             details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
             validation.setSuccess(true);
-          } else if (isPaygoUpgrade){
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+          } else if (isPaygoUpgrade) {
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
             details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
             validation.setMessage("Review needed");
             validation.setSuccess(false);
-          }else {
+          } else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -1419,8 +1485,8 @@ public class CanadaUtil extends AutomationUtil {
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
           details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
           validation.setSuccess(true);
-        }else if (isPaygoUpgrade){
-          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED","Updates to address fields for " + addrType + " need to be verified.");
+        } else if (isPaygoUpgrade) {
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to address fields for " + addrType + " need to be verified.");
           details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
           validation.setMessage("Review needed");
           validation.setSuccess(false);
