@@ -335,12 +335,9 @@ public class KscReportsService extends BaseBatchService {
     LOG.info("Current Japan Time: " + new Timestamp(curr.getTimeInMillis()) + ", Date: " + curr.get(Calendar.DATE) + ", Day: "
         + curr.get(Calendar.DAY_OF_WEEK));
 
-    if (curr.get(Calendar.DATE) == 1 && curr.get(Calendar.DAY_OF_WEEK) < 3 && curr.get(Calendar.DAY_OF_WEEK) > 0) {
+    if (curr.get(Calendar.DATE) == 1) {
       this.mode = MONTHLY;
-      LOG.info("Setting mode to MONTHLY (regular business day)");
-    } else if ((curr.get(Calendar.DATE) == 2 || curr.get(Calendar.DATE) == 3) && curr.get(Calendar.DAY_OF_WEEK) == 2) {
-      this.mode = MONTHLY;
-      LOG.info("Setting mode to MONTHLY (first monday of month, Day 1 = Saturday/Sunday)");
+      LOG.info("Setting mode to MONTHLY (first day of month)");
     } else {
       if (curr.get(Calendar.DAY_OF_WEEK) < 3 && curr.get(Calendar.DAY_OF_WEEK) > 0) {
         LOG.info("Skipping report generation for day " + curr.get(Calendar.DAY_OF_WEEK));
