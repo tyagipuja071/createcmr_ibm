@@ -7232,7 +7232,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "POST_CD":
         if (StringUtils.isNotBlank(tempVal)) {
           String postal = tempVal.replace("-", "");
-          String locn = IERPRequestUtils.getLocationByPostal(entityManager, postal);
+          String locn = "";
+          String csbo = "";
+
+          Object[] resultByPostal = IERPRequestUtils.geLocnCsboByPostal(entityManager, postal);
+
+          if (resultByPostal != null) {
+            locn = resultByPostal[1] != null ? (String) resultByPostal[1] : "";
+            csbo = resultByPostal[2] != null ? (String) resultByPostal[2] : "";
+          }
           if (StringUtils.isNotBlank(locn)) {
             muaModel.setPostCd(tempVal);
             muaModel.setCounty(locn);
@@ -7286,8 +7294,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           muaModel.setBldg(bldg1);
           muaModel.setCustNm4(bldg2);
         }
-        break;
-      case "LOCN_CD":
         break;
       case "CUST_PHONE":
         if (StringUtils.isNotBlank(tempVal)) {
@@ -7433,15 +7439,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "BILLING_PROC_CD":
         if (StringUtils.isNotBlank(tempVal)) {
           muModel.setCodReason(tempVal);
-        }
-        break;
-      case "CS_BO":
-        if (StringUtils.isNotBlank(tempVal)) {
-          String postal = tempVal.replace("-", "");
-          String csbo = IERPRequestUtils.getCsboByPostal(entityManager, postal);
-          if (StringUtils.isNotBlank(csbo)) {
-            muModel.setRepTeamMemberNo(csbo);
-          }
         }
         break;
       case "CSBO":

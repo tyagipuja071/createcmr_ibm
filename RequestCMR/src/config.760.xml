@@ -51,12 +51,6 @@
 					<length>2</length>
 				</column>
 				<column>
-					<label>Postal Code (for CSBO only)</label>
-					<dbColumn>CS_BO</dbColumn>
-					<width>20</width>
-					<length>10</length>
-				</column>
-				<column>
 					<label>CSBO</label>
 					<dbColumn>CSBO</dbColumn>
 					<width>20</width>
@@ -155,12 +149,6 @@
 					<dbColumn>BLDG</dbColumn>
 					<width>30</width>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
 				</column>
 				<column>
 					<label>Tel No</label>
@@ -269,12 +257,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
-				</column>
-				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
 					<width>12</width>
@@ -379,12 +361,6 @@
 					<dbColumn>BLDG</dbColumn>
 					<width>30</width>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
 				</column>
 				<column>
 					<label>Tel No</label>
@@ -493,12 +469,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
-				</column>
-				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
 					<width>12</width>
@@ -603,12 +573,6 @@
 					<dbColumn>BLDG</dbColumn>
 					<width>30</width>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
 				</column>
 				<column>
 					<label>Tel No</label>
@@ -718,12 +682,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
-				</column>
-				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
 					<width>12</width>
@@ -828,12 +786,6 @@
 					<dbColumn>BLDG</dbColumn>
 					<width>30</width>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
 				</column>
 				<column>
 					<label>Tel No</label>
@@ -942,12 +894,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
-				</column>
-				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
 					<width>12</width>
@@ -1052,12 +998,6 @@
 					<dbColumn>BLDG</dbColumn>
 					<width>30</width>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
 				</column>
 				<column>
 					<label>Tel No</label>
@@ -1166,12 +1106,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
-				</column>
-				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
 					<width>12</width>
@@ -1276,12 +1210,6 @@
 					<dbColumn>BLDG</dbColumn>
 					<width>30</width>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
 				</column>
 				<column>
 					<label>Tel No</label>
@@ -1390,12 +1318,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
-				</column>
-				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
 					<width>12</width>
@@ -1502,12 +1424,6 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
-				</column>
-				<column>
 					<label>Tel No</label>
 					<dbColumn>CUST_PHONE</dbColumn>
 					<width>12</width>
@@ -1612,12 +1528,6 @@
 					<dbColumn>BLDG</dbColumn>
 					<width>30</width>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Location</label>
-					<dbColumn>LOCN_CD</dbColumn>
-					<width>20</width>
-					<lovId>LocationCode</lovId>
 				</column>
 				<column>
 					<label>Tel No</label>
