@@ -3903,6 +3903,9 @@ function setIsicValueLogic() {
   if (reqType == 'U' && custSubGrp == 'ISOCU' && officeCd == 'WZ') {
     return;
   }
+  if (reqType == 'U' && custSubGrp == 'BPWPQ' && officeCd == 'WZ') {
+    return;
+  }
 
   if (inJpts37Ofcd()) {
     var isicCd = getTs37IsicByOfcd();
