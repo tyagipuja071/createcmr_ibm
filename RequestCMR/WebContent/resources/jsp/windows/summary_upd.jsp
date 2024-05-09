@@ -18,6 +18,16 @@
       return value;
     }
   }
+  
+  
+  function licenseFormatter(value, rowIndex) {
+    if (value == 'N') {
+      return '<span style="color:green;font-weight:bold">New License</span>';
+    } else {
+      return '';
+    }
+  }
+
   function addressTypeComparator(a1, b1) {
     var a = a1 == 'Sold To' ? 'ZS01' : (a1 == 'Install At' ? 'ZI01' : (a1 == 'Bill To' ? 'ZP01' : (a1 == 'Ship To' ? 'ZD01' : a1)));
     var b = b1 == 'Sold To' ? 'ZS01' : (b1 == 'Install At' ? 'ZI01' : (b1 == 'Bill To' ? 'ZP01' : (b1 == 'Ship To' ? 'ZD01' : b1)));
