@@ -2299,8 +2299,12 @@ function sboCodeValidator() {
       validate : function() {
         var isuCd = FormManager.getActualValue('isuCd');
         var clientTier = FormManager.getActualValue('clientTier');
+        var reqType = FormManager.getActualValue('reqType');
         var isuCtc = isuCd + clientTier;
         var sbo = FormManager.getActualValue('salesBusOffCd');
+        if (reqType != 'C') {
+          return;
+        }
         if (isuCtc == '8B') {
           if (sbo != '140') {
             return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'140\'\  for ISU CTC 8B.');
