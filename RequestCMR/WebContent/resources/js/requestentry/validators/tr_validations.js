@@ -3098,7 +3098,7 @@ function clientTierCodeValidator() {
       id : 'clientTier',
       type : 'text',
       name : 'clientTier'
-    }, false, 'Please select valid ISU and CTC.');
+    }, false, 'Client Tier can only accept blank.');
   }
 }
 
