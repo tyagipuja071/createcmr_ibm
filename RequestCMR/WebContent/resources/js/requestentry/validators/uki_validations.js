@@ -36,6 +36,7 @@ var _oldIsicCd = null;
 var _CTCHandlerIL = null;
 var _isuCdHandlerIL = null;
 var _CTCHandlerIE = null;
+var _custSubGrpHandlerCounter = 0;
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
     _gtcAddrTypeHandlerIL[i] = null;
@@ -480,7 +481,10 @@ function afterConfigForUKI() {
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       _custType = FormManager.getActualValue('custSubGrp');
       // checkScenarioChanged();
-      autoSetSpecialTaxCdByScenario();
+      _custSubGrpHandlerCounter++;
+      if (_custSubGrpHandlerCounter > 2) {        
+        autoSetSpecialTaxCdByScenario();
+      }
       if (_custType != '') {
         var qParams = {
           REQ_ID : FormManager.getActualValue('reqId'),
@@ -766,7 +770,10 @@ function setCustClassCd() {
   }
 }
 
-function autoSetSpecialTaxCdByScenario() {
+function autoSetSpecialTaxCdByScenario(value) {
+//  if (value == undefined || value == false) {
+//    return;
+//  }
   var reqType = FormManager.getActualValue('reqType');
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var _custType = FormManager.getActualValue('custSubGrp');
@@ -10773,8 +10780,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
+//  GEOHandler.addAfterConfig(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
+//  GEOHandler.addAfterTemplateLoad(autoSetSpecialTaxCdByScenario, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(lockIsuCtcUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(lockIsuCtcUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
