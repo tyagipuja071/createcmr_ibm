@@ -1821,6 +1821,11 @@ public class EMEAHandler extends BaseSOFHandler {
         if (records != null && records.size() >= 0) {
           data.setSpecialTaxCd("Bl");
         }
+
+        if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+          CmrtCust cust = this.legacyObjects.getCustomer();
+          data.setSpecialTaxCd(StringUtils.isNotEmpty(cust.getTaxCd()) ? cust.getTaxCd() : "Bl");
+        }
         entityManager.clear();
         entityManager.close();
       }
