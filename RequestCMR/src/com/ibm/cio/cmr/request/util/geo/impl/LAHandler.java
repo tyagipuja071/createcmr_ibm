@@ -126,6 +126,11 @@ public class LAHandler extends GEOHandler {
           }
           converted.add(record);
         }
+        
+        if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+          record.setCmrAddrTypeCode("PG01");
+        }
+        converted.add(record);
       }
       source.setItems(converted);
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
@@ -133,6 +138,10 @@ public class LAHandler extends GEOHandler {
         if ("ZS01".equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
           continue;
         }
+        if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+          record.setCmrAddrTypeCode("PG01");
+        }
+      
         converted.add(record);
       }
       source.setItems(converted);
@@ -451,8 +460,10 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    String postalCode = currentRecord.getCmrPostalCode();
-    postalCode = !StringUtils.isEmpty(postalCode) ? postalCode.replace("-", "") : "";
+    String postalCode = currentRecord.getCmrPostalCode();   
+    if ("U".equals(admin.getReqType()) && !"631".equals(currentRecord.getCmrIssuedBy())) {
+      postalCode = !StringUtils.isEmpty(postalCode) ? postalCode.replace("-", "") : "";
+    }
     String issuingCountry = currentRecord.getCmrIssuedBy();
     String streetAddr1 = address.getAddrTxt();
     address.setPostCd(postalCode);
