@@ -1628,6 +1628,14 @@ public class TransConnService extends BaseBatchService {
       DebugUtil.printObjectAsJson(LOG, request);
     }
 
+    LOG.info("is prospect conversion: " + prospectConversion);
+    LOG.info("Cmr No: " + data.getCmrNo());
+    LOG.info("Prospect No: " + data.getProspectSeqNo());
+    LOG.info("Prospect Seq ind: " + admin.getProspLegalInd());
+    if (prospectConversion) {
+      DebugUtil.printObjectAsJson(LOG, request);
+    }
+
     if ("C".equals(admin.getReqType()) && StringUtils.isBlank(request.getCmrNo())
         && ("BFKSC".equals(data.getCustSubGrp()) || "BCEXA".equals(data.getCustSubGrp()))) {
       request.setCmrNo("BCBF");
