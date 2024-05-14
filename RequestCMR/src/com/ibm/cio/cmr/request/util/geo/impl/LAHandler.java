@@ -3022,7 +3022,7 @@ public class LAHandler extends GEOHandler {
 
   @Override
   public boolean hasChecklist(String cmrIssiungCntry) {
-    if (SystemLocation.VENEZUELA_BOLIVARIAN.equals(cmrIssiungCntry)) {
+    if (Arrays.asList(SystemLocation.VENEZUELA_BOLIVARIAN, SystemLocation.NICARAGUA).contains(cmrIssiungCntry)) {
       return true;
     } else {
       return false;
