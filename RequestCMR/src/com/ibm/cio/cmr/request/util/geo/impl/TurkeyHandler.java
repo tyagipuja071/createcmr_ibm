@@ -4064,6 +4064,7 @@ public class TurkeyHandler extends BaseSOFHandler {
             if ("Data".equalsIgnoreCase(name)) {
               String isuCd = ""; // 11
               String clientTier = ""; // 12
+              String enterprise = ""; // 9
               String cmrNo = ""; // 0
               String ordBlk = ""; // 6
               String stcOrdBlk = ""; // 7
@@ -4073,6 +4074,8 @@ public class TurkeyHandler extends BaseSOFHandler {
               clientTier = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
               isuCd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              enterprise = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               ordBlk = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
@@ -4090,6 +4093,10 @@ public class TurkeyHandler extends BaseSOFHandler {
                 LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
                 error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br>");
               }
+              if (!StringUtils.isBlank(enterprise) && !((enterprise.length() == 6) || "@".equals(enterprise))) {
+                LOG.trace("Enterprise length should be of 6 characters or @");
+                error.addError(row.getRowNum(), "Enterprise", "Enterprise length should be of 6 characters or @.\n");
+              }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that both ISU and CTC value needs to be filled..");
@@ -4101,19 +4108,19 @@ public class TurkeyHandler extends BaseSOFHandler {
                   error.addError(row.getRowNum() + 1, "Client Tier",
                       ":Note that Client Tier should be 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
+              } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"E".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError(row.getRowNum() + 1, "Client Tier",
+                      ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
               } else if (!StringUtils.isBlank(isuCd) && "36".equals(isuCd)) {
                 if (StringUtils.isBlank(clientTier) || !"Y".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.");
                   error.addError(row.getRowNum() + 1, "Client Tier",
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
-                }
-              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-                if (StringUtils.isBlank(clientTier) || !"T".contains(clientTier)) {
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError(row.getRowNum() + 1, "Client Tier",
-                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
                   && !"@".equalsIgnoreCase(clientTier)) {
