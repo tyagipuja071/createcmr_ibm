@@ -3475,9 +3475,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setCtcBySBOForBrazil, SysLoc.BRAZIL);
   // Checklist
-  GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.VENEZUELA ]);
-  GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VENEZUELA ]);
-  GEOHandler.addAfterConfig(addChecklistBtnHandler, [ SysLoc.VENEZUELA ]);
-  GEOHandler.addAfterConfig(checkChecklistButtons, [ SysLoc.VENEZUELA ]);
+  GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
+  GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
+  GEOHandler.addAfterConfig(addChecklistBtnHandler, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
+  GEOHandler.addAfterConfig(checkChecklistButtons, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
 
 });
