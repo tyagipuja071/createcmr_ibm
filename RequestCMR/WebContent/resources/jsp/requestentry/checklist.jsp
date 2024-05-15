@@ -91,7 +91,7 @@ table.checklist span.checklist-radio {
     <cmr:view forCountry="714">
       <jsp:include page="AP/laos_checklist.jsp" />
     </cmr:view>
-    <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,799,805,808,821,823,832,842,849,865,889,871">
+    <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,762,767,787,799,805,821,823,832,849,865,889">
       <jsp:include page="CEMEA/cemea_checklist.jsp" />
     </cmr:view> 
     <cmr:view forCountry="641">
@@ -110,7 +110,13 @@ table.checklist span.checklist-radio {
     </cmr:view>
      <cmr:view forCountry="788">
       <jsp:include page="NL/nl_checklist.jsp" />
-    </cmr:view>    
+    </cmr:view>  
+     <cmr:view forCountry="752,768,772,808,842,871">
+      <jsp:include page="CEMEA/cemea_la_mco2_checklist.jsp" />
+    </cmr:view> 
+    <cmr:view forCountry="810,662,745,835,825">
+      <jsp:include page="MCO2/mco2_checklist.jsp" />
+    </cmr:view>   
     </cmr:column>
   </cmr:row>
 </cmr:section>
