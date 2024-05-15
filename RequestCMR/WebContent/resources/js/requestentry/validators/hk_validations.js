@@ -4335,7 +4335,7 @@ function addAddressInstancesValidator() {
                   // New requirement : Defect 1767113 : For HK and MO ->
                   // Multiple
                   // Billing & Billing CCR are to be allowed
-                  if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02' || record.addrType == 'MAIL')) {
+                  if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02' || record.addrType == 'MAIL' || record.addrType == 'ZD01')) {
                     continue;
                   }
                   addrCnt++;
