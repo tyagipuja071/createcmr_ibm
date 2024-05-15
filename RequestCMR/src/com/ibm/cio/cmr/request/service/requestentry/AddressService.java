@@ -301,7 +301,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if (JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
-        createJPIntlAddr(model, addr, entityManager);
+        createJPIntlAddr(model, addr, entityManager, geoHandler);
       }
 
       if (CNHandler.isCNIssuingCountry(model.getCmrIssuingCntry())) {
@@ -1910,8 +1910,20 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     return sapNo;
   }
 
-  public void createJPIntlAddr(AddressModel model, Addr addr, EntityManager entityManager) {
+  public void createJPIntlAddr(AddressModel model, Addr addr, EntityManager entityManager, GEOHandler geoHandler) {
     IntlAddr iAddr = createIntlAddrFromModel(model, addr, entityManager);
+
+    if (!"ZC01".equals(addr.getId().getAddrType())) {
+      if (iAddr.getIntlCustNm1().length() > 35) {
+        String[] parts = null;
+        String name1 = iAddr.getIntlCustNm1();
+        String name2 = iAddr.getIntlCustNm2();
+        parts = geoHandler.doSplitName(name1, name2, 35, 35);
+        iAddr.setIntlCustNm1(parts[0]);
+        iAddr.setIntlCustNm2(parts[1]);
+      }
+    }
+
     IntlAddr iAddrExist = getIntlAddrById(addr, entityManager);
     String phone = addr.getCustPhone();
     if (phone != null && phone.length() == 9) {
@@ -2091,7 +2103,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         updateEntity(newAddr, entityManager);
       }
     } else {
-      createJPIntlAddr(model, addr, entityManager);
+      createJPIntlAddr(model, addr, entityManager, geoHandler);
     }
     return true;
   }
