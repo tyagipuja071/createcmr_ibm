@@ -66,9 +66,9 @@
 				<column exactLength="true">
 					<label>Enterprise Number</label>
 					<dbColumn>ENTERPRISE</dbColumn>
+                    <length>6</length>
 					<width>30</width>
 				</column>
-
 				<column>
 					<label>INAC/NAC Code</label>
 					<dbColumn>INAC_CD</dbColumn>

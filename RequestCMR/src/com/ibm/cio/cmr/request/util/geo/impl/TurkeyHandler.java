@@ -4093,9 +4093,9 @@ public class TurkeyHandler extends BaseSOFHandler {
                 LOG.trace("Please fill either STC Order Block Code or Embargo Code ");
                 error.addError((row.getRowNum() + 1), "Order Block Code", "Please fill either STC Order Block Code or Embargo Code.<br>");
               }
-              if (!StringUtils.isBlank(enterprise) && !((enterprise.length() == 6) || "@".equals(enterprise))) {
-                LOG.trace("Enterprise length should be of 6 characters or @");
-                error.addError(row.getRowNum(), "Enterprise", "Enterprise length should be of 6 characters or @.\n");
+              if (!StringUtils.isBlank(enterprise) && !((enterprise.length() == 6) || "@@@@@@".equals(enterprise))) {
+                LOG.trace("Enterprise length should be of 6 characters or @@@@@@");
+                error.addError(row.getRowNum(), "Enterprise", "Enterprise length should be of 6 characters or @@@@@@.\n");
               }
               if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(clientTier))
                   || (StringUtils.isNotBlank(clientTier) && StringUtils.isBlank(isuCd))) {
