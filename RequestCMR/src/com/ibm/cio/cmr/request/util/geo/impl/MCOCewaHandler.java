@@ -961,7 +961,8 @@ public class MCOCewaHandler extends MCOHandler {
 
   @Override
   public boolean hasChecklist(String cmrIssiungCntry) {
-    if (SystemLocation.SOUTH_SUDAN.equals(cmrIssiungCntry)) {
+    if (Arrays.asList(SystemLocation.SOUTH_SUDAN, SystemLocation.ERITREA, SystemLocation.SOMALIA, SystemLocation.ZIMBABWE)
+        .contains(cmrIssiungCntry)) {
       return true;
     } else {
       return false;
