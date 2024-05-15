@@ -27,6 +27,9 @@
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Nature of Business:  Provide web site (if available): ">
       <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
    </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Industry Segment: ">
+      <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
+   </cmr:chk-lbl-field>
    <cmr:chk-section name="Section A:  Denied Parties List Status" >
       <cmr:chk-entry number="1" section="A">
          Is the Customer on the DPL?

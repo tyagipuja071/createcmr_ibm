@@ -15,8 +15,20 @@
    }
    %>
 <cmr:checklist title1="ADVANCED SUPERCOMPUTER and SEMICONDUCTOR MANUFACTURING CUSTOMER SCREENING CHECKLIST
-(USERP Section 4 Part 2)"
-  title2="This Questionnaire is designed for evaluation of all customers/BPs given a Customer Number located in Applicable D:5 Countries">
+(USERP Section 4 Part 2)">
+  <cmr:chk-block>"This Questionnaire is designed for evaluation of all customers/BPs given a Customer Number located in Applicable D:5 Countries"</cmr:chk-block>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Company Full Name: ">
+      <%=RequestUtils.generateChecklistLocalAddress(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Complete Address: ">
+      <%=RequestUtils.generateChecklistFreeTxtField1(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Nature of Business:  Provide web site (if available): ">
+      <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
+   </cmr:chk-lbl-field>
+<cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Industry Segment: ">
+      <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
+   </cmr:chk-lbl-field>
 <cmr:chk-section name="Section A">
 		<cmr:chk-entry number="1" displayNumber="1.1" dplField="" section="A">
 			<span style="font-weight: bold; text-decoration: underline">Supercomputer ---</span>To the best of your knowledge or belief is your customer involved in the design, development, 
@@ -75,8 +87,8 @@ To the best of your knowledge or belief is your customer involved with the desig
 		</cmr:chk-entry>
 	</cmr:chk-section>
 	
-	<strong>If any of the above questions have answered <span style="font-weight: bold"> YES </span>, please <span style="font-color: red">
-	 STOP and CONTACT your ERC </span> 
+	<cmr:chk-block><strong>If any of the above questions have answered <span style="font-weight: bold"> YES </span>, please <span style="font-color: red">
+	 STOP and CONTACT your ERC </span> </strong></cmr:chk-block>
 
 	
  <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Name, Title, and OU/BU  of Requester: ">
