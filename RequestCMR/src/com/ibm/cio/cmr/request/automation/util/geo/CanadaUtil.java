@@ -1307,7 +1307,7 @@ public class CanadaUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String isu = "";
     String ctc = "";
-    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
+    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId)) {
 
       String firstChar = coverageId.substring(0, 1);
 
@@ -1316,22 +1316,22 @@ public class CanadaUtil extends AutomationUtil {
 
       if (("T").equalsIgnoreCase(firstChar)) {
         if (StringUtils.isBlank(data.getGbgId())) {
-          if (scenario.equalsIgnoreCase("ECO")) {
+          if ("ECO".equalsIgnoreCase(scenario)) {
             isu = "36";
             ctc = "Y";
-          } else if (scenario.equalsIgnoreCase("PRIV")) {
+          } else if ("PRIV".equalsIgnoreCase(scenario)) {
             isu = "21";
             ctc = " ";
-          } else if (!scenario.equalsIgnoreCase("ECO") && !scenario.equalsIgnoreCase("PRIV")) {
+          } else if (!("ECO".equalsIgnoreCase(scenario) && !"PRIV".equalsIgnoreCase(scenario))) {
             isu = "27";
             ctc = "E";
           }
 
         } else {
-          if (scenario.equalsIgnoreCase("ECO")) {
+          if ("ECO".equalsIgnoreCase(scenario)) {
             isu = "36";
             ctc = "Y";
-          } else if (scenario.equalsIgnoreCase("PRIV")) {
+          } else if ("PRIV".equalsIgnoreCase(scenario)) {
             isu = "21";
             ctc = " ";
           } else {
@@ -1358,25 +1358,27 @@ public class CanadaUtil extends AutomationUtil {
 
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       } /*
-         * else if (ECOSYSTEM_LIST.contains(coverageId)) { if
-         * (StringUtils.isBlank(data.getGbgId())) { if
-         * (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc = "Y"; } else if
-         * (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc = " "; } else
-         * if (!scenario.equalsIgnoreCase("ECO") &&
-         * !scenario.equalsIgnoreCase("PRIV")) { isu = "27"; ctc = "E"; }
+         * else if (ECOSYSTEM_LIST . contains ( coverageId )) { if (StringUtils
+         * . isBlank (data . getGbgId ())) { if (scenario . equalsIgnoreCase (
+         * "ECO" )) { isu = "36"; ctc = "Y"; } else if (scenario .
+         * equalsIgnoreCase ( "PRIV" )) { isu = "21"; ctc = " "; } else if (!
+         * scenario . equalsIgnoreCase ( "ECO") && !scenario . equalsIgnoreCase
+         * ( "PRIV" )) { isu = "27"; ctc = "E"; }
          * 
-         * } else { if (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc =
-         * "Y"; } else if (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc
-         * = " "; } else if (!scenario.equalsIgnoreCase("ECO") &&
-         * !scenario.equalsIgnoreCase("PRIV")) { isu = data.getIsuCd(); ctc =
-         * data.getClientTier(); } } setISUCTCBasedOnCoverage(details,
+         * } else { if (scenario . equalsIgnoreCase ( "ECO" )) { isu = "36"; ctc
+         * = "Y"; } else if (scenario . equalsIgnoreCase ( "PRIV" )) { isu =
+         * "21"; ctc = " "; } else if (! scenario . equalsIgnoreCase ( "ECO") &&
+         * !scenario . equalsIgnoreCase ( "PRIV" )) { isu = data. getIsuCd ();
+         * ctc = data. getClientTier (); } } setISUCTCBasedOnCoverage ( details,
          * overrides, coverageId, data, isu, ctc); }
          */
-      else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
-        if (scenario.equalsIgnoreCase("ECO")) {
+      else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar))
+
+      {
+        if ("ECO".equalsIgnoreCase(scenario)) {
           isu = "36";
           ctc = "Y";
-        } else if (scenario.equalsIgnoreCase("PRIV")) {
+        } else if ("PRIV".equalsIgnoreCase(scenario)) {
           isu = "21";
           ctc = " ";
         } else {
