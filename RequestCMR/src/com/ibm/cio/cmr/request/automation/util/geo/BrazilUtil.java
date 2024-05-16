@@ -207,6 +207,13 @@ public class BrazilUtil extends AutomationUtil {
               ctc = "Y";
         }
         
+        if(comment.equals("Kyndryl"))
+        {
+              isu = "5K";
+              ctc = "";
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COV_DESC", data.getCovDesc(), "KYNDRYL - BR");
+        }
+        
         if(comment.equals("Strategic") || comment.equals("Signature"))
         {
           if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
