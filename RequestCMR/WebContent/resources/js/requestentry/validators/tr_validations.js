@@ -731,9 +731,7 @@ function setClientTierAndISR(value) {
   console.log("setClientTierAndISR=======");
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return;
-  }
+
   /*
    * if (!PageManager.isReadOnly()) { FormManager.enable('clientTier'); }
    */
@@ -751,7 +749,7 @@ function setClientTierAndISR(value) {
       tierValues = [ 'E' ];
     } else if (value == '36') {
       tierValues = [ 'Y' ];
-    } else if (value == '5K' || value == '21' || value == '8B' || value == '28' || value == '04') {
+    } else {
       tierValues = [ '' ];
     }
   }
@@ -762,6 +760,9 @@ function setClientTierAndISR(value) {
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+  }
+  if (reqType != 'C') {
+    return;
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     console.log("skip set ISR.");
@@ -2060,12 +2061,10 @@ function setSBOValuesForIsuCtc(value) {
   var isuCtc = ((value != undefined ? value : isuCd) + clientTier);
 
   var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
-  if (reqType != 'C') {
-    return;
-  }
+
   var qParams = null;
   console.log("begin setSBO:" + '%' + isuCtc + '%');
   if (isuCd != '') {
@@ -2087,15 +2086,16 @@ function setSBOValuesForIsuCtc(value) {
       }
       if (sboList.length == 1 || (sboList.length > 1 && _isScenarioChanged)) {
         FormManager.setValue('salesBusOffCd', sboList[0]);
-        if (isuCtc == '27E') {
+        if (isuCtc == '27E' || isuCtc == '34Q' || isuCtc == '36Y') {
           FormManager.setValue('salesBusOffCd', 'A20');
-          FormManager.readOnly('salesBusOffCd');
-        } else if (isuCtc == '34Q' || isuCtc == '36Y') {
-          FormManager.setValue('salesBusOffCd', 'A20');
-          FormManager.enable('salesBusOffCd');
+          // FormManager.readOnly('salesBusOffCd');
         } else if (isuCtc == '8B' || isuCtc == '21') {
           FormManager.readOnly('salesBusOffCd');
         }
+        // else if (isuCtc == '34Q' || isuCtc == '36Y') {
+        // FormManager.setValue('salesBusOffCd', 'A20');
+        // FormManager.enable('salesBusOffCd');
+        // }
       } else if (!_isScenarioChanged) {
         var oldSbo = null;
         qParams = {
@@ -2112,15 +2112,17 @@ function setSBOValuesForIsuCtc(value) {
       console.log("setting sbo=====" + isuCtc);
       if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
         FormManager.setValue('salesBusOffCd', 'A00');
-        FormManager.enable('salesBusOffCd');
+        // FormManager.enable('salesBusOffCd');
       } else if (isuCtc == '34Q' || isuCtc == '36Y') {
         FormManager.setValue('salesBusOffCd', 'A20');
-        FormManager.enable('salesBusOffCd');
+        // FormManager.enable('salesBusOffCd');
       } else if (isuCtc == '8B' || isuCtc == '21') {
         FormManager.readOnly('salesBusOffCd');
       } else
         FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     }
+    // setting SBO Behaviour for commercial type scenarions
+
   } else {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     console.log("reset SBO start.");
@@ -2364,7 +2366,8 @@ function entValidator() {
                   landCntry = result.ret1;
                 }
                 var crossSubTypes = [ 'ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP', 'LSXCO', 'LSXGO', 'LSXPC', 'LSXTP' ];
-                if (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry)) {
+                var reqtype = FormManager.getActualValue('reqType');
+                if (reqtype != 'C' || (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry))) {
                   return;
                 }
                 if (custType == 'LOCAL') {
@@ -3369,6 +3372,8 @@ function setCBEnterpriseCEWA(isuCtc, currentLandedCountry, issuingCntry) {
       FormManager.setValue('enterprise', '911755');
     } else
       FormManager.setValue('enterprise', '');
+  } else if (isuCtc == '5K') {
+    FormManager.setValue('enterprise', '');
   }
 }
 
