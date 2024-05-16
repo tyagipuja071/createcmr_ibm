@@ -2386,35 +2386,71 @@ function entValidator() {
                   } else
                     return new ValidationResult(null, true, null);
                 } else {
-                  if (SOUTH_AFRICA_LC.includes(landCntry)) {
-
+                  if (landCntry == 'ZA') {
                     if (isuCtc == '27E') {
                       return entValidatorSA(subIndustryCd, enterprise);
-                      // if (!((enterprise == '011680' || enterprise == '011684'
-                      // || enterprise == '011679' || enterprise == '011681' ||
-                      // enterprise == '011682' || enterprise == '011683') ||
-                      // (validEnt27E
-                      // .includes(enterprise)))) {
-                      // return new
-                      // ValidationResult(FormManager.getField('enterprise'),
-                      // false,
-                      // 'Enterprise can only accept \'011680\'\ \'911716\'\
-                      // \'011684\'\ \'011681\'\ \'011682\'\ \'011683\'\ for ISU
-                      // CTC 27E.');
-                      // } else
-                      // return new ValidationResult(null, true, null);
                     } else if (isuCtc == '34Q') {
                       if (!(enterprise == '004179' || enterprise == '011678')) {
                         return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'004179\'\ \'011678\'\ for ISU CTC 34Q.');
                       } else
                         return new ValidationResult(null, true, null);
                     } else if (isuCtc == '36Y') {
-                      if (!(enterprise == '008028' || enterprise == '010032' || enterprise == '012430' || enterprise == '009814' || enterprise == '012095' || enterprise == '012096'
-                          || enterprise == '012097' || enterprise == '012098' || enterprise == '012100' || enterprise == '012101' || enterprise == '012102')) {
-                        return new ValidationResult(
-                            FormManager.getField('enterprise'),
-                            false,
-                            'Enterprise can only accept \'008028\'\ \'010032\'\ \'012430\'\ \'009814\'\ \'010032\'\ \'009814\'\ \'012095\'\ \'012096\'\ \'012097\'\ \'012098\'\ \'012099\'\ \'012100\'\ \'012101\'\ \'012102\'\ for ISU CTC 36Y.');
+                      if (!(enterprise == '008028' || enterprise == '010032' || enterprise == '012430')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'008028\'\ \'010032\'\ \'012430\'\ for ISU CTC 36Y.');
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '12' || isuCtc == '4K' || isuCtc == '5K') {
+                      if (!(enterprise == '')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank for ISU CTC ' + isuCtc);
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else
+                      return new ValidationResult(null, true, null);
+                  } else if (landCntry == 'NA') {
+                    if (isuCtc == '27E') {
+                      if (!(enterprise == '909813')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'909813\'\ for ISU CTC 27E.');
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else if (isuCtc == '36Y') {
+                      if (!(enterprise == '009814' || enterprise == '012095' || enterprise == '012096')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'009814\'\ \'012095\'\ \'012096\'\ for ISU CTC 36Y.');
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '12' || isuCtc == '4K' || isuCtc == '5K') {
+                      if (!(enterprise == '')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank for ISU CTC ' + isuCtc);
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else
+                      return new ValidationResult(null, true, null);
+                  } else if (landCntry == 'LS') {
+                    if (isuCtc == '27E') {
+                      if (!(enterprise == '910510')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'910510\'\ for ISU CTC 27E.');
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else if (isuCtc == '36Y') {
+                      if (!(enterprise == '012097' || enterprise == '012098' || enterprise == '012099')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'012097\'\ \'012098\'\ \'012099\'\ for ISU CTC 36Y.');
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '12' || isuCtc == '4K' || isuCtc == '5K') {
+                      if (!(enterprise == '')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept blank for ISU CTC ' + isuCtc);
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else
+                      return new ValidationResult(null, true, null);
+                  } else if (landCntry == 'SZ') {
+                    if (isuCtc == '27E') {
+                      if (!(enterprise == '910509')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'910509\'\ for ISU CTC 27E.');
+                      } else
+                        return new ValidationResult(null, true, null);
+                    } else if (isuCtc == '36Y') {
+                      if (!(enterprise == '012100' || enterprise == '012101' || enterprise == '012099')) {
+                        return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise can only accept \'012100\'\ \'012101\'\ \'012102\'\ for ISU CTC 36Y.');
                       } else
                         return new ValidationResult(null, true, null);
                     } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '12' || isuCtc == '4K' || isuCtc == '5K') {
