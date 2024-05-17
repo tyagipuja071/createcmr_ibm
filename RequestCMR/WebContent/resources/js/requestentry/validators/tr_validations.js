@@ -66,7 +66,8 @@ function addISUHandler() {
   });
   _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
     var value = FormManager.getField('clientTier');
-    setClientTierAndISR(value);
+    var isuCd = FormManager.getField('isuCd');
+    setClientTierAndISR(isuCd);
     setValuesForTurkey();
   });
 }
