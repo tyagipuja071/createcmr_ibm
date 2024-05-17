@@ -2059,86 +2059,52 @@ function setSBOValuesForIsuCtc(value) {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var isuCtc = ((value != undefined ? value : isuCd) + clientTier);
-
+  var reqId = FormManager.getActualValue('reqId');
+  var commSubTypes = [ 'COMME', 'GOVRN', 'IGF', 'THDPT', 'XINTS', 'XGOV', 'XIGF', 'XTP' ];
+  var privSubTypes = [ 'PRICU', 'XPC' ];
+  var MEA_COUNTRIES_CB = [ 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ',
+      'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB',
+      'OM', 'QA', 'SA', 'YE', 'SY' ];
+  var landCntry = '';
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  // GET LANDCNTRY in case of CB
+  var result = cmr.query('LANDCNTRY.IT', {
+    REQID : reqId
+  });
+  if (result != null && result.ret1 != undefined) {
+    landCntry = result.ret1;
+  }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('salesBusOffCd');
+  }
   var reqType = FormManager.getActualValue('reqType');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
 
-  var qParams = null;
-  console.log("begin setSBO:" + '%' + isuCtc + '%');
-  if (isuCd != '') {
-    var results = null;
-    qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCtc + '%'
-    };
-    results = cmr.query('GET.SBOLIST.BYISU', qParams);
-    console.log("there are " + results.length + " SBO returned.");
-    if (results.length > 0) {
-      var sboList = new Array();
-      for (var i = 0; i < results.length; i++) {
-        sboList[i] = results[i].ret1;
-      }
-      if (results.length != 0) {
-        FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
-      }
-      if (sboList.length == 1 || (sboList.length > 1 && _isScenarioChanged)) {
-        FormManager.setValue('salesBusOffCd', sboList[0]);
-        if (isuCtc == '27E' || isuCtc == '34Q' || isuCtc == '36Y') {
-          FormManager.setValue('salesBusOffCd', 'A20');
-          // FormManager.readOnly('salesBusOffCd');
-        } else if (isuCtc == '8B' || isuCtc == '21') {
-          FormManager.readOnly('salesBusOffCd');
-        }
-        // else if (isuCtc == '34Q' || isuCtc == '36Y') {
-        // FormManager.setValue('salesBusOffCd', 'A20');
-        // FormManager.enable('salesBusOffCd');
-        // }
-      } else if (!_isScenarioChanged) {
-        var oldSbo = null;
-        qParams = {
-          REQ_ID : FormManager.getActualValue('reqId')
-        };
-        oldSbo = cmr.query('GET.SBO.BYREQ', qParams);
-        if (oldSbo != null && oldSbo != "") {
-          if (sboList.indexOf(oldSbo.ret1) >= 0) {
-            FormManager.setValue('salesBusOffCd', oldSbo.ret1);
-          }
-        }
-      }
-    } else {
-      console.log("setting sbo=====" + isuCtc);
-      if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
-        FormManager.setValue('salesBusOffCd', 'A00');
-        // FormManager.enable('salesBusOffCd');
-      } else if (isuCtc == '34Q' || isuCtc == '36Y') {
-        FormManager.setValue('salesBusOffCd', 'A20');
-        // FormManager.enable('salesBusOffCd');
-      } else if (isuCtc == '8B' || isuCtc == '21') {
-        FormManager.readOnly('salesBusOffCd');
-      } else
-        FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    }
-    // setting SBO Behaviour for commercial type scenarions
-
-  } else {
-    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-    console.log("reset SBO start.");
-
-    var oldSbo = null;
-    qParams = {
-      REQ_ID : FormManager.getActualValue('reqId')
-    };
-    oldSbo = cmr.query('GET.SBO.BYREQ', qParams);
-    if (oldSbo != null && oldSbo != "") {
-      FormManager.setValue('salesBusOffCd', oldSbo.ret1);
-      console.log("reseting SBO ." + oldSbo);
-    }
-  }
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (custSubGrp == 'BUSPR') {
+    FormManager.setValue('salesBusOffCd', '140');
+  } else if (custSubGrp == 'INTER' || custSubGrp == 'IBMEM' || custSubGrp == 'XINT') {
+    FormManager.setValue('salesBusOffCd', 'A10');
+  } else if ((commSubTypes.includes(custSubGrp) && isuCtc == '27E') || privSubTypes.includes(custSubGrp)) {
+    FormManager.setValue('salesBusOffCd', 'A20');
     FormManager.readOnly('salesBusOffCd');
+  } else if (commSubTypes.includes(custSubGrp) && MEA_COUNTRIES_CB.includes(landCntry)) {
+    FormManager.setValue('salesBusOffCd', 'A20');
+    FormManager.readOnly('salesBusOffCd');
+  } else if (commSubTypes.includes(custSubGrp) && !MEA_COUNTRIES_CB.includes(landCntry) && (isuCtc == '34Q' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '28' || isuCtc == '5K')) {
+    if (isuCtc == '34Q') {
+      FormManager.setValue('salesBusOffCd', 'A20');
+    } else if (isuCtc == '36Y') {
+      FormManager.setValue('salesBusOffCd', 'A20');
+    } else if (isuCtc == '04') {
+      FormManager.setValue('salesBusOffCd', 'A20');
+    } else if (isuCtc == '38') {
+      FormManager.setValue('salesBusOffCd', 'A20');
+    } else if (isuCtc == '5K') {
+      FormManager.setValue('salesBusOffCd', 'A20');
+    }
+    FormManager.enable('salesBusOffCd');
   }
 }
 
@@ -3451,7 +3417,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(filterCmrnoForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(abbrvLocMandatory, [ SysLoc.TURKEY ]);
