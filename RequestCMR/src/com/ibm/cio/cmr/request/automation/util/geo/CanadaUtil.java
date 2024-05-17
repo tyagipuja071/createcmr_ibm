@@ -530,8 +530,13 @@ public class CanadaUtil extends AutomationUtil {
 
         List<String> ECOSYSTEM_LIST = Arrays.asList("T0007992", "T0007993", "T0007994", "T0008059");
         if (("T").equalsIgnoreCase(firstChar) && !ECOSYSTEM_LIST.contains(coverageId)) {
-          isu = "34";
-          ctc = "Q";
+          if (StringUtils.isBlank(data.getIsuCd())) {
+            isu = "27";
+            ctc = "E";
+          } else {
+            isu = "34";
+            ctc = "Q";
+          }
           setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
         } else if (ECOSYSTEM_LIST.contains(coverageId)) {
           isu = "34";
