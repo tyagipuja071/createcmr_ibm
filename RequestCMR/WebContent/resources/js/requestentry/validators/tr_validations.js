@@ -3359,17 +3359,17 @@ function setCBEnterpriseCEWA(isuCtc, currentLandedCountry, issuingCntry) {
   var landedCntryBMZ = [ 'BW', 'MW', 'ZM' ];
   var landedCntryCGNT = [ 'CG', 'CD', 'CF', 'CM', 'GA', 'GQ', 'NE', 'TD' ];
   var landedCntryE = 'ET';
-  var landCntryGLS = [ 'GH', 'LR, SL' ];
-  var landCntryK = 'KE';
-  var landCntryL = 'LY';
+  var landedCntryGLS = [ 'GH', 'LR, SL' ];
+  var landedCntryK = 'KE';
+  var landedCntryL = 'LY';
   var landedCntryMS = [ 'MG', 'MU', 'SC' ];
   var landedCntryN = 'NE';
   var landedCntryGMS = [ 'GM', 'GN', 'GW', 'ML', 'MR', 'SN' ];
   var landedCntryBT = [ 'BF', 'BJ', 'TG' ];
-  var landCntryT = 'TN';
-  var landCntryBDERSTU = [ 'BI', 'DJ', 'ER', 'RW', 'SO', 'SD', 'TZ', 'UG' ];
-  var landCntryZ = 'ZW';
-  var landCntryD = 'DZ';
+  var landedCntryT = 'TN';
+  var landedCntryBDERSTU = [ 'BI', 'DJ', 'ER', 'RW', 'SO', 'SD', 'TZ', 'UG' ];
+  var landedCntryZ = 'ZW';
+  var landedCntryD = 'DZ';
 
   if (isuCtc == '34Q') {
     if (landedCntryACMS.includes(currentLandedCountry)) {
@@ -3380,33 +3380,35 @@ function setCBEnterpriseCEWA(isuCtc, currentLandedCountry, issuingCntry) {
       FormManager.setValue('enterprise', '911757');
     } else if (landedCntryE.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911733');
-    } else if (landCntryGLS.includes(currentLandedCountry)) {
+    } else if (landedCntryGLS.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '901444');
-    } else if (landCntryK.includes(currentLandedCountry)) {
+    } else if (landedCntryK.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911730');
-    } else if (landCntryL.includes(currentLandedCountry)) {
+    } else if (landedCntryL.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911756');
     } else if (landedCntryMS.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911740');
     } else if (landedCntryN.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911737');
-    } else if (landCntryGMS.includes(currentLandedCountry)) {
+    } else if (landedCntryGMS.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '906402');
-    } else if (landCntryBT.includes(currentLandedCountry)) {
+    } else if (landedCntryBT.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911758');
     } else if (landedCntryT.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '901728');
-    } else if (landCntryBDERSTU.includes(currentLandedCountry)) {
+    } else if (landedCntryBDERSTU.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '907897');
-    } else if (landCntryZ.includes(currentLandedCountry)) {
+    } else if (landedCntryZ.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911743');
-    } else if (landCntryD.includes(currentLandedCountry)) {
+    } else if (landedCntryD.includes(currentLandedCountry)) {
       FormManager.setValue('enterprise', '911755');
     } else
       FormManager.setValue('enterprise', '');
-  } else if (isuCtc == '5K') {
+  } else
     FormManager.setValue('enterprise', '');
-  }
+  // else if (isuCtc == '5K') {
+  // FormManager.setValue('enterprise', '');
+  // }
 }
 
 function getLandedCountry() {
