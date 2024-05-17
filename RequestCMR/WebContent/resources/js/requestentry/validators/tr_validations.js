@@ -3060,7 +3060,7 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept value Y.');
     }
-  } else if (isuCode == '8B' || isuCode == '21' || isuCode == '28' || isuCode == '04' || isuCode == '5K') {
+  } else {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
 
@@ -3075,12 +3075,6 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept blank.');
     }
-  } else {
-    return new ValidationResult({
-      id : 'clientTier',
-      type : 'text',
-      name : 'clientTier'
-    }, false, 'Client Tier can only accept blank.');
   }
 }
 
