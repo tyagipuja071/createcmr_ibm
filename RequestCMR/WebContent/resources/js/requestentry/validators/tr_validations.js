@@ -2271,31 +2271,40 @@ function sboCodeValidator() {
         var reqType = FormManager.getActualValue('reqType');
         var isuCtc = isuCd + clientTier;
         var sbo = FormManager.getActualValue('salesBusOffCd');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var reqId = FormManager.getActualValue('reqId');
+        var commSubTypes = [ 'COMME', 'GOVRN', 'IGF', 'THDPT', 'XINTS', 'XGOV', 'XIGF', 'XTP' ];
+        var privSubTypes = [ 'PRICU', 'XPC' ];
+        var MEA_COUNTRIES_CB = [ 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD',
+            'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS',
+            'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY' ];
+        var landCntry = '';
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        // GET LANDCNTRY in case of CB
+        var result = cmr.query('LANDCNTRY.IT', {
+          REQID : reqId
+        });
+        if (result != null && result.ret1 != undefined) {
+          landCntry = result.ret1;
+        }
         if (reqType != 'C') {
           return;
         }
-        if (isuCtc == '8B') {
+        if (custSubGrp == 'BUSPR' && isuCtc == '8B') {
           if (sbo != '140') {
             return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'140\'\  for ISU CTC 8B.');
-          } else
-            return new ValidationResult(null, true, null);
-        } else if (isuCtc == '21') {
+          }
+        } else if ((custSubGrp == 'INTER' || custSubGrp == 'IBMEM' || custSubGrp == 'XINT') && isuCtc == '21') {
           if (sbo != 'A10') {
             return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'A10\'\ for ISU CTC 21.');
-          } else
-            return new ValidationResult(null, true, null);
-        } else if (isuCtc == '27E' || isuCtc == '34Q' || isuCtc == '36Y') {
+          }
+        } else if ((commSubTypes.includes(custSubGrp) && isuCtc == '27E') || privSubTypes.includes(custSubGrp) || (commSubTypes.includes(custSubGrp) && MEA_COUNTRIES_CB.includes(landCntry))) {
           if (sbo != 'A20') {
             return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'A20\'\ for ISU CTC ' + isuCtc);
-          } else
-            return new ValidationResult(null, true, null);
-        } else if (isuCtc == '04' || isuCtc == '28' || isuCtc == '5K') {
-          if (sbo != 'A00') {
-            return new ValidationResult(FormManager.getField('salesBusOffCd'), false, 'SBO can only accept \'A00\'\ for ISU ' + isuCtc);
-          } else
-            return new ValidationResult(null, true, null);
-        } else
+          }
+        } else {
           return new ValidationResult(null, true, null);
+        }
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
