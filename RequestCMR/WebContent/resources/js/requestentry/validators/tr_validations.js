@@ -735,9 +735,7 @@ function setClientTierAndISR(value) {
   /*
    * if (!PageManager.isReadOnly()) { FormManager.enable('clientTier'); }
    */
-  if (!value) {
-    value = FormManager.getActualValue('isuCd');
-  }
+  value = FormManager.getActualValue('isuCd');
   if (_pagemodel.isuCd != value) {
     // FormManager.setValue('clientTier', '');
   }
