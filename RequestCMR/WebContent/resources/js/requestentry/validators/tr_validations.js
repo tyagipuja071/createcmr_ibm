@@ -2099,11 +2099,11 @@ function setSBOValuesForIsuCtc(value) {
     } else if (isuCtc == '36Y') {
       FormManager.setValue('salesBusOffCd', 'A20');
     } else if (isuCtc == '04') {
-      FormManager.setValue('salesBusOffCd', 'A20');
-    } else if (isuCtc == '38') {
-      FormManager.setValue('salesBusOffCd', 'A20');
+      FormManager.setValue('salesBusOffCd', 'A00');
+    } else if (isuCtc == '28') {
+      FormManager.setValue('salesBusOffCd', 'A00');
     } else if (isuCtc == '5K') {
-      FormManager.setValue('salesBusOffCd', 'A20');
+      FormManager.setValue('salesBusOffCd', 'A00');
     }
     FormManager.enable('salesBusOffCd');
   }
@@ -2323,6 +2323,7 @@ function entValidator() {
                 var custType = FormManager.getActualValue('custGrp');
                 var countryUse = FormManager.getActualValue('countryUse');
                 var reqId = FormManager.getActualValue('reqId');
+                var reqType = FormManager.getActualValue('reqType');
                 var subIndustryCd = FormManager.getActualValue('subIndustryCd');
                 validEnt27E = [ '011675', '011677', '011676', '011672', '011673', '011674', '909813', '909813', '910510', '910509' ];
                 var SA_LC = [ 'ZA', 'NA', 'LS', 'SZ' ];
@@ -2341,7 +2342,7 @@ function entValidator() {
                   landCntry = result.ret1;
                 }
                 var crossSubTypes = [ 'ZAXCO', 'ZAXGO', 'ZAXPC', 'ZAXTP', 'SZXCO', 'SZXGO', 'SZXPC', 'SZXTP', 'NAXCO', 'NAXGO', 'NAXPC', 'NAXTP', 'LSXCO', 'LSXGO', 'LSXPC', 'LSXTP' ];
-                if (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry)) {
+                if (reqType != 'C' || (crossSubTypes.includes(custSubType) && ME_LC.includes(landCntry))) {
                   return;
                 }
                 if (custType == 'LOCAL') {
