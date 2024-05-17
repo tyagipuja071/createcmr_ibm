@@ -3122,6 +3122,15 @@ function clientTierCodeValidator() {
         name : 'clientTier'
       }, false, 'Client Tier can only accept value Y.');
     }
+  } else if (isuCode == '32') {
+    if (clientTierCode != '') {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'Client Tier can only accept blank');
+    } else
+      return new ValidationResult(null, true);
   } else {
     if (clientTierCode == '') {
       $("#clientTierSpan").html('');
