@@ -367,7 +367,7 @@ public class TransConnService extends BaseBatchService {
         String mapping = Admin.BATCH_SERVICE_MAPPING;
         PreparedQuery requestQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql(sqlMail));
         requestQuery.setParameter("REQ_ID", mqIntfReq.getReqId());
-        requestQuery.setParameter("REQ_STATUS", "COM");
+        requestQuery.setParameter("REQ_STATUS", isError ? CmrConstants.REQUEST_STATUS.PPN.toString() : CmrConstants.REQUEST_STATUS.COM.toString());
         requestQuery.setParameter("CHANGED_BY_ID", mqIntfReq.getLastUpdtBy());
         List<CompoundEntity> records = requestQuery.getCompundResults(1, Admin.class, mapping);
 
