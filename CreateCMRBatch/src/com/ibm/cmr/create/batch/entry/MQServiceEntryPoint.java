@@ -16,20 +16,20 @@ import com.ibm.cmr.create.batch.service.MQInterfaceServiceDev;
 public class MQServiceEntryPoint extends BatchEntryPoint {
 
   public static void main(String[] args) throws CmrException {
-    if (args.length < 1) {
-      System.out.println("MQ type(params) must be specified as arguments (put or get): exiting..");
-      System.exit(-1);
-    }
-    String type = args[0]; // get or put
+//    if (args.length < 1) {
+//      System.out.println("MQ type(params) must be specified as arguments (put or get): exiting..");
+//      System.exit(-1);
+//    }
+//    String type = args[0]; // get or put
 
     String mode = null;
-    if (type != null && type.trim().equalsIgnoreCase("put")) {
-      BatchEntryPoint.initContext("MQPublish");
-      mode = MQInterfaceService.PUBLISH;
-    } else if (type != null && type.trim().equalsIgnoreCase("get")) {
-      BatchEntryPoint.initContext("MQSubscribe");
+//    if (type != null && type.trim().equalsIgnoreCase("put")) {
+//      BatchEntryPoint.initContext("MQPublish");
+//      mode = MQInterfaceService.PUBLISH;
+//    } else if (type != null && type.trim().equalsIgnoreCase("get")) {
+//      BatchEntryPoint.initContext("MQSubscribe");
       mode = MQInterfaceService.SUBSCRIBE;
-    }
+//    }
 
     MQInterfaceService service = null;
     if (args.length > 1 && "DEV".equals(args[1])) {
