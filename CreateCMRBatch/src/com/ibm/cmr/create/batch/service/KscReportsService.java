@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.reports.DBCSContactField;
 import com.ibm.cio.cmr.request.util.reports.DBCSReportField;
 import com.ibm.cio.cmr.request.util.reports.DateRangeContainer;
 import com.ibm.cio.cmr.request.util.reports.DateTimeReportField;
@@ -200,7 +201,7 @@ public class KscReportsService extends BaseBatchService {
     ReportSpec spec = new ReportSpec("KSC.RPT.ADDR", "ABFAD" + (daily ? "D" : "M") + "1." + this.timestampString);
     spec.configureFields(new DateTimeReportField("DRXCN", 8, "yyyyMMdd"), new ReportField("RASXA", 5), new ReportField("RCUXA", 6),
         new PostalCodeField("CZIPA", 8), new DBCSReportField("TXTBA01", 62), new DBCSReportField("TXTBA02", 62), new DBCSReportField("TXTBA03", 62),
-        new DBCSReportField("TXTBA06", 62), new DBCSReportField("TXTBA04", 62), new DBCSReportField("TXTBA05", 62), new DBCSReportField("NRPAA", 32),
+        new DBCSReportField("TXTBA06", 62), new DBCSReportField("TXTBA04", 62), new DBCSReportField("TXTBA05", 62), new DBCSContactField("NRPAA", 32),
         new ReportField("RPHAS", 17), new ReportField("RFAX", 17), new ReportField("UADUX", 16));
     if (daily) {
       spec.setFilterKey("KSC.RPT.ADDR.DAILY");
