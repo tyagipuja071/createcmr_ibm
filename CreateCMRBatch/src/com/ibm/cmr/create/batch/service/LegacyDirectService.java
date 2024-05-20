@@ -137,7 +137,7 @@ public class LegacyDirectService extends TransConnService {
       SystemLocation.BELARUS, SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN, SystemLocation.BOSNIA_AND_HERZEGOVINA,
       SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
       SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);
-  
+
   private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
       SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
       SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
@@ -1344,18 +1344,18 @@ public class LegacyDirectService extends TransConnService {
         (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "") + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
     cust.setCreditCd(data.getCreditCd());
     cust.setTaxCd(data.getSpecialTaxCd());
-    
+
     cust.setSalesRepNo(data.getRepTeamMemberNo());
     cust.setSalesGroupRep(data.getSalesTeamCd());
 
     if (!StringUtils.isEmpty(data.getEnterprise()) && !ME_COUNTRY_LIST.contains(cntry)) {
       cust.setEnterpriseNo(data.getEnterprise().length() > 6 ? data.getEnterprise().substring(0, 6) : data.getEnterprise());
     }
-    
+
     if (!StringUtils.isEmpty(data.getTaxCd2()) && ME_COUNTRY_LIST.contains(cntry)) {
       cust.setEnterpriseNo(data.getTaxCd2().length() > 6 ? data.getTaxCd2().substring(0, 6) : data.getTaxCd2());
     }
-    
+
     cust.setCeBo(data.getEngineeringBo());
     cust.setIbo((!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : ""));
     cust.setSbo((!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : ""));
@@ -4342,7 +4342,11 @@ public class LegacyDirectService extends TransConnService {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      cust.setEnterpriseNo(muData.getEnterprise());
+      if ("@".equals(muData.getEnterprise().trim()) || "@@@@@@".equals(muData.getEnterprise().trim())) {
+        cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getEnterprise());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {
