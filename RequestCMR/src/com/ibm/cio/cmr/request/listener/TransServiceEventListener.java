@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.listener;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,12 +22,23 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 public class TransServiceEventListener {
   private static final Logger LOG = Logger.getLogger(TransServiceEventListener.class);
   private static final ThreadLocal<EntityManager> currentEntityManager = new ThreadLocal<>();
+  public static final List<String> EMEA_DB2_COUNTRIES = Arrays.asList("624", "788", "603", "607", "358", "626", "699", "644", "704", "668", "651",
+      "740", "694", "695", "705", "787", "820", "826", "821", "707", "693", "708", "363", "359", "889", "741", "758", "680", "610", "620", "840",
+      "636", "841", "645", "692", "669", "810", "881", "667", "662", "865", "383", "745", "698", "656", "753", "725", "691", "879", "675", "750",
+      "752", "637", "762", "764", "767", "768", "770", "772", "700", "769", "382", "717", "373", "642", "782", "880", "804", "805", "808", "823",
+      "670", "831", "827", "832", "635", "876", "833", "835", "864", "842", "850", "851", "718", "729", "862", "857", "677", "849", "883", "825",
+      "678", "702", "806", "846", "726", "755", "822", "838", "666", "866", "754");
 
   @PrePersist
   @PreUpdate
   public void updateTransServiceBasedOnActiveOrInactiveKna1(Kna1 kna1) {
     try {
       String kunnr = kna1.getId().getKunnr();
+      if (EMEA_DB2_COUNTRIES.contains(kna1.getKatr6())) {
+        if (kna1.getZzkvNode2() == null) {
+          kna1.setZzkvNode2("");
+        }
+      }
       if (isDeactivation(kna1)) {
         updateTransServiceForDeactivation(kunnr);
         return;
