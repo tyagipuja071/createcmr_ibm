@@ -3643,8 +3643,11 @@ function setCustNmDetailOnAddrSave() {
 }
 
 function setAccountAbbNmOnAddrSave() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (cmr.currentRequestType == 'C') {
-    // setAccountAbbNmOnAddrSaveCreate();
+    if (custSubGrp == 'BFKSC') {
+      setAccountAbbNmOnAddrSaveCreate();
+    }
   } else if (cmr.currentRequestType == 'U') {
     // setAccountAbbNmOnAddrSaveUpdate();
   }
@@ -6962,7 +6965,7 @@ function setAbbrevNmReqForBFKSCScenario() {
   }
 
   if (custSubGrp == 'BFKSC') {
-    if (custType == 'CEA' || custType == 'EA') {
+    if (custType == 'CEA' || custType == 'EA' || custType == 'A') {
       FormManager.enable('abbrevNm');
     } else {
       FormManager.clearValue('abbrevNm');
