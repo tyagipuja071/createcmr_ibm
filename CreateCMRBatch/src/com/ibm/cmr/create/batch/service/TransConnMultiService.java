@@ -43,9 +43,6 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
     case Manual:
       this.service.monitorDisAutoProcRec(entityManager, requests);
       break;
-    case Pending:
-      this.service.monitorTransconn(entityManager, requests);
-      break;
     case Pool:
       this.service.monitorLegacyPending(entityManager, requests);
       break;
