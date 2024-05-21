@@ -604,7 +604,7 @@ public class IERPRequestUtils extends RequestUtils {
 
     PreparedQuery query = new PreparedQuery(entityMgr, sql);
     query.setParameter("CMR_ISSUING_CNTRY", SystemLocation.JAPAN);
-    query.setParameter("CS_BO", csbo);
+    query.setParameter("CD", csbo);
     query.setForReadOnly(true);
 
     List<Object[]> results = query.getResults();
