@@ -4,18 +4,18 @@ dojo.require("dojo.fx.Toggler");
  * Scripts to handle retrieval of messages from the backend, via AJAX
  * 
  */
-var MessageMgr = (function() {
+var MessageMgr = (function () {
   var clientMessages = {};
 
   var clientMsgUrl = cmr.CONTEXT_ROOT + '/messages/client.json';
 
-  var getClientMessages = function() {
+  var getClientMessages = function () {
     dojo.xhrGet({
-      url : clientMsgUrl,
-      handleAs : 'json',
-      method : 'GET',
-      timeout : 50000,
-      load : function(data, ioargs) {
+      url: clientMsgUrl,
+      handleAs: 'json',
+      method: 'GET',
+      timeout: 50000,
+      load: function (data, ioargs) {
         clientMessages.REQUIRED = data.m5001;
         clientMessages.INVALID_VALUE = data.m5002;
         clientMessages.BLUEPAGES_ERROR = data.m5003;
@@ -45,12 +45,12 @@ var MessageMgr = (function() {
         clientMessages.LATIN1 = data.m5027;
         clientMessages.NO_QUOTATION = data.m5028;
       },
-      error : function(error, ioargs) {
+      error: function (error, ioargs) {
       }
     });
   };
 
-  var clearMessagesInternal = function(modal) {
+  var clearMessagesInternal = function (modal) {
     dojo.byId('cmr-info-box').style.display = 'none';
     dojo.byId('cmr-error-box').style.display = 'none';
     dojo.byId('cmr-validation-box').style.display = 'none';
@@ -66,32 +66,32 @@ var MessageMgr = (function() {
     }
   };
 
-  dojo.ready(function() {
+  dojo.ready(function () {
     getClientMessages();
   });
 
   return {
-    get : function(msgCode, msgParams) {
+    get: function (msgCode, msgParams) {
       var returnedMsg = '';
       dojo.xhrGet({
-        url : 'messages/' + msgCode,
-        content : {
-          params : msgParams
+        url: 'messages/' + msgCode,
+        content: {
+          params: msgParams
         },
-        handleAs : 'text',
-        method : 'GET',
-        timeout : 50000,
-        sync : true,
-        load : function(data, ioargs) {
+        handleAs: 'text',
+        method: 'GET',
+        timeout: 50000,
+        sync: true,
+        load: function (data, ioargs) {
           returnedMsg = data;
         },
-        error : function(error, ioargs) {
+        error: function (error, ioargs) {
           returnedMsg = 'Message could not be retrieved at this time.';
         }
       });
       return returnedMsg;
     },
-    showInfoMessage : function(message, modal, alwaysShow) {
+    showInfoMessage: function (message, modal, alwaysShow) {
       var suff = modal ? '-modal' : '';
       clearMessagesInternal();
       if (message) {
@@ -101,20 +101,20 @@ var MessageMgr = (function() {
       dojo.byId('cmr-info-box' + suff).style.opacity = '1';
       if (!alwaysShow) {
         var toggle = new dojo.fx.Toggler({
-          node : 'cmr-info-box' + suff,
-          hideDuration : 1000
+          node: 'cmr-info-box' + suff,
+          hideDuration: 1000
         });
-        cmr.removeInfo = function() {
+        cmr.removeInfo = function () {
           dojo.byId('cmr-info-box' + suff).style.display = 'none';
           cmr.toggle = null;
           document.onclick = null;
         };
-        cmr.toggle = function() {
+        cmr.toggle = function () {
           toggle.hide();
           window.setTimeout('cmr.removeInfo()', 1000);
         };
       }
-      document.onclick = function() {
+      document.onclick = function () {
         if (cmr.toggle) {
           cmr.toggle();
         }
@@ -124,7 +124,7 @@ var MessageMgr = (function() {
       } else {
       }
     },
-    showErrorMessage : function(message, modal) {
+    showErrorMessage: function (message, modal) {
       var suff = modal ? '-modal' : '';
       var pref = modal ? cmr.currentModalId + '-' : '';
       clearMessagesInternal();
@@ -137,8 +137,8 @@ var MessageMgr = (function() {
       } else {
       }
     },
-    clearMessages : clearMessagesInternal,
-    showValidationErrors : function(errors, modal) {
+    clearMessages: clearMessagesInternal,
+    showValidationErrors: function (errors, modal) {
       clearMessagesInternal(modal);
       var html = '';
       var msg = '';
@@ -166,7 +166,7 @@ var MessageMgr = (function() {
         }
 
         var focus = error.tabId ? 'focusActualField(\'' + fieldId + '\', \'' + error.tabId + '\', ' + modal + ')' : 'focusActualField(\'' + fieldId
-            + '\', null, ' + modal + ')';
+          + '\', null, ' + modal + ')';
         html += '<li onclick="' + focus + '">' + i + '. ' + msg + '</li>';
 
         // add the error icon to label
@@ -179,7 +179,7 @@ var MessageMgr = (function() {
         if (error.tabId) {
           // add the error icon to tab
           var icon2 = '<img src="' + cmr.CONTEXT_ROOT
-              + '/resources/images/error-icon.png" class="cmr-input-error-icon" title="Some fields have errors.">';
+            + '/resources/images/error-icon.png" class="cmr-input-error-icon" title="Some fields have errors.">';
           var tab = dojo.query('#' + error.tabId);
           if (tab && tab[0].innerHTML.indexOf('cmr-input-error-icon') < 0) {
             tab[0].innerHTML = tab[0].innerHTML + icon2;
@@ -198,7 +198,7 @@ var MessageMgr = (function() {
         }
       }
     },
-    MESSAGES : clientMessages
+    MESSAGES: clientMessages
   };
 })();
 

@@ -1249,7 +1249,7 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if ("@".equals(muData.getEnterprise())) {
+      if ("@@@@@@".equals(muData.getEnterprise())) {
         cust.setEnterpriseNo("");
       } else {
         cust.setEnterpriseNo(muData.getEnterprise());

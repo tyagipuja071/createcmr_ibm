@@ -69,7 +69,7 @@ public class LegacyCommonUtil {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getEnterprise().trim())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getEnterprise().trim()) || "@@@@@@".equals(muData.getEnterprise().trim())) {
         cust.setEnterpriseNo("");
       } else {
         cust.setEnterpriseNo(muData.getEnterprise());
