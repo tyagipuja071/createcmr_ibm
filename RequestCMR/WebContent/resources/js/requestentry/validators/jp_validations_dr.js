@@ -7628,6 +7628,21 @@ function addEnglishStreetValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function setContactMandatory() {
+  var addrType = FormManager.getActualValue('addrType');
+  var aduAddrTypes = new Set(['ZS02', 'ZS01', 'ZP01', 'ZI01', 'ZP09', 'ZI03', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08']);
+
+  if (cmr.addressMode == 'newAddress') {
+    if (aduAddrTypes.has(addrType)) {
+      setAddrFieldMandatory('contact', 'Contact', 'Contact');
+    }
+  } else if (cmr.addressMode == 'updateAddress') {
+    if (aduAddrTypes.has(addrType)) {
+      setAddrFieldMandatory('contact', 'Contact', 'Contact');
+    }
+  }
+}
+
 function setDefaultContact(addrType) {
   var contact = FormManager.getActualValue('contact');
   var aduAddrTypes = new Set(['ZS02', 'ZS01', 'ZP01', 'ZI01', 'ZP09', 'ZI03', 'ZP02', 'ZP03', 'ZP04', 'ZP05', 'ZP06', 'ZP07', 'ZP08']);
@@ -7746,6 +7761,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(setFieldValueOnAddrSave, GEOHandler.JP);
   GEOHandler.addAddrFunction(showOrHideAddrFieldForBPWPQ, GEOHandler.JP);
   GEOHandler.addAddrFunction(showOrHideAddrFieldForLocationCode, GEOHandler.JP);
+  GEOHandler.addAddrFunction(setContactMandatory, GEOHandler.JP);
 
   GEOHandler.registerValidator(addDateValidatorForReqDueDate, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addINACCodeValidator, GEOHandler.JP, null, true);
