@@ -2100,6 +2100,16 @@ public class JPHandler extends GEOHandler {
       if (iAddr != null) {
         iAddr.getId().setAddrType(addr.getId().getAddrType());
         iAddr.getId().setAddrSeq(addr.getId().getAddrSeq());
+        if (!"ZC01".equals(addr.getId().getAddrType())) {
+          if (iAddr.getIntlCustNm1().length() > 35) {
+            String[] parts = null;
+            String name1 = iAddr.getIntlCustNm1();
+            String name2 = iAddr.getIntlCustNm2();
+            parts = doSplitName(name1, name2, 35, 35);
+            iAddr.setIntlCustNm1(parts[0]);
+            iAddr.setIntlCustNm2(parts[1]);
+          }
+        }
         entityManager.persist(iAddr);
         entityManager.flush();
       }
