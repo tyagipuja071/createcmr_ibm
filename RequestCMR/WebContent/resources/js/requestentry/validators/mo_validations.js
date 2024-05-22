@@ -154,6 +154,7 @@ function addAfterConfigAP() {
   }
 
   if (reqType == 'C' && custType == 'LOCAL') {
+    FormManager.readOnly('stateProv');
     FormManager.readOnly('postCd');
   } else {
     if (reqType != 'C' && custType != 'LOCAL' && cntry == '736') {
@@ -4570,6 +4571,23 @@ function setKUKLAvaluesMO() {
   }
 }
 
+function onChangeMOlandCntryStateProvPostCd() {
+  var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function (value) {
+    var landCntry = FormManager.getActualValue('landCntry');
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (landCntry == 'MO') {
+      FormManager.readOnly('stateProv');
+      FormManager.readOnly('postCd');
+    } else {
+      FormManager.enable('stateProv');
+      FormManager.enable('postCd');
+    }
+  });
+  if (_landCntryHandler && _landCntryHandler[0]) {
+    _landCntryHandler[0].onChange();
+  }
+}
+
 
 function afterConfigMO() {
   addAfterConfigAP();
@@ -4586,6 +4604,7 @@ function afterConfigMO() {
   defaultCMRNumberPrefix();
   filterInacCdBasedInacTypeChange();
   setKuklaAfterConfigMO();
+  onChangeMOlandCntryStateProvPostCd();
 }
 
 function afterTemplateLoadMO() {
@@ -4600,7 +4619,7 @@ function afterTemplateLoadMO() {
   setCtcOnIsuCdChangeGCG();
   defaultCMRNumberPrefix();
   initChecklistMainAddress();
-
+  onChangeMOlandCntryStateProvPostCd();
 }
 
 dojo.addOnLoad(function () {
