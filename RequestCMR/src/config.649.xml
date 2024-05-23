@@ -83,9 +83,15 @@
 				<column>
 					<label>Credit Code</label>
 					<!--NOTE: TEMPORARY DB MAPPING waiting for CREDIT_CODE -->
-					<dbColumn>CUST_CLASS</dbColumn>
+					<dbColumn>CREDIT_CD</dbColumn>
 					<width>15</width>
 					<length>2</length>
+				</column>
+				<column>
+					<label>Customer Classification Code</label>
+					<dbColumn>CUST_CLASS</dbColumn>
+					<width>15</width>
+					<lovId>CustClass</lovId>
 				</column>
 				<column>
 					<label>Order block code</label>

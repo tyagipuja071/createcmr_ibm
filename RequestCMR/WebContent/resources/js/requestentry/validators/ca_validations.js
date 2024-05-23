@@ -653,7 +653,11 @@ function addFieldHandlers() {
   }
 
   if (_custSubGrpHandler == null) {
+    var custGrpFlagCount = 0;
     _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      if (value) {
+        custGrpFlagCount++
+      }
       if (FormManager.getActualValue('reqType') == 'U') {
         return;
       }
@@ -666,6 +670,10 @@ function addFieldHandlers() {
         if (role == 'REQUESTER') {
           FormManager.readOnly('abbrevNm');
         }
+      }
+      
+      if (custGrpFlagCount > 1) {        
+        setCustClassBP(value);
       }
     });
   }
@@ -1412,7 +1420,11 @@ function clientTierValidator() {
 }
 
 function setCustClassByEfc(efcValue) {
-
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp.includes("BUS")) {
+    return;
+  }
   if (!efcValue) {
     FormManager.setValue('custClass', '');
     return;
@@ -1429,6 +1441,16 @@ function setCustClassByEfc(efcValue) {
     FormManager.setValue('custClass', result[0].ret1);
   }
 
+}
+
+function setCustClassBP(value) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  // Setting the default value of customer class for BP scenario
+  if (custSubGrp.includes("BUS")) {
+    FormManager.setValue('custClass', '40');
+  }
+  
 }
 
 function getCsBranchFromPostalCode(postCd) {
