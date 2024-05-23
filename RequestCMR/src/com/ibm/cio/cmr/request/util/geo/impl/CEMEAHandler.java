@@ -1164,6 +1164,11 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setEngineeringBo("");
     }
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (!(StringUtils.isEmpty(mainRecord.getCmrSortl()))) {
+        data.setSalesBusOffCd(mainRecord.getCmrSortl());
+      }
+    }
   }
 
   private boolean loadDuplicateCMR(Data data, String dupCntry, String dupCmrNo) throws Exception {
