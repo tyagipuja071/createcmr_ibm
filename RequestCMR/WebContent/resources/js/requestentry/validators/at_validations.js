@@ -464,6 +464,20 @@ function afterConfigForCEMEA() {
     }
     // CREATCMR-6378
     retainVatValueAT();
+    
+    
+    if (FormManager.getActualValue('reqType') == 'U') {
+      var _kukla = null;
+      var ret = cmr.query('DATA_RDC.CUST_CLASS', {
+        REQ_ID : FormManager.getActualValue('reqId')
+      });
+      if (ret && ret.ret1 && ret.ret1 != '') {
+        _kukla = ret.ret1;
+      }
+      if (_kukla != null && _kukla.startsWith('4')) {
+        FormManager.enable('custClass');
+      } 
+    }
   }
 
   setAustriaUIFields();
