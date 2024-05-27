@@ -151,10 +151,6 @@ public class TransConnService extends BaseBatchService {
       records = gatherAbortedRecords(entityManager);
       monitorAbortedRecords(entityManager, records);
 
-      LOG.info("Skipping TransConn fetch... (Transconn Removed)");
-      // records = gatherTransConnRecords(entityManager);
-      // monitorTransconn(entityManager, records);
-
       LOG.info("Processing MQ Interface records...");
       records = gatherMQInterfaceRequests(entityManager);
       monitorMQInterfaceRequests(entityManager, records);
