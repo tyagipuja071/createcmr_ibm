@@ -201,6 +201,23 @@ function addInacCdValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function enableCustClassForUpdate() {
+  if (FormManager.getActualValue('reqType') != 'U'){
+    return;
+  }
+  var _kukla = null;
+  var ret = cmr.query('DATA_RDC.CUST_CLASS', {
+    REQ_ID : FormManager.getActualValue('reqId')
+  });
+  if (ret && ret.ret1 && ret.ret1 != '') {
+    _kukla = ret.ret1;
+  }
+  if (_kukla != null && _kukla.startsWith('4')) {
+    FormManager.enable('custClass');
+  }
+  
+}
+
 function addChangeNameAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -1530,7 +1547,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultARFAARByScenario, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setVatInd, SysLoc.CANADA);
-
+  GEOHandler.addAfterConfig(enableCustClassForUpdate, SysLoc.CANADA);
+  
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
   // CREATCMR-788
