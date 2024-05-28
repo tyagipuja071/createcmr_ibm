@@ -2237,7 +2237,7 @@ function addNLChecklistValidator() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 2; i <= 15; i++) {
+  for (var i = 0; i <= 15; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
@@ -2249,11 +2249,10 @@ function addChecklistBtnHandler() {
 
 function freeTxtFieldShowHide(buttonNo) {
   var shouldDisplay = false;
-
-  if (buttonNo <= 1) {
-    return;
-  }
   var fieldIdNo = getCheckListFieldNo(buttonNo);
+  if(buttonNo == 0 || buttonNo == 1){
+	fieldIdNo = 13;
+   }
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
 
@@ -2275,7 +2274,7 @@ function getCheckListFieldNo(buttonNo) {
 }
 
 function checkChecklistButtons() {
-  for (var i = 2; i <= 14; i = i + 2) {
+  for (var i = 0; i <= 14; i = i + 2) {
     if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
       document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
     }
