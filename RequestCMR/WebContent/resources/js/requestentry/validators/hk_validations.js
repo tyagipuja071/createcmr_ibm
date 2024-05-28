@@ -92,6 +92,7 @@ function addHandlersForGCG() {
   if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
     _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function (value) {
       setAbbrvNameBPScen();
+      setKUKLAvaluesHK();
     });
   }
 
@@ -1161,6 +1162,19 @@ function addFieldFormatValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addrSeqFormatter(value, rowIndex) {
+  var rowData = this.grid.getItem(rowIndex);
+  var curAddrSeq = rowData.addrSeq[0];
+  var importInd = rowData.importInd[0];
+  var validSeq = ["A", "B", "C", "D", "E"];
+  var reqType = FormManager.getActualValue('reqType');
+  var newAddressInUpdate = ('U' == reqType && importInd == 'N') ;
+  if ((reqType == 'C' || newAddressInUpdate ) && !validSeq.includes(curAddrSeq)) {
+    return 'N/A';
+  }
+  return value;
 }
 
 function addEROAttachmentValidator() {
@@ -2581,6 +2595,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesHK();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -4320,7 +4335,7 @@ function addAddressInstancesValidator() {
                   // New requirement : Defect 1767113 : For HK and MO ->
                   // Multiple
                   // Billing & Billing CCR are to be allowed
-                  if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02')) {
+                  if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02' || record.addrType == 'MAIL' || record.addrType == 'ZD01')) {
                     continue;
                   }
                   addrCnt++;
@@ -8565,6 +8580,69 @@ function validateInacValuesHK() {
   })(), 'IBM_REQ_TAB', 'frmCMR');
 }
 
+function setFieldToReadyOnly() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  }
+}
+
+function setKUKLAvaluesHK() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var bpRelType = FormManager.getActualValue('bpRelType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('setKUKLAvaluesHK() >>>> set KUKLA values for HK >>>>');
+
+  var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRMLC', 'NRMLD', 'CROSS']);
+  var cond2 = new Set(['DUMMY', 'INTER']);
+
+  var kuklaHK = [];
+  if (reqType == 'C') {
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.HK_MO_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaHK.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (cond1.has(custSubGrp)) {
+        if ((industryClass == 'G' || industryClass == 'H' || industryClass == 'Y')) {
+          FormManager.setValue('custClass', kuklaHK[1]);
+        } else if (industryClass == 'E') {
+          FormManager.setValue('custClass', kuklaHK[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaHK[0]);
+        }
+      } else if (custSubGrp == 'BUSPR') {
+        if (bpRelType == 'DS') {
+          FormManager.setValue('custClass', kuklaHK[5]);
+        } else if (bpRelType == 'SP') {
+          FormManager.setValue('custClass', kuklaHK[3]);
+        } else if (bpRelType == 'RS') {
+          FormManager.setValue('custClass', kuklaHK[4]);
+        }
+      } else if (cond2.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaHK[7]);
+      } else if (custSubGrp == 'BLUMX') {
+        FormManager.setValue('custClass', kuklaHK[6]);
+      }
+    }
+  }
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.AP = [SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
   SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA];
@@ -8839,4 +8917,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.registerValidator(validateInacValuesHK, [SysLoc.HONG_KONG]);
+
+  GEOHandler.addAfterTemplateLoad(setFieldToReadyOnly, SysLoc.HONG_KONG);
+  GEOHandler.addAfterConfig(setFieldToReadyOnly, SysLoc.HONG_KONG);
 });

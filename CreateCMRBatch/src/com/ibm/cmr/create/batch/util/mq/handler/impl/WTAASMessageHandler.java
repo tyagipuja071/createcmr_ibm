@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasRecord;
 import com.ibm.cmr.create.batch.util.AttributesPerLineOutputter;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -129,8 +130,17 @@ public class WTAASMessageHandler extends MQMessageHandler {
       // not the first XML, and address data is created
       this.messageHash.put("TransCode", "N");
     } else if ("U".equals(this.mqIntfReqQueue.getReqType()) && "Y".equals(this.addrData.getImportInd())) {
-      // put the AddrNo
-      this.messageHash.put("AddressNo", StringUtils.leftPad(this.addrData.getId().getAddrSeq().trim(), 5, '0'));
+
+      if (SystemLocation.HONG_KONG.equals(this.mqIntfReqQueue.getCmrIssuingCntry())
+          || SystemLocation.MACAO.equals(this.mqIntfReqQueue.getCmrIssuingCntry())) {
+        String pairedSeq = StringUtils.isNotBlank(this.addrData.getPairedAddrSeq()) ? this.addrData.getPairedAddrSeq().trim() : "";
+        this.messageHash.put("AddressNo", StringUtils.leftPad(pairedSeq, 5, '0'));
+        LOG.info("Addr Seq: " + this.addrData.getId().getAddrSeq());
+        LOG.info("Paired Seq: " + pairedSeq);
+      } else {
+        // put the AddrNo
+        this.messageHash.put("AddressNo", StringUtils.leftPad(this.addrData.getId().getAddrSeq().trim(), 5, '0'));
+      }
     }
 
     Document document = new Document();

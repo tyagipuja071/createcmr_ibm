@@ -792,6 +792,20 @@ function addFieldFormatValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+
+function addrSeqFormatter(value, rowIndex) {
+  var rowData = this.grid.getItem(rowIndex);
+  var curAddrSeq = rowData.addrSeq[0];
+  var importInd = rowData.importInd[0];
+  var validSeq = ["A", "B", "C", "D", "E"];
+  var reqType = FormManager.getActualValue('reqType');
+  var newAddressInUpdate = ('U' == reqType && importInd == 'N') ;
+  if ((reqType == 'C' || newAddressInUpdate ) && !validSeq.includes(curAddrSeq)) {
+    return 'N/A';
+  }
+  return value;
+}
+
 function addEROAttachmentValidator() {
   FormManager.addFormValidator((function () {
     return {
@@ -1941,6 +1955,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesMO();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -2630,7 +2645,7 @@ function addAddressInstancesValidator() {
                   // New requirement : Defect 1767113 : For HK and MO ->
                   // Multiple
                   // Billing & Billing CCR are to be allowed
-                  if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02')) {
+                  if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02' || record.addrType == 'MAIL' || record.addrType == 'ZD01')) {
                     continue;
                   }
                   addrCnt++;
@@ -3093,7 +3108,7 @@ function validateStreetAddrCont2() {
       validate: function () {
         var streetAddrCont1 = FormManager.getActualValue('addrTxt2');
         var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-        var streetAddrCont2 = FormManager.getActualValue('dept');
+        var streetAddrCont2 = FormManager.getActualValue('city1');
         
         if (streetAddrCont1 == '' && streetAddrCont2 != '') {
           return new ValidationResult(null, false, 'Street Address Con\'t2 cannot have a value as Street Address Con\'t1 is blank.');
@@ -4485,6 +4500,77 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setFieldToReadyOnly() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  }
+}
+
+function setKuklaAfterConfigMO() {
+  if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
+    _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function (value) {
+      setKUKLAvaluesMO();
+    });
+  }
+}
+
+function setKUKLAvaluesMO() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var bpRelType = FormManager.getActualValue('bpRelType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('setKUKLAvaluesMO() >>>> set KUKLA values for MO >>>>');
+
+  var cond1 = new Set(['AQSTN', 'ECOSY', 'ASLOM', 'KYND', 'MKTPC', 'NRML', 'CROSS']);
+  var cond2 = new Set(['DUMMY', 'INTER']);
+
+  var kuklaMO = [];
+  if (reqType == 'C') {
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.HK_MO_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaMO.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (cond1.has(custSubGrp)) {
+        if ((industryClass == 'G' || industryClass == 'H' || industryClass == 'Y')) {
+          FormManager.setValue('custClass', kuklaMO[1]);
+        } else if (industryClass == 'E') {
+          FormManager.setValue('custClass', kuklaMO[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaMO[0]);
+        }
+      } else if (custSubGrp == 'BUSPR') {
+        if (bpRelType == 'DS') {
+          FormManager.setValue('custClass', kuklaMO[5]);
+        } else if (bpRelType == 'SP') {
+          FormManager.setValue('custClass', kuklaMO[3]);
+        } else if (bpRelType == 'RS') {
+          FormManager.setValue('custClass', kuklaMO[4]);
+        }
+      } else if (cond2.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaMO[7]);
+      } else if (custSubGrp == 'BLUMX') {
+        FormManager.setValue('custClass', kuklaMO[6]);
+      }
+    }
+  }
+}
+
 
 function afterConfigMO() {
   addAfterConfigAP();
@@ -4500,7 +4586,7 @@ function afterConfigMO() {
   reqReasonHandler();
   defaultCMRNumberPrefix();
   filterInacCdBasedInacTypeChange();
-  
+  setKuklaAfterConfigMO();
 }
 
 function afterTemplateLoadMO() {
@@ -4515,7 +4601,6 @@ function afterTemplateLoadMO() {
   setCtcOnIsuCdChangeGCG();
   defaultCMRNumberPrefix();
   initChecklistMainAddress();
-  
 }
 
 dojo.addOnLoad(function () {
@@ -4527,6 +4612,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addSalesRepNameNoCntryValidator, [SysLoc.MACAO]);
   GEOHandler.enableCopyAddress(SysLoc.MACAO);
   GEOHandler.addAfterConfig(afterConfigMO, SysLoc.MACAO);
+  GEOHandler.addAfterTemplateLoad(afterTemplateLoadMO, SysLoc.MACAO);
   GEOHandler.enableCustomerNamesOnAddress(SysLoc.MACAO);
   GEOHandler.addAddrFunction(updateMainCustomerNames, SysLoc.MACAO);
   GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, SysLoc.MACAO);
@@ -4545,4 +4631,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addEROAttachmentValidator, [SysLoc.MACAO], GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(validateStreetAddrCont2, [SysLoc.MACAO], null, true);
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
+
+  GEOHandler.addAfterTemplateLoad(setFieldToReadyOnly, SysLoc.MACAO);
+  GEOHandler.addAfterConfig(setFieldToReadyOnly, SysLoc.MACAO);
 });

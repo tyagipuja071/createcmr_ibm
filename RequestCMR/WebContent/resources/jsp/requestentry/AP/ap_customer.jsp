@@ -20,19 +20,19 @@
   <cmr:row addBackground="false">
     <cmr:column span="2" containerForField="AbbrevLocation">
       <p>
-        <label for="abbrevLocn"> 
-          <cmr:fieldLabel fieldId="AbbrevLocation" />: 
+        <label for="abbrevLocn">
+          <cmr:fieldLabel fieldId="AbbrevLocation" />:
         </label>
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-        <cmr:column span="2" containerForField="CustClass" forCountry="616,796">
-        <p>
-          <cmr:label fieldId="custClass">
-            <cmr:fieldLabel fieldId="CustClass" />:
-          </cmr:label>
-          <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
-        </p>
+    <cmr:column span="2" containerForField="CustClass" forCountry="616,796,738,736">
+      <p>
+        <cmr:label fieldId="custClass">
+          <cmr:fieldLabel fieldId="CustClass" />:
+        </cmr:label>
+        <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+      </p>
     </cmr:column>
   </cmr:row>
 </cmr:view>
