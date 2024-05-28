@@ -184,7 +184,7 @@
       <cmr:field fieldId="Department" id="dept" path="dept" />
     </p>
   </cmr:column>
-    <cmr:column span="2" forCountry="616,796,736,738">
+    <cmr:column span="2" forCountry="616,796">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
