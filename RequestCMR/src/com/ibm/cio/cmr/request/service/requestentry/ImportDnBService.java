@@ -989,7 +989,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       namePart1 = namePart1.substring(0, length1);
     }
     namePart2 = namePart2.trim();
-    if (namePart2.getBytes(Charset.forName("UTF-8")).length > length2) {
+    if (namePart2.length() > length2) {
       namePart2 = namePart2.substring(0, length2);
     }
 

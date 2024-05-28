@@ -25,9 +25,11 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.reports.DBCSContactField;
 import com.ibm.cio.cmr.request.util.reports.DBCSReportField;
 import com.ibm.cio.cmr.request.util.reports.DateRangeContainer;
 import com.ibm.cio.cmr.request.util.reports.DateTimeReportField;
+import com.ibm.cio.cmr.request.util.reports.PostalCodeField;
 import com.ibm.cio.cmr.request.util.reports.ReportField;
 import com.ibm.cio.cmr.request.util.reports.ReportSpec;
 import com.ibm.cmr.create.batch.util.reports.KscReportTrailer;
@@ -53,11 +55,13 @@ public class KscReportsService extends BaseBatchService {
    * Mode of the batch. D - Daily, M - Monthly
    */
   private String mode = DAILY;
+  private boolean manualExecution = false;
 
   private static final String DEFAULT_OUTPUT_DIR = "/ci/shared/data/jp/ksc";
 
   private String timestampString;
   private Timestamp currTimestamp;
+  private Timestamp serverTimestamp;
 
   private File outputDir;
 
@@ -77,6 +81,15 @@ public class KscReportsService extends BaseBatchService {
 
     cleanup(this.outputDir);
 
+    if (!isManualExecution()) {
+      if (!setModeAndGenerate(entityManager)) {
+        LOG.info("KSC Reports generation skipped for today.");
+        return true;
+      }
+    } else {
+      LOG.info("Manual mode parameter supplied. Forcing to run");
+    }
+
     DateRangeContainer dateRange = initDateRange(entityManager, this.mode);
     LOG.debug("Using date range " + dateRange.getFromDate() + " - " + dateRange.getToDate());
     generateReports(entityManager, dateRange, !MONTHLY.equals(this.mode));
@@ -90,15 +103,6 @@ public class KscReportsService extends BaseBatchService {
   private void cleanup(File outputDir) {
 
     LOG.debug("Cleaning up old files...");
-    int daysAdjust = -1;
-    Calendar curr = new GregorianCalendar();
-    curr.setTime(this.currTimestamp);
-    if (curr.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-      // for monday, go back 3 days
-      daysAdjust = -3;
-    }
-
-    LOG.debug("Current Japan Time: " + this.currTimestamp + ", Days Adjust: " + daysAdjust);
     SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
     List<File> toDelete = new ArrayList<File>();
     for (File file : outputDir.listFiles()) {
@@ -107,17 +111,8 @@ public class KscReportsService extends BaseBatchService {
         if (fileDate.toLowerCase().contains("receive")) {
           toDelete.add(file);
         } else {
-          Date dt = format.parse(fileDate);
-          Calendar jpTime = new GregorianCalendar();
-          jpTime.setTime(this.currTimestamp);
-          // add 1 hour for processing time
-          jpTime.add(Calendar.HOUR, 1);
-          // add the days adjustment
-          jpTime.add(Calendar.DATE, daysAdjust);
-
-          if (dt.before(jpTime.getTime())) {
-            toDelete.add(file);
-          }
+          format.parse(fileDate);
+          toDelete.add(file);
         }
       } catch (Exception e) {
         // unparseable
@@ -205,8 +200,8 @@ public class KscReportsService extends BaseBatchService {
     LOG.debug("Configuring " + (daily ? "daily" : "monthly") + " address report..");
     ReportSpec spec = new ReportSpec("KSC.RPT.ADDR", "ABFAD" + (daily ? "D" : "M") + "1." + this.timestampString);
     spec.configureFields(new DateTimeReportField("DRXCN", 8, "yyyyMMdd"), new ReportField("RASXA", 5), new ReportField("RCUXA", 6),
-        new ReportField("CZIPA", 8), new DBCSReportField("TXTBA01", 62), new DBCSReportField("TXTBA02", 62), new DBCSReportField("TXTBA03", 62),
-        new DBCSReportField("TXTBA06", 62), new DBCSReportField("TXTBA04", 62), new DBCSReportField("TXTBA05", 62), new DBCSReportField("NRPAA", 32),
+        new PostalCodeField("CZIPA", 8), new DBCSReportField("TXTBA01", 62), new DBCSReportField("TXTBA02", 62), new DBCSReportField("TXTBA03", 62),
+        new DBCSReportField("TXTBA06", 62), new DBCSReportField("TXTBA04", 62), new DBCSReportField("TXTBA05", 62), new DBCSContactField("NRPAA", 32),
         new ReportField("RPHAS", 17), new ReportField("RFAX", 17), new ReportField("UADUX", 16));
     if (daily) {
       spec.setFilterKey("KSC.RPT.ADDR.DAILY");
@@ -314,6 +309,7 @@ public class KscReportsService extends BaseBatchService {
   private void setTimestamp() {
     SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
     this.currTimestamp = SystemUtil.getActualTimestamp();
+    this.serverTimestamp = new Timestamp(this.currTimestamp.getTime());
     this.currTimestamp = adjustTime(this.currTimestamp, +9);
     this.timestampString = format.format(this.currTimestamp);
   }
@@ -332,6 +328,44 @@ public class KscReportsService extends BaseBatchService {
     entityManager.flush();
   }
 
+  private boolean setModeAndGenerate(EntityManager entityManager) {
+    boolean generate = true;
+    Calendar curr = new GregorianCalendar();
+    curr.setTime(this.currTimestamp);
+    LOG.info("Current Server Time: " + this.serverTimestamp);
+    LOG.info("Current Japan Time: " + new Timestamp(curr.getTimeInMillis()) + ", Date: " + curr.get(Calendar.DATE) + ", Day: "
+        + curr.get(Calendar.DAY_OF_WEEK));
+
+    if (curr.get(Calendar.DATE) == 1) {
+      this.mode = MONTHLY;
+      LOG.info("Setting mode to MONTHLY (first day of month)");
+    } else {
+      if (curr.get(Calendar.DAY_OF_WEEK) < 3 && curr.get(Calendar.DAY_OF_WEEK) > 0) {
+        LOG.info("Skipping report generation for day " + curr.get(Calendar.DAY_OF_WEEK));
+        generate = false;
+      } else {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        String currentJpDate = formatter.format(curr.getTime());
+        LOG.debug("Checking holiday for " + currentJpDate);
+        String holidayCheck = "select 1 from creqcmr.lov where field_id = '##JPHolidays' and cmr_issuing_cntry = '760' and cd = :HOLIDAY";
+        PreparedQuery query = new PreparedQuery(entityManager, holidayCheck);
+        query.setParameter("HOLIDAY", currentJpDate);
+        query.setForReadOnly(true);
+        boolean holiday = query.exists();
+        LOG.debug("Date is " + (holiday ? "" : "NOT ") + "a holiday.");
+        if (holiday) {
+          LOG.info("Date " + currentJpDate + " is a holiday. Skipping report generation.");
+          generate = false;
+        } else {
+          LOG.info("Setting mode to DAILY");
+          this.mode = DAILY;
+
+        }
+      }
+    }
+    return generate;
+  }
+
   @Override
   protected boolean isTransactional() {
     return true;
@@ -347,6 +381,14 @@ public class KscReportsService extends BaseBatchService {
 
   public void setReferenceDate(Date referenceDate) {
     this.referenceDate = referenceDate;
+  }
+
+  public boolean isManualExecution() {
+    return manualExecution;
+  }
+
+  public void setManualExecution(boolean manualExecution) {
+    this.manualExecution = manualExecution;
   }
 
 }

@@ -75,9 +75,20 @@ public class ApprovalController extends BaseController {
     boolean processing = CmrConstants.YES_NO.Y.toString().equals(request.getParameter("processing"));
     String view = "approve";
     String title = UIMgr.getText("title.approval");
+    LOG.debug("Approval being processed = code: " + approvalCode);
     ApprovalResponseModel approval = new ApprovalResponseModel();
     try {
-      approval = modelFromRequest;
+      approval = decodeUrlParam(approvalCode);
+      if (approval == null) {
+        approval = modelFromRequest;
+      }
+      LOG.debug("Approval specs = id: " + approval.getApprovalId() + ", approver: " + approval.getApproverId() + ", type: " + approval.getType());
+      if (approval.getApprovalId() > 0) {
+        Thread.currentThread()
+            .setName("APPR-" + approval.getApprovalId() + (approval.getApproverId() != null ? "-" + approval.getApproverId() : "-unknown"));
+      } else if (approval.getApproverId() != null) {
+        Thread.currentThread().setName("APPR-000-" + approval.getApproverId());
+      }
       if (!processing) {
         if (!authorize(request)) {
           // only show this when not yet processing
@@ -104,7 +115,6 @@ public class ApprovalController extends BaseController {
         approval.setType("L");
         approvalService.processTransaction(approval, request);
 
-        System.err.println("Req ID " + approval.getReqId());
         createAppUser(approval, request);
         if (!approval.isProcessed()) {
           // show status changed if status is now invalid
@@ -148,6 +158,7 @@ public class ApprovalController extends BaseController {
     ModelAndView mv = new ModelAndView(view, "approval", approval);
     mv.addObject("approvalTitle", title);
     mv.addObject("attach", new AttachmentModel());
+    Thread.currentThread().setName("Executor-" + Thread.currentThread().getId());
     return mv;
   }
 

@@ -1086,7 +1086,7 @@ public class MEHandler extends BaseSOFHandler {
           data.setPhone1(data.getPhone1().substring(0, 15));
         }
       }
-      data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
+      //data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
       if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
         data.setPhone3(mainRecord.getCmrBusinessReg());
       }
@@ -2282,6 +2282,13 @@ public class MEHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
             }
+          }  else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+            if (StringUtils.isBlank(clientTier) || !"E".equals(clientTier)) {
+              LOG.trace("The row " + (row.getRowNum() + 1)
+                  + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Client Tier",
+                  ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
+            }
           } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
             if (StringUtils.isBlank(clientTier) || !"T".equals(clientTier)) {
               LOG.trace("The row " + (row.getRowNum() + 1)
@@ -2289,7 +2296,7 @@ public class MEHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
             }
-          } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+          } else if ((!StringUtils.isBlank(isuCd) && !Arrays.asList("27","32", "34", "36").contains(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
             LOG.trace("Client Tier should be '@' for the selected ISU Code.");
             error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
           }

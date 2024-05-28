@@ -468,10 +468,10 @@ function afterConfigForUS() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   _usSicm = FormManager.getActualValue('usSicmen');
   _kukla = FormManager.getActualValue('custClass');
-  if (_usSicm.length > 4) {
-    _usSicm = _usSicm.substring(0, 4);
-    FormManager.setValue('usSicmen', _usSicm);
-  }
+  /*
+   * if (_usSicm.length > 4) { _usSicm = _usSicm.substring(0, 4);
+   * FormManager.setValue('usSicmen', _usSicm); }
+   */
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -488,27 +488,21 @@ function afterConfigForUS() {
   if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
     FormManager.enable('miscBillCd');
   }
-  if (reqType == 'C' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
-    if (role == 'Requester' || role == 'Viewer') {
+  if (reqType == 'C') {
+    if (custSubGrp == 'ECOSYSTEM' && (role == 'Processor' || role == 'Requester' || role == 'Viewer')) {
       FormManager.setValue('isuCd', '36');
       FormManager.setValue('clientTier', 'Y');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
-    } else if (role == 'Processor') {
-      FormManager.setValue('isuCd', '36');
-      FormManager.enable('isuCd');
-      FormManager.setValue('clientTier', 'Y');
+    } else if (custSubGrp == 'PRIV' && (role == 'Processor' || role == 'Requester' || role == 'Viewer')) {
+      FormManager.setValue('isuCd', '21');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+    } else if ((custSubGrp != 'PRIV' || custSubGrp != 'ECOSYSTEM') && (role == 'Processor')) {
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier')
     }
-  } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
-    FormManager.setValue('isuCd', '28');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
-  } else if (reqType == 'C' && role == 'Requester' && custGrp == '15' && custSubGrp == 'FSP POOL') {
-    FormManager.setValue('isuCd', '28');
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('clientTier');
   } else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');

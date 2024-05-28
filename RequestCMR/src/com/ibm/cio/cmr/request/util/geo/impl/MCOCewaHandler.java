@@ -37,8 +37,10 @@ import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -66,8 +68,8 @@ public class MCOCewaHandler extends MCOHandler {
       "EPL Address", "Data" };
 
   private static final String[] MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "Company", "CustClassCode", "LocalTax2",
-      "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel", "ModeOfPayment", "CodFlag", "SalRepNameNo" };
+      "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County",
+      "City2", "INACType", "BPRelationType", "MembLevel", "ModeOfPayment", "CodFlag", "SalRepNameNo" };
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
@@ -98,10 +100,6 @@ public class MCOCewaHandler extends MCOHandler {
 
           if (legacyCust.getTaxCd() != null)
             data.setSpecialTaxCd(legacyCust.getTaxCd());
-
-          if (legacyCust.getEnterpriseNo() != null)
-            data.setEnterprise(legacyCust.getEnterpriseNo());
-
         }
 
         data.setDunsNo(mainRecord.getCmrDuns());
@@ -126,6 +124,35 @@ public class MCOCewaHandler extends MCOHandler {
         data.setPpsceid("");
       }
     }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      String enterprise = "";
+      enterprise = getRdcNode2(data.getCmrNo(), data.getCmrIssuingCntry());
+      data.setEnterprise(enterprise);
+    }
+  }
+
+  private String getRdcNode2(String cmrNo, String cntry) {
+    String zzkvNode2 = "";
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String sql = ExternalizedQuery.getSql("CEWA.GET.KNA1.ZZKVNODE2");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("KATR6", cntry);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("ZZKV_CUSNO", cmrNo);
+      query.setForReadOnly(true);
+      String result = query.getSingleResult(String.class);
+      if (result != null) {
+        zzkvNode2 = result;
+      }
+      return zzkvNode2;
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+
   }
 
   private String getKunnrSapr3Kna1(String cmrNo, String cntry) throws Exception {
@@ -563,9 +590,11 @@ public class MCOCewaHandler extends MCOHandler {
             String nameCont = ""; // 3
             String street = ""; // 4
             String streetCont = ""; // 5
+            String stateProv = ""; // 7
+
             String collectioncd = ""; // 4
             String sbo = ""; // 5
-            String landedcountry = "";// 8
+            String landedcountry = "";// 9
             String embargo = ""; // 9
             String cof = ""; // 10
             String cod = ""; // 11
@@ -573,11 +602,11 @@ public class MCOCewaHandler extends MCOHandler {
             String deptNo = ""; // 14
             String city = "";
             String postalcd = "";
-            String phoneNo = ""; // 10
-            String phoneNoData = ""; // 13
+            String phoneNo = ""; // 11
+            String phoneNoData = ""; // 14
             String stcont = ""; // 5
             String addnameinfo = ""; // 9
-            String poBox = "";// 10
+            String poBox = "";// 11
             String tin = "";// 15
             String isuCd = "";// 7
             String clientTier = "";// 8
@@ -632,28 +661,30 @@ public class MCOCewaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(6);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
-              postalcd = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
-              landedcountry = validateColValFromCell(currCell);
+              postalcd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
+              landedcountry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
               addnameinfo = validateColValFromCell(currCell);
 
               if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
-                currCell = (XSSFCell) row.getCell(10);
+                currCell = (XSSFCell) row.getCell(11);
                 poBox = validateColValFromCell(currCell);
                 if (currCell != null) {
                   DataFormatter df = new DataFormatter();
-                  poBox = df.formatCellValue(row.getCell(10));
+                  poBox = df.formatCellValue(row.getCell(11));
                 }
               }
             }
 
             if ("Shipping Address".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(10);
+              currCell = (XSSFCell) row.getCell(11);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNo = df.formatCellValue(row.getCell(10));
+                phoneNo = df.formatCellValue(row.getCell(11));
               }
             }
 
@@ -694,6 +725,16 @@ public class MCOCewaHandler extends MCOHandler {
                 if (StringUtils.isBlank(city)) {
                   LOG.trace("City is required.");
                   error.addError((row.getRowNum() + 1), "City", "City is required. ");
+                }
+
+                String pattern = "^[a-zA-Z0-9]*$";
+                if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                  LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                  error.addError(row.getRowNum(), "State/Province",
+                      "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+                } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedcountry)) {
+                  LOG.trace("State/Province and Landed country both should be filled");
+                  error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
                 }
 
                 if (StringUtils.isBlank(landedcountry)) {
@@ -858,14 +899,14 @@ public class MCOCewaHandler extends MCOHandler {
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-                if (StringUtils.isBlank(clientTier) || !"T".contains(clientTier)) {
+              } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"E".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
-                      ":Note that Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd) || "27".equals(isuCd)))
                   && !"@".equalsIgnoreCase(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");

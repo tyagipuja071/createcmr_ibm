@@ -1,5 +1,7 @@
-  <%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
+<%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page import="com.ibm.cio.cmr.request.ui.PageManager"%>
+<%@page import="com.ibm.cio.cmr.request.CmrConstants"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -9,6 +11,8 @@
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <%
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
+  String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntry(), reqentry.getReqType());
+  
 %>
 <cmr:row topPad="10">
   <cmr:column span="4">
@@ -215,6 +219,7 @@
       <cmr:field fieldId="CustFAX" id="custFax" path="custFax" />
     </p>
   </cmr:column>
+  <%  if (!CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>
   <cmr:column span="2" containerForField="EstabFuncCd">
     <p>
       <cmr:label fieldId="estabFuncCd">
@@ -224,6 +229,8 @@
       <cmr:field fieldId="EstabFuncCd" id="estabFuncCd" path="estabFuncCd" />
     </p>
   </cmr:column>
+ <%  } %>
+  
   <cmr:column span="2" containerForField="Division">
     <p>
       <cmr:label fieldId="divn">
@@ -242,6 +249,7 @@
       <cmr:field fieldId="City2" id="city2" path="city2" />
     </p>
   </cmr:column>
+  <%  if (!CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>
   <cmr:column span="2" containerForField="CompanySize">
     <p>
       <cmr:label fieldId="companySize">
@@ -251,10 +259,11 @@
       <cmr:field fieldId="CompanySize" id="companySize" path="companySize" />
     </p>
   </cmr:column>
+ <%  } %>
   <cmr:column span="2" containerForField="Contact">
     <p>
       <cmr:label fieldId="contact">
-        <cmr:fieldLabel fieldId="Contact" />:
+        <cmr:fieldLabel fieldId="Contact" />:<cmr:info text="${ui.info.contact}" />
              <cmr:delta text="-" id="delta-contact" />
       </cmr:label>
       <cmr:field fieldId="Contact" id="contact" path="contact" />

@@ -68,7 +68,7 @@ function afterConfigForJPMass() {
     FormManager.readOnly('requestDueDateTemp');
   }
 
-  disableAutoProcForProcessor();
+  // disableAutoProcForProcessor();
 }
 
 function addDateValidatorForReqDueDate() {

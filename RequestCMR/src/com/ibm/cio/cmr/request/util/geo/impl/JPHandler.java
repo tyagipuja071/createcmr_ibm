@@ -26,6 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -58,6 +62,7 @@ import com.ibm.cio.cmr.request.entity.SalesPaymentPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -73,10 +78,12 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CRISServiceClient;
@@ -133,7 +140,6 @@ public class JPHandler extends GEOHandler {
       put("7", "ZI01");
       put("2", "ZP01");
       put("1", "ZS02");
-      put("6", "ZI02");
       put("E", "ZI03");
       put("A", "ZP02");
       put("B", "ZP03");
@@ -182,6 +188,9 @@ public class JPHandler extends GEOHandler {
   @Override
   public ImportCMRModel handleImportAddress(EntityManager entityManager, HttpServletRequest request, ParamContainer params,
       ImportCMRModel searchModel) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.JAPAN, "U");
+    boolean isIERPProcessingType = CmrConstants.PROCESSING_TYPE_IERP.equals(processingType);
+    LOG.info("Processing Type: " + processingType + ", is IERP: " + isIERPProcessingType);
 
     // this is called when Estab + Company or Company is imported
     String addrType = searchModel.getAddrType();
@@ -303,7 +312,7 @@ public class JPHandler extends GEOHandler {
           // data.setCsBo(company.getSBO()== null ? company.getSBO() :
           // company.getSBO().trim());
           if (admin != null && admin.getReqType() != null && admin.getReqType().equals("U")) {
-            data.setDunsNo(company != null ? company.getDunsNo() : null);
+            data.setDunsNo(currentAccount != null ? currentAccount.getAccountDunsNo() : "");
           }
           PropertyUtils.copyProperties(dataRdc, data);
           entityManager.merge(data);
@@ -328,7 +337,7 @@ public class JPHandler extends GEOHandler {
             }
           }
           if (admin != null && admin.getReqType() != null && admin.getReqType().equals("U")) {
-            data.setDunsNo(company != null ? company.getDunsNo() : null);
+            data.setDunsNo(currentAccount != null ? currentAccount.getAccountDunsNo() : "");
           }
           PropertyUtils.copyProperties(dataRdc, data);
           entityManager.merge(data);
@@ -428,7 +437,7 @@ public class JPHandler extends GEOHandler {
         removeOtherAddresses(entityManager, reqentry.getReqId(), "ZC01");
       } else {
         // normal import
-        if (establishment != null) {
+        if (establishment != null && !isIERPProcessingType) {
           removeCurrentAddr(entityManager, reqentry.getReqId(), "ZE01");
           LOG.debug("Adding Establishment Address to Request ID " + reqentry.getReqId());
           addrPk = new AddrPK();
@@ -630,6 +639,10 @@ public class JPHandler extends GEOHandler {
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.JAPAN, "U");
+    boolean isIERPProcessingType = CmrConstants.PROCESSING_TYPE_IERP.equals(processingType);
+    LOG.info("Processing Type: " + processingType + ", is IERP: " + isIERPProcessingType);
+
     FindCMRRecordModel mainRecord = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
     String mandt = SystemConfiguration.getValue("MANDT");
     boolean onlyCrisAddrFlag = false;
@@ -641,6 +654,7 @@ public class JPHandler extends GEOHandler {
       mainRecord.setCmrAddrTypeCode(StringUtils.isNotEmpty(searchModel.getAddrType()) ? searchModel.getAddrType() : "ZS01");
       onlyCrisAddrFlag = true;
     }
+    String cmrNum = mainRecord.getCmrNum() != null ? mainRecord.getCmrNum() : "";
 
     Set<String> addedRecords = new HashSet<>();
     this.currentAccount = findAccountFromCRIS(searchModel.getCmrNum());
@@ -648,18 +662,21 @@ public class JPHandler extends GEOHandler {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
     CRISCompany company = this.currentAccount.getParentCompany();
-    if (company == null) {
+    if (company == null && !cmrNum.startsWith("P")) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_COMPANY_DATA);
     }
-    company.setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
+    if (company != null) {
+      company
+          .setTaigaCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, SystemConfiguration.getValue("MANDT"), company.getId().getCompanyNo()));
+    }
 
     CRISEstablishment establishment = this.currentAccount.getParentEstablishment();
-    if (establishment == null) {
+    if (establishment == null && !cmrNum.startsWith("P")) {
       throw new CmrException(MessageUtil.ERROR_RETRIEVE_ESTABLISHMENT_DATA);
     }
 
     if (reqEntry.getReqType() != null && reqEntry.getReqType().equals("U")) {
-      mainRecord.setCmrDuns(company.getDunsNo());
+      mainRecord.setCmrDuns(currentAccount.getAccountDunsNo());
     }
     mainRecord.setJsic(this.currentAccount.getJSIC());
     mainRecord.setSbo(this.currentAccount.getSBO());
@@ -697,6 +714,10 @@ public class JPHandler extends GEOHandler {
 
     if ("ZS01".equals(mainRecord.getCmrAddrTypeCode()) && StringUtils.isBlank(mainRecord.getCmrShortName())) {
       mainRecord.setCmrShortName(this.currentAccount.getNameAbbr());
+    }
+
+    if (cmrNum.startsWith("P")) {
+      mainRecord.setCmrOrderBlock(this.currentAccount.getProspectInd());
     }
 
     if (onlyCrisAddrFlag) {
@@ -749,8 +770,14 @@ public class JPHandler extends GEOHandler {
         sourceRecord.setLocationNo(this.currentAccount.getLocCode());
         sourceRecord.setCmrPOBoxPostCode(
             JPHandler.getAccountTaigaByAccountNo(entityManager, mandt, this.currentAccount.getAccountNo(), mainRecord.getCmrAddrTypeCode()));
+        sourceRecord.setEstabNo(this.currentAccount.getEstablishmentNo());
         for (String adu : crisAddr.getAddrType().split("")) {
           String cmrAddrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
+
+          if (cmrNum.startsWith("P") && "ZP02".equals(cmrAddrType)) {
+            cmrAddrType = "ZS01";
+          }
+
           if (!StringUtils.isEmpty(adu) && !StringUtils.isEmpty(cmrAddrType) && !addedRecords.contains(cmrAddrType + "/" + crisAddr.getAddrSeq())) {
 
             FindCMRRecordModel copy = new FindCMRRecordModel();
@@ -765,10 +792,13 @@ public class JPHandler extends GEOHandler {
             }
             LOG.debug("Adding " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
 
-            if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
-                && StringUtils.isNotBlank(reqEntry.getBillToCustNo()) && !copy.getCmrAddrTypeCode().equals("ZS01")
-                && !copy.getCmrAddrTypeCode().equals("ZS02") && !copy.getCmrAddrTypeCode().equals("ZP01")) {
+            if ("C".equals(reqEntry.getReqType()) && ("BPWPQ".equals(reqEntry.getCustSubGrp()) || "NORML".equals(reqEntry.getCustSubGrp()))
+                && StringUtils.isNotBlank(reqEntry.getCreditToCustNo()) && StringUtils.isNotBlank(reqEntry.getBillToCustNo())
+                && !copy.getCmrAddrTypeCode().equals("ZS01") && !copy.getCmrAddrTypeCode().equals("ZS02")
+                && !copy.getCmrAddrTypeCode().equals("ZP01")) {
               LOG.debug("Skip " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request.");
+            } else if ("C".equals(reqEntry.getReqType()) && isNormlCreditToImport(reqEntry) && !copy.getCmrAddrTypeCode().equals("ZS01")) {
+              LOG.debug("Skip " + copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq() + " to the request for Normal with Credit to.");
             } else {
               addedRecords.add(copy.getCmrAddrTypeCode() + "/" + copy.getCmrAddrSeq());
               converted.add(copy);
@@ -809,10 +839,20 @@ public class JPHandler extends GEOHandler {
       String cmrType = null;
       for (CRISAddress legacyAddr : this.currentAccount.getAddresses()) {
         for (String adu : legacyAddr.getAddrType().split("")) {
+
+          String accountCmrNo = this.currentAccount.getId() != null && this.currentAccount.getId().getAccountNo() != null
+              ? this.currentAccount.getId().getAccountNo() : "";
+
+          boolean isProspect = accountCmrNo.startsWith("P") && "75".equals(this.currentAccount.getProspectInd()) && "A".equals(adu);
+          if (isProspect) {
+            continue;
+          }
+
           if (onlyCrisAddrFlag && adu != "3" || !StringUtils.isEmpty(adu) && !legacyValues.contains(adu)) {
             // this is an address on CRIS only, add to the request
             LOG.debug("Adding ADU " + adu + " to the request.");
             cmrType = LEGACY_TO_CREATECMR_TYPE_MAP.get(adu);
+
             if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
                 && StringUtils.isNotBlank(reqEntry.getBillToCustNo())) {
               if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq()) && "ZS02".equals(cmrType)) {
@@ -821,6 +861,20 @@ public class JPHandler extends GEOHandler {
                 continue;
               }
             }
+
+            if ("C".equals(reqEntry.getReqType()) && "NORML".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
+                && StringUtils.isBlank(reqEntry.getBillToCustNo())) {
+              continue;
+            }
+            if ("C".equals(reqEntry.getReqType()) && "NORML".equals(reqEntry.getCustSubGrp()) && StringUtils.isNotBlank(reqEntry.getCreditToCustNo())
+                && StringUtils.isNotBlank(reqEntry.getBillToCustNo())) {
+              if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq()) && "ZP01".equals(cmrType)) {
+                LOG.debug("Adding ADU2 for norml request with Credit to.");
+              } else {
+                continue;
+              }
+            }
+
             if (cmrType != null && !addedRecords.contains(cmrType + "/" + legacyAddr.getAddrSeq())) {
               record = new FindCMRRecordModel();
               record.setCmrAddrTypeCode(cmrType);
@@ -830,6 +884,16 @@ public class JPHandler extends GEOHandler {
               record.setCmrName1Plain(legacyAddr.getCompanyNameKanji()); // this.currentAccount.getNameKanji()
               record.setCmrName2Plain(legacyAddr.getCompanyNameKana()); // this.currentAccount.getNameKana()
               record.setCmrName3(this.currentAccount.getNameAbbr());
+
+              if (StringUtils.isBlank(record.getCmrName3())) {
+                if (StringUtils.isNotBlank(legacyAddr.getEnglishName1())) {
+                  record.setCmrName3(legacyAddr.getEnglishName1());
+                }
+              }
+
+              record.setCmrName(legacyAddr.getEnglishName1());
+              record.setEstabNo(this.currentAccount.getEstablishmentNo());
+
               record.setCmrBldg(legacyAddr.getBldg());
               record.setCmrCountryLanded("JP");
               sbPhone = new StringBuilder();
@@ -863,61 +927,70 @@ public class JPHandler extends GEOHandler {
       }
     }
 
-    // now add company and establishment
-    record = new FindCMRRecordModel();
+    if (!cmrNum.startsWith("P")) {
 
-    // add here company fields
-    record.setCompanyNo(company.getCompanyNo());
-    record.setSbo(company.getSBO());
-    record.setLocationNo(company.getLocCode());
-    record.setCompanySize(company.getEmployeeSize());
-    record.setCmrAddrTypeCode("ZC01");
-    record.setCmrAddrSeq("C");
-    record.setParentCMRNo(company.getCompanyNo());
-    record.setCmrStreetAddress(company.getAddress());
-    record.setCmrName1Plain(company.getNameKanji());
-    record.setCmrName2Plain(company.getNameKana());
-    record.setCmrName3(company.getNameAbbr());
-    record.setCmrBldg(company.getBldg());
-    sbPhone = new StringBuilder();
-    sbPhone.append(!StringUtils.isEmpty(company.getPhoneShi()) ? company.getPhoneShi() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneKyo()) ? company.getPhoneKyo() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneBango()) ? company.getPhoneBango() : "");
-    record.setCmrCustPhone(sbPhone.toString());
-    record.setCmrCountryLanded("JP");
-    record.setCmrPostalCode(company.getPostCode());
-    record.setCmrPOBoxPostCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, mandt, company.getCompanyNo()));
-    record.setInspbydebi(JPHandler.getRolByKtokd(entityManager, company.getCompanyNo(), "ZORG"));
-    converted.add(record);
+      // now add company and establishment
+      record = new FindCMRRecordModel();
 
-    // add here establishment fields
-    record = new FindCMRRecordModel();
-    record.setCmrAddrTypeCode("ZE01");
-    record.setCmrAddrSeq("E");
-    // s establishment.getEstablishmentNo();
-    record.setEstabNo(establishment.getEstablishmentNo());
-    record.setCompanyNo(establishment.getCompanyNo());
-    // record.setSbo(establishment.getSBO());
-    record.setEstabFuncCd(establishment.getFuncCode());
-    record.setLocationNo(establishment.getLocCode());
-    record.setParentCMRNo(establishment.getEstablishmentNo());
-    record.setCmrStreetAddress(establishment.getAddress());
-    record.setCmrName1Plain(establishment.getNameKanji());
-    record.setCmrName2Plain(establishment.getNameKana());
-    record.setCmrName3(establishment.getNameAbbr());
-    record.setCmrBldg(establishment.getBldg());
-    sbPhone = new StringBuilder();
-    sbPhone.append(!StringUtils.isEmpty(establishment.getPhoneShi()) ? establishment.getPhoneShi() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(establishment.getPhoneKyo()) ? establishment.getPhoneKyo() : "");
-    sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(establishment.getPhoneBango()) ? establishment.getPhoneBango() : "");
-    record.setCmrCustPhone(sbPhone.toString());
-    record.setCmrCountryLanded("JP");
-    record.setCmrPostalCode(establishment.getPostCode());
-    if ("C".equals(reqEntry.getReqType()) && "BPWPQ".equals(reqEntry.getCustSubGrp())) {
-      record.setBillingCustNo(reqEntry.getBillToCustNo());
-      record.setCreditToCustNo(reqEntry.getCreditToCustNo());
+      // add here company fields
+      record.setCompanyNo(company.getCompanyNo());
+      record.setSbo(company.getSBO());
+      record.setLocationNo(company.getLocCode());
+      record.setCompanySize(company.getEmployeeSize());
+      record.setCmrAddrTypeCode("ZC01");
+      record.setCmrAddrSeq("C");
+      record.setParentCMRNo(company.getCompanyNo());
+      record.setCmrStreetAddress(company.getAddress());
+      record.setCmrName1Plain(company.getNameKanji());
+      record.setCmrName2Plain(company.getNameKana());
+      record.setCmrName3(company.getNameAbbr());
+      record.setCmrBldg(company.getBldg());
+      sbPhone = new StringBuilder();
+      sbPhone.append(!StringUtils.isEmpty(company.getPhoneShi()) ? company.getPhoneShi() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneKyo()) ? company.getPhoneKyo() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(company.getPhoneBango()) ? company.getPhoneBango() : "");
+      record.setCmrCustPhone(sbPhone.toString());
+      record.setCmrCountryLanded("JP");
+      record.setCmrPostalCode(company.getPostCode());
+      record.setCmrPOBoxPostCode(JPHandler.getCompanyTaigaByCompanyNo(entityManager, mandt, company.getCompanyNo()));
+      record.setInspbydebi(JPHandler.getRolByKtokd(entityManager, company.getCompanyNo(), "ZORG"));
+
+      converted.add(record);
+
+      // add here establishment fields
+      record = new FindCMRRecordModel();
+      record.setCmrAddrTypeCode("ZE01");
+      record.setCmrAddrSeq("E");
+      // s establishment.getEstablishmentNo();
+      record.setEstabNo(establishment.getEstablishmentNo());
+      record.setCompanyNo(establishment.getCompanyNo());
+      // record.setSbo(establishment.getSBO());
+      record.setEstabFuncCd(establishment.getFuncCode());
+      record.setLocationNo(establishment.getLocCode());
+      record.setParentCMRNo(establishment.getEstablishmentNo());
+      record.setCmrStreetAddress(establishment.getAddress());
+      record.setCmrName1Plain(establishment.getNameKanji());
+      record.setCmrName2Plain(establishment.getNameKana());
+      record.setCmrName3(establishment.getNameAbbr());
+      record.setCmrBldg(establishment.getBldg());
+      sbPhone = new StringBuilder();
+      sbPhone.append(!StringUtils.isEmpty(establishment.getPhoneShi()) ? establishment.getPhoneShi() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "").append(!StringUtils.isEmpty(establishment.getPhoneKyo()) ? establishment.getPhoneKyo() : "");
+      sbPhone.append(sbPhone.length() > 0 ? "-" : "")
+          .append(!StringUtils.isEmpty(establishment.getPhoneBango()) ? establishment.getPhoneBango() : "");
+      record.setCmrCustPhone(sbPhone.toString());
+      record.setCmrCountryLanded("JP");
+      record.setCmrPostalCode(establishment.getPostCode());
+      if ("C".equals(reqEntry.getReqType()) && ("BPWPQ".equals(reqEntry.getCustSubGrp()) || isNormlCreditToImport(reqEntry))) {
+        record.setBillingCustNo(reqEntry.getBillToCustNo());
+        record.setCreditToCustNo(reqEntry.getCreditToCustNo());
+      }
+
+      if (!isIERPProcessingType) {
+        converted.add(record);
+      }
+
     }
-    converted.add(record);
 
     source.setItems(converted);
   }
@@ -937,6 +1010,8 @@ public class JPHandler extends GEOHandler {
 
     if ("C".equals(admin.getReqType()) && "BPWPQ".equals(data.getCustSubGrp())) {
       LOG.debug("skip imports on creates for bpwpq");
+    } else if ("C".equals(admin.getReqType()) && "NORML".equals(data.getCustSubGrp()) && !"".equals(data.getCreditToCustNo())) {
+      LOG.debug("skip imports on creates for NORML with credit to custno.");
     } else {
       data.setCreditToCustNo(mainRecord.getCreditToCustNo());
       data.setBillToCustNo(mainRecord.getBillingCustNo());
@@ -969,7 +1044,8 @@ public class JPHandler extends GEOHandler {
     data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
 
     data.setSvcArOffice(mainRecord.getCmrCustGrpId());
-    data.setAgreementSignDate(mainRecord.getCmrContractSignDt());
+    data.setAgreementSignDate(mainRecord.getCmrContractSignDt() != null && mainRecord.getCmrContractSignDt().trim().length() == 8
+        ? mainRecord.getCmrContractSignDt().substring(2) : mainRecord.getCmrContractSignDt().trim());
 
     if (mainRecord.getCompanyCd() != null) {
       if (mainRecord.getCompanyCd().equals("AA")) {
@@ -1119,22 +1195,33 @@ public class JPHandler extends GEOHandler {
     address.setLocationCode(currentRecord.getLocationNo());
     address.setCompanySize(currentRecord.getCompanySize());
     address.setCity2(currentRecord.getCompanyNo());
-    address.setDivn(currentRecord.getEstabNo());
 
     address.setOffice(currentRecord.getCmrOffice());
     address.setCustPhone(currentRecord.getCmrCustPhone());
     address.setCustFax(currentRecord.getCmrCustFax());
     address.setDept(currentRecord.getCmrDept());
 
-    String addrTxt = null;
-    if (currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().trim().length() > 23) {
-      addrTxt = currentRecord.getCmrStreetAddress().trim().substring(23);
+    String addrTxt = "";
+    String addrTxt2 = "";
+
+    if (currentRecord.getCmrStreetAddress() != null) {
+      if (currentRecord.getCmrStreetAddress().trim().length() > 17) {
+        addrTxt = currentRecord.getCmrStreetAddress().trim().substring(0, 17);
+        addrTxt2 = currentRecord.getCmrStreetAddress().trim().substring(17);
+      } else {
+        addrTxt = currentRecord.getCmrStreetAddress().trim();
+      }
     }
-    address.setAddrTxt(currentRecord.getCmrStreetAddress() == null ? currentRecord.getCmrStreetAddress()
-        : currentRecord.getCmrStreetAddress().trim().length() > 23 ? currentRecord.getCmrStreetAddress().trim().substring(0, 23)
-            : currentRecord.getCmrStreetAddress().trim());
-    address.setAddrTxt(convert2DBCS(address.getAddrTxt()));
-    address.setAddrTxt2(addrTxt);
+
+    if (!StringUtils.isEmpty(addrTxt)) {
+      address.setAddrTxt(convert2DBCS(addrTxt));
+    }
+    if (!StringUtils.isEmpty(addrTxt2)) {
+      if (addrTxt2.length() > 13)
+        addrTxt2 = addrTxt2.substring(0, 13);
+      address.setAddrTxt2(convert2DBCS(addrTxt2));
+    }
+
     // 1652081
     convertKATAKANA(currentRecord.getCmrName2Plain(), address);
     String custNm4 = null;
@@ -1151,7 +1238,7 @@ public class JPHandler extends GEOHandler {
         address.setRol(currentRecord.getInspbydebi());
       }
     } else {
-      address.setContact(currentRecord.getCmrName4() == null ? currentRecord.getCmrName4()
+      address.setContact(currentRecord.getCmrName4() == null ? "ご担当者"
           : currentRecord.getCmrName4().trim().length() > 15 ? currentRecord.getCmrName4().trim().substring(0, 15)
               : currentRecord.getCmrName4().trim());
     }
@@ -1183,6 +1270,10 @@ public class JPHandler extends GEOHandler {
       }
     } else {
       address.setCustNm3(currentRecord.getCmrName3() == null ? currentRecord.getCmrName3() : currentRecord.getCmrName3().trim());
+    }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      address.setDivn(currentRecord.getEstabNo());
     }
 
     converAbbNm(address.getCustNm3(), address);
@@ -1298,7 +1389,8 @@ public class JPHandler extends GEOHandler {
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if ("BPWPQ".equals(data.getCustSubGrp()) && !"".equals(data.getCreditToCustNo()) && !"".equals(data.getBillToCustNo())) {
+      if (("BPWPQ".equals(data.getCustSubGrp()) && !"".equals(data.getCreditToCustNo()) && !"".equals(data.getBillToCustNo()))
+          || ("NORML".equals(data.getCustSubGrp()) && !"".equals(data.getCreditToCustNo()))) {
         admin.setCustType("A");
       }
     }
@@ -1317,22 +1409,6 @@ public class JPHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "JSICCd", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getJsicCd(), "JSIC", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getJsicCd(), "JSIC", cmrCountry));
-      results.add(update);
-    }
-    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_CUSTOMER.equals(type)
-        && !equals(oldData.getOemInd(), newData.getOemInd())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "OEMInd", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getOemInd(), "OEMInd", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getOemInd(), "OEMInd", cmrCountry));
-      results.add(update);
-    }
-    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_CUSTOMER.equals(type)
-        && !equals(oldData.getEmail2(), newData.getEmail2())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "AbbrevLocation", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getEmail2(), "AbbrevLocation", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getEmail2(), "AbbrevLocation", cmrCountry));
       results.add(update);
     }
     if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_CUSTOMER.equals(type)
@@ -1437,14 +1513,6 @@ public class JPHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "zSeriesSw", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getZseriesSw(), "zSeriesSw", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getZseriesSw(), "zSeriesSw", cmrCountry));
-      results.add(update);
-    }
-    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
-        && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
       results.add(update);
     }
     if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
@@ -1571,6 +1639,41 @@ public class JPHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getIdentClient(), "ROLAccount", cmrCountry));
       results.add(update);
     }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getSvcArOffice(), newData.getSvcArOffice())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "JITReqGroupId", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSvcArOffice(), "JITReqGroupId", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSvcArOffice(), "JITReqGroupId", cmrCountry));
+      results.add(update);
+    }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getClientTier(), newData.getClientTier())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ClientTier", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getClientTier(), "ClientTier", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getClientTier(), "ClientTier", cmrCountry));
+      results.add(update);
+    }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getAgreementSignDate(), newData.getAgreementSignDate())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "AECISubDate", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getAgreementSignDate(), "AECISubDate", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getAgreementSignDate(), "AECISubDate", cmrCountry));
+      results.add(update);
+    }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getMrcCd(), newData.getMrcCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "MrcCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
@@ -1649,6 +1752,8 @@ public class JPHandler extends GEOHandler {
     handleData4RAOnDataSave(data);
     setROLBeforeDataSave(entityManager, data, admin);
     setTAIGABeforeDataSave(entityManager, data);
+
+    setDataValuesOnNonRelevantFieldsInDRFlow(entityManager, admin, data);
   }
 
   private void setSalesRepTmDateOfAssign(Data data, Admin admin, EntityManager entityManager) {
@@ -1966,14 +2071,25 @@ public class JPHandler extends GEOHandler {
     addr.setCustNm4(addr.getCustNm4() == null ? addr.getCustNm4()
         : addr.getCustNm4().trim().length() > 23 ? addr.getCustNm4().trim().substring(0, 23) : addr.getCustNm4().trim());
 
-    String addrTemp = null;
-    if (addr.getAddrTxt() != null && addr.getAddrTxt().trim().length() > 23) {
-      addrTemp = addr.getAddrTxt().trim().substring(23);
-      addr.setAddrTxt2(addrTemp);
+    String addrTxt = "";
+    String addrTxt2 = "";
+    if (addr.getAddrTxt() != null) {
+      if (addr.getAddrTxt().trim().length() > 17) {
+        addrTxt = addr.getAddrTxt().trim().substring(0, 17);
+        addrTxt2 = addr.getAddrTxt().trim().substring(17);
+      } else {
+        addrTxt = addr.getAddrTxt().trim();
+      }
     }
-    addr.setAddrTxt(addr.getAddrTxt() == null ? addr.getAddrTxt()
-        : addr.getAddrTxt().trim().length() > 23 ? addr.getAddrTxt().trim().substring(0, 23) : addr.getAddrTxt().trim());
-    addr.setAddrTxt(convert2DBCS(addr.getAddrTxt()));
+
+    if (!StringUtils.isEmpty(addrTxt)) {
+      addr.setAddrTxt(convert2DBCS(addrTxt));
+    }
+    if (!StringUtils.isEmpty(addrTxt2)) {
+      if (addrTxt2.length() > 13)
+        addrTxt2 = addrTxt2.substring(0, 13);
+      addr.setAddrTxt2(convert2DBCS(addrTxt2));
+    }
 
     setCSBOBeforeAddrSave(entityManager, addr);
     setCustNmDetailBeforeAddrSave(entityManager, addr);
@@ -1984,6 +2100,16 @@ public class JPHandler extends GEOHandler {
       if (iAddr != null) {
         iAddr.getId().setAddrType(addr.getId().getAddrType());
         iAddr.getId().setAddrSeq(addr.getId().getAddrSeq());
+        if (!"ZC01".equals(addr.getId().getAddrType())) {
+          if (iAddr.getIntlCustNm1().length() > 35) {
+            String[] parts = null;
+            String name1 = iAddr.getIntlCustNm1();
+            String name2 = iAddr.getIntlCustNm2();
+            parts = doSplitName(name1, name2, 35, 35);
+            iAddr.setIntlCustNm1(parts[0]);
+            iAddr.setIntlCustNm2(parts[1]);
+          }
+        }
         entityManager.persist(iAddr);
         entityManager.flush();
       }
@@ -2005,9 +2131,43 @@ public class JPHandler extends GEOHandler {
     }
 
     setFieldBeforeAddrSave(entityManager, addr);
-
     setAbbrevBeforeAddrSave(entityManager, addr);
+    copySoldToEstabNoToADUs(entityManager, addr);
+  }
 
+  private void copySoldToEstabNoToADUs(EntityManager entityManager, Addr addr) {
+    Addr soldToAddr;
+    List<Addr> addrs = getAddresses(entityManager, addr.getId().getReqId());
+    if ("ZS01".equals(addr.getId().getAddrType())) {
+      soldToAddr = addr;
+      if (soldToAddr != null) {
+        copyEstabToOtherADUs(entityManager, addrs, soldToAddr);
+      }
+    } else {
+      soldToAddr = addrs.stream().filter(a -> a != null && "ZS01".equals(a.getId().getAddrType())).findAny().orElse(null);
+      if (soldToAddr != null && StringUtils.isNotBlank(soldToAddr.getDivn())) {
+        copyEstabFromSoldTo(addr, soldToAddr);
+      }
+    }
+  }
+
+  private void copyEstabFromSoldTo(Addr addr, Addr soldToAddr) {
+    addr.setDivn(soldToAddr.getDivn());
+  }
+
+  private void copyEstabToOtherADUs(EntityManager entityManager, List<Addr> addrs, Addr soldToAddr) {
+    if (soldToAddr != null && StringUtils.isNotBlank(soldToAddr.getDivn()) && addrs != null && !addrs.isEmpty()) {
+      String estabNo = soldToAddr.getDivn();
+      for (Addr addr : addrs) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          continue;
+        }
+        addr.setDivn(estabNo);
+        entityManager.merge(addr);
+      }
+    }
+
+    entityManager.flush();
   }
 
   public IntlAddr getIntlAddrListById(Addr addr, EntityManager entityManager) {
@@ -2065,7 +2225,11 @@ public class JPHandler extends GEOHandler {
       for (Addr address : addrList) {
         if (!("ZC01".equals(address.getId().getAddrType()) || "ZE01".equals(address.getId().getAddrType()))) {
           if ("SUBSI".equals(data.getCustGrp())) {
-            address.setRol("");
+            if ("U".equalsIgnoreCase(admin.getReqType()) && "BFKSC".equalsIgnoreCase(data.getCustSubGrp())) {
+              // retain value ROL Flag
+            } else {
+              address.setRol("");
+            }
           } else {
             address.setRol(rolData);
           }
@@ -2110,6 +2274,50 @@ public class JPHandler extends GEOHandler {
       }
     }
     data.setTerritoryCd(taigaCd);
+  }
+
+  private void setDataValuesOnNonRelevantFieldsInDRFlow(EntityManager entityManager, Admin admin, Data data) {
+    String currentConnection = SystemParameters.getString("TMP_JP_BATCH_PROCESS");
+    if ("DR".equals(currentConnection)) {
+      String custSubGrp = data.getCustSubGrp() == null ? "" : data.getCustSubGrp();
+
+      // General Tab
+      data.setIcmsInd(""); // OFCD /Sales(Team) No/Rep Sales No Change
+
+      // Customer Tab
+      data.setEmail2(""); // Customer Name_Detail
+      data.setOemInd(""); // "OEM"
+      data.setEducAllowCd(""); // Education Group
+      data.setCustAcctType(""); // Customer Group
+      data.setIinInd(""); // IIN
+      data.setSiInd(""); // SI
+      data.setCrsCd(""); // CRS Code
+      data.setCreditCd(""); // CAR Code
+      data.setGovType(""); // Government Entity
+      data.setOutsourcingService(""); // Outsourcing Service
+
+      // IBM Tab
+      switch (custSubGrp) {
+      case "RACMR":
+      case "BFKSC":
+        break;
+      case "":
+      default:
+        data.setSalesTeamCd(""); // Sales/Team No (Dealer No.)
+        break;
+      }
+
+      data.setRepTeamMemberNo(""); // Rep Sales No.
+      data.setPrivIndc(""); // Request For
+      data.setProdType(""); // Product Type
+      data.setCsDiv(""); // CS DIV
+      data.setTier2(""); // TIER-2
+      data.setAdminDeptLine(""); // Admin Depart Line
+
+      if ("BPWPQ".equals(data.getCustSubGrp()) && (!"WZ".equals(data.getSalesBusOffCd()) && !"WP".equals(data.getSalesBusOffCd()))) {
+        data.setSalesBusOffCd("WP");
+      }
+    }
   }
 
   private void setFieldBeforeAddrSave(EntityManager entityManager, Addr addr) throws Exception {
@@ -2654,6 +2862,7 @@ public class JPHandler extends GEOHandler {
     setSapNoOnImport(entityManager, admin, data);
     copyIntlAddrValuesToAddr(entityManager, admin);
     copyOtherValuesOfCompanyEstabToADUs(entityManager, admin, data);
+    setDataValuesOnNonRelevantFieldsInDRFlow(entityManager, admin, data);
   }
 
   private void copyOtherValuesOfCompanyEstabToADUs(EntityManager entityManager, Admin admin, Data data) {
@@ -2722,10 +2931,13 @@ public class JPHandler extends GEOHandler {
 
   private Map<String, String> mapIntlAddrTypeToEngName(List<IntlAddr> intlAddrs) {
     Map<String, String> intlAddrTypeToEngNameMap = new HashMap<>();
-    for (IntlAddr intlAddr : intlAddrs) {
-      intlAddrTypeToEngNameMap.put(intlAddr.getId().getAddrType(), intlAddr.getIntlCustNm1());
+    if (intlAddrs != null) {
+      for (IntlAddr intlAddr : intlAddrs) {
+        String name1 = intlAddr.getIntlCustNm1() == null ? "" : intlAddr.getIntlCustNm1();
+        String name2 = intlAddr.getIntlCustNm2() == null ? "" : " ".concat(intlAddr.getIntlCustNm2());
+        intlAddrTypeToEngNameMap.put(intlAddr.getId().getAddrType(), name1 + name2);
+      }
     }
-
     return intlAddrTypeToEngNameMap;
   }
 
@@ -2737,12 +2949,12 @@ public class JPHandler extends GEOHandler {
       List<Addr> addrs = getAddresses(entityManager, admin.getId().getReqId());
 
       for (Addr addr : addrs) {
-        if ("ZE01".equals(addr.getId().getAddrType()) || StringUtils.isNotEmpty(addr.getSapNo())) {
+        if ("ZE01".equals(addr.getId().getAddrType())) {
           continue;
         }
 
         String seqNoEquiv = ADDR_TYPE_TO_KNA1_SEQ_MAP.get(addr.getId().getAddrType());
-        if (StringUtils.isNotEmpty(seqNoEquiv)) {
+        if (StringUtils.isNotEmpty(seqNoEquiv) && !"ZC01".equals(addr.getId().getAddrType())) {
           addr.setSapNo(seqNoToKunnrMap.get(seqNoEquiv));
         }
 
@@ -2843,7 +3055,12 @@ public class JPHandler extends GEOHandler {
           intlAddr.setIntlCustNm1(fullEnglish.length() > 22 ? fullEnglish.substring(0, 22) : fullEnglish);
         }
       } else {
-        intlAddr.setIntlCustNm1(kna1.getName1() + kna1.getName2());
+        String[] parts = null;
+        String name1 = kna1.getName1();
+        String name2 = kna1.getName2();
+        parts = doSplitName(name1, name2, 35, 35);
+        intlAddr.setIntlCustNm1(parts[0]);
+        intlAddr.setIntlCustNm2(parts[1]);
       }
       intlAddr.setAddrTxt(kna1.getStras());
       intlAddr.setCity1(kna1.getOrt01());
@@ -3030,7 +3247,7 @@ public class JPHandler extends GEOHandler {
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "ADDR_TXT", "DEPT", "OFFICE", "POST_CD", "BLDG", "CUST_PHONE",
-        "LOCN_CD", "CUST_FAX", "ESTAB_FUNC_CD", "COMPANY_SIZE", "CONTACT", "ROL", "PO_BOX_CITY"));
+        "LOCN_CD", "CUST_FAX", "ESTAB_FUNC_CD", "COMPANY_SIZE", "CONTACT", "ROL", "PO_BOX_CITY", "PO_BOX_POST_CD"));
     return fields;
   }
 
@@ -3264,7 +3481,17 @@ public class JPHandler extends GEOHandler {
     if (legacyType == null) {
       return null;
     }
+
+    String accountCmrNo = this.currentAccount.getId() != null && this.currentAccount.getId().getAccountNo() != null
+        ? this.currentAccount.getId().getAccountNo() : "";
+
     for (CRISAddress address : this.currentAccount.getAddresses()) {
+
+      if (accountCmrNo.startsWith("P") && "75".equals(this.currentAccount.getProspectInd()) && "A".equals(address.getAddrType())
+          && "3".equals(legacyType)) {
+        return address;
+      }
+
       if (legacyType.equals(address.getAddrType()) || address.getAddrType().contains(legacyType)) {
         return address;
       }
@@ -3500,7 +3727,7 @@ public class JPHandler extends GEOHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   public static String addJpRALogicOnSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
@@ -4084,16 +4311,3803 @@ public class JPHandler extends GEOHandler {
   }
 
   private static String getRolByKtokd(EntityManager entityManager, String companyOrAccountCMRNO, String ktokd) throws Exception {
-    if (ktokd == null)
+    if (ktokd == null) {
       return "";
+
+    }
     String rol = "";
-    List<Kna1> l = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), companyOrAccountCMRNO);
-    Kna1 kna1 = l.stream().filter(k -> ktokd.equals(k.getKtokd())).findFirst().orElse(null);
-    if (kna1 != null) {
-      rol = kna1.getInspbydebi();
-      ;
+    List<Kna1> kna1List = getKna1List(entityManager, SystemConfiguration.getValue("MANDT"), companyOrAccountCMRNO);
+
+    if (kna1List != null) {
+      Kna1 kna1 = kna1List.stream().filter(k -> ktokd.equals(k.getKtokd())).findFirst().orElse(null);
+      if (kna1 != null) {
+        rol = kna1.getInspbydebi();
+      }
     }
     return rol;
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CUST_PREF_LANG", "SUB_INDUSTRY_CD", "ISIC_CD", "TAX_CD1", "CMR_OWNER", "ISU_CD", "CLIENT_TIER",
+        "INAC_CD", "INAC_TYPE", "COMPANY", "PPSCEID", "COLL_BO_ID", "COLLECTOR_NO", "SALES_BO_CD", "EMAIL1", "EMAIL2", "EMAIL3", "COV_DESC", "COV_ID",
+        "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO", "JSIC_CD", "SECONDARY_LOCN_NO",
+        "OEM_IND", "LEASING_COMP_INDC", "EDUC_ALLOW_CD", "CUST_ACCT_TYP", "CUST_CLASS", "IIN_IND", "VALUE_ADD_REM", "CHANNEL_CD", "SI_IND", "CRS_CD",
+        "CREDIT_CD", "GOVERNMENT", "OUTSOURCING_SERV", "ZSERIES_SW", "CMR_NO_2", "CLIENT_TIER", "SEARCH_TERM", "MRC_CD", "REP_TEAM_MEMBER_NO",
+        "SALES_TEAM_CD", "SALES_BO_CD", "ORG_NO", "CHARGE_CD", "SO_PRJ_CD", "CS_DIV", "BILLING_PROC_CD", "INVOICE_SPLIT_CD", "CREDIT_TO_CUST_NO",
+        "CS_BO", "TIER_2", "BILL_TO_CUST_NO", "ADMIN_DEPT_LN", "IDENT_CLIENT", "TERRITORY_CD"));
+
+    return fields;
+  }
+
+  private boolean isNormlCreditToImport(RequestEntryModel reqEntry) {
+    String creditToCustNo = StringUtils.isNotEmpty(reqEntry.getCreditToCustNo()) ? reqEntry.getCreditToCustNo() : "";
+    String billToCustNo = StringUtils.isNotEmpty(reqEntry.getBillToCustNo()) ? reqEntry.getBillToCustNo() : "";
+    if ("NORML".equals(reqEntry.getCustSubGrp()) && !creditToCustNo.equals("") && billToCustNo.equals("")) {
+      return true;
+    }
+    return false;
+  }
+
+  private void logValidationErrorSingleByte(TemplateValidation error, Row row, String templateColumn) {
+    LOG.trace(templateColumn + " should be single byte character only.");
+    error.addError((row.getRowNum() + 1), "<br>" + templateColumn, templateColumn + " should be single byte character only.");
+  }
+
+  private void logValidationErrorDoubleByte(TemplateValidation error, Row row, String templateColumn) {
+    LOG.trace(templateColumn + " should be double byte character only.");
+    error.addError((row.getRowNum() + 1), "<br>" + templateColumn, templateColumn + " should be double byte character only.");
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    LOG.debug("inside JP validateMassUpdateTemplateDupFills handler...");
+
+    XSSFCell currCell = null;
+    boolean isDataFilled = false;
+    boolean isCompanyFilled = false;
+
+    boolean isADU3Filled = false;
+    boolean isADU1Filled = false;
+    boolean isADU2Filled = false;
+    boolean isADU7Filled = false;
+
+    boolean isADUAFilled = false;
+    boolean isADUBFilled = false;
+    boolean isADUCFilled = false;
+    boolean isADUDFilled = false;
+    boolean isADUEFilled = false;
+    boolean isADUFFilled = false;
+    boolean isADUGFilled = false;
+    boolean isADUHFilled = false;
+
+    boolean isADU4Filled = false;
+
+    Map<String, HashSet<String>> mapCmrSeq = new HashMap<String, HashSet<String>>();
+
+    for (String name : JP_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating Japan mass update template --> sheet " + name);
+
+      if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            // DATA SHEET
+            String cmrNo = "";
+            String accountAbbrevName = "";
+            String jsic = "";
+            String custClass = "";
+            String custGrp = "";
+            String officeCd = "";
+            String inacCd = "";
+            String billingProcessCd = "";
+            String postalForCsbo = "";
+            String csbo = "";
+            String rolFlag = "";
+
+            // ADDRESS SHEET
+            String addrSeq = "";
+            String custNameKanji = "";
+            String nameKanjiContinue = "";
+            String katakana = "";
+            String fullEnglishName = "";
+            String address = "";
+            String englishStreet = "";
+            String englishCity = "";
+            String englishDistrict = "";
+            String postalCode = "";
+            String branchOffice = "";
+            String department = "";
+            String building = "";
+            String location = "";
+            String telNo = "";
+            String fax = "";
+            String contact = "";
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              accountAbbrevName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              jsic = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              custClass = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              custGrp = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              officeCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              inacCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              billingProcessCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              postalForCsbo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              csbo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              rolFlag = validateColValFromCell(currCell);
+
+              // Data Sheet
+              if (StringUtils.isNotBlank(accountAbbrevName) || StringUtils.isNotBlank(jsic) || StringUtils.isNotBlank(custClass)
+                  || StringUtils.isNotBlank(custGrp) || StringUtils.isNotBlank(officeCd) || StringUtils.isNotBlank(inacCd)
+                  || StringUtils.isNotBlank(billingProcessCd) || StringUtils.isNotBlank(postalForCsbo) || StringUtils.isNotBlank(csbo)) {
+                isDataFilled = true;
+              }
+
+              if ((isDataFilled) && StringUtils.isBlank(cmrNo)) {
+                LOG.trace("CMR No. is required.");
+                error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR No. is required.");
+              } else if (mapCmrSeq.containsKey(cmrNo)) {
+                error.addError(row.getRowNum() + 1, "<br>CMR No.", "Duplicate CMR No. It should be entered only once.");
+              } else {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "CMR No.");
+                } else {
+                  mapCmrSeq.put(cmrNo, new HashSet<String>());
+                }
+              }
+
+              // Account Abbreviated Name
+              if (isDataFilled && StringUtils.isNotBlank(accountAbbrevName)) {
+                if ("@".equals(accountAbbrevName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Account Abbreviated Name", "@ value for Account Abbreviated Name is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(accountAbbrevName);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Account Abbreviated Name");
+                  }
+                }
+              }
+
+              // JSIC
+              if (isDataFilled && StringUtils.isNotBlank(jsic)) {
+                if ("@".equals(jsic)) {
+                  error.addError((row.getRowNum() + 1), "<br>JSIC", "@ value for JSIC is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(jsic);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "JSIC");
+                  }
+                }
+              }
+
+              // Customer Class
+              if (isDataFilled && StringUtils.isNotBlank(custClass)) {
+                if ("@".equals(custClass)) {
+                  error.addError((row.getRowNum() + 1), "<br>Customer Class", "@ value for Customer Class is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(custClass);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Customer Class");
+                  }
+                }
+              }
+
+              // Customer Group
+              if (isDataFilled && StringUtils.isNotBlank(custGrp)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(custGrp);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Customer Group");
+                }
+              }
+
+              // Office Code
+              if (isDataFilled && StringUtils.isNotBlank(officeCd)) {
+                if ("@".equals(officeCd)) {
+                  error.addError((row.getRowNum() + 1), "<br>Office Code", "@ value for Office Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(officeCd);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Office Code");
+                  }
+                }
+              }
+
+              // INAC/NAC Code
+              if (isDataFilled && StringUtils.isNotBlank(inacCd)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(inacCd);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "INAC Code");
+                }
+              }
+
+              // Billing Process Code
+              if (isDataFilled && StringUtils.isNotBlank(billingProcessCd)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(billingProcessCd);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Billing Process Code");
+                }
+              }
+
+              // CSBO
+              if (isDataFilled && StringUtils.isNotBlank(csbo)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(csbo);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "CSBO");
+                }
+              }
+
+              // ROL Flag
+              if (isDataFilled && StringUtils.isNotBlank(rolFlag)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(rolFlag);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "ROL Flag");
+                }
+              }
+
+            }
+
+            if ("Company".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // Company Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isCompanyFilled = true;
+              }
+
+              if (isCompanyFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+
+                }
+              }
+
+              if ((isCompanyFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isCompanyFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isCompanyFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isCompanyFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isCompanyFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isCompanyFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isCompanyFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isCompanyFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isCompanyFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isCompanyFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isCompanyFilled && StringUtils.isNotBlank(postalCode)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isCompanyFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isCompanyFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isCompanyFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isCompanyFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isCompanyFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isCompanyFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-3".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-3 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU3Filled = true;
+              }
+
+              if (isADU3Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADU3Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADU3Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU3Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU3Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADU3Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADU3Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADU3Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU3Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU3Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU3Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADU3Filled && StringUtils.isNotBlank(postalCode)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU3Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU3Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU3Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADU3Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU3Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU3Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-1".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-1 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU1Filled = true;
+              }
+
+              if (isADU1Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADU1Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADU1Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU1Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU1Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADU1Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADU1Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADU1Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU1Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU1Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU1Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADU1Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU1Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU1Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU1Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADU1Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU1Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU1Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-2".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-2 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU2Filled = true;
+              }
+
+              if (isADU2Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADU2Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADU2Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU2Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU2Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADU2Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADU2Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADU2Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU2Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU2Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU2Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADU2Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU2Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU2Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU2Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+              // Tel No
+              if (isADU2Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU2Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU2Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-7".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-7 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU7Filled = true;
+              }
+
+              if (isADU7Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADU7Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADU7Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU7Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU7Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADU7Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADU7Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADU7Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU7Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU7Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU7Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADU7Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU7Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU7Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU7Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADU7Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU7Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU7Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-A".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-A Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUAFilled = true;
+              }
+
+              if (isADUAFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUAFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUAFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUAFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUAFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUAFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUAFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUAFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUAFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUAFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUAFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUAFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUAFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUAFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUAFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUAFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUAFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUAFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-B".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-B Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUBFilled = true;
+              }
+
+              if (isADUBFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUBFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUBFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUBFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUBFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUBFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUBFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUBFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUBFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUBFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUBFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUBFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUBFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUBFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUBFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUBFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUBFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUBFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-C".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-C Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUCFilled = true;
+              }
+
+              if (isADUCFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUCFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUCFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUCFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUCFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUCFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUCFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUCFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUCFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUCFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUCFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUCFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUCFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUCFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUCFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUCFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUCFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUCFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-D".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-D Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUDFilled = true;
+              }
+
+              if (isADUDFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUDFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUDFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUDFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUDFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUDFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUDFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUDFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUDFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUDFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUDFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUDFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUDFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUDFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUDFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUDFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUDFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUDFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-E".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-E Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUEFilled = true;
+              }
+
+              if (isADUEFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUEFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUEFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUEFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUEFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUEFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUEFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUEFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUEFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUEFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUEFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUEFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUEFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUEFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUEFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUEFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUEFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUEFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-F".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-F Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUFFilled = true;
+              }
+
+              if (isADUFFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUFFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUFFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUFFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUFFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUFFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUFFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUFFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUFFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUFFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUFFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUFFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUFFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUFFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+              }
+
+              // Building
+              if (isADUFFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUFFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUFFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUFFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-G".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-G Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUGFilled = true;
+              }
+
+              if (isADUGFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUGFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUGFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUGFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUGFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUGFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUGFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUGFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUGFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUGFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUGFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUGFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUGFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUGFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUGFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUGFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUGFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUGFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-H".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-H Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADUHFilled = true;
+              }
+
+              if (isADUHFilled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADUHFilled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADUHFilled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADUHFilled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADUHFilled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADUHFilled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADUHFilled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADUHFilled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADUHFilled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADUHFilled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADUHFilled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADUHFilled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADUHFilled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADUHFilled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADUHFilled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADUHFilled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADUHFilled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADUHFilled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+
+            if ("ADU-4".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              addrSeq = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNameKanji = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameKanjiContinue = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              katakana = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              fullEnglishName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              address = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              englishStreet = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              englishCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              englishDistrict = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              branchOffice = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              department = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              building = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              location = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              telNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              fax = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(17);
+              contact = validateColValFromCell(currCell);
+
+              // ADU-4 Sheet
+              if (StringUtils.isNotBlank(addrSeq) || StringUtils.isNotBlank(custNameKanji) || StringUtils.isNotBlank(nameKanjiContinue)
+                  || StringUtils.isNotBlank(katakana) || StringUtils.isNotBlank(fullEnglishName) || StringUtils.isNotBlank(address)
+                  || StringUtils.isNotBlank(englishStreet) || StringUtils.isNotBlank(englishCity) || StringUtils.isNotBlank(englishDistrict)
+                  || StringUtils.isNotBlank(postalCode) || StringUtils.isNotBlank(branchOffice) || StringUtils.isNotBlank(department)
+                  || StringUtils.isNotBlank(building) || StringUtils.isNotBlank(location) || StringUtils.isNotBlank(telNo)
+                  || StringUtils.isNotBlank(fax) || StringUtils.isNotBlank(contact)) {
+                isADU4Filled = true;
+              }
+
+              if (isADU4Filled) {
+                if (StringUtils.isBlank(cmrNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is required.");
+                } else if (StringUtils.isNotBlank(cmrNo)) {
+                  if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
+                    error.addError((row.getRowNum() + 1), "<br>CMR No.", "CMR number is not in Data sheet.");
+                  } else {
+                    boolean isSingleByte = IERPRequestUtils.containsSingleByte(cmrNo);
+                    if (!isSingleByte) {
+                      logValidationErrorSingleByte(error, row, "CMR No.");
+                    }
+                  }
+                }
+              }
+
+              if ((isADU4Filled) && StringUtils.isBlank(addrSeq)) {
+                LOG.trace("Address Sequence No is required.");
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "Address Sequence No is required.");
+              } else if (StringUtils.isNotBlank(addrSeq)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(addrSeq);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Address Sequence");
+                }
+              }
+
+              if (isADU4Filled && addrSeq.contains("@")) {
+                error.addError((row.getRowNum() + 1), "<br>Sequence", "@ value for Address Sequence No is not allowed.");
+              }
+
+              // Customer Name-KANJI
+              if (isADU4Filled && StringUtils.isNotBlank(custNameKanji)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(custNameKanji);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Customer Name-KANJI");
+                }
+              }
+
+              // Name-KANJI Continue
+              if (isADU4Filled && StringUtils.isNotBlank(nameKanjiContinue)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(nameKanjiContinue);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Name-KANJI Continue");
+                }
+              }
+
+              // Katakana
+              if (isADU4Filled && StringUtils.isNotBlank(katakana)) {
+                if ("@".equals(katakana)) {
+                  error.addError((row.getRowNum() + 1), "<br>Katakana", "@ value for Katakana is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(katakana);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Katakana");
+                  }
+                }
+              }
+
+              // Full English Name
+              if (isADU4Filled && StringUtils.isNotBlank(fullEnglishName)) {
+                if ("@".equals(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name", "@ value for Full English Name is not allowed.");
+                }
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(fullEnglishName);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "Full English Name");
+                }
+              }
+
+              if (StringUtils.isNotBlank(custNameKanji)) {
+                if (StringUtils.isBlank(katakana) || StringUtils.isBlank(fullEnglishName)) {
+                  error.addError((row.getRowNum() + 1), "<br>Full English Name",
+                      "Provide both Katakana and Full English Name when Customer Name-KANJI is filled.");
+                }
+              }
+
+              // Address
+              if (isADU4Filled && StringUtils.isNotBlank(address)) {
+                if ("@".equals(address)) {
+                  error.addError((row.getRowNum() + 1), "<br>Address", "@ value for Address is not allowed.");
+                } else {
+                  boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(address);
+                  if (!isDoubleByte) {
+                    logValidationErrorDoubleByte(error, row, "Address");
+                  }
+                }
+              }
+
+              // English Street Address
+              if (isADU4Filled && StringUtils.isNotBlank(englishStreet)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishStreet);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English Street");
+                }
+              }
+
+              // English City Name
+              if (isADU4Filled && StringUtils.isNotBlank(englishCity)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English City");
+                }
+              }
+
+              // English District
+              if (isADU4Filled && StringUtils.isNotBlank(englishDistrict)) {
+                boolean isSingleByte = IERPRequestUtils.containsSingleByte(englishCity);
+                if (!isSingleByte) {
+                  logValidationErrorSingleByte(error, row, "English District");
+                }
+              }
+
+              // Postal Code
+              if (isADU4Filled && StringUtils.isNotBlank(postalForCsbo)) {
+                if ("@".equals(postalCode)) {
+                  error.addError((row.getRowNum() + 1), "<br>Postal Code", "@ value for Postal Code is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(postalCode);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Postal Code");
+                  }
+                }
+              }
+
+              // Branch/Office
+              if (isADU4Filled && StringUtils.isNotBlank(branchOffice)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(branchOffice);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Branch");
+                }
+
+              }
+
+              // Department
+              if (isADU4Filled && StringUtils.isNotBlank(department)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(department);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Department");
+                }
+
+              }
+
+              // Building
+              if (isADU4Filled && StringUtils.isNotBlank(building)) {
+
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(building);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Building");
+                }
+
+              }
+
+              // Tel No
+              if (isADU4Filled && StringUtils.isNotBlank(telNo)) {
+                if ("@".equals(telNo)) {
+                  error.addError((row.getRowNum() + 1), "<br>Tel No", "@ value for Tel No is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(telNo);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Tel No");
+                  }
+                }
+              }
+
+              // FAX
+              if (isADU4Filled && StringUtils.isNotBlank(fax)) {
+                if ("@".equals(fax)) {
+                  error.addError((row.getRowNum() + 1), "<br>Fax", "@ value for Fax is not allowed.");
+                } else {
+                  boolean isSingleByte = IERPRequestUtils.containsSingleByte(fax);
+                  if (!isSingleByte) {
+                    logValidationErrorSingleByte(error, row, "Fax");
+                  }
+                }
+              }
+
+              // Contact
+              if (isADU4Filled && StringUtils.isNotBlank(contact)) {
+                boolean isDoubleByte = IERPRequestUtils.containsDoubleByte(contact);
+                if (!isDoubleByte) {
+                  logValidationErrorDoubleByte(error, row, "Contact");
+                }
+              }
+
+            }
+          }
+        }
+        if (error.hasErrors()) {
+          validations.add(error);
+        }
+      } // end if
+    } // end for
   }
 
 }

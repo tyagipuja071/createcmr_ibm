@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.GeoContactInfoModel;
 import com.ibm.cio.cmr.request.model.requestentry.GeoTaxInfoModel;
+import com.ibm.cio.cmr.request.model.requestentry.LicenseModel;
 import com.ibm.cio.cmr.request.model.window.MassDataSummaryModel;
 import com.ibm.cio.cmr.request.model.window.RequestSummaryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
@@ -43,6 +44,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.service.requestentry.AdminService;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.service.requestentry.TaxInfoService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -286,13 +288,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(getCodeAndDescription(oldData.getCmrOwner(), "CMROwner", cmrCountry));
             results.add(update);
           }
-          if (TYPE_IBM.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
-              && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Company"))) {
-            update = new UpdatedDataModel();
-            update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
-            update.setNewData(newData.getCompany());
-            update.setOldData(oldData.getCompany());
-            results.add(update);
+          if (!"760".equalsIgnoreCase(oldData.getCmrIssuingCntry())) {
+            if (TYPE_IBM.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Company"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
+              update.setNewData(newData.getCompany());
+              update.setOldData(oldData.getCompany());
+              results.add(update);
+            }
           }
           if (!"848".equals(oldData.getCmrIssuingCntry()) && !SystemLocation.GERMANY.equals(oldData.getCmrIssuingCntry())) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())
@@ -413,13 +417,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getTaxCd1());
               results.add(update);
             }
-            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "LocalTax2"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
-              update.setNewData(newData.getTaxCd2());
-              update.setOldData(oldData.getTaxCd2());
-              results.add(update);
+            if (!"760".equalsIgnoreCase(oldData.getCmrIssuingCntry())) {
+              if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())
+                  && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "LocalTax2"))) {
+                update = new UpdatedDataModel();
+                update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
+                update.setNewData(newData.getTaxCd2());
+                update.setOldData(oldData.getTaxCd2());
+                results.add(update);
+              }
             }
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getVat(), newData.getVat())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "VAT"))) {
@@ -446,13 +452,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getTaxPayerCustCd());
               results.add(update);
             }
-            if (TYPE_IBM.equals(type) && !equals(oldData.getEnterprise(), newData.getEnterprise())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Enterprise"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "Enterprise", "-"));
-              update.setNewData(newData.getEnterprise());
-              update.setOldData(oldData.getEnterprise());
-              results.add(update);
+            if (!"760".equalsIgnoreCase(oldData.getCmrIssuingCntry())) {
+              if (TYPE_IBM.equals(type) && !equals(oldData.getEnterprise(), newData.getEnterprise())
+                  && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Enterprise"))) {
+                update = new UpdatedDataModel();
+                update.setDataField(PageManager.getLabel(cmrCountry, "Enterprise", "-"));
+                update.setNewData(newData.getEnterprise());
+                update.setOldData(oldData.getEnterprise());
+                results.add(update);
+              }
             }
             if (TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getSearchTerm())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "SearchTerm"))) {
@@ -1674,4 +1682,16 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     }
     return reqType;
   }
+
+  public List<LicenseModel> getNewLicenses(HttpServletRequest request, long reqId) {
+    LicenseService service = new LicenseService();
+    EntityManager entityManager = JpaManager.getEntityManager();
+    return service.getNewLicenses(reqId, entityManager);
+  }
+
+  public List<LicenseModel> getNewLicenses(EntityManager entityManager, long reqId) throws CmrException {
+    LicenseService service = new LicenseService();
+    return service.getNewLicenses(reqId, entityManager);
+  }
+
 }

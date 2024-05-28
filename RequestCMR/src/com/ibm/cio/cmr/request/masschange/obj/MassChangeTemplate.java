@@ -44,6 +44,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
@@ -146,7 +147,7 @@ public class MassChangeTemplate {
           if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
             String isuCd = "";
             String ctc = "";
-            List<String> isuNotBlankCtc = Arrays.asList("36", "34", "32");
+            List<String> isuNotBlankCtc = Arrays.asList("36", "34", "32", "27");
             int rowIndex = 0;
             for (Row row : sheet) {
               rowIndex = row.getRowNum();
@@ -161,7 +162,7 @@ public class MassChangeTemplate {
               ctc = validateColValFromCell(currCell);
 
               isuCd = !StringUtils.isBlank(isuCd) ? isuCd.substring(0, 2) : "";
-              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+              if ((StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
@@ -179,13 +180,16 @@ public class MassChangeTemplate {
                       ":Client Tier should be 'Y' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if (!StringUtils.isBlank(isuCd) && "32".equals(isuCd)) {
-                if (StringUtils.isBlank(ctc) || !"T".contains(ctc)) {
+                LOG.trace("The row " + (rowIndex + 1) + ":ISU 32 is obsolete. Please select a valid ISU.");
+                error.addError((rowIndex + 1), "Client Tier", ":ISU 32 is obsolete. Please select a valid ISU.<br>");
+              } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
                   LOG.trace("The row " + (rowIndex + 1)
-                      + ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.");
+                      + ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((rowIndex + 1), "Client Tier",
-                      ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
+                      ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
+              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "36".equals(isuCd) || "27".equals(isuCd)))
                   && !"@".equalsIgnoreCase(ctc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
@@ -280,7 +284,8 @@ public class MassChangeTemplate {
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validateSwiss(entityManager, book, country, maxRows, hwFlagMap));
         }
-      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)) {
+      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country) || LAHandler.isLACountry(country)
+          || JPHandler.isJPIssuingCountry(country)) {
         if (SystemLocation.GERMANY.equals(country)) {
           XSSFSheet dataSheet = book.getSheet("Data");
           int cmrRecords = 0;
@@ -330,7 +335,7 @@ public class MassChangeTemplate {
           if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
             String isuCd = "";
             String ctc = "";
-            List<String> isuNotBlankCtc = Arrays.asList("36", "34", "32");
+            List<String> isuNotBlankCtc = Arrays.asList("36", "34", "32", "27");
             for (Row row : sheet) {
               TemplateValidation error = new TemplateValidation(name);
               int rowIndex = row.getRowNum();
@@ -343,7 +348,7 @@ public class MassChangeTemplate {
               currCell = (XSSFCell) row.getCell(6);
               ctc = validateColValFromCell(currCell);
               isuCd = !StringUtils.isBlank(isuCd) ? isuCd.substring(0, 2) : "";
-              if ((StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) || (StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
+              if ((StringUtils.isNotBlank(ctc) && StringUtils.isBlank(isuCd))) {
                 LOG.trace("The row " + (rowIndex + 1) + ":Note that both ISU and CTC value needs to be filled..");
                 error.addError((rowIndex + 1), "Data Tab", ":Please fill both ISU and CTC value.<br>");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
@@ -367,10 +372,20 @@ public class MassChangeTemplate {
                   error.addError((rowIndex + 1), "Client Tier",
                       ":Client Tier should be 'T' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if ((!StringUtils.isBlank(isuCd) && !("34".equals(isuCd) || "32".equals(isuCd) || "36".equals(isuCd)))
-                  && !"@".equalsIgnoreCase(ctc)) {
-                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError((rowIndex + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd + ".<br>");
+              } else if (!StringUtils.isBlank(isuCd) && "27".equals(isuCd)) {
+                if (StringUtils.isBlank(ctc) || !"E".contains(ctc)) {
+                  LOG.trace("The row " + (rowIndex + 1)
+                      + ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((rowIndex + 1), "Client Tier",
+                      ":Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isBlank(isuCd) && !(isuNotBlankCtc.contains(isuCd))) {
+                if (!"@".equalsIgnoreCase(ctc)) {
+                  LOG.trace("The row " + (rowIndex + 1)
+                      + ":Client Tier should be '@' for the selected ISU Code. Please fix and upload the template again.");
+                  error.addError((rowIndex + 1), "Client Tier",
+                      ":Client Tier should be '@' for the selected ISU Code. Please fix and upload the template again.<br>");
+                }
               }
               validations.add(error);
             }
@@ -697,7 +712,7 @@ public class MassChangeTemplate {
     XSSFWorkbook book = new XSSFWorkbook(is);
     try {
       List<TemplateValidation> validations = new ArrayList<TemplateValidation>();
-      if (LAHandler.isLACountry(country)) {
+      if (LAHandler.isLACountry(country) || JPHandler.isJPIssuingCountry(country)) {
         IERPRequestUtils.validateMassUpdateTemplateDupFills(validations, book, maxRows, country, admin);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));

@@ -63,7 +63,13 @@
 					<length>1</length>
 					<lovId>EmbargoCode</lovId>
 				</column>
-				<column>
+				<column exactLength="true">
+					<label>Enterprise Number</label>
+					<dbColumn>ENTERPRISE</dbColumn>
+					<width>15</width>
+					<length>6</length>
+				</column>	
+                <column>
                     <label>STC order block code</label>
                     <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
                     <width>15</width>
@@ -151,6 +157,12 @@
 					<width>40</width>
 					<length>21</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -222,6 +234,12 @@
 					<width>40</width>
 					<length>24</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -292,6 +310,12 @@
 					<width>40</width>
 					<length>21</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -355,7 +379,13 @@
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
 					<length>21</length>
-				</column>			
+				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>			
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
@@ -425,6 +455,12 @@
 					<width>40</width>
 					<length>21</length>
 				</column>
+              <column>
+                    <label>State/Province</label>
+                    <dbColumn>STATE_PROV</dbColumn>
+                    <width>40</width>
+                    <bdsId>StateProv</bdsId>      
+              </column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>

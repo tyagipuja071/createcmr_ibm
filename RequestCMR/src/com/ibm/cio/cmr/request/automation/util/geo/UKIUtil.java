@@ -27,10 +27,12 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Licenses;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.LicenseService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
@@ -265,8 +267,8 @@ public class UKIUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-		cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
-	    break;
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, details, resultCodes, change, "R");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -484,6 +486,21 @@ public class UKIUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+
+    if ("U".equals(admin.getReqType()) && SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      if ("Z".equals(data.getSpecialTaxCd())) {
+        LicenseService service = new LicenseService();
+        List<Licenses> newLicenses = service.getLicensesByIndc(entityManager, data.getId().getReqId(), LicenseService.NEW_LICENSE_INDC);
+        if (newLicenses.size() > 0) {
+          details.append("A new license has been added, so the request will now be placed in CMDE's queue.\n");
+          engineData.addNegativeCheckStatus("_updatedToZTaxCode", "A new license has been added, so the request will now be placed in CMDE's queue.");
+          results.setResults("Review Required");
+          results.setDetails(details.toString());
+          return results;
+        }
+      }
+    }
+
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");
@@ -710,7 +727,7 @@ public class UKIUtil extends AutomationUtil {
         if (covCalculatedFromRdc) {
           details.append("Coverage calculated successfully from found CMRs.").append("\n");
         } else {
-          details.append("Coverage calculated successfully using 34Q logic.").append("\n");
+          details.append("Coverage calculated successfully using 27E logic.").append("\n");
         }
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
@@ -725,13 +742,13 @@ public class UKIUtil extends AutomationUtil {
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
-        details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
+        details.append("Coverage could not be calculated using 27E logic. Using values from request").append("\n");
         details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
         details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else {
-        String msg = "Coverage cannot be calculated. No valid 34Q mapping or existing CMRs found from request data.";
+        String msg = "Coverage cannot be calculated. No valid 27E mapping or existing CMRs found from request data.";
         details.append(msg);
         results.setResults("Cannot Calculate");
         results.setDetails(details.toString());
@@ -800,15 +817,10 @@ public class UKIUtil extends AutomationUtil {
       PostCd = PostCd.substring(0, 2);
     }
 
-    if ("34".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
-
-      if ("Q".equals(clientTier) && SCOTLAND_POST_CD.contains(PostCd)) {
-        container.setSbo("758");
-        container.setSalesRep("SPA758");
-        return container;
-      } else if ("Q".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd)) {
-        container.setSbo("958");
-        container.setSalesRep("MMIRE1");
+    if ("27".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+      if ("E".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd)) {
+        container.setSbo("057");
+        container.setSalesRep("SPA057");
         return container;
       } else {
         String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");

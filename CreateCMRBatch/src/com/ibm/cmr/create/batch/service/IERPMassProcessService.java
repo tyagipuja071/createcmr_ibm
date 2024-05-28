@@ -164,6 +164,7 @@ public class IERPMassProcessService extends TransConnService {
         processError(entityManager, admin, e.getMessage());
       }
     }
+
     return true;
   }
 
@@ -906,5 +907,4 @@ public class IERPMassProcessService extends TransConnService {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
   }
-
 }

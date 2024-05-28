@@ -56,6 +56,7 @@ import com.ibm.cio.cmr.request.model.requestentry.CheckListModel;
 import com.ibm.cio.cmr.request.model.requestentry.DataModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.requestentry.LicenseModel;
 import com.ibm.cio.cmr.request.model.requestentry.NotifyListModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.requestentry.SubindustryIsicSearchModel;
@@ -559,13 +560,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     if (transitionToNext && "PCP".equals(trans.getNewReqStatus())) {
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setProcessedTs(null);
-      if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
-        boolean crosCompleted = reqIsCrosCompleted(entityManager, admin.getId().getReqId());
-        if (crosCompleted) {
-          this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
-          admin.setReqStatus("PCO");
-        }
-      }
+      // if (geoHandler != null &&
+      // LAHandler.isLACountry(model.getCmrIssuingCntry())) {
+      // boolean crosCompleted = reqIsCrosCompleted(entityManager,
+      // admin.getId().getReqId());
+      // if (crosCompleted) {
+      // this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
+      // admin.setReqStatus("PCO");
+      // }
+      // }
 
       if (geoHandler != null
           && (SystemLocation.HONG_KONG.equals(model.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(model.getCmrIssuingCntry()))) {
@@ -1313,6 +1316,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     mv.addObject("approval", new ApprovalResponseModel());
     mv.addObject("fiscalDataModal", new ValidateFiscalDataModel());
     mv.addObject("autoDnbModel", new AutoDNBDataModel());
+    mv.addObject("licenseModel", new LicenseModel());
 
     EntityManager entityManager = JpaManager.getEntityManager();
 

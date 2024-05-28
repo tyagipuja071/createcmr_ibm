@@ -145,8 +145,12 @@ public class ReportSpec {
       query.append(ExternalizedQuery.getSql(this.orderByKey));
     }
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("DATE_FROM", adjustTime(dateRange.getFromDate()));
-    query.setParameter("DATE_TO", adjustTime(dateRange.getToDate()));
+    Timestamp from = adjustTime(dateRange.getFromDate());
+    Timestamp to = adjustTime(dateRange.getToDate());
+
+    LOG.debug("Adjusted report date for " + this.reportFilename + ": " + from + " - " + to);
+    query.setParameter("DATE_FROM", from);
+    query.setParameter("DATE_TO", to);
     for (String key : this.params.keySet()) {
       query.setParameter(key, this.params.get(key));
     }

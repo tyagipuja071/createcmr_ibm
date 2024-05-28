@@ -456,6 +456,7 @@ var TemplateService = (function() {
 
                       // CREATCMR-4293
                       var ctc = '';
+                      var enterprise = '';
                       var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
                       if (CMR_ISSUING_CNTRY_ARRAY.includes(cmrIssuingCntry)) {
@@ -472,6 +473,14 @@ var TemplateService = (function() {
                             ctc = '';
                           }
                           FormManager.setValue(name, ctc);
+                        }
+                      }
+                      if (cmrIssuingCntry == '864' || cmrIssuingCntry == '862') {
+                        if (name == 'enterprise') {
+                          if (_pagemodel.enterprise == null) {
+                            enterprise = '';
+                          }
+                          FormManager.setValue(name, enterprise);
                         }
                       }
                       // CREATCMR-4293
@@ -626,7 +635,8 @@ var TemplateService = (function() {
             }
           }
 
-          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755')
+          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755' || FormManager
+              .getActualValue('cmrIssuingCntry') == '864' || FormManager.getActualValue('cmrIssuingCntry') == '862')
               && name == 'enterprise') {
             // SKIP for CMR-2617 Germany
             // SKIP for CMR-2001 Austria
@@ -652,11 +662,22 @@ var TemplateService = (function() {
         }
 
         if (scenarioChanged == true) {
-          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry'))) {
-            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))) {
+          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry')) || FormManager.getActualValue('cmrIssuingCntry') == '649') {
+            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))
+                || scenario == 'PRIV' || scenario == 'ECO') {
               var isuCd = FormManager.getActualValue('isuCd');
               if (isuCd == '8B' || isuCd == '21') {
                 FormManager.setValue('clientTier', '');
+              }
+              if (isuCd == '21') {
+                FormManager.setValue('clientTier', '');
+                FormManager.readOnly('isuCd');
+                FormManager.readOnly('clientTier');
+              }
+              if (isuCd == '36') {
+                FormManager.setValue('clientTier', 'Y');
+                FormManager.readOnly('isuCd');
+                FormManager.readOnly('clientTier');
               }
             }
           }
@@ -737,15 +758,18 @@ var TemplateService = (function() {
           var driver = template.driver;
           var driverFieldName = driver.fieldName;
           scenario = FormManager.getActualValue(driverFieldName);
-          var cmrCountries = [ '666', '862', '726'];
+          var cmrCountries = [ '666', '862', '726' ];
           var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) &&  !cmrCountries.includes(cmrIssuingCntry)) {
+          if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) && !cmrCountries.includes(cmrIssuingCntry)) {
             scenarioChanged = true;
+          } else {
+            scenarioChanged = false; // This impl has been done for 3 countries
+            // (Greece,Cyprus,Turkey) as per
+            // CREATCMR-9532, however, it's not
+            // restricted to these only and can be
+            // used for other countries as and when
+            // required.
           }
-          else
-      	  {
-      	  scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
-      	  }
           scenarioChanged = scenarioChanged || (currentChosenScenario != '' && currentChosenScenario != scenario);
           currentChosenScenario = scenario;
 
@@ -926,14 +950,17 @@ var TemplateService = (function() {
             }
           }
         }
-        var cmrCountries = [ '666', '862', '726'];
+        var cmrCountries = [ '666', '862', '726' ];
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var scenarioChanged = false;
-        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario  &&  !cmrCountries.includes(cmrIssuingCntry)) {
+        if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario && !cmrCountries.includes(cmrIssuingCntry)) {
           scenarioChanged = true;
-        }
-        else
-    	{ scenarioChanged = false;  // This impl has been done for 3 countries (Greece,Cyprus,Turkey) as per CREATCMR-9532, however, it's not restricted to these only and can be used for other countries as and when required.
+        } else {
+          scenarioChanged = false; // This impl has been done for 3 countries
+          // (Greece,Cyprus,Turkey) as per
+          // CREATCMR-9532, however, it's not
+          // restricted to these only and can be used
+          // for other countries as and when required.
         }
 
         if ((typeof GEOHandler) != 'undefined') {

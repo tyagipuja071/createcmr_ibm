@@ -253,7 +253,10 @@ public class CmrClientService extends BaseSimpleService<Object> {
           .setIndustryCode(data.getSubIndustryCd() != null && data.getSubIndustryCd().length() > 0 ? data.getSubIndustryCd().substring(0, 1) : null);
       coverage.setIndustrySolutionUnit(data.getIsuCd());
       coverage.setNationalTaxID(data.getTaxCd1());
+      if(!"631".equalsIgnoreCase(data.getCmrIssuingCntry()))
+      {
       coverage.setSORTL(data.getSearchTerm());
+      }
       coverage.setUnISIC(data.getIsicCd());
       coverage.setSitePartyID(data.getSitePartyId());
       coverage.setCity(addr.getCity1());
@@ -305,8 +308,8 @@ public class CmrClientService extends BaseSimpleService<Object> {
         }
 
         if (coverageOutput == null) {
-          if (output.getCoverage().size() > 0) {
-            coverageOutput = output.getCoverage().get(0);
+          if (output.getCoverage().size() > 1) {
+            coverageOutput = output.getCoverage().get(1);
           } else {
             coverageOutput = new Coverage();
           }

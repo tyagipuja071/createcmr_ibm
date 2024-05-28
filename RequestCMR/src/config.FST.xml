@@ -1,7 +1,7 @@
 <template id="FST" for="UPDATE">
 	<tabs>
 		<tab name="Data" type="Data">
-		<columns>
+			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
 					<dbColumn>CMR_NO</dbColumn>
@@ -63,12 +63,18 @@
 					<length>1</length>
 					<lovId>EmbargoCode</lovId>
 				</column>
+				<column exactLength="true">
+					<label>Enterprise Number</label>
+					<dbColumn>ENTERPRISE</dbColumn>
+					<width>15</width>
+					<length>6</length>
+				</column>
 				<column>
-                    <label>STC order block code</label>
-                    <dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
-                    <width>15</width>
-                    <lovId>TaxExemptStatus3</lovId>
-                </column>
+					<label>STC order block code</label>
+					<dbColumn>TAX_EXEMPT_STATUS_3</dbColumn>
+					<width>15</width>
+					<lovId>TaxExemptStatus3</lovId>
+				</column>
 				<column>
 					<label>CoF</label>
 					<dbColumn>OUT_CITY_LIMIT</dbColumn>
@@ -81,24 +87,24 @@
 					<dbColumn>ENTP_UPDT_TYP</dbColumn>
 					<width>15</width>
 					<lovId>CodFlag</lovId>
-				</column>				
+				</column>
 				<column number="false">
-          			<label>VAT</label>
-          			<dbColumn>VAT</dbColumn>
-          			<width>20</width>
-          			<length>20</length>
-        		</column>
-        		<column>
-          			<label>Phone #</label>
-          			<dbColumn>RESTRICT_TO</dbColumn>
-          			<length>16</length>
-        		</column>
-        		<column exactLength="true">
+					<label>VAT</label>
+					<dbColumn>VAT</dbColumn>
+					<width>20</width>
+					<length>20</length>
+				</column>
+				<column>
+					<label>Phone #</label>
+					<dbColumn>RESTRICT_TO</dbColumn>
+					<length>16</length>
+				</column>
+				<column exactLength="true">
 					<label>Internal Department Number</label>
 					<dbColumn>AFFILIATE</dbColumn>
 					<width>20</width>
 					<length>6</length>
-				</column>				
+				</column>
 			</columns>
 		</tab>
 		<tab name="Mail-to Address" type="Address" typeCode="ZS02">
@@ -144,6 +150,12 @@
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
 					<length>21</length>
+				</column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -216,6 +228,12 @@
 					<length>24</length>
 				</column>
 				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
@@ -284,6 +302,12 @@
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
 					<length>21</length>
+				</column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -356,6 +380,12 @@
 					<length>21</length>
 				</column>
 				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
+				</column>
+				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
@@ -374,13 +404,14 @@
 					<length>30</length>
 				</column>
 				<column>
-          			<label>Phone #</label>
-          			<dbColumn>CUST_PHONE</dbColumn>
-          			<length>16</length>
-        		</column>
+					<label>Phone #</label>
+					<dbColumn>CUST_PHONE</dbColumn>
+					<length>16</length>
+				</column>
 			</columns>
 		</tab>
-		<tab name="Install-at Address" data="false" type="Address" typeCode="ZI01">
+		<tab name="Install-at Address" data="false" type="Address"
+			typeCode="ZI01">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -423,6 +454,12 @@
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
 					<length>21</length>
+				</column>
+				<column>
+					<label>State/Province</label>
+					<dbColumn>STATE_PROV</dbColumn>
+					<width>40</width>
+					<bdsId>StateProv</bdsId>
 				</column>
 				<column>
 					<label>Postal Code</label>

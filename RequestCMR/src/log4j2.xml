@@ -25,8 +25,8 @@
     <Root level="ERROR" additivity="false">
       <AppenderRef ref="console" />
     </Root> 
-    <Logger name="com.ibm" level="TRACE" additivity="false">
-      <AppenderRef ref="logdna" level="TRACE"/>
+    <Logger name="com.ibm" level="DEBUG" additivity="false">
+      <AppenderRef ref="logdna" level="DEBUG"/>
       <AppenderRef ref="rollingFile" level="DEBUG"/>
     </Logger>
   </Loggers>
