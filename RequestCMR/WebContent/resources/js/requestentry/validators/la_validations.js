@@ -1313,7 +1313,7 @@ function addTaxCodesValidator() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 2; i <= 15; i++) {
+  for (var i = 0; i <= 15; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
@@ -1325,14 +1325,12 @@ function addChecklistBtnHandler() {
 
 function freeTxtFieldShowHide(buttonNo) {
   var shouldDisplay = false;
-
-  if (buttonNo <= 1) {
-    return;
-  }
   var fieldIdNo = getCheckListFieldNo(buttonNo);
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
-
+  if(buttonNo == 0 || buttonNo == 1){
+	fieldIdNo = 13;
+   }
   if (buttonNo%2 == 0) {
     shouldDisplay = true;
   } else {
