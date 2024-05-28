@@ -1052,17 +1052,10 @@ public class JPHandler extends GEOHandler {
     data.setAgreementSignDate(mainRecord.getCmrContractSignDt() != null && mainRecord.getCmrContractSignDt().trim().length() == 8
         ? mainRecord.getCmrContractSignDt().substring(2) : mainRecord.getCmrContractSignDt().trim());
 
-    if (mainRecord.getCompanyCd() != null) {
-      if (mainRecord.getCompanyCd().equals("AA")) {
-        data.setCustGrp("IBMTP");
-      } else {
-        data.setCustGrp("SUBSI");
-      }
-    }
-    if ("IBMTP".equals(data.getCustGrp())) {
+    if ("IBMTP".equals(data.getCustGrp()) || (!"XT".equals(mainRecord.getSbo()) && StringUtils.isNotBlank(mainRecord.getSbo()))) {
       data.setSalesBusOffCd(
           mainRecord.getSbo() != null && mainRecord.getSbo().length() == 3 ? mainRecord.getSbo().substring(1) : mainRecord.getSbo());
-    } else if (StringUtils.isEmpty(data.getCustGrp()) || data.getCustGrp().equals("SUBSI")) {
+    } else if (StringUtils.isEmpty(data.getCustGrp()) || data.getCustGrp().equals("SUBSI") || "XT".equals(mainRecord.getSbo())) {
       data.setSalesBusOffCd(
           mainRecord.getSboSub() != null && mainRecord.getSboSub().length() == 3 ? mainRecord.getSboSub().substring(1) : mainRecord.getSboSub());
     }
