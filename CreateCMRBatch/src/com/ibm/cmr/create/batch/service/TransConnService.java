@@ -29,8 +29,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 import com.ibm.ci.search.client.IndexServiceClient;
 import com.ibm.ci.search.client.impl.index.DeleteFromIndexRequest;
 import com.ibm.ci.search.client.impl.index.IndexResponse;
-import com.ibm.cio.cmr.create.entity.NotifyReq;
-import com.ibm.cio.cmr.create.entity.NotifyReqPK;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
@@ -153,9 +151,17 @@ public class TransConnService extends BaseBatchService {
       records = gatherAbortedRecords(entityManager);
       monitorAbortedRecords(entityManager, records);
 
+      LOG.info("Processing TransConn records... (Transconn Removed)");
+      // records = gatherTransConnRecords(entityManager);
+      // monitorTransconn(entityManager, records);
+
       LOG.info("Processing MQ Interface records...");
       records = gatherMQInterfaceRequests(entityManager);
       monitorMQInterfaceRequests(entityManager, records);
+
+      LOG.info("Reprocess MQ Interface records Reprocess...");
+      // records = gatherMQInterfaceRequestsReprocess(entityManager);
+      // monitorMQInterfaceRequestsReprocess(entityManager, records);
 
       LOG.info("Processing Completed Manual records...");
       records = gatherDisAutoProcRecords(entityManager);
@@ -170,9 +176,9 @@ public class TransConnService extends BaseBatchService {
         monitorLegacyPending(entityManager, records);
       }
 
-      LOG.info("Processing LA Reprocess RDC records...");
-      records = gatherLAReprocessRdcRecords(entityManager);
-      monitorLAReprocessRdcRecords(entityManager, records);
+      LOG.info("Processing LA Reprocess RDC records... (Transconn Removed)");
+      // records = gatherLAReprocessRdcRecords(entityManager);
+      // monitorLAReprocessRdcRecords(entityManager, records);
 
       return true;
     } catch (Exception e) {
@@ -183,14 +189,16 @@ public class TransConnService extends BaseBatchService {
 
   protected List<Long> gatherLAReprocessRdcRecords(EntityManager entityManager) {
     // search for LA records to be reprocessed in RDC
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR.LA_RDC_REPROCESS");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    List<Admin> reprocessRecords = query.getResults(Admin.class);
-    LOG.debug("Size of LA Reprocess Rdc Records : " + reprocessRecords.size());
+    // String sql = ExternalizedQuery.getSql("BATCH.MONITOR.LA_RDC_REPROCESS");
+    // PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // List<Admin> reprocessRecords = query.getResults(Admin.class);
+    LOG.debug("Size of LA Reprocess Rdc Records : " + 0);
+    LOG.info("gatherLAReprocessRdcRecords -- removed");
+
     List<Long> queue = new ArrayList<>();
-    for (Admin admin : reprocessRecords) {
-      queue.add(admin.getId().getReqId());
-    }
+    // for (Admin admin : reprocessRecords) {
+    // queue.add(admin.getId().getReqId());
+    // }
     return queue;
   }
 
@@ -282,18 +290,116 @@ public class TransConnService extends BaseBatchService {
   protected List<Long> gatherTransConnRecords(EntityManager entityManager) {
     long start = new Date().getTime();
     // search the notify requests from transconn where NOTIFIED_IND <> 'Y'
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_TRANSCONN");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("NOTIFIED_IND", CmrConstants.NOTIFY_IND_YES);
-
-    List<NotifyReq> notifyList = query.getResults(NotifyReq.class);
-    LOG.debug("Size of Notify List : " + notifyList.size());
+    // String sql = ExternalizedQuery.getSql("BATCH.MONITOR_TRANSCONN");
+    // PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // query.setParameter("NOTIFIED_IND", CmrConstants.NOTIFY_IND_YES);
+    //
+    // List<NotifyReq> notifyList = query.getResults(NotifyReq.class);
+    LOG.debug("Size of Notify List : " + 0);
+    LOG.info("gatherTransConnRecords -- removed");
     List<Long> queue = new ArrayList<>();
-    for (NotifyReq notif : notifyList) {
-      queue.add(notif.getId().getNotifyId());
-    }
+    // for (NotifyReq notif : notifyList) {
+    // queue.add(notif.getId().getNotifyId());
+    // }
     ProfilerLogger.LOG.trace("After gatherTransConnRecords " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
+
+  }
+
+  /**
+   * Monitor records from the TRANSCONN.NOTIFY_REQ
+   * 
+   * @param entityManager
+   * @throws JsonGenerationException
+   * @throws JsonMappingException
+   * @throws IOException
+   * @throws Exception
+   */
+  public void monitorTransconn(EntityManager entityManager, List<Long> notifyList) throws Exception {
+    LOG.info("monitorTransconn - removed");
+
+    // for (Long id : notifyList) {
+    // try {
+    // Thread.currentThread().setName("REQ-" + id);
+    // long start = new Date().getTime();
+    // NotifyReqPK pk = new NotifyReqPK();
+    // pk.setNotifyId(id);
+    // NotifyReq notify = entityManager.find(NotifyReq.class, pk);
+    // if (BatchUtil.excludeForEnvironment(this.context, entityManager,
+    // notify.getReqId())) {
+    // continue;
+    // }
+    // LOG.info("Processing Notify Req " + notify.getId().getNotifyId() + "
+    // [Request ID: " + notify.getReqId() + "]");
+    // NotifyReqModel notifyReqModel = new NotifyReqModel();
+    // copyValuesFromEntity(notify, notifyReqModel);
+    //
+    // // create a entry in request's comment log re_cmt_log table
+    // if (!StringUtils.isBlank(notify.getCmtLogMsg())) {
+    // createNotifyReqCommentLog(entityManager, notifyReqModel);
+    // }
+    // // update the NOTIFIED_IND of NOTIFY_REQ Table for each record
+    // // processed
+    // notify.setNotifiedInd(CmrConstants.NOTIFY_IND_YES);
+    // updateEntity(notify, entityManager);
+    //
+    // partialCommit(entityManager); // commit the transconn changes so
+    // // that
+    // // they won't be on the next run
+    //
+    // // retrieve the mail contents and needed entities
+    // String sqlMail = "BATCH.GET_MAIL_CONTENTS";
+    // String mapping = Admin.BATCH_SERVICE_MAPPING;
+    // PreparedQuery requestQuery = new PreparedQuery(entityManager,
+    // ExternalizedQuery.getSql(sqlMail));
+    // requestQuery.setParameter("REQ_ID", notify.getReqId());
+    // requestQuery.setParameter("REQ_STATUS", notify.getReqStatus());
+    // requestQuery.setParameter("CHANGED_BY_ID", notify.getChangedById());
+    // List<CompoundEntity> records = requestQuery.getCompundResults(1,
+    // Admin.class, mapping);
+    //
+    // CompoundEntity entities = records.get(0);
+    // Admin admin = entities.getEntity(Admin.class);
+    // Data data = entities.getEntity(Data.class);
+    // WfHist wfHist = entities.getEntity(WfHist.class);
+    // entityManager.detach(data);
+    // entityManager.detach(wfHist);
+    //
+    // if (wfHist != null) {
+    // RequestUtils.sendEmailNotifications(entityManager, admin, wfHist);
+    // } else {
+    // LOG.warn("Cannot create Workflow History, missing WF_HIST record.");
+    // }
+    //
+    // if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) &&
+    // CmrConstants.REQUEST_STATUS.COM.toString().equals(admin.getReqStatus()))
+    // {
+    // processSingleRequest(entityManager, admin, data);
+    //
+    // } else if (MASS_REQUEST_TYPES.contains(admin.getReqType())) {
+    // processMassChanges(entityManager, admin, data);
+    //
+    // } else if (CmrConstants.REQ_TYPE_UPDT_BY_ENT.equals(admin.getReqType()))
+    // {
+    // processUpdateByEnterprise(entityManager, admin, data);
+    //
+    // } else {
+    // LOG.warn("Request ID " + admin.getId().getReqId() + " cannot be
+    // processed. Improper Type or not completed.");
+    // }
+    //
+    // partialCommit(entityManager);
+    // ProfilerLogger.LOG.trace(
+    // "After monitorTransconn for Request ID: " + id + " " +
+    // DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s
+    // 's'"));
+    // } catch (Exception e) {
+    // SlackAlertsUtil.recordException("TransConn", "Notify ID " + id, e);
+    // LOG.error("Error in processing TransConn Record with Notify ID " + id + "
+    // [" + e.getMessage() + "]", e);
+    // }
+    // }
+    Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
 
   }
 
@@ -319,6 +425,31 @@ public class TransConnService extends BaseBatchService {
     ProfilerLogger.LOG.trace("After gatherMQInterfaceRequests " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
     return queue;
 
+  }
+
+  /**
+   * Prepares a list of request IDs to reprocess *
+   * 
+   * @param entityManager
+   * @return
+   */
+  protected List<Long> gatherMQInterfaceRequestsReprocess(EntityManager entityManager) {
+    LOG.info("gatherMQInterfaceRequestsReprocess...");
+    // search for HKMO records to be reprocessed in RDC
+    long start = new Date().getTime();
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_MQ_INTF_REQ_QUEUE_REPROCESS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MQ_IND", CmrConstants.MQ_IND_YES);
+
+    List<MqIntfReqQueue> mqIntfList = query.getResults(MqIntfReqQueue.class);
+    LOG.debug("Size of MQ Intf List : " + mqIntfList.size());
+
+    List<Long> queue = new ArrayList<>();
+    for (MqIntfReqQueue mq : mqIntfList) {
+      queue.add(mq.getId().getQueryReqId());
+    }
+    ProfilerLogger.LOG.trace("After gatherMQInterfaceRequests " + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
+    return queue;
   }
 
   /**
@@ -403,7 +534,8 @@ public class TransConnService extends BaseBatchService {
         // record.");
         // }
 
-        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.COM.toString().equals(admin.getReqStatus())) {
+        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.COM.toString().equals(admin.getReqStatus())
+            || CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
           processSingleRequest(entityManager, admin, data);
 
         } else if (MASS_REQUEST_TYPES.contains(admin.getReqType())) {
@@ -427,6 +559,105 @@ public class TransConnService extends BaseBatchService {
     }
     Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
 
+  }
+
+  /**
+   * Monitor records from the CREQCMR.MQ_INTF_REQ_QUEUE
+   * 
+   * @param entityManager
+   * @throws JsonGenerationException
+   * @throws JsonMappingException
+   * @throws IOException
+   * @throws Exception
+   */
+  public synchronized void monitorMQInterfaceRequestsReprocess(EntityManager entityManager, List<Long> forReprocess)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
+    LOG.info("HKMO -- monitorMQInterfaceRequestsReprocess");
+    boolean isError = false;
+    for (Long id : forReprocess) {
+      long start = new Date().getTime();
+      MqIntfReqQueuePK pk = new MqIntfReqQueuePK();
+      pk.setQueryReqId(id);
+      MqIntfReqQueue mqIntfReq = entityManager.find(MqIntfReqQueue.class, pk);
+
+      isError = mqIntfReq.getReqStatus() != null && mqIntfReq.getReqStatus().contains(MQMsgConstants.REQ_STATUS_SER);
+      try {
+        LOG.info("Processing MQ Intf Req " + mqIntfReq.getId().getQueryReqId() + " [Request ID: " + mqIntfReq.getReqId() + "]");
+        MQIntfReqQueueModel mqIntfReqModel = new MQIntfReqQueueModel();
+        copyValuesFromEntity(mqIntfReq, mqIntfReqModel);
+
+        // create a entry in request's comment log re_cmt_log table
+        if (isError) {
+          createMQIntfReqCommentLog(entityManager, mqIntfReqModel);
+        }
+        // update the MQ_IND of NOTIFY_REQ Table for each record
+        // processed
+        mqIntfReq.setMqInd("N");
+        updateEntity(mqIntfReq, entityManager);
+
+        partialCommit(entityManager); // commit the MQ_INTF_REQ_QUEUE
+        // changes so
+        // that
+        // they won't be on the next run
+
+        // retrieve the mail contents and needed entities
+        String sqlMail = "BATCH.GET_MAIL_CONTENTS";
+        String mapping = Admin.BATCH_SERVICE_MAPPING;
+        PreparedQuery requestQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql(sqlMail));
+        requestQuery.setParameter("REQ_ID", mqIntfReq.getReqId());
+        requestQuery.setParameter("REQ_STATUS", isError ? CmrConstants.REQUEST_STATUS.PPN.toString() : CmrConstants.REQUEST_STATUS.COM.toString());
+        requestQuery.setParameter("CHANGED_BY_ID", mqIntfReq.getLastUpdtBy());
+        List<CompoundEntity> records = requestQuery.getCompundResults(1, Admin.class, mapping);
+
+        CompoundEntity entities = records.get(0);
+        Admin admin = entities.getEntity(Admin.class);
+        Data data = entities.getEntity(Data.class);
+        WfHist wfHist = entities.getEntity(WfHist.class);
+
+        if (data != null) {
+          entityManager.detach(data);
+        }
+        if (wfHist != null) {
+          entityManager.detach(wfHist);
+        } else {
+          // create generic wf hist, will be removed once all
+          // functions e2e are
+          // tested
+          wfHist = new WfHist();
+          wfHist.setReqId(mqIntfReq.getReqId());
+          wfHist.setCmt(isError ? MQMsgConstants.WH_COMMENT_REJECT : MQMsgConstants.WH_HIST_CMT_COM + data.getCmrNo());
+          wfHist.setCreateById(MQMsgConstants.MQ_APP_USER);
+          wfHist.setCreateTs(SystemUtil.getCurrentTimestamp());
+          wfHist.setCreateByNm(MQMsgConstants.MQ_APP_USER);
+          wfHist.setReqStatus(isError ? CmrConstants.REQUEST_STATUS.PPN.toString() : CmrConstants.REQUEST_STATUS.COM.toString());
+          wfHist.setRejReason("");
+        }
+
+        if (wfHist != null) {
+          RequestUtils.sendEmailNotifications(entityManager, admin, wfHist);
+        }
+        if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
+          List<Long> singleId = new ArrayList<>();
+          singleId.add(id);
+
+          LOG.info("Reprocessing ID: " + id);
+          admin.setReqStatus("COM");
+          updateEntity(admin, entityManager);
+
+          monitorMQInterfaceRequests(entityManager, singleId);
+        } else {
+          LOG.warn("Request ID " + admin.getId().getReqId() + " cannot be processed. Improper Type or not completed.");
+        }
+
+        partialCommit(entityManager);
+        ProfilerLogger.LOG.trace("After monitorMQInterfaceRequests for Request ID: " + id + " "
+            + DurationFormatUtils.formatDuration(new Date().getTime() - start, "m 'm' s 's'"));
+      } catch (Exception e) {
+        SlackAlertsUtil.recordException("TransConn", "Query ID " + mqIntfReq.getId().getQueryReqId(), e);
+        LOG.error("Error in processing TransConn Record " + mqIntfReq.getId().getQueryReqId() + " for Request ID " + mqIntfReq.getReqId() + " ["
+            + e.getMessage() + "]", e);
+      }
+    }
   }
 
   /**
@@ -1379,7 +1610,8 @@ public class TransConnService extends BaseBatchService {
     // try to convert the request to Legal CMR conversion
 
     if (this.deleteRDcTargets) {
-      deleteRDcTargetRecords(entityManager, data.getCmrNo(), data.getCmrIssuingCntry());
+      // deleteRDcTargetRecords(entityManager, data.getCmrNo(),
+      // data.getCmrIssuingCntry());
     }
     convertToProspectToLegalCMRInput(request, entityManager, request.getReqId());
 
@@ -1393,6 +1625,14 @@ public class TransConnService extends BaseBatchService {
     // call the create cmr service
     LOG.trace("Request JSON:");
     if (LOG.isTraceEnabled()) {
+      DebugUtil.printObjectAsJson(LOG, request);
+    }
+
+    LOG.info("is prospect conversion: " + prospectConversion);
+    LOG.info("Cmr No: " + data.getCmrNo());
+    LOG.info("Prospect No: " + data.getProspectSeqNo());
+    LOG.info("Prospect Seq ind: " + admin.getProspLegalInd());
+    if (prospectConversion) {
       DebugUtil.printObjectAsJson(LOG, request);
     }
 
@@ -1413,8 +1653,17 @@ public class TransConnService extends BaseBatchService {
       response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
     } else {
       try {
+        LOG.info("processCreateRequest -- Sending request to service START");
+        DebugUtil.printObjectAsJson(LOG, request);
+
+        LOG.info("applicationId: " + applicationId);
         this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
+        LOG.info(serviceClient.getRequestMethod());
         response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+        LOG.info("processCreateRequest -- Sending request to service END");
+
+        DebugUtil.printObjectAsJson(LOG, response);
+
       } catch (Exception e) {
         LOG.error("Error when connecting to the service.", e);
         response = new ProcessResponse();
@@ -1472,7 +1721,8 @@ public class TransConnService extends BaseBatchService {
       // request
       if (isCompletedSuccessfully(resultCode)) {
 
-        setLAAdminToCompleted(admin, data);
+        setCountryAdminToCompleted(admin, data);
+
         if (response.isCmrNoGenerated() && !StringUtils.isEmpty(response.getCmrNo())) {
           LOG.debug("CMR No. " + response.getCmrNo() + " generated. Updating DATA for Request " + data.getId().getReqId());
           data.setCmrNo(response.getCmrNo());
@@ -1510,7 +1760,7 @@ public class TransConnService extends BaseBatchService {
           comment = comment.append("RDc create processing for CMR No " + request.getCmrNo() + " failed. Error: " + response.getMessage()
               + " System will retry processing once.");
         } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
-          setLAAdminToPending(admin, data);
+          setCountryAdminToPending(admin, data);
           comment = comment.append("RDc create processing for CMR No " + request.getCmrNo() + " failed. Error: " + response.getMessage());
         } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
           comment = comment.append("Create processing in RDc skipped: " + response.getMessage());
@@ -3092,16 +3342,28 @@ public class TransConnService extends BaseBatchService {
     Thread.currentThread().setName("TransConn-" + Thread.currentThread().getId());
   }
 
-  private void setLAAdminToCompleted(Admin admin, Data data) {
-    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+  private void setCountryAdminToCompleted(Admin admin, Data data) {
+    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) || SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry())
+        || SystemLocation.MACAO.equals(data.getCmrIssuingCntry())) {
+      LOG.debug("Setting country to COM..");
+      admin.setLockBy(null);
+      admin.setLockByNm(null);
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
       admin.setReqStatus("COM");
+      admin.setProcessedFlag("Y");
     }
   }
 
-  private void setLAAdminToPending(Admin admin, Data data) {
-    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-      admin.setReqStatus("PPN");
-      admin.setProcessedFlag("E"); // set request status to error.
+  private void setCountryAdminToPending(Admin admin, Data data) {
+    if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())
+        || (SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(data.getCmrIssuingCntry()))) {
+      LOG.debug("Unlocking request due to error..");
+      admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+      admin.setLockBy(null);
+      admin.setLockByNm(null);
+      admin.setLockTs(null);
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
+      admin.setProcessedFlag("E");
     }
   }
 

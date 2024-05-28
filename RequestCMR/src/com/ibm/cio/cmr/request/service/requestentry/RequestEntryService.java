@@ -569,6 +569,16 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       // admin.setReqStatus("PCO");
       // }
       // }
+
+      if (geoHandler != null
+          && (SystemLocation.HONG_KONG.equals(model.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(model.getCmrIssuingCntry()))) {
+        boolean wtaasCompleted = reqIsWtaasCompleted(entityManager, admin.getId().getReqId());
+        if (wtaasCompleted) {
+          this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
+          updateMQRequestForReprocess(entityManager, admin.getId().getReqId());
+          admin.setReqStatus("PCO");
+        }
+      }
     }
 
     if (transitionToNext) {
@@ -2069,6 +2079,23 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       return true;
     }
     return false;
+  }
+
+  private boolean reqIsWtaasCompleted(EntityManager entityManager, Long reqId) {
+    String sql = ExternalizedQuery.getSql("GCG.GETCOUNT_COM_NOTIFY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    int count = query.getSingleResult(Integer.class);
+    if (count > 0) {
+      return true;
+    }
+    return false;
+  }
+
+  private void updateMQRequestForReprocess(EntityManager entityManager, long requestID) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GCG.UPDATE_FOR_REPROCESS"));
+    query.setParameter("REQ_ID", requestID);
+    query.executeSql();
   }
 
   /**
