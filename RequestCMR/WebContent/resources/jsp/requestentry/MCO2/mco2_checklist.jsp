@@ -40,8 +40,8 @@
    <cmr:chk-section name="Section A:  Denied Parties List Status" >
       <cmr:chk-entry number="1" section="A">
              Is the Customer on the DPL?        
-            <span id="checklist_txt_field_13" style="display:none"><label for="dijit_form_TextBox_13">If yes, provide details of DPL denial code and DPL entry information. </label>
-         <%=RequestUtils.generateChecklistFreeTxtField13(request)%>
+            <span id="checklist_txt_field_5" style="display:none"><label for="dijit_form_TextBox_5">If yes, provide details of DPL denial code and DPL entry information. </label>
+         <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
          </span> 
       </cmr:chk-entry>
    </cmr:chk-section> 
@@ -84,6 +84,6 @@
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Pursuant to IBM's Business Conduct Guidelines (BCG), I certify that the information provided in this Proliferation Screening questionnaire, including all other support documentation related to this transaction, is true, accurate, and complete to the best of my knowledge and belief.
       Type name here to indicate acknowledgment of this certification: ">
-      <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
+      <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
    </cmr:chk-lbl-field>
 </cmr:checklist>

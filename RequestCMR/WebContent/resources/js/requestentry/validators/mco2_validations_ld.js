@@ -193,21 +193,24 @@ function addNewHandlersForMCO2() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 0; i <= 15; i++) {
+  for (var i = 0; i <= 1; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function (value) {
-        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+		        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
       });
     }
   }
 }
 
 function freeTxtFieldShowHide(buttonNo) {
+	if(['810','662','745','835','825'].includes(FormManager.getActualValue('cmrIssuingCntry')) && buttonNo > 1){
+		return;
+	}
   var shouldDisplay = false;
   var fieldIdNo = getCheckListFieldNo(buttonNo);
   if(buttonNo == 0 || buttonNo == 1){
-	fieldIdNo = 13;
+	fieldIdNo = 5;
    }
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
@@ -230,16 +233,12 @@ function getCheckListFieldNo(buttonNo) {
 }
 
 function checkChecklistButtons() {
-	var j =14;
-	if(['835','825'].includes(FormManager.getActualValue('cmrIssuingCntry'))){
-		j = 10;
+  for (var i = 0; i <= 14; i = i + 2) {
+	if(['810','662','745','835','825'].includes(FormManager.getActualValue('cmrIssuingCntry')) && i > 1){
+		break;;
 	}
-  for (var i = 0; i <= j; i = i + 2) {
     if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
 	    var fieldNo = getCheckListFieldNo(i);
-	    if(i == 0 || i== 1){
-		   fieldNo = 13;
-	}
       document.getElementById('checklist_txt_field_' + fieldNo).style.display = 'block';
     }
   }
@@ -278,15 +277,6 @@ function setChecklistStatus() {
         document.getElementById("checklistStatus").innerHTML = "Complete";
         FormManager.setValue('checklistStatus', "Complete");
       }
-
-      if (questions[14].checked) {
-        // if question 8 = YES, country field is required
-        var country = checklist.query('input[name="freeTxtField1"]');
-        if (country.length > 0 && country[0].value.trim() == '') {
-          document.getElementById("checklistStatus").innerHTML = "Incomplete";
-          FormManager.setValue('checklistStatus', "Incomplete");
-        }
-      }
     } else {
       document.getElementById("checklistStatus").innerHTML = "Complete";
       FormManager.setValue('checklistStatus', "Complete");
@@ -307,8 +297,8 @@ function addCEMEAChecklistValidator() {
           var noOfQuestions = questions.length / 2;
           var noOfTextBoxes = textBoxes.length;
 
-          for (var i = 0; i < noOfTextBoxes; i++) {
-            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+          for (var i = 3; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i)).style.display == 'block'))) {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
@@ -324,12 +314,6 @@ function addCEMEAChecklistValidator() {
           }
 
           // if question 8 = YES, country field is required
-          if (questions[14].checked) {
-            var country = checklist.query('input[name="freeTxtField1"]');
-            if (country.length > 0 && country[0].value.trim() == '') {
-              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. Item #8 Re-export field is required.');
-            }
-          }
           // add check for checklist on DB
           var reqId = FormManager.getActualValue('reqId');
           var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
