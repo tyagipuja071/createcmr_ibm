@@ -230,9 +230,17 @@ function getCheckListFieldNo(buttonNo) {
 }
 
 function checkChecklistButtons() {
-  for (var i = 0; i <= 14; i = i + 2) {
+	var j =14;
+	if(['835','825'].includes(FormManager.getActualValue('cmrIssuingCntry'))){
+		j = 10;
+	}
+  for (var i = 0; i <= j; i = i + 2) {
     if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
-      document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
+	    var fieldNo = getCheckListFieldNo(i);
+	    if(i == 0 || i== 1){
+		   fieldNo = 13;
+	}
+      document.getElementById('checklist_txt_field_' + fieldNo).style.display = 'block';
     }
   }
 }
