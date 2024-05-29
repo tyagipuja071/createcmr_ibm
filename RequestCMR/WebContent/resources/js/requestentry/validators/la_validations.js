@@ -1326,11 +1326,11 @@ function addChecklistBtnHandler() {
 function freeTxtFieldShowHide(buttonNo) {
   var shouldDisplay = false;
   var fieldIdNo = getCheckListFieldNo(buttonNo);
-  var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
-  var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
   if(buttonNo == 0 || buttonNo == 1){
 	fieldIdNo = 13;
    }
+  var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
+  var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
   if (buttonNo%2 == 0) {
     shouldDisplay = true;
   } else {
