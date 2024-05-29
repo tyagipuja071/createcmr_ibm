@@ -810,7 +810,7 @@ function resetPhoneValidationForSSA() {
   if (SSAMX_COUNTRIES.indexOf(country) > -1) {
     if (country != '815') { // except PERU
       console.log('resetPhoneValidationForSSA : not -> PERU');
-      if (FormManager.GETFIELD_VALIDATIONS['contactPhone'].indexOf(Validators.DIGIT) > -1) {
+      if (FormManager.GETFIELD_VALIDATIONS['contactPhone'] != undefined && FormManager.GETFIELD_VALIDATIONS['contactPhone'].indexOf(Validators.DIGIT) > -1) {
         FormManager.removeValidator('contactPhone', Validators.DIGIT);
         FormManager.addValidator('contactPhone', Validators.DIGIT_OR_DOT, [ 'Phone Number' ]);
       }
