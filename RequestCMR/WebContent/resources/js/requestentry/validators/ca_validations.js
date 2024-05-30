@@ -201,7 +201,13 @@ function addInacCdValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function enableCustClassForUpdate() {
+function enableCustClass() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'PROCESSOR') {
+    FormManager.enable('custClass');
+  } else {
+    FormManager.readOnly('custClass');
+  }
   if (FormManager.getActualValue('reqType') != 'U'){
     return;
   }
@@ -214,6 +220,8 @@ function enableCustClassForUpdate() {
   }
   if (_kukla != null && _kukla.startsWith('4')) {
     FormManager.enable('custClass');
+  } else {
+    FormManager.readOnly('custClass');
   }
   
 }
@@ -1547,7 +1555,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultARFAARByScenario, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setVatInd, SysLoc.CANADA);
-  GEOHandler.addAfterConfig(enableCustClassForUpdate, SysLoc.CANADA);
+  GEOHandler.addAfterConfig(enableCustClass, SysLoc.CANADA);
   
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
