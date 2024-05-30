@@ -1164,6 +1164,11 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setEngineeringBo("");
     }
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (!(StringUtils.isEmpty(mainRecord.getCmrSortl()))) {
+        data.setSalesBusOffCd(mainRecord.getCmrSortl());
+      }
+    }
   }
 
   private boolean loadDuplicateCMR(Data data, String dupCntry, String dupCmrNo) throws Exception {
@@ -1436,7 +1441,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
 
-    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && !"707".equals(data.getCmrIssuingCntry())) {
       String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       // check if share seq address
       String isShareZP01 = isShareZP01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), soldtoseq);
@@ -2301,11 +2306,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 
                 if (!StringUtils.isBlank(city) && Pattern.compile("[0,7,8,9]").matcher(city.substring(city.length() - 1)).find()
                     && "BUCHAREST SECTOR".equals(city.substring(0, 16))) {
-                  if (!"Address in Local language".equalsIgnoreCase(sheet.getSheetName())) {
-                    error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
-                  } else {
-                    error.addError(row.getRowNum(), "City", "Correct format for city is BUCUREȘTI SECTORUL 'N' (N = number 1,2,3,4,5 or 6) <br>");
-                  }
+                  error.addError(row.getRowNum(), "City", "Correct format for city is BUCHAREST SECTOR 'N'  (N = number 1,2,3,4,5 or 6) <br>");
                 }
 
                 if (!StringUtils.isBlank(custName1) && !custName1.equals(custName1.toUpperCase())) {
