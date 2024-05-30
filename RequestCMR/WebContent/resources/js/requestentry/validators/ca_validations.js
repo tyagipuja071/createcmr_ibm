@@ -203,7 +203,7 @@ function addInacCdValidator() {
 
 function enableCustClass() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'PROCESSOR') {
+  if (role == 'REQUESTER') {
     FormManager.enable('custClass');
   } else {
     FormManager.readOnly('custClass');
