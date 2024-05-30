@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.io.ByteArrayInputStream;
@@ -11,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -126,9 +122,9 @@ public class CEMEATransformer extends MessageTransformer {
 
     String sbo = messageHash.get("SBO");
 
-    if (!StringUtils.isEmpty(sbo)) {
-      sbo = StringUtils.rightPad(sbo, 7, '0');
-    }
+    // if (!StringUtils.isEmpty(sbo)) {
+    // sbo = StringUtils.rightPad(sbo, 7, '0');
+    // }
     messageHash.put("SBO", sbo);
     messageHash.put("IBO", sbo);
 
@@ -234,8 +230,8 @@ public class CEMEATransformer extends MessageTransformer {
         LOG.debug("CMR No. " + cmrNo + " specified for dual creates. Using this CN.");
       }
     } else if (!StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())) {
-      LOG.debug("Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. "
-          + handler.mqIntfReqQueue.getCmrNo());
+      LOG.debug(
+          "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
       messageHash.put("CustomerNo", handler.mqIntfReqQueue.getCmrNo());
     }
 
@@ -254,9 +250,9 @@ public class CEMEATransformer extends MessageTransformer {
         messageHash.put("SR", cmrData.getDupSalesRepNo());
         sbo = cmrData.getDupSalesBoCd();
 
-        if (!StringUtils.isEmpty(sbo)) {
-          sbo = StringUtils.rightPad(sbo, 7, '0');
-        }
+        // if (!StringUtils.isEmpty(sbo)) {
+        // sbo = StringUtils.rightPad(sbo, 7, '0');
+        // }
         messageHash.put("SBO", sbo);
         messageHash.put("IBO", sbo);
         messageHash.put("EnterpriseNo", cmrData.getDupEnterpriseNo());
@@ -638,7 +634,7 @@ public class CEMEATransformer extends MessageTransformer {
         try {
           SAXParserFactory factory = SAXParserFactory.newInstance();
           factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
           factory.newSAXParser().parse(new InputSource(bis), dupHandler);
         } finally {
           bis.close();
