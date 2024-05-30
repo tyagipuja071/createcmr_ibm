@@ -2515,15 +2515,15 @@ function validateCustNameChangeForDPLCheck() {
             console.log("MAIN CUST NAME1 on DB >> " + _mainCustNm1Old);
             console.log("MAIN CUST NAME2 on DB >> " + _mainCustNm2Old);
 
-            if ('U' == _reqType && (_action == 'CRU' || _action == 'VAL') && _pagemodel.userRole.toUpperCase() == 'PROCESSOR') {
-              if (_mainCustNm1 != _mainCustNm1Old || _mainCustNm2 != _mainCustNm2Old) {
-                return new ValidationResult(null, false, 'Customer Name or Customer Name 2 were changed. Please Save first to reflect your changes.');
-              } else {
-                return new ValidationResult(null, true);
-              }
-            } else {
-              return new ValidationResult(null, true);
-            }
+//            if ('U' == _reqType && (_action == 'CRU' || _action == 'VAL') && _pagemodel.userRole.toUpperCase() == 'PROCESSOR') {
+//              if (_mainCustNm1 != _mainCustNm1Old || _mainCustNm2 != _mainCustNm2Old) {
+//                return new ValidationResult(null, false, 'Customer Name or Customer Name 2 were changed. Please Save first to reflect your changes.');
+//              } else {
+//                return new ValidationResult(null, true);
+//              }
+//            } else {
+//              return new ValidationResult(null, true);
+//            }
           }
         }
       }
