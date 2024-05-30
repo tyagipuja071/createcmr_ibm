@@ -457,7 +457,7 @@ function afterConfigForCEMEA() {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
     custSubGrp = FormManager.getActualValue('custSubGrp')
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'PROCESSOR' || custSubGrp.includes('BUS')) {
+    if (role == 'REQUESTER') {
       FormManager.enable('custClass');
     } else {
       FormManager.readOnly('custClass');
