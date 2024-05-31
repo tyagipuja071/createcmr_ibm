@@ -771,6 +771,18 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     addr.setCustPhone(cmr.getCmrCustPhone());
     addr.setCustFax(cmr.getCmrCustFax());
 
+    if (!("ZC01".equalsIgnoreCase(type)) && SystemLocation.JAPAN.equalsIgnoreCase(reqModel.getCmrIssuingCntry())) {
+      String defaultContact = "ご担当者";
+      if (StringUtils.isEmpty(cmr.getCmrCollectorNo()) || cmr.getCmrCollectorNo() == null) {
+        addr.setContact(defaultContact);
+      } else if (cmr.getCmrCollectorNo().trim().length() > 15) {
+        addr.setContact(cmr.getCmrCollectorNo().trim().substring(0, 15));
+      } else {
+        addr.setContact(cmr.getCmrCollectorNo().trim());
+      }
+      reqEntryService.updateEntity(addr, entityManager);
+    }
+
     // CREATCMR-5741 - no addr std
     /*
      * if ("U".equals(reqModel.getReqType())) { addr.setAddrStdResult("X"); }
