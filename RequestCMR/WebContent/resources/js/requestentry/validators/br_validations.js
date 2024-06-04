@@ -2099,46 +2099,46 @@ function setCrosTypSubTypSSAMXOnSecnarios() {
   }
 }
 
-//function validateCustNameChangeForDPLCheck() {
-//  // CRU
-//  console.log("validateCustNameChangeForDPLCheck..............");
-//  FormManager.addFormValidator((function() {
-//    return {
-//      validate : function() {
-//        // If update request, if yourAction == CRU, if
-//        // processor
-//        if (typeof (_pagemodel) != 'undefined') {
-//          var _reqType = FormManager.getActualValue('reqType');
-//          var _action = FormManager.getActualValue('yourAction');
-//          var id = FormManager.getActualValue('reqId');
-//          var ret = cmr.query('GET_ADMIN_MAIN_CUST_NAMES', {
-//            REQ_ID : id
-//          });
-//
-//          if (ret != null && ret.ret1 != null) {
-//            var _mainCustNm1 = FormManager.getActualValue('mainCustNm1');
-//            var _mainCustNm2 = FormManager.getActualValue('mainCustNm2');
-//            var _mainCustNm1Old = ret.ret1;
-//            var _mainCustNm2Old = ret.ret2;
-//
-//            console.log("MAIN CUST NAME1 on DB >> " + _mainCustNm1Old);
-//            console.log("MAIN CUST NAME2 on DB >> " + _mainCustNm2Old);
-//
-//            if ('U' == _reqType && (_action == 'CRU' || _action == 'VAL') && _pagemodel.userRole.toUpperCase() == 'PROCESSOR') {
-//              if (_mainCustNm1 != _mainCustNm1Old || _mainCustNm2 != _mainCustNm2Old) {
-//                return new ValidationResult(null, false, 'Customer Name or Customer Name 2 were changed. Please Save first to reflect your changes.');
-//              } else {
-//                return new ValidationResult(null, true);
-//              }
-//            } else {
-//              return new ValidationResult(null, true);
-//            }
-//          }
-//        }
-//      }
-//    };
-//  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-//}
+function validateCustNameChangeForDPLCheck() {
+  // CRU
+  console.log("validateCustNameChangeForDPLCheck..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        // If update request, if yourAction == CRU, if
+        // processor
+        if (typeof (_pagemodel) != 'undefined') {
+          var _reqType = FormManager.getActualValue('reqType');
+          var _action = FormManager.getActualValue('yourAction');
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('GET_ADMIN_MAIN_CUST_NAMES', {
+            REQ_ID : id
+          });
+
+          if (ret != null && ret.ret1 != null) {
+            var _mainCustNm1 = FormManager.getActualValue('mainCustNm1');
+            var _mainCustNm2 = FormManager.getActualValue('mainCustNm2');
+            var _mainCustNm1Old = ret.ret1;
+            var _mainCustNm2Old = ret.ret2;
+
+            console.log("MAIN CUST NAME1 on DB >> " + _mainCustNm1Old);
+            console.log("MAIN CUST NAME2 on DB >> " + _mainCustNm2Old);
+
+            if ('U' == _reqType && (_action == 'CRU' || _action == 'VAL') && _pagemodel.userRole.toUpperCase() == 'PROCESSOR') {
+              if (_mainCustNm1 != _mainCustNm1Old || _mainCustNm2 != _mainCustNm2Old) {
+                return new ValidationResult(null, false, 'Customer Name or Customer Name 2 were changed. Please Save first to reflect your changes.');
+              } else {
+                return new ValidationResult(null, true);
+              }
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
 // CREATCMR-531
 function setIERPSitePartyIDForLA() {
   var role = null;
@@ -2808,7 +2808,7 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
-  //GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateAddlContactEmailFieldForReactivate, [ SysLoc.BRAZIL ], GEOHandler.ROLE_PROCESSOR, true);
 
   // GEOHandler.addAfterConfig(disableFieldsForBrazil, [ SysLoc.BRAZIL ]);

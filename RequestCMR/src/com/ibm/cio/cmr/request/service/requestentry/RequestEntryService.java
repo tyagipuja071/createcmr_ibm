@@ -621,7 +621,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
         && CmrConstants.Create_Update_CMR().equals(model.getAction())) {
-      LAHandler.doDPLNotDone(String.valueOf(model.getReqId()), entityManager, model.getAction(), admin, lockedBy, lockedByNm, processingStatus);
+      if ("631".equals(data.getCmrIssuingCntry()) && !admin.getMainCustNm1().equals(admin.getOldCustNm1())) {
+        // do not throw error if customer name is change for brazil
+      } else {
+        LAHandler.doDPLNotDone(String.valueOf(model.getReqId()), entityManager, model.getAction(), admin, lockedBy, lockedByNm, processingStatus);
+      }
     }
 
     if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
