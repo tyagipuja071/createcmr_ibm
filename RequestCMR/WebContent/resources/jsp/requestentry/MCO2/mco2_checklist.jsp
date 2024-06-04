@@ -74,7 +74,8 @@
       </cmr:chk-entry>
    </cmr:chk-section>
    <cmr:chk-block>
-  If any of the above questions have answered  <span style="font-weight: bold;"> YES </span>, please  <span style="font-weight: bold; color: red,">STOP </span> and <span style="font-weight: bold; color: red,">CONTACT your ERC</span>
+  If any of the above questions have answered  <span style="font-weight: bold; color:red"> YES </span>, please  <span style="font-weight: bold; color: red">STOP </span> and <span style="font-weight: bold; color: red">CONTACT your ERC</span>
+ </span>
 </cmr:chk-block>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Name, Title, and OU/BU  of Requester: ">
       <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
@@ -82,8 +83,20 @@
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Date completed: ">
       <%=RequestUtils.generateChecklistFreeTxtField4(request)%>
    </cmr:chk-lbl-field>
-   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Pursuant to IBM's Business Conduct Guidelines (BCG), I certify that the information provided in this Proliferation Screening questionnaire, including all other support documentation related to this transaction, is true, accurate, and complete to the best of my knowledge and belief.
-      Type name here to indicate acknowledgment of this certification: ">
-      <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
-   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="">
+    <cmr:chk-block>
+      <div>Pursuant to <a href="https://w3.ibm.com/w3publisher/trust-compliance/bcgs">IBM's Business Conduct Guidelines (BCG)</a>, 
+      <br>
+      I certify that the information provided in this 
+      <br>
+     questionnaire is true, accurate, and complete to the best 
+     <br>
+     of my knowledge and belief.
+   <br>
+  <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
+   </div>
+        <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
+   
+   </cmr:chk-block>
+    </cmr:chk-lbl-field>
 </cmr:checklist>
