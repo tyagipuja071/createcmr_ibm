@@ -202,6 +202,9 @@ function addInacCdValidator() {
 }
 
 function enableCustClass() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'REQUESTER') {
     FormManager.enable('custClass');
