@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.util.reports.DateTimeReportField;
 import com.ibm.cio.cmr.request.util.reports.PostalCodeField;
 import com.ibm.cio.cmr.request.util.reports.ReportField;
 import com.ibm.cio.cmr.request.util.reports.ReportSpec;
+import com.ibm.cmr.create.batch.util.CMRFTPConnection;
 import com.ibm.cmr.create.batch.util.reports.KscReportTrailer;
 
 /**
@@ -58,15 +59,23 @@ public class KscReportsService extends BaseBatchService {
   private boolean manualExecution = false;
 
   private static final String DEFAULT_OUTPUT_DIR = "/ci/shared/data/jp/ksc";
+  private static final String DEFAULT_OUTPUT_DIR_EXTERNAL = "/ci/shared/data/external/ksc";
 
   private String timestampString;
   private Timestamp currTimestamp;
   private Timestamp serverTimestamp;
 
   private File outputDir;
+  private boolean useExternalFtp = false;
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
+
+    this.useExternalFtp = "EXTERNAL".equals(SystemParameters.getString("SFTP.KSC"));
+    if (this.useExternalFtp) {
+      LOG.info("Running in EXTERNAL mode");
+    }
+
     setTimestamp();
 
     String outDir = SystemParameters.getString("KSC.RPT.DIR");
@@ -74,8 +83,8 @@ public class KscReportsService extends BaseBatchService {
       outDir = DEFAULT_OUTPUT_DIR;
     }
     this.outputDir = new File(outDir);
-    if (!outputDir.exists() || !outputDir.isDirectory()) {
-      LOG.warn("Output directory " + outputDir.getAbsolutePath() + " is not a valid directory. Setting to " + DEFAULT_OUTPUT_DIR);
+    if (!this.outputDir.exists() || !this.outputDir.isDirectory()) {
+      LOG.warn("Output directory " + this.outputDir.getAbsolutePath() + " is not a valid directory. Setting to " + DEFAULT_OUTPUT_DIR);
       this.outputDir = new File(DEFAULT_OUTPUT_DIR);
     }
 
@@ -94,6 +103,9 @@ public class KscReportsService extends BaseBatchService {
     LOG.debug("Using date range " + dateRange.getFromDate() + " - " + dateRange.getToDate());
     generateReports(entityManager, dateRange, !MONTHLY.equals(this.mode));
 
+    if (this.useExternalFtp) {
+      copyFilesToExternalSFTP(this.outputDir.getAbsolutePath());
+    }
     return true;
   }
 
@@ -122,6 +134,31 @@ public class KscReportsService extends BaseBatchService {
     for (File file : toDelete) {
       LOG.debug("Removing file " + file.getName());
       file.delete();
+    }
+    if (this.useExternalFtp) {
+      cleanupExternalFiles();
+    }
+  }
+
+  /**
+   * Deletes the files from the external system
+   */
+  private void cleanupExternalFiles() {
+    String extDirectory = SystemParameters.getString("KSC.INPUT.DIR.EXT");
+    if (StringUtils.isBlank(extDirectory)) {
+      extDirectory = DEFAULT_OUTPUT_DIR_EXTERNAL;
+    }
+    try {
+      try (CMRFTPConnection sftp = new CMRFTPConnection()) {
+        LOG.debug("Checking files under " + extDirectory);
+        for (String filename : sftp.listFiles(extDirectory)) {
+          LOG.debug("Deleting file " + filename);
+          sftp.deleteFile(extDirectory + "/" + filename);
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("An error occurred when deleting files from external SFTP", e);
+      throw new RuntimeException("Cannot copy from external SFTP.");
     }
   }
 
@@ -255,6 +292,30 @@ public class KscReportsService extends BaseBatchService {
     spec.setLimitDuplicateKeys(true);
     spec.setKeyField("RESXA");
     return spec;
+  }
+
+  /**
+   * Copies all the generated files from local to external SFTP
+   * 
+   * @param outputDir
+   */
+  private void copyFilesToExternalSFTP(String outputDir) {
+    LOG.debug("Uploading generated files to external SFTP..");
+    String extDirectory = SystemParameters.getString("KSC.INPUT.DIR.EXT");
+    if (StringUtils.isBlank(extDirectory)) {
+      extDirectory = DEFAULT_OUTPUT_DIR_EXTERNAL;
+    }
+    try {
+      try (CMRFTPConnection sftp = new CMRFTPConnection()) {
+        for (File file : new File(outputDir).listFiles()) {
+          sftp.putFile(file.getAbsolutePath(), extDirectory + "/" + file.getName());
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("An error occurred when copying files from external SFTP", e);
+      throw new RuntimeException("Cannot copy from external SFTP.");
+    }
+
   }
 
   /**
