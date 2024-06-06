@@ -34,12 +34,7 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
-import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
+import com.ibm.cmr.create.batch.util.CMRFTPConnection;
 
 /**
  * for GCARS process
@@ -54,15 +49,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
   private static final String REMOTE_DIR = "/is/isdata/cmr_partners/gcarsBR/IBMgcars/";
   private static final String REMOTE_ARCHIVE_DIR = "/is/isdata/cmr_partners/gcarsBR/IBMgcarsarchive/";
 
-  private static final String REMOTE_HOST = System.getProperty("GCARS_FTP_HOST");
-  private static final String USERNAME = System.getProperty("GCARS_FTP_USER");
-  private static final String PASSWORD = System.getProperty("GCARS_FTP_PASS");
-  private static final String KNOWN_HOSTS = System.getProperty("GCARS_FTP_KNOWN_HOSTS");
-  private static final String PRIV_KEY = System.getProperty("GCARS_FTP_PRIV_KEY");
   private static final String GCARS_FILE = "bbcro.z010.gcars.inbound.txt";
-  private static final int REMOTE_PORT = 22;
-  private static final int SESSION_TIMEOUT = 10000;
-  private static final int CHANNEL_TIMEOUT = 5000;
 
   private Map<String, Integer> fileSizes = new HashMap<String, Integer>();
   private Map<String, Integer> processedSizes = new HashMap<String, Integer>();
@@ -145,7 +132,7 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
     return queue;
   }
 
-  protected Queue<GCARSUpdtQueue> copyFromRDCServer(EntityManager entityManager) {
+  public Queue<GCARSUpdtQueue> copyFromRDCServer(EntityManager entityManager) {
     LOG.debug("GCARS copyFromRDCServer");
     Queue<GCARSUpdtQueue> queue = new LinkedList<GCARSUpdtQueue>();
 
@@ -163,36 +150,17 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
 
     String localFile = localDir + GCARS_FILE;
     String remoteFile = remoteDir + GCARS_FILE;
-    Session jschSession = null;
-    try {
+    try (CMRFTPConnection sftp = new CMRFTPConnection()) {
 
-      JSch jsch = new JSch();
       LOG.debug("Local file: " + localFile);
       LOG.debug("Remote file: " + remoteFile);
-      LOG.debug("Known Hosts File: " + KNOWN_HOSTS);
-      LOG.debug("Connecting to FTP Server " + REMOTE_HOST + ":" + REMOTE_PORT + " using " + USERNAME);
-      jsch.setKnownHosts(KNOWN_HOSTS);
-      jsch.addIdentity(PRIV_KEY);
-      LOG.debug("Identity added...");
-      LOG.debug("Opening session...");
-      jschSession = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
-      LOG.debug("Set Password...");
-      jschSession.setPassword(PASSWORD);
-      jschSession.connect(SESSION_TIMEOUT);
-
-      LOG.debug("Opening channel...");
-      Channel sftp = jschSession.openChannel("sftp");
-      sftp.connect(CHANNEL_TIMEOUT);
-      LOG.debug("Connected to " + REMOTE_HOST);
 
       String archiveDir = SystemConfiguration.getValue("GCARS_REMOTE_ARCHIVE_DIR");
       if (StringUtils.isBlank(archiveDir)) {
         archiveDir = REMOTE_ARCHIVE_DIR;
       }
 
-      ChannelSftp channelSftp = (ChannelSftp) sftp;
-
-      channelSftp.get(remoteFile, localFile);
+      sftp.getFile(remoteFile, localFile);
 
       SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy-HH-mm");
       Timestamp ts = SystemUtil.getActualTimestamp();
@@ -200,19 +168,12 @@ public class GCARSService extends MultiThreadedBatchService<GCARSUpdtQueue> {
       String fileSubstring = GCARS_FILE.replace(".txt", "-" + dateStr + ".txt");
       LOG.debug(" - Moving file to remote archive dir: " + remoteFile + dateStr);
 
-      channelSftp.rename(remoteFile, archiveDir + fileSubstring);
+      sftp.moveFile(remoteFile, archiveDir + fileSubstring);
 
-      channelSftp.exit();
       LOG.debug("Download complete.");
 
-    } catch (JSchException | SftpException e) {
+    } catch (Exception e) {
       LOG.warn("An error has occurred when trying to download files from FTP server", e);
-    } catch (Exception ex) {
-      LOG.debug("Error encountered in GCARS Download" + ex.getStackTrace());
-    } finally {
-      if (jschSession != null) {
-        jschSession.disconnect();
-      }
     }
     return queue;
   }
