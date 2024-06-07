@@ -1,5 +1,11 @@
 dojo.require("dijit.form.Form");
 dojo.require("dojo.string");
+dojo.ready(function() {
+	if ((window.location.href).includes("c360-prod")) {
+		alert("This urls will be sunset in 18th of June 2024. Please bookmark and start using the new url: https://createcmr.epm2-prod.not-for-users.ibm.com/CreateCMR/login. \n \n Click 'Ok' and you will be redirect automatically "); 
+		window.location.href = "https://createcmr.epm2-prod.not-for-users.ibm.com/CreateCMR/login";
+	};
+});
 var login = (function() {
 
   dojo.ready(function() {
