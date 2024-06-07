@@ -741,4 +741,16 @@ public class ASEANHandler extends APHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  @Override
+  public boolean hasChecklist(String cmrIssiungCntry) {
+    switch (cmrIssiungCntry) {
+    case SystemLocation.VIETNAM:
+      return true;
+    case SystemLocation.THAILAND:
+      return true;
+    }
+    return false;
+  }
+
 }
