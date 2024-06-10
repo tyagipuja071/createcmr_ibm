@@ -3246,9 +3246,9 @@ function freeTxtFieldShowHide(buttonNo) {
   } else {
     shouldDisplay = false;
   }
-  if (shouldDisplay) {
-	var element = document.getElementById('checklist_txt_field_' + 5);
+  var element = document.getElementById('checklist_txt_field_' + 5);
   var textFieldElement = document.getElementsByName('freeTxtField' + 5)[0];
+  if (shouldDisplay) {
     element.style.display = 'block';
   } else {
     element.style.display = 'none';
