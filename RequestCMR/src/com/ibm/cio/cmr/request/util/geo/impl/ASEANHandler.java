@@ -51,6 +51,8 @@ public class ASEANHandler extends APHandler {
   private static final String[] MY_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] MM_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
 
+  private static Map<String, String> ASEAN_SEQ_1 = new HashMap<>();
+
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.BRUNEI, "BN");
     LANDED_CNTRY_MAP.put(SystemLocation.INDONESIA, "ID");
@@ -62,6 +64,20 @@ public class ASEANHandler extends APHandler {
     LANDED_CNTRY_MAP.put(SystemLocation.MYANMAR, "MM");
     LANDED_CNTRY_MAP.put(SystemLocation.LAOS, "LA");
     LANDED_CNTRY_MAP.put(SystemLocation.CAMBODIA, "KH");
+
+    // NOTE: Key = CREQCMR addr type
+    // ZS01 Mailing
+    // ZP01 Billing
+    // ZI01 Installing
+    // ZH01 Shipping
+    // ZP02 Software
+
+    ASEAN_SEQ_1.put("ZS01", "AA");
+    ASEAN_SEQ_1.put("ZP01", "BB");
+    ASEAN_SEQ_1.put("ZI01", "CC");
+    ASEAN_SEQ_1.put("ZH01", "DD");
+    ASEAN_SEQ_1.put("ZP02", "EE");
+
   }
 
   public static void main(String[] args) {
@@ -741,4 +757,43 @@ public class ASEANHandler extends APHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      // For Primary Address
+      newAddrSeq = getNewPrimaryAddressSeq(entityManager, reqId, addrType, cmrIssuingCntry);
+
+      // maybe separate logic for additional addresses
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewPrimaryAddressSeq(EntityManager entityManager, long reqId, String addrType, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+    switch (cmrIssuingCntry) {
+    // case SystemLocation.BANGLADESH: this is in ISAHandler
+    case SystemLocation.INDONESIA:
+    case SystemLocation.PHILIPPINES:
+    case SystemLocation.SINGAPORE:
+    case SystemLocation.VIETNAM:
+    case SystemLocation.THAILAND:
+      newAddrSeq = ASEAN_SEQ_1.get(addrType);
+      break;
+    default:
+      newAddrSeq = "";
+      break;
+    }
+    return newAddrSeq;
+  }
+
 }
