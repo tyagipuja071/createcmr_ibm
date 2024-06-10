@@ -46,7 +46,10 @@
        <span style="font-weight:bold">US DPL and UN Sanction List Check:</span>
     </cmr:chk-entry>
     <cmr:chk-entry matchField="true">
-       <span style="font-weight:bold">Match / Potential Match Found:</span>
+       <span style="font-weight:bold">Is the Customer on the DPL?</span>
+        <span id="checklist_txt_field_1" style="display:none"><label for="dijit_form_TextBox_1">If yes, provide details of DPL denial code and DPL entry information. </label>
+         <%=RequestUtils.generateChecklistFreeTxtField1(request)%>
+         </span> 
     </cmr:chk-entry>
   </cmr:chk-section>
   
@@ -153,7 +156,58 @@
       Macao, Moldova, Mongolia, Romania, Russia, Sudan, Syria, Tajikstan, Turkmenistan, Ukraine, Uzbekistan, Vietnam                                                            
     </cmr:chk-entry>
   </cmr:chk-section>
-
+ <cmr:chk-section name="Section D:">
+    <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Supercomputer</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a 'supercomputer'?</cmr:chk-entry>
+      <cmr:chk-entry number="1" section="D">
+         Does your customer build supercomputers?
+      </cmr:chk-entry>
+      <cmr:chk-entry number="2" section="D">
+         Does your customer own supercomputers?
+      </cmr:chk-entry>
+      <cmr:chk-entry number="3" section="D">
+         To the best of your knowledge or belief, is your customer involved in any activity to incorporate items into a supercomputer, or the design, development, manufacturing, testing, etc. of any components/items that will be used in a 'supercomputer'?
+         <br><i>Note: this question is asking if the customer makes or supports tools/components that are used in a supercomputer or to build a supercomputer.</i>
+          <br>
+         <span style="font-weight: bold;">DEFINITIONS-</span>
+         <ul>
+            <li><span style="font-weight: bold;">Supercomputer: </span> A high-performance multi-rack system having thousands of closely coupled compute cores connected in parallel with networking technology and having a high peak power capacity requiring cooling elements. They are used for computationally intensive tasks including scientific and engineering work. Supercomputers may include shared memory, distributed memory, or a combination of both. </li>            
+         </ul>
+      </cmr:chk-entry>
+   </cmr:chk-section>
+   <cmr:chk-section name="Section E:">
+   <cmr:chk-entry number="1" section="E">
+         <span style="font-weight: bold; text-decoration: underline">Semiconductor Manufacturing</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of integrated circuits?
+         <br><i>Note: This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.</i>
+      </cmr:chk-entry>
+       <cmr:chk-entry number="2" section="E">
+         To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment <span style="font-weight: bold; text-decoration: underline">of the tools </span>that are used in the production, manufacturing, testing, etc. of semiconductors.
+         <br><i>Note: This question is asking if the customer builds tools that are used in the semiconductor manufacturing process.</i>
+      </cmr:chk-entry>
+   </cmr:chk-section>
+   <cmr:chk-block>
+  If any of the above questions have answered  <span style="font-weight: bold; color:red"> YES </span>, please  <span style="font-weight: bold; color: red">STOP </span> and <span style="font-weight: bold; color: red">CONTACT your ERC</span>
+ </span>
+</cmr:chk-block>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Name, Title, and OU/BU  of Requester: ">
+      <%=RequestUtils.generateChecklistFreeTxtField4(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Date completed: ">
+      <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="">
+    <cmr:chk-block>
+      <div>Pursuant to <a href="https://w3.ibm.com/w3publisher/trust-compliance/bcgs">IBM's Business Conduct Guidelines (BCG)</a>, 
+      <br>
+      I certify that the information provided in this 
+      <br>
+     questionnaire is true, accurate, and complete to the best 
+     <br>
+     of my knowledge and belief.
+   <br>
+  <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
+        <%=RequestUtils.generateChecklistFreeTxtField6(request)%>   
+   </cmr:chk-block>
+    </cmr:chk-lbl-field>
   <cmr:chk-lbl-field addSpace="true" labelWidth="30%" boldLabel="true" label="Completed by Sales Representative:">
     ${reqentry.requesterNm} (${reqentry.requesterId})
   </cmr:chk-lbl-field>
