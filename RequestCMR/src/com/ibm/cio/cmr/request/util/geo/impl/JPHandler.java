@@ -1230,11 +1230,19 @@ public class JPHandler extends GEOHandler {
       if ("ZC01".equals(address.getId().getAddrType())) {
         address.setRol(currentRecord.getInspbydebi());
       }
-    } else {
-      address.setContact(currentRecord.getCmrName4() == null ? "ご担当者"
-          : currentRecord.getCmrName4().trim().length() > 15 ? currentRecord.getCmrName4().trim().substring(0, 15)
-              : currentRecord.getCmrName4().trim());
     }
+
+    String defaultContact = "ご担当者";
+    if (!("ZC01".equalsIgnoreCase(address.getId().getAddrType()))) {
+      if (StringUtils.isEmpty(currentRecord.getCmrCollectorNo()) || currentRecord.getCmrCollectorNo() == null) {
+        address.setContact(defaultContact);
+      } else if (currentRecord.getCmrCollectorNo().trim().length() > 15) {
+        address.setContact(currentRecord.getCmrCollectorNo().trim().substring(0, 15));
+      } else {
+        address.setContact(currentRecord.getCmrCollectorNo().trim());
+      }
+    }
+
     String[] namearray = dividingCustName1toName2(address.getCustNm1(), null);
     if (namearray != null && namearray.length == 2) {
       address.setCustNm2(namearray[1]);
