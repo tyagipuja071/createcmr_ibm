@@ -29,7 +29,7 @@
       <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
    </cmr:chk-lbl-field>
     <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Industry Segment: ">
-      <%=RequestUtils.generateChecklistFreeTxtField14(request)%>
+      <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
    </cmr:chk-lbl-field>
    <br>
    <cmr:chk-block>
@@ -40,8 +40,8 @@
    <cmr:chk-section name="Section A:  Denied Parties List Status" >
       <cmr:chk-entry number="1" section="A">
              Is the Customer on the DPL?        
-            <span id="checklist_txt_field_5" style="display:none"><label for="dijit_form_TextBox_5">If yes, provide details of DPL denial code and DPL entry information. </label>
-         <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
+            <span id="checklist_txt_field_4" style="display:none"><label for="dijit_form_TextBox_4">If yes, provide details of DPL denial code and DPL entry information. </label>
+         <%=RequestUtils.generateChecklistFreeTxtField4(request)%>
          </span> 
       </cmr:chk-entry>
    </cmr:chk-section> 
@@ -49,28 +49,43 @@
     <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Supercomputer</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a 'supercomputer'?</cmr:chk-entry>
       <cmr:chk-entry number="1" section="B">
          Does your customer build supercomputers?
+          <span id="checklist_txt_field_5" style="display:none"><label for="dijit_form_TextBox_5">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
+         </span>
       </cmr:chk-entry>
       <cmr:chk-entry number="2" section="B">
          Does your customer own supercomputers?
+          <span id="checklist_txt_field_6" style="display:none"><label for="dijit_form_TextBox_6">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
+         </span>
       </cmr:chk-entry>
       <cmr:chk-entry number="3" section="B">
          To the best of your knowledge or belief, is your customer involved in any activity to incorporate items into a supercomputer, or the design, development, manufacturing, testing, etc. of any components/items that will be used in a 'supercomputer'?
-         <br><i>Note: this question is asking if the customer makes or supports tools/components that are used in a supercomputer or to build a supercomputer.</i>
+         <br><i> <b>Note:</b> this question is asking if the customer makes or supports tools/components that are used in a supercomputer or to build a supercomputer.</i>
           <br>
          <span style="font-weight: bold;">DEFINITIONS-</span>
          <ul>
             <li><span style="font-weight: bold;">Supercomputer: </span> A high-performance multi-rack system having thousands of closely coupled compute cores connected in parallel with networking technology and having a high peak power capacity requiring cooling elements. They are used for computationally intensive tasks including scientific and engineering work. Supercomputers may include shared memory, distributed memory, or a combination of both. </li>            
          </ul>
+         <span id="checklist_txt_field_7" style="display:none"><label for="dijit_form_TextBox_7">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField7(request)%>
+         </span>
       </cmr:chk-entry>
    </cmr:chk-section>
    <cmr:chk-section name="Section C:">
    <cmr:chk-entry number="1" section="C">
          <span style="font-weight: bold; text-decoration: underline">Semiconductor Manufacturing</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of integrated circuits?
-         <br><i>Note: This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.</i>
+         <br><i> <b>Note:</b> This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.</i>
+      <span id="checklist_txt_field_8" style="display:none"><label for="dijit_form_TextBox_8">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField8(request)%>
+         </span>
       </cmr:chk-entry>
        <cmr:chk-entry number="2" section="C">
          To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment <span style="font-weight: bold; text-decoration: underline">of the tools </span>that are used in the production, manufacturing, testing, etc. of semiconductors.
-         <br><i>Note: This question is asking if the customer builds tools that are used in the semiconductor manufacturing process.</i>
+         <br><i> <b>Note:</b> This question is asking if the customer builds tools that are used in the semiconductor manufacturing process.</i>
+       <span id="checklist_txt_field_9" style="display:none"><label for="dijit_form_TextBox_9">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField9(request)%>
+         </span>
       </cmr:chk-entry>
    </cmr:chk-section>
    <cmr:chk-block>
@@ -78,14 +93,14 @@
  </span>
 </cmr:chk-block>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Name, Title, and OU/BU  of Requester: ">
-      <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
+      <%=RequestUtils.generateChecklistFreeTxtField10(request)%>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Date completed: ">
-      <%=RequestUtils.generateChecklistFreeTxtField4(request)%>
+      <%=RequestUtils.generateChecklistFreeTxtField11(request)%>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="">
     <cmr:chk-block>
-      <div>Pursuant to <a href="https://w3.ibm.com/w3publisher/trust-compliance/bcgs">IBM's Business Conduct Guidelines (BCG)</a>, 
+      <div><i>Pursuant to <a href="https://w3.ibm.com/w3publisher/trust-compliance/bcgs">IBM's Business Conduct Guidelines (BCG)</a>, 
       <br>
       I certify that the information provided in this 
       <br>
@@ -93,9 +108,10 @@
      <br>
      of my knowledge and belief.
    <br>
+   </i>
   <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
    </div>
-        <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
+        <%=RequestUtils.generateChecklistFreeTxtField12(request)%>
    
    </cmr:chk-block>
     </cmr:chk-lbl-field>
