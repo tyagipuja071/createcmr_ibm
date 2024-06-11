@@ -45,6 +45,10 @@ public class ISAHandler extends APHandler {
   private static final String[] BD_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] LK_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
 
+  private static final String SOLD_TO_ADDR_TYPE = "ZS01";
+
+  private static final String SOLD_TO_FIXED_SEQ = "AA";
+
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.INDIA, "IN");
     LANDED_CNTRY_MAP.put(SystemLocation.BANGLADESH, "BD");
@@ -470,4 +474,27 @@ public class ISAHandler extends APHandler {
     }
     return null;
   };
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      newAddrSeq = getNewAddressSeq(entityManager, reqId, addrType);
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewAddressSeq(EntityManager entityManager, long reqId, String addrType) {
+    String newAddrSeq = "";
+    switch (addrType) {
+    case SOLD_TO_ADDR_TYPE:
+      newAddrSeq = SOLD_TO_FIXED_SEQ;
+      break;
+    default:
+      newAddrSeq = "";
+      break;
+    }
+    return newAddrSeq;
+  }
 }

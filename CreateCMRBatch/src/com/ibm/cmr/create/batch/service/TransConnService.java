@@ -117,6 +117,7 @@ public class TransConnService extends BaseBatchService {
   protected static final String ACTION_RDC_UPDT_BY_ENT = "System Action:RDc Enterprise update";
   protected static final String FORCED_UPDATE_COMMENT = "System Action:  Status changed to 'Processing Create/Updt Pending', Request Type changed to 'Update' for further automatic processing";
   protected static final String REVERT_TO_CREATE_COMMENT = "System Action:  Request Type reverted to 'Create' (original request type)";
+  private static final List<String> AP_ISSUING_COUNTRY = Arrays.asList("834", "744", "615", "749", "852", "856", "643", "778", "818");
 
   protected ProcessClient serviceClient;
   protected MassProcessClient massServiceClient;
@@ -3243,7 +3244,7 @@ public class TransConnService extends BaseBatchService {
 
   private void setCountryAdminToCompleted(Admin admin, Data data) {
     if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry()) || SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry())
-        || SystemLocation.MACAO.equals(data.getCmrIssuingCntry())) {
+        || SystemLocation.MACAO.equals(data.getCmrIssuingCntry()) || AP_ISSUING_COUNTRY.contains(data.getCmrIssuingCntry())) {
       LOG.debug("Setting country to COM..");
       admin.setLockBy(null);
       admin.setLockByNm(null);
@@ -3255,7 +3256,8 @@ public class TransConnService extends BaseBatchService {
 
   private void setCountryAdminToPending(Admin admin, Data data) {
     if (CmrConstants.LA_COUNTRIES.contains(data.getCmrIssuingCntry())
-        || (SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(data.getCmrIssuingCntry()))) {
+        || (SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(data.getCmrIssuingCntry()))
+        || AP_ISSUING_COUNTRY.contains(data.getCmrIssuingCntry())) {
       LOG.debug("Unlocking request due to error..");
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
       admin.setLockBy(null);

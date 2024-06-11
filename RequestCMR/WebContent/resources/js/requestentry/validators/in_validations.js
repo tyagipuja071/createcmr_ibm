@@ -117,12 +117,15 @@ function addAfterConfigAP() {
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
+      FormManager.readOnly('subIndustryCd');
+      FormManager.readOnly('mrcCd');
     }
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-    FormManager.readOnly('subIndustryCd');
+
+    FormManager.enable('mrcCd');
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
@@ -1147,8 +1150,6 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
   } else if (reqType == 'U' && role == 'REQUESTER') {
-    FormManager.readOnly('isicCd');
-    FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
       case 'PRIV':
         // ISIC = 9500, - lock field
@@ -2215,36 +2216,27 @@ function lockFieldsForIndia(){
   FormManager.readOnly('abbrevNm');
   FormManager.readOnly('abbrevLocn');
   FormManager.readOnly('custPrefLang');
-  FormManager.readOnly('subIndustryCd');
   FormManager.readOnly('sensitiveFlag');
-  FormManager.readOnly('isicCd');
   FormManager.readOnly('taxCd1');
   FormManager.readOnly('cmrNo');
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('cmrOwner');
 
-  FormManager.readOnly('apCustClusterId');
   FormManager.resetValidations('apCustClusterId');
 
-  FormManager.readOnly('clientTier');
   FormManager.resetValidations('clientTier');
 
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
   FormManager.readOnly('bpRelType');
   FormManager.readOnly('busnType');
   FormManager.resetValidations('busnType');
 
   FormManager.readOnly('cmrNoPrefix');
-  FormManager.readOnly('collectionCd');
   FormManager.resetValidations('collectionCd');
 
   FormManager.readOnly('repTeamMemberNo');
   FormManager.resetValidations('repTeamMemberNo');
 
   FormManager.readOnly('miscBillCd');
-  FormManager.readOnly('inacType');
-  FormManager.readOnly('inacCd');
   FormManager.readOnly('restrictInd');
   FormManager.readOnly('govType');
   FormManager.readOnly('repTeamMemberName');
@@ -2577,18 +2569,11 @@ function handleObseleteExpiredDataForUpdate() {
  }
  // lock all the coverage fields and remove validator
  if (reqType == 'U' && role == 'REQUESTER') {
-   FormManager.readOnly('apCustClusterId');
-   FormManager.readOnly('clientTier');
-   FormManager.readOnly('mrcCd');
-   FormManager.readOnly('inacType');
-   FormManager.readOnly('isuCd');
-   FormManager.readOnly('inacCd');
    FormManager.readOnly('repTeamMemberNo');
    FormManager.readOnly('repTeamMemberName');
    FormManager.readOnly('isbuCd');
    FormManager.readOnly('covId');
    FormManager.readOnly('cmrNoPrefix');
-   FormManager.readOnly('collectionCd');
    FormManager.readOnly('engineeringBo');
    FormManager.readOnly('commercialFinanced');
    FormManager.readOnly('creditCd');

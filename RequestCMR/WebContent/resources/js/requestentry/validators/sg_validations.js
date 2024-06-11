@@ -86,7 +86,6 @@ function setInacType() {
 		} else {
 			FormManager.setValue('inacType', 'I');
 		}
-		FormManager.readOnly('inacType');
 	}
 }
 
@@ -113,17 +112,19 @@ function addAfterConfigAP() {
 	FormManager.readOnly('isbuCd');
 
 	if (role == 'REQUESTER' || role == 'VIEWER') {
-		FormManager.readOnly('mrcCd');
 		FormManager.readOnly('isbuCd');
 		if (role == 'VIEWER') {
+			FormManager.readOnly('mrcCd');
 			FormManager.readOnly('abbrevNm');
 			FormManager.readOnly('clientTier');
+			FormManager.readOnly('subIndustryCd');
 		}
 		FormManager.readOnly('sectorCd');
 		FormManager.readOnly('abbrevLocn');
 		FormManager.readOnly('territoryCd');
 		FormManager.readOnly('IndustryClass');
-		FormManager.readOnly('subIndustryCd');
+
+		FormManager.enable('mrcCd');
 	} else {
 		FormManager.enable('mrcCd');
 		FormManager.enable('isbuCd');
@@ -137,10 +138,6 @@ function addAfterConfigAP() {
 
 	if (role != 'PROCESSOR') {
 		FormManager.readOnly('miscBillCd');
-	}
-
-	if (reqType == 'U' && cntry == '834') {
-		FormManager.readOnly('isicCd');
 	}
 
 	if (reqType == 'C' && custGrp == 'CROSS' && custSubGrp == 'SPOFF') {
@@ -158,11 +155,6 @@ function addAfterConfigAP() {
 	// CREATCMR-788
 	addressQuotationValidatorAP();
 	// CREATCMR-10215
-	var isDnbRecord = FormManager.getActualValue('findDnbResult');
-	if (isDnbRecord == 'Accepted') {
-		console.log(">>> SG-834 >>> Lock ISIC For D&B Import.");
-		FormManager.readOnly('isicCd');
-	}
 	updateIsbuCd();
 	if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
 		FormManager.enable('clientTier');
@@ -758,7 +750,6 @@ function setIsicCdIfCmrResultAccepted(value) {
 		FormManager.enable('isicCd');
 		FormManager.enable('subIndustryCd');
 	} else {
-		FormManager.readOnly('isicCd');
 		FormManager.readOnly('subIndustryCd');
 		switch (custSubGrp) {
 			case 'PRIV':
@@ -2045,18 +2036,11 @@ function handleObseleteExpiredDataForUpdate() {
 	}
 	// lock all the coverage fields and remove validator
 	if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
-		FormManager.readOnly('apCustClusterId');
-		FormManager.readOnly('clientTier');
-		FormManager.readOnly('mrcCd');
-		FormManager.readOnly('inacType');
-		FormManager.readOnly('isuCd');
-		FormManager.readOnly('inacCd');
 		FormManager.readOnly('repTeamMemberNo');
 		FormManager.readOnly('repTeamMemberName');
 		FormManager.readOnly('isbuCd');
 		FormManager.readOnly('covId');
 		FormManager.readOnly('cmrNoPrefix');
-		FormManager.readOnly('collectionCd');
 		FormManager.readOnly('engineeringBo');
 		FormManager.readOnly('commercialFinanced');
 		FormManager.readOnly('creditCd');
@@ -2676,8 +2660,6 @@ function coverage2024ForSG() {
 	if (custSubGrp == 'PRIV') {
 		FormManager.readOnly('isicCd');
 		FormManager.setValue('isicCd', '9500');
-	} else {
-	  FormManager.enable('isicCd');
 	}
 
 	var _clusterHandlerSG = null;
@@ -2696,19 +2678,6 @@ function coverage2024ForSG() {
 	if (window.localStorage.getItem('cluster') == FormManager.getActualValue('apCustClusterId') && FormManager.getActualValue('apCustClusterId') == '00000') {
 		setISUCTCByCluster();
 		setInacByClusterSG();
-	}
-	// for blank cluster, blank out others
-	if (FormManager.getActualValue('apCustClusterId') == '') {
-		FormManager.setValue('isuCd', '');
-		FormManager.readOnly('isuCd');
-		FormManager.setValue('clientTier', '');
-		FormManager.readOnly('clientTier');
-		FormManager.setValue('inacCd', '');
-		FormManager.readOnly('inacCd');
-		FormManager.setValue('inacType', '');
-		FormManager.readOnly('inacType');
-		FormManager.setValue('mrcCd', '');
-		FormManager.readOnly('mrdCd');
 	}
 }
 
@@ -2793,8 +2762,6 @@ function setInacByClusterSG() {
 	}
 	if (inacList.length == 1) {
 		FormManager.setValue('inacCd', inacList[0]);
-		FormManager.readOnly('inacCd');
-		FormManager.readOnly('inacType');
 		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
 		FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	}
@@ -2824,8 +2791,6 @@ function setInacByClusterManageEnableSG() {
 		FormManager.removeValidator('inacType', Validators.REQUIRED);
 	}
 	if (inacList.length == 1) {
-		FormManager.readOnly('inacCd');
-		FormManager.readOnly('inacType');
 		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
 		FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	}
@@ -2837,12 +2802,6 @@ function setReadOnlyFields() {
 		FormManager.enable('isuCd');
 		FormManager.readOnly('clientTier');
 
-	}
-
-	if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
-		console.log("Disabling isuCd for REQUESTER...");
-		FormManager.readOnly('isuCd');
-		FormManager.readOnly('clientTier');
 	}
 
 }
