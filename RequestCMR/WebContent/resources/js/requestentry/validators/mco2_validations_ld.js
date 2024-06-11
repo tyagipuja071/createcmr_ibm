@@ -193,7 +193,7 @@ function addNewHandlersForMCO2() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 0; i <= 1; i++) {
+  for (var i = 0; i <= 11; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function (value) {
@@ -204,14 +204,8 @@ function addChecklistBtnHandler() {
 }
 
 function freeTxtFieldShowHide(buttonNo) {
-	if(['810','662','745','835','825'].includes(FormManager.getActualValue('cmrIssuingCntry')) && buttonNo > 1){
-		return;
-	}
   var shouldDisplay = false;
   var fieldIdNo = getCheckListFieldNo(buttonNo);
-  if(buttonNo == 0 || buttonNo == 1){
-	fieldIdNo = 5;
-   }
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
 
@@ -221,22 +215,25 @@ function freeTxtFieldShowHide(buttonNo) {
     shouldDisplay = false;
   }
   if (shouldDisplay) {
+	  dojo.byId('dijit_form_TextBox_' + i).hidden = false;
     element.style.display = 'block';
   } else {
+		dojo.byId('dijit_form_TextBox_' + i).hidden = true;
     element.style.display = 'none';
     textFieldElement.value = '';
   }
 }
 
 function getCheckListFieldNo(buttonNo) {
-  return ((buttonNo - (buttonNo % 2)) / 2) + 5;
+	if(buttonNo % 2 == 0){
+	 return (buttonNo / 2) + 4;	
+	}else{
+	 return ((buttonNo-1) / 2) + 4;	
+	}
 }
 
 function checkChecklistButtons() {
-  for (var i = 0; i <= 14; i = i + 2) {
-	if(['810','662','745','835','825'].includes(FormManager.getActualValue('cmrIssuingCntry')) && i > 1){
-		break;;
-	}
+  for (var i = 0; i <= 11; i++) {
     if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
 	    var fieldNo = getCheckListFieldNo(i);
       document.getElementById('checklist_txt_field_' + fieldNo).style.display = 'block';
@@ -259,7 +256,7 @@ function setChecklistStatus() {
       var noOfTextBoxes = textBoxes.length;
 
       for (var i = 0; i < noOfTextBoxes; i++) {
-        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''  &&  dojo.byId('dijit_form_TextBox_' + i).hidden) {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
         }
       }
