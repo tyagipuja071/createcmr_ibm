@@ -32,6 +32,8 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cmr.create.batch.util.CMRFTPConnection;
+import com.jcraft.jsch.JSchException;
 
 /**
  * for TCR process
@@ -42,6 +44,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
   private static final Logger LOG = Logger.getLogger(TCRService.class);
   private static final String DEFAULT_DIR = "/ci/shared/data/tcr/";
   private static final String ARCHIVE_DIR = "/ci/shared/data/tcrarchive/";
+  private static final String DEFAULT_DIR_EXT = "/ci/shared/data/tcr/";
   private Map<String, Integer> fileSizes = new HashMap<String, Integer>();
   private Map<String, Integer> processedSizes = new HashMap<String, Integer>();
 
@@ -51,6 +54,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
   public static final String STATUS_COMPLETED = "C";
   public static final String TCR_USER = "TCR";
   private Mode mode = Mode.Extract;
+  private boolean useExternalFtp = false;
 
   public static enum Mode {
     Extract, Update, Clean
@@ -58,6 +62,10 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
 
   @Override
   public Queue<USTCRUpdtQueue> getRequestsToProcess(EntityManager entityManager) {
+    this.useExternalFtp = "EXTERNAL".equals(SystemParameters.getString("SFTP.TCR"));
+    if (this.useExternalFtp) {
+      LOG.info("Running in EXTERNAL mode");
+    }
     switch (this.mode) {
     case Extract:
       return extractFromFiles(entityManager);
@@ -97,6 +105,9 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
    * @return
    */
   protected Queue<USTCRUpdtQueue> extractFromFiles(EntityManager entityManager) {
+    if (this.useExternalFtp) {
+      copyFilesFromExternalFTP();
+    }
     String directory = SystemParameters.getString("TCR.INPUT.DIR");
     if (StringUtils.isBlank(directory)) {
       directory = DEFAULT_DIR;
@@ -122,6 +133,45 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
       LOG.debug("Gathered " + queue.size() + " records from TCR files.");
     }
     return queue;
+  }
+
+  /***
+   * Copies the files from the external FTP location and puts them on the local
+   * directory
+   * 
+   * @throws Exception
+   * @throws JSchException
+   */
+  protected void copyFilesFromExternalFTP() {
+    String extDirectory = SystemParameters.getString("TCR.INPUT.DIR.EXT");
+    if (StringUtils.isBlank(extDirectory)) {
+      extDirectory = DEFAULT_DIR_EXT;
+    }
+
+    LOG.debug("Running on external mode on directory " + extDirectory);
+
+    try {
+      try (CMRFTPConnection sftp = new CMRFTPConnection()) {
+        List<String> list = sftp.listFiles(extDirectory);
+
+        LOG.debug(list.size() + " files retrieved from server");
+        String directory = SystemParameters.getString("TCR.INPUT.DIR");
+        if (StringUtils.isBlank(directory)) {
+          directory = DEFAULT_DIR;
+        }
+
+        for (String filename : list) {
+          String localFile = directory + "/" + filename;
+          LOG.info("Moving " + filename + " to local file " + localFile);
+          sftp.getFile(extDirectory + "/" + filename, localFile);
+        }
+
+      }
+    } catch (Exception e) {
+      LOG.error("An error occurred when copying files from external SFTP", e);
+      throw new RuntimeException("Cannot copy from external SFTP.");
+    }
+    LOG.info("Files moved to local directory.");
   }
 
   /**
@@ -489,8 +539,8 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
       int processed = this.processedSizes.get(fileName);
       if (expected == processed) {
         // copy the file to archive first
-        File source = new File(directory + File.separator + fileName);
-        File target = new File(archive + File.separator + fileName);
+        File source = new File(directory + "/" + fileName);
+        File target = new File(archive + "/" + fileName);
         LOG.debug("File " + fileName + " processed fully. Archiving to " + target.getAbsolutePath());
         try {
           FileUtils.copyFile(source, target);
@@ -505,6 +555,37 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
     }
     this.fileSizes.clear();
     this.processedSizes.clear();
+    if (this.useExternalFtp) {
+      cleanUpExternalSFTP();
+    }
+  }
+
+  /**
+   * Deletes the files from the external SFTP location
+   */
+  protected void cleanUpExternalSFTP() {
+    String extDirectory = SystemParameters.getString("TCR.INPUT.DIR.EXT");
+    if (StringUtils.isBlank(extDirectory)) {
+      extDirectory = DEFAULT_DIR_EXT;
+    }
+
+    LOG.debug("Running on external mode..");
+
+    try {
+      try (CMRFTPConnection sftp = new CMRFTPConnection()) {
+        List<String> list = sftp.listFiles(extDirectory);
+
+        for (String filename : list) {
+          LOG.info("deleting " + filename + " from external server..");
+          sftp.deleteFile(extDirectory + "/" + filename);
+        }
+
+      }
+    } catch (Exception e) {
+      LOG.error("An error occurred when deteling files from external SFTP", e);
+      throw new RuntimeException("Cannot delete from external SFTP.");
+    }
+    LOG.info("Files moved to local directory.");
   }
 
   @Override
