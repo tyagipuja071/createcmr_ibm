@@ -662,7 +662,7 @@ function addVatExemptHandler() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 0; i <= 24; i++) {
+  for (var i = 0; i <= 25; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
@@ -675,9 +675,6 @@ function addChecklistBtnHandler() {
 function freeTxtFieldShowHide(buttonNo) {
   var shouldDisplay = false;
   var fieldIdNo = getCheckListFieldNo(buttonNo);
-  if(buttonNo == 0 || buttonNo == 1){
-	fieldIdNo = 13;
-   }
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
   if (buttonNo % 2 == 0) {
@@ -694,15 +691,23 @@ function freeTxtFieldShowHide(buttonNo) {
 }
 
 function getCheckListFieldNo(buttonNo) {
-  return ((buttonNo - (buttonNo % 2)) / 2) + 5;
+	if(buttonNo % 2 == 0){
+	 return (buttonNo / 2) + 4;	
+	}else{
+	 return ((buttonNo-1) / 2) + 4;	
+	}
 }
 
+
 function checkChecklistButtons() {
-  for (var i = 0; i <= 24; i = i + 2) {
-    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
-      document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
-    }
-  }
+	for (var i = 0; i <= 25; i = i + 2) {
+		if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+			if(getCheckListFieldNo(i) > 16)
+			break;
+			
+	    document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
+		}
+	}
 }
 
 var _DupIssuingCntryCdHandler = null;
@@ -2537,12 +2542,17 @@ function addCEMEAChecklistValidator() {
               checkCount++;
             }
           }
-          for (var i = 0; i < noOfTextBoxes; i++) {
+          for (var i = 0; i < noOfTextBoxes - 3; i++) {
             if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
-                && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+                 &&  document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
+          
+          if(FormManager.getActualValue('dijit_form_TextBox_17') == '' || FormManager.getActualValue('dijit_form_TextBox_18') == '' || FormManager.getActualValue('dijit_form_TextBox_19') == ''){
+	            return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+          }
+          
           if (noOfQuestions != checkCount) {
             return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
           }

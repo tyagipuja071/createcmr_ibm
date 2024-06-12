@@ -90,6 +90,10 @@ public class CheckListModel extends BaseModel {
   private String freeTxtField13;
   private String freeTxtField14;
   private String freeTxtField15;
+  private String freeTxtField16;
+  private String freeTxtField17;
+  private String freeTxtField18;
+  private String freeTxtField19;
 
   @Override
   public boolean allKeysAssigned() {
@@ -685,4 +689,35 @@ public class CheckListModel extends BaseModel {
     this.freeTxtField15 = freeTxtField15;
   }
 
+  public String getFreeTxtField16() {
+    return freeTxtField16;
+  }
+
+  public void setFreeTxtField16(String freeTxtField16) {
+    this.freeTxtField16 = freeTxtField16;
+  }
+
+  public String getFreeTxtField17() {
+    return freeTxtField17;
+  }
+
+  public void setFreeTxtField17(String freeTxtField17) {
+    this.freeTxtField17 = freeTxtField17;
+  }
+
+  public String getFreeTxtField18() {
+    return freeTxtField18;
+  }
+
+  public void setFreeTxtField18(String freeTxtField18) {
+    this.freeTxtField18 = freeTxtField18;
+  }
+
+  public String getFreeTxtField19() {
+    return freeTxtField19;
+  }
+
+  public void setFreeTxtField19(String freeTxtField19) {
+    this.freeTxtField19 = freeTxtField19;
+  }
 }

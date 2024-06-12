@@ -1479,6 +1479,36 @@ public class RequestUtils {
         + "\">";
   }
 
+  public static String generateChecklistFreeTxtField16(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField16() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField16(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField16\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField17(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField17() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField17(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField17\" value=\"" + value
+        + "\">";
+  }
+
+  public static String generateChecklistFreeTxtField18(HttpServletRequest request) {
+    CheckListModel checklist = (CheckListModel) request.getAttribute("checklist");
+    String value = "";
+    if (checklist != null && checklist.getFreeTxtField18() != null) {
+      value = StringUtils.replace(checklist.getFreeTxtField18(), "\"", "&quot;");
+    }
+    return "<input type=\"text\" dojoType=\"dijit.form.TextBox\" style=\"width:400px\" maxlength=\"70\" name=\"freeTxtField18\" value=\"" + value
+        + "\">";
+  }
+
   /**
    * Gets the sub industry code for the given ISIC
    * 
@@ -2066,7 +2096,7 @@ public class RequestUtils {
       LocalTime localTime = LocalTime.now(ZoneId.of("GMT"));
       localTime = localTime.plusHours(8);
       int hour = localTime.getHour();
-      if ((24-hour > 23) && day != Calendar.SATURDAY && day != Calendar.SUNDAY) {
+      if ((24 - hour > 23) && day != Calendar.SATURDAY && day != Calendar.SUNDAY) {
         sendNotification = true;
       }
     }
