@@ -28,7 +28,7 @@
       <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Industry Segment: ">
-      <%=RequestUtils.generateChecklistFreeTxtField14(request)%>
+      <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
    </cmr:chk-lbl-field>
     <br>
    <cmr:chk-block>
@@ -39,8 +39,8 @@
    <cmr:chk-section name="Section A:  Denied Parties List Status" >
       <cmr:chk-entry number="1" section="A">
              Is the Customer on the DPL?        
-            <span id="checklist_txt_field_13" style="display:none"><label for="dijit_form_TextBox_13">If yes, provide details of DPL denial code and DPL entry information. </label>
-         <%=RequestUtils.generateChecklistFreeTxtField13(request)%>
+            <span id="checklist_txt_field_4" style="display:none"><label for="dijit_form_TextBox_4">If yes, provide details of DPL denial code and DPL entry information. </label>
+         <%=RequestUtils.generateChecklistFreeTxtField4(request)%>
          </span> 
       </cmr:chk-entry>
    </cmr:chk-section>
@@ -48,22 +48,22 @@
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Chemical or Biological Weapons:</span></cmr:chk-entry>
       <cmr:chk-entry number="2" section="B">
          To the best of your knowledge or belief is your customer involved in any activity related to or in support of Chemical or Biological Weapons?
-         <span id="checklist_txt_field_6" style="display:none"><label for="dijit_form_TextBox_6">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
+         <span id="checklist_txt_field_5" style="display:none"><label for="dijit_form_TextBox_5">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
          </span> 
       </cmr:chk-entry>
       <cmr:chk-entry number="3" section="B">
          To the best of your knowledge or belief is your customer involved in any activity related to the design, development, repair, manufacture of chemical weapons precursors?
          <br><i>Note: This includes any activity related to or in support of rocket systems or unmanned aerial vehicles for the delivery of chemical, biological, or nuclear weapons</i> 
-         <span id="checklist_txt_field_7" style="display:none"><label for="dijit_form_TextBox_6">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField7(request)%>
+         <span id="checklist_txt_field_6" style="display:none"><label for="dijit_form_TextBox_6">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField6(request)%>
          </span>
       </cmr:chk-entry>
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Nuclear:</span></cmr:chk-entry>
       <cmr:chk-entry number="4" section="B">
          To the best of your knowledge or belief, is this customer involved in any activity (design, development, manufacture etc.) of nuclear weapons or nuclear explosive devices?  
-         <span id="checklist_txt_field_8" style="display:none"><label for="dijit_form_TextBox_7">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField8(request)%>
+         <span id="checklist_txt_field_7" style="display:none"><label for="dijit_form_TextBox_7">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField7(request)%>
          </span>
       </cmr:chk-entry>
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Missile:</span></cmr:chk-entry>
@@ -73,15 +73,15 @@
             <li>"Rocket Systems" include, but are not limited to: ballistic missiles, space launch vehicles, and sounding rockets</li>
             <li>"Unmanned Air Vehicles" include, but are not limited to: cruise missiles, target drones and reconnaissance drones</li>
          </ul>
-         <span id="checklist_txt_field_9" style="display:none"><label for="dijit_form_TextBox_8">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField9(request)%>
+         <span id="checklist_txt_field_8" style="display:none"><label for="dijit_form_TextBox_8">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField8(request)%>
          </span>
       </cmr:chk-entry>
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Military- Intelligence End user/Military-intelligence End Use:</span></cmr:chk-entry>
       <cmr:chk-entry number="6" section="B">
          To the best of your knowledge or belief is your customer involved business activities with a Intelligence and/or military-intelligence end user or items with military-intelligence end uses?
-         <span id="checklist_txt_field_10" style="display:none"><label for="dijit_form_TextBox_9">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField10(request)%>
+         <span id="checklist_txt_field_9" style="display:none"><label for="dijit_form_TextBox_9">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField9(request)%>
          </span>
          <br>
          <span style="font-weight: bold;">DEFINITIONS-</span>
@@ -94,8 +94,8 @@
       <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Military End user/Military End Use:</span></cmr:chk-entry>
       <cmr:chk-entry number="7" section="B">
          To the best of your knowledge, is the customer a military end user or involved in business activities with a military end user or items with military end uses? 
-         <span id="checklist_txt_field_11" style="display:none"><label for="dijit_form_TextBox_10">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField11(request)%>
+         <span id="checklist_txt_field_10" style="display:none"><label for="dijit_form_TextBox_10">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField10(request)%>
          </span>
          <br>
          <span style="font-weight: bold;">DEFINITIONS-</span>
@@ -163,8 +163,8 @@
                <td>Weapon </td>
             </tr>
          </table>
-         <span id="checklist_txt_field_12" style="display:none"><label for="dijit_form_TextBox_11">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField12(request)%>
+         <span id="checklist_txt_field_11" style="display:none"><label for="dijit_form_TextBox_11">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField11(request)%>
          </span>
       </cmr:chk-entry>
    </cmr:chk-section>
@@ -177,12 +177,15 @@
     <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Supercomputer</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a 'supercomputer'?</cmr:chk-entry>
       <cmr:chk-entry number="1" section="C">
          Does your customer build supercomputers?
-         <span id="checklist_txt_field_14" style="display:none"><label for="dijit_form_TextBox_14">If yes, please provide an explanation below detailing this customer's business:</label>
-         <%=RequestUtils.generateChecklistFreeTxtField14(request)%>
+         <span id="checklist_txt_field_12" style="display:none"><label for="dijit_form_TextBox_12">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField12(request)%>
          </span>
       </cmr:chk-entry>
       <cmr:chk-entry number="2" section="C">
          Does your customer own supercomputers?
+         <span id="checklist_txt_field_13" style="display:none"><label for="dijit_form_TextBox_13">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField13(request)%>
+         </span>
       </cmr:chk-entry>
       <cmr:chk-entry number="3" section="C">
          To the best of your knowledge or belief, is your customer involved in any activity to incorporate items into a supercomputer, or the design, development, manufacturing, testing, etc. of any components/items that will be used in a 'supercomputer'?
@@ -192,16 +195,25 @@
          <ul>
             <li><span style="font-weight: bold;">Supercomputer: </span> A high-performance multi-rack system having thousands of closely coupled compute cores connected in parallel with networking technology and having a high peak power capacity requiring cooling elements. They are used for computationally intensive tasks including scientific and engineering work. Supercomputers may include shared memory, distributed memory, or a combination of both. </li>            
          </ul>
+          <span id="checklist_txt_field_14" style="display:none"><label for="dijit_form_TextBox_14">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField14(request)%>
+         </span>
       </cmr:chk-entry>
    </cmr:chk-section>
    <cmr:chk-section name="Section D:">
    <cmr:chk-entry number="1" section="D">
          <span style="font-weight: bold; text-decoration: underline">Semiconductor Manufacturing</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of integrated circuits?
          <br><i>Note: This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.</i>
+      <span id="checklist_txt_field_15" style="display:none"><label for="dijit_form_TextBox_15">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistFreeTxtField15(request)%>
+         </span>
       </cmr:chk-entry>
        <cmr:chk-entry number="2" section="D">
          To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment <span style="font-weight: bold; text-decoration: underline">of the tools </span>that are used in the production, manufacturing, testing, etc. of semiconductors.
          <br><i>Note: This question is asking if the customer builds tools that are used in the semiconductor manufacturing process.</i>
+      <span id="checklist_txt_field_16" style="display:none"><label for="dijit_form_TextBox_16">If yes, please provide an explanation below detailing this customer's business:</label>
+         <%=RequestUtils.generateChecklistLocalName(request)%>
+         </span>
       </cmr:chk-entry>
    </cmr:chk-section>
    <cmr:chk-block>
@@ -210,10 +222,10 @@
 </cmr:chk-block>
 
   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Name, Title, and OU/BU  of Requester: ">
-      <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
+      <%=RequestUtils.generateChecklistFreeTxtField16(request)%>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Date completed: ">
-      <%=RequestUtils.generateChecklistFreeTxtField4(request)%>
+      <%=RequestUtils.generateChecklistFreeTxtField17(request)%>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="">
     <cmr:chk-block>
@@ -227,7 +239,7 @@
    <br>
   <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
    </div>
-        <%=RequestUtils.generateChecklistFreeTxtField5(request)%>
+        <%=RequestUtils.generateChecklistFreeTxtField18(request)%>
    
    </cmr:chk-block>
     </cmr:chk-lbl-field>
