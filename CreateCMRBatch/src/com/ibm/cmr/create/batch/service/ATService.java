@@ -1552,6 +1552,7 @@ public class ATService extends TransConnService {
     }
 
     try {
+      String errormsg;
       // update MASS_UPDT table with the error txt and row status cd
       if (response != null) {
         if (response.getRecords() != null && response.getRecords().size() > 0) {
@@ -1561,9 +1562,9 @@ public class ATService extends TransConnService {
             updtQuery.setParameter("ITERATION_ID", iterationId);
             updtQuery.setParameter("CMR_NO", record.getCmrNo());
             List<MassUpdt> updateList = updtQuery.getResults(MassUpdt.class);
-
             for (MassUpdt massUpdt : updateList) {
-              massUpdt.setErrorTxt(record.getMessage());
+              errormsg = errorTxt(record.getMessage(), 10000);
+              massUpdt.setErrorTxt(errormsg);
               if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(record.getStatus())) {
                 massUpdt.setRowStatusCd("RDCER");
               } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(record.getStatus())) {
@@ -1916,34 +1917,37 @@ public class ATService extends TransConnService {
             }
 
             if (StringUtils.isEmpty(sMassUpdt.getErrorTxt())) {
-              sMassUpdt.setErrorTxt(comment.toString());
+              String errormsg = errorTxt(comment.toString(), 10000);
+              sMassUpdt.setErrorTxt(errormsg);
             } else {
-              sMassUpdt.setErrorTxt(sMassUpdt.getErrorTxt() + comment.toString());
+              String errormsg = errorTxt(sMassUpdt.getErrorTxt() + comment.toString(), 10000);
+              sMassUpdt.setErrorTxt(errormsg);
             }
 
             sMassUpdt.setRowStatusCd(MASS_UPDATE_DONE);
 
             rdcProcessStatusMsgs.add(CmrConstants.RDC_STATUS_COMPLETED);
           } else {
+            String errormsg = errorTxt(comment.toString(), 10000);
             if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
-              sMassUpdt.setErrorTxt(comment.toString());
+
+              sMassUpdt.setErrorTxt(errormsg);
               rdcProcessStatusMsgs.add(resultCode);
             } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(errormsg);
               rdcProcessStatusMsgs.add(resultCode);
             } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " is NOT COMPLETED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
-              rdcProcessStatusMsgs.add(resultCode);
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(errormsg);
             } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
               comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + " is IGNORED.");
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE);
-              sMassUpdt.setErrorTxt(comment.toString());
+              sMassUpdt.setErrorTxt(errormsg);
               rdcProcessStatusMsgs.add(resultCode);
             } else {
               sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_DONE);
@@ -2259,5 +2263,14 @@ public class ATService extends TransConnService {
       partialCommit(em);
     }
     return response;
+  }
+
+  public String errorTxt(String msg, int limit) {
+    if (msg.length() > limit - 1) {
+      return msg.substring(0, 9999);
+    } else {
+      return msg;
+    }
+
   }
 }
