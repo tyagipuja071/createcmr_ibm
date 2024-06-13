@@ -1169,6 +1169,12 @@ public class CEMEAHandler extends BaseSOFHandler {
         data.setSalesBusOffCd(mainRecord.getCmrSortl());
       }
     }
+    // CREATCMR - 10129
+    if (SystemLocation.HUNGARY.equals(data.getCmrIssuingCntry())) {
+      data.setTaxCd1(mainRecord.getCmrLocalTax2());
+      data.setTaxCd3(node1);
+
+    }
   }
 
   private boolean loadDuplicateCMR(Data data, String dupCntry, String dupCmrNo) throws Exception {
