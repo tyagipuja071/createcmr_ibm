@@ -88,6 +88,31 @@
       </cmr:column>
     </cmr:view>
   </cmr:row>
+  
+   <cmr:view forCountry="740">
+      <cmr:column span="2" containerForField="LocalTax1">
+        <p>
+          <cmr:label fieldId="taxCd1">
+            <cmr:fieldLabel fieldId="LocalTax1" />: 
+              <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
+          </cmr:label>
+          <cmr:field fieldId="LocalTax1" id="taxCd1" path="taxCd1" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    
+    <cmr:view forCountry="740">
+      <cmr:column span="2" containerForField="LocalTax3">
+        <p>
+          <cmr:label fieldId="taxCd3">
+            <cmr:fieldLabel fieldId="LocalTax3" />: 
+              <cmr:delta text="${rdcdata.taxCd3}" oldValue="${reqentry.taxCd3}" />
+          </cmr:label>
+          <cmr:field fieldId="LocalTax3" id="taxCd3" path="taxCd3" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+  
     <cmr:row addBackground="true">
       <!-- Fiscal code field for Romania -->
      <cmr:view forCountry="826">
