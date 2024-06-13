@@ -294,7 +294,7 @@ function addCEMEAChecklistValidator() {
           var noOfQuestions = questions.length / 2;
           var noOfTextBoxes = textBoxes.length;
 
-          for (var i = 3; i < noOfTextBoxes; i++) {
+          for (var i = 3; i < noOfTextBoxes - 3; i++) {
             if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i)).style.display == 'block'))) {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
