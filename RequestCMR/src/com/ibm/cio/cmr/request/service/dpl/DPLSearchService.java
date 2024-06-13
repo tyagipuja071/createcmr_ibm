@@ -35,7 +35,6 @@ import com.ibm.cio.cmr.request.service.requestentry.AttachmentService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dpl.DPLResultCompany;
 import com.ibm.cio.cmr.request.util.dpl.DPLResultsItemizer;
@@ -398,9 +397,6 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
-          if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
-            result.setWatsonxOutput(watsonxOutput);
-          }
           results.add(result);
         } else {
           LOG.debug("An error was encountered when trying to search: " + resp.getMsg());
