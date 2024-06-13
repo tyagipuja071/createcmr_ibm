@@ -1818,7 +1818,6 @@ public class CEETransformer extends EMEATransformer {
         legacyCustExt.setBankAcctNo("");
       }
     }
-
     Admin admin = cmrObjects.getAdmin();
     if ("C".equals(admin.getReqType()) && "644".equals(data.getCmrIssuingCntry()) && "LOCAL".equals(data.getCustGrp())
         && !"Y".equals(data.getVatExempt())) {
@@ -1859,6 +1858,16 @@ public class CEETransformer extends EMEATransformer {
         legacyCustExt.setiTaxCode("");
       }
     }
+
+    if (SystemLocation.HUNGARY.equals(data.getCmrIssuingCntry())) {
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+        legacyCustExt.setiTaxCode(data.getTaxCd1());
+      }
+      if (!StringUtils.isBlank(data.getTaxCd3())) {
+        legacyCustExt.setBankAcctNo(data.getTaxCd3());
+      }
+    }
+
   }
 
   @Override
