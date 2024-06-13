@@ -7,8 +7,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 
-@JsonIgnoreProperties(
-    ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecordModel> {
 
   private static final long serialVersionUID = 1L;
@@ -323,6 +322,8 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrStxlTxtVal;
 
   private String cmrCreditToCustNo;
+
+  private String cmrTaxJurisCd;
 
   public String getCmrStxlTxtVal() {
     return cmrStxlTxtVal;
@@ -2537,6 +2538,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setCmrContractSignDt(String cmrContractSignDt) {
     this.cmrContractSignDt = cmrContractSignDt;
+  }
+
+  public String getCmrTaxJurisCd() {
+    return cmrTaxJurisCd;
+  }
+
+  public void setCmrTaxJurisCd(String cmrTaxJurisCd) {
+    this.cmrTaxJurisCd = cmrTaxJurisCd;
   }
 
 }
