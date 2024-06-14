@@ -2587,7 +2587,7 @@ function disableProcpectCmrCY() {
     return;
   }
   var ifProspect = FormManager.getActualValue('prospLegalInd');
-  FormManager.enable('custPrefLang');
+  FormManager.readonly('custPrefLang');
   if (dijit.byId('prospLegalInd')) {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
