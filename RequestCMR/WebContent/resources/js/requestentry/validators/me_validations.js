@@ -798,7 +798,9 @@ function addVatExemptHandler() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 0; i <= 25; i++) {
+  var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
@@ -2904,7 +2906,8 @@ function addCEMEAChecklistValidator() {
               checkCount++;
             }
           }
-          for (var i = 0; i < noOfTextBoxes - 3; i++) {
+          noOfTextBoxes = noOfTextBoxes > 15 ? 15 : noOfTextBoxes;
+          for (var i = 0; i < noOfTextBoxes; i++) {
             if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
                  &&  document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');

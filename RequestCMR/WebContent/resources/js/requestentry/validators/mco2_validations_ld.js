@@ -193,7 +193,9 @@ function addNewHandlersForMCO2() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 0; i <= 11; i++) {
+	var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns.length; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function (value) {
@@ -233,8 +235,10 @@ function getCheckListFieldNo(buttonNo) {
 }
 
 function checkChecklistButtons() {
-  for (var i = 0; i <= 11; i=i+2) {
-    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns.length; i=i+2) {
+	    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
 	    var fieldNo = getCheckListFieldNo(i);
       document.getElementById('checklist_txt_field_' + fieldNo).style.display = 'block';
     }
@@ -254,7 +258,7 @@ function setChecklistStatus() {
     if (questions.length > 0) {
       var noOfQuestions = questions.length / 2;
       var noOfTextBoxes = textBoxes.length;
-
+      noOfTextBoxes = noOfTextBoxes > 15 ? 15 : noOfTextBoxes;
       for (var i = 0; i < noOfTextBoxes; i++) {
         if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''  &&  document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
@@ -293,7 +297,7 @@ function addCEMEAChecklistValidator() {
         if (questions.length > 0) {
           var noOfQuestions = questions.length / 2;
           var noOfTextBoxes = textBoxes.length;
-
+          noOfTextBoxes = noOfTextBoxes > 15 ? 15 : noOfTextBoxes ;
           for (var i = 3; i < noOfTextBoxes; i++) {
             if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i)).style.display == 'block'))) {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
@@ -3373,7 +3377,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.MCO2 = ['373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
 		'782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883'];
 		
-	GEOHandler.MCO2_CHECKLIST = ['810','662','745','835','825'];	
+	GEOHandler.MCO2_CHECKLIST = ['810','662','745','835','825','842'];	
 	console.log('adding MCO2 functions...');
 	GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
 	GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, ['ZD01', 'ZI01']);
@@ -3475,10 +3479,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterTemplateLoad(enableTinNumber, SysLoc.KENYA);
 	GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.MCO2, null, true);
 
-	GEOHandler.addAfterConfig(setChecklistStatus, ['842']);
-	GEOHandler.registerValidator(addChecklistValidator, ['842']);
-	GEOHandler.addAfterConfig(addChecklistBtnHandler, ['842']);
-	GEOHandler.addAfterConfig(checkChecklistButtons, ['842']);
+	
 	GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrLOCALAndNonMEA, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrCROSS, GEOHandler.MCO2, null, true);
