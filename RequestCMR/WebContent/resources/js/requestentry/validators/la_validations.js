@@ -1310,8 +1310,10 @@ function addTaxCodesValidator() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 2; i <= 15; i++) {
-    _checklistBtnHandler[i] = null;
+  var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns.length; i++) {
+	    _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
         freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
@@ -1344,12 +1346,18 @@ function freeTxtFieldShowHide(buttonNo) {
 }
 
 function getCheckListFieldNo(buttonNo) {
-  return ((buttonNo - (buttonNo % 2))/2) + 5;
-}
-
+if(buttonNo % 2 == 0){
+	 return (buttonNo / 2) + 4;	
+	}else{
+	 return ((buttonNo-1) / 2) + 4;	
+	}
+	}
+	
 function checkChecklistButtons() {
-  for (var i = 2; i<=14; i=i+2) {
-    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+ var checklist = dojo.query('table.checklist');
+    var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i< radioBtns.length; i=i+2) {
+	    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
       document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
     }
   }
@@ -1367,9 +1375,9 @@ function setChecklistStatus() {
     if (questions.length > 0) {
       var noOfQuestions = questions.length / 2;
       var noOfTextBoxes = textBoxes.length;
-      
+      noOfTextBoxes = noOfTextBoxes > 15 ? 15 : noOfTextBoxes;
       for (var i=0; i < noOfTextBoxes; i++) {
-        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display == 'block') {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
         }
       }
@@ -1415,9 +1423,9 @@ function addChecklistValidator() {
         if (questions.length > 0) {
           var noOfQuestions = questions.length / 2;
           var noOfTextBoxes = textBoxes.length;
-          
+          noOfTextBoxes = noOfTextBoxes > 15 ? 15 : noOfTextBoxes;
           for (var i=0; i < noOfTextBoxes; i++) {
-            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display == 'block') {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
