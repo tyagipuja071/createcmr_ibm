@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.service.requestentry.AttachmentService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dpl.DPLResultCompany;
 import com.ibm.cio.cmr.request.util.dpl.DPLResultsItemizer;
@@ -123,6 +124,10 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       if (result.getDeniedPartyRecords() != null) {
         resultCount += result.getDeniedPartyRecords().size();
       }
+        if ("897".equals(reqData.getData().getCmrIssuingCntry()) && result.getWatsonxOutput() != null
+            && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
+          watsonxOutput = result.getWatsonxOutput();
+        }
     }
 
     ScorecardPK scorecardPk = new ScorecardPK();
@@ -164,7 +169,13 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     LOG.debug("Attaching " + fileName + " to Request " + reqId);
 
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-        pdf.exportToPdf(null, null, null, bos, null);
+        if ("897".equals(reqData.getData().getCmrIssuingCntry()) && !StringUtils.isBlank(watsonxOutput)
+            && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
+          pdf.exportToPdfWithWatsonx(null, null, null, bos, null, watsonxOutput);
+        } else {
+          pdf.exportToPdf(null, null, null, bos, null);
+        }
+
       byte[] pdfBytes = bos.toByteArray();
 
       try (ByteArrayInputStream bis = new ByteArrayInputStream(pdfBytes)) {
@@ -390,6 +401,9 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         DPLSearchResponse resp = null;
         if (SystemUtil.useKYCForDPLChecks()) {
           KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
+          if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
+            watsonxOutput = kycResponse.getResult().getWatsonxOutput();
+          }
           resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
         } else {
           resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
@@ -397,6 +411,9 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
+          if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
+            result.setWatsonxOutput(watsonxOutput);
+          }
           results.add(result);
         } else {
           LOG.debug("An error was encountered when trying to search: " + resp.getMsg());
