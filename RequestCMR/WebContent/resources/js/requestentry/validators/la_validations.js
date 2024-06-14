@@ -1324,10 +1324,6 @@ function addChecklistBtnHandler() {
 
 function freeTxtFieldShowHide(buttonNo) {
   var shouldDisplay = false;
-
-  if (buttonNo <= 1) {
-    return;
-  }
   var fieldIdNo = getCheckListFieldNo(buttonNo);
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
