@@ -127,7 +127,7 @@ public class CMRFTPConnection implements AutoCloseable {
     try (FileInputStream fis = new FileInputStream(localFile)) {
       LOG.debug("Uploading file " + localFile + " to external SFTP file " + destinationFile);
       this.channel.put(fis, destinationFile);
-      this.channel.chmod(755, destinationFile);
+      this.channel.chmod(Integer.parseInt("755",8), destinationFile);
     }
   }
 
