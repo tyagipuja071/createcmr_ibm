@@ -77,7 +77,7 @@
     </cmr:view>
     <!-- OIB field for Croatia -->
     <cmr:view forCountry="704">
-      <cmr:column span="2" containerForField="LocalTax1">
+      <cmr:column span="2" containerForField="pou">
         <p>
           <cmr:label fieldId="taxCd1">
             <cmr:fieldLabel fieldId="LocalTax1" />: 
@@ -89,6 +89,7 @@
     </cmr:view>
   </cmr:row>
   
+    <cmr:row>
    <cmr:view forCountry="740">
       <cmr:column span="2" containerForField="LocalTax1">
         <p>
@@ -101,7 +102,6 @@
       </cmr:column>
     </cmr:view>
     
-    <cmr:view forCountry="740">
       <cmr:column span="2" containerForField="LocalTax3">
         <p>
           <cmr:label fieldId="taxCd3">
@@ -111,7 +111,7 @@
           <cmr:field fieldId="LocalTax3" id="taxCd3" path="taxCd3" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-    </cmr:view>
+    </cmr:row>
   
     <cmr:row addBackground="true">
       <!-- Fiscal code field for Romania -->
