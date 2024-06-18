@@ -26,9 +26,12 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -36,6 +39,7 @@ import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.la.br.ConsultaCCCResponse;
 import com.ibm.cmr.services.client.automation.la.br.MidasRequest;
 import com.ibm.cmr.services.client.automation.la.br.SintegraResponse;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 
 public class BrazilUtil extends AutomationUtil {
 
@@ -136,6 +140,7 @@ public class BrazilUtil extends AutomationUtil {
    String custType=admin.getCustType();
    RequestEntryModel model = requestData.createModelFromRequest();
    List<String> custArray = Arrays.asList("INTER","PRIPE","IBMEM","BUSPR");   
+   List<String> scenSubType=Arrays.asList("BUSPR","INTER");
    if(!custArray.contains(custType))
    {
     List<Addr> addr = requestData.getAddresses();
@@ -235,6 +240,16 @@ public class BrazilUtil extends AutomationUtil {
 
       if(!"CROSS".equalsIgnoreCase(custGrp) )
       {
+        Map<String,String> dnbDtl = new HashMap<>();
+        if(stateProv==null && data.getSubIndustryCd()==null)
+        {
+          LOG.debug("State Prov is null...");
+          dnbDtl= getDnbDetailsForCov(data, entityManager);
+          stateProv=dnbDtl.get("stateProv");
+          firstCharSubIndustry=dnbDtl.get("subInd");
+          
+          
+        }
       LOG.debug("GBG is BGNONE...");
       if (covId != null) {
 
@@ -326,6 +341,16 @@ public class BrazilUtil extends AutomationUtil {
             setCoverageDetails(details,overrides,data,covType,covId,covDesc);
             setIsuAndCtc(overrides,data,details,isu27,ctc27);
           }
+          
+          if("SP".contains(stateProv) && indCd1.contains(firstCharSubIndustry) )
+          {
+            covType="T";
+            covId="0011206";
+            covDesc="BR - DSS SP Gov";
+            setCoverageDetails(details,overrides,data,covType,covId,covDesc);
+            setIsuAndCtc(overrides,data,details,isu27,ctc27);
+          }
+          
           if("SP".contains(stateProv) && indCd5.contains(firstCharSubIndustry) )
           {
             covType="T";
@@ -370,6 +395,19 @@ public class BrazilUtil extends AutomationUtil {
       }
     }
     }   
+   }
+   
+   if("LOCAL".equalsIgnoreCase(custGrp) && scenSubType.contains(custSubGrp) && data.getIsuCd()==null && data.getClientTier()==null)
+   {
+     if("BUSPR".equalsIgnoreCase(custSubGrp))
+       {
+       setIsuAndCtc(overrides,data,details,"8B","");
+       }
+     if("INTER".equalsIgnoreCase(custSubGrp))
+     {
+     setIsuAndCtc(overrides,data,details,"21","");
+     }
+     
    }
    
    if("CROSS".equalsIgnoreCase(custGrp) && "BUSPR".equalsIgnoreCase(custType))
@@ -420,5 +458,53 @@ public class BrazilUtil extends AutomationUtil {
        lov.setComment((String) codes.get(0)[2]);
      }
      return lov;
+   }
+   
+   private Map<String,String> getDnbDetailsForCov(Data data,EntityManager em) {
+     String stateProvVal=null;
+     String dunsNo=null;
+     String isic=null;
+     String subInd=null;
+     Map<String,String> m=new HashMap<>();
+     CompanyRecordModel record=new CompanyRecordModel();
+     record.setCountryCd("BR");
+     record.setIssuingCntry("631");
+     record.setVat(data.getVat());
+     List<CompanyRecordModel> record1 = null;
+     try {
+       record1 = CompanyFinder.findCompanies(record);
+     } catch (Exception e) {
+       // TODO Auto-generated catch block
+       e.printStackTrace();
+     }
+     if(record1!=null && !record1.isEmpty())
+     {
+       stateProvVal= record1.get(0).getStateProv();
+       m.put("stateProv", stateProvVal);
+       dunsNo= record1.get(0).getDunsNo();
+     }
+     DnBCompany dnbDetailsUI = null;
+     try {
+       dnbDetailsUI = RequestEntryService.getDnBDetailsUI(dunsNo);
+     } catch (Exception e) {
+       // TODO Auto-generated catch block
+       e.printStackTrace();
+     }
+     if(dnbDetailsUI!=null)
+     {
+       isic= dnbDetailsUI.getIbmIsic();
+       subInd= getSubIndustry(em,isic);
+       m.put("subInd", subInd);
+     }
+     return m;
+     
+   }
+   
+   public String getSubIndustry(EntityManager entityManager,String isic) {
+     String sql = ExternalizedQuery.getSql("GET.SUBIND.FROM.ISIC");
+     PreparedQuery query = new PreparedQuery(entityManager, sql);
+     query.setParameter("REFT_UNSIC_CD", isic);
+     List<String> rec = query.getResults(String.class);
+     return rec.get(0);
    }
 }
