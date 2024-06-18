@@ -5345,6 +5345,69 @@ function setSBOAfterSave(){
 	}
 }
 
+function taxCodeHungaryValidation() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var taxCd3 = FormManager.getActualValue('taxCd3');
+          if(taxCd3 != '' && taxCd3 != undefined && taxCd3 != null && !taxCd3.startsWith('177')) {
+          return new ValidationResult(null, false, 'Group Vat ID should start with 177.');
+          }        
+          return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var taxCd3 = FormManager.getActualValue('taxCd3');
+          if(taxCd3 != '' && taxCd3 != undefined && taxCd3 != null && taxCd3.length != 13 ) {
+	        return new ValidationResult(null, false, 'Group Vat ID length should be 13 characters.');
+          }        
+          return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var taxCd3 = FormManager.getActualValue('taxCd3');
+          if(taxCd3 != '' && taxCd3 != undefined && taxCd3 != null  && taxCd3.length == 13 && !taxCd3.substring(3).match("([0-9]{5}-[0-9]{1}-[0-9]{2})$")) {
+	        return new ValidationResult(null, false, 'Format should be 177nnnnn-n-nn.');
+          }        
+          return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+   FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var taxCd1 = FormManager.getActualValue('taxCd1');
+          if(taxCd1 != '' && taxCd1 != undefined && taxCd1 != null && taxCd1.length != 13 ) {
+	        return new ValidationResult(null, false, 'Domestic Tax ID length should be 13 characters.');
+          }        
+          return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var taxCd1 = FormManager.getActualValue('taxCd1');
+          if(taxCd1 != null  && taxCd1.length == 13 && !taxCd1.match("([0-9]{8}-[0-9]{1}-[0-9]{2})$")) {
+	        return new ValidationResult(null, false, 'Format should be nnnnnnnn-n-nn.');
+          }        
+          return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+}
+
 dojo.addOnLoad(function() {
 	GEOHandler.CEE = ['358', '359', '363', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '707', '708', '713', '740', '741', '787', '820', '821',
 		'826', '889'];
@@ -5488,7 +5551,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterConfig(setClientTier, GEOHandler.CEE);
 	GEOHandler.addAfterTemplateLoad(setClientTier, GEOHandler.CEE);
 	GEOHandler.addAfterConfig(setSBOAfterSave, GEOHandler.CEE);
-
+  GEOHandler.registerValidator(taxCodeHungaryValidation, [SysLoc.HUNGARY], null, true);
 	// GEOHandler.addAfterTemplateLoad(setSBOFromDBMapping, GEOHandler.CEE);  
 	// GEOHandler.addAfterConfig(setSBOFromDBMapping, GEOHandler.CEE);
 
