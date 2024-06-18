@@ -403,6 +403,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
           KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
           if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
             watsonxOutput = kycResponse.getResult().getWatsonxOutput();
+            System.out.println("DPLSearchService Line 406: " + watsonxOutput);
           }
           resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
         } else {
