@@ -5357,7 +5357,7 @@ function taxCodeHungaryValidation() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-  
+
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
@@ -5369,7 +5369,7 @@ function taxCodeHungaryValidation() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-  
+
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
@@ -5381,7 +5381,7 @@ function taxCodeHungaryValidation() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-  
+
    FormManager.addFormValidator((function () {
     return {
       validate: function () {
@@ -5393,7 +5393,7 @@ function taxCodeHungaryValidation() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-  
+
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
@@ -5405,7 +5405,7 @@ function taxCodeHungaryValidation() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-  
+
 }
 
 dojo.addOnLoad(function() {
@@ -5552,7 +5552,6 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterTemplateLoad(setClientTier, GEOHandler.CEE);
 	GEOHandler.addAfterConfig(setSBOAfterSave, GEOHandler.CEE);
   GEOHandler.registerValidator(taxCodeHungaryValidation, [SysLoc.HUNGARY], null, true);
-
 	// GEOHandler.addAfterTemplateLoad(setSBOFromDBMapping, GEOHandler.CEE);  
 	// GEOHandler.addAfterConfig(setSBOFromDBMapping, GEOHandler.CEE);
 
