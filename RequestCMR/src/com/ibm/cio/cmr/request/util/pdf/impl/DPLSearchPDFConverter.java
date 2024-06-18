@@ -81,13 +81,6 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
             document.add(section);
             document.add(blankLine());
 
-            document.add(createSubHeader("Watson assessment:"));
-            Paragraph paragraph = new Paragraph(
-                "True, Matched Names: MID AMERICA, ZIVS FARM TRADE MID, CYBER FARM LABS, CYBER FARM LABS, CYBER FARM LABS, CYBER FARM LABS, CYBER FARM LABS, CYBER FARM LABS, CYBER FARM LABS, CYBER FARM LABS");
-            paragraph.setFontSize(7);
-            document.add(paragraph);
-            document.add(blankLine());
-
             for (DPLSearchResults result : this.dplResults) {
               if (result.getDeniedPartyRecords() == null) {
                 result.setDeniedPartyRecords(new ArrayList<DPLRecord>());
