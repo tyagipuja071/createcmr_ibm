@@ -130,9 +130,10 @@ public class WTAASMessageHandler extends MQMessageHandler {
       // not the first XML, and address data is created
       this.messageHash.put("TransCode", "N");
     } else if ("U".equals(this.mqIntfReqQueue.getReqType()) && "Y".equals(this.addrData.getImportInd())) {
-
+      LOG.info("Is AP Country: " + CmrConstants.AP_COUNTRIES.contains(this.mqIntfReqQueue.getCmrIssuingCntry()));
       if (SystemLocation.HONG_KONG.equals(this.mqIntfReqQueue.getCmrIssuingCntry())
-          || SystemLocation.MACAO.equals(this.mqIntfReqQueue.getCmrIssuingCntry())) {
+          || SystemLocation.MACAO.equals(this.mqIntfReqQueue.getCmrIssuingCntry())
+          || CmrConstants.AP_COUNTRIES.contains(this.mqIntfReqQueue.getCmrIssuingCntry())) {
         String pairedSeq = StringUtils.isNotBlank(this.addrData.getPairedAddrSeq()) ? this.addrData.getPairedAddrSeq().trim() : "";
         this.messageHash.put("AddressNo", StringUtils.leftPad(pairedSeq, 5, '0'));
         LOG.info("Addr Seq: " + this.addrData.getId().getAddrSeq());
