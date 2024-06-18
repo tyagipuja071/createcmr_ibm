@@ -89,7 +89,8 @@
     </cmr:view>
   </cmr:row>
   
-   <cmr:view forCountry="740">
+   <cmr:row>
+      <cmr:view forCountry="740">
       <cmr:column span="2" containerForField="LocalTax1">
         <p>
           <cmr:label fieldId="taxCd1">
@@ -99,9 +100,7 @@
           <cmr:field fieldId="LocalTax1" id="taxCd1" path="taxCd1" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-    </cmr:view>
     
-    <cmr:view forCountry="740">
       <cmr:column span="2" containerForField="LocalTax3">
         <p>
           <cmr:label fieldId="taxCd3">
@@ -112,7 +111,7 @@
         </p>
       </cmr:column>
     </cmr:view>
-  
+  </cmr:row>
     <cmr:row addBackground="true">
       <!-- Fiscal code field for Romania -->
      <cmr:view forCountry="826">
