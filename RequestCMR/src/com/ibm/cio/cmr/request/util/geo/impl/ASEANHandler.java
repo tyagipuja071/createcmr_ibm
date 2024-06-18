@@ -21,6 +21,8 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -198,6 +200,8 @@ public class ASEANHandler extends APHandler {
                       record.setCmrAddrTypeCode(supportedAddrType);
                   }
                   record.setCmrAddrSeq(wtaasAddress.getAddressNo());
+                  LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
+                  mainRecord.setTransAddrNo(wtaasAddress.getAddressNo());
 
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
@@ -205,7 +209,9 @@ public class ASEANHandler extends APHandler {
                 } else {
                   LOG.debug(" - Main address, importing from FindCMR main record.");
                   // will import ZS01 from RDc directly
-                  mainRecord.setCmrAddrSeq(wtaasAddress.getAddressNo());
+                  LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
+                  mainRecord.setTransAddrNo(wtaasAddress.getAddressNo());
+
                   handleRDcRecordValues(mainRecord);
                   converted.add(mainRecord);
                 }
@@ -222,12 +228,9 @@ public class ASEANHandler extends APHandler {
         List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
         LOG.debug(" - Main address, importing from FindCMR main record.");
         // will import ZS01 from RDc directly
+        LOG.info("Main Record Addr Type: " + mainRecord.getCmrAddrType());
+
         record = mainRecord;
-        if (StringUtils.isEmpty(mainRecord.getCmrAddrSeq())) {
-          record.setCmrAddrSeq("00001");
-        } else {
-          record.setCmrAddrSeq(StringUtils.leftPad(mainRecord.getCmrAddrSeq(), 5, '0'));
-        }
         handleRDcRecordValues(record);
         converted.add(record);
         doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
@@ -257,7 +260,7 @@ public class ASEANHandler extends APHandler {
 
       LOG.info("After Mapped Addrtype: " + addrType);
 
-      if (!"ZS01".equals(addrType) && CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
+      if (addrType != null && !"ZS01".equals(addrType) && CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
         handleRDcRecordValues(record);
         record.setCmrAddrTypeCode(addrType);
         converted.add(record);
@@ -1060,6 +1063,19 @@ public class ASEANHandler extends APHandler {
       break;
     }
     return newAddrSeq;
+  }
+
+  @Override
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    LOG.info("setAddressValuesOnImport");
+
+    if (currentRecord != null) {
+      LOG.info("paired seq no before: " + address.getPairedAddrSeq());
+      address.setPairedAddrSeq(currentRecord.getTransAddrNo());
+      LOG.info("paired seq no after: " + address.getPairedAddrSeq());
+
+      super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
+    }
   }
 
 }
