@@ -2372,22 +2372,22 @@ public class USUtil extends AutomationUtil {
 
       if (("T").equalsIgnoreCase(firstChar)) {
         if (StringUtils.isBlank(data.getGbgId())) {
-          if (scenario.equalsIgnoreCase("ECOSYSTEM")) {
+          if ("ECOSYSTEM".equalsIgnoreCase(scenario)) {
             isu = "36";
             ctc = "Y";
-          } else if (scenario.equalsIgnoreCase("PRIV")) {
+          } else if ("PRIV".equalsIgnoreCase(scenario)) {
             isu = "21";
             ctc = " ";
-          } else if (!scenario.equalsIgnoreCase("ECOSYSTEM") && !scenario.equalsIgnoreCase("PRIV")) {
+          } else if (!"ECOSYSTEM".equalsIgnoreCase(scenario) && !("PRIV").equalsIgnoreCase(scenario)) {
             isu = "27";
             ctc = "E";
           }
 
         } else {
-          if (scenario.equalsIgnoreCase("ECOSYSTEM")) {
+          if ("ECOSYSTEM".equalsIgnoreCase(scenario)) {
             isu = "36";
             ctc = "Y";
-          } else if (scenario.equalsIgnoreCase("PRIV")) {
+          } else if ("PRIV".equalsIgnoreCase(scenario)) {
             isu = "21";
             ctc = " ";
           } else {
@@ -2430,10 +2430,10 @@ public class USUtil extends AutomationUtil {
          * overrides, coverageId, data, isu, ctc); }
          */
       else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
-        if (scenario.equalsIgnoreCase("ECO")) {
+        if ("ECO".equalsIgnoreCase(scenario)) {
           isu = "36";
           ctc = "Y";
-        } else if (scenario.equalsIgnoreCase("PRIV")) {
+        } else if ("PRIV".equalsIgnoreCase(scenario)) {
           isu = "21";
           ctc = " ";
         } else {
