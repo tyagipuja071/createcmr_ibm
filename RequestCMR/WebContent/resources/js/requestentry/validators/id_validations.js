@@ -204,17 +204,18 @@ function addAfterConfigAP() {
   FormManager.readOnly('isbuCd');
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('isbuCd');
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
+      FormManager.readOnly('subIndustryCd');
     }
+    FormManager.readOnly('isbuCd');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-    FormManager.readOnly('subIndustryCd');
+
+    FormManager.enable('mrcCd');
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
@@ -294,10 +295,6 @@ function addAfterConfigAP() {
       FormManager.enable('inacCd');
 
     }
-  }
-
-  if (reqType == 'U' && ((cntry == '834' || cntry == '749'))) {
-    FormManager.readOnly('isicCd');
   }
 
   if (reqType == 'C' && custGrp == 'CROSS' && cntry == '736') {
@@ -536,8 +533,6 @@ function setInacByCluster() {
       console.log('>>> setInacByCluster >>> arr = ' + arr);
       if (inacList.length == 1) {
         FormManager.setValue('inacCd', arr[0]);
-        FormManager.readOnly('inacType');
-        FormManager.readOnly('inacCd');
       } else {
         FormManager.enable('inacType');
         FormManager.enable('inacCd');
@@ -2727,8 +2722,6 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
   } else {
-    FormManager.readOnly('isicCd');
-    FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
       case 'PRIV':
         // ISIC = 9500, - lock field
@@ -3303,7 +3296,6 @@ function updateMRCAseanAnzIsa() {
       console.log('>>>> updateMRCAseanAnzIsa >>>> 834/SG >>>> 00000/INTER/DUMMY >>>> SET mrcCd=2 >>>>');
       FormManager.setValue('mrcCd', '2');
     }
-    FormManager.readOnly('mrcCd');
   }
 }
 
@@ -5933,18 +5925,11 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('repTeamMemberName');
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
