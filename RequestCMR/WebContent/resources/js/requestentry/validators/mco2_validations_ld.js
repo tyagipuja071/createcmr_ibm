@@ -217,10 +217,8 @@ function freeTxtFieldShowHide(buttonNo) {
     shouldDisplay = false;
   }
   if (shouldDisplay) {
-	  dojo.byId('dijit_form_TextBox_' + i).hidden = false;
     element.style.display = 'block';
   } else {
-		dojo.byId('dijit_form_TextBox_' + i).hidden = true;
     element.style.display = 'none';
     textFieldElement.value = '';
   }
