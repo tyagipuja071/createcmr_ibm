@@ -2544,10 +2544,9 @@ function addCEMEAChecklistValidator() {
               checkCount++;
             }
           }
-          noOfTextBoxes = noOfTextBoxes > 15 ? 15 : noOfTextBoxes;
           for (var i = 0; i < noOfTextBoxes; i++) {
-            if (checklist.query('input[type="text"]')[getCheckListFieldNo(i)].value.trimEnd() == ''
-                 &&  document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display == 'block') {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
+                 &&  document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }

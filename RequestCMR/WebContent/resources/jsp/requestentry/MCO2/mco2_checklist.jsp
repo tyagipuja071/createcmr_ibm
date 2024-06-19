@@ -20,16 +20,16 @@
  <cmr:checklist title1="ADVANCED SUPERCOMPUTER and SEMICONDUCTOR MANUFACTURING CUSTOMER SCREENING CHECKLIST (USERP Section 4 Part 2)"
    title2="This Questionnaire is designed for evaluation of all customers/BPs given a Customer Number located in Applicable D:5 Countries"> 
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Company Full Name: ">
-      <%=RequestUtils.generateChecklistLocalAddress(request)%>
+     <span id="checklist_txt_field_0" style="display:block"> <%=RequestUtils.generateChecklistLocalAddress(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Complete Address: ">
-      <%=RequestUtils.generateChecklistFreeTxtField1(request)%>
+   <span id="checklist_txt_field_1" style="display:block">   <%=RequestUtils.generateChecklistFreeTxtField1(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Nature of Business:  Provide web site (if available): ">
-      <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
+   <span id="checklist_txt_field_2" style="display:block">   <%=RequestUtils.generateChecklistFreeTxtField2(request)%> </span>
    </cmr:chk-lbl-field>
     <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Industry Segment: ">
-      <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
+  <span id="checklist_txt_field_3" style="display:block">    <%=RequestUtils.generateChecklistFreeTxtField3(request)%> </span>
    </cmr:chk-lbl-field>
    <br>
    <cmr:chk-block>
@@ -93,10 +93,10 @@
  </span>
 </cmr:chk-block>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Name, Title, and OU/BU  of Requester: ">
-      <%=RequestUtils.generateChecklistFreeTxtField10(request)%>
+  <span id="checklist_txt_field_10" style="display:block">    <%=RequestUtils.generateChecklistFreeTxtField10(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Date completed: ">
-      <%=RequestUtils.generateChecklistFreeTxtField11(request)%>
+   <span id="checklist_txt_field_11" style="display:block">   <%=RequestUtils.generateChecklistFreeTxtField11(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="">
     <cmr:chk-block>
@@ -111,7 +111,7 @@
    </i>
   <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
    </div>
-        <%=RequestUtils.generateChecklistFreeTxtField12(request)%>
+    <span id="checklist_txt_field_12" style="display:block">    <%=RequestUtils.generateChecklistFreeTxtField12(request)%> </span>
    
    </cmr:chk-block>
     </cmr:chk-lbl-field>
