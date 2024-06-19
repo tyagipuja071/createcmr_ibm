@@ -16,7 +16,7 @@
    %>
 	<cmr:checklist title1="MULTIPURPOSE PROLIFERATION AND MILITARY SCREENING CHECKLIST (Supplement 2.5 to USERP Section 4 Part 2)">
 		<cmr:chk-block>Applicable to the following countries:<br>
-	 Afghanistan, Iraq, Lebanon, Libya, Pakistan, Venezuela
+	 Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People’s Republic of China (including Hong Kong), Egypt, Georgia, Iraq, Israel, Jordan, Kazakhstan, Kuwait, Kyrgyzstan, Laos, Lebanon, Libya, Macau, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Taiwan, Tajikistan, Turkmenistan, Ukraine, United Arab Emirates, Uzbekistan, Venezuela, Vietnam, Yemen
 		</cmr:chk-block>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Company Full Name: ">
   <span id="checklist_txt_field_0" style="display:block">    <%=RequestUtils.generateChecklistLocalAddress(request)%> </span>
