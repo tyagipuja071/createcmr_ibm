@@ -19,16 +19,16 @@
 	 Afghanistan, Iraq, Lebanon, Libya, Pakistan, Venezuela
 		</cmr:chk-block>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Company Full Name: ">
-      <%=RequestUtils.generateChecklistLocalAddress(request)%>
+  <span id="checklist_txt_field_0" style="display:block">    <%=RequestUtils.generateChecklistLocalAddress(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Complete Address: ">
-      <%=RequestUtils.generateChecklistFreeTxtField1(request)%>
+   <span id="checklist_txt_field_1" style="display:block">   <%=RequestUtils.generateChecklistFreeTxtField1(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Nature of Business:  Provide web site (if available): ">
-      <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
+  <span id="checklist_txt_field_2" style="display:block">    <%=RequestUtils.generateChecklistFreeTxtField2(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Industry Segment: ">
-      <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
+  <span id="checklist_txt_field_3" style="display:block">    <%=RequestUtils.generateChecklistFreeTxtField3(request)%> </span>
    </cmr:chk-lbl-field>
     <br>
    <cmr:chk-block>
@@ -222,14 +222,14 @@
 </cmr:chk-block>
 
   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Name, Title, and OU/BU  of Requester: ">
-      <%=RequestUtils.generateChecklistFreeTxtField16(request)%>
+ <span id="checklist_txt_field_17" style="display:block">     <%=RequestUtils.generateChecklistFreeTxtField16(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Date completed: ">
-      <%=RequestUtils.generateChecklistFreeTxtField17(request)%>
+  <span id="checklist_txt_field_18" style="display:block">    <%=RequestUtils.generateChecklistFreeTxtField17(request)%> </span>
    </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="">
     <cmr:chk-block>
-      <div>Pursuant to <a href="https://w3.ibm.com/w3publisher/trust-compliance/bcgs">IBM's Business Conduct Guidelines (BCG)</a>, 
+      <div><i>Pursuant to <a href="https://w3.ibm.com/w3publisher/trust-compliance/bcgs">IBM's Business Conduct Guidelines (BCG)</a>, 
       <br>
       I certify that the information provided in this 
       <br>
@@ -237,9 +237,10 @@
      <br>
      of my knowledge and belief.
    <br>
+   </i>
   <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
    </div>
-        <%=RequestUtils.generateChecklistFreeTxtField18(request)%>
+   <span id="checklist_txt_field_19" style="display:block">     <%=RequestUtils.generateChecklistFreeTxtField18(request)%> </span>
    
    </cmr:chk-block>
     </cmr:chk-lbl-field>
