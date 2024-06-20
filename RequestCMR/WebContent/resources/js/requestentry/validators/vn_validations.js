@@ -75,17 +75,18 @@ function addAfterConfigAP() {
   FormManager.readOnly('isbuCd');
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('isbuCd');
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
+      FormManager.readOnly('subIndustryCd');
     }
+    FormManager.readOnly('isbuCd');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-    FormManager.readOnly('subIndustryCd');
+
+    FormManager.enable('mrcCd');
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('abbrevNm');
@@ -115,10 +116,6 @@ function addAfterConfigAP() {
   var clusterId = FormManager.getActualValue('apCustClusterId');
   if (reqType == 'C' && cntry == '643' && clusterId == '00000') {
     FormManager.readOnly('apCustClusterId');
-  }
-
-  if (reqType == 'U' && ((cntry == '834' || cntry == '852'))) {
-    FormManager.readOnly('isicCd');
   }
 
   if (reqType == 'C' && custGrp == 'CROSS' && cntry == '736') {
@@ -5058,18 +5055,11 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('repTeamMemberName');
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
