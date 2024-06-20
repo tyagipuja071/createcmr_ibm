@@ -2348,6 +2348,9 @@ public class CEMEAHandler extends BaseSOFHandler {
               int ctcIndex = 7; //
               int fiscalCdIndex = 15; // default index
               int vatIndex = 15;
+              int grpVatIndex = 16;
+              int domesticTaxIndex = 17;
+
               for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
                 currCell = (XSSFCell) row.getCell(cellIndex);
 
@@ -2376,6 +2379,14 @@ public class CEMEAHandler extends BaseSOFHandler {
                   vatIndex = cellIndex;
                   break;
                 }
+                if ("Group VAT ID".equals(cellVal)) {
+                  grpVatIndex = cellIndex;
+                  break;
+                }
+                if ("omestic TAX ID".equals(cellVal)) {
+                  domesticTaxIndex = cellIndex;
+                  break;
+                }
               }
 
               currCell = (XSSFCell) row.getCell(ordBlkIndex);
@@ -2384,10 +2395,28 @@ public class CEMEAHandler extends BaseSOFHandler {
               String stcOrdBlk = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(vatIndex);
               String vat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(grpVatIndex);
+              String grpVat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(domesticTaxIndex);
+              String domesticTax = validateColValFromCell(currCell);
 
-              if ("740".equals(country) && StringUtils.isNotBlank(vat) && !"@".equals(vat) && vat.length() == 10 && !vat.matches("HU[0-9]{8}")) {
-                LOG.trace("VAT format for Hungary should be HU99999999 ");
-                error.addError((row.getRowNum() + 1), "VAT", "VAT format for Hungary should be HU99999999.<br> ");
+              if ("740".equals(country)) {
+                if (StringUtils.isNotBlank(vat) && !"@".equals(vat) && vat.length() == 10 && !vat.matches("HU[0-9]{8}")) {
+                  LOG.trace("VAT format for Hungary should be HU99999999 ");
+                  error.addError((row.getRowNum() + 1), "VAT", "VAT format for Hungary should be HU99999999.<br> ");
+                }
+                if (StringUtils.isNotBlank(grpVat) && !"@".equals(grpVat) && vat.length() == 13 && !grpVat.startsWith("177")
+                    && !grpVat.substring(0, 3).matches("[0-9]{5}-[0-9]{1}-[0-9]{2})")) {
+                  LOG.trace("VAT format for Hungary should be HU99999999 ");
+                  error.addError((row.getRowNum() + 1), "Group VAT ID",
+                      "Group VAT ID should start with 177 and format should be 177nnnnn-n-nn.<br> ");
+                }
+                if (StringUtils.isNotBlank(domesticTax) && !"@".equals(domesticTax) && domesticTax.length() == 13
+                    && !domesticTax.matches("[0-9]{8}-[0-9]{1}-[0-9]{2}")) {
+                  LOG.trace("Domestic TAX ID format should be nnnnnnnn-n-nn.");
+                  error.addError((row.getRowNum() + 1), "Domestic TAX ID", "Domestic TAX ID format should be nnnnnnnn-n-nn.<br> ");
+                }
+
               }
               if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
                 LOG.trace("Order Block Code should only @, E, R, J. >> ");
