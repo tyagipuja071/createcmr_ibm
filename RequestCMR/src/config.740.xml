@@ -98,7 +98,7 @@
 					<label>VAT</label>
 					<dbColumn>VAT</dbColumn>
 					<width>5</width>
-					<length>20</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Collection Code</label>
