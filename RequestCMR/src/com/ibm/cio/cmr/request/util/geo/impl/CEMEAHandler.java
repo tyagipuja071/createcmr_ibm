@@ -2347,7 +2347,7 @@ public class CEMEAHandler extends BaseSOFHandler {
               int isuCdIndex = 6; //
               int ctcIndex = 7; //
               int fiscalCdIndex = 15; // default index
-
+              int vatIndex = 15;
               for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
                 currCell = (XSSFCell) row.getCell(cellIndex);
 
@@ -2372,12 +2372,23 @@ public class CEMEAHandler extends BaseSOFHandler {
                   fiscalCdIndex = cellIndex;
                   break;
                 }
+                if ("VAT".equals(cellVal)) {
+                  vatIndex = cellIndex;
+                  break;
+                }
               }
 
               currCell = (XSSFCell) row.getCell(ordBlkIndex);
               String ordBlk = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(stcOrdBlkIndex);
               String stcOrdBlk = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(vatIndex);
+              String vat = validateColValFromCell(currCell);
+
+              if ("740".equals(country) && StringUtils.isNotBlank(vat) && !"@".equals(vat) && vat.length() == 10 && !vat.matches("HU[0-9]{8}")) {
+                LOG.trace("VAT format for Hungary should be HU99999999 ");
+                error.addError((row.getRowNum() + 1), "VAT", "VAT format for Hungary should be HU99999999.<br> ");
+              }
               if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
                 LOG.trace("Order Block Code should only @, E, R, J. >> ");
                 error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");
