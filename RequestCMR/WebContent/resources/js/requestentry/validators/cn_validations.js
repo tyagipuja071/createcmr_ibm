@@ -3725,6 +3725,27 @@ function checkForCompanyProofAttachment() {
   }
 }
 
+function setCoverage2H2024(){
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if(custSubGrp == 'NRMLC'){
+	if( role == 'REQUESTER'){
+	FormManager.setValue('searchTerm','');
+	FormManager.readOnly('searchTerm');
+	}
+  FormManager.setValue('isuCd','34');
+  FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+  FormManager.setValue('clientTier','Q');
+  FormManager.readOnly('isuCd');
+  FormManager.setValue('clientTier');
+	FormManager.enable('inacCd');
+	FormManager.enable('inacType');
+
+}
+	
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.CN = [SysLoc.CHINA];
   console.log('adding CN validators...');
@@ -3750,6 +3771,8 @@ dojo.addOnLoad(function () {
 
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(setCoverage2H2024, GEOHandler.CN);
+
   // GEOHandler.addAfterTemplateLoad(setInacBySearchTerm, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
   // GEOHandler.CN);
