@@ -38,12 +38,16 @@ import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Address;
  * @author JeffZAMORA
  * 
  */
-public class ISAHandler extends APHandler {
+public class ISASunsetHandler extends APHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
   private static final String[] IN_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
   private static final String[] BD_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] LK_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
+
+  private static final String SOLD_TO_ADDR_TYPE = "ZS01";
+
+  private static final String SOLD_TO_FIXED_SEQ = "AA";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.INDIA, "IN");
@@ -68,7 +72,7 @@ public class ISAHandler extends APHandler {
     // address.getValues().put(Address.Line6, "<SRI LANKA> 12345");
 
     FindCMRRecordModel record = new FindCMRRecordModel();
-    ISAHandler handler = new ISAHandler();
+    ISASunsetHandler handler = new ISASunsetHandler();
     handler.handleWTAASAddressImport(null, SystemLocation.INDIA, null, record, address);
 
   }
@@ -470,4 +474,27 @@ public class ISAHandler extends APHandler {
     }
     return null;
   };
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      newAddrSeq = getNewAddressSeq(entityManager, reqId, addrType);
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewAddressSeq(EntityManager entityManager, long reqId, String addrType) {
+    String newAddrSeq = "";
+    switch (addrType) {
+    case SOLD_TO_ADDR_TYPE:
+      newAddrSeq = SOLD_TO_FIXED_SEQ;
+      break;
+    default:
+      newAddrSeq = "";
+      break;
+    }
+    return newAddrSeq;
+  }
 }
