@@ -193,10 +193,12 @@ public class ASEANSunsetHandler extends APHandler {
                     // handle here the different mappings
                     handleWTAASAddressImport(entityManager, record.getCmrIssuedBy(), mainRecord, record, wtaasAddress);
                     String supportedAddrType = getAddrTypeForWTAASAddrUse(record.getCmrIssuedBy(), wtaasAddress.getAddressUse());
-                    if (supportedAddrType != null)
+                    if (supportedAddrType != null) {
                       record.setCmrAddrTypeCode(supportedAddrType);
+                    }
+                    LOG.info("address not found in RDC. setting sequence from wtaas: " + wtaasAddress.getAddressNo());
+                    record.setCmrAddrSeq(wtaasAddress.getAddressNo());
                   }
-                  record.setCmrAddrSeq(wtaasAddress.getAddressNo());
                   LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
                   mainRecord.setTransAddrNo(wtaasAddress.getAddressNo());
 
