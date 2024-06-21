@@ -1521,6 +1521,13 @@ function setVatInd() {
   }
 }
 
+function setCustClass() {
+	var custGrp = FormManager.getActualValue('custGrp');
+	if (custGrp == "CROSS") {
+	  FormManager.setValue('custClass', '11');
+	}
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -1562,6 +1569,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultARFAARByScenario, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setVatInd, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(setCustClass, SysLoc.CANADA);
   GEOHandler.addAfterConfig(enableCustClass, SysLoc.CANADA);
   
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
