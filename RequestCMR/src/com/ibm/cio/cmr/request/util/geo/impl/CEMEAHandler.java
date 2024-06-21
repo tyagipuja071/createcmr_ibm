@@ -2410,7 +2410,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                   LOG.trace("VAT format for Hungary should be HU99999999 ");
                   error.addError((row.getRowNum() + 1), "VAT", "VAT format for Hungary should be HU99999999.<br> ");
                 }
-                if (StringUtils.isNotBlank(grpVat) && !"@".equals(grpVat) && vat.length() == 13 && !grpVat.startsWith("177")
+                if (StringUtils.isNotBlank(grpVat) && !"@".equals(grpVat) && grpVat.length() == 13 && !grpVat.startsWith("177")
                     && !grpVat.substring(0, 3).matches("[0-9]{5}-[0-9]{1}-[0-9]{2})")) {
                   LOG.trace("VAT format for Hungary should be HU99999999 ");
                   error.addError((row.getRowNum() + 1), "Group VAT ID",

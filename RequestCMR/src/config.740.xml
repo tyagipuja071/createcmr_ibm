@@ -94,19 +94,19 @@
 					<width>10</width>
 					<lovId>CustClass</lovId>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>VAT</label>
 					<dbColumn>VAT</dbColumn>
 					<width>5</width>
 					<length>10</length>
 				</column>
-					<column>
+					<column xactLength="true">
 					<label>Group VAT ID</label>
 					<dbColumn>Group VAT ID</dbColumn>
 					<width>5</width>
 					<length>13</length>
 				</column>
-					<column>
+					<column xactLength="true">
 					<label>Domestic TAX ID</label>
 					<dbColumn>Domestic TAX ID</dbColumn>
 					<width>5</width>
