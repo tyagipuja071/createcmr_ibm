@@ -100,13 +100,13 @@
 					<width>5</width>
 					<length>10</length>
 				</column>
-					<column xactLength="true">
+					<column exactLength="true">
 					<label>Group VAT ID</label>
 					<dbColumn>Group VAT ID</dbColumn>
 					<width>5</width>
 					<length>13</length>
 				</column>
-					<column xactLength="true">
+					<column exactLength="true">
 					<label>Domestic TAX ID</label>
 					<dbColumn>Domestic TAX ID</dbColumn>
 					<width>5</width>
