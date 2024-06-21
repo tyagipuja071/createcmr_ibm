@@ -204,19 +204,19 @@ function addAfterConfigAP() {
   FormManager.readOnly('isbuCd');
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('isbuCd');
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
+      FormManager.readOnly('subIndustryCd');
     }
+    FormManager.readOnly('isbuCd');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-    FormManager.readOnly('subIndustryCd');
-  } else {
+
     FormManager.enable('mrcCd');
+  } else {
     FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
@@ -5933,18 +5933,11 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('repTeamMemberName');
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
