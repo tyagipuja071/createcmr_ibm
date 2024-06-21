@@ -61,20 +61,8 @@ public class ISASunsetHandler extends APHandler {
   private static final String[] LK_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
 
   private static final String MAILING_ADDR_TYPE = "ZS01";
-  private static final String BILLING_ADDR_TYPE = "ZP01";
-  private static final String SHIPPING_ADDR_TYPE = "ZD01";
-  private static final String INSTALLING_ADDR_TYPE = "ZI01";
-  private static final String BILL_TO_ADDR_TYPE = "ZP01";
-  private static final String INSTALL_AT_ADDR_TYPE = "ZI01";
-  private static final String SHIP_TO_ADDR_TYPE = "ZD01";
 
   private static final String MAILING_FIXED_SEQ = "AA";
-  private static final String BILLING_FIXED_SEQ = "BB";
-  private static final String SHIPPING_FIXED_SEQ = "SS";
-  private static final String INSTALLING_FIXED_SEQ = "SS";
-  private static final String BILL_TO_FIXED_SEQ = "020";
-  private static final String INSTALL_AT_FIXED_SEQ = "050";
-  private static final String SHIP_TO_FIXED_SEQ = "040";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.INDIA, "IN");
