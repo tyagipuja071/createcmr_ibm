@@ -953,7 +953,7 @@ public class CmrConstants {
   public static final List<String> LA_COUNTRIES = Arrays.asList("613", "629", "655", "661", "663", "681", "683", "829", "731", "735", "799", "811",
       "813", "815", "869", "871", "631", "781");
 
-  public static final List<String> AP_COUNTRIES = Arrays.asList("615", "749", "818", "852", "856");
+  public static final List<String> AP_COUNTRIES = Arrays.asList("615", "749", "818", "852", "856", "834", "744");
 
   public static final List<String> ANZ_COUNTRIES = Arrays.asList("616", "796");
 
