@@ -339,9 +339,9 @@ function addFieldFormatValidator() {
 						addrCity1 = recordList.city1;
 
 						/*
-			 * if (typeof (addrSequence) == 'object') { addrSequence =
-			 * addrSequence[0]; }
-			 */
+             * if (typeof (addrSequence) == 'object') { addrSequence =
+             * addrSequence[0]; }
+             */
 						if (typeof (addrDept) == 'object') {
 							addrDept = addrDept[0];
 						}
@@ -935,6 +935,11 @@ function setISBUScenarioLogic() {
 		FormManager.setValue('isbuCd', '');
 		FormManager.limitDropdownValues(FormManager.getField('isbuCd'), isbuList);
 	}
+	else if (custSubGrp == 'PRIV') {
+	  FormManager.enable('isicCd');
+    FormManager.enable('subIndustryCd');
+  } 
+	
 }
 
 
@@ -1321,9 +1326,9 @@ function addDoubleCreateValidatorSG() {
 					return new ValidationResult(null, true);
 				}
 				/*
-		 * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
-		 * }else{ showError = false; }
-		 */
+         * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true;
+         * }else{ showError = false; }
+         */
 				if (cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF') {
 					if (FormManager.getActualValue('cmrNo') != '' && cmrNumber.length == 6) {
 						var cmrNumber = FormManager.getActualValue('cmrNo');
