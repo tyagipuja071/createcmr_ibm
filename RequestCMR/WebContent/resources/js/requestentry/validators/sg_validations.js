@@ -917,6 +917,7 @@ function updateIsbuCd() {
 function setISBUScenarioLogic() {
 	console.log('>>>> setISBUScenarioLogic >>>>');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	var role = FormManager.getActualValue('userRole').toUpperCase();
 	var isbuList = null;
 
 
@@ -938,7 +939,10 @@ function setISBUScenarioLogic() {
 	else if (custSubGrp == 'PRIV') {
 	  FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
-  } 
+  }
+	 if (role == 'REQUESTER' ) {
+	    FormManager.enable('abbrevLocn');
+	 }
 	
 }
 
