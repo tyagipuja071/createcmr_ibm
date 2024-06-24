@@ -175,6 +175,7 @@ function setInacBySearchTerm(value) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isInacRetrieved = false;
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
   FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
@@ -183,7 +184,7 @@ function setInacBySearchTerm(value) {
     return;
   }
   if (!_cluster && value != undefined) {
-    if (_cluster == '') {
+    if (_cluster == '' && custSubGrp != 'NRMLC') {
       console.log('>>>> EMPTY INAC/INACTYPE when cluster is not valid >>>>');
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
       FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
@@ -3734,11 +3735,6 @@ function setCoverage2H2024(){
 	FormManager.setValue('searchTerm','');
 	FormManager.readOnly('searchTerm');
 	}
-  FormManager.setValue('isuCd','34');
-  FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-  FormManager.setValue('clientTier','Q');
-  FormManager.readOnly('isuCd');
-  FormManager.setValue('clientTier');
 	FormManager.enable('inacCd');
 	FormManager.enable('inacType');
 
