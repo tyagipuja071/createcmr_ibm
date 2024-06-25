@@ -3732,6 +3732,7 @@ function setCoverage2H2024(){
 
   if(custSubGrp == 'NRMLC'){
 	if( role == 'REQUESTER'){
+	FormManager.removeValidator('searchTerm', Validators.REQUIRED);
 	FormManager.setValue('searchTerm','');
 	FormManager.readOnly('searchTerm');
 	}
