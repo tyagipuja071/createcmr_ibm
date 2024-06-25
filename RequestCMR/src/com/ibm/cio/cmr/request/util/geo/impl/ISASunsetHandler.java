@@ -63,12 +63,19 @@ public class ISASunsetHandler extends APHandler {
   private static final String MAILING_ADDR_TYPE = "ZS01";
 
   private static final String MAILING_FIXED_SEQ = "AA";
+  private static Map<String, String> BD_ADDR_SEQ = new HashMap<>();
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.INDIA, "IN");
     LANDED_CNTRY_MAP.put(SystemLocation.BANGLADESH, "BD");
     LANDED_CNTRY_MAP.put(SystemLocation.SRI_LANKA, "LK");
     LANDED_CNTRY_MAP.put(SystemLocation.NEPAL, "NP");
+
+    BD_ADDR_SEQ.put("ZS01", "AA");
+    BD_ADDR_SEQ.put("ZP01", "BB");
+    BD_ADDR_SEQ.put("ZI01", "CC");
+    BD_ADDR_SEQ.put("ZH01", "DD");
+    BD_ADDR_SEQ.put("ZP02", "EE");
   }
 
   public static void main(String[] args) {
@@ -495,7 +502,11 @@ public class ISASunsetHandler extends APHandler {
     String newAddrSeq = "";
 
     if (!StringUtils.isEmpty(addrType)) {
-      newAddrSeq = getNewAddressSeq(entityManager, reqId, addrType);
+      if (SystemLocation.BANGLADESH.equals(cmrIssuingCntry)) {
+        newAddrSeq = getNewPrimaryAddressSeqForBD(entityManager, reqId, addrType);
+      } else {
+        newAddrSeq = getNewAddressSeq(entityManager, reqId, addrType);
+      }
     }
     return newAddrSeq;
   }
@@ -510,6 +521,12 @@ public class ISASunsetHandler extends APHandler {
       newAddrSeq = "";
       break;
     }
+    return newAddrSeq;
+  }
+
+  private String getNewPrimaryAddressSeqForBD(EntityManager entityManager, long reqId, String addrType) {
+    String newAddrSeq = "";
+    newAddrSeq = BD_ADDR_SEQ.get(addrType);
     return newAddrSeq;
   }
 
