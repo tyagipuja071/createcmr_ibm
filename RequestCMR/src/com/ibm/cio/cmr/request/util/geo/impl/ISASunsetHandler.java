@@ -713,6 +713,19 @@ public class ISASunsetHandler extends APHandler {
 
   }
 
+  @Override
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    LOG.info("setAddressValuesOnImport");
+
+    if (currentRecord != null) {
+      LOG.info("paired seq no before: " + address.getPairedAddrSeq());
+      address.setPairedAddrSeq(currentRecord.getTransAddrNo());
+      LOG.info("paired seq no after: " + address.getPairedAddrSeq());
+
+      super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
+    }
+  }
+
   private String getZS01AddressUse(String country) {
     switch (country) {
     case SystemLocation.AUSTRALIA:
