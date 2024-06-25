@@ -5375,7 +5375,7 @@ function taxCodeHungaryValidation() {
       validate: function () {
         var taxCd3 = FormManager.getActualValue('taxCd3');
           if(taxCd3 != '' && taxCd3 != undefined && taxCd3 != null  && taxCd3.length == 13 && !taxCd3.substring(3).match("([0-9]{5}-[0-9]{1}-[0-9]{2})$")) {
-	        return new ValidationResult(null, false, 'Format should be 177nnnnn-n-nn.');
+	        return new ValidationResult(null, false, 'Group VAT Id format should be 177nnnnn-n-nn.');
           }        
           return new ValidationResult(null, true);
       }
@@ -5399,7 +5399,7 @@ function taxCodeHungaryValidation() {
       validate: function () {
         var taxCd1 = FormManager.getActualValue('taxCd1');
           if(taxCd1 != null  && taxCd1.length == 13 && !taxCd1.match("([0-9]{8}-[0-9]{1}-[0-9]{2})$")) {
-	        return new ValidationResult(null, false, 'Format should be nnnnnnnn-n-nn.');
+	        return new ValidationResult(null, false, 'Domestic Tax ID format should be nnnnnnnn-n-nn.');
           }        
           return new ValidationResult(null, true);
       }
