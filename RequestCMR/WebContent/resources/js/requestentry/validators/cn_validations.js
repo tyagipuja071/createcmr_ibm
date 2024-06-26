@@ -3729,8 +3729,7 @@ function checkForCompanyProofAttachment() {
 function setCoverage2H2024(){
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
 	var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  if(custSubGrp == 'NRMLC'){
+  if( ['NRMLC','AQSTN'].includes(custSubGrp)){
 	if( role == 'REQUESTER'){
 	FormManager.removeValidator('searchTerm', Validators.REQUIRED);
 	FormManager.setValue('searchTerm','');
