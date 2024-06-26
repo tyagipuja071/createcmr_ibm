@@ -954,7 +954,8 @@ function hideTDOFields() {
 }
 
 function setReadOnlyFields() {
-  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && !['NRMLC','AQSTN'].includes(custSubGrp)) {
     console.log("Enabling isuCd for PROCESSOR...");
     FormManager.enable('isuCd');
   }
@@ -3728,13 +3729,10 @@ function checkForCompanyProofAttachment() {
 
 function setCoverage2H2024(){
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
-	var role = FormManager.getActualValue('userRole').toUpperCase();
   if( ['NRMLC','AQSTN'].includes(custSubGrp)){
-	if( role == 'REQUESTER'){
 	FormManager.removeValidator('searchTerm', Validators.REQUIRED);
 	FormManager.setValue('searchTerm','');
-	FormManager.readOnly('searchTerm');
-	}
+	FormManager.readOnly('searchTerm');	
 	FormManager.enable('inacCd');
 	FormManager.enable('inacType');
 
