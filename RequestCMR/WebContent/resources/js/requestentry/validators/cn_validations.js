@@ -184,7 +184,7 @@ function setInacBySearchTerm(value) {
     return;
   }
   if (!_cluster && value != undefined) {
-    if (_cluster == '' && custSubGrp != 'NRMLC') {
+    if (_cluster == '' && !['NRMLC','AQSTN'].includes(custSubGrp)) {
       console.log('>>>> EMPTY INAC/INACTYPE when cluster is not valid >>>>');
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
       FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
@@ -3729,8 +3729,7 @@ function checkForCompanyProofAttachment() {
 function setCoverage2H2024(){
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
 	var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  if(custSubGrp == 'NRMLC'){
+  if( ['NRMLC','AQSTN'].includes(custSubGrp)){
 	if( role == 'REQUESTER'){
 	FormManager.removeValidator('searchTerm', Validators.REQUIRED);
 	FormManager.setValue('searchTerm','');

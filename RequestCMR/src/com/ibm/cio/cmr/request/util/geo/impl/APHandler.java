@@ -1115,6 +1115,8 @@ public abstract class APHandler extends GEOHandler {
       return true;
     case SystemLocation.LAOS:
       return true;
+    case SystemLocation.THAILAND:
+      return true;
     }
     return false;
   }
