@@ -200,7 +200,7 @@ public class ASEANSunsetHandler extends APHandler {
                     record.setCmrAddrSeq(wtaasAddress.getAddressNo());
                   }
                   LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
-                  mainRecord.setTransAddrNo(wtaasAddress.getAddressNo());
+                  record.setTransAddrNo(wtaasAddress.getAddressNo());
 
                   if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
                     converted.add(record);
