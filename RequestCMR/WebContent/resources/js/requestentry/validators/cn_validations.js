@@ -184,7 +184,7 @@ function setInacBySearchTerm(value) {
     return;
   }
   if (!_cluster && value != undefined) {
-    if (_cluster == '' && custSubGrp != 'NRMLC') {
+    if (_cluster == '' && ['NRMLC','AQSTN'].includes(custSubGrp)) {
       console.log('>>>> EMPTY INAC/INACTYPE when cluster is not valid >>>>');
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
       FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
