@@ -177,9 +177,12 @@ function setInacBySearchTerm(value) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-  FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-  FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
+	if (!['NRMLC', 'AQSTN'].includes(custSubGrp)) {
+		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+		FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 
+	}
+  
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
