@@ -180,7 +180,7 @@ dojo.addOnLoad(function(){
         	  <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
       	 	</p>
     	  </cmr:column>
-		<cmr:column span="2" containerForField="OrdBlk" forCountry="744,834">
+		<cmr:column span="2" containerForField="OrdBlk" forCountry="744,834,615,749,818,852,856,652,643,778">
 			<p>
 				<cmr:label fieldId="ordBlk">
 					<cmr:fieldLabel fieldId="OrdBlk" />:
