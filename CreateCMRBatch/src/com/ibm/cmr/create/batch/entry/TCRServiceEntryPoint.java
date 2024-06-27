@@ -28,12 +28,14 @@ public class TCRServiceEntryPoint extends BatchEntryPoint {
       service.setSkipExit(runUpdate);
       service.setMode(Mode.Extract);
       service.execute();
+
+      service.setSkipExit(runUpdate);
+      service.setMode(Mode.Clean);
+      service.execute();
+
     }
 
     if (runUpdate) {
-      service.setSkipExit(true);
-      service.setMode(Mode.Clean);
-      service.execute();
 
       service.setSkipExit(false);
       service.setMode(Mode.Update);
