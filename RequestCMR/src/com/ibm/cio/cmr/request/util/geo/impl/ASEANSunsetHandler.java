@@ -251,7 +251,17 @@ public class ASEANSunsetHandler extends APHandler {
       LOG.info("TransAddressNo Orig: " + record.getTransAddrNo());
 
       if (StringUtils.isBlank(record.getTransAddrNo()) && StringUtils.isNotBlank(record.getCmrAddrSeq())) {
-        record.setTransAddrNo(record.getCmrAddrSeq());
+
+        // TEMP for testing: handle indonesia here for new rdc addresses -- it
+        // reached here meaning it is RDC only addresses
+        if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType()) && SystemLocation.INDONESIA.equals(record.getCmrIssuedBy())) {
+          LOG.info("INDONESIA HERE");
+          LOG.info("Marking X for wtaas logic new create");
+          record.setTransAddrNo("X");
+        } else {
+          record.setTransAddrNo(record.getCmrAddrSeq());
+
+        }
       }
       LOG.info("TransAddressNo After: " + record.getTransAddrNo());
 
