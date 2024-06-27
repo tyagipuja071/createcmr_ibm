@@ -92,6 +92,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
       break;
     case Clean:
       cleanRedundantRecords(entityManager);
+      cleanUp(entityManager);
       break;
     }
     return true;
@@ -150,6 +151,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
 
     LOG.debug("Running on external mode on directory " + extDirectory);
 
+    int fileCount = 0;
     try {
       try (CMRFTPConnection sftp = new CMRFTPConnection()) {
         List<String> list = sftp.listFiles(extDirectory);
@@ -164,6 +166,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
           String localFile = directory + "/" + filename;
           LOG.info("Moving " + filename + " to local file " + localFile);
           sftp.getFile(extDirectory + "/" + filename, localFile);
+          fileCount++;
         }
 
       }
@@ -171,7 +174,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
       LOG.error("An error occurred when copying files from external SFTP", e);
       throw new RuntimeException("Cannot copy from external SFTP.");
     }
-    LOG.info("Files moved to local directory.");
+    LOG.info(fileCount + " files moved to local directory.");
   }
 
   /**
@@ -604,7 +607,7 @@ public class TCRService extends MultiThreadedBatchService<USTCRUpdtQueue> {
 
   @Override
   protected boolean hasCleanup() {
-    return true;
+    return false;
   }
 
   @Override
