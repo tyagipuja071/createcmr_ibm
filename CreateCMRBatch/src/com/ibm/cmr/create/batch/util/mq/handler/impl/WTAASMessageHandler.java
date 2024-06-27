@@ -85,7 +85,8 @@ public class WTAASMessageHandler extends MQMessageHandler {
 
     if ("U".equals(this.mqIntfReqQueue.getReqType())) {
       // for updates, send only changed address
-      if (lastSequence > 0 && (!"Y".equals(this.addrData.getChangedIndc()) && "Y".equals(this.addrData.getImportInd()))) {
+      if (lastSequence > 0 && (!"Y".equals(this.addrData.getChangedIndc()) && "Y".equals(this.addrData.getImportInd()))
+          && !createdInRDCOnly(this.mqIntfReqQueue.getReqType(), this.mqIntfReqQueue.getCmrIssuingCntry(), this.addrData.getPairedAddrSeq())) {
         int nextSequence = getNextSequenceForUpdates(lastSequence);
         if (nextSequence > 0) {
           LOG.debug("Address " + this.addrData.getId().getAddrType() + " (" + this.addrData.getId().getAddrSeq() + ") updated. Sending this one.");
@@ -126,7 +127,8 @@ public class WTAASMessageHandler extends MQMessageHandler {
     this.messageHash.put("DocRefNo", this.mqIntfReqQueue.getDocmRefnNo() != null ? this.mqIntfReqQueue.getDocmRefnNo() : "");
     this.messageHash.put("CntryNo", this.mqIntfReqQueue.getCmrIssuingCntry());
 
-    if (lastSequence > 0 && !"Y".equals(this.addrData.getImportInd())) {
+    if (lastSequence > 0 && (!"Y".equals(this.addrData.getImportInd())
+        || createdInRDCOnly(this.mqIntfReqQueue.getReqType(), this.mqIntfReqQueue.getCmrIssuingCntry(), this.addrData.getPairedAddrSeq()))) {
       // not the first XML, and address data is created
       this.messageHash.put("TransCode", "N");
     } else if ("U".equals(this.mqIntfReqQueue.getReqType()) && "Y".equals(this.addrData.getImportInd())) {
@@ -847,6 +849,21 @@ public class WTAASMessageHandler extends MQMessageHandler {
     AttributesPerLineOutputter outputter = new AttributesPerLineOutputter(1);
     XMLOutputter fmt = new XMLOutputter(format, outputter);
     return fmt;
+  }
+
+  // we will send it to wtaas as new
+  private boolean createdInRDCOnly(String reqType, String cntry, String pairedSeq) {
+    LOG.info("Req Type: " + reqType);
+    LOG.info("cntry: " + cntry);
+    LOG.info("pairedSeq: " + pairedSeq);
+
+    if ("U".equals(reqType) && "749".equals(cntry) && "X".equals(pairedSeq)) {
+      LOG.info("Returning TRUE");
+
+      return true;
+    }
+    LOG.info("Returning FALSE");
+    return false;
   }
 
 }
