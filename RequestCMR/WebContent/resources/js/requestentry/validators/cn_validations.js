@@ -953,7 +953,8 @@ function hideTDOFields() {
 }
 
 function setReadOnlyFields() {
-  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && !['NRMLC','AQSTN'].includes(custSubGrp)) {
     console.log("Enabling isuCd for PROCESSOR...");
     FormManager.enable('isuCd');
   }
@@ -3294,6 +3295,19 @@ function retrievedForCNValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function setCoverage2H2024(){
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if( ['NRMLC','AQSTN'].includes(custSubGrp)){
+	FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+	FormManager.setValue('searchTerm','');
+	FormManager.readOnly('searchTerm');
+	
+	FormManager.enable('inacCd');
+	FormManager.enable('inacType');
+}
+	
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -3319,6 +3333,7 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(setCoverage2H2024, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(setInacBySearchTerm, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
   // GEOHandler.CN);
