@@ -177,9 +177,12 @@ function setInacBySearchTerm(value) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-  FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-  FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
+	if (!['NRMLC', 'AQSTN'].includes(custSubGrp)) {
+		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+		FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 
+	}
+  
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -3735,9 +3738,40 @@ function setCoverage2H2024(){
 	FormManager.readOnly('searchTerm');	
 	FormManager.enable('inacCd');
 	FormManager.enable('inacType');
-
 }
-	
+ if(['EMBSA','CROSS'].includes(custSubGrp) && FormManager.getActualValue('searchTerm') == ''){
+		FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+}	
+}
+
+var custSubGrpHandler = null;
+var scenarioChanged = false;
+var previousSelection = null;
+var currentSelection = null;
+var isPrvsSlctnBlank = true;
+
+function clearPreviousSortl() {
+	if (custSubGrpHandler == null) {
+		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+			if (!['CROSS', 'EMBSA'].includes(FormManager.getActualValue('custSubGrp'))) {
+					return;
+				}
+			currentSelection = FormManager.getActualValue('custSubGrp');
+			previousSelection = localStorage.getItem("oldCustGrp");
+			if (previousSelection != null && previousSelection != '' && previousSelection != undefined) {
+				isPrvsSlctnBlank = false;
+			}
+			if ((!isPrvsSlctnBlank && previousSelection != currentSelection && _pagemodel['custSubGrp'] == null) || (!isPrvsSlctnBlank && previousSelection == _pagemodel['custSubGrp'] && previousSelection != currentSelection)) {
+				scenarioChanged = true;
+			} else if ((!isPrvsSlctnBlank && (previousSelection == currentSelection && currentSelection == _pagemodel['custSubGrp']))) {
+				scenarioChanged = false;
+			}
+			if (scenarioChanged) {
+					FormManager.setValue('searchTerm', '');
+			}
+			localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
+		});
+	}
 }
 
 dojo.addOnLoad(function () {
@@ -3766,6 +3800,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setCoverage2H2024, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(clearPreviousSortl, GEOHandler.CN);
 
   // GEOHandler.addAfterTemplateLoad(setInacBySearchTerm, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
