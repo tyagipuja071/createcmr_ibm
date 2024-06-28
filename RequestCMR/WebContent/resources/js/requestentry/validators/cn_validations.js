@@ -175,16 +175,21 @@ function setInacBySearchTerm(value) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isInacRetrieved = false;
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
-	if (!['NRMLC', 'AQSTN'].includes(custSubGrp)) {
-  FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+	if (['NRMLC', 'AQSTN'].includes(custSubGrp)) {
+  FormManager.removeValidator('inacCd', Validators.REQUIRED);
+  FormManager.removeValidator('inacType', Validators.REQUIRED);
+    }else{
+	FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
   FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-    }
+    
+}
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   if (!_cluster && value != undefined) {
-    if (_cluster == '') {
+    if (_cluster == '' && !['NRMLC','AQSTN'].includes(custSubGrp)) {
       console.log('>>>> EMPTY INAC/INACTYPE when cluster is not valid >>>>');
       FormManager.limitDropdownValues(FormManager.getField('inacCd'), []);
       FormManager.limitDropdownValues(FormManager.getField('inacType'), []);
@@ -3319,7 +3324,7 @@ var isPrvsSlctnBlank = true;
 function clearPreviousSortl() {
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-			if (!['CROSS', 'EMBSA'].includes(FormManager.getActualValue('custSubGrp'))) {
+			if (!['CROSS', 'EMBSA','AQSTN','NRMLC'].includes(FormManager.getActualValue('custSubGrp'))) {
 					return;
 				}
 			currentSelection = FormManager.getActualValue('custSubGrp');
@@ -3333,7 +3338,14 @@ function clearPreviousSortl() {
 				scenarioChanged = false;
 			}
 			if (scenarioChanged) {
-					FormManager.setValue('searchTerm', '');
+				if(['CROSS','EMBSA'].includes(FormManager.getActualValue('custSubGrp'))){
+				FormManager.setValue('searchTerm', '');
+				}else if(['NRMLC','AQSTN'].includes(FormManager.getActualValue('custSubGrp'))){
+					FormManager.removeValidator('inacType', Validators.REQUIRED);
+				  FormManager.removeValidator('inacCd', Validators.REQUIRED);
+				  FormManager.setValue('inacCd', '');
+				  FormManager.setValue('inacType', '');
+				}
 			}
 			localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
 		});
@@ -3366,6 +3378,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setCoverage2H2024, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(clearPreviousSortl, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(setInacBySearchTerm, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
   // GEOHandler.CN);
