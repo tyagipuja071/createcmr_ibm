@@ -177,11 +177,14 @@ function setInacBySearchTerm(value) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-	if (!['NRMLC', 'AQSTN'].includes(custSubGrp)) {
-		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-		FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
+	if (['NRMLC', 'AQSTN'].includes(custSubGrp)) {
+  FormManager.removeValidator('inacCd', Validators.REQUIRED);
+  FormManager.removeValidator('inacType', Validators.REQUIRED);
+    }else{
+	FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
+  FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 
-	}
+}
   
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -3753,7 +3756,7 @@ var isPrvsSlctnBlank = true;
 function clearPreviousSortl() {
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-			if (!['CROSS', 'EMBSA'].includes(FormManager.getActualValue('custSubGrp'))) {
+			if (!['CROSS', 'EMBSA','AQSTN','NRMLC'].includes(FormManager.getActualValue('custSubGrp'))) {
 					return;
 				}
 			currentSelection = FormManager.getActualValue('custSubGrp');
@@ -3767,13 +3770,19 @@ function clearPreviousSortl() {
 				scenarioChanged = false;
 			}
 			if (scenarioChanged) {
-					FormManager.setValue('searchTerm', '');
+				if(['CROSS','EMBSA'].includes(FormManager.getActualValue('custSubGrp'))){
+				FormManager.setValue('searchTerm', '');
+				}else if(['NRMLC','AQSTN'].includes(FormManager.getActualValue('custSubGrp'))){
+					FormManager.removeValidator('inacType', Validators.REQUIRED);
+				  FormManager.removeValidator('inacCd', Validators.REQUIRED);
+				  FormManager.setValue('inacCd', '');
+				  FormManager.setValue('inacType', '');
+				}
 			}
 			localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
 		});
 	}
 }
-
 dojo.addOnLoad(function () {
   GEOHandler.CN = [SysLoc.CHINA];
   console.log('adding CN validators...');
