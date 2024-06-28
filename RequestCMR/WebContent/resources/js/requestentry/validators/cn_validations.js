@@ -3754,6 +3754,18 @@ var currentSelection = null;
 var isPrvsSlctnBlank = true;
 
 function clearPreviousSortl() {
+		// first change to custSubGrp
+	if (FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)) {
+	if (['CROSS', 'EMBSA'].includes(FormManager.getActualValue('custSubGrp'))) {
+					FormManager.setValue('searchTerm', '');
+				} else if (['NRMLC', 'AQSTN'].includes(FormManager.getActualValue('custSubGrp'))) {
+					FormManager.removeValidator('inacType', Validators.REQUIRED);
+					FormManager.removeValidator('inacCd', Validators.REQUIRED);
+					FormManager.setValue('inacCd', '');
+					FormManager.setValue('inacType', '');
+				}
+		localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
+	}
 	if (custSubGrpHandler == null) {
 		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
 			if (!['CROSS', 'EMBSA', 'AQSTN', 'NRMLC'].includes(FormManager.getActualValue('custSubGrp'))) {
