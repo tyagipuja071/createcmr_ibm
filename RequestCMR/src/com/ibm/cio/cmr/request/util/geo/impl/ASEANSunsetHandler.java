@@ -252,15 +252,13 @@ public class ASEANSunsetHandler extends APHandler {
 
       if (StringUtils.isBlank(record.getTransAddrNo()) && StringUtils.isNotBlank(record.getCmrAddrSeq())) {
 
-        // TEMP for testing: handle indonesia here for new rdc addresses -- it
-        // reached here meaning it is RDC only addresses
+        // it reached this logic so it means this is RDC only address not
+        // present in wtaas
         if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType()) && SystemLocation.INDONESIA.equals(record.getCmrIssuedBy())) {
-          LOG.info("INDONESIA HERE");
           LOG.info("Marking X for wtaas logic new create");
           record.setTransAddrNo("X");
         } else {
           record.setTransAddrNo(record.getCmrAddrSeq());
-
         }
       }
       LOG.info("TransAddressNo After: " + record.getTransAddrNo());

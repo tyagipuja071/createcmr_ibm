@@ -857,7 +857,7 @@ public class WTAASMessageHandler extends MQMessageHandler {
     LOG.info("cntry: " + cntry);
     LOG.info("pairedSeq: " + pairedSeq);
 
-    if ("U".equals(reqType) && "749".equals(cntry) && "X".equals(pairedSeq)) {
+    if ("U".equals(reqType) && ("749".equals(cntry) || "615".equals(cntry)) && "X".equals(pairedSeq)) {
       LOG.info("Returning TRUE");
 
       return true;

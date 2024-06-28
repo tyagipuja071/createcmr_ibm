@@ -676,7 +676,15 @@ public class ISASunsetHandler extends APHandler {
       LOG.info("TransAddressNo Orig: " + record.getTransAddrNo());
 
       if (StringUtils.isBlank(record.getTransAddrNo()) && StringUtils.isNotBlank(record.getCmrAddrSeq())) {
-        record.setTransAddrNo(record.getCmrAddrSeq());
+        // it reached this logic so it means this is RDC only address not
+        // present in wtaas
+        if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType()) && SystemLocation.BANGLADESH.equals(record.getCmrIssuedBy())) {
+          LOG.info("Marking X for wtaas logic new create");
+          record.setTransAddrNo("X");
+        } else {
+          record.setTransAddrNo(record.getCmrAddrSeq());
+
+        }
       }
       LOG.info("TransAddressNo After: " + record.getTransAddrNo());
 
