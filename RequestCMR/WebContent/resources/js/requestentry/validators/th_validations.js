@@ -3357,6 +3357,30 @@ function disableChecklist() {
 
 }
 
+
+function initChecklistMainAddressAndName() {
+  var containerAddr = dojo.byId('dijit_form_TextBox_0');
+  var containerName = dojo.byId('dijit_form_TextBox_1');
+    FormManager.setValue('dijit_form_TextBox_6',localStorage.getItem('checklistSaveDate'));
+    FormManager.readOnly('dijit_form_TextBox_6');
+  if (containerAddr != null) {
+    if (typeof (_allAddressData) != 'undefined') {
+      for (var i = 0; i < _allAddressData.length; i++) {
+        if (_allAddressData[i].addrType && _allAddressData[i].addrType[0] == 'ZS01') {
+          containerAddr.innerHTML = _allAddressData[i].addrTxt[0] + ' ' + _allAddressData[i].city1[0] + ' ' + _allAddressData[i].postCd[0];
+          containerName.innerHTML = _allAddressData[i].custNm1[0];
+          FormManager.setValue('dijit_form_TextBox_0',containerAddr.innerHTML);
+          FormManager.setValue('dijit_form_TextBox_1',containerName.innerHTML);
+          FormManager.readOnly('dijit_form_TextBox_0');
+          FormManager.readOnly('dijit_form_TextBox_1');
+          return;
+        }
+      }
+      container.innerHTML = '';
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
 	console.log('adding THAILAND functions...');
 	console.log('the value of person full id is ' + localStorage.getItem("pID"));
@@ -3423,5 +3447,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addChecklistBtnHandler, [SysLoc.THAILAND]);
   GEOHandler.addAfterConfig(checkChecklistButtons, [SysLoc.THAILAND]);
   GEOHandler.addAfterConfig(disableChecklist, [SysLoc.THAILAND]);
+  GEOHandler.addAfterConfig(initChecklistMainAddressAndName, [SysLoc.THAILAND]);
 
 });

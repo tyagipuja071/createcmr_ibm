@@ -46,7 +46,7 @@
       </cmr:chk-entry>
    </cmr:chk-section> 
    <cmr:chk-section name="Section B:">
-    <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Supercomputer</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a 'supercomputer'?</cmr:chk-entry>
+    <cmr:chk-entry><span style="font-weight: bold; text-decoration: underline">Supercomputer</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of a "supercomputer"?</cmr:chk-entry>
       <cmr:chk-entry number="1" section="B">
          Does your customer build supercomputers?
       </cmr:chk-entry>
@@ -55,7 +55,7 @@
       </cmr:chk-entry>
       <cmr:chk-entry number="3" section="B">
          To the best of your knowledge or belief, is your customer involved in any activity to incorporate items into a supercomputer, or the design, development, manufacturing, testing, etc. of any components/items that will be used in a 'supercomputer'?
-         <br><i>Note: this question is asking if the customer makes or supports tools/components that are used in a supercomputer or to build a supercomputer.</i>
+         <br><b>Note: </b> this question is asking if the customer makes or supports tools/components that are used in a supercomputer or to build a supercomputer.
           <br>
          <span style="font-weight: bold;">DEFINITIONS-</span>
          <ul>
@@ -66,11 +66,11 @@
    <cmr:chk-section name="Section C:">
    <cmr:chk-entry number="1" section="C">
          <span style="font-weight: bold; text-decoration: underline">Semiconductor Manufacturing</span> ---- To the best of your knowledge or belief is your customer involved in the design, development, manufacturing, testing, etc. of integrated circuits?
-         <br><i>Note: This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.</i>
+         <br><b>Note:</b> This question is asking if the customer is involved in the semiconductor or integrated circuit manufacturing process.
       </cmr:chk-entry>
        <cmr:chk-entry number="2" section="C">
          To the best of your knowledge or belief is your customer involved with the design, development, manufacturing, testing, etc. of any parts, components, or equipment <span style="font-weight: bold; text-decoration: underline">of the tools </span>that are used in the production, manufacturing, testing, etc. of semiconductors.
-         <br><i>Note: This question is asking if the customer builds tools that are used in the semiconductor manufacturing process.</i>
+         <br><b>Note: </b>This question is asking if the customer builds tools that are used in the semiconductor manufacturing process.
       </cmr:chk-entry>
    </cmr:chk-section>
    <cmr:chk-block>
@@ -99,4 +99,7 @@
    
    </cmr:chk-block>
     </cmr:chk-lbl-field>
+    <cmr:chk-lbl-field addSpace="true" labelWidth="30%" boldLabel="true" label="Completed by Sales Representative:">
+    ${reqentry.requesterNm} (${reqentry.requesterId})
+  </cmr:chk-lbl-field>
 </cmr:checklist>
