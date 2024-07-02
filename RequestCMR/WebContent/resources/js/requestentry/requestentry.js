@@ -88,6 +88,8 @@ function processRequestAction() {
       FormManager.setValue('hasError', 'Y');
     }
     doSaveRequest();
+    var formattedDate = moment(new Date(), "YYYY-MM-DD HH:mm:SS.sss").format("YYYY-MM-DD");
+    localStorage.setItem('checklistSaveDate',formattedDate);
 
   } else if (action == YourActions.Validate) {
     cmr.showProgress('Checking request data..');
