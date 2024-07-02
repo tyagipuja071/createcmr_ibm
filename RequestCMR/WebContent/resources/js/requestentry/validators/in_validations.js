@@ -106,10 +106,11 @@ function addAfterConfigAP() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
 
-    
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') 
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('repTeamMemberName');
     FormManager.readOnly('isbuCd');
+    FormManager.readOnly('ordBlk');
+  }
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
     FormManager.readOnly('mrcCd');
