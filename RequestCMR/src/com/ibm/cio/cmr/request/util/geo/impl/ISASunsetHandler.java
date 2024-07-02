@@ -637,6 +637,13 @@ public class ISASunsetHandler extends APHandler {
         LOG.info("Main Record Addr Type: " + mainRecord.getCmrAddrType());
 
         record = mainRecord;
+
+        LOG.info("ISA Is Prospect: " + prospectCmrChosen);
+        if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType()) && prospectCmrChosen) {
+          record.setCmrAddrSeq(MAILING_FIXED_SEQ);
+          LOG.info("Sequence Number: " + record.getCmrAddrSeq());
+        }
+
         handleRDcRecordValues(record);
         converted.add(record);
         doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
