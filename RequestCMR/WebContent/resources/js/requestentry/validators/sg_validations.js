@@ -107,9 +107,11 @@ function addAfterConfigAP() {
 		FormManager.addValidator('cmrNo', Validators.REQUIRED, ['CMR Number'], 'MAIN_IBM_TAB');
 	}
 
-	if (FormManager.getActualValue('viewOnlyPage') == 'true')
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
 		FormManager.readOnly('repTeamMemberName');
-	FormManager.readOnly('isbuCd');
+		FormManager.readOnly('isbuCd');
+		FormManager.readOnly('ordBlk');
+	}
 
 	if (role == 'REQUESTER' || role == 'VIEWER') {
 		FormManager.readOnly('isbuCd');

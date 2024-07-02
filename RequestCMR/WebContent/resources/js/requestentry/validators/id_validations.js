@@ -199,9 +199,11 @@ function addAfterConfigAP() {
     FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CmrNoPrefix'], 'MAIN_IBM_TAB');
   }
 
-  if (FormManager.getActualValue('viewOnlyPage') == 'true')
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('repTeamMemberName');
-  FormManager.readOnly('isbuCd');
+    FormManager.readOnly('isbuCd');
+    FormManager.readOnly('ordBlk');
+  }
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
     if (role == 'VIEWER') {

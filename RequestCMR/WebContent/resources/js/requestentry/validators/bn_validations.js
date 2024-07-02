@@ -188,13 +188,15 @@ function addAfterConfigAP() {
     FormManager.removeValidator('cmrNo', Validators.REQUIRED);
   }
 
- if (cntry == '616' && reqType == 'C' && (role == 'PROCESSOR' || role == 'REQUESTER') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
-    FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CmrNoPrefix' ], 'MAIN_IBM_TAB');
-    }
-    
-  if (FormManager.getActualValue('viewOnlyPage') == 'true')
+  if (cntry == '616' && reqType == 'C' && (role == 'PROCESSOR' || role == 'REQUESTER') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
+    FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CmrNoPrefix'], 'MAIN_IBM_TAB');
+  }
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('repTeamMemberName');
     FormManager.readOnly('isbuCd');
+    FormManager.readOnly('ordBlk');
+  }
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
     if (role == 'VIEWER') {
