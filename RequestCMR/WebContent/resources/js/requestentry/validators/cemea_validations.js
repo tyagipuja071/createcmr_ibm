@@ -5640,7 +5640,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [SysLoc.SLOVAKIA]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [SysLoc.SLOVAKIA]);
   // Hungary
-  GEOHandler.addAddrFunction(initAddressPageHungary, [SysLoc.HUNGARY]);
+ // GEOHandler.addAddrFunction(initAddressPageHungary, [SysLoc.HUNGARY]);
   GEOHandler.addAfterConfig(afterConfigTemplateForHungary, [SysLoc.HUNGARY]);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForHungary, [SysLoc.HUNGARY]);
   // Czech
