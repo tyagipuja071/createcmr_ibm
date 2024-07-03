@@ -7615,8 +7615,8 @@ function updateChecklist() {
 
 
 function initChecklistDate() {
-    FormManager.setValue('dijit_form_TextBox_6',localStorage.getItem('checklistSaveDate'));
-    FormManager.readOnly('dijit_form_TextBox_6');  
+    FormManager.setValue('dijit_form_TextBox_4',localStorage.getItem('checklistSaveDate'));
+    FormManager.readOnly('dijit_form_TextBox_4');  
 }
 
 
