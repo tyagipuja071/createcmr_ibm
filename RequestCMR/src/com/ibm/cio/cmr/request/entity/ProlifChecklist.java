@@ -247,45 +247,47 @@ public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Se
   @Column(name = "FREE_TXT_FIELD_5")
   private String freeTxtField5;
 
-  @Column(
-      name = "FREE_TXT_FIELD_6")
+  @Column(name = "FREE_TXT_FIELD_6")
   private String freeTxtField6;
 
-  @Column(
-      name = "FREE_TXT_FIELD_7")
+  @Column(name = "FREE_TXT_FIELD_7")
   private String freeTxtField7;
 
-  @Column(
-      name = "FREE_TXT_FIELD_8")
+  @Column(name = "FREE_TXT_FIELD_8")
   private String freeTxtField8;
 
-  @Column(
-      name = "FREE_TXT_FIELD_9")
+  @Column(name = "FREE_TXT_FIELD_9")
   private String freeTxtField9;
 
-  @Column(
-      name = "FREE_TXT_FIELD_10")
+  @Column(name = "FREE_TXT_FIELD_10")
   private String freeTxtField10;
 
-  @Column(
-      name = "FREE_TXT_FIELD_11")
+  @Column(name = "FREE_TXT_FIELD_11")
   private String freeTxtField11;
 
-  @Column(
-      name = "FREE_TXT_FIELD_12")
+  @Column(name = "FREE_TXT_FIELD_12")
   private String freeTxtField12;
 
-  @Column(
-      name = "FREE_TXT_FIELD_13")
+  @Column(name = "FREE_TXT_FIELD_13")
   private String freeTxtField13;
 
-  @Column(
-      name = "FREE_TXT_FIELD_14")
+  @Column(name = "FREE_TXT_FIELD_14")
   private String freeTxtField14;
 
-  @Column(
-      name = "FREE_TXT_FIELD_15")
+  @Column(name = "FREE_TXT_FIELD_15")
   private String freeTxtField15;
+
+  @Column(name = "FREE_TXT_FIELD_16")
+  private String freeTxtField16;
+
+  @Column(name = "FREE_TXT_FIELD_17")
+  private String freeTxtField17;
+
+  @Column(name = "FREE_TXT_FIELD_18")
+  private String freeTxtField18;
+
+  @Column(name = "FREE_TXT_FIELD_19")
+  private String freeTxtField19;
 
   public String getUsDplSanctioned() {
     return this.usDplSanctioned;
@@ -885,6 +887,38 @@ public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Se
 
   public void setFreeTxtField15(String freeTxtField15) {
     this.freeTxtField15 = freeTxtField15;
+  }
+
+  public String getFreeTxtField16() {
+    return freeTxtField16;
+  }
+
+  public void setFreeTxtField16(String freeTxtField16) {
+    this.freeTxtField16 = freeTxtField16;
+  }
+
+  public String getFreeTxtField17() {
+    return freeTxtField17;
+  }
+
+  public void setFreeTxtField17(String freeTxtField17) {
+    this.freeTxtField17 = freeTxtField17;
+  }
+
+  public String getFreeTxtField18() {
+    return freeTxtField18;
+  }
+
+  public void setFreeTxtField18(String freeTxtField18) {
+    this.freeTxtField18 = freeTxtField18;
+  }
+
+  public String getFreeTxtField19() {
+    return freeTxtField19;
+  }
+
+  public void setFreeTxtField19(String freeTxtField19) {
+    this.freeTxtField19 = freeTxtField19;
   }
 
 }

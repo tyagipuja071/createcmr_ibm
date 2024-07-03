@@ -1004,4 +1004,11 @@ public class MCOFstHandler extends MCOHandler {
     return Arrays.asList(MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
   }
 
+  @Override
+  public boolean hasChecklist(String cmrIssiungCntry) {
+    if (Arrays.asList(SystemLocation.CENTRAL_AFRICAN_REPUBLIC, SystemLocation.DEMOCRATIC_CONGO).contains(cmrIssiungCntry)) {
+      return true;
+    }
+    return false;
+  }
 }

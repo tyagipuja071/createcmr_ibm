@@ -663,7 +663,9 @@ function addVatExemptHandler() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 2; i <= 15; i++) {
+  var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns.length; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
@@ -675,14 +677,9 @@ function addChecklistBtnHandler() {
 
 function freeTxtFieldShowHide(buttonNo) {
   var shouldDisplay = false;
-
-  if (buttonNo <= 1) {
-    return;
-  }
   var fieldIdNo = getCheckListFieldNo(buttonNo);
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
-
   if (buttonNo % 2 == 0) {
     shouldDisplay = true;
   } else {
@@ -697,15 +694,23 @@ function freeTxtFieldShowHide(buttonNo) {
 }
 
 function getCheckListFieldNo(buttonNo) {
-  return ((buttonNo - (buttonNo % 2)) / 2) + 5;
+	if(buttonNo % 2 == 0){
+	 return (buttonNo / 2) + 4;	
+	}else{
+	 return ((buttonNo-1) / 2) + 4;	
+	}
 }
 
+
 function checkChecklistButtons() {
-  for (var i = 2; i <= 14; i = i + 2) {
-    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
-      document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
-    }
-  }
+	for (var i = 0; i <= 25; i = i + 2) {
+		if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+			if(getCheckListFieldNo(i) > 16)
+			break;
+			
+	    document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
+		}
+	}
 }
 
 var _DupIssuingCntryCdHandler = null;
@@ -2542,10 +2547,11 @@ function addCEMEAChecklistValidator() {
           }
           for (var i = 0; i < noOfTextBoxes; i++) {
             if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''
-                && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+                 &&  document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
+          
           if (noOfQuestions != checkCount) {
             return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
           }
@@ -4449,6 +4455,32 @@ function StcOrderBlockValidation() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function disableChecklist() {
+	  var checklist = dojo.query('table.checklist');
+	  var radioBtns = checklist.query('input[type="radio"]');
+	  var textFields = checklist.query('input[type="text"]');
+
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+		for (var i = 0; i < radioBtns.length; i++) {
+			FormManager.readOnly('dijit_form_RadioButton_' + i);
+		}
+
+		for (var j = 0; j < textFields.length; j++) {
+			FormManager.readOnly('dijit_form_TextBox_' + j)
+		}
+	} else {
+		for (var i = 0; i < radioBtns.length; i++) {
+			FormManager.enable('dijit_form_RadioButton_' + i);
+		}
+
+		for (var j = 0; j < textFields.length; j++) {
+			FormManager.enable('dijit_form_TextBox_' + j)
+		}
+	}
+
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
       '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '729' ];
@@ -4462,6 +4494,7 @@ dojo.addOnLoad(function() {
   GEOHandler.CEMEA_EXCLUDE_CEE = GEOHandler.CEMEA.filter(function(v) {
     return GEOHandler.CEE.indexOf(v) == -1
   });
+   GEOHandler.ME_CHECKLIST = ['752','768','772','808'];
   console.log('adding CEMEA functions...');
   GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
   // GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy);
@@ -4471,7 +4504,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(addHandlersForCEMEA, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.CEMEA);
+  GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.ME_CHECKLIST);
   GEOHandler.addAfterConfig(addVatExemptHandler, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.CEMEA);
@@ -4531,8 +4564,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetAndPoBoxFormValidator, GEOHandler.ME);
 
   // Checklist
-  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.CEMEA_CHECKLIST);
-  GEOHandler.registerValidator(addCEMEAChecklistValidator, GEOHandler.CEMEA_CHECKLIST);
+  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.ME_CHECKLIST);
+  GEOHandler.registerValidator(addCEMEAChecklistValidator, GEOHandler.ME_CHECKLIST);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
@@ -4580,7 +4613,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(onCustSubGrpChange, GEOHandler.ME);
   GEOHandler.registerValidator(clientTierValidator, GEOHandler.ME, null, true);
-  GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.ME);
+  GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.ME_CHECKLIST);
   GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.ME, null, true);
+  GEOHandler.addAfterConfig(disableChecklist, GEOHandler.ME_CHECKLIST);
 
 });
