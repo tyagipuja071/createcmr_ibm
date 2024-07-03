@@ -1171,8 +1171,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     // CREATCMR - 10129
     if (SystemLocation.HUNGARY.equals(data.getCmrIssuingCntry())) {
-      data.setTaxCd1(mainRecord.getCmrTaxJurisCd());
-      data.setTaxCd3(node1);
+      data.setTaxCd3(mainRecord.getCmrTaxJurisCd());
+      data.setTaxCd1(mainRecord.getCmrBusinessReg());
 
     }
   }
