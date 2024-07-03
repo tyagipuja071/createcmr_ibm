@@ -7614,6 +7614,12 @@ function updateChecklist() {
 }
 
 
+function initChecklistDate() {
+    FormManager.setValue('dijit_form_TextBox_6',localStorage.getItem('checklistSaveDate'));
+    FormManager.readOnly('dijit_form_TextBox_6');  
+}
+
+
 dojo.addOnLoad(function () {
   console.log('adding AP functions...');
   console.log('the value of person full id is ' + localStorage.getItem("pID"));
@@ -7683,4 +7689,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(addChecklistBtnHandler, [SysLoc.VIETNAM]);
   GEOHandler.addAfterConfig(checkChecklistButtons, [SysLoc.VIETNAM]);
   GEOHandler.addAfterConfig(updateChecklist, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(initChecklistDate, [SysLoc.VIETNAM]);
+
 });
