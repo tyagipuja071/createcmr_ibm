@@ -618,10 +618,6 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
       name = "MEXICO_BILLING_NAME")
   private String mexicoBillingName;
 
-  @Column(
-      name = "SECONDARY_LOCN_NO")
-  private String proxiLocnNo;
-
   public String getMexicoBillingName() {
     return mexicoBillingName;
   }
@@ -1788,14 +1784,6 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setTaxCd3(String taxCd3) {
     this.taxCd3 = taxCd3;
-  }
-
-  public String getProxiLocnNo() {
-    return proxiLocnNo;
-  }
-
-  public void setProxiLocnNo(String proxiLocnNo) {
-    this.proxiLocnNo = proxiLocnNo;
   }
 
 }
