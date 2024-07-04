@@ -1042,6 +1042,8 @@ public class JPHandler extends GEOHandler {
     data.setCsDiv(mainRecord.getCsDiv());
     data.setOemInd(mainRecord.getOemInd());
     data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
+    // duplicates the value of proxiLocnNo after Import
+    data.setBusnType(mainRecord.getAttach());
 
     data.setSvcArOffice(mainRecord.getCmrCustGrpId());
     data.setAgreementSignDate(mainRecord.getCmrContractSignDt() != null && mainRecord.getCmrContractSignDt().trim().length() == 8
@@ -1673,6 +1675,16 @@ public class JPHandler extends GEOHandler {
       update.setNewData(service.getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
       results.add(update);
+    }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry)) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getProxiLocnNo())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "IBMRelatedCMR", "-"));
+        update.setNewData(service.getCodeAndDescription(newData.getProxiLocnNo(), "IBMRelatedCMR", cmrCountry));
+        update.setOldData(service.getCodeAndDescription(oldData.getBusnType(), "IBMRelatedCMR", cmrCountry));
+        results.add(update);
+      }
     }
   }
 
