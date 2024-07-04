@@ -1862,12 +1862,10 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (SystemLocation.HUNGARY.equals(data.getCmrIssuingCntry())) {
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCustExt.setiTaxCode(data.getTaxCd1());
-      }
-      if (!StringUtils.isBlank(data.getTaxCd3())) {
-        legacyCustExt.setBankAcctNo(data.getTaxCd3());
-      }
+      String iTaxCode = StringUtils.isNotEmpty(data.getTaxCd1()) ? data.getTaxCd1() : "";
+      String bankAccNo = StringUtils.isNotEmpty(data.getTaxCd3()) ? data.getTaxCd3() : "";
+      legacyCustExt.setiTaxCode(iTaxCode);
+      legacyCustExt.setBankAcctNo(bankAccNo);
     }
 
   }
