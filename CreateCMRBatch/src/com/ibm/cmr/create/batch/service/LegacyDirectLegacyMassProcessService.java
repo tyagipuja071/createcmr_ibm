@@ -1150,7 +1150,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
         createEntity(custExt, entityManager);
         legacyObjects.setCustomerExt(custExt);
-      } else if (transformer != null && (SystemLocation.ROMANIA.equals(data.getCmrIssuingCntry()))) {
+      } else if (transformer != null && (Arrays.asList(SystemLocation.HUNGARY, SystemLocation.ROMANIA).contains(data.getCmrIssuingCntry()))) {
         CmrtCustExtPK custExtPk = null;
         LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
         // Initialize the object
