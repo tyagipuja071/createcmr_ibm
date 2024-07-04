@@ -1646,6 +1646,15 @@ public class CEMEAHandler extends BaseSOFHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd3(), newData.getTaxCd3())
+        && SystemLocation.HUNGARY.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Group VAT ID", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxCd3(), "Group VAT ID", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxCd3(), "Group VAT ID", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   @Override

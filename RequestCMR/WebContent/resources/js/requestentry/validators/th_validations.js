@@ -3376,7 +3376,8 @@ function initChecklistMainAddressAndName() {
           return;
         }
       }
-      container.innerHTML = '';
+      containerAddr.innerHTML = '';
+      containerName.innerHTML = '';
     }
   }
 }
