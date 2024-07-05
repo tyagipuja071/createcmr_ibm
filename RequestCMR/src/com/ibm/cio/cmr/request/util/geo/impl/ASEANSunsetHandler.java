@@ -23,10 +23,15 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -1020,6 +1025,7 @@ public class ASEANSunsetHandler extends APHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##RegionCode", "miscBillCd");
+    map.put("##OrdBlk", "ordBlk");
     return map;
   }
 
@@ -1076,6 +1082,23 @@ public class ASEANSunsetHandler extends APHandler {
       LOG.info("paired seq no after: " + address.getPairedAddrSeq());
 
       super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
+    }
+  }
+
+  @Override
+  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
+      List<UpdatedDataModel> results) {
+
+    UpdatedDataModel update = null;
+
+    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
+      update.setNewData(newData.getOrdBlk());
+      update.setOldData(oldData.getOrdBlk());
+      results.add(update);
     }
   }
 

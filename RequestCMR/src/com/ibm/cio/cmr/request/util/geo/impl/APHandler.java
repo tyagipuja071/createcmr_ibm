@@ -356,6 +356,14 @@ public abstract class APHandler extends GEOHandler {
       update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
+      update.setNewData(newData.getOrdBlk());
+      update.setOldData(oldData.getOrdBlk());
+      results.add(update);
+    }
   }
 
   public DataRdc getAPClusterDataRdc(EntityManager entityManager, long reqId) {
@@ -852,7 +860,7 @@ public abstract class APHandler extends GEOHandler {
    * @param val2
    * @return
    */
-  private boolean equals(String val1, String val2) {
+  protected boolean equals(String val1, String val2) {
     if (val1 == null && val2 != null) {
       return StringUtils.isEmpty(val2.trim());
     }
