@@ -19,7 +19,8 @@ function addHandlersForAP() {
   
   if (_inacCdHandlerIN == null) {
     _inacCdHandlerIN = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
-      lockInacTypeForIGF();     
+      lockInacTypeForIGF();
+      setKUKLAvaluesIN();
     });
   }  
   
@@ -40,6 +41,7 @@ function custSubGrpHandler() {
       onIsicChange();   
       prospectFilterISBU();    
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesIN();
     });
   }
 }
@@ -1015,6 +1017,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesIN();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -2866,6 +2869,68 @@ function lockInacType(){
     FormManager.removeValidator('inacType', Validators.REQUIRED);
   }
   
+}
+
+function setKUKLAvaluesIN() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isicCd = FormManager.getActualValue('isicCd');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesIN() >>>> set KUKLA values for IN >>>>');
+
+  var custSubGrp1 = new Set(['BLUMX', 'ESOSW', 'ECSYS', 'IGF', 'KYNDR', 'NRML']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRMLC', 'CROSS']);
+  var custSubGrp3 = new Set(['PRIV']);
+  var custSubGrp4 = new Set(['MKTPC']);
+  var custSubGrp5 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaIN = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaIN.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaIN[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaIN[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaIN[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaIN[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaIN[4]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        if (isicCd = '9500') {
+          FormManager.setValue('custClass', kuklaIN[4]);
+        } else {
+          FormManager.setValue('custClass', kuklaIN[0]);
+        }
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaIN[5]);
+      }
+    }
+  }
 }
 
 dojo.addOnLoad(function() {  
