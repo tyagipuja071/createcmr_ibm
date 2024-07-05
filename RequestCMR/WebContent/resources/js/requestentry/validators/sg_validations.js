@@ -2832,6 +2832,7 @@ function setKUKLAvaluesSG() {
 
 	var kuklaSG = [];
 	if (reqType == 'C') {
+	  FormManager.readOnly('custClass');
 	  var qParams = {
 		_qall: 'Y',
 		ISSUING_CNTRY: cntry,

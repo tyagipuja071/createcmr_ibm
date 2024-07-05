@@ -2895,6 +2895,7 @@ function setKUKLAvaluesIN() {
 
   var kuklaIN = [];
   if (reqType == 'C') {
+    FormManager.readOnly('custClass');
     var qParams = {
       _qall: 'Y',
       ISSUING_CNTRY: cntry,
