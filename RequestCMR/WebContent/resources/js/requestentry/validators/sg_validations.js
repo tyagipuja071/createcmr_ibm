@@ -2084,72 +2084,17 @@ function executeBeforeSubmit() {
 	console.log('>>>> executeBeforeSubmit >>>>');
 	var reqType = FormManager.getActualValue('reqType');
 	var action = FormManager.getActualValue('yourAction');
-
 	var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	if (cntry == SysLoc.SINGAPORE) {
-		if (reqType == 'U') {
-			var errMsg = checkAnyChangesOnCustNameAddrGST(cntry);
-			if (errMsg != '' && action == 'SFP') {
-				cmr.showAlert(errMsg);
-			} else {
-				showVerificationModal();
-			}
-		} else {
-			showVerificationModal();
-		}
+
+	if (reqType == 'U') {
+		showVerificationModal();
+	} else {
+		showVerificationModal();
 	}
 }
 
 function showVerificationModal() {
 	cmr.showModal('addressVerificationModal');
-}
-
-
-function checkAnyChangesOnCustNameAddrGST(cntry) {
-	console.log('>>>> checkAnyChangesOnCustNameAddrGST >>>>');
-	var errorMsg = '';
-	var isUpdated = false;
-
-	if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-		var record = null;
-		var updateInd = null;
-
-		for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-			record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-			updateInd = record.updateInd;
-			if (typeof (updateInd) == 'object') {
-				updateInd = updateInd[0];
-				if (updateInd == 'U' || updateInd == 'N') {
-					isUpdated = true;
-					break;
-				}
-			}
-		}
-	}
-	if (!isUpdated) {
-		var currentGst = FormManager.getActualValue('vat');
-		var qParams = {
-			REQ_ID: FormManager.getActualValue('reqId'),
-		};
-
-		var result = cmr.query('GET.OLD_VAT_BY_REQID', qParams);
-		var oldGst = result.ret1;
-		oldGst = oldGst == undefined ? '' : oldGst;
-
-		if (result != null && oldGst != null && oldGst != currentGst) {
-			isUpdated = true;
-		}
-	}
-	if (!isUpdated) {
-		if (cntry != '') {
-			if (cntry == SysLoc.SINGAPORE) {
-				errorMsg = 'You haven\'t updated anything on customer name/address or UEN#, please check and take relevant edit operation before submit this Update request.';
-			} else if (cntry == SysLoc.INDIA) {
-				errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request.';
-			}
-		}
-	}
-	return errorMsg;
 }
 
 // CREATCMR-6880
