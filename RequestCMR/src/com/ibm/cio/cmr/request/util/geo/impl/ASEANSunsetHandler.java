@@ -76,6 +76,8 @@ public class ASEANSunsetHandler extends APHandler {
   private static final String[] MM_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
 
   private static Map<String, String> ASEAN_SEQ_1 = new HashMap<>();
+  private static Map<String, String> ASEAN_SEQ_2 = new HashMap<>();
+
   private static final String GRP1_SOLD_TO_FIXED_SEQ = "AA";
 
   static {
@@ -103,6 +105,9 @@ public class ASEANSunsetHandler extends APHandler {
     ASEAN_SEQ_1.put("ZH01", "DD");
     ASEAN_SEQ_1.put("ZP02", "EE");
 
+    ASEAN_SEQ_2.put("ZS01", "AA");
+    ASEAN_SEQ_2.put("ZP01", "BB");
+    ASEAN_SEQ_2.put("ZP02", "EE");
   }
 
   public static void main(String[] args) {
@@ -1064,6 +1069,10 @@ public class ASEANSunsetHandler extends APHandler {
     case SystemLocation.VIETNAM:
     case SystemLocation.THAILAND:
       newAddrSeq = ASEAN_SEQ_1.get(addrType);
+      break;
+    case SystemLocation.BRUNEI:
+    case SystemLocation.MALAYSIA:
+      newAddrSeq = ASEAN_SEQ_2.get(addrType);
       break;
     default:
       newAddrSeq = "";
