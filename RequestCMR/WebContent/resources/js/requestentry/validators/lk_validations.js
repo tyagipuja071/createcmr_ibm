@@ -5042,7 +5042,6 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
