@@ -71,8 +71,8 @@ public class ASEANSunsetHandler extends APHandler {
   private static final String[] SG_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] VN_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] TH_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
-  private static final String[] BN_SUPPORTED_ADDRESS_USES = { "1", "2", "5" };
-  private static final String[] MY_SUPPORTED_ADDRESS_USES = { "1", "2", "5" };
+  private static final String[] BN_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
+  private static final String[] MY_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] MM_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
 
   private static Map<String, String> ASEAN_SEQ_1 = new HashMap<>();
