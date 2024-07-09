@@ -185,6 +185,11 @@ function addAfterConfigAP() {
   _clusterHandlerINDONESIA = 0;
   // CREATCMR-7883-7884
   _inacHandlerANZSG = 0;
+
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+  }
+
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
@@ -1393,6 +1398,7 @@ function onCustSubGrpChange() {
       resetFieldsAfterCustSubGrpChange();
     }
 
+    setKUKLAvaluesPH();
 
   });
 }
@@ -2388,6 +2394,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesPH();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -8094,6 +8101,63 @@ function inacValidation(){
       FormManager.setValue('inacType', '');
       FormManager.enable('inacType');
       FormManager.enable('inacCd');
+    }
+  }
+}
+
+function setKUKLAvaluesPH() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesPH() >>>> set KUKLA values for PH >>>>');
+
+  var custSubGrp1 = new Set(['ASLOM', 'DUMMY', 'ECSYS', 'KYND', 'XASLM',]);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XASLO', 'CROSS',]);
+  var custSubGrp3 = new Set(['BUSPR']);
+  var custSubGrp4 = new Set(['PRIV']);
+  var custSubGrp5 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaPH = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaPH.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaPH[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaPH[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaPH[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaPH[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaPH[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaPH[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaPH[5]);
+      }
     }
   }
 }
