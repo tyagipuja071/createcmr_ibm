@@ -20,7 +20,6 @@ function addHandlersForAP() {
   if (_inacCdHandlerIN == null) {
     _inacCdHandlerIN = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
       lockInacTypeForIGF();
-      setKUKLAvaluesIN();
     });
   }  
   
@@ -103,6 +102,10 @@ function addAfterConfigAP() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
+
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+  }
   
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
@@ -2873,7 +2876,7 @@ function setKUKLAvaluesIN() {
       } else if (custSubGrp3.has(custSubGrp)) {
         FormManager.setValue('custClass', kuklaIN[4]);
       } else if (custSubGrp4.has(custSubGrp)) {
-        if (isicCd = '9500') {
+        if (isicCd == '9500') {
           FormManager.setValue('custClass', kuklaIN[4]);
         } else {
           FormManager.setValue('custClass', kuklaIN[0]);
