@@ -84,11 +84,13 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
   @Override
   protected void performTransaction(ApprovalResponseModel approval, EntityManager entityManager, HttpServletRequest request) throws Exception {
     AppUser user = AppUser.getUser(request);
+    String comments = request.getParameter("comments");
+    approval.setComments(comments);
     if ("ADD_APPROVAL".equals(approval.getAction())) {
       if (user.getIntranetId().equals(approval.getIntranetId())) {
         throw new CmrException(MessageUtil.ERROR_CANNOT_ADD_YOURSELF_AS_APPROVAL);
       }
-
+     
       approval.setApprovalId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "APPROVAL_ID", "CREQCMR"));
       ApprovalReq approver = createFromModel(approval, entityManager, request);
       approver.setStatus(CmrConstants.APPROVAL_DRAFT);
