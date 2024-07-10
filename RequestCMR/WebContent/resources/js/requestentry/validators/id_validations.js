@@ -8605,8 +8605,8 @@ function setKUKLAvaluesID() {
 
   console.log('>>>> setKUKLAvaluesID() >>>> set KUKLA values for ID >>>>');
 
-  var custSubGrp1 = new Set(['ASLOM', 'BLUMX', 'DUMMY', 'ECSYS', 'KYND', 'XASLM',]);
-  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XASLM', 'CROSS',]);
+  var custSubGrp1 = new Set(['ASLOM', 'BLUMX', 'DUMMY', 'ECSYS', 'KYND', 'XASLM']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XAQST', 'CROSS']);
   var custSubGrp3 = new Set(['BUSPR']);
   var custSubGrp4 = new Set(['PRICU']);
   var custSubGrp5 = new Set(['INTER']);
