@@ -8117,8 +8117,8 @@ function setKUKLAvaluesPH() {
 
   console.log('>>>> setKUKLAvaluesPH() >>>> set KUKLA values for PH >>>>');
 
-  var custSubGrp1 = new Set(['ASLOM', 'DUMMY', 'ECSYS', 'KYND', 'XASLM',]);
-  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XASLO', 'CROSS',]);
+  var custSubGrp1 = new Set(['ASLOM', 'DUMMY', 'ECSYS', 'KYND', 'XASLO']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XAQST', 'CROSS']);
   var custSubGrp3 = new Set(['BUSPR']);
   var custSubGrp4 = new Set(['PRIV']);
   var custSubGrp5 = new Set(['INTER']);
