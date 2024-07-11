@@ -682,6 +682,17 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             results.add(update);
           }
 
+          if ("744".equals(oldData.getCmrIssuingCntry())) {
+            if (TYPE_IBM.equals(type) && !equals(oldData.getMrcCd(), newData.getMrcCd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "MrcCd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "MrcCd", "-"));
+              update.setNewData(getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
+              update.setOldData(getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
+              results.add(update);
+            }
+          }
+
           if (geoHandler != null) {
             geoHandler.addSummaryUpdatedFields(this, type, cmrCountry, newData, oldData, results);
           }
