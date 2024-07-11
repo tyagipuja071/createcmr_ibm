@@ -197,7 +197,7 @@ function processRequestAction() {
         } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
           matchDnBForAutomationCountries();
         } else {
-          executeBeforeSubmit();
+          addUpdateChecksExecution(frmCMR);
         }
       } else if (cmrCntry == SysLoc.AUSTRALIA && reqType == 'U') {
         // Cmr-3176- Dnb match
@@ -2677,7 +2677,7 @@ function checkIfDataOrAddressFieldsUpdated(frmCMR) {
 
 function checkIfUpdateChecksRequiredOnUI() {
   console.log('checkIfUpdateChecksRequiredOnUI..');
-  var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '897', '724', '618', '848', '631', '866', '754', '649', '641', '624', '788', '678', '702', '806', '846', '706', '744', '838', '616', '834' ];
+  var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '897', '724', '618', '848', '631', '866', '754', '649', '641', '624', '788', '678', '702', '806', '846', '706', '838', '616', '834' ];
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
