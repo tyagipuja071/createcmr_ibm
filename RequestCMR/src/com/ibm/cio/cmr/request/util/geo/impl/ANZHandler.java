@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -525,7 +526,7 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // TODO Auto-generated method stub
-	  request.setSORTL(data.getApCustClusterId());
+    request.setSORTL(data.getApCustClusterId());
 
   }
 
