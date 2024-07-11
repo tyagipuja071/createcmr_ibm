@@ -87,6 +87,11 @@ function addAfterConfigAP() {
 	var role = FormManager.getActualValue('userRole').toUpperCase();
 	var reqType = FormManager.getActualValue('reqType');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+	if (reqType == 'C') {
+		FormManager.readOnly('custClass');
+	}
+
 	if (reqType == 'U') {
 		FormManager.removeValidator('vat', Validators.REQUIRED);
 	}
@@ -603,6 +608,8 @@ function onCustSubGrpChange() {
 		setISBUScenarioLogic();
 		autoSetAbbrevNmLocnLogic();
 		setCollectionCd();
+
+		setKUKLAvaluesTH();
 	});
 }
 
@@ -788,6 +795,7 @@ function onSubIndustryChange() {
 		if (value != null && value.length > 1) {
 			updateIndustryClass();
 			addSectorIsbuLogicOnSubIndu();
+			setKUKLAvaluesTH();
 		}
 	});
 	if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -3359,25 +3367,82 @@ function disableChecklist() {
 
 
 function initChecklistMainAddressAndName() {
-  var containerAddr = dojo.byId('dijit_form_TextBox_0');
-  var containerName = dojo.byId('dijit_form_TextBox_1');
-    FormManager.setValue('dijit_form_TextBox_6',localStorage.getItem('checklistSaveDate'));
-    FormManager.readOnly('dijit_form_TextBox_6');
-  if (containerAddr != null) {
-    if (typeof (_allAddressData) != 'undefined') {
-      for (var i = 0; i < _allAddressData.length; i++) {
-        if (_allAddressData[i].addrType && _allAddressData[i].addrType[0] == 'ZS01') {
-          containerAddr.innerHTML = _allAddressData[i].addrTxt[0] + ' ' + _allAddressData[i].city1[0] + ' ' + _allAddressData[i].postCd[0];
-          containerName.innerHTML = _allAddressData[i].custNm1[0];
-          FormManager.setValue('dijit_form_TextBox_0',containerAddr.innerHTML);
-          FormManager.setValue('dijit_form_TextBox_1',containerName.innerHTML);
-          FormManager.readOnly('dijit_form_TextBox_0');
-          FormManager.readOnly('dijit_form_TextBox_1');
-          return;
-        }
+	var containerAddr = dojo.byId('dijit_form_TextBox_0');
+	var containerName = dojo.byId('dijit_form_TextBox_1');
+	  FormManager.setValue('dijit_form_TextBox_6',localStorage.getItem('checklistSaveDate'));
+	  FormManager.readOnly('dijit_form_TextBox_6');
+	if (containerAddr != null) {
+	  if (typeof (_allAddressData) != 'undefined') {
+		for (var i = 0; i < _allAddressData.length; i++) {
+		  if (_allAddressData[i].addrType && _allAddressData[i].addrType[0] == 'ZS01') {
+			containerAddr.innerHTML = _allAddressData[i].addrTxt[0] + ' ' + _allAddressData[i].city1[0] + ' ' + _allAddressData[i].postCd[0];
+			containerName.innerHTML = _allAddressData[i].custNm1[0];
+			FormManager.setValue('dijit_form_TextBox_0',containerAddr.innerHTML);
+			FormManager.setValue('dijit_form_TextBox_1',containerName.innerHTML);
+			FormManager.readOnly('dijit_form_TextBox_0');
+			FormManager.readOnly('dijit_form_TextBox_1');
+			return;
+		  }
+		}
+		containerAddr.innerHTML = '';
+		containerName.innerHTML = '';
+	  }
+	}
+  }
+
+function setKUKLAvaluesTH() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesTH() >>>> set KUKLA values for TH >>>>');
+
+  var custSubGrp1 = new Set(['ASLOM', 'DUMMY', 'ECSYS', 'KYND', 'NRMLS', 'XASLM']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XAQST', 'CROSS']);
+  var custSubGrp3 = new Set(['BUSPR']);
+  var custSubGrp4 = new Set(['PRIV']);
+  var custSubGrp5 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaTH = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaTH.push(results[i].ret1);
       }
-      containerAddr.innerHTML = '';
-      containerName.innerHTML = '';
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaTH[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaTH[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaTH[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[5]);
+      }
     }
   }
 }
