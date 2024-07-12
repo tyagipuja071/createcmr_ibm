@@ -2833,8 +2833,7 @@ function setKUKLAvaluesSG() {
   }
 }
 
-
-dojo.addOnLoad(function () {
+dojo.addOnLoad(function() {
 	console.log('adding AP functions...');
 	console.log('the value of person full id is ' + localStorage.getItem("pID"));
 	GEOHandler.setRevertIsicBehavior(false);
