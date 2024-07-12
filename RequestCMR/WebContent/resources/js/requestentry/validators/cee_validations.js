@@ -4362,7 +4362,7 @@ function afterConfigForSlovakia() {
 }
 
 function initAddressPageHungary() {
-	setCustomerName2LblAndBubble();
+	// setCustomerName2LblAndBubble();
 }
 
 function afterConfigTemplateForCzech() {
@@ -4380,7 +4380,7 @@ function afterConfigTemplateForCroatia() {
 function afterConfigTemplateForHungary() {
 	if (_landCntryHandler == null) {
 		_landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
-			setCustomerName2LblAndBubble();
+		//	setCustomerName2LblAndBubble();
 		});
 	}
 }
