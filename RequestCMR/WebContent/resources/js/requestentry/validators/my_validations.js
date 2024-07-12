@@ -185,6 +185,11 @@ function addAfterConfigAP() {
   _clusterHandlerINDONESIA = 0;
   // CREATCMR-7883-7884
   _inacHandlerANZSG = 0;
+
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+  }
+
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
@@ -1464,6 +1469,7 @@ function onCustSubGrpChange() {
       resetFieldsAfterCustSubGrpChange();
     }
 
+    setKUKLAvaluesMY();
 
   });
 }
@@ -2574,6 +2580,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesMY();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -8595,6 +8602,65 @@ function checkCmrUpdateBeforeImport() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function setKUKLAvaluesMY() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesMY() >>>> set KUKLA values for MY >>>>');
+
+  var custSubGrp1 = new Set(['ASLOM', 'DUMMY', 'ECSYS', 'KYND', 'XASLM']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRMLC', 'XAQST', 'CROSS']);
+  var custSubGrp3 = new Set(['BUSPR']);
+  var custSubGrp4 = new Set(['PRIV']);
+  var custSubGrp5 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaMY = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaMY.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaMY[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaMY[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaMY[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaMY[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaMY[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaMY[4]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaMY[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaMY[5]);
+      }
+    }
+  }
 }
 
 dojo.addOnLoad(function () {
