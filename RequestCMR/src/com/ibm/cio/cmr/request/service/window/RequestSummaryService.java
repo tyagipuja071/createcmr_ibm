@@ -682,7 +682,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             results.add(update);
           }
 
-          if ("744".equals(oldData.getCmrIssuingCntry())) {
+          if ("744".equals(oldData.getCmrIssuingCntry()) || "834".equals(oldData.getCmrIssuingCntry())) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getMrcCd(), newData.getMrcCd())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "MrcCd"))) {
               update = new UpdatedDataModel();

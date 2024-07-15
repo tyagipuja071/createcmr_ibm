@@ -222,7 +222,8 @@ function processRequestAction() {
           matchDnBForAutomationCountries();
         } else {
           if (cmrCntry == SysLoc.SINGAPORE) {
-            executeBeforeSubmit();
+            // executeBeforeSubmit();
+            addUpdateChecksExecution(frmCMR);
           } else {
             // cmr.showModal('addressVerificationModal');
             showAddressVerificationModal();
@@ -2677,7 +2678,7 @@ function checkIfDataOrAddressFieldsUpdated(frmCMR) {
 
 function checkIfUpdateChecksRequiredOnUI() {
   console.log('checkIfUpdateChecksRequiredOnUI..');
-  var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '897', '724', '618', '848', '631', '866', '754', '649', '641', '624', '788', '678', '702', '806', '846', '706', '838', '616', '834' ];
+  var CNTRY_LIST_FOR_UPDT_CHECKS_ON_UI = [ '897', '724', '618', '848', '631', '866', '754', '649', '641', '624', '788', '678', '702', '806', '846', '706', '838', '616' ];
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
