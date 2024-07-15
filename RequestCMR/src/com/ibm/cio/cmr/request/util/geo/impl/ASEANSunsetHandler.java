@@ -31,7 +31,6 @@ import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
-import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -1101,14 +1100,6 @@ public class ASEANSunsetHandler extends APHandler {
     UpdatedDataModel update = null;
 
     super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
-
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
-      update.setNewData(newData.getOrdBlk());
-      update.setOldData(oldData.getOrdBlk());
-      results.add(update);
-    }
   }
 
 }
