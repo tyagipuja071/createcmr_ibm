@@ -109,6 +109,7 @@ function addAfterConfigAP() {
   
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('mrcCd');
   }
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -118,20 +119,17 @@ function addAfterConfigAP() {
   }
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('isbuCd');
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('subIndustryCd');
       FormManager.readOnly('mrcCd');
     }
+    FormManager.readOnly('isbuCd');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-
-    FormManager.enable('mrcCd');
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
@@ -557,13 +555,17 @@ function setAttachmentOnCluster() {
 
 function defaultCMRNumberPrefix() {
   console.log('>>>> defaultCMRNumberPrefix >>>>');
-  if (FormManager.getActualValue('reqType') == 'U') {
-    return
 
-  }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
 
   if (role == 'PROCESSOR' && custSubGrp == 'INTER') {
     FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CmrNoPrefix' ], 'MAIN_IBM_TAB');
@@ -590,9 +592,13 @@ function defaultCMRNumberPrefix() {
 
 function onCustSubGrpChange() {
   console.log('>>>> onCustSubGrpChange >>>>');
-  if (FormManager.getActualValue('reqType') == 'U') {
-    return
 
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
   }
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
@@ -1193,6 +1199,10 @@ function setIsicCdIfDnbAndCmrResultOther(value){
   var value = FormManager.getActualValue('isicCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond4 = new Set(['INTER','PRIV','XPRIV','DUMMY','IGF']);
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
   if (cond4.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
