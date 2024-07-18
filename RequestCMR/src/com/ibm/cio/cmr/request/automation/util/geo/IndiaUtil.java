@@ -392,12 +392,14 @@ public class IndiaUtil extends AutomationUtil {
         validation.setMessage("Successful");
       }
     }
-    // if (!ignoredUpdates.isEmpty()) {
-    // details.append("Updates to the following fields skipped validation:\n");
-    // for (String field : ignoredUpdates) {
-    // details.append(" - " + field + "\n");
-    // }
-    // }
+
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
+      }
+    }
+
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;
