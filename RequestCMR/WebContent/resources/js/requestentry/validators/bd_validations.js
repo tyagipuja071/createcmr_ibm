@@ -88,6 +88,7 @@ function addAfterConfigAP() {
 
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('mrcCd');
   }
 
   if (cntry == '834' && reqType == 'C' && role == 'REQUESTER' && custType == 'CROSS' && custSubGrp == 'SPOFF') {
@@ -107,14 +108,13 @@ function addAfterConfigAP() {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('subIndustryCd');
+      FormManager.readOnly('mrcCd');
     }
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-
-    FormManager.enable('mrcCd');
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
