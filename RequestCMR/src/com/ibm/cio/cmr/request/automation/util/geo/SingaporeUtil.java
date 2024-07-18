@@ -512,6 +512,7 @@ public class SingaporeUtil extends AutomationUtil {
       for (String field : ignoredUpdates) {
         details.append(" - " + field + "\n");
       }
+      validation.setSuccess(true);
     }
 
     output.setDetails(details.toString());
