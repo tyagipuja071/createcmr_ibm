@@ -2017,7 +2017,7 @@ function addInstallAtAddressValidator() {
         var record = cmr.query('GETZI01VALRECORDS', qParams);
         var zi01Reccount = record.ret1;
         if (addrType == 'ZI01' && Number(zi01Reccount) >= 3 && cmr.addressMode != 'updateAddress' && reqType!='U') {
-          return new ValidationResult(null, false, 'Only three Intall-At Addresses can be defined.');
+          return new ValidationResult(null, false, 'Only three Install-At Addresses can be defined.');
         } else {
           return new ValidationResult(null, true);
         }
