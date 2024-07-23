@@ -133,7 +133,6 @@ public class DPLCheckElement extends ValidatingElement {
                 output.setOnError(false);
               } else {
                 details.append("DPL Search cannot be executed at the moment.");
-                log.debug("PDF Attachemnt issue log debug");
                 engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
                 output.setOnError(true);
               }
@@ -278,7 +277,6 @@ public class DPLCheckElement extends ValidatingElement {
             output.setOnError(false);
           } else {
             details.append("DPL Search cannot be executed at the moment.");
-            log.debug("PDF Attachemnt issue log debug");
             engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
             output.setOnError(true);
           }
@@ -297,7 +295,6 @@ public class DPLCheckElement extends ValidatingElement {
             output.setOnError(false);
           } else {
             details.append("DPL Search cannot be executed at the moment.");
-            log.debug("PDF Attachemnt issue log debug");
             engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
             output.setOnError(true);
           }
@@ -328,7 +325,6 @@ public class DPLCheckElement extends ValidatingElement {
 
     } catch (Exception e) {
       details.append("DPL Search cannot be executed at the moment.");
-      log.debug("PDF Attachemnt issue log debug");
       engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
       output.setOnError(true);
     } finally {
