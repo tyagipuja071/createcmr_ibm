@@ -35,6 +35,8 @@ function afterConfigTW() {
       }
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
+
+      FormManager.readOnly('custClass');
     } else if (reqType == 'U') {
       if (taxLocation == null || taxLocation == '') {
         FormManager.clearValue('mktgDept');
@@ -166,9 +168,21 @@ function addHandlersForTW() {
       }
       if (value != null && value.length > 1) {
         updateIndustryClass();
+        setKUKLAvaluesTW();
       }
     });
   }
+}
+
+function onCustSubGrpChange() {
+  console.log('>>>> onCustSubGrpChange >>>>');
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+    setKUKLAvaluesTW();
+  });
 }
 
 // CREATCMR -5269
@@ -868,6 +882,64 @@ function setDefaultCustPrefLanguage() {
   }
 }
 
+function setKUKLAvaluesTW() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isicCd = FormManager.getActualValue('isicCd');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesTW() >>>> set KUKLA values for TW >>>>');
+
+  var custSubGrp1 = new Set(['LOBLU', 'ECOSY', 'KYND', 'LOMAR', 'NRMLD',]);
+  var custSubGrp2 = new Set(['LOACQ', 'NRMLC', 'LOOFF', 'CBFOR ']);
+  var custSubGrp3 = new Set(['LOECO']);
+  var custSubGrp4 = new Set(['LOPRI']);
+  var custSubGrp5 = new Set(['LOINT']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaTW = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaTW.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTW[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaTW[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaTW[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaTW[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTW[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTW[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTW[5]);
+      }
+    }
+  }
+}
+
 function afterConfigCallsTW() {
   afterConfigTW();
   addHandlersForTW();
@@ -881,6 +953,7 @@ function afterConfigCallsTW() {
   setMrcCd();
   handleObseleteExpiredDataForUpdate();
   setAddrFieldsValidation();
+  onCustSubGrpChange();
 }
 
 function afterTemplateLoadTW() {
