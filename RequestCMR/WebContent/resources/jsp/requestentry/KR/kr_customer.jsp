@@ -82,7 +82,15 @@
         <label for="contactName1"> <cmr:fieldLabel fieldId="ContactName1" />: </label>
         <cmr:field fieldId="ContactName1" id="contactName1" path="contactName1" tabId="MAIN_CUST_TAB" />
       </p>
-    </cmr:column>    
+    </cmr:column>
+    <cmr:column span="2" containerForField="CustClass" forCountry="766">
+      <p>
+        <cmr:label fieldId="custClass">
+          <cmr:fieldLabel fieldId="CustClass" />:
+        </cmr:label>
+        <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
   </cmr:row>
   <cmr:row addBackground="false">
      <cmr:column span="2" containerForField="RestrictTo" >
