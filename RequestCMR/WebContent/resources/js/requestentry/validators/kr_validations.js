@@ -14,6 +14,7 @@ function afterConfigKR() {
 
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function (value) {
     getIsuFromIsic();
+    setKUKLAvaluesKR();
   });
 
   if (_isuHandler == null) {
@@ -34,6 +35,8 @@ function afterConfigKR() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
+
+    setKUKLAvaluesKR();
   });
 
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function (value) {
@@ -91,6 +94,8 @@ function afterConfigKR() {
 
   if (reqType == 'C') {
     FormManager.addValidator('MrcCd', Validators.REQUIRED, ['Market Responsibility Code (MRC)'], 'MAIN_IBM_TAB');
+
+    FormManager.readOnly('custClass');
   }
 
   // story: attachment Company Proof required
@@ -877,8 +882,77 @@ function setCTCIsuMrcByCluster() {
   }
 }
 
-dojo.addOnLoad(function () {
-  GEOHandler.KR = ['766'];
+function setKUKLAvaluesKR() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isicCd = FormManager.getActualValue('isicCd');
+
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (subIndustryCd != null && subIndustryCd.length > 1) {
+    var industryClass = subIndustryCd.substr(0, 1);
+  }
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesKR() >>>> set KUKLA values for KR >>>>');
+
+  var custSubGrp1 = new Set(['BLUMX', 'ESA', 'ECOSY', 'LKYN', 'NRST', 'VAPAR']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'CROSS']);
+  var custSubGrp3 = new Set(['CBBUS']);
+  var custSubGrp4 = new Set(['PRIPE']);
+  var custSubGrp5 = new Set(['MKTPC']);
+  var custSubGrp6 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaKR = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaKR.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaKR[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaKR[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaKR[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        if (isicCd == '9500') {
+          FormManager.setValue('custClass', kuklaKR[4]);
+        } else {
+          FormManager.setValue('custClass', kuklaKR[0]);
+        }
+      } else if (custSubGrp6.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[5]);
+      }
+    }
+  }
+}
+
+dojo.addOnLoad(function() {
+  GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.KR);
   GEOHandler.setRevertIsicBehavior(false);
