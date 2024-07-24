@@ -57,10 +57,16 @@ public class TWHandler extends GEOHandler {
   private static final boolean RETRIEVE_INVALID_CUSTOMERS = true;
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
+  private static Map<String, String> TW_ADDR_SEQ = new HashMap<>();
 
   static {
 
     LANDED_CNTRY_MAP.put(SystemLocation.TAIWAN, "TW");
+
+    TW_ADDR_SEQ.put("ZS01", "B");
+    TW_ADDR_SEQ.put("ZP01", "C");
+    TW_ADDR_SEQ.put("ZP02", "D");
+    TW_ADDR_SEQ.put("ZI01", "E");
 
   }
 
@@ -116,6 +122,12 @@ public class TWHandler extends GEOHandler {
         : currentRecord.getCmrIntlCity1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
     address.setBldg(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2()
         : currentRecord.getCmrIntlCity2().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
+
+    if (currentRecord != null) {
+      LOG.info("paired seq no before: " + address.getPairedAddrSeq());
+      address.setPairedAddrSeq(currentRecord.getTransAddrNo());
+      LOG.info("paired seq no after: " + address.getPairedAddrSeq());
+    }
   }
 
   @Override
@@ -143,6 +155,22 @@ public class TWHandler extends GEOHandler {
         mv.addObject("originatorId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
       }
     }
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      newAddrSeq = getNewPrimaryAddressSeq(entityManager, reqId, addrType);
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewPrimaryAddressSeq(EntityManager entityManager, long reqId, String addrType) {
+    String newAddrSeq = "";
+    newAddrSeq = TW_ADDR_SEQ.get(addrType);
+    return newAddrSeq;
   }
 
   @Override
@@ -885,4 +913,10 @@ public class TWHandler extends GEOHandler {
     return true;
   }
 
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
 }
