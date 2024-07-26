@@ -13,7 +13,6 @@ function afterConfigTW() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
-  FormManager.readOnly('isuCd');
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -194,12 +193,6 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U') {
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('covId');
     FormManager.readOnly('collectionCd');
@@ -594,6 +587,7 @@ function setISUForDefaultSearchTerm() {
 }
 
 function setMrcCd() {
+  var reqType = FormManager.getActualValue('reqType');
   var _cluster = FormManager.getActualValue('searchTerm');
   var _clusterWithMrcCD2 = ['04476', '09154','09151','09153','09147','09152','09155','71300'];
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -602,8 +596,10 @@ function setMrcCd() {
   } else {
     FormManager.setValue('mrcCd', '3');
   }
-  
-  FormManager.readOnly('mrcCd');
+
+  if (reqType == 'C') {
+    FormManager.readOnly('mrcCd');
+  }
 }
 
 // CREATCMR-7882
