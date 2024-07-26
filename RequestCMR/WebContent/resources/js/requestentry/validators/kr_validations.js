@@ -47,9 +47,11 @@ function afterConfigKR() {
 //    FormManager.setValue('inacCd','');
 //    LockDefaultISUClientTierMrcValues();
     setInacNacValues(value);
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('mrcCd');
+    if (reqType == 'C') {
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
+    }
   });
 
   var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
@@ -130,12 +132,16 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
+  if (reqType == 'C') {
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 }
 
 function setClientTierValues() {
+  var reqType = FormManager.getActualValue('reqType');
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -144,15 +150,16 @@ function setClientTierValues() {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.readOnly('clientTier');
   } else {
-    var reqType = FormManager.getActualValue('reqType');
     if (reqType != 'U') {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     }
   }
   handleObseleteExpiredDataForUpdate();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
+  if (reqType == 'C') {
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 }
 
 function setChecklistStatus() {
@@ -427,12 +434,6 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U') {
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('covId');
     FormManager.readOnly('commercialFinanced');
