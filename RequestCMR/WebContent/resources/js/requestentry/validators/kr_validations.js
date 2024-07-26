@@ -47,9 +47,11 @@ function afterConfigKR() {
     //    FormManager.setValue('inacCd','');
     //    LockDefaultISUClientTierMrcValues();
     setInacNacValues(value);
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('mrcCd');
+    if (reqType == 'C') {
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
+    }
   });
 
   var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function (value) {
@@ -130,12 +132,16 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
+  if (reqType == 'C') {
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 }
 
 function setClientTierValues() {
+  var reqType = FormManager.getActualValue('reqType');
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -144,15 +150,16 @@ function setClientTierValues() {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.readOnly('clientTier');
   } else {
-    var reqType = FormManager.getActualValue('reqType');
     if (reqType != 'U') {
       FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
     }
   }
   handleObseleteExpiredDataForUpdate();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
+  if (reqType == 'C') {
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 }
 
 function setChecklistStatus() {
@@ -426,66 +433,6 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U') {
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
-    FormManager.readOnly('repTeamMemberNo');
-    FormManager.readOnly('covId');
-    FormManager.readOnly('commercialFinanced');
-    FormManager.readOnly('contactName2');
-    FormManager.readOnly('contactName3');
-    FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('bgId');
-    FormManager.readOnly('gbgId');
-    FormManager.readOnly('bgRuleId');
-    FormManager.readOnly('geoLocationCd');
-    FormManager.readOnly('dunsNo');
-    FormManager.readOnly('orgNo');
-    FormManager.readOnly('creditCd');
-    FormManager.readOnly('dealerNo');
-
-    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('isuCd', Validators.REQUIRED);
-    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-    FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
-    FormManager.removeValidator('contactName2', Validators.REQUIRED);
-    FormManager.removeValidator('contactName3', Validators.REQUIRED);
-    FormManager.removeValidator('bgId', Validators.REQUIRED);
-    FormManager.removeValidator('gbgId', Validators.REQUIRED);
-    FormManager.removeValidator('geoLocationId', Validators.REQUIRED);
-    FormManager.removeValidator('dunsNo', Validators.REQUIRED);
-    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
-    FormManager.removeValidator('orgNo', Validators.REQUIRED);
-    FormManager.removeValidator('creditCd', Validators.REQUIRED);
-    FormManager.removeValidator('dealerNo', Validators.REQUIRED);
-
-  }
-}
-
-// CREATCMR -5269
-function handleObseleteExpiredDataForUpdate() {
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  // lock all the coverage fields and remove validator
-  if (reqType == 'U') {
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('covId');
     FormManager.readOnly('commercialFinanced');
