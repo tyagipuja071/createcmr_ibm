@@ -357,7 +357,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </c:if>
     <form:hidden path="covBgRetrievedInd" />
     <form:hidden path="rdcProcessingMsg" />
-    <cmr:view exceptForCountry="848,618,724,706,897,619,621,627,647,640,759,791,839,843,859,744,834,615,749,818,852,856,652,643,778">
+    <cmr:view exceptForCountry="848,618,724,706,897,619,621,627,647,640,759,791,839,843,859,744,834,615,749,818,852,856,652,643,778,766,858">
     	<form:hidden path="ordBlk" />
     </cmr:view>
     <cmr:view forGEO="LA">
