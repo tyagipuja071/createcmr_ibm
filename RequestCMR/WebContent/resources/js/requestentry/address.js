@@ -429,6 +429,7 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
     _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
     _assignDetailsValue('#AddressDetailsModal #countyName_view', details.ret45);
+    _assignDetailsValue('#AddressDetailsModal #locationCode_view', details.ret56);
   }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
@@ -1108,6 +1109,10 @@ function addEditAddressModal_onLoad() {
         if (dijit.byId('hwInstlMstrFlg') != undefined && FormManager.getField('hwInstlMstrFlg') != null) {
           FormManager.getField('hwInstlMstrFlg').set('checked', details.ret75 == 'Y' ? true : false);
         }
+      }
+      
+      if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
+        FormManager.setValue('locationCode', details.ret56);
       }
 
       if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
