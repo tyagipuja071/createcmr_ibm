@@ -267,6 +267,17 @@ public class KRHandler extends GEOHandler {
       String countyName = addr.getCountyName();
       addr.setCountyName(countyName.substring(1));
     }
+
+    if (StringUtils.isNotBlank(addr.getLocationCode()) && "ZP01".equals(addr.getId().getAddrType())) {
+      String locCd = addr.getLocationCode();
+      LOG.debug("LOCATION Code on Addr Save" + locCd);
+      addr.getId().setAddrSeq(locCd);
+    } else {
+      String seqNo = addr.getId().getAddrSeq();
+      LOG.debug("Sequence No. " + seqNo);
+      addr.setLocationCode(seqNo);
+    }
+
   }
 
   @Override
@@ -721,6 +732,11 @@ public class KRHandler extends GEOHandler {
     return fields;
   }
 
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    return getDataFieldsForUpdateCheck(cmrIssuingCntry);
+  }
+
   public static boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
     String srcName = null;
     Column srcCol = null;
@@ -1074,4 +1090,32 @@ public class KRHandler extends GEOHandler {
     originatorIdInAdmin = admin.getOriginatorId();
     return originatorIdInAdmin;
   };
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    switch (addrType) {
+    case "ZS01":
+      newAddrSeq = "L00";
+      break;
+    case "ZI01":
+      newAddrSeq = "I00";
+      break;
+    case "ZD01":
+      newAddrSeq = "D00";
+      break;
+    default:
+      newAddrSeq = "";
+      LOG.debug("Addr Type: " + addrType + ", has no default address sequence.");
+    }
+    return newAddrSeq;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
 }
