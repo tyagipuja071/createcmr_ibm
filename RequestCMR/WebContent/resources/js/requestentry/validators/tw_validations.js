@@ -895,8 +895,8 @@ function setKUKLAvaluesTW() {
 
   console.log('>>>> setKUKLAvaluesTW() >>>> set KUKLA values for TW >>>>');
 
-  var custSubGrp1 = new Set(['LOBLU', 'ECOSY', 'KYND', 'LOMAR', 'NRMLD',]);
-  var custSubGrp2 = new Set(['LOACQ', 'NRMLC', 'LOOFF', 'CBFOR ']);
+  var custSubGrp1 = new Set(['LOBLU', 'ECOSY', 'KYND', 'LOMAR', 'NRMLD']);
+  var custSubGrp2 = new Set(['LOACQ', 'NRMLC', 'LOOFF', 'CBFOR']);
   var custSubGrp3 = new Set(['LOECO']);
   var custSubGrp4 = new Set(['LOPRI']);
   var custSubGrp5 = new Set(['LOINT']);
