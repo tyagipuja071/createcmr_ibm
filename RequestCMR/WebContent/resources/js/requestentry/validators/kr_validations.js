@@ -7,9 +7,14 @@
  
 function afterConfigKR() {
   if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    FormManager.readOnly('ordBlk');
     return;
   }
   
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('ordBlk');
+  }
+
   var role = null;
   var reqType = null;
   var _isuHandler = null;

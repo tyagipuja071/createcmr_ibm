@@ -233,7 +233,7 @@ dojo.addOnLoad(function(){
         </p>
       </cmr:column>
 
-      <cmr:column span="2" containerForField="OrdBlk" forCountry="897" >
+      <cmr:column span="2" containerForField="OrdBlk" forCountry="897,766,858" >
         <p>
           <cmr:label fieldId="ordBlk">
             <cmr:fieldLabel fieldId="OrdBlk" />: 
