@@ -19,6 +19,10 @@ function afterConfigTW() {
     taxLocation = _pagemodel.mktgDept;
   }
 
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('ordBlk');
+  }
+
   if (!FormManager.getField('reqType') || reqType == '') {
     window.setTimeout('afterConfigTW()', 500);
   } else {
