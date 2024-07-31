@@ -11,7 +11,7 @@
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
 <cmr:row topPad="10">
-  <cmr:column span="4">
+  <cmr:column span="3">
 
     <cmr:label fieldId="addrType">
       <cmr:fieldLabel fieldId="AddressType" />: 
@@ -22,6 +22,15 @@
       <cmr:field fieldId="AddressTypeInput" id="addrType" path="addrType" />
     </div>
     <div id="addrTypeStaticText" style="display: none">ZS01</div>
+  </cmr:column>
+      <cmr:column span="1" containerForField="LocationCode">
+    <p>
+      <cmr:label fieldId="locationCode">
+        <cmr:fieldLabel fieldId="LocationCode" />:
+             <cmr:delta text="-" id="delta-locationCode" />
+      </cmr:label>
+      <cmr:field fieldId="LocationCode" id="locationCode" path="locationCode" size="100"/>
+    </p>
   </cmr:column>
   <br>
   <br>
