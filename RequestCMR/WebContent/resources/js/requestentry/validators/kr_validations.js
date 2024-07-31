@@ -33,8 +33,8 @@ function afterConfigKR() {
     FormManager.resetDropdownValues(FormManager.getField('searchTerm'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-    //    FormManager.setValue('inacType','');
-    //    FormManager.setValue('inacCd','');
+    // FormManager.setValue('inacType','');
+    // FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
     FormManager.enable('isicCd');
     FormManager.enable('inacType');
@@ -50,9 +50,9 @@ function afterConfigKR() {
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('isuCd'));
-    //    FormManager.setValue('inacType','');
-    //    FormManager.setValue('inacCd','');
-    //    LockDefaultISUClientTierMrcValues();
+    // FormManager.setValue('inacType','');
+    // FormManager.setValue('inacCd','');
+    // LockDefaultISUClientTierMrcValues();
     setInacNacValues(value);
     if (reqType == 'C') {
       FormManager.readOnly('clientTier');
@@ -610,7 +610,7 @@ function setInacNacValues(searchTermChange) {
             inacCdValue.push(results[i].ret1);
           }
           FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-          //            FormManager.setValue('inacCd', inacCdValue[0]);
+          // FormManager.setValue('inacCd', inacCdValue[0]);
           if (inacCdValue.length == 1) {
             FormManager.setValue('inacCd', inacCdValue[0]);
           }
@@ -934,6 +934,58 @@ function setKUKLAvaluesKR() {
   }
 }
 
+function addSeqNumFormatValidator() {
+  console.log(">>>>  addSeqNumFormatValidator");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrType = FormManager.getActualValue('addrType');
+        if(addrType != 'ZP01') {
+          return new ValidationResult(null, true);
+        }
+        
+        var seqNum = FormManager.getActualValue('locationCode');
+        var isValidSeqNumFormat = /^B\d{2}$/.test(seqNum);
+
+        if (!isValidSeqNumFormat) {
+          return new ValidationResult(null, false, 'Seq/Loc Code value should start with \'B\' followed by 2 numeric characters.');
+        } 
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addSeqNumDuplicateValidator() {
+  console.log(">>>>  addSeqNumDuplicateValidator");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrType = FormManager.getActualValue('addrType');
+
+        if(addrType != 'ZP01') {
+          return new ValidationResult(null, true);
+        }
+        
+        // frey here
+        var requestId = FormManager.getActualValue('reqId');
+        var seqNum = FormManager.getActualValue('locationCode');
+
+        var addrSeqCount = cmr.query('ADDR_SEQ.COUNT', {
+          REQ_ID : requestId,
+          ADDR_TYPE : addrType,
+          ADDR_SEQ : seqNum
+        });
+        
+        if (addrSeqCount.ret1 > 0) {
+          return new ValidationResult(null, false, 'Sec./Loc Code \'' + seqNum + '\' already exists. Please provide a different Sec./Loc Code.');
+        } 
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -968,8 +1020,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
 
-  //  GEOHandler.addAfterConfig(setInacNacValues, GEOHandler.KR);
-  //  GEOHandler.addAfterTemplateLoad(setInacNacValues, GEOHandler.KR);
+  // GEOHandler.addAfterConfig(setInacNacValues, GEOHandler.KR);
+  // GEOHandler.addAfterTemplateLoad(setInacNacValues, GEOHandler.KR);
   GEOHandler.addAfterConfig(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterConfig(setCTCIsuMrcByCluster, GEOHandler.KR);
