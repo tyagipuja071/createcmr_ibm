@@ -1,6 +1,8 @@
 /* Register KR Javascripts */
 var _isicHandler = null;
 var _searchTermHandler = null;
+ var _addrTypesForKR = ['ZS01', 'ZP01', 'ZI01', 'ZD01'];
+ var _addrTypeHandler = [];
 
 function afterConfigKR() {
   if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
@@ -62,10 +64,11 @@ function afterConfigKR() {
   var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function (value) {
     setInacNacValues("inacChange");
   });
-
-  //  var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-  //    setInacNacValues();
-  //  });
+  
+// var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange',
+// function(value) {
+// setInacNacValues();
+// });
 
   reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
@@ -141,6 +144,34 @@ function afterConfigKR() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
+  }
+  
+  for (var i = 0; i < _addrTypesForKR.length; i++) {
+    _addrTypeHandler[i] = null;
+    if (_addrTypeHandler[i] == null) {
+      _addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForKR[i]), 'onClick', function(value) {
+        FormManager.clearValue('locationCode');
+        setLockUnlockSeqNum();
+      });
+    }
+  }
+}
+
+function setLockUnlockSeqNum(cntry, addressMode, details) {
+  var addrType = FormManager.getActualValue('addrType');
+  
+  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+    FormManager.clearValue('locationCode');
+  } else if (addressMode == 'updateAddress') {
+    addrType = details != null ? details.ret2 : '';
+  }
+  
+  if(addrType == 'ZP01') {
+    FormManager.enable('locationCode');
+    FormManager.addValidator('locationCode', Validators.REQUIRED, [ 'Seq/Loc Code' ], '');
+  } else {
+    FormManager.readOnly('locationCode');
+    FormManager.removeValidator('locationCode', Validators.REQUIRED);
   }
 }
 
@@ -631,7 +662,7 @@ function validateCustnameForKynd() {
         var errorMsg = '';
         var action = FormManager.getActualValue('yourAction');
 
-//        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase(); 
+// var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();
         var custNm1 = '';
         if (_allAddressData == undefined || _allAddressData == null || _allAddressData.length == 0) {
           return;
@@ -916,7 +947,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.KR);
   FormManager.skipByteChecks(['billingPstlAddr', 'divn', 'custNm3', 'custNm4', 'contact', 'dept', 'poBoxCity', 'countyName']);
+  GEOHandler.addToggleAddrTypeFunction(setLockUnlockSeqNum, GEOHandler.KR);
+  GEOHandler.registerValidator(addSeqNumFormatValidator, GEOHandler.KR);
+  GEOHandler.registerValidator(addSeqNumDuplicateValidator, GEOHandler.KR);
 
+  
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
   GEOHandler.registerValidator(validateCustnameForKynd, GEOHandler.KR);
 
