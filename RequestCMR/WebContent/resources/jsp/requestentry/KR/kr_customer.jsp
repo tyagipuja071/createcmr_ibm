@@ -45,18 +45,6 @@
             </label>
             <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
            </p> </cmr:column> --%>
-            
-<%--     <cmr:column span="2" containerForField="CollectionCd">
-      <p>
-        <cmr:label fieldId="collectionCd">
-          <cmr:fieldLabel fieldId="CollectionCd" />: 
-              <cmr:delta text="${rdcdata.collectionCd}" oldValue="${reqentry.collectionCd}" id="delta-collectionCd" />
-        </cmr:label>
-        <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column> --%>
-
-    
 <%--     <cmr:column span="2" containerForField="EmbargoCode">
       <p>
         <cmr:label fieldId="embargoCd">
