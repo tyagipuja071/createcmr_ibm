@@ -585,6 +585,11 @@ public class TWHandler extends GEOHandler {
     return fields;
   }
 
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    return getDataFieldsForUpdateCheck(cmrIssuingCntry);
+  }
+
   public static boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
     String srcName = null;
     Column srcCol = null;
