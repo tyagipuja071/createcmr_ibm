@@ -415,7 +415,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
           if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))
-              && names.get(0).equals(reqData.getAdmin().getMainCustNm1()) && !StringUtils.isBlank(watsonxOutput)) {
+              && !StringUtils.isBlank(watsonxOutput)) {
             result.setWatsonxOutput(watsonxOutput);
           }
           results.add(result);
