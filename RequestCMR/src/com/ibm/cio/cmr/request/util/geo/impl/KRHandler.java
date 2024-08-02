@@ -407,14 +407,6 @@ public class KRHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrdBlk", cmrCountry));
       results.add(update);
     }
-
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
-      update.setNewData(newData.getOrdBlk());
-      update.setOldData(oldData.getOrdBlk());
-      results.add(update);
-    }
   }
 
   /**
