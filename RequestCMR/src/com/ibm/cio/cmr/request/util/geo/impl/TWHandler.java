@@ -372,8 +372,8 @@ public class TWHandler extends GEOHandler {
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
-      update.setNewData(newData.getOrdBlk());
-      update.setOldData(oldData.getOrdBlk());
+      update.setNewData(service.getCodeAndDescription(newData.getOrdBlk(), "OrdBlk", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrdBlk", cmrCountry));
       results.add(update);
     }
   }
@@ -635,6 +635,11 @@ public class TWHandler extends GEOHandler {
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
         "DUNS_NO", "ABBREV_LOCN"));
     return fields;
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    return getDataFieldsForUpdateCheck(cmrIssuingCntry);
   }
 
   public static boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {

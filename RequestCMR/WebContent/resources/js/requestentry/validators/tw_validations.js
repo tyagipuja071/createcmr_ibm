@@ -199,7 +199,6 @@ function handleObseleteExpiredDataForUpdate() {
   if (reqType == 'U') {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('covId');
-    FormManager.readOnly('collectionCd');
     FormManager.readOnly('cmrNoPrefix');
     FormManager.readOnly('dupCmrIndc');
     FormManager.readOnly('sitePartyId');
