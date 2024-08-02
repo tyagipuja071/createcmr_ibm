@@ -304,6 +304,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     List<String> names = new ArrayList<String>();
     List<DPLSearchResults> results = new ArrayList<DPLSearchResults>();
     String watsonxOutput = "";
+    int nameIndex = 0;
 
     Long reqId = (Long) params.getParam("reqId");
     RequestData reqData = null;
@@ -401,9 +402,10 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         DPLSearchResponse resp = null;
         if (SystemUtil.useKYCForDPLChecks()) {
           KycScreeningResponse kycResponse = client.executeAndWrap(DPLCheckClient.KYC_APP_ID, request, KycScreeningResponse.class);
-          if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
+          if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX")) && nameIndex == 0) {
             watsonxOutput = kycResponse.getResult().getWatsonxOutput();
             LOG.debug("DPLSearchService Line 406: " + watsonxOutput);
+            nameIndex++;
           }
           resp = RequestUtils.convertToLegacySearchResults("CreateCMR", kycResponse);
         } else {
@@ -412,7 +414,8 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         if (resp.isSuccess()) {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
-          if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))) {
+          if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "Y".equals(SystemParameters.getString("DPL.WATSONX"))
+              && names.get(0).equals(reqData.getAdmin().getMainCustNm1()) && !StringUtils.isBlank(watsonxOutput)) {
             result.setWatsonxOutput(watsonxOutput);
           }
           results.add(result);
