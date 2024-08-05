@@ -1535,6 +1535,13 @@ function validateSortl() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function setCustClass() {
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	if (custSubGrp == 'GOVMT') {
+		FormManager.setValue('custClass', '12');
+	}
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.DE = [SysLoc.GERMANY];
   console.log('adding DE validators...');
@@ -1609,5 +1616,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(validateSortl, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(resetSortlValidator, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetSortlValidator, GEOHandler.DE);
+  GEOHandler.addAfterConfig(setCustClass, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(setCustClass, GEOHandler.DE);
 
 });
