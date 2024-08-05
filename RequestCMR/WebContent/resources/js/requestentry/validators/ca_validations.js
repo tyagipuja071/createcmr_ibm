@@ -1448,6 +1448,14 @@ function addressQuotationValidator() {
   FormManager.addValidator('mainCustNm2', Validators.NO_QUOTATION, [ 'Customer Name Con\'t' ]);
 
 }
+
+function setCustClass() {
+	var custGrp = FormManager.getActualValue('custGrp');
+	if (custGrp == "CROSS") {
+	  FormManager.setValue('custClass', '11');
+	}
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -1496,5 +1504,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-788
   GEOHandler.addAddrFunction(addressQuotationValidator, [ SysLoc.CANADA ]);
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.CANADA ]);
+  GEOHandler.addAfterTemplateLoad(setCustClass, SysLoc.CANADA);
 
 });
