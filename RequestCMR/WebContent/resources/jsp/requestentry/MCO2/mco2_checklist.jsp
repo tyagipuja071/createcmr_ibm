@@ -111,7 +111,8 @@
    </i>
   <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
    </div>
-    <span id="checklist_txt_field_12" style="display:block">    <%=RequestUtils.generateChecklistFreeTxtField12(request)%> </span>
+    <span id="checklist_txt_field_12" style="display:block">  
+      <%=RequestUtils.generateChecklistFreeTxtField12(request)%> </span>
    
    </cmr:chk-block>
     </cmr:chk-lbl-field>

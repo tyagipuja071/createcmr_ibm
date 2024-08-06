@@ -240,9 +240,9 @@
    </i>
   <span style="text-decoration: underline"> Type name here to indicate acknowledgment of this certification: </span>
    </div>
-   <span id="checklist_txt_field_19" style="display:block">     <%=RequestUtils.generateChecklistFreeTxtField18(request)%> </span>
+   <span id="checklist_txt_field_19" style="display:block">   
+     <%=RequestUtils.generateChecklistFreeTxtField18(request)%> </span>
    
    </cmr:chk-block>
     </cmr:chk-lbl-field>
 </cmr:checklist>
-

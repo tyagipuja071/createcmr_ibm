@@ -25,19 +25,23 @@ public class TCRServiceEntryPoint extends BatchEntryPoint {
     // gather records first
     TCRService service = new TCRService();
     if (runExtract) {
-      service.setSkipExit(runUpdate);
+      service.setSkipExit(true);
       service.setMode(Mode.Extract);
       service.execute();
     }
 
     if (runUpdate) {
-      service.setSkipExit(true);
+
+      service.setSkipExit(runExtract);
+      service.setMode(Mode.Update);
+      service.execute();
+    }
+
+    if (runExtract) {
+      service.setSkipExit(false);
       service.setMode(Mode.Clean);
       service.execute();
 
-      service.setSkipExit(false);
-      service.setMode(Mode.Update);
-      service.execute();
     }
   }
 }

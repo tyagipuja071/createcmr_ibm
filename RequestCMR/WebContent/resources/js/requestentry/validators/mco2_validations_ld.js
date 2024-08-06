@@ -1994,6 +1994,141 @@ function validateCollectionCd() {
 	})(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+var _checklistBtnHandler = [];
+function addChecklistBtnHandler() {
+	var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns.length; i++) {
+    _checklistBtnHandler[i] = null;
+    if (_checklistBtnHandler[i] == null) {
+      _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function (value) {
+		        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+      });
+    }
+  }
+}
+
+function freeTxtFieldShowHide(buttonNo) {
+  var shouldDisplay = false;
+  var fieldIdNo = getCheckListFieldNo(buttonNo);
+  var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
+  var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
+
+  if (buttonNo % 2 == 0) {
+    shouldDisplay = true;
+  } else {
+    shouldDisplay = false;
+  }
+  if (shouldDisplay) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none';
+    textFieldElement.value = '';
+  }
+}
+
+function getCheckListFieldNo(buttonNo) {
+	if(buttonNo % 2 == 0){
+	 return (buttonNo / 2) + 4;	
+	}else{
+	 return ((buttonNo-1) / 2) + 4;	
+	}
+}
+
+function checkChecklistButtons() {
+var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns.length; i=i+2) {
+	    if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
+	    var fieldNo = getCheckListFieldNo(i);
+      document.getElementById('checklist_txt_field_' + fieldNo).style.display = 'block';
+    }
+  }
+}
+
+
+function setChecklistStatus() {
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
+  var textBoxes = checklist.query('input[type="text"]');
+
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var noOfTextBoxes = textBoxes.length;
+      for (var i = 0; i < noOfTextBoxes; i++) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''  &&  document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+      }
+
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
+}
+
+function addCEMEAChecklistValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        console.log('validating checklist..');
+        var checklist = dojo.query('table.checklist');
+
+        var questions = checklist.query('input[type="radio"]');
+        var textBoxes = checklist.query('input[type="text"]');
+        if (questions.length > 0) {
+          var noOfQuestions = questions.length / 2;
+          var noOfTextBoxes = textBoxes.length;
+          for (var i = 0; i < noOfTextBoxes; i++) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
+              return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+            }
+          }
+
+          var checkCount = 0;
+          for (var i = 0; i < questions.length; i++) {
+            if (questions[i].checked) {
+              checkCount++;
+            }
+          }
+          if (noOfQuestions != checkCount) {
+            return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+          }
+
+          // if question 8 = YES, country field is required
+          // add check for checklist on DB
+          var reqId = FormManager.getActualValue('reqId');
+          var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+            REQID: reqId
+          });
+          if (!record || !record.sectionA1) {
+            return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
+}
+
 
 
 function addEmbargoCodeValidator() {
@@ -3391,12 +3526,11 @@ function disableChecklist() {
 
 }
 
-
-dojo.addOnLoad(function () {
+dojo.addOnLoad(function() {
 	GEOHandler.MCO2 = ['373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
 		'782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883'];
-		
-	GEOHandler.MCO2_CHECKLIST = ['810','662','745','835','825','842'];	
+		GEOHandler.MCO2_CHECKLIST = ['810','662','745','835','825','842'];	
+
 	console.log('adding MCO2 functions...');
 	GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
 	GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, ['ZD01', 'ZI01']);
@@ -3498,7 +3632,11 @@ dojo.addOnLoad(function () {
 	GEOHandler.addAfterTemplateLoad(enableTinNumber, SysLoc.KENYA);
 	GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.MCO2, null, true);
 
-	
+	 GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.MCO2_CHECKLIST);
+  GEOHandler.registerValidator(addCEMEAChecklistValidator, GEOHandler.MCO2_CHECKLIST);
+  GEOHandler.addAfterConfig(addChecklistBtnHandler, GEOHandler.MCO2_CHECKLIST);
+  GEOHandler.addAfterConfig(checkChecklistButtons, GEOHandler.MCO2_CHECKLIST);
+  GEOHandler.addAfterConfig(disableChecklist, GEOHandler.MCO2_CHECKLIST);
 	GEOHandler.registerValidator(StcOrderBlockValidation, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrLOCALAndNonMEA, GEOHandler.MCO2, null, true);
 	GEOHandler.registerValidator(validateISUCTCEnterprisefrCROSS, GEOHandler.MCO2, null, true);
