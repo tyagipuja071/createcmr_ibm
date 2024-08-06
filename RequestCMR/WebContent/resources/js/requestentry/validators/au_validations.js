@@ -3208,8 +3208,10 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.AUSTRALIA], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addSoltToAddressValidator, [SysLoc.AUSTRALIA]);
-  GEOHandler.registerValidator(addBillToAddressValidator, [SysLoc.AUSTRALIA]);
-  GEOHandler.registerValidator(addInstallAtAddressValidator, [SysLoc.AUSTRALIA]);
+  // GEOHandler.registerValidator(addBillToAddressValidator,
+  // [SysLoc.AUSTRALIA]);
+  // GEOHandler.registerValidator(addInstallAtAddressValidator,
+  // [SysLoc.AUSTRALIA]);
 
   GEOHandler.registerValidator(addAddressInstancesValidator, [SysLoc.AUSTRALIA], null, true);
   GEOHandler.registerValidator(addContactInfoValidator, [SysLoc.AUSTRALIA], GEOHandler.REQUESTER, true);
