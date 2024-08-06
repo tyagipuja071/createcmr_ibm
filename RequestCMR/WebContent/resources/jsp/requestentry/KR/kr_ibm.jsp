@@ -84,15 +84,17 @@
         <cmr:field fieldId="MrcCd" path="mrcCd" id="mrcCd" tabId="MAIN_IBM_TAB"/>
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="CollectionCd">
-      <p>
-        <cmr:label fieldId="collectionCd">
-          <cmr:fieldLabel fieldId="CollectionCd" />:
-          <cmr:delta text="${rdcdata.collectionCd}" oldValue="${reqentry.collectionCd}" id="delta-collectionCd" />
-        </cmr:label>
-        <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
-      </p>
-    </cmr:column>
+    <%if (reqentry.getReqType().equalsIgnoreCase("U")){ %>
+      <cmr:column span="2" containerForField="CollectionCd">
+        <p>
+          <cmr:label fieldId="collectionCd">
+            <cmr:fieldLabel fieldId="CollectionCd" />:
+            <cmr:delta text="${rdcdata.collectionCd}" oldValue="${reqentry.collectionCd}" id="delta-collectionCd" />
+          </cmr:label>
+          <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      <%} %>
 <%--     	  <cmr:column span="2" containerForField="SOENumber">
           <p>
            <cmr:label fieldId="soeReqNo">
