@@ -126,12 +126,10 @@ public class LAHandler extends GEOHandler {
           }
           converted.add(record);
         }
-        if (SystemLocation.BRAZIL.equals(record.getCmrIssuedBy())) {
-          if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
-              && StringUtils.isNotEmpty(record.getExtWalletId())) {
-            record.setCmrAddrTypeCode("PG01");
-          }
-          converted.add(record);
+
+        if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+            && StringUtils.isNotEmpty(record.getExtWalletId())) {
+          record.setCmrAddrTypeCode("PG01");
         }
       }
       source.setItems(converted);
@@ -140,11 +138,9 @@ public class LAHandler extends GEOHandler {
         if ("ZS01".equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
           continue;
         }
-        if (SystemLocation.BRAZIL.equals(record.getCmrIssuedBy())) {
-          if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
-              && StringUtils.isNotEmpty(record.getExtWalletId())) {
-            record.setCmrAddrTypeCode("PG01");
-          }
+        if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+            && StringUtils.isNotEmpty(record.getExtWalletId())) {
+          record.setCmrAddrTypeCode("PG01");
         }
         converted.add(record);
       }
@@ -292,9 +288,8 @@ public class LAHandler extends GEOHandler {
         data.setTaxCd1(taxCd1);
       }
 
-      if(!"631".equalsIgnoreCase(data.getCmrIssuingCntry()))
-      {
-      doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
+      if (!"631".equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        doSolveMrcIsuClientTierLogicOnImport(data, issuingCountry, sORTL, mainRecord);
       }
       data.setBgId(mainRecord.getCmrBuyingGroup());
       data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
@@ -1198,15 +1193,17 @@ public class LAHandler extends GEOHandler {
       }
     } else {
       LOG.debug("No MRC_CODE retrieved or there are too many retrived codes. . . Setting default values");
-      if (SystemLocation.ARGENTINA.equals(issuingCountry)
-          || SystemLocation.MEXICO.equals(issuingCountry) || SystemLocation.PERU.equals(issuingCountry)) {
+      if (SystemLocation.ARGENTINA.equals(issuingCountry) || SystemLocation.MEXICO.equals(issuingCountry)
+          || SystemLocation.PERU.equals(issuingCountry)) {
         data.setMrcCd("M");
         // 1H2023 handling for update duplicate 161 sortls
-//        if (SystemLocation.BRAZIL.equals(issuingCountry) && "161".equals(sORTL) && StringUtils.isNotBlank(mainRecord.getIsuCode())) {
-//          if ("32".equals(mainRecord.getIsuCode())) {
-//            data.setMrcCd("T");
-//          }
-//        }
+        // if (SystemLocation.BRAZIL.equals(issuingCountry) &&
+        // "161".equals(sORTL) &&
+        // StringUtils.isNotBlank(mainRecord.getIsuCode())) {
+        // if ("32".equals(mainRecord.getIsuCode())) {
+        // data.setMrcCd("T");
+        // }
+        // }
       } else if (SystemLocation.ECUADOR.equals(issuingCountry) || SystemLocation.PARAGUAY.equals(issuingCountry)
           || SystemLocation.URUGUAY.equals(issuingCountry)) {
         data.setMrcCd("P");
@@ -1219,10 +1216,11 @@ public class LAHandler extends GEOHandler {
 
       if (!StringUtils.isEmpty(data.getMrcCd())) {
         String retrievedISUCode = (String) cmrClientService.getISUCode(issuingCountry, data.getMrcCd()); // skip
-//        if (SystemLocation.BRAZIL.equals(issuingCountry) && "161".equals(sORTL)) {
-//          // set to blank to get the findcmr values for isu/ctc
-//          retrievedISUCode = "";
-//        }
+        // if (SystemLocation.BRAZIL.equals(issuingCountry) &&
+        // "161".equals(sORTL)) {
+        // // set to blank to get the findcmr values for isu/ctc
+        // retrievedISUCode = "";
+        // }
         if (!StringUtils.isEmpty(retrievedISUCode)) {
           data.setIsuCd(retrievedISUCode);
           String retrievedClientTierCd = (String) cmrClientService.getClientTierCode(data.getMrcCd(), retrievedISUCode);
