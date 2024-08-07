@@ -118,6 +118,11 @@ public class TWHandler extends GEOHandler {
     String strAdd2 = ((currentRecord.getCmrCity() == null ? "" : currentRecord.getCmrCity().trim()) + " "
         + (currentRecord.getCmrCountryLanded() == null ? "" : currentRecord.getCmrCountryLanded().trim())).trim();
 
+    LOG.info("========== will call splitAddress method with the following values:");
+    LOG.info("========== address " + address.toString());
+    LOG.info("========== strAdd1 " + strAdd1 + " and size is " + strAdd1.length());
+    LOG.info("========== strAdd2 " + strAdd2 + " and size is " + strAdd2.length());
+
     splitAddress(address, strAdd1, strAdd2, 60, 60);
 
     address.setDept(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1()
