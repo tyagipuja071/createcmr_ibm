@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -64,6 +65,7 @@ public class ANZHandler extends GEOHandler {
   private static final List<String> BILL_TO_FIXED_SEQ = Arrays.asList("01", "H");
   private static final List<String> INSTALL_AT_FIXED_SEQ_AU = Arrays.asList("02", "03", "G");
   private static final List<String> INSTALL_AT_FIXED_SEQ_NZ = Arrays.asList("09", "G");
+  private static final List<String> SHIP_TO_FIXED_SEQ = Arrays.asList("040");
 
   public static void main(String[] args) {
   }
@@ -614,6 +616,9 @@ public class ANZHandler extends GEOHandler {
     case INSTALL_AT_ADDR_TYPE:
       newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_AU);
       break;
+    case SHIP_TO_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ);
+      break;
     default:
       newAddrSeq = "";
       break;
@@ -633,6 +638,9 @@ public class ANZHandler extends GEOHandler {
     case INSTALL_AT_ADDR_TYPE:
       newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_NZ);
       break;
+    case SHIP_TO_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ);
+      break;
     default:
       newAddrSeq = "";
       break;
@@ -641,21 +649,65 @@ public class ANZHandler extends GEOHandler {
   }
 
   private String getNewSeqFromSeqToCheck(EntityManager entityManager, long reqId, String addrType, List<String> seqToCheck) {
-    Set<String> existingSeq = getAddrSeqByType(entityManager, reqId, addrType);
+    Set<String> existingSeq = getExistingAddrSeqInclRdc(entityManager, reqId);
     if (existingSeq.isEmpty()) {
       return seqToCheck.get(0);
     }
-    if (existingSeq.size() < seqToCheck.size()) {
+    if (!areAllElementsPresent(seqToCheck, existingSeq)) {
       for (String b : seqToCheck) {
         if (!existingSeq.contains(b)) {
           return b;
         }
       }
     } else {
-      return String.valueOf(existingSeq.size() + 1);
-
+      return String.valueOf(getNewSeqAdditionalAddr(existingSeq, addrType));
     }
     return "";
+  }
+
+  private boolean areAllElementsPresent(List<String> seqToCheck, Set<String> existingSeq) {
+    return existingSeq.containsAll(seqToCheck);
+  }
+
+  private String getNewSeqAdditionalAddr(Set<String> existingAddrSeqSet, String addrType) {
+    int candidateSeqNum = 0;
+    switch (addrType) {
+    case BILL_TO_ADDR_TYPE:
+      candidateSeqNum = 20;
+      break;
+    case INSTALL_AT_ADDR_TYPE:
+      candidateSeqNum = 50;
+      break;
+    case SHIP_TO_ADDR_TYPE:
+      candidateSeqNum = 40;
+      break;
+    default:
+      candidateSeqNum = 0;
+      LOG.debug("ANZ additional address failed to assign sequence");
+      break;
+    }
+
+    LOG.info("Candidate Seq: " + candidateSeqNum);
+    return getAvailAddrSeqNumInclRdc(existingAddrSeqSet, candidateSeqNum);
+  }
+
+  private String getAvailAddrSeqNumInclRdc(Set<String> existingAddrSeqSet, int candidateSeqNum) {
+    int availSeqNum = 0;
+    if (existingAddrSeqSet.contains(String.format("%03d", candidateSeqNum))) {
+      availSeqNum = candidateSeqNum;
+      while (existingAddrSeqSet.contains(String.format("%03d", availSeqNum))) {
+        availSeqNum++;
+        if (availSeqNum > 999) {
+          availSeqNum = 1;
+        }
+      }
+    } else {
+      availSeqNum = candidateSeqNum;
+    }
+
+    LOG.info("Avail: " + availSeqNum);
+
+    return String.format("%03d", availSeqNum);
   }
 
   private Set<String> getAddrSeqByType(EntityManager entityManager, long reqId, String addrType) {
@@ -667,6 +719,48 @@ public class ANZHandler extends GEOHandler {
 
     Set<String> addrSeqSet = new HashSet<>();
     addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<String> getExistingAddrSeqInclRdc(EntityManager entityManager, long reqId) {
+    DataPK pk = new DataPK();
+    pk.setReqId(reqId);
+    Data data = entityManager.find(Data.class, pk);
+
+    String cmrNo = data.getCmrNo();
+    Set<String> allAddrSeqFromAddr = getAllSavedSeqFromAddr(entityManager, reqId);
+    Set<String> allAddrSeqFromRdc = getAllSavedSeqFromRdc(entityManager, cmrNo, data.getCmrIssuingCntry());
+
+    Set<String> mergedAddrSet = new HashSet<>();
+    mergedAddrSet.addAll(allAddrSeqFromAddr);
+    mergedAddrSet.addAll(allAddrSeqFromRdc);
+
+    return mergedAddrSet;
+  }
+
+  private Set<String> getAllSavedSeqFromAddr(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("CA.GET.ADDRSEQ.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<String> results = query.getResults(String.class);
+
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<String> getAllSavedSeqFromRdc(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
+    String sql = ExternalizedQuery.getSql("CA.GET.KNA1_ZZKV_SEQNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<String> resultsRDC = query.getResults(String.class);
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(resultsRDC);
 
     return addrSeqSet;
   }
