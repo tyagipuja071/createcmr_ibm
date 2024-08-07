@@ -2018,7 +2018,7 @@ function addInstallAtAddressValidator() {
         var record = cmr.query('GETZI01VALRECORDS', qParams);
         var zi01Reccount = record.ret1;
         if (addrType == 'ZI01' && Number(zi01Reccount) >= 3 && cmr.addressMode != 'updateAddress' && reqType!='U') {
-          return new ValidationResult(null, false, 'Only three Intall-At Addresses can be defined.');
+          return new ValidationResult(null, false, 'Only three Install-At Addresses can be defined.');
         } else {
           return new ValidationResult(null, true);
         }
@@ -3211,8 +3211,10 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addFailedDPLValidator, [SysLoc.AUSTRALIA]);
   GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.AUSTRALIA], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addSoltToAddressValidator, [SysLoc.AUSTRALIA]);
-  GEOHandler.registerValidator(addBillToAddressValidator, [SysLoc.AUSTRALIA]);
-  GEOHandler.registerValidator(addInstallAtAddressValidator, [SysLoc.AUSTRALIA]);
+  // GEOHandler.registerValidator(addBillToAddressValidator,
+  // [SysLoc.AUSTRALIA]);
+  // GEOHandler.registerValidator(addInstallAtAddressValidator,
+  // [SysLoc.AUSTRALIA]);
 
   GEOHandler.registerValidator(addAddressInstancesValidator, [SysLoc.AUSTRALIA], null, true);
   GEOHandler.registerValidator(addContactInfoValidator, [SysLoc.AUSTRALIA], GEOHandler.REQUESTER, true);

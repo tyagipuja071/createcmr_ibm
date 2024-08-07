@@ -3000,8 +3000,8 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(additionalAddrNmValidatorNZ, [SysLoc.NEW_ZEALAND], null, true);
   GEOHandler.registerValidator(additionalAddrNmValidatorOldNZ, [SysLoc.NEW_ZEALAND], null, true);
   GEOHandler.registerValidator(addSoltToAddressValidator, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.registerValidator(addBillToAddressValidator, [SysLoc.NEW_ZEALAND]);
-  GEOHandler.registerValidator(addInstallAtAddressValidator, [SysLoc.NEW_ZEALAND]);
+  //GEOHandler.registerValidator(addBillToAddressValidator, [SysLoc.NEW_ZEALAND]);
+  //GEOHandler.registerValidator(addInstallAtAddressValidator, [SysLoc.NEW_ZEALAND]);
   
   GEOHandler.registerValidator(addAddressInstancesValidator, [SysLoc.NEW_ZEALAND], null, true);
   GEOHandler.registerValidator(addContactInfoValidator, [SysLoc.NEW_ZEALAND], GEOHandler.REQUESTER, true);
