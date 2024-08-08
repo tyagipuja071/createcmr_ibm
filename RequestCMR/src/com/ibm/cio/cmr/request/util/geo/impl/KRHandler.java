@@ -163,6 +163,10 @@ public class KRHandler extends GEOHandler {
     address.setDept(currentRecord.getCmrDept() == null ? currentRecord.getCmrDept() : currentRecord.getCmrDept().trim());
     address.setPoBoxPostCd(
         currentRecord.getCmrPOBoxPostCode() == null ? currentRecord.getCmrPOBoxPostCode() : currentRecord.getCmrPOBoxPostCode().trim());
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      address.setLocationCode(address.getId().getAddrSeq());
+    }
   }
 
   @Override
