@@ -1102,9 +1102,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCTCIsuMrcByCluster, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setCTCIsuMrcByCluster, GEOHandler.KR);
 
+<<<<<<< HEAD
   // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.KR, null, true);
 
+=======
+>>>>>>> refs/remotes/origin/yellow_tw_kr_dual_write
   GEOHandler.registerValidator(addKRAddressGridValidator, [ SysLoc.KOREA ], null, true);
   
 });
