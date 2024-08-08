@@ -24,6 +24,19 @@
         <cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
+
+    <%if (reqentry.getReqType().equalsIgnoreCase("U")){ %>
+      <cmr:column span="2" containerForField="OrdBlk">
+        <p>
+          <cmr:label fieldId="ordBlk">
+            <cmr:fieldLabel fieldId="OrdBlk" />:
+            <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
+          </cmr:label>
+          <cmr:field fieldId="OrdBlk" id="ordBlk" path="ordBlk" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      <%} %>
+
   		  <cmr:column span="2" containerForField="SalRepNameNo">
       		<p>
         	  <cmr:label fieldId="repTeamMemberNo">

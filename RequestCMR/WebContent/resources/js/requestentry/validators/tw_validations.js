@@ -1,5 +1,25 @@
 /* Register TW Javascripts */
 
+/**
+* No single byte characters for TW
+*/
+function addSingleByteValidatorTW(cntry, details) {
+  FormManager.addValidator('custNm1', Validators.LATIN, ['Customer English Name']);
+  FormManager.addValidator('custNm2', Validators.LATIN, ['Customer English Name Con' + '\'' + 't']);
+  FormManager.addValidator('custNm3', Validators.NO_SINGLE_BYTE, ['Customer Chinese Name']);
+  FormManager.addValidator('custNm4', Validators.NO_SINGLE_BYTE, ['Customer Chinese Name Con' + '\'' + 't']);
+  FormManager.addValidator('addrTxt', Validators.LATIN, ['Customer English Address']);
+  FormManager.addValidator('addrTxt2', Validators.LATIN, ['Customer English Address Con' + '\'' + 't']);
+  FormManager.addValidator('dept', Validators.NO_SINGLE_BYTE, ['Customer Chinese Address']);
+  FormManager.addValidator('bldg', Validators.NO_SINGLE_BYTE, ['Customer Chinese Address Con' + '\'' + 't']);
+  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, ['Contact Name'], 'MAIN_CUST_TAB');
+  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, ['Contact Job Title'], 'MAIN_CUST_TAB');
+  FormManager.addValidator('email3', Validators.LATIN, ['Goods Receiver Telephone Number'], 'MAIN_CUST_TAB');
+
+  FormManager.addValidator('orgNo', Validators.LATIN, ['Customer Telephone Number'], 'MAIN_CUST_TAB');
+  FormManager.addValidator('restrictTo', Validators.LATIN, ['Customer Fax Number'], 'MAIN_CUST_TAB');
+}
+
 function afterConfigTW() {
   var reqType = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -227,7 +247,107 @@ function handleObseleteExpiredDataForUpdate() {
   }
 }
 
+function replaceAndSymbol(value) {
+  var modifiedVal = '';
+  if (value != null && value.length > 0) {
+    modifiedVal = value;
+    modifiedVal = modifiedVal.replace(/&/g, '＆');
+  }
 
+  return modifiedVal;
+};
+
+function replaceCrossbarSymbol(value) {
+  var modifiedVal = '';
+  if (value != null && value.length > 0) {
+    modifiedVal = value;
+    modifiedVal = modifiedVal.replace(/-/g, '－');
+    modifiedVal = modifiedVal.replace(/−/g, "－");
+    modifiedVal = modifiedVal.replace(/･/g, '・');
+
+    modifiedVal = modifiedVal.replace(/,/g, '，');
+    modifiedVal = modifiedVal.replace(/:/g, '：');
+    modifiedVal = modifiedVal.replace(/_/g, '＿');
+    modifiedVal = modifiedVal.replace(/\(/g, '（');
+    modifiedVal = modifiedVal.replace(/\)/g, '）');
+  }
+
+  return modifiedVal;
+};
+
+function convert2DBCSIgnoreCase(input) {
+  var modifiedVal = '';
+  if (input != null && input.length > 0) {
+    modifiedVal = input;
+    modifiedVal = modifiedVal.replace(/1/g, '１');
+    modifiedVal = modifiedVal.replace(/2/g, '２');
+    modifiedVal = modifiedVal.replace(/3/g, '３');
+    modifiedVal = modifiedVal.replace(/4/g, '４');
+    modifiedVal = modifiedVal.replace(/5/g, '５');
+    modifiedVal = modifiedVal.replace(/6/g, '６');
+    modifiedVal = modifiedVal.replace(/7/g, '７');
+    modifiedVal = modifiedVal.replace(/8/g, '８');
+    modifiedVal = modifiedVal.replace(/9/g, '９');
+    modifiedVal = modifiedVal.replace(/0/g, '０');
+    modifiedVal = modifiedVal.replace(/a/g, 'ａ');
+    modifiedVal = modifiedVal.replace(/b/g, 'ｂ');
+    modifiedVal = modifiedVal.replace(/c/g, 'ｃ');
+    modifiedVal = modifiedVal.replace(/d/g, 'ｄ');
+    modifiedVal = modifiedVal.replace(/e/g, 'ｅ');
+    modifiedVal = modifiedVal.replace(/f/g, 'ｆ');
+    modifiedVal = modifiedVal.replace(/g/g, 'ｇ');
+    modifiedVal = modifiedVal.replace(/h/g, 'ｈ');
+    modifiedVal = modifiedVal.replace(/i/g, 'ｉ');
+    modifiedVal = modifiedVal.replace(/j/g, 'ｊ');
+    modifiedVal = modifiedVal.replace(/k/g, 'ｋ');
+    modifiedVal = modifiedVal.replace(/l/g, 'ｌ');
+    modifiedVal = modifiedVal.replace(/m/g, 'ｍ');
+    modifiedVal = modifiedVal.replace(/n/g, 'ｎ');
+    modifiedVal = modifiedVal.replace(/o/g, 'ｏ');
+    modifiedVal = modifiedVal.replace(/p/g, 'ｐ');
+    modifiedVal = modifiedVal.replace(/q/g, 'ｑ');
+    modifiedVal = modifiedVal.replace(/r/g, 'ｒ');
+    modifiedVal = modifiedVal.replace(/s/g, 'ｓ');
+    modifiedVal = modifiedVal.replace(/t/g, 'ｔ');
+    modifiedVal = modifiedVal.replace(/u/g, 'ｕ');
+    modifiedVal = modifiedVal.replace(/v/g, 'ｖ');
+    modifiedVal = modifiedVal.replace(/w/g, 'ｗ');
+    modifiedVal = modifiedVal.replace(/x/g, 'ｘ');
+    modifiedVal = modifiedVal.replace(/y/g, 'ｙ');
+    modifiedVal = modifiedVal.replace(/z/g, 'ｚ');
+    modifiedVal = modifiedVal.replace(/A/g, 'Ａ');
+    modifiedVal = modifiedVal.replace(/B/g, 'Ｂ');
+    modifiedVal = modifiedVal.replace(/C/g, 'Ｃ');
+    modifiedVal = modifiedVal.replace(/D/g, 'Ｄ');
+    modifiedVal = modifiedVal.replace(/E/g, 'Ｅ');
+    modifiedVal = modifiedVal.replace(/F/g, 'Ｆ');
+    modifiedVal = modifiedVal.replace(/G/g, 'Ｇ');
+    modifiedVal = modifiedVal.replace(/H/g, 'Ｈ');
+    modifiedVal = modifiedVal.replace(/I/g, 'Ｉ');
+    modifiedVal = modifiedVal.replace(/J/g, 'Ｊ');
+    modifiedVal = modifiedVal.replace(/K/g, 'Ｋ');
+    modifiedVal = modifiedVal.replace(/L/g, 'Ｌ');
+    modifiedVal = modifiedVal.replace(/M/g, 'Ｍ');
+    modifiedVal = modifiedVal.replace(/N/g, 'Ｎ');
+    modifiedVal = modifiedVal.replace(/O/g, 'Ｏ');
+    modifiedVal = modifiedVal.replace(/P/g, 'Ｐ');
+    modifiedVal = modifiedVal.replace(/Q/g, 'Ｑ');
+    modifiedVal = modifiedVal.replace(/R/g, 'Ｒ');
+    modifiedVal = modifiedVal.replace(/S/g, 'Ｓ');
+    modifiedVal = modifiedVal.replace(/T/g, 'Ｔ');
+    modifiedVal = modifiedVal.replace(/U/g, 'Ｕ');
+    modifiedVal = modifiedVal.replace(/V/g, 'Ｖ');
+    modifiedVal = modifiedVal.replace(/W/g, 'Ｗ');
+    modifiedVal = modifiedVal.replace(/X/g, 'Ｘ');
+    modifiedVal = modifiedVal.replace(/Y/g, 'Ｙ');
+    modifiedVal = modifiedVal.replace(/Z/g, 'Ｚ');
+    modifiedVal = modifiedVal.replace(/ /g, '　');
+    modifiedVal = replaceAndSymbol(modifiedVal);
+    modifiedVal = replaceCrossbarSymbol(modifiedVal);
+  }
+
+  return modifiedVal;
+}
 
 /*
  * Set CMR Double Creation warning when its value is Y
@@ -386,26 +506,6 @@ function addTWChecklistValidator() {
       }
     };
   })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
-}
-
-function addSingleByteValidatorTW(cntry, details) {
-
-  /* Address */
-  FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer English Name' ]);
-  FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer English Name Con' + '\'' + 't' ]);
-  FormManager.addValidator('custNm3', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Name' ]);
-  FormManager.addValidator('custNm4', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Name Con' + '\'' + 't' ]);
-  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Customer English Address' ]);
-  FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Customer English Address Con' + '\'' + 't' ]);
-  FormManager.addValidator('dept', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Address' ]);
-  FormManager.addValidator('bldg', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Address Con' + '\'' + 't' ]);
-  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Contact Name' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Contact Job Title' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('email3', Validators.LATIN, [ 'Goods Receiver Telephone Number' ], 'MAIN_CUST_TAB');
-
-  FormManager.addValidator('orgNo', Validators.LATIN, [ 'Customer Telephone Number' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('restrictTo', Validators.LATIN, [ 'Customer Fax Number' ], 'MAIN_CUST_TAB');
-
 }
 
 function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
@@ -939,6 +1039,74 @@ function setKUKLAvaluesTW() {
   }
 }
 
+// Customer Chinese Name
+function convertCustCnNameToDBCS() {
+  dojo.connect(FormManager.getField('custNm3'), 'onChange', function (value) {
+    var custCnName = FormManager.getActualValue('custNm3');
+
+    FormManager.setValue('custNm3', convert2DBCSIgnoreCase(custCnName));
+    custCnName = FormManager.getActualValue('custNm3');
+  });
+}
+
+// Customer Chinese Name Con't
+function convertCustCnNameContToDBCS() {
+  dojo.connect(FormManager.getField('custNm4'), 'onChange', function (value) {
+    var custCnNameCont = FormManager.getActualValue('custNm4');
+
+    FormManager.setValue('custNm4', convert2DBCSIgnoreCase(custCnNameCont));
+    custCnNameCont = FormManager.getActualValue('custNm4');
+  });
+}
+
+// Customer Chinese Address
+function convertCustCnAddrToDBCS() {
+  dojo.connect(FormManager.getField('dept'), 'onChange', function (value) {
+    var custCnAddr = FormManager.getActualValue('dept');
+
+    FormManager.setValue('dept', convert2DBCSIgnoreCase(custCnAddr));
+    custCnAddr = FormManager.getActualValue('dept');
+  });
+}
+
+// Customer Chinese Address Con't
+function convertCustCnAddrContToDBCS() {
+  dojo.connect(FormManager.getField('bldg'), 'onChange', function (value) {
+    var custCnAddrCont = FormManager.getActualValue('bldg');
+
+    FormManager.setValue('bldg', convert2DBCSIgnoreCase(custCnAddrCont));
+    custCnAddrCont = FormManager.getActualValue('bldg');
+  });
+}
+
+function addCustCnNameAndAddrTWValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var custCnName = FormManager.getActualValue('custNm3');
+        var custCnNameCont = FormManager.getActualValue('custNm4');
+
+        var custCnAddr = FormManager.getActualValue('dept');
+        var custCnAddrCont = FormManager.getActualValue('bldg');
+
+        if (custCnName.length > 23) {
+          return new ValidationResult(null, false, "Customer Chinese Name should be 23 double-byte characters max.");
+        } else if (custCnNameCont.length > 23) {
+          return new ValidationResult(null, false, "Customer Chinese Name Con't should be 23 double-byte characters max.");
+        }
+
+        if (custCnAddr.length > 23) {
+          return new ValidationResult(null, false, "Customer Chinese Address should be 23 double-byte characters max.");
+        } else if (custCnAddrCont.length > 23) {
+          return new ValidationResult(null, false, "Customer Chinese Address Con't should be 23 double-byte characters max.");
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function afterConfigCallsTW() {
   afterConfigTW();
   addHandlersForTW();
@@ -998,6 +1166,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.TW, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
+  GEOHandler.registerValidator(addCustCnNameAndAddrTWValidator, [ SysLoc.TAIWAN ], null, true);
+
+  GEOHandler.addToggleAddrTypeFunction(convertCustCnNameToDBCS, GEOHandler.TW);
+  GEOHandler.addToggleAddrTypeFunction(convertCustCnNameContToDBCS, GEOHandler.TW);
+  GEOHandler.addToggleAddrTypeFunction(convertCustCnAddrToDBCS, GEOHandler.TW);
+  GEOHandler.addToggleAddrTypeFunction(convertCustCnAddrContToDBCS, GEOHandler.TW);
   
   // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.TW,null,true);
