@@ -1102,7 +1102,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCTCIsuMrcByCluster, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setCTCIsuMrcByCluster, GEOHandler.KR);
 
-
   // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.KR, null, true);
 
