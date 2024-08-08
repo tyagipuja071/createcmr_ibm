@@ -936,6 +936,67 @@ function addSeqNumDuplicateValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addKRAddressGridValidator() {
+  console.log(">>>> addKRAddressGridValidator ");
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.KOREA) {
+          return new ValidationResult(null, true);
+        }
+
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          var custNm3 = '';
+          var custNm4 = '';
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            // Customer Name_Korean
+            var isCustNm3Filled = (record.custNm3[0] != null && record.custNm3[0] != '');
+            if (!isCustNm3Filled) {
+              if (custNm3 != '') {
+                custNm3 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm3 += record.addrTypeText[0];
+              }
+            }
+
+            // Street address_Korean
+            var isCustNm4Filled = (record.custNm4[0] != null && record.custNm4[0] != '');
+            if (!isCustNm4Filled) {
+              if (custNm4 != '') {
+                custNm4 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm4 += record.addrTypeText[0];
+              }
+            }
+          }
+
+          if (custNm3 != '') {
+            return new ValidationResult(null, false, 'Please fill out Customer Name_Korean for the following address: ' + custNm3);
+          } else if (custNm4 != '') {
+            return new ValidationResult(null, false, 'Please fill out Street address_Korean for the following address: ' + custNm4);
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 function canRemoveAddress(value, rowIndex, grid) {
   console.log('>>>> canRemoveAddress >>>>');
   var rowData = grid.getItem(rowIndex);
@@ -991,5 +1052,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterConfig(setCTCIsuMrcByCluster, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setCTCIsuMrcByCluster, GEOHandler.KR);
+
+  GEOHandler.registerValidator(addKRAddressGridValidator, [ SysLoc.KOREA ], null, true);
   
 });
