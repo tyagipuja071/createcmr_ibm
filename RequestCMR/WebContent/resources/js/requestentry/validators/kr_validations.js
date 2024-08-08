@@ -167,7 +167,7 @@ function setLockUnlockSeqNum(cntry, addressMode, details) {
     addrType = details != null ? details.ret2 : '';
   }
   
-  if(addrType == 'ZP01') {
+  if(addrType == 'ZP01' && addressMode != 'updateAddress') {
     FormManager.enable('locationCode');
     FormManager.addValidator('locationCode', Validators.REQUIRED, [ 'Seq/Loc Code' ], '');
   } else {
@@ -914,11 +914,10 @@ function addSeqNumDuplicateValidator() {
       validate : function() {
         var addrType = FormManager.getActualValue('addrType');
 
-        if(addrType != 'ZP01') {
+        if(addrType != 'ZP01' || cmr.addressMode == 'updateAddress') {
           return new ValidationResult(null, true);
         }
         
-        // frey here
         var requestId = FormManager.getActualValue('reqId');
         var seqNum = FormManager.getActualValue('locationCode');
 
@@ -935,6 +934,21 @@ function addSeqNumDuplicateValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
+
+function canRemoveAddress(value, rowIndex, grid) {
+  console.log('>>>> canRemoveAddress >>>>');
+  var rowData = grid.getItem(rowIndex);
+  var importInd = rowData.importInd[0];
+  var reqType = FormManager.getActualValue('reqType');
+  if ('U' == reqType && 'Y' == importInd) {
+    return false;
+  }
+  return true;
+}
+
+function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
+  return canRemoveAddress(value, rowIndex, grid);
 }
 
 dojo.addOnLoad(function() {
