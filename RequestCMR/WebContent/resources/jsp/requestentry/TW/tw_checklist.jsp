@@ -15,7 +15,7 @@
     readOnly = false;
   }
 %>
-<cmr:checklist title1="Taiwan End Use/End User Screening Checklist">
+<cmr:checklist title1="Taiwan End Use/End User Screening Checklist" title2="最終用途/最終使用者篩選清單">
   <!--
   <cmr:chk-section name="Customer Information:">
      <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label=" Customer Company: ">
@@ -96,8 +96,8 @@ Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan,
       <span style="font-weight:bold;text-decoration:underline">Missile</span> <b> （導彈）</b><br>
       <br>
       
-      To the best of your knowledge or belief is your customer involved in any activity related to or in support of rocket systems and/or unmanned air vehicles?<br>
-據您所知或所確信的，您的客戶是否參與或支援與火箭系統或無人機相關的任何活動？<br>
+      To the best of your knowledge or belief is your customer involved in any activity related to or in support of <b>rocket systems</b> and/or unmanned air vehicles?<br>
+據您所知或所確信的，您的客戶是否參與或支援與<b>火箭系統或無人機</b>相關的任何活動？<br>
 
      <br> 
      <ul>   
@@ -221,7 +221,10 @@ Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan,
 	 
      </cmr:chk-entry>
   </cmr:chk-section>
-  
-      
+  <cmr:chk-block boldText="false">
+    This checklist has been translated into Chinese but in the event of any conflict between the English and Chinese versions, the English version shall prevail.<br>
+此清單已翻譯成中文，但如果兩者之間有任何衝突，以英文版為準。 
+</cmr:chk-block>
+        
 </cmr:checklist>
 
