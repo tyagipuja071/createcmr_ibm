@@ -108,6 +108,8 @@ public class KRHandler extends GEOHandler {
      */
 
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
+
+    data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "");
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // ?Representative(CEO) name in business license?
     // data.setContactName1(mainRecord.getUsCmrRestrictTo());
@@ -403,7 +405,13 @@ public class KRHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getSearchTerm(), "SearchTerm", cmrCountry));
       results.add(update);
     }
-
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "CollectionCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "CollectionCd", cmrCountry));
+      results.add(update);
+    }
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
