@@ -88,6 +88,7 @@ public class TWHandler extends GEOHandler {
     data.setDunsNo(mainRecord.getCmrDuns() == null ? mainRecord.getCmrDuns() : mainRecord.getCmrDuns().trim());
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode() == null ? mainRecord.getInvoiceSplitCode() : mainRecord.getInvoiceSplitCode().trim());
+    data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "");
 
     // jira 2567
     String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();
@@ -368,7 +369,6 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
