@@ -108,16 +108,10 @@ public class TWHandler extends GEOHandler {
         : currentRecord.getCmrIntlName1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
     address.setCustNm4(currentRecord.getCmrIntlName2() == null ? currentRecord.getCmrIntlName2()
         : currentRecord.getCmrIntlName2().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
-
-    String strAdd1 = ((currentRecord.getCmrName4() == null ? "" : currentRecord.getCmrName4().trim()) + " "
-        + (currentRecord.getCmrStreetAddress() == null ? "" : currentRecord.getCmrStreetAddress().trim()) + " "
-        + (currentRecord.getCmrCity2() == null ? "" : currentRecord.getCmrCity2().trim())).trim();
-
-    String strAdd2 = ((currentRecord.getCmrCity() == null ? "" : currentRecord.getCmrCity().trim()) + " "
-        + (currentRecord.getCmrCountryLanded() == null ? "" : currentRecord.getCmrCountryLanded().trim())).trim();
-
-    splitAddress(address, strAdd1, strAdd2, 60, 60);
-
+    address
+        .setAddrTxt(currentRecord.getCmrStreetAddress() == null ? currentRecord.getCmrStreetAddress() : currentRecord.getCmrStreetAddress().trim());
+    address.setAddrTxt2(
+        currentRecord.getCmrStreetAddressCont() == null ? currentRecord.getCmrStreetAddressCont() : currentRecord.getCmrStreetAddressCont().trim());
     address.setDept(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1()
         : currentRecord.getCmrIntlCity1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
     address.setBldg(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2()
