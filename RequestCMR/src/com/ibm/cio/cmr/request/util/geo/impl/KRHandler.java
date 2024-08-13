@@ -169,8 +169,7 @@ public class KRHandler extends GEOHandler {
     LOG.debug("KRHandler Address Import Ind: " + address.getImportInd());
     LOG.debug("KRHandler Admin Req Type: " + admin.getReqType());
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
-        || (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) && "D".equals(address.getImportInd()))) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || ("D".equals(address.getImportInd()))) {
       LOG.debug("Setting location code before: " + address.getLocationCode());
       LOG.debug("Sequence: " + address.getId().getAddrSeq());
       address.setLocationCode(address.getId().getAddrSeq());
