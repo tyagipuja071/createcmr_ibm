@@ -2150,6 +2150,7 @@ function setFieldsCharForScenarios() {
   }
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (custSubGroup == 'PRICU') {
     FormManager.setValue('inacCd', '');
     FormManager.setValue('vat', '');
@@ -2179,7 +2180,11 @@ function setFieldsCharForScenarios() {
     FormManager.setValue('custClass', '11');
   }
   if (custSubGroup == 'GOVRN' || custSubGroup == 'GOVIG') {
-    FormManager.setValue('custClass', '12');
+    if (cntry == '838') {
+      FormManager.setValue('custClass', '13');
+    } else {
+      FormManager.setValue('custClass', '12');
+    }
   }
 
 }
