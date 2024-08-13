@@ -19,7 +19,9 @@ import javax.persistence.TemporalType;
  * @author Jeffrey Zamora
  */
 @Entity
-@Table(name = "ADDR_RDC", schema = "CREQCMR")
+@Table(
+    name = "ADDR_RDC",
+    schema = "CREQCMR")
 public class AddrRdc extends BaseEntity<AddrPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -36,132 +38,177 @@ public class AddrRdc extends BaseEntity<AddrPK> implements Serializable {
     this.id = id;
   }
 
-  @Column(name = "CUST_NM1")
+  @Column(
+      name = "CUST_NM1")
   private String custNm1;
 
-  @Column(name = "CUST_NM2")
+  @Column(
+      name = "CUST_NM2")
   private String custNm2;
 
-  @Column(name = "CUST_NM3")
+  @Column(
+      name = "CUST_NM3")
   private String custNm3;
 
-  @Column(name = "CUST_NM4")
+  @Column(
+      name = "CUST_NM4")
   private String custNm4;
 
-  @Column(name = "ADDR_TXT")
+  @Column(
+      name = "ADDR_TXT")
   private String addrTxt;
 
   private String city1;
 
-  @Column(name = "CITY2")
+  @Column(
+      name = "CITY2")
   private String city2;
 
-  @Column(name = "STATE_PROV")
+  @Column(
+      name = "STATE_PROV")
   private String stateProv;
 
-  @Column(name = "POST_CD")
+  @Column(
+      name = "POST_CD")
   private String postCd;
 
-  @Column(name = "LAND_CNTRY")
+  @Column(
+      name = "LAND_CNTRY")
   private String landCntry;
 
   private String county;
 
-  @Column(name = "BLDG")
+  @Column(
+      name = "BLDG")
   private String bldg;
 
-  @Column(name = "FLOOR")
+  @Column(
+      name = "FLOOR")
   private String floor;
 
-  @Column(name = "OFFICE")
+  @Column(
+      name = "OFFICE")
   private String office;
 
-  @Column(name = "DEPT")
+  @Column(
+      name = "DEPT")
   private String dept;
 
-  @Column(name = "PO_BOX")
+  @Column(
+      name = "PO_BOX")
   private String poBox;
 
-  @Column(name = "PO_BOX_CITY")
+  @Column(
+      name = "PO_BOX_CITY")
   private String poBoxCity;
 
-  @Column(name = "PO_BOX_POST_CD")
+  @Column(
+      name = "PO_BOX_POST_CD")
   private String poBoxPostCd;
 
-  @Column(name = "CUST_FAX")
+  @Column(
+      name = "CUST_FAX")
   private String custFax;
 
-  @Column(name = "CUST_PHONE")
+  @Column(
+      name = "CUST_PHONE")
   private String custPhone;
 
-  @Column(name = "TRANSPORT_ZONE")
+  @Column(
+      name = "TRANSPORT_ZONE")
   private String transportZone;
 
-  @Column(name = "ADDR_STD_RESULT")
+  @Column(
+      name = "ADDR_STD_RESULT")
   private String addrStdResult;
 
-  @Column(name = "ADDR_STD_ACCEPT_IND")
+  @Column(
+      name = "ADDR_STD_ACCEPT_IND")
   private String addrStdAcceptInd;
 
-  @Column(name = "ADDR_STD_REJ_REASON")
+  @Column(
+      name = "ADDR_STD_REJ_REASON")
   private String addrStdRejReason;
 
-  @Column(name = "ADDR_STD_REJ_CMT")
+  @Column(
+      name = "ADDR_STD_REJ_CMT")
   private String addrStdRejCmt;
 
-  @Column(name = "ADDR_STD_TS")
+  @Column(
+      name = "ADDR_STD_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date addrStdTs;
 
-  @Column(name = "SAP_NO")
+  @Column(
+      name = "SAP_NO")
   private String sapNo;
 
-  @Column(name = "IMPORT_IND")
+  @Column(
+      name = "IMPORT_IND")
   private String importInd;
 
-  @Column(name = "DIVN")
+  @Column(
+      name = "DIVN")
   private String divn;
 
-  @Column(name = "ADDR_TXT_2")
+  @Column(
+      name = "ADDR_TXT_2")
   private String addrTxt2;
 
-  @Column(name = "TAX_CD_1")
+  @Column(
+      name = "TAX_CD_1")
   private String taxCd1;
 
-  @Column(name = "TAX_CD_2")
+  @Column(
+      name = "TAX_CD_2")
   private String taxCd2;
 
-  @Column(name = "VAT")
+  @Column(
+      name = "VAT")
   private String vat;
 
-  @Column(name = "PAIRED_ADDR_SEQ")
+  @Column(
+      name = "LOCN_CD")
+  private String locationCode;
+
+  @Column(
+      name = "PAIRED_ADDR_SEQ")
   private String pairedAddrSeq;
 
-  @Column(name = "BILLING_PSTL_ADDR")
+  @Column(
+      name = "BILLING_PSTL_ADDR")
   private String billingPstlAddr;
 
-  @Column(name = "COMPANY_SIZE")
+  @Column(
+      name = "COMPANY_SIZE")
   private int companySize;
 
-  @Column(name = "ROL")
+  @Column(
+      name = "ROL")
   private String rol;
 
-  @Column(name = "ESTAB_FUNC_CD")
+  @Column(
+      name = "ESTAB_FUNC_CD")
   private String estabFuncCd;
 
-  @Column(name = "CONTACT")
+  @Column(
+      name = "CONTACT")
   private String contact;
 
-  @Column(name = "CUST_LANG_CD")
+  @Column(
+      name = "CUST_LANG_CD")
   private String custLangCd;
 
-  @Column(name = "HW_INSTL_MSTR_FLG")
+  @Column(
+      name = "HW_INSTL_MSTR_FLG")
   private String hwInstlMstrFlg;
 
-  @Column(name = "TAX_OFFICE")
+  @Column(
+      name = "TAX_OFFICE")
   private String taxOffice;
 
-  @Column(name = "EXT_WALLET_ID")
+  @Column(
+      name = "EXT_WALLET_ID")
   private String extWalletId;
 
   public String getBillingPstlAddr() {
@@ -506,5 +553,13 @@ public class AddrRdc extends BaseEntity<AddrPK> implements Serializable {
 
   public void setExtWalletId(String extWalletId) {
     this.extWalletId = extWalletId;
+  }
+
+  public String getLocationCode() {
+    return locationCode;
+  }
+
+  public void setLocationCode(String locationCode) {
+    this.locationCode = locationCode;
   }
 }
