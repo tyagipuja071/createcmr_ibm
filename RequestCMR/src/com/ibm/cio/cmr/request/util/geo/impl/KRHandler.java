@@ -165,10 +165,17 @@ public class KRHandler extends GEOHandler {
         currentRecord.getCmrPOBoxPostCode() == null ? currentRecord.getCmrPOBoxPostCode() : currentRecord.getCmrPOBoxPostCode().trim());
 
     LOG.debug("KRHandler Address Import Ind: " + address.getImportInd());
+    LOG.debug("KRHandler Admin Req Type: " + admin.getReqType());
+
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
         || (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) && "D".equals(address.getImportInd()))) {
+      LOG.debug("Setting location code before: " + address.getLocationCode());
+      LOG.debug("Sequence: " + address.getId().getAddrSeq());
       address.setLocationCode(address.getId().getAddrSeq());
     }
+
+    LOG.debug("KRHandler Setting location code after: " + address.getLocationCode());
+
   }
 
   @Override
