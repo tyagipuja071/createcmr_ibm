@@ -165,6 +165,15 @@ function afterConfigKR() {
       });
     }
   }
+  
+  if(FormManager.getActualValue('importInd') == 'D') {
+    var addrType = FormManager.getActualValue('addrType');
+
+    if(addrType == 'ZS01') {
+      FormManager.readOnly('locationCode');
+      FormManager.removeValidator('locationCode', Validators.REQUIRED);
+    }
+  }
 }
 
 function replaceAndSymbol(value) {
