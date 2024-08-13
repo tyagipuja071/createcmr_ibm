@@ -88,6 +88,7 @@ public class TWHandler extends GEOHandler {
     data.setDunsNo(mainRecord.getCmrDuns() == null ? mainRecord.getCmrDuns() : mainRecord.getCmrDuns().trim());
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode() == null ? mainRecord.getInvoiceSplitCode() : mainRecord.getInvoiceSplitCode().trim());
+    data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "");
 
     // jira 2567
     String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();
@@ -110,16 +111,10 @@ public class TWHandler extends GEOHandler {
         : currentRecord.getCmrIntlName1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
     address.setCustNm4(currentRecord.getCmrIntlName2() == null ? currentRecord.getCmrIntlName2()
         : currentRecord.getCmrIntlName2().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
-
-    String strAdd1 = ((currentRecord.getCmrName4() == null ? "" : currentRecord.getCmrName4().trim()) + " "
-        + (currentRecord.getCmrStreetAddress() == null ? "" : currentRecord.getCmrStreetAddress().trim()) + " "
-        + (currentRecord.getCmrCity2() == null ? "" : currentRecord.getCmrCity2().trim())).trim();
-
-    String strAdd2 = ((currentRecord.getCmrCity() == null ? "" : currentRecord.getCmrCity().trim()) + " "
-        + (currentRecord.getCmrCountryLanded() == null ? "" : currentRecord.getCmrCountryLanded().trim())).trim();
-
-    splitAddress(address, strAdd1, strAdd2, 60, 60);
-
+    address
+        .setAddrTxt(currentRecord.getCmrStreetAddress() == null ? currentRecord.getCmrStreetAddress() : currentRecord.getCmrStreetAddress().trim());
+    address.setAddrTxt2(
+        currentRecord.getCmrStreetAddressCont() == null ? currentRecord.getCmrStreetAddressCont() : currentRecord.getCmrStreetAddressCont().trim());
     address.setDept(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1()
         : currentRecord.getCmrIntlCity1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
     address.setBldg(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2()
@@ -368,7 +363,6 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));

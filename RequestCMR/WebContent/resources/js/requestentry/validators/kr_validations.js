@@ -1,6 +1,6 @@
 /* Register KR Javascripts */
-var _isicHandler = null;
-var _searchTermHandler = null;
+ var _isicHandler = null;
+ var _searchTermHandler = null;
  var _addrTypesForKR = ['ZS01', 'ZP01', 'ZI01', 'ZD01'];
  var _addrTypeHandler = [];
 
@@ -28,23 +28,23 @@ function afterConfigKR() {
   var reqType = null;
   var _isuHandler = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function (value) {
+  
+  _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     getIsuFromIsic();
     setKUKLAvaluesKR();
   });
-
+  
   if (_isuHandler == null) {
-    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues();
     });
   }
-  var _scenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function (value) {
+  var _scenarioHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     FormManager.resetDropdownValues(FormManager.getField('searchTerm'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-    // FormManager.setValue('inacType','');
-    // FormManager.setValue('inacCd','');
+// FormManager.setValue('inacType','');
+// FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
     FormManager.enable('isicCd');
     FormManager.enable('inacType');
