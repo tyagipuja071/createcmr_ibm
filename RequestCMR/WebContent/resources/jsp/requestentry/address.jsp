@@ -439,7 +439,19 @@ visibility: hidden !IMPORTANT;
             <cmr:formatter functionName="stateProvFormatter" />
           </cmr:gridCol>
         </cmr:view>
-        
+
+        <!-- TW State Prov -->
+        <cmr:view forCountry="858">
+          <cmr:gridCol width="80px" field="stateProv" header="${ui.grid.stateProvince}">
+            <cmr:formatter functionName="stateProvFormatter" />
+          </cmr:gridCol>
+        </cmr:view>
+
+        <!-- TW Disctrict -->
+        <cmr:view forCountry="862">
+          <cmr:gridCol width="100px" field="dept" header="District" />
+        </cmr:view>
+
         <cmr:view forCountry="666">
           <cmr:gridCol width="90px" field="addrTxt2" header="${ui.grid.occupation}" />
         </cmr:view>
@@ -451,7 +463,7 @@ visibility: hidden !IMPORTANT;
         
         
         <!--  City except for JP -->
-        <cmr:view exceptForGEO="JP,TW">
+        <cmr:view exceptForGEO="JP">
           <cmr:gridCol width="80px" field="city1" header="${ui.grid.city1}" />
         </cmr:view>
         

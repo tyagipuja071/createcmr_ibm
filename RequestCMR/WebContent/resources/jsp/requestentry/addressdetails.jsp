@@ -134,6 +134,34 @@
        <div id="bldg_view">-</div>
       </cmr:column>
      </cmr:row>
+    <cmr:row addBackground="true">
+      <cmr:column span="1">
+        <cmr:label fieldId="city2_view">
+          <span class="lbl-City2">District</span>:
+        </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="city2_view">-</div>
+      </cmr:column>
+      <cmr:column span="1">
+        <cmr:label fieldId="city1_view">
+          <span class="lbl-City1">City</span>:
+        </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="city1_view">-</div>
+      </cmr:column>
+    </cmr:row>
+    <cmr:row addBackground="true">
+      <cmr:column span="1">
+        <cmr:label fieldId="stateProv_view">
+          <span class="lbl-StateProv">State/Province</span>:
+        </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="stateProv_view">-</div>
+      </cmr:column>
+    </cmr:row>
   </cmr:view>
   
   <!-- Korea -->
