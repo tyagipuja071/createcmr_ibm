@@ -147,7 +147,40 @@
       </p>
   </cmr:column>
 </cmr:row>
- 
+
+<cmr:row>
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="stateProv">
+        <cmr:fieldLabel fieldId="StateProv" />:
+        <cmr:delta text="-" id="delta-stateProv" code="L" />
+        <cmr:info text="${ui.info.addrStateProv}" />
+      </cmr:label>
+      <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="city1">
+        <cmr:fieldLabel fieldId="City1" />:
+        <cmr:delta text="-" id="delta-city1" />
+      </cmr:label>
+      <cmr:field fieldId="City1" id="city1" path="city1" />
+    </p>
+  </cmr:column>
+
+  <cmr:column span="2" containerForField="City2">
+    <p>
+      <cmr:label fieldId="city2">
+        <cmr:fieldLabel fieldId="City2" />:
+        <cmr:delta text="-" id="delta-city2" />
+      </cmr:label>
+      <cmr:field fieldId="City2" id="city2" path="city2" />
+    </p>
+  </cmr:column>
+</cmr:row>
+
  <cmr:row addBackground="true">
   <cmr:column span="2">
   <p>
