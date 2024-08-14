@@ -868,6 +868,31 @@ function setDefaultCustPrefLanguage() {
   }
 }
 
+function disableChecklist() {
+  var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  var textFields = checklist.query('input[type="text"]');
+
+if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  for (var i = 0; i < radioBtns.length; i++) {
+    FormManager.readOnly('dijit_form_RadioButton_' + i);
+  }
+
+  for (var j = 0; j < textFields.length; j++) {
+    FormManager.readOnly('dijit_form_TextBox_' + j)
+  }
+} else {
+  for (var i = 0; i < radioBtns.length; i++) {
+    FormManager.enable('dijit_form_RadioButton_' + i);
+  }
+
+  for (var j = 0; j < textFields.length; j++) {
+    FormManager.enable('dijit_form_TextBox_' + j)
+  }
+}
+
+}
+
 function afterConfigCallsTW() {
   afterConfigTW();
   addHandlersForTW();
@@ -935,5 +960,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(chineseAddrMandtValidator, GEOHandler.TW, null, true);
 
   FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'footnoteTxt1', 'contactName3' ]);
+  GEOHandler.addAfterConfig(disableChecklist,  GEOHandler.TW_CHECKLIST);
 
 });
