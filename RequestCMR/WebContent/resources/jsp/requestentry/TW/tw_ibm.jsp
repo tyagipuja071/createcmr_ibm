@@ -25,7 +25,6 @@
       </p>
     </cmr:column>
 
-    <%if (reqentry.getReqType().equalsIgnoreCase("U")){ %>
       <cmr:column span="2" containerForField="OrdBlk">
         <p>
           <cmr:label fieldId="ordBlk">
@@ -35,7 +34,6 @@
           <cmr:field fieldId="OrdBlk" id="ordBlk" path="ordBlk" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
-      <%} %>
 
   		  <cmr:column span="2" containerForField="SalRepNameNo">
       		<p>
