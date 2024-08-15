@@ -62,6 +62,7 @@ public class CMRFTPConnection implements AutoCloseable {
     JSch jsch = new JSch();
     LOG.debug("Connecting to FTP Server " + REMOTE_HOST + ":" + REMOTE_PORT + " using " + USERNAME);
     LOG.debug(" - Known Hosts File: " + KNOWN_HOSTS);
+    LOG.debug(" - Private Key: " + PRIV_KEY);
     jsch.setKnownHosts(KNOWN_HOSTS);
     jsch.addIdentity(PRIV_KEY);
     this.session = jsch.getSession(USERNAME, REMOTE_HOST, REMOTE_PORT);
@@ -127,6 +128,7 @@ public class CMRFTPConnection implements AutoCloseable {
     try (FileInputStream fis = new FileInputStream(localFile)) {
       LOG.debug("Uploading file " + localFile + " to external SFTP file " + destinationFile);
       this.channel.put(fis, destinationFile);
+      this.channel.chmod(Integer.parseInt("664",8), destinationFile);
     }
   }
 

@@ -1310,7 +1310,9 @@ function addTaxCodesValidator() {
 
 var _checklistBtnHandler = [];
 function addChecklistBtnHandler() {
-  for (var i = 2; i <= 15; i++) {
+	var checklist = dojo.query('table.checklist');
+  var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i < radioBtns.length; i++) {
     _checklistBtnHandler[i] = null;
     if (_checklistBtnHandler[i] == null) {
       _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function(value) {
@@ -1322,14 +1324,9 @@ function addChecklistBtnHandler() {
 
 function freeTxtFieldShowHide(buttonNo) {
   var shouldDisplay = false;
-
-  if (buttonNo <= 1) {
-    return;
-  }
   var fieldIdNo = getCheckListFieldNo(buttonNo);
   var element = document.getElementById('checklist_txt_field_' + fieldIdNo);
   var textFieldElement = document.getElementsByName('freeTxtField' + fieldIdNo)[0];
-
   if (buttonNo%2 == 0) {
     shouldDisplay = true;
   } else {
@@ -1344,11 +1341,17 @@ function freeTxtFieldShowHide(buttonNo) {
 }
 
 function getCheckListFieldNo(buttonNo) {
-  return ((buttonNo - (buttonNo % 2))/2) + 5;
-}
+if(buttonNo % 2 == 0){
+	 return (buttonNo / 2) + 4;	
+	}else{
+	 return ((buttonNo-1) / 2) + 4;	
+	}
+	}
 
 function checkChecklistButtons() {
-  for (var i = 2; i<=14; i=i+2) {
+	  var checklist = dojo.query('table.checklist');
+    var radioBtns = checklist.query('input[type="radio"]');
+  for (var i = 0; i< radioBtns.length; i=i+2) {
     if (document.getElementById('dijit_form_RadioButton_' + i).checked) {
       document.getElementById('checklist_txt_field_' + getCheckListFieldNo(i)).style.display = 'block';
     }
@@ -1367,9 +1370,8 @@ function setChecklistStatus() {
     if (questions.length > 0) {
       var noOfQuestions = questions.length / 2;
       var noOfTextBoxes = textBoxes.length;
-      
       for (var i=0; i < noOfTextBoxes; i++) {
-        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == ''  && document.getElementById('checklist_txt_field_' + i).style.display == 'block') {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
         }
       }
@@ -1415,9 +1417,8 @@ function addChecklistValidator() {
         if (questions.length > 0) {
           var noOfQuestions = questions.length / 2;
           var noOfTextBoxes = textBoxes.length;
-          
           for (var i=0; i < noOfTextBoxes; i++) {
-            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i+3)).style.display == 'block'))) {
+            if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' &&  document.getElementById('checklist_txt_field_' + (i)).style.display == 'block') {
               return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
             }
           }
@@ -3422,6 +3423,31 @@ function getZS01LandedCountry(){
   return zs01Cntry;
 }
 
+function disableChecklist() {
+	  var checklist = dojo.query('table.checklist');
+	  var radioBtns = checklist.query('input[type="radio"]');
+	  var textFields = checklist.query('input[type="text"]');
+
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+		for (var i = 0; i < radioBtns.length; i++) {
+			FormManager.readOnly('dijit_form_RadioButton_' + i);
+		}
+
+		for (var j = 0; j < textFields.length; j++) {
+			FormManager.readOnly('dijit_form_TextBox_' + j)
+		}
+	} else {
+		for (var i = 0; i < radioBtns.length; i++) {
+			FormManager.enable('dijit_form_RadioButton_' + i);
+		}
+
+		for (var j = 0; j < textFields.length; j++) {
+			FormManager.enable('dijit_form_TextBox_' + j)
+		}
+	}
+
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -3519,8 +3545,11 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterTemplateLoad(lockFieldsForLA, GEOHandler.LA);
   GEOHandler.addAfterTemplateLoad(setCtcBySBOForBrazil, SysLoc.BRAZIL);
-	GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.VENEZUELA ]);
-  GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VENEZUELA ]);
-  GEOHandler.addAfterConfig(addChecklistBtnHandler, [ SysLoc.VENEZUELA ]);
-  GEOHandler.addAfterConfig(checkChecklistButtons, [ SysLoc.VENEZUELA ]);
+  // Checklist
+  GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
+  GEOHandler.registerValidator(addChecklistValidator, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
+  GEOHandler.addAfterConfig(addChecklistBtnHandler, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
+  GEOHandler.addAfterConfig(checkChecklistButtons, [ SysLoc.VENEZUELA,SysLoc.NICARAGUA ]);
+  GEOHandler.addAfterConfig(disableChecklist, [SysLoc.VENEZUELA,SysLoc.NICARAGUA]);
+
 });

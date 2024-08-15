@@ -1042,22 +1042,17 @@ public class JPHandler extends GEOHandler {
     data.setCsDiv(mainRecord.getCsDiv());
     data.setOemInd(mainRecord.getOemInd());
     data.setTerritoryCd(mainRecord.getCmrPOBoxPostCode());
+    // duplicates the value of proxiLocnNo after Import
+    data.setBusnType(mainRecord.getAttach());
 
     data.setSvcArOffice(mainRecord.getCmrCustGrpId());
     data.setAgreementSignDate(mainRecord.getCmrContractSignDt() != null && mainRecord.getCmrContractSignDt().trim().length() == 8
         ? mainRecord.getCmrContractSignDt().substring(2) : mainRecord.getCmrContractSignDt().trim());
 
-    if (mainRecord.getCompanyCd() != null) {
-      if (mainRecord.getCompanyCd().equals("AA")) {
-        data.setCustGrp("IBMTP");
-      } else {
-        data.setCustGrp("SUBSI");
-      }
-    }
-    if ("IBMTP".equals(data.getCustGrp())) {
+    if ("IBMTP".equals(data.getCustGrp()) || (!"XT".equals(mainRecord.getSbo()) && StringUtils.isNotBlank(mainRecord.getSbo()))) {
       data.setSalesBusOffCd(
           mainRecord.getSbo() != null && mainRecord.getSbo().length() == 3 ? mainRecord.getSbo().substring(1) : mainRecord.getSbo());
-    } else if (StringUtils.isEmpty(data.getCustGrp()) || data.getCustGrp().equals("SUBSI")) {
+    } else if (StringUtils.isEmpty(data.getCustGrp()) || data.getCustGrp().equals("SUBSI") || "XT".equals(mainRecord.getSbo())) {
       data.setSalesBusOffCd(
           mainRecord.getSboSub() != null && mainRecord.getSboSub().length() == 3 ? mainRecord.getSboSub().substring(1) : mainRecord.getSboSub());
     }
@@ -1237,11 +1232,19 @@ public class JPHandler extends GEOHandler {
       if ("ZC01".equals(address.getId().getAddrType())) {
         address.setRol(currentRecord.getInspbydebi());
       }
-    } else {
-      address.setContact(currentRecord.getCmrName4() == null ? "ご担当者"
-          : currentRecord.getCmrName4().trim().length() > 15 ? currentRecord.getCmrName4().trim().substring(0, 15)
-              : currentRecord.getCmrName4().trim());
     }
+
+    String defaultContact = "ご担当者";
+    if (!("ZC01".equalsIgnoreCase(address.getId().getAddrType()))) {
+      if (StringUtils.isEmpty(currentRecord.getCmrName4()) || currentRecord.getCmrName4() == null) {
+        address.setContact(defaultContact);
+      } else if (currentRecord.getCmrName4().trim().length() > 15) {
+        address.setContact(currentRecord.getCmrName4().trim().substring(0, 15));
+      } else {
+        address.setContact(currentRecord.getCmrName4().trim());
+      }
+    }
+
     String[] namearray = dividingCustName1toName2(address.getCustNm1(), null);
     if (namearray != null && namearray.length == 2) {
       address.setCustNm2(namearray[1]);
@@ -1673,6 +1676,16 @@ public class JPHandler extends GEOHandler {
       update.setNewData(service.getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
       results.add(update);
+    }
+
+    if (SystemLocation.JAPAN.equals(cmrCountry)) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getProxiLocnNo())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "IBMRelatedCMR", "-"));
+        update.setNewData(service.getCodeAndDescription(newData.getProxiLocnNo(), "IBMRelatedCMR", cmrCountry));
+        update.setOldData(service.getCodeAndDescription(oldData.getBusnType(), "IBMRelatedCMR", cmrCountry));
+        results.add(update);
+      }
     }
   }
 
