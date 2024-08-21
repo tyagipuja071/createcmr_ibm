@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.dpl.DPLSearchResult;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
@@ -142,6 +143,12 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
         entityManager.merge(scorecard);
         entityManager.flush();
+      }
+
+      if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)
+          && (!CmrConstants.RESULT_REJECTED.equals(scorecard.getFindDnbResult())
+              && !CmrConstants.RESULT_REJECTED.equals(scorecard.getFindCmrResult()))) {
+        reqData.getAdmin().setReqStatus("PCP");
       }
 
       AttachmentService attachmentService = new AttachmentService();

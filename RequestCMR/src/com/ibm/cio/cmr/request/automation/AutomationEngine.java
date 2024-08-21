@@ -592,7 +592,8 @@ public class AutomationEngine {
             pendingChecks.put("_usproliferr", "Proliferation country location is requested, CMDE review required.");
             // CREATCMR-8124
           }
-          if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
+          if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)
+              || ("897".equals(data.getCmrIssuingCntry()) && "PCP".equals(admin.getReqStatus()) && "C".equals(admin.getReqType()))) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || (isFullSunsetCty)) {
               // move to PCP
