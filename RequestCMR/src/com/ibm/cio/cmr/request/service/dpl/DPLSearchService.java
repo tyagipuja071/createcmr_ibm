@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.dpl.DPLSearchResult;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
@@ -145,9 +144,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         entityManager.flush();
       }
 
-      if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)
-          && (!CmrConstants.RESULT_REJECTED.equals(scorecard.getFindDnbResult())
-              && !CmrConstants.RESULT_REJECTED.equals(scorecard.getFindCmrResult()))) {
+      if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)) {
         reqData.getAdmin().setReqStatus("PCP");
       }
 

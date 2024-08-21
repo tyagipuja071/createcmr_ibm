@@ -204,6 +204,7 @@ public class AutomationEngine {
     boolean isEroSkipToPpn = false;
     boolean usProliferationCntrySkip = false;
     boolean requesterFromTaxTeam = false;
+    boolean isUsWatsonxSkipToPcp = true;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
     boolean isFullSunsetCty = false;
@@ -289,6 +290,10 @@ public class AutomationEngine {
                 + " has occured. Please check concerned logs for the same.");
             break;
           }
+        }
+
+        if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
+          isUsWatsonxSkipToPcp = false;
         }
 
         LOG.trace("Result for " + element.getProcessDesc() + ": " + result.getResults());
@@ -593,7 +598,7 @@ public class AutomationEngine {
             // CREATCMR-8124
           }
           if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)
-              || ("897".equals(data.getCmrIssuingCntry()) && "PCP".equals(admin.getReqStatus()) && "C".equals(admin.getReqType()))) {
+              || (isUsWatsonxSkipToPcp && "PCP".equals(admin.getReqStatus()))) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || (isFullSunsetCty)) {
               // move to PCP
