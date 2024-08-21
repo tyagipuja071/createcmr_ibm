@@ -144,6 +144,10 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         entityManager.flush();
       }
 
+      if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)) {
+        reqData.getAdmin().setReqStatus("PCP");
+      }
+
       AttachmentService attachmentService = new AttachmentService();
       Timestamp ts = SystemUtil.getActualTimestamp();
       DPLSearchPDFConverter pdf = new DPLSearchPDFConverter(user.getIntranetId(), ts.getTime(), companyName, results);
