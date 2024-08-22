@@ -32,7 +32,7 @@
   </cmr:chk-section>
   -->
 
-    <cmr:chk-section name="Section A" >
+    <cmr:chk-section name="Section A: Diversion Risk Profile (DRP) Screening Checklist" >
      <cmr:chk-entry>
      To prevent delivery to parties who may direct products to unauthorized destinations and/or end users/uses. Some indicators of red flags include, but are not limited to:
      </cmr:chk-entry>
@@ -50,6 +50,7 @@
     </cmr:chk-entry>
     <cmr:chk-entry number="4" section="A">
       The customer has requested unusual payment or delivery terms and conditions.
+          客戶要求特殊的付款或交貨條款和條件。
     </cmr:chk-entry>
     <cmr:chk-entry number="5" section="A">
     A Business Partner (BP) places a second order for the same or similar products for a new / different end user, soon after being informed that the order for the original end user was delayed or rejected due to US export control restrictions.<br>
