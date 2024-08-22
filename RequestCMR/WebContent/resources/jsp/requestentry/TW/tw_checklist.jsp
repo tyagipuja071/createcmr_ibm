@@ -37,7 +37,7 @@
      To prevent delivery to parties who may direct products to unauthorized destinations and/or end users/uses. Some indicators of red flags include, but are not limited to:
      </cmr:chk-entry>
     <cmr:chk-entry number="1" section="A">
-      The order (hardware and software) does not match the customer's business requirements.   <br>
+      1.	The order (hardware, software, services, etc.) does not match the customer's business requirements.   <br>
      	 訂單（硬體，軟體或服務）與客戶的業務要求不匹配。 
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="A">
