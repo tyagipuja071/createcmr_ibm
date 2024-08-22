@@ -66,8 +66,8 @@ Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan,
   </cmr:chk-section>
     <cmr:chk-section name="Section B" >
     <cmr:chk-entry>
-      There is an indication customer has an unauthorized dealings with parties and/or products are
-      destined for a prohibited proliferation end use/user (missiles, chemical & biological weapons, nuclear) in any of the countries shown in each category:
+      To prevent the delivery of hardware, software and/or technology to an activity of proliferation concern (e.g. Chemical or 
+      Biological Weapons, Nuclear & Missile) and the unauthorized delivery to an military/intelligence end user, military/military-intelligence end user or for a military/military-intelligence end use.
     </cmr:chk-entry>
     <cmr:chk-entry number="1" section="B">
       <span style="font-weight:bold;text-decoration:underline">Chemical or Biological Weapons</span> <B>（化學武器或生物武器）</B>
