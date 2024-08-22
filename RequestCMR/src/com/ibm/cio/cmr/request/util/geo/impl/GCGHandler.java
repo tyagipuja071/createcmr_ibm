@@ -14,7 +14,6 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -23,6 +22,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -104,110 +104,32 @@ public class GCGHandler extends APHandler {
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
-    LOG.debug("Converting search results to WTAAS equivalent..");
-    FindCMRRecordModel mainRecord = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
-    if (mainRecord != null) {
-      boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
-      if (!prospectCmrChosen) {
-        this.currentRecord = retrieveWTAASValues(mainRecord);
-        if (this.currentRecord != null) {
+    LOG.debug("Converting search results..");
+    List<FindCMRRecordModel> converted = new ArrayList<>();
+    List<FindCMRRecordModel> records = source.getItems();
 
-          List<WtaasAddress> wtaasAddresses = this.currentRecord.uniqueAddresses();
-          LOG.info("GCG WTAAS address count: " + wtaasAddresses.size());
-          if (wtaasAddresses != null && !wtaasAddresses.isEmpty()) {
-
-            String zs01AddressUse = getZS01AddressUse(mainRecord.getCmrIssuedBy());
-            FindCMRRecordModel record = null;
-            List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
-            // import only ZS01 from RDC for Create request
-            if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
-              LOG.debug(" - Main address, importing from FindCMR main record.");
-              // will import ZS01 from RDc directly
-              record = mainRecord;
-              if ("ZS01".equals(record.getCmrAddrTypeCode())) {
-                handleRDcRecordValues(record);
-                record.setCmrAddrSeq(SOLD_TO_FIXED_SEQ);
-                converted.add(record);
-              }
-
-            } else {
-              // only create the actual number of addresses in wtaas
-              for (WtaasAddress wtaasAddress : wtaasAddresses) {
-                LOG.debug("WTAAS Addr No: " + wtaasAddress.getAddressNo() + " Use: " + wtaasAddress.getAddressUse());
-                if (!wtaasAddress.getAddressUse().contains(zs01AddressUse)) {
-                  LOG.debug(" - Additional address, checking RDC equivalent..");
-                  record = locateRdcRecord(source, wtaasAddress);
-
-                  if (record != null) {
-                    LOG.debug(" - RDC equivalent found with type = " + record.getCmrAddrTypeCode() + " seq = " + record.getCmrAddrSeq()
-                        + ", using directly");
-                    handleRDcRecordValues(record);
-                  } else {
-                    // create a copy of the main record, to preserve data fields
-                    LOG.debug(" - not found. parsing WTAAS data..");
-                    record = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(record, mainRecord);
-
-                    // clear the address values
-                    record.setCmrName1Plain(null);
-                    record.setCmrName2Plain(null);
-                    record.setCmrName3(null);
-                    record.setCmrName4(null);
-                    record.setCmrDept(null);
-                    record.setCmrCity(null);
-                    record.setCmrState(null);
-                    record.setCmrCountryLanded(null);
-                    record.setCmrStreetAddress(null);
-                    record.setCmrStreetAddressCont(null);
-                    record.setCmrSapNumber(null);
-
-                    // handle here the different mappings
-                    handleWTAASAddressImport(entityManager, record.getCmrIssuedBy(), mainRecord, record, wtaasAddress);
-                    String supportedAddrType = getAddrTypeForWTAASAddrUse(record.getCmrIssuedBy(), wtaasAddress.getAddressUse());
-                    if (supportedAddrType != null)
-                      record.setCmrAddrTypeCode(supportedAddrType);
-                  }
-                  record.setCmrAddrSeq(wtaasAddress.getAddressNo());
-                  LOG.info("setting record.setCmrAddrSeq : " + wtaasAddress.getAddressNo());
-
-                  record.setTransAddrNo(wtaasAddress.getAddressNo());
-                  LOG.info("setting record.setTransAddrNo : " + wtaasAddress.getAddressNo());
-
-                  if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
-                    converted.add(record);
-                  }
-                } else {
-                  LOG.debug(" - Main address, importing from FindCMR main record.");
-                  LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
-                  LOG.info("wtaasAddress.getAddressUse(): " + wtaasAddress.getAddressUse());
-                  mainRecord.setTransAddrNo(wtaasAddress.getAddressNo());
-
-                  // will import ZS01 from RDc directly
-                  handleRDcRecordValues(mainRecord);
-                  converted.add(mainRecord);
-                }
-              }
-            }
-
-            doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
-            Collections.sort(converted);
-            source.setItems(converted);
-          }
-        }
-      } else {
-        FindCMRRecordModel record = null;
-        List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      LOG.debug("Converting search results creates..");
+      for (FindCMRRecordModel record : records) {
         LOG.debug(" - Main address, importing from FindCMR main record.");
-        // will import ZS01 from RDc directly
-        record = mainRecord;
-        handleRDcRecordValues(record);
+        if ("ZS01".equals(record.getCmrAddrTypeCode())) {
+          record.setCmrAddrSeq(SOLD_TO_FIXED_SEQ);
+          converted.add(record);
+        }
         converted.add(record);
-        doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
-        Collections.sort(converted);
-        source.setItems(converted);
       }
-
+    } else {
+      LOG.debug("Converting search results update..");
+      for (FindCMRRecordModel record : records) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
+          continue;
+        }
+        converted.add(record);
+      }
     }
+    doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
+    Collections.sort(converted);
+    source.setItems(converted);
   }
 
   /**
@@ -700,6 +622,92 @@ public class GCGHandler extends APHandler {
     LOG.info("Seq " + seq + ", Addr Type: " + correctAddrType);
 
     return correctAddrType;
+  }
+
+  @Override
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+    if (!prospectCmrChosen) {
+      // data.setApCustClusterId(this.currentRecord.get(WtaasQueryKeys.Data.ClusterNo));
+      // data.setRepTeamMemberNo(this.currentRecord.get(WtaasQueryKeys.Data.SalesmanNo));
+      // data.setCollectionCd(this.currentRecord.get(WtaasQueryKeys.Data.IBMCode));
+      // data.setIsbuCd(this.currentRecord.get(WtaasQueryKeys.Data.SellDept));
+      // data.setMrcCd(this.currentRecord.get(WtaasQueryKeys.Data.MrktRespCode));
+      // data.setIsbuCd(this.currentRecord.get(WtaasQueryKeys.Data.SellDept));
+      // data.setBusnType(this.currentRecord.get(WtaasQueryKeys.Data.SellBrnchOff));
+      // data.setGovType(this.currentRecord.get(WtaasQueryKeys.Data.GovCustInd));
+      // data.setMiscBillCd(this.currentRecord.get(WtaasQueryKeys.Data.RegionCode));
+      data.setClientTier(mainRecord.getCmrTier());
+      data.setTerritoryCd(mainRecord.getCmrIssuedBy());
+    } else {
+      data.setCmrNo("");
+    }
+
+    autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
+    data.setIsuCd(mainRecord.getCmrIsu());
+
+    if (admin.getReqType().equals("U")) {
+      data.setAbbrevLocn(mainRecord.getCmrDataLine());
+    }
+
+    if (mainRecord.getCmrCountryLandedDesc().isEmpty() && !prospectCmrChosen) {
+      data.setAbbrevLocn(mainRecord.getCmrDataLine());
+    }
+
+    // fix Defect 1732232: Abbreviated Location issue
+    if (!StringUtils.isBlank(data.getAbbrevLocn()) && data.getAbbrevLocn().length() > 9) {
+      data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 9));
+    }
+
+  }
+
+  private void autoSetAbbrevLocnNMOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) {
+    if (SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry())) {
+      if (admin.getReqType().equals("C")) {
+        data.setAbbrevLocn("00 HK");
+      }
+      if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp()) || "XAQST".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Acquisition use only");
+      } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "ESA use only");
+      } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Consumer only");
+      } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Market Place Order");
+      } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Softlayer use only");
+      } else {
+        setAbbrevNM(data, mainRecord.getCmrName1Plain());
+      }
+    }
+
+    if (SystemLocation.MACAO.equals(data.getCmrIssuingCntry())) {
+      if (admin.getReqType().equals("C")) {
+        data.setAbbrevLocn("00 HK");
+      }
+      if ("AQSTN".equalsIgnoreCase(data.getCustSubGrp()) || "XAQST".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Acquisition use only");
+      } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "ESA use only");
+      } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Consumer only");
+      } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Market Place Order");
+      } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
+        setAbbrevNM(data, "Softlayer use only");
+      } else {
+        setAbbrevNM(data, mainRecord.getCmrName1Plain());
+      }
+    }
+  }
+
+  private void setAbbrevNM(Data data, String abbrevNM) {
+
+    if (!StringUtils.isBlank(abbrevNM))
+      if (abbrevNM.length() > 21)
+        data.setAbbrevNm(abbrevNM.substring(0, 21));
+      else
+        data.setAbbrevNm(abbrevNM);
   }
 
 }
