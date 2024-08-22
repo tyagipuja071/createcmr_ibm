@@ -1914,6 +1914,12 @@ public class RequestUtils {
         admin.setProspLegalInd("Y");
         // CREATCMR - 10267
         data.setCapInd("Y");
+      } else if (SystemLocation.TAIWAN.equals(data.getCmrIssuingCntry())) {
+        if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(data.getOrdBlk())) {
+          admin.setProspLegalInd("Y");
+        } else {
+          admin.setProspLegalInd(null);
+        }
       } else {
         admin.setProspLegalInd(null);
       }
