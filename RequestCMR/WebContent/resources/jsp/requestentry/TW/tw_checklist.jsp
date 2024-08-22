@@ -49,7 +49,7 @@
       IBM對客戶的業務需求和IBM產品的使用並不熟知和瞭解。  
     </cmr:chk-entry>
     <cmr:chk-entry number="4" section="A">
-      The customer has requested unusual payment or delivery terms and conditions.
+      The customer has requested unusual payment or delivery terms and conditions.<br>
           客戶要求特殊的付款或交貨條款和條件。
     </cmr:chk-entry>
     <cmr:chk-entry number="5" section="A">
