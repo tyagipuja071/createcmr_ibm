@@ -1895,17 +1895,17 @@ public class CEETransformer extends EMEATransformer {
 		if (SystemLocation.HUNGARY.equals(cmrObjects.getData().getCmrIssuingCntry())) {
 			if (!StringUtils.isBlank(muData.getTaxCd1())) {
 				if ("@".equals(muData.getTaxCd1())) {
-					custExt.setiTaxCode("");
-				} else {
 					custExt.setiTaxCode(muData.getTaxCd1());
+				} else {
+					custExt.setiTaxCode("");
 				}
 			}
 
 			if (!StringUtils.isBlank(muData.getTaxCd3())) {
 				if ("@".equals(muData.getTaxCd1())) {
-					custExt.setBankAcctNo(muData.getTaxCd3());
-				} else {
 					custExt.setBankAcctNo("");
+				} else {
+					custExt.setBankAcctNo(muData.getTaxCd3());
 				}
 			}
 		}
