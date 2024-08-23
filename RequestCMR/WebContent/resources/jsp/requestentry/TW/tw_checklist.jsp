@@ -32,37 +32,51 @@
   </cmr:chk-section>
   -->
 
-    <cmr:chk-section name="Section A" >
+     <cmr:chk-section name="Section A: Diversion Risk Profile (DRP) Screening Checklist" >
+     <cmr:chk-entry>
+     To prevent delivery to parties who may direct products to unauthorized destinations and/or end users/uses. Some indicators of red flags include, but are not limited to:
+     </cmr:chk-entry>
     <cmr:chk-entry number="1" section="A">
-      The order (hardware and software) does not match the customer's business requirements.    
+      The order (hardware, software, services, etc.) does not match the customer's business requirements.   <br>
+     	 訂單（硬體，軟體或服務）與客戶的業務要求不匹配。 
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="A">
-      The customer is not using normal installation, training and maintenance services.    
+      The customer is not using normal installation, training and maintenance services.   <br>
+      	客戶沒有使用正常的安裝、培訓和維護服務。 
     </cmr:chk-entry>
     <cmr:chk-entry number="3" section="A">
-      The customer's business needs and use of IBM's products is not well known and understand by IBM.    
+      The customer's business needs and use of IBM's products is not well known and understood by IBM.  <br>
+      IBM對客戶的業務需求和IBM產品的使用並不熟知和瞭解。  
     </cmr:chk-entry>
     <cmr:chk-entry number="4" section="A">
-      The customer has requested unusual payment or delivery terms and conditions.
+      The customer has requested unusual payment or delivery terms and conditions.<br>
+          客戶要求特殊的付款或交貨條款和條件。
     </cmr:chk-entry>
     <cmr:chk-entry number="5" section="A">
-      A Business Partner (BP) places a second order for the same or similar products for a new / different end user, soon after being informed that the order for the original end user was delayed or rejected due to US export control restrictions?   
-    </cmr:chk-entry>
+    A Business Partner (BP) places a second order for the same or similar products for a new / different end user, soon after being informed that the order for the original end user was delayed or rejected due to US export control restrictions.<br>
+IBM合作夥伴 （BP） 在被告知原本的客戶訂單因美國出口管制限制而被延遲或拒絕後不久，為不同的客戶下了第二個相同或類似產品的訂單。
+        </cmr:chk-entry>
     <cmr:chk-entry number="6" section="A">
-      There is an indication that the products are destined for an embargoed or terrorist country (Cuba, Iran, North Korea, Sudan, Syria)?    
+    There is an indication that the products are destined for a sanctioned country/region (The latest list can be found in  <a href="https://w3.ibm.com/w3publisher/ibm-export-regulation-office/us-embargo-and-sanctions-programs" target="_blank">https://w3.ibm.com/w3publisher/ibm-export-regulation-office/us-embargo-and-sanctions-programs</a>)<br>
+有跡象顯明，產品/服務/技術將被運往受制裁的國家/地區（古巴、伊朗、朝鮮、敘利亞、烏克蘭的克里米亞、頓涅茨克和盧甘斯克地區、俄羅斯和白俄羅斯）。但名單會變動，請查看 <a href="https://w3.ibm.com/w3publisher/ibm-export-regulation-office/us-embargo-and-sanctions-programs" target="_blank">https://w3.ibm.com/w3publisher/ibm-export-regulation-office/us-embargo-and-sanctions-programs</a>
+    
     </cmr:chk-entry>
     <cmr:chk-entry number="7" section="A">
-      There is an indication that the customer or supplier is owned or controlled by the government of an embargoed country?    
+    There is an indication that the customer or supplier is owned or controlled by the government of a sanctioned country/region.</br>
+       有跡象顯明，客戶或供應商由受制裁國家/地區的政府擁有或控制？
     </cmr:chk-entry>
     <cmr:chk-entry number="8" section="A">
-      There is an indication (anywhere in the world) that our products will be used in the design, development, production, stockpiling or use of nuclear, chemical or biological weapons and/or their delivery vehicles (a.k.a. rocket systems and/or unmanned air vehicles, a.k.a. missiles)?
+    There is an indication (anywhere in the world) that our products will be used in the design, development, production, stockpiling (only applies to actual chemical and biological weapons), operation, installation (including on-site installation), maintenance (checking), repair, overhaul, or refurbishing of nuclear weapons (including foreign maritime nuclear propulsion projects), chemical or biological weapons and/or their delivery vehicles, (including a whole plant of chemical weapons precursors), 
+    and/or missiles (a.k.a. rocket systems and/or unmanned aerial vehicles).<br>
+有跡象顯明（在世界任何地方）我們的產品將用於核武器（包括外國海上核推進專案）、化學或生物武器和/或其運載工具（包括一整套化學武器前體）和/或導彈（又名火箭系統和/或無人駕駛飛行器）的設計、開發、生產、儲存（僅適用於實際的化學和生物武器）、操作、安裝（包括現場安裝）、維護（檢查）、修理、大修或翻新。
     </cmr:chk-entry>
     <cmr:chk-entry number="9" section="A">
-      There is an indication that the products are destined for a prohibited proliferation end use/user(missiles, chemical & biological weapons, nuclear) in any of the following countries: 
-Nuclear: People's Republic of China, Cuba, Iran, Iraq, Israel, Korea (North), Libya, Pakistan, Russia.
-Chemical & Biological Weapons: Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People's Republic of China, Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macao, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Vietnam, Yemen.
-Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan, Korea (North), Kuwait, Lebanon, Libya, Macao, Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, United Arab Emirates, Yemen   
-    </cmr:chk-entry>
+    There is an indication that the products are destined for a prohibited proliferation end use/user (missiles, chemical & biological weapons, nuclear) in any of the following countries: Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, Cambodia, People's Republic of China (includes Hong Kong), Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macau, Moldova, Mongolia, Myanmar (Burma), Nicaragua, Oman, Pakistan, Qatar, 
+    Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Venezuela, Vietnam, Yemen.<br>
+有跡象顯明，這些產品將在以下任何國家/地區用於被禁止的擴散最終用途/使用者（導彈、化學和生物武器、核武器）：
+阿富汗、亞美尼亞、亞塞拜然、巴林、白俄羅斯、柬埔寨、中華人民共和國（包括香港）、古巴、埃及、喬治亞、伊朗、伊拉克、以色列、約旦、哈薩克、朝鮮（北部）、科威特、吉爾吉斯斯坦、黎巴嫩、利比亞、澳門、摩爾多瓦、蒙古、緬甸、尼加拉瓜、阿曼、巴基斯坦、卡達、俄羅斯、沙烏地阿拉伯、敘利亞、臺灣、塔吉克斯坦、土庫曼斯坦、阿拉伯聯合大公國、烏茲別克、委內瑞拉、越南、葉門
+    
+      </cmr:chk-entry>
   </cmr:chk-section>
     <cmr:chk-section name="Section B" >
     <cmr:chk-entry>
