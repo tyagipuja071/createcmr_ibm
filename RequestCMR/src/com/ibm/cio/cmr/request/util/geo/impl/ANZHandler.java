@@ -62,9 +62,9 @@ public class ANZHandler extends GEOHandler {
 
   private static final String SOLD_TO_FIXED_SEQ_AU = "07";
   private static final String SOLD_TO_FIXED_SEQ_NZ = "02";
-  private static final List<String> BILL_TO_FIXED_SEQ = Arrays.asList("01", "H");
-  private static final List<String> INSTALL_AT_FIXED_SEQ_AU = Arrays.asList("02", "03", "G");
-  private static final List<String> INSTALL_AT_FIXED_SEQ_NZ = Arrays.asList("09", "G");
+  private static final List<String> BILL_TO_FIXED_SEQ = Arrays.asList("020");
+  private static final List<String> INSTALL_AT_FIXED_SEQ_AU = Arrays.asList("050");
+  private static final List<String> INSTALL_AT_FIXED_SEQ_NZ = Arrays.asList("050");
   private static final List<String> SHIP_TO_FIXED_SEQ = Arrays.asList("040");
 
   public static void main(String[] args) {
@@ -652,31 +652,19 @@ public class ANZHandler extends GEOHandler {
     Set<String> existingSeq = getExistingAddrSeqInclRdc(entityManager, reqId);
     if (existingSeq.isEmpty()) {
       return seqToCheck.get(0);
-    }
-    if (!areAllElementsPresent(seqToCheck, existingSeq)) {
-      for (String b : seqToCheck) {
-        if (!existingSeq.contains(b)) {
-          return b;
-        }
-      }
     } else {
       return String.valueOf(getNewSeqAdditionalAddr(existingSeq, addrType));
     }
-    return "";
-  }
-
-  private boolean areAllElementsPresent(List<String> seqToCheck, Set<String> existingSeq) {
-    return existingSeq.containsAll(seqToCheck);
   }
 
   private String getNewSeqAdditionalAddr(Set<String> existingAddrSeqSet, String addrType) {
     int candidateSeqNum = 0;
     switch (addrType) {
     case BILL_TO_ADDR_TYPE:
-      candidateSeqNum = 20;
+      candidateSeqNum = 21;
       break;
     case INSTALL_AT_ADDR_TYPE:
-      candidateSeqNum = 50;
+      candidateSeqNum = 51;
       break;
     case SHIP_TO_ADDR_TYPE:
       candidateSeqNum = 40;
@@ -708,19 +696,6 @@ public class ANZHandler extends GEOHandler {
     LOG.info("Avail: " + availSeqNum);
 
     return String.format("%03d", availSeqNum);
-  }
-
-  private Set<String> getAddrSeqByType(EntityManager entityManager, long reqId, String addrType) {
-    String sql = ExternalizedQuery.getSql("GCG.GET.ADDRSEQ.BY_ADDRTYPE");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", addrType);
-    List<String> results = query.getResults(String.class);
-
-    Set<String> addrSeqSet = new HashSet<>();
-    addrSeqSet.addAll(results);
-
-    return addrSeqSet;
   }
 
   private Set<String> getExistingAddrSeqInclRdc(EntityManager entityManager, long reqId) {
