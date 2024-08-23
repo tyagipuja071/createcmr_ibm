@@ -102,13 +102,13 @@
 				</column>
 					<column exactLength="true">
 					<label>Group VAT ID</label>
-					<dbColumn>Group VAT ID</dbColumn>
+					<dbColumn>TAX_CD3</dbColumn>
 					<width>5</width>
 					<length>13</length>
 				</column>
 					<column exactLength="true">
 					<label>Domestic TAX ID</label>
-					<dbColumn>Domestic TAX ID</dbColumn>
+					<dbColumn>TAX_CD1</dbColumn>
 					<width>5</width>
 					<length>13</length>
 				</column>
