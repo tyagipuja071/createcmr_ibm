@@ -969,7 +969,7 @@ public class KRHandler extends GEOHandler {
                 || ("ZS01".equals(tempRec.getCmrAddrTypeCode()) && (tempRec.getCmrOrderBlock().equals("75")))) {
               boolean isProspects = tempRec != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(tempRec.getCmrOrderBlock());
               if (isProspects) {
-                tempRec.setCmrAddrSeq("B");
+                tempRec.setCmrAddrSeq("L00");
               }
               tempRec.setCmrAddrTypeCode("ZS01");
               recordsToReturn.add(tempRec);
