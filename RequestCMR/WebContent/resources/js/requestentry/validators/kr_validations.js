@@ -5,8 +5,8 @@
  var _addrTypeHandler = [];
 
 /**
-* No single byte characters for KR
-*/
+ * No single byte characters for KR
+ */
 function addSingleByteValidatorKR(cntry, addressMode, details) {
   FormManager.addValidator('custNm3', Validators.NO_SINGLE_BYTE, ['Customer Name_Korean']);
   FormManager.addValidator('billingPstlAddr', Validators.NO_SINGLE_BYTE, ['Customer Name_Korean Continue']);
@@ -166,7 +166,7 @@ function afterConfigKR() {
     }
   }
   
-  if(FormManager.getActualValue('importInd') == 'D') {
+  if (FormManager.getActualValue('importInd') == 'D' || FormManager.getActualValue('ordBlk') == '75') {
     var addrType = FormManager.getActualValue('addrType');
 
     if(addrType == 'ZS01') {
