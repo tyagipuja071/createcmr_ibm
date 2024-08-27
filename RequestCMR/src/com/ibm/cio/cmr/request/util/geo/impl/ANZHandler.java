@@ -661,10 +661,10 @@ public class ANZHandler extends GEOHandler {
     int candidateSeqNum = 0;
     switch (addrType) {
     case BILL_TO_ADDR_TYPE:
-      candidateSeqNum = 21;
+      candidateSeqNum = 20;
       break;
     case INSTALL_AT_ADDR_TYPE:
-      candidateSeqNum = 51;
+      candidateSeqNum = 50;
       break;
     case SHIP_TO_ADDR_TYPE:
       candidateSeqNum = 40;
