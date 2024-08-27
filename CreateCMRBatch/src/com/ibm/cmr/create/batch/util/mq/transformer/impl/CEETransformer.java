@@ -1895,9 +1895,9 @@ public class CEETransformer extends EMEATransformer {
 		if (SystemLocation.HUNGARY.equals(cmrObjects.getData().getCmrIssuingCntry())) {
 			if (!StringUtils.isBlank(muData.getTaxCd1())) {
 				if ("@".equals(muData.getTaxCd1())) {
-					custExt.setiTaxCode(muData.getTaxCd1());
-				} else {
 					custExt.setiTaxCode("");
+				} else {
+					custExt.setiTaxCode(muData.getTaxCd1());
 				}
 			}
 
