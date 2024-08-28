@@ -1869,7 +1869,7 @@ public class RequestUtils {
       if (cmrNo.startsWith("P")) {
         // prospect imported
         admin.setProspLegalInd("Y");
-      } else if (SystemLocation.TAIWAN.equals(data.getCmrIssuingCntry())) {
+      } else if (SystemLocation.TAIWAN.equals(data.getCmrIssuingCntry()) || SystemLocation.KOREA.equals(data.getCmrIssuingCntry())) {
         if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(data.getOrdBlk())) {
           admin.setProspLegalInd("Y");
         } else {
