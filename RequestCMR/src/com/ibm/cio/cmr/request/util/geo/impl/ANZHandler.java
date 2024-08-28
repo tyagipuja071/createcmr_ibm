@@ -595,29 +595,36 @@ public class ANZHandler extends GEOHandler {
     String newAddrSeq = "";
 
     if (!StringUtils.isEmpty(addrType)) {
+
+      AdminPK adminPK = new AdminPK();
+      adminPK.setReqId(reqId);
+      Admin admin = entityManager.find(Admin.class, adminPK);
+
+      boolean isUpdate = CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType());
+
       if (SystemLocation.AUSTRALIA.equals(cmrIssuingCntry)) {
-        newAddrSeq = getNewAddressSeqAU(entityManager, reqId, addrType);
+        newAddrSeq = getNewAddressSeqAU(entityManager, reqId, addrType, isUpdate);
       } else if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
-        newAddrSeq = getNewAddressSeqNZ(entityManager, reqId, addrType);
+        newAddrSeq = getNewAddressSeqNZ(entityManager, reqId, addrType, isUpdate);
       }
     }
     return newAddrSeq;
   }
 
-  private String getNewAddressSeqAU(EntityManager entityManager, long reqId, String addrType) {
+  private String getNewAddressSeqAU(EntityManager entityManager, long reqId, String addrType, boolean isUpdate) {
     String newAddrSeq = "";
     switch (addrType) {
     case SOLD_TO_ADDR_TYPE:
       newAddrSeq = SOLD_TO_FIXED_SEQ_AU;
       break;
     case BILL_TO_ADDR_TYPE:
-      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, BILL_TO_FIXED_SEQ);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, BILL_TO_FIXED_SEQ, isUpdate);
       break;
     case INSTALL_AT_ADDR_TYPE:
-      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_AU);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_AU, isUpdate);
       break;
     case SHIP_TO_ADDR_TYPE:
-      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ, isUpdate);
       break;
     default:
       newAddrSeq = "";
@@ -626,20 +633,20 @@ public class ANZHandler extends GEOHandler {
     return newAddrSeq;
   }
 
-  private String getNewAddressSeqNZ(EntityManager entityManager, long reqId, String addrType) {
+  private String getNewAddressSeqNZ(EntityManager entityManager, long reqId, String addrType, boolean isUpdate) {
     String newAddrSeq = "";
     switch (addrType) {
     case SOLD_TO_ADDR_TYPE:
       newAddrSeq = SOLD_TO_FIXED_SEQ_NZ;
       break;
     case BILL_TO_ADDR_TYPE:
-      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, BILL_TO_FIXED_SEQ);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, BILL_TO_FIXED_SEQ, isUpdate);
       break;
     case INSTALL_AT_ADDR_TYPE:
-      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_NZ);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_NZ, isUpdate);
       break;
     case SHIP_TO_ADDR_TYPE:
-      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ, isUpdate);
       break;
     default:
       newAddrSeq = "";
@@ -648,23 +655,42 @@ public class ANZHandler extends GEOHandler {
     return newAddrSeq;
   }
 
-  private String getNewSeqFromSeqToCheck(EntityManager entityManager, long reqId, String addrType, List<String> seqToCheck) {
+  private String getNewSeqFromSeqToCheck(EntityManager entityManager, long reqId, String addrType, List<String> seqToCheck, boolean isUpdate) {
     Set<String> existingSeq = getExistingAddrSeqInclRdc(entityManager, reqId);
+    boolean isAddrTypeExist = false;
+
+    if (isUpdate) {
+      List<Addr> allAddrByTypeFromAddr = getAddressByType(entityManager, addrType, reqId);
+      int addrCount = allAddrByTypeFromAddr.size();
+      if (addrCount > 0) {
+        isAddrTypeExist = true;
+      }
+    }
+
     if (existingSeq.isEmpty()) {
       return seqToCheck.get(0);
     } else {
-      return String.valueOf(getNewSeqAdditionalAddr(existingSeq, addrType));
+      return String.valueOf(getNewSeqAdditionalAddr(existingSeq, addrType, isAddrTypeExist, isUpdate));
     }
   }
 
-  private String getNewSeqAdditionalAddr(Set<String> existingAddrSeqSet, String addrType) {
+  private String getNewSeqAdditionalAddr(Set<String> existingAddrSeqSet, String addrType, boolean isAddrTypeExist, boolean isUpdate) {
     int candidateSeqNum = 0;
     switch (addrType) {
     case BILL_TO_ADDR_TYPE:
-      candidateSeqNum = 20;
+
+      if (isUpdate && isAddrTypeExist) {
+        candidateSeqNum = 21;
+      } else {
+        candidateSeqNum = 20;
+      }
       break;
     case INSTALL_AT_ADDR_TYPE:
-      candidateSeqNum = 50;
+      if (isUpdate && isAddrTypeExist) {
+        candidateSeqNum = 51;
+      } else {
+        candidateSeqNum = 50;
+      }
       break;
     case SHIP_TO_ADDR_TYPE:
       candidateSeqNum = 40;
@@ -696,6 +722,15 @@ public class ANZHandler extends GEOHandler {
     LOG.info("Avail: " + availSeqNum);
 
     return String.format("%03d", availSeqNum);
+  }
+
+  private List<Addr> getAddressByType(EntityManager entityManager, String addrType, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    List<Addr> addrList = query.getResults(Addr.class);
+    return addrList;
   }
 
   private Set<String> getExistingAddrSeqInclRdc(EntityManager entityManager, long reqId) {
