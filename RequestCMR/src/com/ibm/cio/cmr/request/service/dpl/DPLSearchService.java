@@ -146,6 +146,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
 
       if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)) {
         reqData.getAdmin().setReqStatus("PCP");
+        scorecard.setDplAssessmentResult("N");
       }
 
       AttachmentService attachmentService = new AttachmentService();
