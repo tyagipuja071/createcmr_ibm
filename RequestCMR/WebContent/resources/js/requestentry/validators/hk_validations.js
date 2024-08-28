@@ -8979,5 +8979,5 @@ dojo.addOnLoad(function () {
 
   GEOHandler.addAfterTemplateLoad(setFieldToReadyOnly, SysLoc.HONG_KONG);
   GEOHandler.addAfterConfig(setFieldToReadyOnly, SysLoc.HONG_KONG);
-  GEOHandler.registerValidator(addAddrGridValidatorAddresses, [ SysLoc.HONG_KONG, SysLoc.MACAO ], null, true);
+  GEOHandler.registerValidator(addAddrGridValidatorAddresses, [ SysLoc.HONG_KONG], null, true);
 });
