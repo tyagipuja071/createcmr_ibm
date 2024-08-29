@@ -1874,35 +1874,35 @@ public class CEETransformer extends EMEATransformer {
 
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
-      MassUpdtData muData, String cmr) throws Exception {
+			MassUpdtData muData, String cmr) throws Exception {
 
-    // for tax office
-    // List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    // if (muaList != null && muaList.size() > 0) {
-    // for (MassUpdtAddr mua : muaList) {
-    // if ("ZP01".equals(mua.getId().getAddrType())) {
-    // if (!StringUtils.isBlank(mua.getFloor())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
-    // custExt.setiTaxCode("");
-    // } else {
-    // custExt.setiTaxCode(mua.getFloor());
-    // }
-    // break;
-    // }
-    //
-    // }
-    // }
-    // }
+		// for tax office
+		// List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+		// if (muaList != null && muaList.size() > 0) {
+		// for (MassUpdtAddr mua : muaList) {
+		// if ("ZP01".equals(mua.getId().getAddrType())) {
+		// if (!StringUtils.isBlank(mua.getFloor())) {
+		// if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
+		// custExt.setiTaxCode("");
+		// } else {
+		// custExt.setiTaxCode(mua.getFloor());
+		// }
+		// break;
+		// }
+		//
+		// }
+		// }
+		// }
 
-	  LOG.debug("LEGACY -- CEE OVERRIDE transformLegacyCustomerExtDataMassUpdate");
 		if (SystemLocation.HUNGARY.equals(cmrObjects.getData().getCmrIssuingCntry())) {
-			LOG.debug("LEGACY -- CEE OVERRIDE data update in custext");
 			if (!StringUtils.isBlank(muData.getTaxCd1())) {
 				if ("@".equals(muData.getTaxCd1())) {
 					custExt.setiTaxCode("");
 				} else {
 					custExt.setiTaxCode(muData.getTaxCd1());
 				}
+			} else {
+				custExt.setiTaxCode("");
 			}
 
 			if (!StringUtils.isBlank(muData.getTaxCd3())) {
@@ -1911,54 +1911,56 @@ public class CEETransformer extends EMEATransformer {
 				} else {
 					custExt.setBankAcctNo(muData.getTaxCd3());
 				}
+			} else {
+				custExt.setBankAcctNo("");
 			}
 		}
-    // RBBXA :Bank Branch Number
-    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getNewEntpName1())) {
-        custExt.setiTaxCode("");
-      } else {
-        if (muData.getNewEntpName1().length() > 8) {
-          custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
-        } else {
-          custExt.setiTaxCode(muData.getNewEntpName1());
-        }
-      }
-    }
+		// RBBXA :Bank Branch Number
+		if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+			if ("@".equals(muData.getNewEntpName1())) {
+				custExt.setiTaxCode("");
+			} else {
+				if (muData.getNewEntpName1().length() > 8) {
+					custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
+				} else {
+					custExt.setiTaxCode(muData.getNewEntpName1());
+				}
+			}
+		}
 
-    // CREATCMR 2440 fiscal code for Romania MassUpdate
-    if (SystemLocation.ROMANIA.equals(cmrObjects.getData().getCmrIssuingCntry())) {
-      if (!StringUtils.isBlank(muData.getTaxCd1())) {
-        custExt.setiTaxCode(muData.getTaxCd1());
-      } else {
-        custExt.setiTaxCode("");
-      }
-    }
+		// CREATCMR 2440 fiscal code for Romania MassUpdate
+		if (SystemLocation.ROMANIA.equals(cmrObjects.getData().getCmrIssuingCntry())) {
+			if (!StringUtils.isBlank(muData.getTaxCd1())) {
+				custExt.setiTaxCode(muData.getTaxCd1());
+			} else {
+				custExt.setiTaxCode("");
+			}
+		}
 
-    if (!StringUtils.isBlank(muData.getEmail2())) {
-      if ("@".equals(muData.getEmail2())) {
-        custExt.setBankAcctNo("");
-      } else {
-        custExt.setBankAcctNo(muData.getEmail2());
-      }
-    }
+		if (!StringUtils.isBlank(muData.getEmail2())) {
+			if ("@".equals(muData.getEmail2())) {
+				custExt.setBankAcctNo("");
+			} else {
+				custExt.setBankAcctNo(muData.getEmail2());
+			}
+		}
 
-    List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-    MassUpdtAddr zp01Addr = new MassUpdtAddr();
-    for (MassUpdtAddr muAddr : muAddrList) {
-      if ("ZP01".equals(muAddr.getId().getAddrType())) {
-        zp01Addr = muAddr;
-        break;
-      }
-    }
-    if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
-      if ("@".equals(zp01Addr.getFloor())) {
-        custExt.setiTaxCode("");
-      } else {
-        custExt.setiTaxCode(zp01Addr.getFloor());
-      }
-    }
-  }
+		List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
+		MassUpdtAddr zp01Addr = new MassUpdtAddr();
+		for (MassUpdtAddr muAddr : muAddrList) {
+			if ("ZP01".equals(muAddr.getId().getAddrType())) {
+				zp01Addr = muAddr;
+				break;
+			}
+		}
+		if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
+			if ("@".equals(zp01Addr.getFloor())) {
+				custExt.setiTaxCode("");
+			} else {
+				custExt.setiTaxCode(zp01Addr.getFloor());
+			}
+		}
+	}
 
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
     CmrtAddr mailingAddr = SerializationUtils.clone(billingAddr);
