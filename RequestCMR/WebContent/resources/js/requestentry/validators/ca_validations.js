@@ -1577,5 +1577,6 @@ dojo.addOnLoad(function() {
   // CREATCMR-788
   GEOHandler.addAddrFunction(addressQuotationValidator, [ SysLoc.CANADA ]);
   GEOHandler.addAfterConfig(addressQuotationValidator, [ SysLoc.CANADA ]);
+  GEOHandler.addAfterTemplateLoad(setCustClass, SysLoc.CANADA);
 
 });
