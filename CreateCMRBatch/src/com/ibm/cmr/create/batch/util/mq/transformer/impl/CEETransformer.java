@@ -1812,6 +1812,7 @@ public class CEETransformer extends EMEATransformer {
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
 
+	LOG.debug("LEGACY -- CEE OVERRIDE transformLegacyCustomerExtData");
     Data data = cmrObjects.getData();
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
       if (!StringUtils.isBlank(data.getTaxCd1())) {
@@ -1860,8 +1861,9 @@ public class CEETransformer extends EMEATransformer {
         legacyCustExt.setiTaxCode("");
       }
     }
-
+    LOG.debug("LEGACY -- CEE OVERRIDE 740 check");
     if (SystemLocation.HUNGARY.equals(data.getCmrIssuingCntry())) {
+      LOG.debug("LEGACY -- CEE OVERRIDE data change");
       String iTaxCode = StringUtils.isNotEmpty(data.getTaxCd1()) ? data.getTaxCd1() : "";
       String bankAccNo = StringUtils.isNotEmpty(data.getTaxCd3()) ? data.getTaxCd3() : "";
       legacyCustExt.setiTaxCode(iTaxCode);
@@ -1892,7 +1894,9 @@ public class CEETransformer extends EMEATransformer {
     // }
     // }
 
+	  LOG.debug("LEGACY -- CEE OVERRIDE transformLegacyCustomerExtDataMassUpdate");
 		if (SystemLocation.HUNGARY.equals(cmrObjects.getData().getCmrIssuingCntry())) {
+			LOG.debug("LEGACY -- CEE OVERRIDE data update in custext");
 			if (!StringUtils.isBlank(muData.getTaxCd1())) {
 				if ("@".equals(muData.getTaxCd1())) {
 					custExt.setiTaxCode("");
