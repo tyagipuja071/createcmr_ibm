@@ -175,6 +175,9 @@ dojo.addOnLoad(function(){
       		<p>
         	  <cmr:label fieldId="collectionCd">
         	    <cmr:fieldLabel fieldId="CollectionCd" />: 
+				<cmr:view forCountry="736,738">
+					<cmr:info text="For AR Team use and update only."></cmr:info>
+				</cmr:view>
            	    <cmr:delta text="${rdcdata.collectionCd}" oldValue="${reqentry.collectionCd}" id="delta-engineeringBo" />
         	  </cmr:label>
         	  <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
