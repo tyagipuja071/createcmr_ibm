@@ -34,6 +34,8 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
+import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
@@ -179,6 +181,10 @@ public class AutomationEngine {
 
     boolean hasOverrideOrMatchingApplied = false;
 
+    ScorecardPK scorecardPk = new ScorecardPK();
+    scorecardPk.setReqId(reqId);
+    Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
+
     // failsafes before engine run for any request
     requestData.getAdmin().setReviewReqIndc("N");
     requestData.getAdmin().setDisableAutoProc("N");
@@ -204,7 +210,8 @@ public class AutomationEngine {
     boolean isEroSkipToPpn = false;
     boolean usProliferationCntrySkip = false;
     boolean requesterFromTaxTeam = false;
-    boolean isUsWatsonxSkipToPcp = true;
+    boolean isUsWatsonxSkipToPcp = false;
+    boolean isUsOtherChecksFailed = false;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
     boolean isFullSunsetCty = false;
@@ -293,7 +300,7 @@ public class AutomationEngine {
         }
 
         if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
-          isUsWatsonxSkipToPcp = false;
+          isUsOtherChecksFailed = true;
         }
 
         LOG.trace("Result for " + element.getProcessDesc() + ": " + result.getResults());
@@ -368,6 +375,9 @@ public class AutomationEngine {
       String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
       if ("N".equals(setPPNFlag)) {
         sccIsValid = true;
+      }
+      if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
+        isUsWatsonxSkipToPcp = true;
       }
     } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
       checkNZBNAPI(stopExecution, actionsOnError);
@@ -598,7 +608,7 @@ public class AutomationEngine {
             // CREATCMR-8124
           }
           if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)
-              || (isUsWatsonxSkipToPcp && "PCP".equals(admin.getReqStatus()))) {
+              || (isUsWatsonxSkipToPcp && !isUsOtherChecksFailed)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || (isFullSunsetCty)) {
               // move to PCP
