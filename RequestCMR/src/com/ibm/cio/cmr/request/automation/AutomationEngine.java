@@ -253,13 +253,6 @@ public class AutomationEngine {
 
     for (AutomationElement<?> element : this.elements) {
       // determine if element is to be skipped
-      if ("GBLScenarioCheckElement".equals(element)) {
-        String s = "";
-      }
-      if ("DPLCheckElement".equals(element.toString())) {
-        String s = "";
-      }
-
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
       boolean skipElement = (skipChecks || engineData.get().isSkipChecks())
           && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType())
