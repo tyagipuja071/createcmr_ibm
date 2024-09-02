@@ -232,6 +232,15 @@
       <cmr:field fieldId="City1" id="city1" path="city1" />
     </p>
   </cmr:column>
+  <cmr:column span="2" forCountry="736,738">
+    <p>
+      <cmr:label fieldId="contact">
+        <cmr:fieldLabel fieldId="Contact" />:
+             <cmr:delta text="-" id="delta-contact" />
+      </cmr:label>
+      <cmr:field fieldId="Contact" id="contact" path="contact" />
+    </p>
+  </cmr:column>
 </cmr:row>
 
 
