@@ -608,7 +608,7 @@ public class AutomationEngine {
             // CREATCMR-8124
           }
           if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)
-              || (isUsWatsonxSkipToPcp && !isUsOtherChecksFailed)) {
+              || (isUsWatsonxSkipToPcp && !isUsOtherChecksFailed && (pendingChecks == null || pendingChecks.isEmpty()))) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || (isFullSunsetCty)) {
               // move to PCP
