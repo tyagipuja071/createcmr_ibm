@@ -261,10 +261,6 @@ public class AutomationEngine {
       boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
-      if ("Global - Update Switch".equals(element.getProcessDesc())) {
-        skipElement = true;
-      }
-
       // CREATCMR-4872
       if (isUsTaxSkipToPcp || isEroSkipToPpn) {
         break;
