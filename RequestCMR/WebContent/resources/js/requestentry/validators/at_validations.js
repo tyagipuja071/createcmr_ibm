@@ -456,12 +456,6 @@ function afterConfigForCEMEA() {
   if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
     custSubGrp = FormManager.getActualValue('custSubGrp')
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER') {
-      FormManager.enable('custClass');
-    } else {
-      FormManager.readOnly('custClass');
-    }
     // CREATCMR-6378
     retainVatValueAT();
     
@@ -3691,6 +3685,7 @@ function setClassificationCodeCEE() {
     return;
   }
 //  FormManager.readOnly('custClass');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if ('C' == FormManager.getActualValue('reqType')) {
     var _custType = FormManager.getActualValue('custSubGrp');
     var isicCd = FormManager.getActualValue('isicCd');
@@ -3705,7 +3700,7 @@ function setClassificationCodeCEE() {
       FormManager.setValue('custClass', '71');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
-    } else if (!_custType.includes('BUS')){
+    } else if (!_custType.includes('BUS') && cmrIssuingCntry != '618'){
       FormManager.setValue('custClass', '11');
     }
   }
