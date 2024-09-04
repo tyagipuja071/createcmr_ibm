@@ -2848,7 +2848,7 @@ function setAffiliateEnterpriseRequired() {
       FormManager.resetValidations('enterprise');
       FormManager.resetValidations('affiliate');
       FormManager.resetValidations('inacCd');
-      if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'PRISM' || custSubType == 'PRICU' || custSubType == 'PRIVA'
+      if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'PRISM' || custSubType == 'PRIVA'
           || custSubType == 'CROPR') {
         FormManager.clearValue('enterprise');
         FormManager.clearValue('affiliate');
