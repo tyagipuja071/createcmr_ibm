@@ -4623,6 +4623,45 @@ function afterTemplateLoadMO() {
   onChangeMOlandCntryStateProvPostCd();
 }
 
+function addAddrGridValidatorAddresses() {
+  console.log(">>>> addAddrGridValidatorAddresses ");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var missingStreetAddrCont = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            var isAddrCont1Cont2Filled = ((record.addrTxt2[0] == null || record.addrTxt2[0] == '') && (record.city1[0] != null && record.city1[0] != ''));
+            if (isAddrCont1Cont2Filled) {
+              if (missingStreetAddrCont != '') {
+                missingStreetAddrCont += ', ' + record.addrTypeText[0];
+              } else {
+                missingStreetAddrCont += record.addrTypeText[0];
+              }
+            }            
+          }
+
+          if (missingStreetAddrCont != '') {
+            return new ValidationResult(null, false, 'Street Address Con\'t2 cannot have a value as Street Address Con\'t1 is blank.: ' + missingStreetAddrCont);
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.AP = [SysLoc.MACAO];
   GEOHandler.GCG = [SysLoc.MACAO];
@@ -4654,4 +4693,5 @@ dojo.addOnLoad(function () {
 
   GEOHandler.addAfterTemplateLoad(setFieldToReadyOnly, SysLoc.MACAO);
   GEOHandler.addAfterConfig(setFieldToReadyOnly, SysLoc.MACAO);
+  GEOHandler.registerValidator(addAddrGridValidatorAddresses, [ SysLoc.MACAO], null, true);
 });
