@@ -97,19 +97,19 @@
 				<column exactLength="true">
 					<label>VAT</label>
 					<dbColumn>VAT</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<length>10</length>
 				</column>
 					<column exactLength="true">
 					<label>Group VAT ID</label>
 					<dbColumn>TAX_CD3</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<length>13</length>
 				</column>
 					<column exactLength="true">
 					<label>Domestic TAX ID</label>
 					<dbColumn>TAX_CD1</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<length>13</length>
 				</column>
 				<column>
