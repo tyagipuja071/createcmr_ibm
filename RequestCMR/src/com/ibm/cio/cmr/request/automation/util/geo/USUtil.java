@@ -910,6 +910,8 @@ public class USUtil extends AutomationUtil {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         } else if (changes.isLegalNameChanged() && isPaygoUpgrade) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
+        } else if ("897".equalsIgnoreCase(data.getCmrIssuingCntry()) && !changes.isLegalNameChanged() && isPaygoUpgrade) {
+          hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         }
       } finally {
         cedpManager.clear();
