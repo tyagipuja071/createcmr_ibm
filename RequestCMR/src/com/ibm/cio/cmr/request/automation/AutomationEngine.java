@@ -204,6 +204,8 @@ public class AutomationEngine {
     boolean isUsTaxSkipToPpn = false;
     boolean usProliferationCntrySkip = false;
     boolean requesterFromTaxTeam = false;
+    boolean isUsWatsonxSkipToPcp = false;
+    boolean isUsOtherChecksFailed = false;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
     boolean isFullSunsetCty = false;
@@ -280,6 +282,10 @@ public class AutomationEngine {
             break;
           }
         }
+        
+        if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
+          isUsOtherChecksFailed = true;
+        }
 
         LOG.trace("Result for " + element.getProcessDesc() + ": " + result.getResults());
         LOG.trace(" - " + result.getDetails());
@@ -345,6 +351,12 @@ public class AutomationEngine {
         LOG.trace("Skipping element " + element.getProcessDesc() + " for request type " + reqType);
       }
       lastElementIndex++;
+    }
+    
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+      if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
+        isUsWatsonxSkipToPcp = true;
+      }
     }
 
     if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
@@ -566,7 +578,8 @@ public class AutomationEngine {
             pendingChecks.put("_usproliferr", "Proliferation country location is requested, CMDE review required.");
             // CREATCMR-8124
           }
-          if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
+          if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)
+              || (isUsWatsonxSkipToPcp && !isUsOtherChecksFailed && (pendingChecks == null || pendingChecks.isEmpty()))) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp()) || (isFullSunsetCty)) {
               // move to PCP
