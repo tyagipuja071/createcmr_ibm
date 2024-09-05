@@ -240,7 +240,7 @@ function processRequestAction() {
         } else {
           if (reqType == 'C') {
             var custSubGrp = FormManager.getActualValue('custSubGrp');
-            if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
+            if (custSubGrp == 'AQSTN') {
               cmr.showProgress('Checking request data..');
               checkRetrievedForNZ();
             } else {
@@ -2816,14 +2816,14 @@ function matchOtherAddressesforNZCreate(data) {
       }
     } else {
       console.log("DNB address match fail. NZAPI address match success.")
-      if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
+      if (custSubGrp == 'AQSTN') {
         checkRetrievedForNZ();
       } else {
         showAddressVerificationModal();
       }
     }
   } else {
-    if (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN') {
+    if (custSubGrp == 'AQSTN') {
       checkRetrievedForNZ();
     } else {
       showAddressVerificationModal();
