@@ -34,6 +34,8 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
+import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
@@ -178,6 +180,10 @@ public class AutomationEngine {
     int lastElementIndex = 0;
 
     boolean hasOverrideOrMatchingApplied = false;
+    
+    ScorecardPK scorecardPk = new ScorecardPK();
+    scorecardPk.setReqId(reqId);
+    Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
 
     // failsafes before engine run for any request
     requestData.getAdmin().setReviewReqIndc("N");
