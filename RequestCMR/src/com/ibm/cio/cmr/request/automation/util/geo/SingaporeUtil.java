@@ -53,6 +53,8 @@ public class SingaporeUtil extends AutomationUtil {
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, "ZH01");
+  private static final List<String> CHECKED_FIELDS = Arrays.asList("ISU Code", "Cluster", "INAC/NAC Code", "INAC Type", "GB segment", "ISIC",
+      "Subindustry", "Market Responsibility Code (MRC)");
 
   public static final String SCENARIO_BLUEMIX = "BLUMX";
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
@@ -458,19 +460,39 @@ public class SingaporeUtil extends AutomationUtil {
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
     List<String> ignoredUpdates = new ArrayList<String>();
-    for (UpdatedDataModel change : changes.getDataUpdates()) {
-      switch (change.getDataField()) {
-      case "ISIC":
-      case "Market Responsibility Code (MRC)":
-      case "Cluster":
-      case "GB segment":
-      case "ISU Code":
-      case "INAC/NAC Code":
-      case "Sales Rep No":
-      case "AR Code":
-      default:
-        ignoredUpdates.add(change.getDataField());
-        break;
+
+    String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("EMAIL", admin.getRequesterId());
+    query.setForReadOnly(true);
+
+    if (query.exists() && "Y".equals(SystemParameters.getString("AP.SKIP_UPDATE_CHECK"))) {
+      // skip checks if requester is from AP CMDE team
+      admin.setScenarioVerifiedIndc("Y");
+      details.append("Requester is from SG CMDE team, skipping update checks.\n");
+      LOG.debug("Requester is from SG CMDE team, skipping update checks.");
+      validation.setMessage("Skipped");
+      validation.setSuccess(true);
+    } else {
+      for (UpdatedDataModel change : changes.getDataUpdates()) {
+        if (CHECKED_FIELDS.contains(change.getDataField())) {
+          if (!(change.getNewData().equals(change.getOldData()))) {
+            String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle .\nLink:- https://jsw.ibm.com/projects/CMDE/summary";
+            if (StringUtils.isNotBlank(error)) {
+              LOG.debug(error);
+              output.setDetails(error);
+              validation.setMessage("Validation Failed");
+              validation.setSuccess(false);
+              if (StringUtils.isBlank(admin.getSourceSystId())) {
+                engineData.addRejectionComment("OTH", error, "", "");
+                output.setOnError(true);
+              }
+              return true;
+            }
+          }
+        } else {
+          ignoredUpdates.add(change.getDataField());
+        }
       }
     }
     if (cmdeReview) {
@@ -479,15 +501,20 @@ public class SingaporeUtil extends AutomationUtil {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
     } else {
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
+      if (!query.exists() && !"Y".equals(SystemParameters.getString("AP.SKIP_UPDATE_CHECK"))) {
+        validation.setSuccess(true);
+        validation.setMessage("Successful");
+      }
     }
+
     if (!ignoredUpdates.isEmpty()) {
       details.append("Updates to the following fields skipped validation:\n");
       for (String field : ignoredUpdates) {
         details.append(" - " + field + "\n");
       }
+      validation.setSuccess(true);
     }
+
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;

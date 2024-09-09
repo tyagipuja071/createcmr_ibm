@@ -22,7 +22,7 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
   private TransConnService service = new TransConnService();
 
   public enum Mode {
-    Aborted, Pending, MQ, Manual, Pool, LAReprocess, HKMOReprocess
+    Aborted, Pending, MQ, Manual, Pool, LAReprocess, HKMOReprocess, APReprocess
   };
 
   private Mode mode = Mode.Pending;

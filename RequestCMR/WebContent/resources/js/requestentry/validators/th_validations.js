@@ -63,7 +63,6 @@ function setInacType() {
 		} else {
 			FormManager.setValue('inacType', 'I');
 		}
-		FormManager.readOnly('inacType');
 	}
 }
 
@@ -88,29 +87,36 @@ function addAfterConfigAP() {
 	var role = FormManager.getActualValue('userRole').toUpperCase();
 	var reqType = FormManager.getActualValue('reqType');
 	var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+	if (reqType == 'C') {
+		FormManager.readOnly('custClass');
+	}
+
 	if (reqType == 'U') {
 		FormManager.removeValidator('vat', Validators.REQUIRED);
+		FormManager.enable('mrcCd');
 	}
 
 	FormManager.removeValidator('cmrNo', Validators.REQUIRED);
 
-
-	if (FormManager.getActualValue('viewOnlyPage') == 'true')
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
 		FormManager.readOnly('repTeamMemberName');
-	FormManager.readOnly('isbuCd');
+		FormManager.readOnly('isbuCd');
+		FormManager.readOnly('ordBlk');
+	}
 
 	if (role == 'REQUESTER' || role == 'VIEWER') {
-		FormManager.readOnly('mrcCd');
-		FormManager.readOnly('isbuCd');
 		if (role == 'VIEWER') {
 			FormManager.readOnly('abbrevNm');
 			FormManager.readOnly('clientTier');
+			FormManager.readOnly('subIndustryCd');
+			FormManager.readOnly('mrcCd');
 		}
+		FormManager.readOnly('isbuCd');
 		FormManager.readOnly('sectorCd');
 		FormManager.readOnly('abbrevLocn');
 		FormManager.readOnly('territoryCd');
 		FormManager.readOnly('IndustryClass');
-		FormManager.readOnly('subIndustryCd');
 	} else {
 		FormManager.enable('mrcCd');
 		FormManager.enable('isbuCd');
@@ -602,6 +608,8 @@ function onCustSubGrpChange() {
 		setISBUScenarioLogic();
 		autoSetAbbrevNmLocnLogic();
 		setCollectionCd();
+
+		setKUKLAvaluesTH();
 	});
 }
 
@@ -787,6 +795,7 @@ function onSubIndustryChange() {
 		if (value != null && value.length > 1) {
 			updateIndustryClass();
 			addSectorIsbuLogicOnSubIndu();
+			setKUKLAvaluesTH();
 		}
 	});
 	if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -2506,18 +2515,11 @@ function handleObseleteExpiredDataForUpdate() {
 	}
 	// lock all the coverage fields and remove validator
 	if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
-		FormManager.readOnly('apCustClusterId');
-		FormManager.readOnly('clientTier');
-		FormManager.readOnly('mrcCd');
-		FormManager.readOnly('inacType');
-		FormManager.readOnly('isuCd');
-		FormManager.readOnly('inacCd');
 		FormManager.readOnly('repTeamMemberNo');
 		FormManager.readOnly('repTeamMemberName');
 		FormManager.readOnly('isbuCd');
 		FormManager.readOnly('covId');
 		FormManager.readOnly('cmrNoPrefix');
-		FormManager.readOnly('collectionCd');
 		FormManager.readOnly('engineeringBo');
 		FormManager.readOnly('commercialFinanced');
 		FormManager.readOnly('creditCd');
@@ -3105,9 +3107,6 @@ function coverage2024ForTH() {
 	if (custSubGrp == 'PRIV') {
 		FormManager.readOnly('isicCd');
 		FormManager.setValue('isicCd', '9500');
-	} else {
-		// FormManager.enable('isicCd');
-	  FormManager.readOnly('isicCd');
 	}
 	var _clusterHandlerSG = null;
 	FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -3125,20 +3124,6 @@ function coverage2024ForTH() {
 	if (window.localStorage.getItem('cluster') == FormManager.getActualValue('apCustClusterId') && FormManager.getActualValue('apCustClusterId') == '00000') {
 		setISUCTCByCluster();
 		setInacByClusterSG();
-	}
-
-	// for blank cluster, blank out others
-	if (FormManager.getActualValue('apCustClusterId') == '') {
-		FormManager.setValue('isuCd', '');
-		FormManager.readOnly('isuCd');
-		FormManager.setValue('clientTier', '');
-		FormManager.readOnly('clientTier');
-		FormManager.setValue('inacCd', '');
-		FormManager.readOnly('inacCd');
-		FormManager.setValue('inacType', '');
-		FormManager.readOnly('inacType');
-		FormManager.setValue('mrcCd', '');
-		FormManager.readOnly('mrdCd');
 	}
 }
 
@@ -3218,11 +3203,66 @@ function setInacByClusterTH() {
 	}
 	if (inacList.length == 1) {
 		FormManager.setValue('inacCd', inacList[0]);
-		FormManager.readOnly('inacCd');
-		FormManager.readOnly('inacType');
 		FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-	  FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
+		FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
 	}
+}
+
+function setKUKLAvaluesTH() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesTH() >>>> set KUKLA values for TH >>>>');
+
+  var custSubGrp1 = new Set(['ASLOM', 'DUMMY', 'ECSYS', 'KYND', 'NRMLS', 'XASLM']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XAQST', 'CROSS']);
+  var custSubGrp3 = new Set(['BUSPR']);
+  var custSubGrp4 = new Set(['PRIV']);
+  var custSubGrp5 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaTH = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaTH.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaTH[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaTH[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaTH[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaTH[5]);
+      }
+    }
+  }
 }
 
 dojo.addOnLoad(function() {

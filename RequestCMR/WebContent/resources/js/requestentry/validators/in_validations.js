@@ -19,7 +19,7 @@ function addHandlersForAP() {
   
   if (_inacCdHandlerIN == null) {
     _inacCdHandlerIN = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
-      lockInacTypeForIGF();     
+      lockInacTypeForIGF();
     });
   }  
   
@@ -40,6 +40,7 @@ function custSubGrpHandler() {
       onIsicChange();   
       prospectFilterISBU();    
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesIN();
     });
   }
 }
@@ -101,28 +102,34 @@ function addAfterConfigAP() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
+
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+  }
   
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('mrcCd');
   }
 
-    
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') 
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('repTeamMemberName');
     FormManager.readOnly('isbuCd');
+    FormManager.readOnly('ordBlk');
+  }
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('isbuCd');
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
+      FormManager.readOnly('subIndustryCd');
+      FormManager.readOnly('mrcCd');
     }
+    FormManager.readOnly('isbuCd');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-    FormManager.readOnly('subIndustryCd');
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
@@ -547,13 +554,17 @@ function setAttachmentOnCluster() {
 
 function defaultCMRNumberPrefix() {
   console.log('>>>> defaultCMRNumberPrefix >>>>');
-  if (FormManager.getActualValue('reqType') == 'U') {
-    return
 
-  }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
 
   if (role == 'PROCESSOR' && custSubGrp == 'INTER') {
     FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CmrNoPrefix' ], 'MAIN_IBM_TAB');
@@ -580,9 +591,13 @@ function defaultCMRNumberPrefix() {
 
 function onCustSubGrpChange() {
   console.log('>>>> onCustSubGrpChange >>>>');
-  if (FormManager.getActualValue('reqType') == 'U') {
-    return
 
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
   }
 
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
@@ -1012,6 +1027,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesIN();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -1146,8 +1162,6 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
   } else {
-    FormManager.readOnly('isicCd');
-    FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
       case 'PRIV':
         // ISIC = 9500, - lock field
@@ -1184,6 +1198,10 @@ function setIsicCdIfDnbAndCmrResultOther(value){
   var value = FormManager.getActualValue('isicCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cond4 = new Set(['INTER','PRIV','XPRIV','DUMMY','IGF']);
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
   if (cond4.has(custSubGrp)) {
     FormManager.setValue('isicCd', value);
     FormManager.readOnly('isicCd');
@@ -2212,36 +2230,27 @@ function lockFieldsForIndia(){
   FormManager.readOnly('abbrevNm');
   FormManager.readOnly('abbrevLocn');
   FormManager.readOnly('custPrefLang');
-  FormManager.readOnly('subIndustryCd');
   FormManager.readOnly('sensitiveFlag');
-  FormManager.readOnly('isicCd');
   FormManager.readOnly('taxCd1');
   FormManager.readOnly('cmrNo');
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('cmrOwner');
 
-  FormManager.readOnly('apCustClusterId');
   FormManager.resetValidations('apCustClusterId');
 
-  FormManager.readOnly('clientTier');
   FormManager.resetValidations('clientTier');
 
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
   FormManager.readOnly('bpRelType');
   FormManager.readOnly('busnType');
   FormManager.resetValidations('busnType');
 
   FormManager.readOnly('cmrNoPrefix');
-  FormManager.readOnly('collectionCd');
   FormManager.resetValidations('collectionCd');
 
   FormManager.readOnly('repTeamMemberNo');
   FormManager.resetValidations('repTeamMemberNo');
 
   FormManager.readOnly('miscBillCd');
-  FormManager.readOnly('inacType');
-  FormManager.readOnly('inacCd');
   FormManager.readOnly('restrictInd');
   FormManager.readOnly('govType');
   FormManager.readOnly('repTeamMemberName');
@@ -2574,18 +2583,11 @@ function handleObseleteExpiredDataForUpdate() {
  }
  // lock all the coverage fields and remove validator
  if (reqType == 'U') {
-   FormManager.readOnly('apCustClusterId');
-   FormManager.readOnly('clientTier');
-   FormManager.readOnly('mrcCd');
-   FormManager.readOnly('inacType');
-   FormManager.readOnly('isuCd');
-   FormManager.readOnly('inacCd');
    FormManager.readOnly('repTeamMemberNo');
    FormManager.readOnly('repTeamMemberName');
    FormManager.readOnly('isbuCd');
    FormManager.readOnly('covId');
    FormManager.readOnly('cmrNoPrefix');
-   FormManager.readOnly('collectionCd');
    FormManager.readOnly('engineeringBo');
    FormManager.readOnly('commercialFinanced');
    FormManager.readOnly('creditCd');
@@ -2623,70 +2625,18 @@ function executeBeforeSubmit() {
   console.log('>>>> executeBeforeSubmit >>>>');
   var reqType = FormManager.getActualValue('reqType');
   var action = FormManager.getActualValue('yourAction');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');  
-    if (reqType == 'U') {
-      var errMsg = checkAnyChangesOnCustNameAddrGST(cntry);
-      if (errMsg != '' && action == 'SFP') {
-        cmr.showAlert(errMsg);
-      } else {
-        showVerificationModal();
-      }
-    } else {
-      showVerificationModal();
-    }
-  
+  if (reqType == 'U') {
+    showVerificationModal();
+  } else {
+    showVerificationModal();
+  }
+
 }
 
 function showVerificationModal() {
   cmr.showModal('addressVerificationModal');
-}
-
-function checkAnyChangesOnCustNameAddrGST(cntry) {
-  console.log('>>>> checkAnyChangesOnCustNameAddrGST >>>>');
-  var errorMsg = '';
-  var isUpdated = false;
-  
-  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-    var record = null;
-    var updateInd = null;
-    
-    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-      updateInd = record.updateInd;
-      if (typeof (updateInd) == 'object') {
-        updateInd = updateInd[0];
-        if(updateInd == 'U' || updateInd == 'N') {
-          isUpdated = true;
-          break;
-        }
-      }
-    }
-  }
-  if (!isUpdated) {
-    var currentGst = FormManager.getActualValue('vat'); 
-    var qParams = {
-        REQ_ID : FormManager.getActualValue('reqId'),
-    };
-    
-    var result = cmr.query('GET.OLD_VAT_BY_REQID', qParams);
-    var oldGst = result.ret1;
-    oldGst = oldGst == undefined ? '' : oldGst;
-    
-    if (result != null && oldGst != null && oldGst != currentGst) {
-      isUpdated = true;
-    }
-  }
-  if (!isUpdated) {
-    if (cntry != '') {
-      if (cntry == SysLoc.SINGAPORE) {
-        errorMsg = 'You haven\'t updated anything on customer name/address or UEN#, please check and take relevant edit operation before submit this Update request.';
-      } else if (cntry == SysLoc.INDIA) {
-        errorMsg = 'You haven\'t updated anything on customer name/address or GST#, please check and take relevant edit operation before submit this Update request.';
-      }
-    }
-  }
-  return errorMsg;
 }
 
 // CREATCMR-6825
@@ -2881,6 +2831,68 @@ function lockInacType(){
     FormManager.removeValidator('inacType', Validators.REQUIRED);
   }
   
+}
+
+function setKUKLAvaluesIN() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isicCd = FormManager.getActualValue('isicCd');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesIN() >>>> set KUKLA values for IN >>>>');
+
+  var custSubGrp1 = new Set(['BLUMX', 'ESOSW', 'ECSYS', 'IGF', 'KYNDR', 'NRML']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRMLC', 'CROSS']);
+  var custSubGrp3 = new Set(['PRIV']);
+  var custSubGrp4 = new Set(['MKTPC']);
+  var custSubGrp5 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaIN = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaIN.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaIN[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaIN[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaIN[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaIN[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaIN[4]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        if (isicCd == '9500') {
+          FormManager.setValue('custClass', kuklaIN[4]);
+        } else {
+          FormManager.setValue('custClass', kuklaIN[0]);
+        }
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaIN[5]);
+      }
+    }
+  }
 }
 
 dojo.addOnLoad(function() {  

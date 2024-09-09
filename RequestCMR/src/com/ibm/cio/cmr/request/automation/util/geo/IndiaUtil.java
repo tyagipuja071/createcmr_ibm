@@ -67,6 +67,8 @@ public class IndiaUtil extends AutomationUtil {
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SECONDARY_SHIPPING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #");
+  private static final List<String> CHECKED_FIELDS = Arrays.asList("ISU Code", "Cluster", "INAC/NAC Code", "INAC Type", "GB segment", "ISIC",
+      "Subindustry", "Market Responsibility Code (MRC)");
 
   private static final Logger LOG = Logger.getLogger(IndiaUtil.class);
 
@@ -142,8 +144,9 @@ public class IndiaUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           String custNmTrimmed = getCustomerFullName(addr).toUpperCase();
           if (hasINLegalEndings(custNmTrimmed)) {
-            details.append(
-                "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
+            details
+                .append(
+                    "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
                 .append("\n");
             engineData.addRejectionComment("OTH",
                 "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .",
@@ -343,34 +346,39 @@ public class IndiaUtil extends AutomationUtil {
     StringBuilder details = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// D for Reject
     List<String> ignoredUpdates = new ArrayList<String>();
-    for (UpdatedDataModel change : changes.getDataUpdates()) {
-      switch (change.getDataField()) {
 
-      case "GST#":
-        // For GST update, Match with gst api
-        boolean matchesgGST = false;
+    String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("EMAIL", admin.getRequesterId());
+    query.setForReadOnly(true);
 
-        if (StringUtils.isBlank(change.getOldData()) && !(change.getNewData().equals(change.getOldData()))) {
-          admin.setScenarioVerifiedIndc("Y");
-        } else {
-          admin.setScenarioVerifiedIndc("N");
-        }
-
-        if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
-          // check against gST
-          matchesgGST = getGstMatches(data.getId().getReqId(), soldTo, data.getVat());
-
-          if (!matchesgGST) {
-            resultCodes.add("R"); // R- review to CMDE
-            details.append("GST# update on the request did not match GST Layer Service.\n");
-          } else {
-            details.append("GST# update on the request matches GST Layer Service.\n");
+    if (query.exists() && "Y".equals(SystemParameters.getString("AP.SKIP_UPDATE_CHECK"))) {
+      // skip checks if requester is from AP CMDE team
+      admin.setScenarioVerifiedIndc("Y");
+      details.append("Requester is from IN CMDE team, skipping update checks.\n");
+      LOG.debug("Requester is from IN CMDE team, skipping update checks.");
+      validation.setMessage("Skipped");
+      validation.setSuccess(true);
+    } else {
+      for (UpdatedDataModel change : changes.getDataUpdates()) {
+        if (CHECKED_FIELDS.contains(change.getDataField())) {
+          if (!(change.getNewData().equals(change.getOldData()))) {
+            String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle .\nLink:- https://jsw.ibm.com/projects/CMDE/summary";
+            if (StringUtils.isNotBlank(error)) {
+              LOG.debug(error);
+              output.setDetails(error);
+              validation.setMessage("Validation Failed");
+              validation.setSuccess(false);
+              if (StringUtils.isBlank(admin.getSourceSystId())) {
+                engineData.addRejectionComment("OTH", error, "", "");
+                output.setOnError(true);
+              }
+              return true;
+            }
           }
+        } else {
+          ignoredUpdates.add(change.getDataField());
         }
-        break;
-      default:
-        ignoredUpdates.add(change.getDataField());
-        break;
       }
     }
 
@@ -379,15 +387,19 @@ public class IndiaUtil extends AutomationUtil {
       validation.setSuccess(false);
       validation.setMessage("Review Required.");
     } else {
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
+      if (!query.exists() && !"Y".equals(SystemParameters.getString("AP.SKIP_UPDATE_CHECK"))) {
+        validation.setSuccess(true);
+        validation.setMessage("Successful");
+      }
     }
+
     if (!ignoredUpdates.isEmpty()) {
       details.append("Updates to the following fields skipped validation:\n");
       for (String field : ignoredUpdates) {
         details.append(" - " + field + "\n");
       }
     }
+
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;
