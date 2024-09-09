@@ -65,6 +65,16 @@
        </cmr:buttonsRow>
      </cmr:column>
   </cmr:row>
+  <cmr:row>
+    <cmr:column span="2" containerForField="CustClass" forCountry="858">
+      <p>
+        <cmr:label fieldId="custClass">
+          <cmr:fieldLabel fieldId="CustClass" />:
+        </cmr:label>
+        <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+  </cmr:row>
     <!-- No5 -->
    <cmr:row addBackground="true">
      <cmr:column span="2" containerForField="FootnoteTxt1">

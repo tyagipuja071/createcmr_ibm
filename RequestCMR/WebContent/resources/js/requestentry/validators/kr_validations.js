@@ -1,12 +1,29 @@
 /* Register KR Javascripts */
  var _isicHandler = null;
  var _searchTermHandler = null;
+ var _addrTypesForKR = ['ZS01', 'ZP01', 'ZI01', 'ZD01'];
+ var _addrTypeHandler = [];
+
+/**
+ * No single byte characters for KR
+ */
+function addSingleByteValidatorKR(cntry, addressMode, details) {
+  FormManager.addValidator('custNm3', Validators.NO_SINGLE_BYTE, ['Customer Name_Korean']);
+  FormManager.addValidator('billingPstlAddr', Validators.NO_SINGLE_BYTE, ['Customer Name_Korean Continue']);
+  FormManager.addValidator('custNm4', Validators.NO_SINGLE_BYTE, ['Street address_Korean']);
+  FormManager.addValidator('divn', Validators.NO_SINGLE_BYTE, ['Street address_Korean Continue']);
+}
  
 function afterConfigKR() {
   if (FormManager.getActualValue('userRole').toUpperCase() == 'VIEWER') {
+    FormManager.readOnly('ordBlk');
     return;
   }
   
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('ordBlk');
+  }
+
   var role = null;
   var reqType = null;
   var _isuHandler = null;
@@ -14,6 +31,7 @@ function afterConfigKR() {
   
   _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     getIsuFromIsic();
+    setKUKLAvaluesKR();
   });
   
   if (_isuHandler == null) {
@@ -25,8 +43,8 @@ function afterConfigKR() {
     FormManager.resetDropdownValues(FormManager.getField('searchTerm'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-//    FormManager.setValue('inacType','');
-//    FormManager.setValue('inacCd','');
+// FormManager.setValue('inacType','');
+// FormManager.setValue('inacCd','');
     FormManager.enable('searchTerm');
     FormManager.enable('isicCd');
     FormManager.enable('inacType');
@@ -34,28 +52,33 @@ function afterConfigKR() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('mrcCd');
+
+    setKUKLAvaluesKR();
   });
   
   var _clusterHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.resetDropdownValues(FormManager.getField('inacCd')); 
     FormManager.resetDropdownValues(FormManager.getField('isuCd')); 
-//    FormManager.setValue('inacType','');
-//    FormManager.setValue('inacCd','');
-//    LockDefaultISUClientTierMrcValues();
+// FormManager.setValue('inacType','');
+// FormManager.setValue('inacCd','');
+// LockDefaultISUClientTierMrcValues();
     setInacNacValues(value);
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('mrcCd');
+    if (reqType == 'C') {
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('mrcCd');
+    }
   });
 
   var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
     setInacNacValues("inacChange");
   });
   
-//  var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-//    setInacNacValues();
-//  });
+// var _inacType = dojo.connect(FormManager.getField('inacType'), 'onChange',
+// function(value) {
+// setInacNacValues();
+// });
 
   reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
@@ -90,8 +113,10 @@ function afterConfigKR() {
   }
   
   if (reqType == 'C') {
-  FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
-    }
+    FormManager.addValidator('MrcCd', Validators.REQUIRED, ['Market Responsibility Code (MRC)'], 'MAIN_IBM_TAB');
+
+    FormManager.readOnly('custClass');
+  }
 
   // story: attachment Company Proof required
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -125,12 +150,155 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
+  if (reqType == 'C') {
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
+  
+  for (var i = 0; i < _addrTypesForKR.length; i++) {
+    _addrTypeHandler[i] = null;
+    if (_addrTypeHandler[i] == null) {
+      _addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForKR[i]), 'onClick', function(value) {
+        FormManager.clearValue('locationCode');
+        setLockUnlockSeqNum();
+      });
+    }
+  }
+  
+  if (FormManager.getActualValue('importInd') == 'D' || FormManager.getActualValue('ordBlk') == '75') {
+    var addrType = FormManager.getActualValue('addrType');
+
+    if(addrType == 'ZS01') {
+      FormManager.readOnly('locationCode');
+      FormManager.removeValidator('locationCode', Validators.REQUIRED);
+    }
+  }
+}
+
+function replaceAndSymbol(value) {
+  var modifiedVal = '';
+  if (value != null && value.length > 0) {
+    modifiedVal = value;
+    modifiedVal = modifiedVal.replace(/&/g, '＆');
+  }
+
+  return modifiedVal;
+};
+
+function replaceCrossbarSymbol(value) {
+  var modifiedVal = '';
+  if (value != null && value.length > 0) {
+    modifiedVal = value;
+    modifiedVal = modifiedVal.replace(/-/g, '－');
+    modifiedVal = modifiedVal.replace(/−/g, "－");
+    modifiedVal = modifiedVal.replace(/･/g, '・');
+
+    modifiedVal = modifiedVal.replace(/,/g, '，');
+    modifiedVal = modifiedVal.replace(/:/g, '：');
+    modifiedVal = modifiedVal.replace(/_/g, '＿');
+    modifiedVal = modifiedVal.replace(/\(/g, '（');
+    modifiedVal = modifiedVal.replace(/\)/g, '）');
+  }
+
+  return modifiedVal;
+};
+
+function convert2DBCSIgnoreCase(input) {
+  var modifiedVal = '';
+  if (input != null && input.length > 0) {
+    modifiedVal = input;
+    modifiedVal = modifiedVal.replace(/1/g, '１');
+    modifiedVal = modifiedVal.replace(/2/g, '２');
+    modifiedVal = modifiedVal.replace(/3/g, '３');
+    modifiedVal = modifiedVal.replace(/4/g, '４');
+    modifiedVal = modifiedVal.replace(/5/g, '５');
+    modifiedVal = modifiedVal.replace(/6/g, '６');
+    modifiedVal = modifiedVal.replace(/7/g, '７');
+    modifiedVal = modifiedVal.replace(/8/g, '８');
+    modifiedVal = modifiedVal.replace(/9/g, '９');
+    modifiedVal = modifiedVal.replace(/0/g, '０');
+    modifiedVal = modifiedVal.replace(/a/g, 'ａ');
+    modifiedVal = modifiedVal.replace(/b/g, 'ｂ');
+    modifiedVal = modifiedVal.replace(/c/g, 'ｃ');
+    modifiedVal = modifiedVal.replace(/d/g, 'ｄ');
+    modifiedVal = modifiedVal.replace(/e/g, 'ｅ');
+    modifiedVal = modifiedVal.replace(/f/g, 'ｆ');
+    modifiedVal = modifiedVal.replace(/g/g, 'ｇ');
+    modifiedVal = modifiedVal.replace(/h/g, 'ｈ');
+    modifiedVal = modifiedVal.replace(/i/g, 'ｉ');
+    modifiedVal = modifiedVal.replace(/j/g, 'ｊ');
+    modifiedVal = modifiedVal.replace(/k/g, 'ｋ');
+    modifiedVal = modifiedVal.replace(/l/g, 'ｌ');
+    modifiedVal = modifiedVal.replace(/m/g, 'ｍ');
+    modifiedVal = modifiedVal.replace(/n/g, 'ｎ');
+    modifiedVal = modifiedVal.replace(/o/g, 'ｏ');
+    modifiedVal = modifiedVal.replace(/p/g, 'ｐ');
+    modifiedVal = modifiedVal.replace(/q/g, 'ｑ');
+    modifiedVal = modifiedVal.replace(/r/g, 'ｒ');
+    modifiedVal = modifiedVal.replace(/s/g, 'ｓ');
+    modifiedVal = modifiedVal.replace(/t/g, 'ｔ');
+    modifiedVal = modifiedVal.replace(/u/g, 'ｕ');
+    modifiedVal = modifiedVal.replace(/v/g, 'ｖ');
+    modifiedVal = modifiedVal.replace(/w/g, 'ｗ');
+    modifiedVal = modifiedVal.replace(/x/g, 'ｘ');
+    modifiedVal = modifiedVal.replace(/y/g, 'ｙ');
+    modifiedVal = modifiedVal.replace(/z/g, 'ｚ');
+    modifiedVal = modifiedVal.replace(/A/g, 'Ａ');
+    modifiedVal = modifiedVal.replace(/B/g, 'Ｂ');
+    modifiedVal = modifiedVal.replace(/C/g, 'Ｃ');
+    modifiedVal = modifiedVal.replace(/D/g, 'Ｄ');
+    modifiedVal = modifiedVal.replace(/E/g, 'Ｅ');
+    modifiedVal = modifiedVal.replace(/F/g, 'Ｆ');
+    modifiedVal = modifiedVal.replace(/G/g, 'Ｇ');
+    modifiedVal = modifiedVal.replace(/H/g, 'Ｈ');
+    modifiedVal = modifiedVal.replace(/I/g, 'Ｉ');
+    modifiedVal = modifiedVal.replace(/J/g, 'Ｊ');
+    modifiedVal = modifiedVal.replace(/K/g, 'Ｋ');
+    modifiedVal = modifiedVal.replace(/L/g, 'Ｌ');
+    modifiedVal = modifiedVal.replace(/M/g, 'Ｍ');
+    modifiedVal = modifiedVal.replace(/N/g, 'Ｎ');
+    modifiedVal = modifiedVal.replace(/O/g, 'Ｏ');
+    modifiedVal = modifiedVal.replace(/P/g, 'Ｐ');
+    modifiedVal = modifiedVal.replace(/Q/g, 'Ｑ');
+    modifiedVal = modifiedVal.replace(/R/g, 'Ｒ');
+    modifiedVal = modifiedVal.replace(/S/g, 'Ｓ');
+    modifiedVal = modifiedVal.replace(/T/g, 'Ｔ');
+    modifiedVal = modifiedVal.replace(/U/g, 'Ｕ');
+    modifiedVal = modifiedVal.replace(/V/g, 'Ｖ');
+    modifiedVal = modifiedVal.replace(/W/g, 'Ｗ');
+    modifiedVal = modifiedVal.replace(/X/g, 'Ｘ');
+    modifiedVal = modifiedVal.replace(/Y/g, 'Ｙ');
+    modifiedVal = modifiedVal.replace(/Z/g, 'Ｚ');
+    modifiedVal = modifiedVal.replace(/ /g, '　');
+    modifiedVal = replaceAndSymbol(modifiedVal);
+    modifiedVal = replaceCrossbarSymbol(modifiedVal);
+  }
+
+  return modifiedVal;
+}
+
+function setLockUnlockSeqNum(cntry, addressMode, details) {
+  var addrType = FormManager.getActualValue('addrType');
+  
+  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+    FormManager.clearValue('locationCode');
+  } else if (addressMode == 'updateAddress') {
+    addrType = details != null ? details.ret2 : '';
+  }
+  
+  if(addrType == 'ZP01' && addressMode != 'updateAddress') {
+    FormManager.enable('locationCode');
+    FormManager.addValidator('locationCode', Validators.REQUIRED, [ 'Seq/Loc Code' ], '');
+  } else {
+    FormManager.readOnly('locationCode');
+    FormManager.removeValidator('locationCode', Validators.REQUIRED);
+  }
 }
 
 function setClientTierValues() {
+  var reqType = FormManager.getActualValue('reqType');
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -139,15 +307,16 @@ function setClientTierValues() {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.readOnly('clientTier');
   } else {
-    var reqType = FormManager.getActualValue('reqType');
     if (reqType != 'U') {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     }
   }
   handleObseleteExpiredDataForUpdate();
-  FormManager.readOnly('clientTier');
-  FormManager.readOnly('isuCd');
-  FormManager.readOnly('mrcCd');
+  if (reqType == 'C') {
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 }
 
 function setChecklistStatus() {
@@ -422,12 +591,6 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U') {
-    FormManager.readOnly('searchTerm');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('covId');
     FormManager.readOnly('commercialFinanced');
@@ -569,7 +732,7 @@ function setInacNacValues(searchTermChange){
                 inacCdValue.push(results[i].ret1);
               }
               FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-//            FormManager.setValue('inacCd', inacCdValue[0]);
+// FormManager.setValue('inacCd', inacCdValue[0]);
               if (inacCdValue.length == 1) {
                 FormManager.setValue('inacCd', inacCdValue[0]);
               }
@@ -621,7 +784,7 @@ function validateCustnameForKynd() {
         var errorMsg = '';
         var action = FormManager.getActualValue('yourAction');
 
-//        var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase(); 
+// var custNm1 = FormManager.getActualValue('mainCustNm1').toUpperCase();
         var custNm1 = '';
         if (_allAddressData == undefined || _allAddressData == null || _allAddressData.length == 0) {
           return;
@@ -772,6 +935,282 @@ function setCTCIsuMrcByCluster() {
   }
 }
 
+function setKUKLAvaluesKR() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isicCd = FormManager.getActualValue('isicCd');
+
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (subIndustryCd != null && subIndustryCd.length > 1) {
+    var industryClass = subIndustryCd.substr(0, 1);
+  }
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesKR() >>>> set KUKLA values for KR >>>>');
+
+  var custSubGrp1 = new Set(['BLUMX', 'ESA', 'ECOSY', 'LKYN', 'NRST', 'VAPAR']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'CROSS']);
+  var custSubGrp3 = new Set(['CBBUS']);
+  var custSubGrp4 = new Set(['PRIPE']);
+  var custSubGrp5 = new Set(['MKTPC']);
+  var custSubGrp6 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaKR = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaKR.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaKR[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaKR[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaKR[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        if (isicCd == '9500') {
+          FormManager.setValue('custClass', kuklaKR[4]);
+        } else {
+          FormManager.setValue('custClass', kuklaKR[0]);
+        }
+      } else if (custSubGrp6.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaKR[5]);
+      }
+    }
+  }
+}
+
+function addSeqNumFormatValidator() {
+  console.log(">>>>  addSeqNumFormatValidator");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrType = FormManager.getActualValue('addrType');
+        if(addrType != 'ZP01') {
+          return new ValidationResult(null, true);
+        }
+        
+        var seqNum = FormManager.getActualValue('locationCode');
+        var isValidSeqNumFormat = /^B\d{2}$/.test(seqNum);
+
+        if (!isValidSeqNumFormat) {
+          return new ValidationResult(null, false, 'Seq/Loc Code value should start with \'B\' followed by 2 numeric characters.');
+        } 
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addSeqNumDuplicateValidator() {
+  console.log(">>>>  addSeqNumDuplicateValidator");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrType = FormManager.getActualValue('addrType');
+
+        if(addrType != 'ZP01' || cmr.addressMode == 'updateAddress') {
+          return new ValidationResult(null, true);
+        }
+        
+        var requestId = FormManager.getActualValue('reqId');
+        var seqNum = FormManager.getActualValue('locationCode');
+
+        var addrSeqCount = cmr.query('ADDR_SEQ.COUNT', {
+          REQ_ID : requestId,
+          ADDR_TYPE : addrType,
+          ADDR_SEQ : seqNum
+        });
+        
+        if (addrSeqCount.ret1 > 0) {
+          return new ValidationResult(null, false, 'Sec./Loc Code \'' + seqNum + '\' already exists. Please provide a different Sec./Loc Code.');
+        } 
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addKRAddressGridValidator() {
+  console.log(">>>> addKRAddressGridValidator ");
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.KOREA) {
+          return new ValidationResult(null, true);
+        }
+
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          var custNm3 = '';
+          var custNm4 = '';
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            // Customer Name_Korean
+            var isCustNm3Filled = (record.custNm3[0] != null && record.custNm3[0] != '');
+            if (!isCustNm3Filled) {
+              if (custNm3 != '') {
+                custNm3 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm3 += record.addrTypeText[0];
+              }
+            }
+
+            // Street address_Korean
+            var isCustNm4Filled = (record.custNm4[0] != null && record.custNm4[0] != '');
+            if (!isCustNm4Filled) {
+              if (custNm4 != '') {
+                custNm4 += ', ' + record.addrTypeText[0];
+              } else {
+                custNm4 += record.addrTypeText[0];
+              }
+            }
+          }
+
+          if (custNm3 != '') {
+            return new ValidationResult(null, false, 'Please fill out Customer Name_Korean for the following address: ' + custNm3);
+          } else if (custNm4 != '') {
+            return new ValidationResult(null, false, 'Please fill out Street address_Korean for the following address: ' + custNm4);
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function setAddrFieldMandatory(id, fieldId, fieldLblDesc) {
+  FormManager.show(fieldId, id);
+  FormManager.addValidator(id, Validators.REQUIRED, [fieldLblDesc]);
+}
+
+function setAddrFieldsMandatoryForUpdtReq() {
+  if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'updateAddress') {
+    setAddrFieldMandatory('custNm3', 'CustomerName3', 'Customer Name_Korean');
+    setAddrFieldMandatory('custNm4', 'CustomerName4', 'Street address_Korean');
+  }
+}
+
+function canRemoveAddress(value, rowIndex, grid) {
+  console.log('>>>> canRemoveAddress >>>>');
+  var rowData = grid.getItem(rowIndex);
+  var importInd = rowData.importInd[0];
+  var reqType = FormManager.getActualValue('reqType');
+  if ('U' == reqType && 'Y' == importInd) {
+    return false;
+  }
+  return true;
+}
+
+function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
+  return canRemoveAddress(value, rowIndex, grid);
+}
+
+// Customer Name_Korean
+function convertCustNmKRToDBCS() {
+  dojo.connect(FormManager.getField('custNm3'), 'onChange', function (value) {
+    var custNmKr = FormManager.getActualValue('custNm3');
+
+    FormManager.setValue('custNm3', convert2DBCSIgnoreCase(custNmKr));
+    custNmKr = FormManager.getActualValue('custNm3');
+  });
+}
+
+// Customer Name_Korean Continue
+function convertCustNmKRContToDBCS() {
+  dojo.connect(FormManager.getField('billingPstlAddr'), 'onChange', function (value) {
+    var custNmKRCont = FormManager.getActualValue('billingPstlAddr');
+
+    FormManager.setValue('billingPstlAddr', convert2DBCSIgnoreCase(custNmKRCont));
+    custNmKRCont = FormManager.getActualValue('billingPstlAddr');
+  });
+}
+
+// Street address_Korean
+function convertStAddrKRToDBCS() {
+  dojo.connect(FormManager.getField('custNm4'), 'onChange', function (value) {
+    var stAddrKR = FormManager.getActualValue('custNm4');
+
+    FormManager.setValue('custNm4', convert2DBCSIgnoreCase(stAddrKR));
+    stAddrKR = FormManager.getActualValue('custNm4');
+  });
+}
+
+// Street address_Korean Continue
+function convertStAddrKRContContToDBCS() {
+  dojo.connect(FormManager.getField('divn'), 'onChange', function (value) {
+    var stAddrKRCont = FormManager.getActualValue('divn');
+
+    FormManager.setValue('divn', convert2DBCSIgnoreCase(stAddrKRCont));
+    stAddrKRCont = FormManager.getActualValue('divn');
+  });
+}
+
+function addCustNmAndStAddrKRLenghtValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var custNmKR = FormManager.getActualValue('custNm3');
+        var custNmKRCont = FormManager.getActualValue('billingPstlAddr');
+
+        var stAddrKR = FormManager.getActualValue('custNm4');
+        var stAddrKRCont = FormManager.getActualValue('divn');
+
+        if (custNmKR.length > 23) {
+          return new ValidationResult(null, false, "Customer Name_Korean should be 23 double-byte characters max.");
+        } else if (custNmKRCont.length > 23) {
+          return new ValidationResult(null, false, "Customer Name_Korean Continue should be 23 double-byte characters max.");
+        }
+
+        if (stAddrKR.length > 23) {
+          return new ValidationResult(null, false, "Street address_Korean should be 23 double-byte characters max.");
+        } else if (stAddrKRCont.length > 23) {
+          return new ValidationResult(null, false, "Street address_Korean Continue should be 23 double-byte characters max.");
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -785,6 +1224,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.KR);
   FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4', 'contact', 'dept', 'poBoxCity', 'countyName' ]);
+  GEOHandler.addToggleAddrTypeFunction(setLockUnlockSeqNum, GEOHandler.KR);
+  GEOHandler.registerValidator(addSeqNumFormatValidator, GEOHandler.KR);
+  GEOHandler.registerValidator(addSeqNumDuplicateValidator, GEOHandler.KR);
 
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
   GEOHandler.registerValidator(validateCustnameForKynd, GEOHandler.KR);
@@ -801,12 +1243,23 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.KR);
+
+  GEOHandler.registerValidator(addCustNmAndStAddrKRLenghtValidator, [SysLoc.KOREA], null, true);
+
+  GEOHandler.addAddrFunction(setAddrFieldsMandatoryForUpdtReq, GEOHandler.KR);
+  GEOHandler.addToggleAddrTypeFunction(addSingleByteValidatorKR, GEOHandler.KR);
+  GEOHandler.addToggleAddrTypeFunction(convertCustNmKRToDBCS, GEOHandler.KR);
+  GEOHandler.addToggleAddrTypeFunction(convertCustNmKRContToDBCS, GEOHandler.KR);
+  GEOHandler.addToggleAddrTypeFunction(convertStAddrKRToDBCS, GEOHandler.KR);
+  GEOHandler.addToggleAddrTypeFunction(convertStAddrKRContContToDBCS, GEOHandler.KR);
   
-//  GEOHandler.addAfterConfig(setInacNacValues, GEOHandler.KR);
-//  GEOHandler.addAfterTemplateLoad(setInacNacValues, GEOHandler.KR);
+// GEOHandler.addAfterConfig(setInacNacValues, GEOHandler.KR);
+// GEOHandler.addAfterTemplateLoad(setInacNacValues, GEOHandler.KR);
   GEOHandler.addAfterConfig(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(getIsuFromIsic, GEOHandler.KR);
   GEOHandler.addAfterConfig(setCTCIsuMrcByCluster, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(setCTCIsuMrcByCluster, GEOHandler.KR);
+
+  GEOHandler.registerValidator(addKRAddressGridValidator, [SysLoc.KOREA], null, true);
   
 });

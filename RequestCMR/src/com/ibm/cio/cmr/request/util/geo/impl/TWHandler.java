@@ -57,10 +57,16 @@ public class TWHandler extends GEOHandler {
   private static final boolean RETRIEVE_INVALID_CUSTOMERS = true;
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
+  private static Map<String, String> TW_ADDR_SEQ = new HashMap<>();
 
   static {
 
     LANDED_CNTRY_MAP.put(SystemLocation.TAIWAN, "TW");
+
+    TW_ADDR_SEQ.put("ZS01", "B");
+    TW_ADDR_SEQ.put("ZP01", "C");
+    TW_ADDR_SEQ.put("ZP02", "D");
+    TW_ADDR_SEQ.put("ZI01", "E");
 
   }
 
@@ -80,6 +86,8 @@ public class TWHandler extends GEOHandler {
     data.setDunsNo(mainRecord.getCmrDuns() == null ? mainRecord.getCmrDuns() : mainRecord.getCmrDuns().trim());
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode() == null ? mainRecord.getInvoiceSplitCode() : mainRecord.getInvoiceSplitCode().trim());
+    data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "");
+    data.setOrdBlk(mainRecord.getCmrOrderBlock() != null ? mainRecord.getCmrOrderBlock() : "");
 
     // jira 2567
     String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();
@@ -102,20 +110,20 @@ public class TWHandler extends GEOHandler {
         : currentRecord.getCmrIntlName1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
     address.setCustNm4(currentRecord.getCmrIntlName2() == null ? currentRecord.getCmrIntlName2()
         : currentRecord.getCmrIntlName2().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
-
-    String strAdd1 = ((currentRecord.getCmrName4() == null ? "" : currentRecord.getCmrName4().trim()) + " "
-        + (currentRecord.getCmrStreetAddress() == null ? "" : currentRecord.getCmrStreetAddress().trim()) + " "
-        + (currentRecord.getCmrCity2() == null ? "" : currentRecord.getCmrCity2().trim())).trim();
-
-    String strAdd2 = ((currentRecord.getCmrCity() == null ? "" : currentRecord.getCmrCity().trim()) + " "
-        + (currentRecord.getCmrCountryLanded() == null ? "" : currentRecord.getCmrCountryLanded().trim())).trim();
-
-    splitAddress(address, strAdd1, strAdd2, 60, 60);
-
+    address
+        .setAddrTxt(currentRecord.getCmrStreetAddress() == null ? currentRecord.getCmrStreetAddress() : currentRecord.getCmrStreetAddress().trim());
+    address.setAddrTxt2(
+        currentRecord.getCmrStreetAddressCont() == null ? currentRecord.getCmrStreetAddressCont() : currentRecord.getCmrStreetAddressCont().trim());
     address.setDept(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1()
         : currentRecord.getCmrIntlCity1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
     address.setBldg(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2()
         : currentRecord.getCmrIntlCity2().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
+
+    if (currentRecord != null) {
+      LOG.info("paired seq no before: " + address.getPairedAddrSeq());
+      address.setPairedAddrSeq(currentRecord.getTransAddrNo());
+      LOG.info("paired seq no after: " + address.getPairedAddrSeq());
+    }
   }
 
   @Override
@@ -143,6 +151,22 @@ public class TWHandler extends GEOHandler {
         mv.addObject("originatorId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
       }
     }
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      newAddrSeq = getNewPrimaryAddressSeq(entityManager, reqId, addrType);
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewPrimaryAddressSeq(EntityManager entityManager, long reqId, String addrType) {
+    String newAddrSeq = "";
+    newAddrSeq = TW_ADDR_SEQ.get(addrType);
+    return newAddrSeq;
   }
 
   @Override
@@ -204,7 +228,7 @@ public class TWHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM4", "ADDR_TXT", "CITY1", "STATE_PROV", "POST_CD", "LAND_CNTRY"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM4", "ADDR_TXT", "STATE_PROV", "CITY1", "CITY2", "POST_CD", "LAND_CNTRY"));
     return fields;
   }
 
@@ -259,61 +283,6 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getOrgNo(), "OriginatorNo", cmrCountry));
       results.add(update);
     }
-
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getCommercialFinanced(),
-    // newData.getCommercialFinanced())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry,
-    // "CommercialFinanced", "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(),
-    // "CommercialFinanced", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(),
-    // "CommercialFinanced", cmrCountry));
-    // results.add(update);
-    // }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getCsBo(), newData.getCsBo())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "CSBOCd", "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getCsBo(),
-    // "CSBOCd", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getCsBo(),
-    // "CSBOCd", cmrCountry));
-    // results.add(update);
-    // }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getContactName2(), newData.getContactName2())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "ContactName2",
-    // "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getContactName2(),
-    // "ContactName2", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getContactName2(),
-    // "ContactName2", cmrCountry));
-    // results.add(update);
-    // }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getEmail1(), newData.getEmail1())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "Email1", "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getEmail1(),
-    // "Email1", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getEmail1(),
-    // "Email1", cmrCountry));
-    // results.add(update);
-    // }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getContactName1(), newData.getContactName1())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "ContactName1",
-    // "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getContactName1(),
-    // "ContactName1", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getContactName1(),
-    // "ContactName1", cmrCountry));
-    // results.add(update);
-    // }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName3(), newData.getContactName3())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "ContactName3", "-"));
@@ -321,46 +290,6 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getContactName3(), "ContactName3", cmrCountry));
       results.add(update);
     }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getBpName(), newData.getBpName())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "BPName", "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getBpName(),
-    // "BPName", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getBpName(),
-    // "BPName", cmrCountry));
-    // results.add(update);
-    // }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getEmail2(), newData.getEmail2())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "Email2", "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getEmail2(),
-    // "Email2", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getEmail2(),
-    // "Email2", cmrCountry));
-    // results.add(update);
-    // }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getBusnType(), newData.getBusnType())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "BusnType", "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getBusnType(),
-    // "BusnType", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getBusnType(),
-    // "BusnType", cmrCountry));
-    // results.add(update);
-    // }
-    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
-    // !equals(oldData.getAffiliate(), newData.getAffiliate())) {
-    // update = new UpdatedDataModel();
-    // update.setDataField(PageManager.getLabel(cmrCountry, "Affiliate", "-"));
-    // update.setNewData(service.getCodeAndDescription(newData.getAffiliate(),
-    // "Affiliate", cmrCountry));
-    // update.setOldData(service.getCodeAndDescription(oldData.getAffiliate(),
-    // "Affiliate", cmrCountry));
-    // results.add(update);
-    // }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmail3(), newData.getEmail3())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Email3", "-"));
@@ -425,7 +354,13 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getGeoLocCd(), "GeoLocationCode", cmrCountry));
       results.add(update);
     }
-
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getOrdBlk(), "OrdBlk", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrdBlk", cmrCountry));
+      results.add(update);
+    }
   }
 
   /**
@@ -641,8 +576,13 @@ public class TWHandler extends GEOHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ABBREV_LOCN"));
+        "DUNS_NO", "ABBREV_LOCN", "MRC_CD", "COLLECTION_CD", "ORD_BLK"));
     return fields;
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    return getDataFieldsForUpdateCheck(cmrIssuingCntry);
   }
 
   public static boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
@@ -851,8 +791,13 @@ public class TWHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-            if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
-              // RETURN ONLY THE SOLD-TO ADDRESS FOR CREATES
+            if (("ZS01".equals(tempRec.getCmrAddrTypeCode()) && (StringUtils.isBlank(tempRec.getCmrOrderBlock())))
+                || ("ZS01".equals(tempRec.getCmrAddrTypeCode()) && (tempRec.getCmrOrderBlock().equals("75")))) {
+              boolean isProspects = tempRec != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(tempRec.getCmrOrderBlock());
+              if (isProspects) {
+                tempRec.setCmrAddrSeq("B");
+              }
+              tempRec.setCmrAddrTypeCode("ZS01");
               recordsToReturn.add(tempRec);
             }
           }
@@ -885,4 +830,10 @@ public class TWHandler extends GEOHandler {
     return true;
   }
 
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
 }

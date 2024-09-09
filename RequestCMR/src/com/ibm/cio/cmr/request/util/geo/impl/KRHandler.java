@@ -108,6 +108,9 @@ public class KRHandler extends GEOHandler {
      */
 
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
+
+    data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "");
+    data.setOrdBlk(mainRecord.getCmrOrderBlock() != null ? mainRecord.getCmrOrderBlock() : "");
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // ?Representative(CEO) name in business license?
     // data.setContactName1(mainRecord.getUsCmrRestrictTo());
@@ -163,6 +166,18 @@ public class KRHandler extends GEOHandler {
     address.setDept(currentRecord.getCmrDept() == null ? currentRecord.getCmrDept() : currentRecord.getCmrDept().trim());
     address.setPoBoxPostCd(
         currentRecord.getCmrPOBoxPostCode() == null ? currentRecord.getCmrPOBoxPostCode() : currentRecord.getCmrPOBoxPostCode().trim());
+
+    LOG.debug("KRHandler Address Import Ind: " + address.getImportInd());
+    LOG.debug("KRHandler Admin Req Type: " + admin.getReqType());
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || ("D".equals(address.getImportInd()))) {
+      LOG.debug("Setting location code before: " + address.getLocationCode());
+      LOG.debug("Sequence: " + address.getId().getAddrSeq());
+      address.setLocationCode(address.getId().getAddrSeq());
+    }
+
+    LOG.debug("KRHandler Setting location code after: " + address.getLocationCode());
+
   }
 
   @Override
@@ -267,6 +282,17 @@ public class KRHandler extends GEOHandler {
       String countyName = addr.getCountyName();
       addr.setCountyName(countyName.substring(1));
     }
+
+    if (StringUtils.isNotBlank(addr.getLocationCode()) && "ZP01".equals(addr.getId().getAddrType())) {
+      String locCd = addr.getLocationCode();
+      LOG.debug("LOCATION Code on Addr Save" + locCd);
+      addr.getId().setAddrSeq(locCd);
+    } else {
+      String seqNo = addr.getId().getAddrSeq();
+      LOG.debug("Sequence No. " + seqNo);
+      addr.setLocationCode(seqNo);
+    }
+
   }
 
   @Override
@@ -386,6 +412,20 @@ public class KRHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "SearchTerm", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getSearchTerm(), "SearchTerm", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getSearchTerm(), "SearchTerm", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "CollectionCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "CollectionCd", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrdBlk", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getOrdBlk(), "OrdBlk", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrdBlk", cmrCountry));
       results.add(update);
     }
   }
@@ -717,8 +757,13 @@ public class KRHandler extends GEOHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ABBREV_LOCN"));
+        "DUNS_NO", "ABBREV_LOCN", "MRC_CD", "COLLECTION_CD", "ORD_BLK"));
     return fields;
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    return getDataFieldsForUpdateCheck(cmrIssuingCntry);
   }
 
   public static boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
@@ -920,8 +965,13 @@ public class KRHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-            if (tempRec.getCmrAddrTypeCode() != null && tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
-              // RETURN ONLY THE SOLD-TO ADDRESS FOR CREATES
+            if (("ZS01".equals(tempRec.getCmrAddrTypeCode()) && (StringUtils.isBlank(tempRec.getCmrOrderBlock())))
+                || ("ZS01".equals(tempRec.getCmrAddrTypeCode()) && (tempRec.getCmrOrderBlock().equals("75")))) {
+              boolean isProspects = tempRec != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(tempRec.getCmrOrderBlock());
+              if (isProspects) {
+                tempRec.setCmrAddrSeq("L00");
+              }
+              tempRec.setCmrAddrTypeCode("ZS01");
               recordsToReturn.add(tempRec);
             }
           }
@@ -1074,4 +1124,32 @@ public class KRHandler extends GEOHandler {
     originatorIdInAdmin = admin.getOriginatorId();
     return originatorIdInAdmin;
   };
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    switch (addrType) {
+    case "ZS01":
+      newAddrSeq = "L00";
+      break;
+    case "ZI01":
+      newAddrSeq = "I00";
+      break;
+    case "ZD01":
+      newAddrSeq = "D00";
+      break;
+    default:
+      newAddrSeq = "";
+      LOG.debug("Addr Type: " + addrType + ", has no default address sequence.");
+    }
+    return newAddrSeq;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
 }
