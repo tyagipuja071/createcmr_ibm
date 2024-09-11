@@ -148,7 +148,7 @@ dojo.addOnLoad(function(){
     	
      <!-- Sales Rep No, Cmr No Prefix, IBM Collection Responsibility -->
     	<cmr:row topPad="10">
-  		  <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="796">
+		  <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="796,736,738">
       		<p>
         	  <cmr:label fieldId="repTeamMemberNo">
           	    <cmr:fieldLabel fieldId="SalRepNameNo" />:<cmr:info text="No impact on CMR/account owner, just AP CMR legacy system(WTAAS) requirement. "></cmr:info> 
@@ -175,6 +175,9 @@ dojo.addOnLoad(function(){
       		<p>
         	  <cmr:label fieldId="collectionCd">
         	    <cmr:fieldLabel fieldId="CollectionCd" />: 
+				<cmr:view forCountry="736,738">
+					<cmr:info text="For AR Team use and update only."></cmr:info>
+				</cmr:view>
            	    <cmr:delta text="${rdcdata.collectionCd}" oldValue="${reqentry.collectionCd}" id="delta-engineeringBo" />
         	  </cmr:label>
         	  <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
