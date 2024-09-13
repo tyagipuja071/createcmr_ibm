@@ -180,6 +180,10 @@ public class AutomationEngine {
     int lastElementIndex = 0;
 
     boolean hasOverrideOrMatchingApplied = false;
+    
+    ScorecardPK scorecardPk = new ScorecardPK();
+    scorecardPk.setReqId(reqId);
+    Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
 
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
@@ -302,6 +306,10 @@ public class AutomationEngine {
         if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
           isUsOtherChecksFailed = true;
         }
+        
+        if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
+          isUsOtherChecksFailed = true;
+        }
 
         LOG.trace("Result for " + element.getProcessDesc() + ": " + result.getResults());
         LOG.trace(" - " + result.getDetails());
@@ -368,6 +376,12 @@ public class AutomationEngine {
         LOG.trace("Skipping element " + element.getProcessDesc() + " for request type " + reqType);
       }
       lastElementIndex++;
+    }
+    
+    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+      if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
+        isUsWatsonxSkipToPcp = true;
+      }
     }
 
     boolean sccIsValid = false;
