@@ -237,6 +237,7 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
             <form:option value="MD">Swiss Processing</form:option>
             <form:option value="FR">France Processing</form:option>
             <form:option value="US">US Processing</form:option>
+            <form:option value="MW">Manual Write</form:option>
           </form:select>
           </p>
         </cmr:column>

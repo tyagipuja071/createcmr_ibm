@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,13 +14,33 @@ import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
+import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasAddress;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Address;
+import com.ibm.cio.cmr.request.util.wtaas.WtaasRecord;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.WtaasClient;
+import com.ibm.cmr.services.client.wtaas.WtaasQueryRequest;
+import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
 
 /**
  * {@link GEOHandler} for:
@@ -39,7 +60,9 @@ import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Address;
  * @author JeffZAMORA
  * 
  */
-public class ASEANHandler extends APHandler {
+public class ASEANSunsetHandler extends APHandler {
+
+  private static final Logger LOG = Logger.getLogger(ASEANSunsetHandler.class);
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
   private static final String[] ID_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
@@ -50,6 +73,11 @@ public class ASEANHandler extends APHandler {
   private static final String[] BN_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] MY_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5" };
   private static final String[] MM_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4" };
+
+  private static Map<String, String> ASEAN_SEQ_1 = new HashMap<>();
+  private static Map<String, String> ASEAN_SEQ_2 = new HashMap<>();
+
+  private static final String GRP1_SOLD_TO_FIXED_SEQ = "AA";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.BRUNEI, "BN");
@@ -62,6 +90,23 @@ public class ASEANHandler extends APHandler {
     LANDED_CNTRY_MAP.put(SystemLocation.MYANMAR, "MM");
     LANDED_CNTRY_MAP.put(SystemLocation.LAOS, "LA");
     LANDED_CNTRY_MAP.put(SystemLocation.CAMBODIA, "KH");
+
+    // NOTE: Key = CREQCMR addr type
+    // ZS01 Mailing
+    // ZP01 Billing
+    // ZI01 Installing
+    // ZH01 Shipping
+    // ZP02 Software
+
+    ASEAN_SEQ_1.put("ZS01", "AA");
+    ASEAN_SEQ_1.put("ZP01", "BB");
+    ASEAN_SEQ_1.put("ZI01", "CC");
+    ASEAN_SEQ_1.put("ZH01", "DD");
+    ASEAN_SEQ_1.put("ZP02", "EE");
+
+    ASEAN_SEQ_2.put("ZS01", "AA");
+    ASEAN_SEQ_2.put("ZP01", "BB");
+    ASEAN_SEQ_2.put("ZP02", "EE");
   }
 
   public static void main(String[] args) {
@@ -80,7 +125,7 @@ public class ASEANHandler extends APHandler {
     // address.getValues().put(Address.Line6, "<SRI LANKA> 12345");
 
     FindCMRRecordModel record = new FindCMRRecordModel();
-    ASEANHandler handler = new ASEANHandler();
+    ASEANSunsetHandler handler = new ASEANSunsetHandler();
     handler.handleWTAASAddressImport(null, SystemLocation.PHILIPPINES, null, record, address);
 
     record = new FindCMRRecordModel();
@@ -91,6 +136,256 @@ public class ASEANHandler extends APHandler {
     System.out.println("Street: " + record.getCmrStreetAddress());
     System.out.println("Street Con't: " + record.getCmrStreetAddressCont());
     System.out.println("Dept: " + record.getCmrDept());
+
+  }
+
+  @Override
+  public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
+      throws Exception {
+    LOG.debug("Converting search results to WTAAS equivalent..");
+    FindCMRRecordModel mainRecord = source.getItems() != null && !source.getItems().isEmpty() ? source.getItems().get(0) : null;
+    if (mainRecord != null) {
+      boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+      if (!prospectCmrChosen) {
+        this.currentRecord = retrieveWTAASValues(mainRecord);
+        if (this.currentRecord != null) {
+
+          List<WtaasAddress> wtaasAddresses = this.currentRecord.uniqueAddresses();
+
+          if (wtaasAddresses != null && !wtaasAddresses.isEmpty()) {
+
+            String zs01AddressUse = getZS01AddressUse(mainRecord.getCmrIssuedBy());
+            FindCMRRecordModel record = null;
+            List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
+            // import only ZS01 from RDC for Create request
+            if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+              LOG.info("CREATE import");
+              LOG.debug(" - Main address, importing from FindCMR main record.");
+              // will import ZS01 from RDc directly
+              record = mainRecord;
+              record.setCmrAddrSeq(GRP1_SOLD_TO_FIXED_SEQ);
+              handleRDcRecordValues(record);
+              converted.add(record);
+            } else {
+              LOG.info("UPDATE import");
+              LOG.info("wtaasAddresses size: " + wtaasAddresses.size());
+              // only create the actual number of addresses in wtaas
+              for (WtaasAddress wtaasAddress : wtaasAddresses) {
+                LOG.debug("WTAAS Addr No: " + wtaasAddress.getAddressNo() + " Use: " + wtaasAddress.getAddressUse());
+                if (!wtaasAddress.getAddressUse().contains(zs01AddressUse)) {
+                  LOG.debug(" - Additional address, checking RDC equivalent..");
+                  record = locateRdcRecord(source, wtaasAddress);
+
+                  if (record != null) {
+                    LOG.debug(" - RDC equivalent found with type = " + record.getCmrAddrTypeCode() + " seq = " + record.getCmrAddrSeq()
+                        + ", using directly");
+                    handleRDcRecordValues(record);
+                  } else {
+                    // create a copy of the main record, to preserve data fields
+                    LOG.debug(" - not found. parsing WTAAS data..");
+                    record = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(record, mainRecord);
+
+                    // clear the address values
+                    record.setCmrName1Plain(null);
+                    record.setCmrName2Plain(null);
+                    record.setCmrName3(null);
+                    record.setCmrName4(null);
+                    record.setCmrDept(null);
+                    record.setCmrCity(null);
+                    record.setCmrState(null);
+                    record.setCmrCountryLanded(null);
+                    record.setCmrStreetAddress(null);
+                    record.setCmrStreetAddressCont(null);
+                    record.setCmrSapNumber(null);
+
+                    // handle here the different mappings
+                    handleWTAASAddressImport(entityManager, record.getCmrIssuedBy(), mainRecord, record, wtaasAddress);
+                    String supportedAddrType = getAddrTypeForWTAASAddrUse(record.getCmrIssuedBy(), wtaasAddress.getAddressUse());
+                    if (supportedAddrType != null) {
+                      record.setCmrAddrTypeCode(supportedAddrType);
+                    }
+                    LOG.info("address not found in RDC. setting sequence from wtaas: " + wtaasAddress.getAddressNo());
+                    record.setCmrAddrSeq(wtaasAddress.getAddressNo());
+                  }
+                  LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
+                  record.setTransAddrNo(wtaasAddress.getAddressNo());
+
+                  if (shouldAddWTAASAddess(record.getCmrIssuedBy(), wtaasAddress)) {
+                    converted.add(record);
+                  }
+                } else {
+                  LOG.debug(" - Main address, importing from FindCMR main record.");
+                  // will import ZS01 from RDc directly
+                  LOG.info("Setting paired seq to: " + wtaasAddress.getAddressNo());
+                  mainRecord.setTransAddrNo(wtaasAddress.getAddressNo());
+
+                  handleRDcRecordValues(mainRecord);
+                  converted.add(mainRecord);
+                }
+              }
+            }
+
+            doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
+            Collections.sort(converted);
+            source.setItems(converted);
+          }
+        }
+      } else {
+        FindCMRRecordModel record = null;
+        List<FindCMRRecordModel> converted = new ArrayList<FindCMRRecordModel>();
+        LOG.debug(" - Main address, importing from FindCMR main record.");
+        // will import ZS01 from RDc directly
+        LOG.info("Main Record Addr Type: " + mainRecord.getCmrAddrType());
+
+        record = mainRecord;
+
+        LOG.info("Is Prospect: " + prospectCmrChosen);
+        if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType()) && prospectCmrChosen) {
+          record.setCmrAddrSeq(GRP1_SOLD_TO_FIXED_SEQ);
+          LOG.info("Sequence Number: " + record.getCmrAddrSeq());
+        }
+        handleRDcRecordValues(record);
+        converted.add(record);
+        doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
+        Collections.sort(converted);
+        source.setItems(converted);
+      }
+    }
+  }
+
+  @Override
+  public void doAfterConvert(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel,
+      List<FindCMRRecordModel> converted) {
+    // / add extra Rdc imports
+    LOG.info("Calling doAfterConvert");
+
+    LOG.info("Importing RDc records..");
+    for (FindCMRRecordModel record : source.getItems()) {
+      LOG.info("Before Mapped Addrtype: " + record.getCmrAddrTypeCode());
+      LOG.info("TransAddressNo Orig: " + record.getTransAddrNo());
+
+      if (StringUtils.isBlank(record.getTransAddrNo()) && StringUtils.isNotBlank(record.getCmrAddrSeq())) {
+
+        // it reached this logic so it means this is RDC only address not
+        // present in wtaas
+        if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType()) && SystemLocation.INDONESIA.equals(record.getCmrIssuedBy())) {
+          LOG.info("Marking X for wtaas logic new create");
+          record.setTransAddrNo("X");
+        } else {
+          record.setTransAddrNo(record.getCmrAddrSeq());
+        }
+      }
+      LOG.info("TransAddressNo After: " + record.getTransAddrNo());
+
+      String addrType = getMappedAddressType(record.getCmrIssuedBy(), record.getCmrAddrTypeCode(), record.getCmrAddrSeq());
+
+      LOG.info("After Mapped Addrtype: " + addrType);
+
+      if (addrType != null && !"ZS01".equals(addrType) && CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
+        handleRDcRecordValues(record);
+        record.setCmrAddrTypeCode(addrType);
+        converted.add(record);
+        LOG.info("ADDED Addr Type: " + addrType);
+      }
+      LOG.info("ASEAN getCmrAddrSeq: " + record.getCmrAddrSeq());
+      LOG.info("ASEAN getCmrName4: " + record.getCmrName4());
+      LOG.info("ASEAN getCmrStreetAddress: " + record.getCmrStreetAddress());
+      LOG.info("ASEAN getCmrCity: " + record.getCmrCity());
+      LOG.info("ASEAN getCmrName4: " + record.getCmrName4());
+    }
+  }
+
+  private String getZS01AddressUse(String country) {
+    switch (country) {
+    case SystemLocation.AUSTRALIA:
+      return "B"; // contract
+    case SystemLocation.NEW_ZEALAND:
+      return "3"; // install
+    case SystemLocation.BANGLADESH:
+      return "1"; // mailing
+    case SystemLocation.INDONESIA:
+      return "1"; // mailing
+    case SystemLocation.PHILIPPINES:
+      return "1"; // mailing
+    case SystemLocation.SINGAPORE:
+      return "1"; // mailing
+    case SystemLocation.VIETNAM:
+      return "1"; // mailing
+    case SystemLocation.THAILAND:
+      return "1"; // mailing
+    case SystemLocation.BRUNEI:
+      return "1"; // mailing
+    case SystemLocation.MALAYSIA:
+      return "1"; // mailing
+    case SystemLocation.MYANMAR:
+      return "1"; // mailing
+    case SystemLocation.SRI_LANKA:
+      return "1"; // mailing
+    case SystemLocation.INDIA:
+      return "1"; // mailing
+    case SystemLocation.MACAO:
+      return "3"; // installing
+    case SystemLocation.HONG_KONG:
+      return "3"; // installing
+    case SystemLocation.TAIWAN:
+      return "B"; // legal address
+    case SystemLocation.KOREA:
+      return "B"; // ??
+
+    default:
+      return null;
+    }
+
+  }
+
+  private FindCMRRecordModel locateRdcRecord(FindCMRResultModel source, WtaasAddress address) {
+    String addrType = null;
+    String addrUse = null;
+    for (FindCMRRecordModel record : source.getItems()) {
+      addrType = getMappedAddressType(record.getCmrIssuedBy(), record.getCmrAddrTypeCode(), record.getCmrAddrSeq());
+      if (!StringUtils.isEmpty(addrType)) {
+        // it's mapped in createcmr, check equivalent address use if the wtaas
+        // address has this use
+        addrUse = getMappedAddressUse(record.getCmrIssuedBy(), addrType);
+        if (!StringUtils.isEmpty(addrUse) && address.getAddressUse().contains(addrUse)) {
+          record.setCmrAddrTypeCode(addrType);
+          return record;
+        }
+      }
+    }
+    return null;
+  }
+
+  private WtaasRecord retrieveWTAASValues(FindCMRRecordModel mainRecord) throws Exception {
+    String cmrIssuingCntry = mainRecord.getCmrIssuedBy();
+    String cmrNo = mainRecord.getCmrNum();
+
+    try {
+      WtaasClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"), WtaasClient.class);
+
+      WtaasQueryRequest request = new WtaasQueryRequest();
+      request.setCmrNo(cmrNo);
+      request.setCountry(cmrIssuingCntry);
+
+      WtaasQueryResponse response = client.executeAndWrap(WtaasClient.QUERY_ID, request, WtaasQueryResponse.class);
+      if (response == null || !response.isSuccess()) {
+        LOG.warn("Error or no response from WTAAS query.");
+        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new Exception("Error or no response from WTAAS query."));
+      }
+      if ("F".equals(response.getData().get("Status"))) {
+        LOG.warn("Customer " + cmrNo + " does not exist in WTAAS.");
+        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new Exception("Customer " + cmrNo + " does not exist in WTAAS."));
+      }
+
+      WtaasRecord record = WtaasRecord.createFrom(response);
+      // record = WtaasRecord.dummy();
+      return record;
+
+    } catch (Exception e) {
+      LOG.warn("An error has occurred during retrieval of the values.", e);
+      throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, e);
+    }
 
   }
 
@@ -734,6 +1029,7 @@ public class ASEANHandler extends APHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##RegionCode", "miscBillCd");
+    map.put("##OrdBlk", "ordBlk");
     return map;
   }
 
@@ -741,4 +1037,69 @@ public class ASEANHandler extends APHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      // For Primary Address
+      newAddrSeq = getNewPrimaryAddressSeq(entityManager, reqId, addrType, cmrIssuingCntry);
+
+      // maybe separate logic for additional addresses
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewPrimaryAddressSeq(EntityManager entityManager, long reqId, String addrType, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+    switch (cmrIssuingCntry) {
+    // case SystemLocation.BANGLADESH: this is in ISAHandler
+    case SystemLocation.INDONESIA:
+    case SystemLocation.PHILIPPINES:
+    case SystemLocation.SINGAPORE:
+    case SystemLocation.VIETNAM:
+    case SystemLocation.THAILAND:
+      newAddrSeq = ASEAN_SEQ_1.get(addrType);
+      break;
+    case SystemLocation.BRUNEI:
+    case SystemLocation.MALAYSIA:
+      newAddrSeq = ASEAN_SEQ_2.get(addrType);
+      break;
+    default:
+      newAddrSeq = "";
+      break;
+    }
+    return newAddrSeq;
+  }
+
+  @Override
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    LOG.info("setAddressValuesOnImport");
+
+    if (currentRecord != null) {
+      LOG.info("paired seq no before: " + address.getPairedAddrSeq());
+      address.setPairedAddrSeq(currentRecord.getTransAddrNo());
+      LOG.info("paired seq no after: " + address.getPairedAddrSeq());
+
+      super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
+    }
+  }
+
+  @Override
+  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
+      List<UpdatedDataModel> results) {
+
+    UpdatedDataModel update = null;
+
+    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
+  }
+
 }

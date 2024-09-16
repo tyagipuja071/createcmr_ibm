@@ -185,8 +185,14 @@ function addAfterConfigAP() {
   _clusterHandlerINDONESIA = 0;
   // CREATCMR-7883-7884
   _inacHandlerANZSG = 0;
+
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+  }
+
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.enable('mrcCd');
   }
 
   if (cntry == '834' && reqType == 'C' && role == 'REQUESTER' && custType == 'CROSS' && custSubGrp == 'SPOFF') {
@@ -199,22 +205,24 @@ function addAfterConfigAP() {
     FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, ['CmrNoPrefix'], 'MAIN_IBM_TAB');
   }
 
-  if (FormManager.getActualValue('viewOnlyPage') == 'true')
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('repTeamMemberName');
-  FormManager.readOnly('isbuCd');
+    FormManager.readOnly('isbuCd');
+    FormManager.readOnly('ordBlk');
+  }
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('isbuCd');
     if (role == 'VIEWER') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('clientTier');
+      FormManager.readOnly('subIndustryCd');
+      FormManager.readOnly('mrcCd');
     }
+    FormManager.readOnly('isbuCd');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
-    FormManager.readOnly('subIndustryCd');
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
@@ -294,10 +302,6 @@ function addAfterConfigAP() {
       FormManager.enable('inacCd');
 
     }
-  }
-
-  if (reqType == 'U' && ((cntry == '834' || cntry == '749'))) {
-    FormManager.readOnly('isicCd');
   }
 
   if (reqType == 'C' && custGrp == 'CROSS' && cntry == '736') {
@@ -536,8 +540,6 @@ function setInacByCluster() {
       console.log('>>> setInacByCluster >>> arr = ' + arr);
       if (inacList.length == 1) {
         FormManager.setValue('inacCd', arr[0]);
-        FormManager.readOnly('inacType');
-        FormManager.readOnly('inacCd');
       } else {
         FormManager.enable('inacType');
         FormManager.enable('inacCd');
@@ -1462,6 +1464,7 @@ function onCustSubGrpChange() {
       resetFieldsAfterCustSubGrpChange();
     }
 
+    setKUKLAvaluesID();
 
   });
 }
@@ -2572,6 +2575,7 @@ function onSubIndustryChange() {
     if (value != null && value.length > 1) {
       updateIndustryClass();
       addSectorIsbuLogicOnSubIndu();
+      setKUKLAvaluesID();
     }
   });
   if (_subIndCdHandler && _subIndCdHandler[0]) {
@@ -2727,8 +2731,6 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
   } else {
-    FormManager.readOnly('isicCd');
-    FormManager.readOnly('subIndustryCd');
     switch (custSubGrp) {
       case 'PRIV':
         // ISIC = 9500, - lock field
@@ -3303,7 +3305,6 @@ function updateMRCAseanAnzIsa() {
       console.log('>>>> updateMRCAseanAnzIsa >>>> 834/SG >>>> 00000/INTER/DUMMY >>>> SET mrcCd=2 >>>>');
       FormManager.setValue('mrcCd', '2');
     }
-    FormManager.readOnly('mrcCd');
   }
 }
 
@@ -5933,18 +5934,11 @@ function handleObseleteExpiredDataForUpdate() {
   }
   // lock all the coverage fields and remove validator
   if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('repTeamMemberName');
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
@@ -8597,6 +8591,63 @@ function checkCmrUpdateBeforeImport() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function setKUKLAvaluesID() {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var industryClass = FormManager.getActualValue('IndustryClass');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    return
+  }
+
+  console.log('>>>> setKUKLAvaluesID() >>>> set KUKLA values for ID >>>>');
+
+  var custSubGrp1 = new Set(['ASLOM', 'BLUMX', 'DUMMY', 'ECSYS', 'KYND', 'XASLM']);
+  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XAQST', 'CROSS']);
+  var custSubGrp3 = new Set(['BUSPR']);
+  var custSubGrp4 = new Set(['PRICU']);
+  var custSubGrp5 = new Set(['INTER']);
+
+  var industryClass1 = new Set(['G', 'H', 'Y']);
+  var industryClass2 = new Set(['E']);
+
+  var kuklaID = [];
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+    var qParams = {
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+    };
+    var results = cmr.query('GET.AP_KUKLA', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        kuklaID.push(results[i].ret1);
+      }
+    }
+
+    if (results != null) {
+      if (custSubGrp1.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaID[0]);
+      } else if (custSubGrp2.has(custSubGrp)) {
+        if (industryClass1.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaID[1]);
+        } else if (industryClass2.has(industryClass)) {
+          FormManager.setValue('custClass', kuklaID[2]);
+        } else {
+          FormManager.setValue('custClass', kuklaID[0]);
+        }
+      } else if (custSubGrp3.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaID[3]);
+      } else if (custSubGrp4.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaID[4]);
+      } else if (custSubGrp5.has(custSubGrp)) {
+        FormManager.setValue('custClass', kuklaID[5]);
+      }
+    }
+  }
 }
 
 dojo.addOnLoad(function () {

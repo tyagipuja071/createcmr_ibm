@@ -26,7 +26,7 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="CustClass" forCountry="616,796,738,736">
+    <cmr:column span="2" containerForField="CustClass" forCountry="616,796,738,736,834,744,615,749,818,852,856,652,643,778">
       <p>
         <cmr:label fieldId="custClass">
           <cmr:fieldLabel fieldId="CustClass" />:

@@ -6,8 +6,10 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -16,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -30,7 +33,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cio.cmr.request.util.wtaas.WtaasAddress;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -47,36 +49,25 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class ANZHandler extends GEOHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
-  private static final String[] NZ_SUPPORTED_ADDRESS_USES = { "1", "2", "3", "4", "5", "G", "H" };
-  private static final String[] AU_SUPPORTED_ADDRESS_USES = { "2", "B", "G", "H", "D", "3", "A", "7", "6", "5", "1" };
   private static final List<String> fields = new ArrayList<>();
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.AUSTRALIA, "AU");
     LANDED_CNTRY_MAP.put(SystemLocation.NEW_ZEALAND, "NZ");
   }
   private static final Logger LOG = Logger.getLogger(ANZHandler.class);
+  private static final String SOLD_TO_ADDR_TYPE = "ZS01";
+  private static final String BILL_TO_ADDR_TYPE = "ZP01";
+  private static final String INSTALL_AT_ADDR_TYPE = "ZI01";
+  private static final String SHIP_TO_ADDR_TYPE = "ZD01";
+
+  private static final String SOLD_TO_FIXED_SEQ_AU = "07";
+  private static final String SOLD_TO_FIXED_SEQ_NZ = "02";
+  private static final List<String> BILL_TO_FIXED_SEQ = Arrays.asList("020");
+  private static final List<String> INSTALL_AT_FIXED_SEQ_AU = Arrays.asList("050");
+  private static final List<String> INSTALL_AT_FIXED_SEQ_NZ = Arrays.asList("050");
+  private static final List<String> SHIP_TO_FIXED_SEQ = Arrays.asList("040");
 
   public static void main(String[] args) {
-  }
-
-  public boolean shouldAddWTAASAddess(String country, WtaasAddress address) {
-
-    boolean shouldAddWTAASAddr = false;
-    if (SystemLocation.AUSTRALIA.equalsIgnoreCase(country)) {
-      for (String addrUse : Arrays.asList(AU_SUPPORTED_ADDRESS_USES)) {
-        if (address.getAddressUse().contains(addrUse)) {
-          shouldAddWTAASAddr = true;
-        }
-      }
-    }
-    if (SystemLocation.NEW_ZEALAND.equalsIgnoreCase(country)) {
-      for (String addrUse : Arrays.asList(NZ_SUPPORTED_ADDRESS_USES)) {
-        if (address.getAddressUse().contains(addrUse)) {
-          shouldAddWTAASAddr = true;
-        }
-      }
-    }
-    return shouldAddWTAASAddr;
   }
 
   @Override
@@ -398,52 +389,59 @@ public class ANZHandler extends GEOHandler {
     List<FindCMRRecordModel> recordsFromSearch = source.getItems();
     List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
 
-    if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
-      doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
-      if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
-        source.setItems(filteredRecords);
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      for (FindCMRRecordModel record : recordsFromSearch) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode())) {
+          if (SystemLocation.AUSTRALIA.equals(record.getCmrIssuedBy())) {
+            record.setCmrAddrSeq(SOLD_TO_FIXED_SEQ_AU);
+          } else {
+            record.setCmrAddrSeq(SOLD_TO_FIXED_SEQ_NZ);
+          }
+          filteredRecords.add(record);
+        }
+
+        if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+            && StringUtils.isNotEmpty(record.getExtWalletId())) {
+          record.setCmrAddrTypeCode("PG01");
+          filteredRecords.add(record);
+        }
+      }
+      source.setItems(filteredRecords);
+    } else {
+      if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
+        doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
+        if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
+          source.setItems(filteredRecords);
+        }
       }
     }
-    
   }
 
   @SuppressWarnings("unchecked")
   public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
     if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
-        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
-        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
-        for (Object tempRecObj : recordsToCheck) {
-          if (tempRecObj instanceof FindCMRRecordModel) {
-            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-            String addrSeq = tempRec.getCmrAddrSeq();
-            String cmrIssuingCntry = tempRec.getCmrIssuedBy();
-            if(StringUtils.isNotEmpty(addrSeq)){
-              if( "G".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
-                tempRec.setCmrAddrTypeCode("CTYG");
-              }
-              if( "H".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
-                tempRec.setCmrAddrTypeCode("CTYH");
-              }
-              if( "03".equals(addrSeq) && CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
-                tempRec.setCmrAddrTypeCode("ZF01");
-              }
-              if (CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
-                if (StringUtils.isNotBlank(addrSeq) && "ZP01".equals(tempRec.getCmrAddrTypeCode())
-                    && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
-                  tempRec.setCmrAddrTypeCode("PG01");
-                }
-              
+      List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+      List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+      for (Object tempRecObj : recordsToCheck) {
+        if (tempRecObj instanceof FindCMRRecordModel) {
+          FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+          String addrSeq = tempRec.getCmrAddrSeq();
+          String cmrIssuingCntry = tempRec.getCmrIssuedBy();
+          if (StringUtils.isNotEmpty(addrSeq)) {
+            if (CmrConstants.ANZ_COUNTRIES.contains(cmrIssuingCntry)) {
+              if (StringUtils.isNotBlank(addrSeq) && "ZP01".equals(tempRec.getCmrAddrTypeCode())
+                  && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
+                tempRec.setCmrAddrTypeCode("PG01");
               }
             }
-
-            recordsToReturn.add(tempRec);
           }
+          recordsToReturn.add(tempRec);
         }
       }
+    }
 
   }
-  
-  
+
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
@@ -456,13 +454,13 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -472,24 +470,24 @@ public class ANZHandler extends GEOHandler {
     String name3 = currentRecord.getCmrName3();
     String name4 = currentRecord.getCmrName4();
     String stras = currentRecord.getCmrStreetAddress();
-    
-    if( StringUtils.isNotEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {
+
+    if (StringUtils.isNotEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {
       address.setAddrTxt(name4);
       address.setAddrTxt2(stras);
       address.setDept(name3.substring(4));
     }
-    
-    if( StringUtils.isEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {      
-      if(name4.contains("ATTN")) {
+
+    if (StringUtils.isEmpty(name3) && StringUtils.isNotEmpty(name4) && StringUtils.isNotEmpty(stras)) {
+      if (name4.contains("ATTN")) {
         address.setDept(name4.substring(4));
         address.setAddrTxt(stras);
-      }else {
+      } else {
         address.setAddrTxt(name4);
         address.setAddrTxt2(stras);
       }
     }
-    
-    if( StringUtils.isEmpty(name3) && StringUtils.isEmpty(name4) && StringUtils.isNotEmpty(stras)) {      
+
+    if (StringUtils.isEmpty(name3) && StringUtils.isEmpty(name4) && StringUtils.isNotEmpty(stras)) {
       address.setAddrTxt(stras);
     }
   }
@@ -507,31 +505,31 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // TODO Auto-generated method stub
-	  request.setSORTL(data.getApCustClusterId());
+    request.setSORTL(data.getApCustClusterId());
   }
 
   @Override
@@ -543,7 +541,7 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -566,15 +564,15 @@ public class ANZHandler extends GEOHandler {
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
-    
-    if(fields.size()==0) {
-      fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "DEPT", "STATE_PROV", "CITY1", "POST_CD",
-          "LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "SAP_NO"));      
+
+    if (fields.size() == 0) {
+      fields
+          .addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "DEPT", "STATE_PROV", "CITY1", "POST_CD", "LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "SAP_NO"));
     }
     return fields;
   }
@@ -584,47 +582,197 @@ public class ANZHandler extends GEOHandler {
     // TODO Auto-generated method stub
     return false;
   }
-  
+
   @Override
   public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
-    String addrSeq = "";
-    if("796".equals(cmrIssuingCntry)) {
-      if("CTYH".equals(addrType)) {
-        addrSeq = "H";
-      }
-      if("CTYG".equals(addrType)) {
-        addrSeq = "G";
-      }
-      if("ZI01".equals(addrType)) {
-        addrSeq = "09";
-      }
-      if("ZS01".equals(addrType)) {
-        addrSeq = "02";
-      }
-      if("ZP01".equals(addrType)) {
-        addrSeq = "01";
-      }
-    }
-    if("616".equals(cmrIssuingCntry)) {
-      if("CTYH".equals(addrType)) {
-        addrSeq = "H";
-      }
-      if("CTYG".equals(addrType)) {
-        addrSeq = "G";
-      }
-      if("ZI01".equals(addrType)) {
-        addrSeq = "02";
-      }
-      if("ZF01".equals(addrType)) {
-        addrSeq = "03";
-      }
-      if("ZS01".equals(addrType)) {
-        addrSeq = "07";
-      }
-      if("ZP01".equals(addrType)) {
-        addrSeq = "01";
-      }
-    }
-    return addrSeq;
+    String newAddrSeq = null;
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
   }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+
+      AdminPK adminPK = new AdminPK();
+      adminPK.setReqId(reqId);
+      Admin admin = entityManager.find(Admin.class, adminPK);
+
+      boolean isUpdate = CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType());
+
+      if (SystemLocation.AUSTRALIA.equals(cmrIssuingCntry)) {
+        newAddrSeq = getNewAddressSeqAU(entityManager, reqId, addrType, isUpdate);
+      } else if (SystemLocation.NEW_ZEALAND.equals(cmrIssuingCntry)) {
+        newAddrSeq = getNewAddressSeqNZ(entityManager, reqId, addrType, isUpdate);
+      }
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewAddressSeqAU(EntityManager entityManager, long reqId, String addrType, boolean isUpdate) {
+    String newAddrSeq = "";
+    switch (addrType) {
+    case SOLD_TO_ADDR_TYPE:
+      newAddrSeq = SOLD_TO_FIXED_SEQ_AU;
+      break;
+    case BILL_TO_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, BILL_TO_FIXED_SEQ, isUpdate);
+      break;
+    case INSTALL_AT_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_AU, isUpdate);
+      break;
+    case SHIP_TO_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ, isUpdate);
+      break;
+    default:
+      newAddrSeq = "";
+      break;
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewAddressSeqNZ(EntityManager entityManager, long reqId, String addrType, boolean isUpdate) {
+    String newAddrSeq = "";
+    switch (addrType) {
+    case SOLD_TO_ADDR_TYPE:
+      newAddrSeq = SOLD_TO_FIXED_SEQ_NZ;
+      break;
+    case BILL_TO_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, BILL_TO_FIXED_SEQ, isUpdate);
+      break;
+    case INSTALL_AT_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ_NZ, isUpdate);
+      break;
+    case SHIP_TO_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ, isUpdate);
+      break;
+    default:
+      newAddrSeq = "";
+      break;
+    }
+    return newAddrSeq;
+  }
+
+  private String getNewSeqFromSeqToCheck(EntityManager entityManager, long reqId, String addrType, List<String> seqToCheck, boolean isUpdate) {
+    Set<String> existingSeq = getExistingAddrSeqInclRdc(entityManager, reqId);
+    boolean isAddrTypeExist = false;
+
+    if (isUpdate) {
+      List<Addr> allAddrByTypeFromAddr = getAddressByType(entityManager, addrType, reqId);
+      int addrCount = allAddrByTypeFromAddr.size();
+      if (addrCount > 0) {
+        isAddrTypeExist = true;
+      }
+    }
+
+    if (existingSeq.isEmpty()) {
+      return seqToCheck.get(0);
+    } else {
+      return String.valueOf(getNewSeqAdditionalAddr(existingSeq, addrType, isAddrTypeExist, isUpdate));
+    }
+  }
+
+  private String getNewSeqAdditionalAddr(Set<String> existingAddrSeqSet, String addrType, boolean isAddrTypeExist, boolean isUpdate) {
+    int candidateSeqNum = 0;
+    switch (addrType) {
+    case BILL_TO_ADDR_TYPE:
+
+      if (isUpdate && isAddrTypeExist) {
+        candidateSeqNum = 21;
+      } else {
+        candidateSeqNum = 20;
+      }
+      break;
+    case INSTALL_AT_ADDR_TYPE:
+      if (isUpdate && isAddrTypeExist) {
+        candidateSeqNum = 51;
+      } else {
+        candidateSeqNum = 50;
+      }
+      break;
+    case SHIP_TO_ADDR_TYPE:
+      candidateSeqNum = 40;
+      break;
+    default:
+      candidateSeqNum = 0;
+      LOG.debug("ANZ additional address failed to assign sequence");
+      break;
+    }
+
+    LOG.info("Candidate Seq: " + candidateSeqNum);
+    return getAvailAddrSeqNumInclRdc(existingAddrSeqSet, candidateSeqNum);
+  }
+
+  private String getAvailAddrSeqNumInclRdc(Set<String> existingAddrSeqSet, int candidateSeqNum) {
+    int availSeqNum = 0;
+    if (existingAddrSeqSet.contains(String.format("%03d", candidateSeqNum))) {
+      availSeqNum = candidateSeqNum;
+      while (existingAddrSeqSet.contains(String.format("%03d", availSeqNum))) {
+        availSeqNum++;
+        if (availSeqNum > 999) {
+          availSeqNum = 1;
+        }
+      }
+    } else {
+      availSeqNum = candidateSeqNum;
+    }
+
+    LOG.info("Avail: " + availSeqNum);
+
+    return String.format("%03d", availSeqNum);
+  }
+
+  private List<Addr> getAddressByType(EntityManager entityManager, String addrType, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    List<Addr> addrList = query.getResults(Addr.class);
+    return addrList;
+  }
+
+  private Set<String> getExistingAddrSeqInclRdc(EntityManager entityManager, long reqId) {
+    DataPK pk = new DataPK();
+    pk.setReqId(reqId);
+    Data data = entityManager.find(Data.class, pk);
+
+    String cmrNo = data.getCmrNo();
+    Set<String> allAddrSeqFromAddr = getAllSavedSeqFromAddr(entityManager, reqId);
+    Set<String> allAddrSeqFromRdc = getAllSavedSeqFromRdc(entityManager, cmrNo, data.getCmrIssuingCntry());
+
+    Set<String> mergedAddrSet = new HashSet<>();
+    mergedAddrSet.addAll(allAddrSeqFromAddr);
+    mergedAddrSet.addAll(allAddrSeqFromRdc);
+
+    return mergedAddrSet;
+  }
+
+  private Set<String> getAllSavedSeqFromAddr(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("CA.GET.ADDRSEQ.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<String> results = query.getResults(String.class);
+
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<String> getAllSavedSeqFromRdc(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
+    String sql = ExternalizedQuery.getSql("CA.GET.KNA1_ZZKV_SEQNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<String> resultsRDC = query.getResults(String.class);
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(resultsRDC);
+
+    return addrSeqSet;
+  }
+
 }

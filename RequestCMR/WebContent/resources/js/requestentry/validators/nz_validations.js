@@ -12,7 +12,7 @@ var _inacCdHandlerIN = null;
 var _importIndIN = null;
 var _vatRegisterHandlerSG = null;
 var _clusterHandlerINDONESIA = 0;
-//var _inacHandlerANZSG = 0;
+// var _inacHandlerANZSG = 0;
 var oldClusterCd = null;
 var _custSubGrpHandler = null;
 function addHandlersForNZ() {
@@ -24,8 +24,8 @@ function addHandlersForNZ() {
 
   if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
     _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
-//      _inacHandlerANZSG = _inacHandlerANZSG + 1;
-//      setIsuOnIsic();
+// _inacHandlerANZSG = _inacHandlerANZSG + 1;
+// setIsuOnIsic();
       setInacByCluster(value);
       setCTCIsuByClusterANZ();
     });
@@ -60,7 +60,7 @@ function addAfterConfigAP() {
   var custGrp = FormManager.getActualValue('custGrp');
   _clusterHandlerINDONESIA = 0;
   // CREATCMR-7883-7884
-//  _inacHandlerANZSG = 0;
+// _inacHandlerANZSG = 0;
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
@@ -186,7 +186,7 @@ function setInacByCluster(value) {
               inacCdValue.push(results[i].ret1);
             }
             FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-//            FormManager.setValue('inacCd', inacCdValue[0]);
+// FormManager.setValue('inacCd', inacCdValue[0]);
             if (inacCdValue.length == 1 && value != undefined) {
               FormManager.setValue('inacCd', inacCdValue[0]);
             }
@@ -1412,7 +1412,7 @@ function setIsuByClusterCTC() {
   if (_clientTierHandler && _clientTierHandler[0]) {
     _clientTierHandler[0].onChange();
   }
-//  setIsuOnIsic();
+// setIsuOnIsic();
 }
 
 function removeStateValidatorForHkMoNZ() {
@@ -1495,57 +1495,60 @@ function addSoltToAddressValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+
+function addBillToAddressValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        var reqType=FormManager.getActualValue('reqType');
+        qParams = {
+          REQ_ID: zs01ReqId,
+        };
+        var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var zp01Reccount = record.ret1;
+        if (addrType == 'ZP01' && Number(zp01Reccount) >= 2 && cmr.addressMode != 'updateAddress' && reqType!='U') {
+          return new ValidationResult(null, false, 'Only two Bill-To Addresses can be defined.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addInstallAtAddressValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        var reqType=FormManager.getActualValue('reqType');
+        qParams = {
+          REQ_ID: zs01ReqId,
+        };
+        var record = cmr.query('GETZI01VALRECORDS', qParams);
+        var zi01Reccount = record.ret1;
+        if (addrType == 'ZI01' && Number(zi01Reccount) >= 2 && cmr.addressMode != 'updateAddress' && reqType!='U') {
+          return new ValidationResult(null, false, 'Only two Install-At Addresses can be defined.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function addAddressInstancesValidator() {
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
         var reqType1=FormManager.getActualValue('reqType');
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0 && reqType1!='U') {
-          return new ValidationResult(null, false, 'One Sold-To Address is mandatory. Only one address for each address type should be defined when sending for processing.');
+          return new ValidationResult(null, false, 'One Sold-To Address is mandatory.');
         }
-        var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-        var reqType=FormManager.getActualValue('reqType');
-        var qParams = {
-          _qall: 'Y',
-          CMR_ISSUING_CNTRY: cmrCntry,
-        };
-        var results = cmr.query('GETADDR_TYPES', qParams);
-        var duplicatesAddr = [];
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-          if (results != null) {
-            for (var j = 0; j < results.length; j++) {
-              var addrCnt = 0;
-              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                  record = _allAddressData[i];
-                }
-                type = record.addrType;
-                if (typeof (type) == 'object') {
-                  type = type[0];
-                }
-                if (results[j].ret1 == type) {
-                  // New requirement : Defect 1767113 : For HK and MO ->
-                  // Multiple
-                  // Billing & Billing CCR are to be allowed
-                  if ((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02')) {
-                    continue;
-                  }
-                  addrCnt++;
-                  if (addrCnt > 1)
-                    duplicatesAddr.push(results[j].ret2);
-                }
-              }
-            }
-          }
-          if (duplicatesAddr.length > 0  && reqType!='U') {
-            return new ValidationResult(null, false, 'Only one instance of each address can be added.Please remove additional ' + duplicatesAddr + ' addresses');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        }
+        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
@@ -2385,7 +2388,7 @@ function additionalAddrNmValidatorOldNZ() {
             }
           }
           if (count > 0) {
-            return new ValidationResult(null, false, 'All Updated / New address customer name should be same as Installing address.');
+            return new ValidationResult(null, false, 'All Updated / New address customer name should be same as Sold-To address.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -2429,7 +2432,7 @@ function additionalAddrNmValidatorNZ() {
           var zs01Name = result1 != undefined ? result1.ret1.concat(result1.ret2) : '';
           name = name1 + name2;
           if (zs01Name != name) {
-            return new ValidationResult(null, false, 'All Updated / New address customer name should be same as Installing address.');
+            return new ValidationResult(null, false, 'All Updated / New address customer name should be same as Sold-To address.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -2455,7 +2458,7 @@ function addValidatorforInstallingNZ() {
         var suburb = FormManager.getActualValue('city1').toUpperCase();
         var address = name1 + name2 + attn + street + street2 + suburb;
         if ((address.includes("PO BOX") || address.includes("POBOX")) && addrType == 'ZS01') {
-          return new ValidationResult(null, false, "NZ Installing address can't contain \'PO BOX\'");
+          return new ValidationResult(null, false, "NZ Sold-To address can't contain \'PO BOX\'");
         } else {
           return new ValidationResult(null, true);
         }
@@ -2714,7 +2717,7 @@ function addCovBGValidator() {
       validate: function () {
         var reqType = FormManager.getActualValue('reqType');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+        if (reqType == 'C' && (custSubGrp == 'AQSTN')) {
           var result = FormManager.getActualValue('covBgRetrievedInd');
           if (result == '' || result.toUpperCase() != 'Y') {
             return new ValidationResult(null, false, 'Coverage/Buying Group/GLC/DUNS values have not been retrieved yet.');
@@ -2834,11 +2837,13 @@ function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChang
     }
     // CREATCMR-7883-7884
 
-//    if (isInacRequired) {
-//      console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
-//      FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'], 'MAIN_IBM_TAB');
-//      FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'], 'MAIN_IBM_TAB');
-//    }
+// if (isInacRequired) {
+// console.log('add REQUIRED of INAC TYPE/CODE for SG/834 >>>>');
+// FormManager.addValidator('inacCd', Validators.REQUIRED, ['INAC/NAC Code'],
+// 'MAIN_IBM_TAB');
+// FormManager.addValidator('inacType', Validators.REQUIRED, ['INAC Type'],
+// 'MAIN_IBM_TAB');
+// }
     // LOCK GB Seg(QTC)/ISU
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
@@ -2953,7 +2958,7 @@ function addAfterConfigNZ() {
   defaultCMRNumberPrefixforANZ();
   onInacTypeChange();
   removeStateValidatorForHkMoNZ();
-//  setCTCIsuByClusterANZ();
+// setCTCIsuByClusterANZ();
   handleObseleteExpiredDataForUpdate();
 }
 
@@ -2967,7 +2972,7 @@ function addressFunctions() {
 function afterTemplateLoadFunctions() {
   defaultCMRNumberPrefixforANZ();
   removeStateValidatorForHkMoNZ();
-//  setCTCIsuByClusterANZ();
+// setCTCIsuByClusterANZ();
   lockClusterFieldsOnScenarioChange();
   clearClusterFieldsOnScenarioChange();
   resetNZNBExempt();
@@ -2996,6 +3001,11 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(additionalAddrNmValidatorNZ, [SysLoc.NEW_ZEALAND], null, true);
   GEOHandler.registerValidator(additionalAddrNmValidatorOldNZ, [SysLoc.NEW_ZEALAND], null, true);
   GEOHandler.registerValidator(addSoltToAddressValidator, [SysLoc.NEW_ZEALAND]);
+// GEOHandler.registerValidator(addBillToAddressValidator,
+// [SysLoc.NEW_ZEALAND]);
+// GEOHandler.registerValidator(addInstallAtAddressValidator,
+// [SysLoc.NEW_ZEALAND]);
+  
   GEOHandler.registerValidator(addAddressInstancesValidator, [SysLoc.NEW_ZEALAND], null, true);
   GEOHandler.registerValidator(addContactInfoValidator, [SysLoc.NEW_ZEALAND], GEOHandler.REQUESTER, true);
   GEOHandler.registerValidator(similarAddrCheckValidator, [SysLoc.NEW_ZEALAND], null, true);
