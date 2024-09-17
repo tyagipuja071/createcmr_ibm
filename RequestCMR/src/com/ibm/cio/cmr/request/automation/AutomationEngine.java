@@ -180,10 +180,6 @@ public class AutomationEngine {
     int lastElementIndex = 0;
 
     boolean hasOverrideOrMatchingApplied = false;
-    
-    ScorecardPK scorecardPk = new ScorecardPK();
-    scorecardPk.setReqId(reqId);
-    Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
 
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
@@ -197,16 +193,16 @@ public class AutomationEngine {
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
-    
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
-    }    
+
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
 
     if (isPaygoUpgrade) {
       requestData.getData().setOrdBlk(null);
     }
-    
+
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
@@ -219,9 +215,9 @@ public class AutomationEngine {
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
     boolean isFullSunsetCty = false;
-    
-    if (Arrays.asList(FULL_SUNSET_COUNTRIES).contains(requestData.getData().getCmrIssuingCntry())){
-    	isFullSunsetCty = true;
+
+    if (Arrays.asList(FULL_SUNSET_COUNTRIES).contains(requestData.getData().getCmrIssuingCntry())) {
+      isFullSunsetCty = true;
     }
 
     // CREATCMR-6331
@@ -250,8 +246,7 @@ public class AutomationEngine {
     }
 
     // Skip Automation elements for HK, MO, CN for TREC
-    if (Arrays.asList("641").contains(requestData.getData().getCmrIssuingCntry())
-        && "TREC".equals(requestData.getAdmin().getReqReason())) {
+    if (Arrays.asList("641").contains(requestData.getData().getCmrIssuingCntry()) && "TREC".equals(requestData.getAdmin().getReqReason())) {
       isEroSkipToPpn = true;
     }
 
@@ -273,11 +268,10 @@ public class AutomationEngine {
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
       }
-      
-    
+
       // handle the special ALL types (approvals)
 
-      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)  || isPaygoUpgrade) {
+      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType) || isPaygoUpgrade) {
 
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
@@ -306,7 +300,7 @@ public class AutomationEngine {
         if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
           isUsOtherChecksFailed = true;
         }
-        
+
         if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
           isUsOtherChecksFailed = true;
         }
@@ -377,7 +371,7 @@ public class AutomationEngine {
       }
       lastElementIndex++;
     }
-    
+
     if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
       if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
         isUsWatsonxSkipToPcp = true;
@@ -478,23 +472,21 @@ public class AutomationEngine {
           moveForPayGo = true;
         }
 
-        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI","CBPRI").contains(data.getCustSubGrp())) {
-     //   admin.setPaygoProcessIndc("Y");
+        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited
+            && !Arrays.asList("PRIV", "PRICU", "BEPRI", "LUPRI", "PRIPE", "CHPRI", "CBPRI").contains(data.getCustSubGrp())) {
+          // admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
-        
-  
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk()) && !"PAYG".equals(admin.getReqReason())) {
-      //      admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
-          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited &&  !"PAYG".equals(admin.getReqReason())) {
-        //    admin.setPaygoProcessIndc("Y");
+          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited && !"PAYG".equals(admin.getReqReason())) {
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
-
 
         if ("C".equals(admin.getReqType()) && moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
