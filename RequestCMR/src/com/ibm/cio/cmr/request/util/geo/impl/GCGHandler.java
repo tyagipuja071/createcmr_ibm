@@ -710,4 +710,21 @@ public class GCGHandler extends APHandler {
         data.setAbbrevNm(abbrevNM);
   }
 
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CUST_PREF_LANG", "ISIC_CD", "SUB_INDUSTRY_CD", "INAC_CD", "ABBREV_NM", "CUST_CLASS", "ISU_CD",
+        "CLIENT_TIER", "MRC_CD", "BP_REL_TYPE", "BP_NAME", "COLLECTION_CD", "MISC_BILL_CD", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC",
+        "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
+    return fields;
+  }
+
+  @Override
+  public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields
+        .addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "STATE_PROV", "CITY2", "POST_CD", "CONTACT"));
+    return fields;
+  }
+
 }
