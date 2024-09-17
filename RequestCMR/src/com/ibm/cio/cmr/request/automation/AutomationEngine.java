@@ -379,7 +379,7 @@ public class AutomationEngine {
     }
 
     boolean sccIsValid = false;
-    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+    if ("897".equals(requestData.getData().getCmrIssuingCntry()) && scorecard != null) {
       String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
       if ("N".equals(setPPNFlag)) {
         sccIsValid = true;
