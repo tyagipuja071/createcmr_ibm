@@ -359,7 +359,7 @@ public class AutomationEngine {
       lastElementIndex++;
     }
     
-    if ("897".equals(requestData.getData().getCmrIssuingCntry())) {
+    if ("897".equals(requestData.getData().getCmrIssuingCntry()) && scorecard != null) {
       if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
         isUsWatsonxSkipToPcp = true;
       }
