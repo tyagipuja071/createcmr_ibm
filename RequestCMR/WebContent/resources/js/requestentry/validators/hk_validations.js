@@ -8711,14 +8711,14 @@ function addInstallAtAddressValidator() {
   FormManager.addFormValidator((function () {
     return {
       validate: function () {
-        var zi01ReqId = FormManager.getActualValue('reqId');
+        var mailReqId = FormManager.getActualValue('reqId');
         var addrType = FormManager.getActualValue('addrType');
         qParams = {
-          REQ_ID: zi01ReqId,
+          REQ_ID: mailReqId,
         };
-        var record = cmr.query('GETZI01VALRECORDS', qParams);
-        var zi01Reccount = record.ret1;
-        if (addrType == 'ZI01' && Number(zi01Reccount) == 10 && cmr.addressMode != 'updateAddress') {
+        var record = cmr.query('GETMAILVALRECORDS', qParams);
+        var mailReccount = record.ret1;
+        if (addrType == 'MAIL' && Number(mailReccount) == 10 && cmr.addressMode != 'updateAddress') {
           return new ValidationResult(null, false, 'Only 10 Install-At Address can be defined.');
         } else {
           return new ValidationResult(null, true);
