@@ -1165,19 +1165,6 @@ function addFieldFormatValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function addrSeqFormatter(value, rowIndex) {
-  var rowData = this.grid.getItem(rowIndex);
-  var curAddrSeq = rowData.addrSeq[0];
-  var importInd = rowData.importInd[0];
-  var validSeq = ["A", "B", "C", "D", "E"];
-  var reqType = FormManager.getActualValue('reqType');
-  var newAddressInUpdate = ('U' == reqType && importInd == 'N') ;
-  if ((reqType == 'C' || newAddressInUpdate ) && !validSeq.includes(curAddrSeq)) {
-    return 'N/A';
-  }
-  return value;
-}
-
 function addEROAttachmentValidator() {
   FormManager.addFormValidator((function () {
     return {
@@ -8699,6 +8686,69 @@ function addAddrGridValidatorAddresses() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addShipToAddressValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var zd01ReqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        qParams = {
+          REQ_ID: zd01ReqId,
+        };
+        var record = cmr.query('GETZD01VALRECORDS', qParams);
+        var zd01Reccount = record.ret1;
+        if (addrType == 'ZD01' && Number(zd01Reccount) == 10 && cmr.addressMode != 'updateAddress') {
+          return new ValidationResult(null, false, 'Only ten Ship-To Address can be defined.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addInstallAtAddressValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var zi01ReqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        qParams = {
+          REQ_ID: zi01ReqId,
+        };
+        var record = cmr.query('GETZI01VALRECORDS', qParams);
+        var zi01Reccount = record.ret1;
+        if (addrType == 'ZI01' && Number(zi01Reccount) == 10 && cmr.addressMode != 'updateAddress') {
+          return new ValidationResult(null, false, 'Only 10 Install-At Address can be defined.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addBillToAddressValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var zp01ReqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        qParams = {
+          REQ_ID: zp01ReqId,
+        };
+        var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var zp01Reccount = record.ret1;
+        if (addrType == 'ZP01' && Number(zp01Reccount) == 12 && cmr.addressMode != 'updateAddress') {
+          return new ValidationResult(null, false, 'Only 12 Bill-To Address can be defined.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.AP = [SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
   SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA];
@@ -8814,6 +8864,9 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(initChecklistMainAddress, [SysLoc.VIETNAM, SysLoc.LAOS, SysLoc.CAMBODIA, SysLoc.HONG_KONG, SysLoc.SINGAPORE, SysLoc.MACAO, SysLoc.MYANMAR]);
   // Address validations
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.AP);
+  GEOHandler.registerValidator(addShipToAddressValidator, SysLoc.HONG_KONG);
+  GEOHandler.registerValidator(addBillToAddressValidator, SysLoc.HONG_KONG);
+  GEOHandler.registerValidator(addInstallAtAddressValidator, SysLoc.HONG_KONG);
   GEOHandler.registerValidator(addAddressInstancesValidator, GEOHandler.AP, null, true);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.AP, GEOHandler.REQUESTER, true);
   GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.AP, null, true);

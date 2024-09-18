@@ -22,7 +22,9 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -67,8 +69,9 @@ public class GCGHandler extends APHandler {
                                                              // logic
 
   private static final String SOLD_TO_FIXED_SEQ = "A";
-  private static final String INSTALL_AT_FIXED_SEQ = "E";
+  private static final List<String> INSTALL_AT_FIXED_SEQ = Arrays.asList("E");
   private static final List<String> BILL_TO_FIXED_SEQ = Arrays.asList("B", "C", "D");
+  private static final List<String> SHIP_TO_FIXED_SEQ = Arrays.asList("040");
   private static final String HK_FULLNAME = "Hong Kong";
   private static final String MO_FULLNAME = "Macao";
   private static final String MO_FULLNAME2 = "Macau";
@@ -453,56 +456,31 @@ public class GCGHandler extends APHandler {
 
   private String getNewAddressSeq(EntityManager entityManager, long reqId, String addrType) {
     String newAddrSeq = "";
+
+    AdminPK adminPK = new AdminPK();
+    adminPK.setReqId(reqId);
+    Admin admin = entityManager.find(Admin.class, adminPK);
+
+    boolean isUpdate = CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType());
+
     switch (addrType) {
     case SOLD_TO_ADDR_TYPE:
       newAddrSeq = SOLD_TO_FIXED_SEQ;
       break;
     case BILL_TO_ADDR_TYPE:
-      newAddrSeq = getNewBillToAddrSeq(entityManager, reqId, addrType);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, BILL_TO_FIXED_SEQ, isUpdate);
       break;
     case INSTALL_AT_ADDR_TYPE:
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, INSTALL_AT_FIXED_SEQ, isUpdate);
+      break;
     case SHIP_TO_ADDR_TYPE:
-      newAddrSeq = getNewInstallOrShipToSeq(entityManager, reqId, addrType);
+      newAddrSeq = getNewSeqFromSeqToCheck(entityManager, reqId, addrType, SHIP_TO_FIXED_SEQ, isUpdate);
       break;
     default:
       newAddrSeq = "";
       break;
     }
     return newAddrSeq;
-  }
-
-  private String getNewInstallOrShipToSeq(EntityManager entityManager, long reqId, String addrType) {
-    String newAddrSeq = "";
-    Set<String> existingAddrs = getAddrSeqByType(entityManager, reqId, addrType);
-    if (existingAddrs.isEmpty()) {
-      if (INSTALL_AT_ADDR_TYPE.equals(addrType)) {
-        newAddrSeq = INSTALL_AT_FIXED_SEQ;
-      }
-    } else {
-      return String.valueOf(existingAddrs.size() + 1);
-    }
-
-    return newAddrSeq;
-  }
-
-  private String getNewBillToAddrSeq(EntityManager entityManager, long reqId, String addrType) {
-    Set<String> existingBillTo = getAddrSeqByType(entityManager, reqId, addrType);
-
-    if (existingBillTo.isEmpty()) {
-      return BILL_TO_FIXED_SEQ.get(0);
-    }
-
-    if (existingBillTo.size() < BILL_TO_FIXED_SEQ.size()) {
-      for (String b : BILL_TO_FIXED_SEQ) {
-        if (!existingBillTo.contains(b)) {
-          return b;
-        }
-      }
-    } else {
-      return String.valueOf(existingBillTo.size() + 1);
-
-    }
-    return "";
   }
 
   private Set<String> getAddrSeqByType(EntityManager entityManager, long reqId, String addrType) {
@@ -725,6 +703,131 @@ public class GCGHandler extends APHandler {
     fields
         .addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "STATE_PROV", "CITY2", "POST_CD", "CONTACT"));
     return fields;
+  }
+  
+  private String getNewSeqFromSeqToCheck(EntityManager entityManager, long reqId, String addrType, List<String> seqToCheck, boolean isUpdate) {
+    Set<String> existingSeq = getExistingAddrSeqInclRdc(entityManager, reqId);
+    boolean isAddrTypeExist = false;
+
+    if (isUpdate) {
+      List<Addr> allAddrByTypeFromAddr = getAddressByType(entityManager, addrType, reqId);
+      int addrCount = allAddrByTypeFromAddr.size();
+      if (addrCount > 0) {
+        isAddrTypeExist = true;
+      }
+    }
+
+    if (existingSeq.isEmpty()) {
+      return seqToCheck.get(0);
+    }
+
+    if (!areAllElementsPresent(seqToCheck, existingSeq)) {
+      for (String b : seqToCheck) {
+        if (!existingSeq.contains(b)) {
+          return b;
+        }
+      }
+    } else {
+      return String.valueOf(getNewSeqAdditionalAddr(existingSeq, addrType, isAddrTypeExist, isUpdate));
+    }
+
+    return "";
+  }
+
+  private boolean areAllElementsPresent(List<String> seqToCheck, Set<String> existingSeq) {
+    return existingSeq.containsAll(seqToCheck);
+  }
+
+  private String getNewSeqAdditionalAddr(Set<String> existingAddrSeqSet, String addrType, boolean isAddrTypeExist, boolean isUpdate) {
+    int candidateSeqNum = 0;
+    switch (addrType) {
+    case BILL_TO_ADDR_TYPE:
+      candidateSeqNum = 21;
+      break;
+    case INSTALL_AT_ADDR_TYPE:
+      candidateSeqNum = 51;
+      break;
+    case SHIP_TO_ADDR_TYPE:
+      candidateSeqNum = 40;
+      break;
+    default:
+      candidateSeqNum = 0;
+      LOG.debug("HKMO additional address failed to assign sequence");
+      break;
+    }
+
+    LOG.info("Candidate Seq: " + candidateSeqNum);
+    return getAvailAddrSeqNumInclRdc(existingAddrSeqSet, candidateSeqNum);
+  }
+
+  private String getAvailAddrSeqNumInclRdc(Set<String> existingAddrSeqSet, int candidateSeqNum) {
+    int availSeqNum = 0;
+    if (existingAddrSeqSet.contains(String.format("%03d", candidateSeqNum))) {
+      availSeqNum = candidateSeqNum;
+      while (existingAddrSeqSet.contains(String.format("%03d", availSeqNum))) {
+        availSeqNum++;
+        if (availSeqNum > 999) {
+          availSeqNum = 1;
+        }
+      }
+    } else {
+      availSeqNum = candidateSeqNum;
+    }
+
+    LOG.info("Avail: " + availSeqNum);
+
+    return String.format("%03d", availSeqNum);
+  }
+
+  private List<Addr> getAddressByType(EntityManager entityManager, String addrType, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    List<Addr> addrList = query.getResults(Addr.class);
+    return addrList;
+  }
+
+  private Set<String> getExistingAddrSeqInclRdc(EntityManager entityManager, long reqId) {
+    DataPK pk = new DataPK();
+    pk.setReqId(reqId);
+    Data data = entityManager.find(Data.class, pk);
+
+    String cmrNo = data.getCmrNo();
+    Set<String> allAddrSeqFromAddr = getAllSavedSeqFromAddr(entityManager, reqId);
+    Set<String> allAddrSeqFromRdc = getAllSavedSeqFromRdc(entityManager, cmrNo, data.getCmrIssuingCntry());
+
+    Set<String> mergedAddrSet = new HashSet<>();
+    mergedAddrSet.addAll(allAddrSeqFromAddr);
+    mergedAddrSet.addAll(allAddrSeqFromRdc);
+
+    return mergedAddrSet;
+  }
+
+  private Set<String> getAllSavedSeqFromAddr(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("CA.GET.ADDRSEQ.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<String> results = query.getResults(String.class);
+
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<String> getAllSavedSeqFromRdc(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
+    String sql = ExternalizedQuery.getSql("CA.GET.KNA1_ZZKV_SEQNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cmrIssuingCntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<String> resultsRDC = query.getResults(String.class);
+    Set<String> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(resultsRDC);
+
+    return addrSeqSet;
   }
 
 }
