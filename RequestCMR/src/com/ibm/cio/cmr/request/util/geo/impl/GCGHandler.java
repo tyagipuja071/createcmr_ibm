@@ -623,6 +623,7 @@ public class GCGHandler extends APHandler {
 
     autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
     data.setIsuCd(mainRecord.getCmrIsu());
+    data.setCollectionCd(mainRecord.getCmrAccRecvBo());
 
     if (admin.getReqType().equals("U")) {
       data.setAbbrevLocn(mainRecord.getCmrDataLine());
