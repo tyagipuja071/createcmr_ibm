@@ -428,7 +428,7 @@ function AddressDetailsModal_onLoad() {
   }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '736' || FormManager.getActualValue('cmrIssuingCntry') == '738') {
-    _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret52);
+    _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
   }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
@@ -1138,7 +1138,7 @@ function addEditAddressModal_onLoad() {
       }
       
       if (FormManager.getActualValue('cmrIssuingCntry') == '736' || FormManager.getActualValue('cmrIssuingCntry') == '738') {
-        FormManager.setValue('contact', details.ret52);
+        FormManager.setValue('contact', details.ret71);
       }
 
       if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
