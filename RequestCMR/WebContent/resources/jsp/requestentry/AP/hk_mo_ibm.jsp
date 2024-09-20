@@ -163,7 +163,7 @@ dojo.addOnLoad(function(){
         	  <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       		</p>
     	  </cmr:column>
-    	  <cmr:column span="2" containerForField="CmrNoPrefix">
+    	  <cmr:column span="2" containerForField="CmrNoPrefix" exceptForCountry="738,736">
       		<p>
         	  <label for="cmrNoPrefix"> 
           	  <cmr:fieldLabel fieldId="CmrNoPrefix" />: 
