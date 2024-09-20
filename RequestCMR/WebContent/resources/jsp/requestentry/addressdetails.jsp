@@ -551,6 +551,19 @@
     </cmr:row>
   </cmr:view>
 
+  <cmr:view forCountry="736,738">
+    <cmr:row>
+      <cmr:column span="1">
+        <cmr:label fieldId="Contact_view">
+          <span class="lbl-Contact">Contact</span>:
+        </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="contact_view">-</div>
+      </cmr:column>
+    </cmr:row>
+  </cmr:view>
+
   <cmr:view forCountry="754,866,755,758">
     <cmr:row>
       <cmr:column span="1">
