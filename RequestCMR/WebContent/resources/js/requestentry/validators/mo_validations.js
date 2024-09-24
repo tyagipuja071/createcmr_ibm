@@ -4658,7 +4658,7 @@ function addShipToAddressValidator() {
         qParams = {
           REQ_ID: zd01ReqId,
         };
-        var record = cmr.query('GETZD01VALRECORDS', qParams);
+        var record = cmr.query('HKMO.GETZD01VALRECORDS', qParams);
         var zd01Reccount = record.ret1;
         if (addrType == 'ZD01' && Number(zd01Reccount) == 10 && cmr.addressMode != 'updateAddress') {
           return new ValidationResult(null, false, 'Only ten Ship-To Address can be defined.');
@@ -4679,7 +4679,7 @@ function addInstallAtAddressValidator() {
         qParams = {
           REQ_ID: mailReqId,
         };
-        var record = cmr.query('GETMAILVALRECORDS', qParams);
+        var record = cmr.query('HKMO.GETMAILVALRECORDS', qParams);
         var mailReccount = record.ret1;
         if (addrType == 'MAIL' && Number(mailReccount) == 10 && cmr.addressMode != 'updateAddress') {
           return new ValidationResult(null, false, 'Only 10 Install-At Address can be defined.');
@@ -4700,7 +4700,7 @@ function addBillToAddressValidator() {
         qParams = {
           REQ_ID: zp01ReqId,
         };
-        var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var record = cmr.query('HKMO.GETZP01VALRECORDS', qParams);
         var zp01Reccount = record.ret1;
         if (addrType == 'ZP01' && Number(zp01Reccount) == 12 && cmr.addressMode != 'updateAddress') {
           return new ValidationResult(null, false, 'Only 12 Bill-To Address can be defined.');
