@@ -59,12 +59,12 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
   @Override
   public void doAfterConvert(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel,
       List<FindCMRRecordModel> converted) {
-    // override it so that the parent logic will not be called
+      // Override this method to prevent the parent logic from being called
   }
 
   @Override
   protected void handleRDcRecordValues(FindCMRRecordModel record) {
-    // override it so that the parent logic will not be called
+    // Override this method to prevent the parent logic from being called
   }
 
   @Override
