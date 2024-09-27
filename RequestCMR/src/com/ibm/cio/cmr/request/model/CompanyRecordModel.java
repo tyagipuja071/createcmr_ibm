@@ -59,6 +59,15 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   private long overrideReqId;
   private boolean hasPaygoUpgradeChk;
+  private String isicCd;
+
+  public String getIsicCd() {
+    return isicCd;
+  }
+
+  public void setIsicCd(String isicCd) {
+    this.isicCd = isicCd;
+  }
 
  
   @Override
