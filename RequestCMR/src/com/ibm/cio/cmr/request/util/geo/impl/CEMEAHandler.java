@@ -79,6 +79,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
+  private static final String GRP_VAT_PATTERN = "^177\\d{5}-\\d-\\d{2}$";
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.ABU_DHABI, "AE");
     LANDED_CNTRY_MAP.put(SystemLocation.ALBANIA, "AL");
@@ -2413,8 +2414,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                   LOG.trace("VAT format for Hungary should be HU99999999 ");
                   error.addError((row.getRowNum() + 1), "VAT", "VAT format for Hungary should be HU99999999.<br> ");
                 }
-                if (StringUtils.isNotBlank(grpVat) && !"@".equals(grpVat) && grpVat.length() == 13 && grpVat.startsWith("177")
-                    && !grpVat.substring(3).matches("([0-9]{5}-[0-9]{1}-[0-9]{2})")) {
+                if (StringUtils.isNotBlank(grpVat) && !"@".equals(grpVat) && !grpVat.matches(GRP_VAT_PATTERN)) {
                   error.addError((row.getRowNum() + 1), "Group VAT ID",
                       "Group VAT ID should start with 177 and format should be 177nnnnn-n-nn.<br> ");
                 }
