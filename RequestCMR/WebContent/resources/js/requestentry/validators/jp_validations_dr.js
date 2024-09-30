@@ -5496,15 +5496,12 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.disable('oemInd');
     FormManager.disable('leasingCompanyIndc');
     FormManager.disable('searchTerm');
-    FormManager.disable('covId');
     FormManager.disable('repTeamMemberNo');
     FormManager.disable('govType');
     FormManager.disable('educAllowCd');
     FormManager.disable('valueAddRem');
     FormManager.disable('channelCd');
     FormManager.disable('siInd');
-    FormManager.disable('inacType');
-    FormManager.disable('inacCd');
     FormManager.enable('billToCustNo');
     FormManager.addValidator('billToCustNo', Validators.REQUIRED, [ 'Bill to Customer No' ], 'MAIN_IBM_TAB');
     // FormManager.enable('zseriesSw');
@@ -7487,6 +7484,7 @@ function hideNonRelevantFieldsInDRFlow() {
   FormManager.hide('EducationAllowance', 'educAllowCd');
   FormManager.disable('custAcctType');
   FormManager.hide('CustAcctType', 'custAcctType');
+  FormManager.removeValidator('custAcctType', Validators.REQUIRED);
   FormManager.disable('iinInd');
   FormManager.hide('IinInd', 'iinInd');
   FormManager.removeValidator('iinInd', Validators.REQUIRED);
