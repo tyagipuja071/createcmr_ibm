@@ -118,18 +118,27 @@
                     </cmr:view>
 
                     <cmr:view forCountry="778">
-                      <script src="${resourcesPath}/js/requestentry/validators/my_validations.js?${cmrv}"
-                        type="text/javascript"></script>
-                    </cmr:view>
+						<%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+  								<script src="${resourcesPath}/js/requestentry/validators/my_validations_dr.js?${cmrv}" type="text/javascript"></script>
+						<%  }  else { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/my_validations.js?${cmrv}" type="text/javascript"></script>
+						<%  } %>
+					</cmr:view>
 
                     <cmr:view forCountry="749">
-                      <script src="${resourcesPath}/js/requestentry/validators/id_validations.js?${cmrv}"
-                        type="text/javascript"></script>
+						<%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/id_validations_dr.js?${cmrv}" type="text/javascript"></script>
+						<%  }  else { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/id_validations.js?${cmrv}" type="text/javascript"></script>
+						<%  } %>
                     </cmr:view>
 
                     <cmr:view forCountry="818">
-                      <script src="${resourcesPath}/js/requestentry/validators/ph_validations.js?${cmrv}"
-                        type="text/javascript"></script>
+						<%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/ph_validations_dr.js?${cmrv}" type="text/javascript"></script>
+						<%  }  else { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/ph_validations.js?${cmrv}" type="text/javascript"></script>
+						<%  } %>
                     </cmr:view>
 
                     <cmr:view forCountry="781">
@@ -138,8 +147,11 @@
                     </cmr:view>
 
                     <cmr:view forCountry="852">
-                      <script src="${resourcesPath}/js/requestentry/validators/vn_validations.js?${cmrv}"
-                        type="text/javascript"></script>
+						<%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/vn_validations_dr.js?${cmrv}" type="text/javascript"></script>
+						<%  }  else { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/vn_validations.js?${cmrv}" type="text/javascript"></script>
+						<%  } %>
                     </cmr:view>
 
                     <cmr:view forGEO="MCO">
@@ -254,18 +266,27 @@
                     </cmr:view>
 
                     <cmr:view forCountry="643">
-                      <script src="${resourcesPath}/js/requestentry/validators/bn_validations.js?${cmrv}"
-                        type="text/javascript"></script>
+						<%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/bn_validations_dr.js?${cmrv}" type="text/javascript"></script>
+						<%  }  else { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/bn_validations.js?${cmrv}" type="text/javascript"></script>
+						<%  } %>
                     </cmr:view>
 
                     <cmr:view forCountry="834">
-                      <script src="${resourcesPath}/js/requestentry/validators/sg_validations.js?${cmrv}"
-                        type="text/javascript"></script>
+						<%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/sg_validations_dr.js?${cmrv}" type="text/javascript"></script>
+						<%  }  else { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/sg_validations.js?${cmrv}" type="text/javascript"></script>
+						<%  } %>
                     </cmr:view>
 
                     <cmr:view forCountry="856">
-                      <script src="${resourcesPath}/js/requestentry/validators/th_validations.js?${cmrv}"
-                        type="text/javascript"></script>
+						<%  if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/th_validations_dr.js?${cmrv}" type="text/javascript"></script>
+						<%  }  else { %>  
+								<script src="${resourcesPath}/js/requestentry/validators/th_validations.js?${cmrv}" type="text/javascript"></script>
+						<%  } %>
                     </cmr:view>
 
                     <cmr:view forCountry="615">
