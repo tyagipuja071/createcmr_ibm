@@ -530,6 +530,12 @@ public class SingaporeUtil extends AutomationUtil {
     // List<DnBMatchingResponse> matches = new ArrayList<DnBMatchingResponse>();
     // boolean matchesDnb = false;
     boolean cmdeReview = false;
+
+    String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("EMAIL", admin.getRequesterId());
+    query.setForReadOnly(true);
+
     for (String addrType : RELEVANT_ADDRESSES) {
       // if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
       // Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
@@ -556,10 +562,21 @@ public class SingaporeUtil extends AutomationUtil {
 
               List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
               for (UpdatedNameAddrModel change : addrChanges) {
-                if ("Customer Name".equals(change.getDataField()) && CmrConstants.RDC_SOLD_TO.equalsIgnoreCase(addr.getId().getAddrType())) {
-                  // CMDE Review
-                  cmdeReview = true;
-                  checkDetails.append("Update of Customer Name for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified.\n");
+
+                if (query.exists() && "Y".equals(SystemParameters.getString("AP.SKIP_UPDATE_CHECK"))) {
+                  // skip checks if requester is from AP CMDE team
+                  LOG.debug("skip address checks for " + addrType + "(" + addr.getId().getAddrSeq() + ") requester is from AP CMDE team.");
+                  admin.setScenarioVerifiedIndc("Y");
+                  checkDetails.append(
+                      "Skip address checks for customer name " + addrType + "(" + addr.getId().getAddrSeq() + ") requester is from AP CMDE team.\n");
+                  validation.setMessage("Skipped");
+                  validation.setSuccess(true);
+                } else {
+                  if ("Customer Name".equals(change.getDataField()) && CmrConstants.RDC_SOLD_TO.equalsIgnoreCase(addr.getId().getAddrType())) {
+                    // CMDE Review
+                    cmdeReview = true;
+                    checkDetails.append("Update of Customer Name for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified.\n");
+                  }
                 }
               }
               List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
@@ -570,15 +587,26 @@ public class SingaporeUtil extends AutomationUtil {
               }
 
               if (!matchesDnb) {
-                // CMDE Review
-                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                cmdeReview = true;
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
-                // company proof
-                if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-                  checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+
+                if (query.exists() && "Y".equals(SystemParameters.getString("AP.SKIP_UPDATE_CHECK"))) {
+                  // skip checks if requester is from AP CMDE team
+                  LOG.debug("skip address checks for " + addrType + "(" + addr.getId().getAddrSeq() + ") requester is from AP CMDE team.");
+                  admin.setScenarioVerifiedIndc("Y");
+                  checkDetails.append(
+                      "Skip address checks for customer name " + addrType + "(" + addr.getId().getAddrSeq() + ") requester is from AP CMDE team.\n");
+                  validation.setMessage("Skipped");
+                  validation.setSuccess(true);
                 } else {
-                  checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                  // CMDE Review
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  cmdeReview = true;
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  // company proof
+                  if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                    checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+                  } else {
+                    checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                  }
                 }
               } else {
                 checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
