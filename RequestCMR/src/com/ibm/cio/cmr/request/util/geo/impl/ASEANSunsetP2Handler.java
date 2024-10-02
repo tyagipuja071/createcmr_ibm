@@ -59,24 +59,57 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
   @Override
   public void doAfterConvert(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel,
       List<FindCMRRecordModel> converted) {
+    LOG.debug("Issuing Country: " + reqEntry.getCmrIssuingCntry());
+    String processingType = PageManager.getProcessingType(reqEntry.getCmrIssuingCntry(), "U");
+    LOG.info("ASEANSunsetP2Handler processing type: " + processingType);
+
+    if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) {
+      LOG.info("DR - IERP Logic");
       // Override this method to prevent the parent logic from being called
+    } else {
+      LOG.info("Phase 1 - MQ Logic");
+      super.doAfterConvert(entityManager, source, reqEntry, searchModel, converted);
+    }
   }
 
   @Override
   protected void handleRDcRecordValues(FindCMRRecordModel record) {
-    // Override this method to prevent the parent logic from being called
+    LOG.debug("Issuing Country: " + record.getCmrIssuedBy());
+    String processingType = PageManager.getProcessingType(record.getCmrIssuedBy(), "U");
+    LOG.info("ASEANSunsetP2Handler processing type: " + processingType);
+
+    if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) {
+      LOG.info("DR - IERP Logic");
+      // Override this method to prevent the parent logic from being called
+    } else {
+      LOG.info("Phase 1 - MQ Logic");
+      super.handleRDcRecordValues(record);
+    }
   }
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    if (currentRecord != null) {
-      address.setCustNm1(currentRecord.getCmrName1Plain());
-      address.setCustNm2(currentRecord.getCmrName2Plain());
-      address.setAddrTxt(currentRecord.getCmrName3());
-      address.setAddrTxt2(currentRecord.getCmrStreetAddress());
-      address.setDept(currentRecord.getCmrName4());
-      address.setCity1(currentRecord.getCmrCity());
-      address.setStateProv(currentRecord.getCmrState());
+
+    // Override this method to prevent the parent logic from being called
+    LOG.debug("Issuing Country: " + currentRecord.getCmrIssuedBy());
+    String processingType = PageManager.getProcessingType(currentRecord.getCmrIssuedBy(), "U");
+    LOG.info("ASEANSunsetP2Handler processing type: " + processingType);
+
+    if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) {
+      LOG.info("DR - IERP Logic");
+      if (currentRecord != null) {
+        address.setCustNm1(currentRecord.getCmrName1Plain());
+        address.setCustNm2(currentRecord.getCmrName2Plain());
+        address.setAddrTxt(currentRecord.getCmrName3());
+        address.setAddrTxt2(currentRecord.getCmrStreetAddress());
+        address.setDept(currentRecord.getCmrName4());
+        address.setCity1(currentRecord.getCmrCity());
+        address.setStateProv(currentRecord.getCmrState());
+      }
+    } else {
+      LOG.info("Phase 1 - MQ Logic");
+      super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
     }
+
   }
 }
