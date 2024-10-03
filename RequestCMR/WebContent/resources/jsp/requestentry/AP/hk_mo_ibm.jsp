@@ -438,19 +438,23 @@ dojo.addOnLoad(function(){
       &nbsp;
     </cmr:row>
   <%}%>
+  <cmr:view exceptForCountry="646,714,720">
+	<cmr:row topPad="10">
+		<cmr:column span="2" containerForField="PPSCEID">
+			<p>
+				<cmr:label fieldId="ppsceid">
+					<cmr:fieldLabel fieldId="PPSCEID" />:
+					<cmr:delta text="${rdcdata.ppsceid}" oldValue="${reqentry.ppsceid}" />
+				</cmr:label>
+				<cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
+			</p>
+		</cmr:column>
+	</cmr:row>
+  </cmr:view>
 
    <!--  PPSCEID, Membership Level, BP Relation Type -->    
    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720">
 		<cmr:row topPad="10">
-  			<cmr:column span="2" containerForField="PPSCEID">
-  				<p>
-  					<cmr:label fieldId="ppsceid">
-              <cmr:fieldLabel fieldId="PPSCEID" />:
-              <cmr:delta text="${rdcdata.ppsceid}" oldValue="${reqentry.ppsceid}"/>
-            </cmr:label>
-            <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
-  				</p>
-  			</cmr:column>
         	<cmr:column span="2" containerForField="MembLevel">
 	          <p>
 	            <cmr:label fieldId="memLvl">
