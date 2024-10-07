@@ -1138,7 +1138,7 @@ public abstract class APHandler extends GEOHandler {
         data.setAbbrevNm(abbrevNM);
   }
 
-  private void autoSetAbbrevLocnNMOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) {
+  public void autoSetAbbrevLocnNMOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) {
     switch (data.getCmrIssuingCntry()) {
     case SystemLocation.INDIA:
       if (admin.getReqType().equals("C")) {
