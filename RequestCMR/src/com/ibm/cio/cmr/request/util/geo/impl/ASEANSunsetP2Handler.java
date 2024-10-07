@@ -117,35 +117,44 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
-    if (!prospectCmrChosen) {
-      // data.setApCustClusterId(this.currentRecord.get(WtaasQueryKeys.Data.ClusterNo));
-      // data.setRepTeamMemberNo(this.currentRecord.get(WtaasQueryKeys.Data.SalesmanNo));
-      // data.setCollectionCd(this.currentRecord.get(WtaasQueryKeys.Data.IBMCode));
-      // // knvv_ext.ACCT_RECV_BO
-      // data.setIsbuCd(this.currentRecord.get(WtaasQueryKeys.Data.SellDept));
-      data.setClientTier(mainRecord.getCmrTier());
-      // data.setMrcCd(this.currentRecord.get(WtaasQueryKeys.Data.MrktRespCode));
-      // data.setTerritoryCd(this.currentRecord.get(WtaasQueryKeys.Data.SellBrnchOff));
-      data.setAbbrevLocn(mainRecord.getCmrDataLine());
-      // data.setIsuCd(mainRecord.getCmrIsu());
-      // data.setBusnType(this.currentRecord.get(WtaasQueryKeys.Data.SellBrnchOff));
-      // data.setGovType(this.currentRecord.get(WtaasQueryKeys.Data.GovCustInd));
-      // data.setMiscBillCd(this.currentRecord.get(WtaasQueryKeys.Data.RegionCode));
+    LOG.debug("Issuing Country: " + data.getCmrIssuingCntry());
+    String processingType = PageManager.getProcessingType(data.getCmrIssuingCntry(), "U");
+    LOG.info("ASEANSunsetP2Handler processing type: " + processingType);
+    if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) {
+      LOG.info("DR - IERP Logic");
+      boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+      if (!prospectCmrChosen) {
+        // data.setApCustClusterId(this.currentRecord.get(WtaasQueryKeys.Data.ClusterNo));
+        // data.setRepTeamMemberNo(this.currentRecord.get(WtaasQueryKeys.Data.SalesmanNo));
+        // data.setCollectionCd(this.currentRecord.get(WtaasQueryKeys.Data.IBMCode));
+        // // knvv_ext.ACCT_RECV_BO
+        // data.setIsbuCd(this.currentRecord.get(WtaasQueryKeys.Data.SellDept));
+        data.setClientTier(mainRecord.getCmrTier());
+        // data.setMrcCd(this.currentRecord.get(WtaasQueryKeys.Data.MrktRespCode));
+        // data.setTerritoryCd(this.currentRecord.get(WtaasQueryKeys.Data.SellBrnchOff));
+        data.setAbbrevLocn(mainRecord.getCmrDataLine());
+        // data.setIsuCd(mainRecord.getCmrIsu());
+        // data.setBusnType(this.currentRecord.get(WtaasQueryKeys.Data.SellBrnchOff));
+        // data.setGovType(this.currentRecord.get(WtaasQueryKeys.Data.GovCustInd));
+        // data.setMiscBillCd(this.currentRecord.get(WtaasQueryKeys.Data.RegionCode));
+      } else {
+        data.setCmrNo("");
+      }
+
+      super.autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
+      data.setIsuCd(mainRecord.getCmrIsu());
+
+      if (mainRecord.getCmrCountryLandedDesc().isEmpty() && !prospectCmrChosen) {
+        data.setAbbrevLocn(mainRecord.getCmrDataLine());
+      }
+
+      // fix Defect 1732232: Abbreviated Location issue
+      if (!StringUtils.isBlank(data.getAbbrevLocn()) && data.getAbbrevLocn().length() > 9) {
+        data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 9));
+      }
     } else {
-      data.setCmrNo("");
-    }
-
-    super.autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
-    data.setIsuCd(mainRecord.getCmrIsu());
-
-    if (mainRecord.getCmrCountryLandedDesc().isEmpty() && !prospectCmrChosen) {
-      data.setAbbrevLocn(mainRecord.getCmrDataLine());
-    }
-
-    // fix Defect 1732232: Abbreviated Location issue
-    if (!StringUtils.isBlank(data.getAbbrevLocn()) && data.getAbbrevLocn().length() > 9) {
-      data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 9));
+      LOG.info("Phase 1 - MQ Logic");
+      super.setDataValuesOnImport(admin, data, results, mainRecord);
     }
 
   }
