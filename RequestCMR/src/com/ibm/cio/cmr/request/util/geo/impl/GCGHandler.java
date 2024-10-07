@@ -621,7 +621,7 @@ public class GCGHandler extends APHandler {
       data.setCmrNo("");
     }
 
-    autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
+    autoSetAbbrevLocnNameOnImport(admin, data, results, mainRecord);
     data.setIsuCd(mainRecord.getCmrIsu());
     data.setCollectionCd(mainRecord.getCmrAccRecvBo());
 
@@ -640,7 +640,7 @@ public class GCGHandler extends APHandler {
 
   }
 
-  private void autoSetAbbrevLocnNMOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) {
+  private void autoSetAbbrevLocnNameOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) {
     if (SystemLocation.HONG_KONG.equals(data.getCmrIssuingCntry())) {
       if (admin.getReqType().equals("C")) {
         data.setAbbrevLocn("00 HK");
@@ -705,7 +705,7 @@ public class GCGHandler extends APHandler {
         .addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "STATE_PROV", "CITY2", "POST_CD", "CONTACT"));
     return fields;
   }
-  
+
   private String getNewSeqFromSeqToCheck(EntityManager entityManager, long reqId, String addrType, List<String> seqToCheck, boolean isUpdate) {
     Set<String> existingSeq = getExistingAddrSeqInclRdc(entityManager, reqId);
     boolean isAddrTypeExist = false;
