@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -159,6 +160,22 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
     }
 
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CUST_PREF_LANG", "ISIC_CD", "SUB_INDUSTRY_CD", "INAC_CD", "ABBREV_LOCN", "CUST_CLASS", "ISU_CD",
+        "CLIENT_TIER", "MRC_CD", "BUSN_TYP", "TERRITORY_CD", "COLLECTION_CD", "MISC_BILL_CD", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC",
+        "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
+    return fields;
+  }
+
+  @Override
+  public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "DEPT", "CITY1", "STATE_PROV", "POST_CD"));
+    return fields;
   }
 
 }
