@@ -52,6 +52,8 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
       source.setItems(converted);
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
+        String addrType = getMappedAddressType(record.getCmrIssuedBy(), record.getCmrAddrTypeCode(), record.getCmrAddrSeq());
+        record.setCmrAddrTypeCode(addrType);
         converted.add(record);
       }
       source.setItems(converted);
