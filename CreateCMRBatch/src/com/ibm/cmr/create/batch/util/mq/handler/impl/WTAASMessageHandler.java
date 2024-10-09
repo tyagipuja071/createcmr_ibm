@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasRecord;
 import com.ibm.cmr.create.batch.util.AttributesPerLineOutputter;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -229,6 +230,16 @@ public class WTAASMessageHandler extends MQMessageHandler {
         // of type
         this.messageHash.put("TransCode", "M");
       }
+
+      LOG.info("Is AP Country: " + CmrConstants.AP_COUNTRIES.contains(this.mqIntfReqQueue.getCmrIssuingCntry()));
+      String enableBlankCMR = SystemParameters.getString("WTAAS_ENABLE_BLANK_CMR");
+      LOG.info("Enable blank CMR: " + enableBlankCMR);
+      if (CmrConstants.AP_COUNTRIES.contains(this.mqIntfReqQueue.getCmrIssuingCntry()) && "C".equals(this.mqIntfReqQueue.getReqType())
+          && "Y".equals(enableBlankCMR)) {
+        this.messageHash.put("TransCode", "N");
+        LOG.info("setting TransCode to N");
+      }
+
       LOG.trace("Formatting address lines..");
       transformer.formatAddressLines(this);
 
