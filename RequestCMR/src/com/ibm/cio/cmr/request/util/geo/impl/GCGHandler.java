@@ -319,14 +319,14 @@ public class GCGHandler extends APHandler {
     if ("ZS01".equals(rdcType) && "A".equals(addressSeq)) {
       return "ZS01"; // address A, sold-to
     }
-    if ("ZP01".equals(rdcType) && Arrays.asList("B", "C", "D").contains(addressSeq)) {
+    if ("ZP01".equals(rdcType) && (Arrays.asList("B", "C", "D").contains(addressSeq) || addressSeq.startsWith("02"))) {
       return "ZP01"; // address B, bill-to
     }
-    if ("ZI01".equals(rdcType) && "E".equals(addressSeq)) {
+    if ("ZI01".equals(rdcType) && ("E".equals(addressSeq) || addressSeq.startsWith("05"))) {
       return "MAIL"; // address E, install-at
     }
 
-    if (SHIP_TO_ADDR_TYPE.equals(rdcType)) {
+    if (SHIP_TO_ADDR_TYPE.equals(rdcType) || addressSeq.startsWith("04")) {
       return SHIP_TO_ADDR_TYPE; // Ship To
     }
 
