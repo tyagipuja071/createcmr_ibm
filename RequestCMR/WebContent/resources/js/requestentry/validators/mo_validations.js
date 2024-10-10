@@ -4742,6 +4742,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addEROAttachmentValidator, [SysLoc.MACAO], GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(validateStreetAddrCont2, [SysLoc.MACAO], null, true);
   GEOHandler.registerValidator(validateGCGCustomerName, GEOHandler.GCG, null, true);
+  GEOHandler.registerValidator(addDPLCheckValidator, [SysLoc.MACAO], GEOHandler.ROLE_REQUESTER, true);
 
   GEOHandler.addAfterTemplateLoad(setFieldToReadyOnly, SysLoc.MACAO);
   GEOHandler.addAfterConfig(setFieldToReadyOnly, SysLoc.MACAO);
