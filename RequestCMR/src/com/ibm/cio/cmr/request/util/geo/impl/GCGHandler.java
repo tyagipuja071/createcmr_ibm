@@ -511,44 +511,32 @@ public class GCGHandler extends APHandler {
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
       LOG.info("paired seq no after: " + address.getPairedAddrSeq());
 
-      // add condition for ABCDE sequence only or for ZD01
-      List<String> rdcSeqValues = Arrays.asList("A", "B", "C", "D", "E");
-      if (rdcSeqValues.contains(currentRecord.getCmrAddrSeq()) || "ZD01".equals(currentRecord.getCmrAddrTypeCode())) {
-        address.setCustNm1(currentRecord.getCmrName1Plain());
-        address.setCustNm2(currentRecord.getCmrName2Plain());
-        if (rdcSeqValues.contains(currentRecord.getCmrAddrSeq())) {
-          address.getId().setAddrType(getCorrectAddressTypeBySequence(currentRecord.getCmrAddrSeq()));
-        }
+      address.setCustNm1(currentRecord.getCmrName1Plain());
+      address.setCustNm2(currentRecord.getCmrName2Plain());
 
-        switch (countAddressLines(currentRecord)) {
-        case 1:
-          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 1");
-          address.setAddrTxt(currentRecord.getCmrStreetAddress());
-          address.setAddrTxt2("");
-          address.setCity1("");
-          break;
-        case 2:
-          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 2");
-          address.setAddrTxt(currentRecord.getCmrStreetAddress());
-          address.setAddrTxt2(currentRecord.getCmrCity());
-          address.setCity1("");
-          break;
-        case 3:
-          LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 3");
-          address.setAddrTxt(currentRecord.getCmrName4());
-          address.setAddrTxt2(currentRecord.getCmrStreetAddress());
-          address.setCity1(currentRecord.getCmrCity());
-          break;
-        default:
-          LOG.info("Address lines are empty on import: Type = " + currentRecord.getCmrAddrTypeCode() + ", Seq = " + currentRecord.getCmrAddrSeq());
-          break;
-        }
-      } else {
-        LOG.debug(
-            "Calling super for Non-RDC address mapping: Type = " + currentRecord.getCmrAddrTypeCode() + ", Seq = " + currentRecord.getCmrAddrSeq());
-        super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
+      switch (countAddressLines(currentRecord)) {
+      case 1:
+        LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 1");
+        address.setAddrTxt(currentRecord.getCmrStreetAddress());
+        address.setAddrTxt2("");
+        address.setCity1("");
+        break;
+      case 2:
+        LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 2");
+        address.setAddrTxt(currentRecord.getCmrStreetAddress());
+        address.setAddrTxt2(currentRecord.getCmrCity());
+        address.setCity1("");
+        break;
+      case 3:
+        LOG.info("Addr Type: " + currentRecord.getCmrAddrTypeCode() + ", Addr Seq: " + currentRecord.getCmrAddrSeq() + ", Line 3");
+        address.setAddrTxt(currentRecord.getCmrName4());
+        address.setAddrTxt2(currentRecord.getCmrStreetAddress());
+        address.setCity1(currentRecord.getCmrCity());
+        break;
+      default:
+        LOG.info("Address lines are empty on import: Type = " + currentRecord.getCmrAddrTypeCode() + ", Seq = " + currentRecord.getCmrAddrSeq());
+        break;
       }
-
     }
   }
 
