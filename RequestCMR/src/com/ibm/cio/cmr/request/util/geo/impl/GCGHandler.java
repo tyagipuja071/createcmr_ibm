@@ -554,7 +554,7 @@ public class GCGHandler extends APHandler {
       }
 
       if (StringUtils.isNotBlank(currentRecord.getCmrName4())) {
-        addrLinesCount++;
+        return 3;
       }
     }
     return addrLinesCount;
