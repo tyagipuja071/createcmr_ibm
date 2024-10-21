@@ -2418,10 +2418,18 @@ public class CEMEAHandler extends BaseSOFHandler {
                   error.addError((row.getRowNum() + 1), "Group VAT ID",
                       "Group VAT ID should start with 177 and format should be 177nnnnn-n-nn.<br> ");
                 }
-                if (StringUtils.isNotBlank(domesticTax) && !"@".equals(domesticTax) && domesticTax.length() == 13
-                    && !domesticTax.matches("[0-9]{8}-[0-9]{1}-[0-9]{2}")) {
-                  LOG.trace("Domestic TAX ID format should be nnnnnnnn-n-nn.");
-                  error.addError((row.getRowNum() + 1), "Domestic TAX ID", "Domestic TAX ID format should be nnnnnnnn-n-nn.<br> ");
+                String trimmedDomesticTax = domesticTax.trim();
+                if (StringUtils.isNotBlank(trimmedDomesticTax) && !"@".equals(trimmedDomesticTax)
+                    && trimmedDomesticTax.matches("^[0-9]{8}-[0-9]{1}-[0-9]{2}$") // Matches
+                                                                                  // the
+                                                                                  // correct
+                                                                                  // format
+                    && trimmedDomesticTax.startsWith("177")) { // Rejects if it
+                                                               // starts with
+                                                               // 177
+                  LOG.trace("Domestic TAX ID format should be nnnnnnnn-n-nn and should not start with 177.");
+                  error.addError((row.getRowNum() + 1), "Domestic TAX ID",
+                      "Domestic TAX ID format should be nnnnnnnn-n-nn and should not start with 177.<br>");
                 }
 
               }
