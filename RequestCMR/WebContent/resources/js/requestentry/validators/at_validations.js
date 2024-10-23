@@ -455,14 +455,23 @@ function afterConfigForCEMEA() {
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER') {
-      FormManager.readOnly('custClass');
-    } else {
-      FormManager.enable('custClass');
-    }
+    custSubGrp = FormManager.getActualValue('custSubGrp')
     // CREATCMR-6378
     retainVatValueAT();
+    
+    
+    if (FormManager.getActualValue('reqType') == 'U') {
+      var _kukla = null;
+      var ret = cmr.query('DATA_RDC.CUST_CLASS', {
+        REQ_ID : FormManager.getActualValue('reqId')
+      });
+      if (ret && ret.ret1 && ret.ret1 != '') {
+        _kukla = ret.ret1;
+      }
+      if (_kukla != null && _kukla.startsWith('4')) {
+        FormManager.enable('custClass');
+      } 
+    }
   }
 
   setAustriaUIFields();
@@ -3675,13 +3684,15 @@ function setClassificationCodeCEE() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  FormManager.readOnly('custClass');
+//  FormManager.readOnly('custClass');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if ('C' == FormManager.getActualValue('reqType')) {
     var _custType = FormManager.getActualValue('custSubGrp');
     var isicCd = FormManager.getActualValue('isicCd');
-    if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'RSBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP') {
-      FormManager.setValue('custClass', '46');
-    } else if (_custType == 'INTER' || _custType == 'XINT' || _custType == 'MEINT' || _custType == 'RSINT' || _custType == 'CSINT' || _custType == 'RSXIN') {
+//    if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'RSBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP') {
+//      FormManager.setValue('custClass', '46');
+//    } else 
+    if (_custType == 'INTER' || _custType == 'XINT' || _custType == 'MEINT' || _custType == 'RSINT' || _custType == 'CSINT' || _custType == 'RSXIN') {
       FormManager.setValue('custClass', '81');
     } else if (_custType == 'PRICU' || _custType == 'CSPC' || _custType == 'MEPC' || _custType == 'RSPC' || _custType == 'RSXPC') {
       FormManager.setValue('custClass', '60');
@@ -3689,7 +3700,7 @@ function setClassificationCodeCEE() {
       FormManager.setValue('custClass', '71');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
-    } else {
+    } else if (!_custType.includes('BUS') && cmrIssuingCntry != '618'){
       FormManager.setValue('custClass', '11');
     }
   }

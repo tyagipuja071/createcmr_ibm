@@ -201,6 +201,34 @@ function addInacCdValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function enableCustClass() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    FormManager.enable('custClass');
+  } else {
+    FormManager.readOnly('custClass');
+  }
+  if (FormManager.getActualValue('reqType') != 'U'){
+    return;
+  }
+  var _kukla = null;
+  var ret = cmr.query('DATA_RDC.CUST_CLASS', {
+    REQ_ID : FormManager.getActualValue('reqId')
+  });
+  if (ret && ret.ret1 && ret.ret1 != '') {
+    _kukla = ret.ret1;
+  }
+  if (_kukla != null && _kukla.startsWith('4')) {
+    FormManager.enable('custClass');
+  } else {
+    FormManager.readOnly('custClass');
+  }
+  
+}
+
 function addChangeNameAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -641,7 +669,11 @@ function addFieldHandlers() {
   }
 
   if (_custSubGrpHandler == null) {
+    var custGrpFlagCount = 0;
     _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      if (value) {
+        custGrpFlagCount++
+      }
       if (FormManager.getActualValue('reqType') == 'U') {
         return;
       }
@@ -654,6 +686,10 @@ function addFieldHandlers() {
         if (role == 'REQUESTER') {
           FormManager.readOnly('abbrevNm');
         }
+      }
+      
+      if (custGrpFlagCount > 1) {        
+        setCustClassBP(value);
       }
     });
   }
@@ -1403,7 +1439,11 @@ function clientTierValidator() {
 }
 
 function setCustClassByEfc(efcValue) {
-
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp.includes("BUS")) {
+    return;
+  }
   if (!efcValue) {
     FormManager.setValue('custClass', '');
     return;
@@ -1420,6 +1460,16 @@ function setCustClassByEfc(efcValue) {
     FormManager.setValue('custClass', result[0].ret1);
   }
 
+}
+
+function setCustClassBP(value) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  // Setting the default value of customer class for BP scenario
+  if (custSubGrp.includes("BUS")) {
+    FormManager.setValue('custClass', '40');
+  }
+  
 }
 
 function getCsBranchFromPostalCode(postCd) {
@@ -1498,7 +1548,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultARFAARByScenario, SysLoc.CANADA);
-
+  GEOHandler.addAfterConfig(enableCustClass, SysLoc.CANADA);
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
   // CREATCMR-788
