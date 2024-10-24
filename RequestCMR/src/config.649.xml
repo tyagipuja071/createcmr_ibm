@@ -26,7 +26,6 @@
 					<width>40</width>
 					<length>20</length>
 				</column>
-
 				<column>
 					<label>Abbraviated location</label>
 					<dbColumn>ABBREV_LOCN</dbColumn>
@@ -83,7 +82,13 @@
 				</column>
 				<column>
 					<label>Credit Code</label>
-					<!--NOTE: TEMPORARY DB MAPPING waiting for CREDIT_CODE-->
+					<!--NOTE: TEMPORARY DB MAPPING waiting for CREDIT_CODE -->
+					<dbColumn>CREDIT_CD</dbColumn>
+					<width>15</width>
+					<length>2</length>
+				</column>
+				<column>
+					<label>Customer Classification Code</label>
 					<dbColumn>CUST_CLASS</dbColumn>
 					<width>15</width>
 					<length>2</length>

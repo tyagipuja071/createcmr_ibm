@@ -168,6 +168,11 @@ public class AustriaUtil extends AutomationUtil {
       case "Company Number":
         cmdeReview = true;
         break;
+      case "Customer Classification Code":
+        String message = "The Customer Classification Code change cannot be automated and will go for CMDE review.";
+        engineData.addNegativeCheckStatus("_custClassCd", message);
+        details.append(message);
+        break;
       case "Client Tier Code":
         // noop, for switch handling only
         break;
