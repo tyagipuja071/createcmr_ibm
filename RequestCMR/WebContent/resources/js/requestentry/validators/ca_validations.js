@@ -1547,7 +1547,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(preTickLatePaymentInd, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
+ 
   GEOHandler.addAfterTemplateLoad(setDefaultARFAARByScenario, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(setCustClass, SysLoc.CANADA);
   GEOHandler.addAfterConfig(enableCustClass, SysLoc.CANADA);
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
