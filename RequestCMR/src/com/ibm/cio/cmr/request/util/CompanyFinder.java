@@ -505,6 +505,7 @@ public class CompanyFinder {
         match.setStreetAddress1(record.getDnbStreetLine1());
         match.setStreetAddress2(record.getDnbStreetLine2());
         match.setMatchGrade(StringUtils.leftPad("" + record.getConfidenceCode(), 2, '0'));
+        match.setIsicCd(record.getIsicCd());
         if (record.getOrgIdDetails() != null && !record.getOrgIdDetails().isEmpty()) {
           StringBuilder sb = new StringBuilder();
           for (DnbOrganizationId orgId : record.getOrgIdDetails()) {
