@@ -269,6 +269,7 @@ var landedCntryMapping = {
 var isuCovHandler = false;
 var ctcCovHandler = false;
 var _custSubTypeHandler = null;
+var _custSubGrpHandler = null;
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -3388,6 +3389,16 @@ function setChecklistStatus() {
   }
 }
 
+function setCustClassBP(value) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  // Setting the default value of customer class for BP scenario
+  if (custSubGrp.includes("BUSPR") || custSubGrp.includes("XBP")) {
+    FormManager.setValue('custClass', '40');
+  }
+  
+}
+
 function addCEMEAChecklistValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -3669,6 +3680,7 @@ function vatExemptOnScenario() {
 function resetVatExemptOnScenario() {
   dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     vatExemptOnScenario();
+    setCustClassBP(value);
   });
 }
 
