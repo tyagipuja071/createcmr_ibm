@@ -22,7 +22,9 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -406,6 +408,36 @@ public class GCGHandler extends APHandler {
     }
 
     return null;
+  }
+
+  @Override
+  public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    super.doBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
+
+    long reqId = addr.getId().getReqId();
+
+    AdminPK adminPK = new AdminPK();
+    adminPK.setReqId(reqId);
+    Admin admin = entityManager.find(Admin.class, adminPK);
+
+    AddrRdc addrRdc = getAddrRdc(entityManager, addr);
+
+    if (addrRdc != null) {
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "Y".equals(addr.getChangedIndc())) {
+        addr.setPairedAddrSeq(addrRdc.getPairedAddrSeq());
+      }
+    }
+  }
+
+  private AddrRdc getAddrRdc(EntityManager entityManager, Addr addr) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDRRDC.SEARCH_BY_REQID_TYPE_SEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setParameter("ADDR_SEQ", addr.getId().getAddrSeq());
+
+    query.setForReadOnly(true);
+    return query.getSingleResult(AddrRdc.class);
   }
 
   @Override
