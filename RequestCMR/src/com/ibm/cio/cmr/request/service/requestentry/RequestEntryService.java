@@ -2084,6 +2084,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
   private boolean reqIsWtaasCompleted(EntityManager entityManager, Long reqId) {
     String sql = ExternalizedQuery.getSql("GCG.GETCOUNT_COM_NOTIFY");
+    String logMessage = (entityManager == null) ? "EntityManager is null" : "EntityManager is valid";
+
+    log.info("reqIsWtaasCompleted: SQL QUERY VALUE --> " + sql);
+    log.info("reqIsWtaasCompleted: REQUEST ID VALUE --> " + reqId);
+    log.info("reqIsWtaasCompleted: " + logMessage);
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     int count = query.getSingleResult(Integer.class);
