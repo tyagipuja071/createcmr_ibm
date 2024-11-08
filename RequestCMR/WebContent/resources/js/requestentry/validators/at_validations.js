@@ -4986,7 +4986,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(getSBOandAssignFirstValue, SysLoc.AUSTRIA);
   GEOHandler.addAddrFunction(setSBOonAddressSave, [SysLoc.AUSTRIA]);
   GEOHandler.addAfterTemplateLoad(setCTCBasedOnISUCode, [SysLoc.AUSTRIA]);
-  GEOHandler.addAfterConfig(setDefaultCustClassBP, SysLoc.AUSTRIA);
   GEOHandler.addAfterTemplateLoad(setDefaultCustClassBP, SysLoc.AUSTRIA);
 
 
