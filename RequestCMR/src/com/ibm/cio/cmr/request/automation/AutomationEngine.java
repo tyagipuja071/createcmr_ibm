@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import javax.persistence.EntityManager;
 
@@ -26,6 +27,7 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutoEngineConfig;
 import com.ibm.cio.cmr.request.entity.AutomationResults;
@@ -39,19 +41,28 @@ import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.dnb.OrgIdComparator;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.dnb.DnbData;
+import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
+
+
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -149,6 +160,107 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
+    
+    //CREATCMR-12637 - Redhat customer name issue
+    String dunsNo = requestData.getData().getDunsNo();
+    String sourceSystId = requestData.getAdmin().getSourceSystId();
+    String issuingCountry = requestData.getData().getCmrIssuingCntry();
+    
+    GEOHandler handler = RequestUtils.getGEOHandler(issuingCountry);
+    int splitLength = handler.getName1Length() == 0 ? 30 : handler.getName1Length();
+    int splitLength2 = handler.getName2Length() == 0 ? 30 : handler.getName2Length();
+    String name1, name2;
+    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)) {
+     
+      DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+      
+      String mainCustNm1 = dnbData.getCompanyName();
+      
+        if (!StringUtils.isBlank(mainCustNm1)){
+         
+            String mainCustNm2 = null;
+            String[] parts = handler.doSplitName(mainCustNm1, mainCustNm2, splitLength, splitLength2);
+            name1 = parts[0];
+            name2 = parts[1];
+            mainCustNm1 = parts[0].toUpperCase();
+            mainCustNm2 = parts[1].toUpperCase();
+            requestData.getAdmin().setMainCustNm1(mainCustNm1);
+            requestData.getAdmin().setMainCustNm2(mainCustNm2);
+            
+           }
+        
+        List<Addr> addresses = requestData.getAddresses();
+        if (addresses != null && !addresses.isEmpty()) {
+            for (Addr address : addresses) {
+              address.setAddrTxt(dnbData.getPrimaryAddress() != null ? dnbData.getPrimaryAddress() : dnbData.getMailingAddress());
+              address.setAddrTxt2(dnbData.getPrimaryAddressCont() != null ? dnbData.getPrimaryAddressCont()
+                  : (dnbData.getPrimaryAddress() == null ? dnbData.getMailingAddressCont() : ""));
+              address.setCity1(dnbData.getPrimaryCity() != null ? dnbData.getPrimaryCity() : dnbData.getMailingCity());
+              if (dnbData.getPrimaryCountry().length() > 2){
+                address.setLandCntry(dnbData.getPrimaryCountry().substring(0, 2));
+              } else {
+                address.setLandCntry(dnbData.getPrimaryCountry());
+              }
+              address.setPostCd(dnbData.getPrimaryPostalCode() != null ? dnbData.getPrimaryPostalCode() : dnbData.getMailingPostalCode());
+              address.setStateProv(dnbData.getPrimaryStateCode() != null ? dnbData.getPrimaryStateCode() : dnbData.getMailingStateCode());
+            }    
+              
+            
+            }
+        
+        DnbData dnb = CompanyFinder.getDnBDetails(dunsNo);
+        if (dnb == null || dnb.getResults() == null || dnb.getResults().isEmpty()) {
+          throw new CmrException(new Exception("D&B record for DUNS " + dunsNo + " cannot be retrieved. Please try another record."));
+        }
+        DnBCompany company = dnb.getResults().get(0);
+        if ("O".equals(company.getOperStatusCode())) {
+          throw new CmrException(new Exception("The company is Out of Business based on D&B records."));
+        }
+        
+        String country = dnbData.getPrimaryCountry();
+        
+        if (country.length() > 2){
+          country.substring(0, 2);
+        } 
+        
+        List<DnbOrganizationId> orgIds = company.getOrganizationIdDetails();
+        if (orgIds != null && !orgIds.isEmpty()) {
+          List<DnbOrganizationId> dnbOrgIds = new ArrayList<DnbOrganizationId>();
+          dnbOrgIds.addAll(orgIds);
+          Collections.sort(dnbOrgIds, new OrgIdComparator());
+          String vat = DnBUtil.getVAT(country, dnbOrgIds);
+          if (!StringUtils.isBlank(vat)) {
+            // do 2 VAT checks
+            boolean vatValid = DnBUtil.validateVAT(country, vat);
+            if (!vatValid && !vat.startsWith(country)) {
+              country = "GR".equals(country) ? "EL" : country;
+              vatValid = DnBUtil.validateVAT(country, country + vat);
+              if (vatValid) {
+                vat = country + vat;
+              } else {
+                String countrySpeficPrefix = handler.getCountrySpecificVatPrefix();
+                // validate for a third time
+                if (countrySpeficPrefix != null) {
+                  vatValid = DnBUtil.validateVAT(country, countrySpeficPrefix + vat);
+                  if (vatValid) {
+                    vat = countrySpeficPrefix + vat;
+                  }
+                }
+              }
+            }
+            requestData.getData().setVat(vat);
+          }
+          String taxCd1 = DnBUtil.getTaxCode1(country, dnbOrgIds);
+          requestData.getData().setTaxCd1(taxCd1);
+          LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
+        }
+        LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + requestData.getData().getIsicCd() + "]");
+        requestData.getData().setIsicCd(dnbData.getIbmIsic());
+        requestData.getData().setSubIndustryCd(getSubindCode(dnbData.getIbmIsic(), entityManager));
+        LOG.debug("- ISIC: " + requestData.getData().getIsicCd() + "  Subindustry: " + requestData.getData().getSubIndustryCd());
+        
+    }
+    
     // put the current engine data on the thread, for reuse if needed
 
     // check child request status first
@@ -992,4 +1104,16 @@ public class AutomationEngine {
       mail.send(host);
     }
   }
+  
+  private String getSubindCode(String isicCd, EntityManager entityManager) {
+    if (StringUtils.isBlank(isicCd) || isicCd.trim().length() < 4) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.DNB.GETSUBIND");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISIC", isicCd);
+    return query.getSingleResult(String.class);
+  }
+
+  
 }

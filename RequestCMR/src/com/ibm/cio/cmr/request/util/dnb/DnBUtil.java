@@ -587,7 +587,7 @@ public class DnBUtil {
    * @return
    * @throws Exception
    */
-  private static boolean validateVAT(String country, String vat) throws Exception {
+  public static boolean validateVAT(String country, String vat) throws Exception {
     LOG.debug("Validating VAT " + vat + " for " + country);
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     ValidatorClient client = CmrServicesFactory.getInstance().createClient(baseUrl, ValidatorClient.class);
