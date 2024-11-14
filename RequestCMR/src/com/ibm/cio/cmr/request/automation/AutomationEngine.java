@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import javax.persistence.EntityManager;
 
@@ -40,6 +41,7 @@ import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -49,12 +51,15 @@ import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.dnb.OrgIdComparator;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
+
 
 
 /**
@@ -153,6 +158,8 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
+    
+    //CREATCMR-12637 - Redhat customer name issue
     String dunsNo = requestData.getData().getDunsNo();
     String sourceSystId = requestData.getAdmin().getSourceSystId();
     String issuingCountry = requestData.getData().getCmrIssuingCntry();
@@ -164,6 +171,7 @@ public class AutomationEngine {
     if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)) {
      
       DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+      
       String mainCustNm1 = dnbData.getCompanyName();
       
         if (!StringUtils.isBlank(mainCustNm1)){
@@ -196,7 +204,43 @@ public class AutomationEngine {
             }    
               
             
-            }        
+            }
+        
+        List<DnbOrganizationId> orgIds = dnbData.getOrganizationIdDetails();
+        if (orgIds != null && !orgIds.isEmpty()) {
+          List<DnbOrganizationId> dnbOrgIds = new ArrayList<DnbOrganizationId>();
+          dnbOrgIds.addAll(orgIds);
+          Collections.sort(dnbOrgIds, new OrgIdComparator());
+          String vat = DnBUtil.getVAT(issuingCountry, dnbOrgIds);
+          if (!StringUtils.isBlank(vat)) {
+            // do 2 VAT checks
+            boolean vatValid = DnBUtil.validateVAT(issuingCountry, vat);
+            if (!vatValid && !vat.startsWith(issuingCountry)) {
+              issuingCountry = "GR".equals(issuingCountry) ? "EL" : issuingCountry;
+              vatValid = DnBUtil.validateVAT(issuingCountry, issuingCountry + vat);
+              if (vatValid) {
+                vat = issuingCountry + vat;
+              } else {
+                String countrySpeficPrefix = handler.getCountrySpecificVatPrefix();
+                // validate for a third time
+                if (countrySpeficPrefix != null) {
+                  vatValid = DnBUtil.validateVAT(issuingCountry, countrySpeficPrefix + vat);
+                  if (vatValid) {
+                    vat = countrySpeficPrefix + vat;
+                  }
+                }
+              }
+            }
+            requestData.getData().setVat(vat);
+          }
+          String taxCd1 = DnBUtil.getTaxCode1(issuingCountry, dnbOrgIds);
+          requestData.getData().setTaxCd1(taxCd1);
+          LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
+        }
+        LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + requestData.getData().getIsicCd() + "]");
+        requestData.getData().setIsicCd(dnbData.getIbmIsic());
+        requestData.getData().setSubIndustryCd(getSubindCode(dnbData.getIbmIsic(), entityManager));
+        LOG.debug("- ISIC: " + requestData.getData().getIsicCd() + "  Subindustry: " + requestData.getData().getSubIndustryCd());
         
     }
     
@@ -1043,4 +1087,16 @@ public class AutomationEngine {
       mail.send(host);
     }
   }
+  
+  private String getSubindCode(String isicCd, EntityManager entityManager) {
+    if (StringUtils.isBlank(isicCd) || isicCd.trim().length() < 4) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.DNB.GETSUBIND");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISIC", isicCd);
+    return query.getSingleResult(String.class);
+  }
+
+  
 }
