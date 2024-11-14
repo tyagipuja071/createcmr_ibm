@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutoEngineConfig;
 import com.ibm.cio.cmr.request.entity.AutomationResults;
@@ -47,11 +48,14 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
+
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -149,6 +153,53 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
+    String dunsNo = requestData.getData().getDunsNo();
+    String sourceSystId = requestData.getAdmin().getSourceSystId();
+    String issuingCountry = requestData.getData().getCmrIssuingCntry();
+    
+    GEOHandler handler = RequestUtils.getGEOHandler(issuingCountry);
+    int splitLength = handler.getName1Length() == 0 ? 30 : handler.getName1Length();
+    int splitLength2 = handler.getName2Length() == 0 ? 30 : handler.getName2Length();
+    String name1, name2;
+    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)) {
+     
+      DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+      String mainCustNm1 = dnbData.getCompanyName();
+      
+        if (!StringUtils.isBlank(mainCustNm1)){
+         
+            String mainCustNm2 = null;
+            String[] parts = handler.doSplitName(mainCustNm1, mainCustNm2, splitLength, splitLength2);
+            name1 = parts[0];
+            name2 = parts[1];
+            mainCustNm1 = parts[0].toUpperCase();
+            mainCustNm2 = parts[1].toUpperCase();
+            requestData.getAdmin().setMainCustNm1(mainCustNm1);
+            requestData.getAdmin().setMainCustNm2(mainCustNm2);
+            
+           }
+        
+        List<Addr> addresses = requestData.getAddresses();
+        if (addresses != null && !addresses.isEmpty()) {
+            for (Addr address : addresses) {
+              address.setAddrTxt(dnbData.getPrimaryAddress() != null ? dnbData.getPrimaryAddress() : dnbData.getMailingAddress());
+              address.setAddrTxt2(dnbData.getPrimaryAddressCont() != null ? dnbData.getPrimaryAddressCont()
+                  : (dnbData.getPrimaryAddress() == null ? dnbData.getMailingAddressCont() : ""));
+              address.setCity1(dnbData.getPrimaryCity() != null ? dnbData.getPrimaryCity() : dnbData.getMailingCity());
+              if (dnbData.getPrimaryCountry().length() > 2){
+                address.setLandCntry(dnbData.getPrimaryCountry().substring(0, 2));
+              } else {
+                address.setLandCntry(dnbData.getPrimaryCountry());
+              }
+              address.setPostCd(dnbData.getPrimaryPostalCode() != null ? dnbData.getPrimaryPostalCode() : dnbData.getMailingPostalCode());
+              address.setStateProv(dnbData.getPrimaryStateCode() != null ? dnbData.getPrimaryStateCode() : dnbData.getMailingStateCode());
+            }    
+              
+            
+            }        
+        
+    }
+    
     // put the current engine data on the thread, for reuse if needed
 
     // check child request status first
