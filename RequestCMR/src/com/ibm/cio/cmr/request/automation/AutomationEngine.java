@@ -46,6 +46,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -58,6 +59,7 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 
 
@@ -206,25 +208,40 @@ public class AutomationEngine {
             
             }
         
-        List<DnbOrganizationId> orgIds = dnbData.getOrganizationIdDetails();
+        DnbData dnb = CompanyFinder.getDnBDetails(dunsNo);
+        if (dnb == null || dnb.getResults() == null || dnb.getResults().isEmpty()) {
+          throw new CmrException(new Exception("D&B record for DUNS " + dunsNo + " cannot be retrieved. Please try another record."));
+        }
+        DnBCompany company = dnb.getResults().get(0);
+        if ("O".equals(company.getOperStatusCode())) {
+          throw new CmrException(new Exception("The company is Out of Business based on D&B records."));
+        }
+        
+        String country = dnbData.getPrimaryCountry();
+        
+        if (country.length() > 2){
+          country.substring(0, 2);
+        } 
+        
+        List<DnbOrganizationId> orgIds = company.getOrganizationIdDetails();
         if (orgIds != null && !orgIds.isEmpty()) {
           List<DnbOrganizationId> dnbOrgIds = new ArrayList<DnbOrganizationId>();
           dnbOrgIds.addAll(orgIds);
           Collections.sort(dnbOrgIds, new OrgIdComparator());
-          String vat = DnBUtil.getVAT(issuingCountry, dnbOrgIds);
+          String vat = DnBUtil.getVAT(country, dnbOrgIds);
           if (!StringUtils.isBlank(vat)) {
             // do 2 VAT checks
-            boolean vatValid = DnBUtil.validateVAT(issuingCountry, vat);
-            if (!vatValid && !vat.startsWith(issuingCountry)) {
-              issuingCountry = "GR".equals(issuingCountry) ? "EL" : issuingCountry;
-              vatValid = DnBUtil.validateVAT(issuingCountry, issuingCountry + vat);
+            boolean vatValid = DnBUtil.validateVAT(country, vat);
+            if (!vatValid && !vat.startsWith(country)) {
+              country = "GR".equals(country) ? "EL" : country;
+              vatValid = DnBUtil.validateVAT(country, country + vat);
               if (vatValid) {
-                vat = issuingCountry + vat;
+                vat = country + vat;
               } else {
                 String countrySpeficPrefix = handler.getCountrySpecificVatPrefix();
                 // validate for a third time
                 if (countrySpeficPrefix != null) {
-                  vatValid = DnBUtil.validateVAT(issuingCountry, countrySpeficPrefix + vat);
+                  vatValid = DnBUtil.validateVAT(country, countrySpeficPrefix + vat);
                   if (vatValid) {
                     vat = countrySpeficPrefix + vat;
                   }
@@ -233,7 +250,7 @@ public class AutomationEngine {
             }
             requestData.getData().setVat(vat);
           }
-          String taxCd1 = DnBUtil.getTaxCode1(issuingCountry, dnbOrgIds);
+          String taxCd1 = DnBUtil.getTaxCode1(country, dnbOrgIds);
           requestData.getData().setTaxCd1(taxCd1);
           LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
         }
