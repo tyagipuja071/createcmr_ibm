@@ -41,7 +41,6 @@ import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
-import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -190,23 +189,52 @@ public class AutomationEngine {
            }
         
         List<Addr> addresses = requestData.getAddresses();
+        List<Addr> updatedAddresses = new ArrayList<>();
+
         if (addresses != null && !addresses.isEmpty()) {
             for (Addr address : addresses) {
-              address.setAddrTxt(dnbData.getPrimaryAddress() != null ? dnbData.getPrimaryAddress() : dnbData.getMailingAddress());
-              address.setAddrTxt2(dnbData.getPrimaryAddressCont() != null ? dnbData.getPrimaryAddressCont()
-                  : (dnbData.getPrimaryAddress() == null ? dnbData.getMailingAddressCont() : ""));
-              address.setCity1(dnbData.getPrimaryCity() != null ? dnbData.getPrimaryCity() : dnbData.getMailingCity());
-              if (dnbData.getPrimaryCountry().length() > 2){
-                address.setLandCntry(dnbData.getPrimaryCountry().substring(0, 2));
-              } else {
-                address.setLandCntry(dnbData.getPrimaryCountry());
-              }
-              address.setPostCd(dnbData.getPrimaryPostalCode() != null ? dnbData.getPrimaryPostalCode() : dnbData.getMailingPostalCode());
-              address.setStateProv(dnbData.getPrimaryStateCode() != null ? dnbData.getPrimaryStateCode() : dnbData.getMailingStateCode());
-            }    
-              
-            
+                if (requestData.getAdmin() == null || dnbData == null) {
+                    throw new IllegalArgumentException("Admin or DNB data is null");
+                }
+
+                String custNm1 = requestData.getAdmin().getMainCustNm1();
+                String custNm2 = requestData.getAdmin().getMainCustNm2();
+                String addrTxt = dnbData.getPrimaryAddress() != null ? dnbData.getPrimaryAddress() : dnbData.getMailingAddress();
+                String addrTxt2 = dnbData.getPrimaryAddressCont() != null 
+                        ? dnbData.getPrimaryAddressCont() 
+                        : (dnbData.getPrimaryAddress() == null ? dnbData.getMailingAddressCont() : "");
+                String city1 = dnbData.getPrimaryCity() != null ? dnbData.getPrimaryCity() : dnbData.getMailingCity();
+                String landCntry = dnbData.getPrimaryCountry() != null
+                        ? (dnbData.getPrimaryCountry().length() > 2 ? dnbData.getPrimaryCountry().substring(0, 2) : dnbData.getPrimaryCountry())
+                        : null; // Default value for null
+                String postCd = dnbData.getPrimaryPostalCode() != null ? dnbData.getPrimaryPostalCode() : dnbData.getMailingPostalCode();
+                String stateProv = dnbData.getPrimaryStateCode() != null ? dnbData.getPrimaryStateCode() : dnbData.getMailingStateCode();
+
+                // Debug log for inputs
+                LOG.debug("Creating Addr with custNm1={}, custNm2={}, addrTxt={}, addrTxt2={}, city1={}, landCntry={}, postCd={}, stateProv={} " + 
+                          custNm1 + custNm2 +  addrTxt + addrTxt2 + city1 + landCntry + postCd + stateProv);
+
+                // Create and add updated address
+                Addr updatedAddress = new Addr();
+                updatedAddress.setCustNm1(custNm1);
+                updatedAddress.setCustNm2(custNm2);
+                updatedAddress.setAddrTxt(addrTxt);
+                updatedAddress.setAddrTxt2(addrTxt2);
+                updatedAddress.setCity1(city1);
+                updatedAddress.setLandCntry(landCntry);
+                updatedAddress.setPostCd(postCd);
+                updatedAddress.setStateProv(stateProv);
+
+                updatedAddresses.add(updatedAddress);
             }
+
+            // Replace the old addresses list with updated addresses
+            requestData.setAddresses(updatedAddresses);
+        } else {
+            LOG.debug("Addresses list is null or empty");
+        }
+
+
         
         DnbData dnb = CompanyFinder.getDnBDetails(dunsNo);
         if (dnb == null || dnb.getResults() == null || dnb.getResults().isEmpty()) {
