@@ -1016,7 +1016,7 @@ public class AutomationEngine {
     String reqType = requestData.getAdmin().getReqType();
 
     // for Create with DUNS and external, auto import D&B details
-    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId) && "C".equals(reqType)) {
+    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId) && "C".equalsIgnoreCase(reqType)) {
       LOG.debug("Importing D&B data for externally created request with DUNS.");
       GEOHandler handler = RequestUtils.getGEOHandler(issuingCountry);
       int splitLength = handler.getName1Length() == 0 ? 30 : handler.getName1Length();
