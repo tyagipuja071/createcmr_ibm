@@ -7,16 +7,17 @@ import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
@@ -41,12 +42,10 @@ import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
-import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SlackAlertsUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -59,10 +58,7 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
-import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
-
-
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -160,108 +156,9 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
-    
-    //CREATCMR-12637 - Redhat customer name issue
-    String dunsNo = requestData.getData().getDunsNo();
-    String sourceSystId = requestData.getAdmin().getSourceSystId();
-    String issuingCountry = requestData.getData().getCmrIssuingCntry();
-    
-    GEOHandler handler = RequestUtils.getGEOHandler(issuingCountry);
-    int splitLength = handler.getName1Length() == 0 ? 30 : handler.getName1Length();
-    int splitLength2 = handler.getName2Length() == 0 ? 30 : handler.getName2Length();
-    String name1, name2;
-    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)) {
-     
-      DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
-      
-      String mainCustNm1 = dnbData.getCompanyName();
-      
-        if (!StringUtils.isBlank(mainCustNm1)){
-         
-            String mainCustNm2 = null;
-            String[] parts = handler.doSplitName(mainCustNm1, mainCustNm2, splitLength, splitLength2);
-            name1 = parts[0];
-            name2 = parts[1];
-            mainCustNm1 = parts[0].toUpperCase();
-            mainCustNm2 = parts[1].toUpperCase();
-            requestData.getAdmin().setMainCustNm1(mainCustNm1);
-            requestData.getAdmin().setMainCustNm2(mainCustNm2);
-            
-           }
-        
-        List<Addr> addresses = requestData.getAddresses();
-        if (addresses != null && !addresses.isEmpty()) {
-            for (Addr address : addresses) {
-              address.setAddrTxt(dnbData.getPrimaryAddress() != null ? dnbData.getPrimaryAddress() : dnbData.getMailingAddress());
-              address.setAddrTxt2(dnbData.getPrimaryAddressCont() != null ? dnbData.getPrimaryAddressCont()
-                  : (dnbData.getPrimaryAddress() == null ? dnbData.getMailingAddressCont() : ""));
-              address.setCity1(dnbData.getPrimaryCity() != null ? dnbData.getPrimaryCity() : dnbData.getMailingCity());
-              if (dnbData.getPrimaryCountry().length() > 2){
-                address.setLandCntry(dnbData.getPrimaryCountry().substring(0, 2));
-              } else {
-                address.setLandCntry(dnbData.getPrimaryCountry());
-              }
-              address.setPostCd(dnbData.getPrimaryPostalCode() != null ? dnbData.getPrimaryPostalCode() : dnbData.getMailingPostalCode());
-              address.setStateProv(dnbData.getPrimaryStateCode() != null ? dnbData.getPrimaryStateCode() : dnbData.getMailingStateCode());
-            }    
-              
-            
-            }
-        
-        DnbData dnb = CompanyFinder.getDnBDetails(dunsNo);
-        if (dnb == null || dnb.getResults() == null || dnb.getResults().isEmpty()) {
-          throw new CmrException(new Exception("D&B record for DUNS " + dunsNo + " cannot be retrieved. Please try another record."));
-        }
-        DnBCompany company = dnb.getResults().get(0);
-        if ("O".equals(company.getOperStatusCode())) {
-          throw new CmrException(new Exception("The company is Out of Business based on D&B records."));
-        }
-        
-        String country = dnbData.getPrimaryCountry();
-        
-        if (country.length() > 2){
-          country.substring(0, 2);
-        } 
-        
-        List<DnbOrganizationId> orgIds = company.getOrganizationIdDetails();
-        if (orgIds != null && !orgIds.isEmpty()) {
-          List<DnbOrganizationId> dnbOrgIds = new ArrayList<DnbOrganizationId>();
-          dnbOrgIds.addAll(orgIds);
-          Collections.sort(dnbOrgIds, new OrgIdComparator());
-          String vat = DnBUtil.getVAT(country, dnbOrgIds);
-          if (!StringUtils.isBlank(vat)) {
-            // do 2 VAT checks
-            boolean vatValid = DnBUtil.validateVAT(country, vat);
-            if (!vatValid && !vat.startsWith(country)) {
-              country = "GR".equals(country) ? "EL" : country;
-              vatValid = DnBUtil.validateVAT(country, country + vat);
-              if (vatValid) {
-                vat = country + vat;
-              } else {
-                String countrySpeficPrefix = handler.getCountrySpecificVatPrefix();
-                // validate for a third time
-                if (countrySpeficPrefix != null) {
-                  vatValid = DnBUtil.validateVAT(country, countrySpeficPrefix + vat);
-                  if (vatValid) {
-                    vat = countrySpeficPrefix + vat;
-                  }
-                }
-              }
-            }
-            requestData.getData().setVat(vat);
-          }
-          String taxCd1 = DnBUtil.getTaxCode1(country, dnbOrgIds);
-          requestData.getData().setTaxCd1(taxCd1);
-          LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
-        }
-        LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + requestData.getData().getIsicCd() + "]");
-        requestData.getData().setIsicCd(dnbData.getIbmIsic());
-        requestData.getData().setSubIndustryCd(getSubindCode(dnbData.getIbmIsic(), entityManager));
-        LOG.debug("- ISIC: " + requestData.getData().getIsicCd() + "  Subindustry: " + requestData.getData().getSubIndustryCd());
-        
-    }
-    
-    // put the current engine data on the thread, for reuse if needed
+    AppUser appUser = createAutomationAppUser();
+
+    prepareDnBImportForExternalRequests(entityManager, reqId, requestData, appUser);
 
     // check child request status first
     long childReqId = requestData.getAdmin().getChildReqId();
@@ -270,11 +167,11 @@ public class AutomationEngine {
       return;
     }
 
+    // put the current engine data on the thread, for reuse if needed
     List<ActionOnError> actionsOnError = new ArrayList<>();
     LOG.trace("Preparing engine data..");
     engineData.remove();
     AutomationEngineData threadData = new AutomationEngineData();
-    AppUser appUser = createAutomationAppUser();
     List<RejectionContainer> rejectInfo = new ArrayList<RejectionContainer>();
     threadData.put(AutomationEngineData.APP_USER, appUser);
     threadData.put(AutomationEngineData.REJECTIONS, rejectInfo);
@@ -292,7 +189,7 @@ public class AutomationEngine {
     int lastElementIndex = 0;
 
     boolean hasOverrideOrMatchingApplied = false;
-    
+
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
     Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
@@ -306,16 +203,15 @@ public class AutomationEngine {
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
 
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(reqType) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
-
 
     if (isPaygoUpgrade) {
       requestData.getData().setOrdBlk(null);
     }
-    
+
     // CREATCMR-4872
     boolean isUsTaxSkipToPcp = false;
     // CREATCMR-5447
@@ -327,9 +223,9 @@ public class AutomationEngine {
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
     requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
     boolean isFullSunsetCty = false;
-    
-    if (Arrays.asList(FULL_SUNSET_COUNTRIES).contains(requestData.getData().getCmrIssuingCntry())){
-    	isFullSunsetCty = true;
+
+    if (Arrays.asList(FULL_SUNSET_COUNTRIES).contains(requestData.getData().getCmrIssuingCntry())) {
+      isFullSunsetCty = true;
     }
 
     // CREATCMR-6331
@@ -376,7 +272,7 @@ public class AutomationEngine {
         hasOverrideOrMatchingApplied = true;
       }
       // handle the special ALL types (approvals)
-      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)  || isPaygoUpgrade) {
+      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType) || isPaygoUpgrade) {
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
 
@@ -400,7 +296,7 @@ public class AutomationEngine {
             break;
           }
         }
-        
+
         if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
           isUsOtherChecksFailed = true;
         }
@@ -470,7 +366,7 @@ public class AutomationEngine {
       }
       lastElementIndex++;
     }
-    
+
     if ("897".equals(requestData.getData().getCmrIssuingCntry()) && scorecard != null) {
       if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
         isUsWatsonxSkipToPcp = true;
@@ -555,17 +451,18 @@ public class AutomationEngine {
           moveForPayGo = true;
         }
 
-        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited && !Arrays.asList("PRIV","PRICU","BEPRI","LUPRI","PRIPE","CHPRI","CBPRI").contains(data.getCustSubGrp())) {
-       // admin.setPaygoProcessIndc("Y");
+        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited
+            && !Arrays.asList("PRIV", "PRICU", "BEPRI", "LUPRI", "PRIPE", "CHPRI", "CBPRI").contains(data.getCustSubGrp())) {
+          // admin.setPaygoProcessIndc("Y");
           createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
         }
 
         if ("U".equals(admin.getReqType())) {
           if ("PG".equals(data.getOrdBlk()) && !"PAYG".equals(admin.getReqReason())) {
-      //      admin.setPaygoProcessIndc("Y");
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
-          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited &&  !"PAYG".equals(admin.getReqReason())) {
-        //    admin.setPaygoProcessIndc("Y");
+          } else if (!engineData.get().getNegativeChecks().isEmpty() && payGoAddredited && !"PAYG".equals(admin.getReqReason())) {
+            // admin.setPaygoProcessIndc("Y");
             createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
           }
         }
@@ -1104,7 +1001,124 @@ public class AutomationEngine {
       mail.send(host);
     }
   }
-  
+
+  private void prepareDnBImportForExternalRequests(EntityManager entityManager, long reqId, RequestData requestData, AppUser appUser)
+      throws Exception {
+    // CREATCMR-12637 - Redhat customer name issue
+    String dunsNo = requestData.getData().getDunsNo();
+    String sourceSystId = requestData.getAdmin().getSourceSystId();
+    String issuingCountry = requestData.getData().getCmrIssuingCntry();
+
+    String reqType = requestData.getAdmin().getReqType();
+
+    // for Create with DUNS and external, auto import D&B details
+    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId) && "C".equals(reqType)) {
+      LOG.debug("Importing D&B data for externally created request with DUNS.");
+      GEOHandler handler = RequestUtils.getGEOHandler(issuingCountry);
+      int splitLength = handler.getName1Length() == 0 ? 30 : handler.getName1Length();
+      int splitLength2 = handler.getName2Length() == 0 ? 30 : handler.getName2Length();
+
+      DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+
+      String mainCustNm1 = dnbData.getCompanyName();
+      String mainCustNm2 = null;
+      if (!StringUtils.isBlank(mainCustNm1)) {
+
+        String[] parts = handler.doSplitName(mainCustNm1, mainCustNm2, splitLength, splitLength2);
+        mainCustNm1 = parts[0].toUpperCase();
+        mainCustNm2 = parts[1].toUpperCase();
+        requestData.getAdmin().setMainCustNm1(mainCustNm1);
+        requestData.getAdmin().setMainCustNm2(mainCustNm2);
+
+      }
+
+      List<Addr> addresses = requestData.getAddresses();
+      if (addresses != null && !addresses.isEmpty()) {
+        for (Addr address : addresses) {
+          if (handler.customerNamesOnAddress()) {
+            address.setCustNm1(mainCustNm1);
+            address.setCustNm2(mainCustNm2);
+          }
+          address.setAddrTxt(dnbData.getPrimaryAddress() != null ? dnbData.getPrimaryAddress() : dnbData.getMailingAddress());
+          address.setAddrTxt2(dnbData.getPrimaryAddressCont() != null ? dnbData.getPrimaryAddressCont()
+              : (dnbData.getPrimaryAddress() == null ? dnbData.getMailingAddressCont() : ""));
+          address.setCity1(dnbData.getPrimaryCity() != null ? dnbData.getPrimaryCity() : dnbData.getMailingCity());
+          if (dnbData.getPrimaryCountry().length() > 2) {
+            address.setLandCntry(dnbData.getPrimaryCountry().substring(0, 2));
+          } else {
+            address.setLandCntry(dnbData.getPrimaryCountry());
+          }
+          address.setPostCd(dnbData.getPrimaryPostalCode() != null ? dnbData.getPrimaryPostalCode() : dnbData.getMailingPostalCode());
+          address.setStateProv(dnbData.getPrimaryStateCode() != null ? dnbData.getPrimaryStateCode() : dnbData.getMailingStateCode());
+          entityManager.merge(address);
+        }
+
+      }
+
+      String country = dnbData.getPrimaryCountry();
+
+      if (country.length() > 2) {
+        country.substring(0, 2);
+      }
+
+      List<DnbOrganizationId> orgIds = dnbData.getOrganizationIdDetails();
+      if (orgIds != null && !orgIds.isEmpty()) {
+        List<DnbOrganizationId> dnbOrgIds = new ArrayList<DnbOrganizationId>();
+        dnbOrgIds.addAll(orgIds);
+        Collections.sort(dnbOrgIds, new OrgIdComparator());
+        String vat = DnBUtil.getVAT(country, dnbOrgIds);
+        if (!StringUtils.isBlank(vat)) {
+          // do 2 VAT checks
+          boolean vatValid = DnBUtil.validateVAT(country, vat);
+          if (!vatValid && !vat.startsWith(country)) {
+            country = "GR".equals(country) ? "EL" : country;
+            vatValid = DnBUtil.validateVAT(country, country + vat);
+            if (vatValid) {
+              vat = country + vat;
+            } else {
+              String countrySpeficPrefix = handler.getCountrySpecificVatPrefix();
+              // validate for a third time
+              if (countrySpeficPrefix != null) {
+                vatValid = DnBUtil.validateVAT(country, countrySpeficPrefix + vat);
+                if (vatValid) {
+                  vat = countrySpeficPrefix + vat;
+                }
+              }
+            }
+          }
+          requestData.getData().setVat(vat);
+        }
+        String taxCd1 = DnBUtil.getTaxCode1(country, dnbOrgIds);
+        requestData.getData().setTaxCd1(taxCd1);
+        LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
+      }
+      LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + requestData.getData().getIsicCd() + "]");
+      requestData.getData().setIsicCd(dnbData.getIbmIsic());
+      requestData.getData().setSubIndustryCd(getSubindCode(dnbData.getIbmIsic(), entityManager));
+      LOG.debug("- ISIC: " + requestData.getData().getIsicCd() + "  Subindustry: " + requestData.getData().getSubIndustryCd());
+      entityManager.merge(requestData.getAdmin());
+      entityManager.merge(requestData.getData());
+
+      // add a comment
+      ReqCmtLog comment = new ReqCmtLog();
+      ReqCmtLogPK reqCmtLogpk = new ReqCmtLogPK();
+      reqCmtLogpk.setCmtId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "CMT_ID"));
+      comment.setId(reqCmtLogpk);
+      comment.setReqId(reqId);
+      comment.setCmt("Request from external system with supplied DUNS. D&B Record imported directly to the request before validations.");
+      // save cmtlockedIn as Y default for current realese
+      comment.setCmtLockedIn(CmrConstants.CMT_LOCK_IND_YES);
+      comment.setCreateById(appUser.getIntranetId());
+      comment.setCreateByNm(appUser.getBluePagesName());
+      // set createTs as current timestamp and updateTs same as CreateTs
+      comment.setCreateTs(SystemUtil.getCurrentTimestamp());
+      comment.setUpdateTs(comment.getCreateTs());
+      entityManager.persist(comment);
+      ;
+    }
+
+  }
+
   private String getSubindCode(String isicCd, EntityManager entityManager) {
     if (StringUtils.isBlank(isicCd) || isicCd.trim().length() < 4) {
       return null;
@@ -1115,5 +1129,4 @@ public class AutomationEngine {
     return query.getSingleResult(String.class);
   }
 
-  
 }
