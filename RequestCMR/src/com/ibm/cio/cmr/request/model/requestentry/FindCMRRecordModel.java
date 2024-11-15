@@ -324,6 +324,8 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   private String cmrCreditToCustNo;
 
+  private String cmrTaxJurisCd;
+
   public String getCmrStxlTxtVal() {
     return cmrStxlTxtVal;
   }
@@ -2537,6 +2539,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setCmrContractSignDt(String cmrContractSignDt) {
     this.cmrContractSignDt = cmrContractSignDt;
+  }
+
+  public String getCmrTaxJurisCd() {
+    return cmrTaxJurisCd;
+  }
+
+  public void setCmrTaxJurisCd(String cmrTaxJurisCd) {
+    this.cmrTaxJurisCd = cmrTaxJurisCd;
   }
 
 }

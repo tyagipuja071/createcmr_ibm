@@ -49,11 +49,6 @@
       <cmr:view exceptForCountry="618,740">
         <cmr:info text="${ui.info.custNm2CEMEA}" />
       </cmr:view>
-      <cmr:view forCountry="740">
-      	<a id = 'custNm2HUInfoBubble'>
-        	<cmr:info text="${ui.info.custNm2HU}" />
-        </a>
-      </cmr:view>
       <cmr:view forCountry="618">
         <cmr:info text="${ui.info.nameAustria}" />
       </cmr:view>
@@ -157,6 +152,7 @@
 				<cmr:field fieldId="Department" id="dept" path="dept" />
 			</p>
 		</cmr:column>
+	</cmr:view>
 		<cmr:column span="2">
 			<p>
 				<cmr:label fieldId="stateProv">
@@ -167,7 +163,6 @@
 				<cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
 			</p>
 		</cmr:column>
-	</cmr:view>
 </cmr:row>
 
 <cmr:row>
