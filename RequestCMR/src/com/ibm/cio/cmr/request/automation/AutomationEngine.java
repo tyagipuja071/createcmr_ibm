@@ -1102,7 +1102,7 @@ public class AutomationEngine {
       requestData.getData().setSubIndustryCd(getSubindCode(dnbData.getIbmIsic(), entityManager));
       LOG.debug("- ISIC: " + requestData.getData().getIsicCd() + "  Subindustry: " + requestData.getData().getSubIndustryCd());
 
-      requestData.getScorecard().setDplChkResult("Accepted");
+      requestData.getScorecard().setFindDnbResult("Accepted");
       entityManager.merge(requestData.getAdmin());
       entityManager.merge(requestData.getData());
       entityManager.merge(requestData.getScorecard());
