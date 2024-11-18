@@ -269,6 +269,7 @@ var landedCntryMapping = {
   "ZM": "883",
   "ZW": "825"
 }
+var _custSubGrpHandler = null;
 var isuCovHandler = false;
 var ctcCovHandler = false;
 var _custSubTypeHandler = null;
@@ -455,14 +456,23 @@ function afterConfigForCEMEA() {
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER') {
-      FormManager.readOnly('custClass');
-    } else {
-      FormManager.enable('custClass');
-    }
+    custSubGrp = FormManager.getActualValue('custSubGrp')
     // CREATCMR-6378
     retainVatValueAT();
+    
+    
+    if (FormManager.getActualValue('reqType') == 'U') {
+      var _kukla = null;
+      var ret = cmr.query('DATA_RDC.CUST_CLASS', {
+        REQ_ID : FormManager.getActualValue('reqId')
+      });
+      if (ret && ret.ret1 && ret.ret1 != '') {
+        _kukla = ret.ret1;
+      }
+      if (_kukla != null && _kukla.startsWith('4')) {
+        FormManager.enable('custClass');
+      } 
+    }
   }
 
   setAustriaUIFields();
@@ -3675,13 +3685,16 @@ function setClassificationCodeCEE() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  FormManager.readOnly('custClass');
+// FormManager.readOnly('custClass');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if ('C' == FormManager.getActualValue('reqType')) {
     var _custType = FormManager.getActualValue('custSubGrp');
     var isicCd = FormManager.getActualValue('isicCd');
-    if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'RSBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP') {
-      FormManager.setValue('custClass', '46');
-    } else if (_custType == 'INTER' || _custType == 'XINT' || _custType == 'MEINT' || _custType == 'RSINT' || _custType == 'CSINT' || _custType == 'RSXIN') {
+// if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'RSBP' ||
+// _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP') {
+// FormManager.setValue('custClass', '46');
+// } else
+    if (_custType == 'INTER' || _custType == 'XINT' || _custType == 'MEINT' || _custType == 'RSINT' || _custType == 'CSINT' || _custType == 'RSXIN') {
       FormManager.setValue('custClass', '81');
     } else if (_custType == 'PRICU' || _custType == 'CSPC' || _custType == 'MEPC' || _custType == 'RSPC' || _custType == 'RSXPC') {
       FormManager.setValue('custClass', '60');
@@ -3689,7 +3702,7 @@ function setClassificationCodeCEE() {
       FormManager.setValue('custClass', '71');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
-    } else {
+    } else if (!_custType.includes('BUS') && cmrIssuingCntry != '618'){
       FormManager.setValue('custClass', '11');
     }
   }
@@ -4751,31 +4764,40 @@ function setCTCBasedOnISUCode() {
   FormManager.setValue('clientTier', CTC_MAPPING[isuCd] || '');
 }
 
-/*function validateSBOValuesForIsuCtc() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate: function() {
-        if (FormManager.getActualValue('reqType') != 'C') {
-          return new ValidationResult(null, true);
-        }
-        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-          return new ValidationResult(null, true);
-        }
-        
-        var sbos = getSBOListByISU()
-        if (sbos.length == 0) {
-          return new ValidationResult(null, false,
-            'No SBO was found for the current ISU/CTC');
-        }
-        if (!sbos.includes(FormManager.getActualValue('salesBusOffCd'))) {
-          return new ValidationResult(null, false,
-            'The SBO provided is invalid. It should be from the list: ' + sbos.join(', '));
-        }
-        return new ValidationResult(null, true);
+function setDefaultCustClassBP() {
+  if (_custSubGrpHandler == null && FormManager.getField('custSubGrp')) {
+    _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      if (FormManager.getActualValue('reqType') == 'U') {
+        return;
       }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}*/
+        setCustClassBP(value);       
+    });
+}
+}
+
+function setCustClassBP(value) {
+var custSubGrp = FormManager.getActualValue('custSubGrp');
+// Setting the default value of customer class for BP scenario
+if (custSubGrp.includes("BUSPR") || custSubGrp.includes("XBP")) {
+  FormManager.setValue('custClass', '40');
+}
+}
+
+/*
+ * function validateSBOValuesForIsuCtc() {
+ * FormManager.addFormValidator((function() { return { validate: function() { if
+ * (FormManager.getActualValue('reqType') != 'C') { return new
+ * ValidationResult(null, true); } if
+ * (FormManager.getActualValue('viewOnlyPage') == 'true') { return new
+ * ValidationResult(null, true); }
+ * 
+ * var sbos = getSBOListByISU() if (sbos.length == 0) { return new
+ * ValidationResult(null, false, 'No SBO was found for the current ISU/CTC'); }
+ * if (!sbos.includes(FormManager.getActualValue('salesBusOffCd'))) { return new
+ * ValidationResult(null, false, 'The SBO provided is invalid. It should be from
+ * the list: ' + sbos.join(', ')); } return new ValidationResult(null, true); } };
+ * })(), 'MAIN_IBM_TAB', 'frmCMR'); }
+ */
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = ['358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
@@ -4964,6 +4986,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(getSBOandAssignFirstValue, SysLoc.AUSTRIA);
   GEOHandler.addAddrFunction(setSBOonAddressSave, [SysLoc.AUSTRIA]);
   GEOHandler.addAfterTemplateLoad(setCTCBasedOnISUCode, [SysLoc.AUSTRIA]);
+  GEOHandler.addAfterTemplateLoad(setDefaultCustClassBP, SysLoc.AUSTRIA);
 
 
 });
