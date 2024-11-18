@@ -74,10 +74,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
-    }  
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
@@ -86,7 +82,10 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     scorecard.setDnbMatchingResult("");
     Boolean override = false;
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
     // CREATCMR-8553: if the address matches with mailing address in DNB, show
     // mailing address in automation details.
     Boolean matchWithDnbMailingAddr = false;
@@ -134,7 +133,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) && !isPaygoUpgrade) {
+          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry()))
+              && !isPaygoUpgrade) {
             result.setOnError(shouldThrowError);
           } else {
             result.setOnError(false);
@@ -146,31 +146,20 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             if (!(SystemLocation.INDIA.equals(data.getCmrIssuingCntry()) && !(StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)))) {
               engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
             }
-            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId()) && isReqRejectedBefore(requestData, entityManager)) {
-              result.setDetails("Processor review is required for data quality purpose");
-              engineData.addNegativeCheckStatus("DNBCheck", "Processor review is required since request has already been rejected for data quality.");
-              LOG.debug("Processor review is required since request has already been rejected for data quality.");
-            }
           } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId()) && isReqRejectedBefore(requestData, entityManager)) {
-              result.setDetails("Processor review is required for data quality purpose");
-              engineData.addNegativeCheckStatus("DNBCheck", "Processor review is required since request has already been rejected for data quality.");
-              LOG.debug("Processor review is required since request has already been rejected for data quality.");
-            }
           } else if (payGoAddredited && !hasValidMatches && !"PAYG".equals(admin.getReqReason())) {
             LOG.debug("DnB Matches not found for PayGo.");
             admin.setPaygoProcessIndc("Y");
             result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");
-          }
-          else if (payGoAddredited && !hasValidMatches && "PAYG".equals(admin.getReqReason())) {
+          } else if (payGoAddredited && !hasValidMatches && "PAYG".equals(admin.getReqReason())) {
             LOG.debug("DnB Matches not found for PayGo.");
             result.setOnError(true);
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
             result.setResults("No Matches");
-           }
+          }
         } else {
           // actions to be performed only when matches with high confidence are
           // found
@@ -296,75 +285,72 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 matchWithDnbMailingAddr = handler.matchDnbMailingAddr(perfectMatch, soldTo, data.getCmrIssuingCntry(), false);
               }
             }
-            
-          // CREATCMR-9938 (KVK Implementation)
 
-						if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
-								&& "LOCAL".equalsIgnoreCase(data.getCustGrp())
-								&& "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
-							boolean taxCd2Found = false;
-							String taxCd2Val = null;
-							long confCode = 0L;
-							long highestConfCode = 0L;
-							int count = 0;
-							DnBMatchingResponse dnbWithHighConfCode = null;
-							for (DnBMatchingResponse dnbRecord : dnbMatches) {
-								confCode = dnbRecord.getConfidenceCode();
-								if (highestConfCode <= confCode) {
+            // CREATCMR-9938 (KVK Implementation)
 
-									highestConfCode = confCode;
-									dnbWithHighConfCode = dnbRecord;
-									count++;
-								}
+            if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()) && "LOCAL".equalsIgnoreCase(data.getCustGrp())
+                && "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
+              boolean taxCd2Found = false;
+              String taxCd2Val = null;
+              long confCode = 0L;
+              long highestConfCode = 0L;
+              int count = 0;
+              DnBMatchingResponse dnbWithHighConfCode = null;
+              for (DnBMatchingResponse dnbRecord : dnbMatches) {
+                confCode = dnbRecord.getConfidenceCode();
+                if (highestConfCode <= confCode) {
 
-							}
-							if (count > 1) {
-								admin.setPaygoProcessIndc("Y");
-								data.setTaxCd2("");
-							}
-							if (count == 1) {
-								List<DnbOrganizationId> dnbOrgIdList = dnbWithHighConfCode.getOrgIdDetails();
-								if (!dnbOrgIdList.isEmpty()) {
-									for (DnbOrganizationId orgId : dnbOrgIdList) {
-										String dnbOrgId = orgId.getOrganizationIdCode();
-										String dnbOrgType = orgId.getOrganizationIdType();
-										if (dnbOrgType.equalsIgnoreCase("Trade Register Number (NL)")
-												&& StringUtils.isNotEmpty(dnbOrgId)) {
-											taxCd2Val = dnbOrgId;
-											taxCd2Found = true;
-										}
+                  highestConfCode = confCode;
+                  dnbWithHighConfCode = dnbRecord;
+                  count++;
+                }
 
-									}
-								}
+              }
+              if (count > 1) {
+                admin.setPaygoProcessIndc("Y");
+                data.setTaxCd2("");
+              }
+              if (count == 1) {
+                List<DnbOrganizationId> dnbOrgIdList = dnbWithHighConfCode.getOrgIdDetails();
+                if (!dnbOrgIdList.isEmpty()) {
+                  for (DnbOrganizationId orgId : dnbOrgIdList) {
+                    String dnbOrgId = orgId.getOrganizationIdCode();
+                    String dnbOrgType = orgId.getOrganizationIdType();
+                    if (dnbOrgType.equalsIgnoreCase("Trade Register Number (NL)") && StringUtils.isNotEmpty(dnbOrgId)) {
+                      taxCd2Val = dnbOrgId;
+                      taxCd2Found = true;
+                    }
 
-								if (StringUtils.isEmpty(data.getTaxCd2())) {
+                  }
+                }
 
-									if (taxCd2Found) {
-										data.setTaxCd2(taxCd2Val);
-									}
+                if (StringUtils.isEmpty(data.getTaxCd2())) {
 
-									if (!taxCd2Found) {
-										data.setTaxCd2("");
-										admin.setPaygoProcessIndc("Y");
-									}
+                  if (taxCd2Found) {
+                    data.setTaxCd2(taxCd2Val);
+                  }
 
-								}
-								else
+                  if (!taxCd2Found) {
+                    data.setTaxCd2("");
+                    admin.setPaygoProcessIndc("Y");
+                  }
 
-								{
-									if (!data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
-										if (taxCd2Found) {
-											data.setTaxCd2(taxCd2Val);
-										} else {
-											admin.setPaygoProcessIndc("Y");
-											data.setTaxCd2("");
-										}
-									}
-								}
+                } else
 
-							}
-						}
-          
+                {
+                  if (!data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
+                    if (taxCd2Found) {
+                      data.setTaxCd2(taxCd2Val);
+                    } else {
+                      admin.setPaygoProcessIndc("Y");
+                      data.setTaxCd2("");
+                    }
+                  }
+                }
+
+              }
+            }
+
             // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
             // Supporting doc provided requires cmde review
             if (((SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()) && AuIsicScenarioList.contains(data.getCustSubGrp()))
@@ -471,13 +457,17 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               }
               itemNo++;
             }
-            if (!override) {
+            if (!override && !isPaygoUpgrade) {
               engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
               result.setResults("Name/Address not matched");
+            } else if (isPaygoUpgrade) {
+              result.setResults("Name/Address not matched");
+              result.setDetails("Matches against D&B were found but no record matched the request data.");
             } else {
               result.setDetails("Matches against D&B were found but no record matched the request data.");
+
             }
-            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !isPaygoUpgrade) {
               result.setOnError(true);
             } else {
               result.setOnError(false);
@@ -784,6 +774,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             setEntityValue(addr, addressInfoField[1], null);
           } else {
             setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue());
+            if (!StringUtils.isBlank(match.getId().getMatchKeyValue()) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+              setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue().toUpperCase());
+            }
           }
         }
       }
@@ -792,6 +785,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         setEntityValue(admin, field, null);
       } else {
         setEntityValue(admin, field, match.getId().getMatchKeyValue());
+        if (!StringUtils.isBlank(match.getId().getMatchKeyValue()) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+          setEntityValue(admin, field, match.getId().getMatchKeyValue().toUpperCase());
+        }
       }
     }
     return true;
@@ -833,16 +829,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         }
       }
     }
-  }
-
-  private boolean isReqRejectedBefore(RequestData requestData, EntityManager entityManager) {
-    if ("897".equals(requestData.getData().getCmrIssuingCntry()) || "649".equals(requestData.getData().getCmrIssuingCntry())) {
-      String sql = ExternalizedQuery.getSql("QUERY.GET_IF_REQ_IS_REJECT_BEFORE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQID", requestData.getAdmin().getId().getReqId());
-      return query.getSingleResult(String.class) != null;
-    }
-    return false;
   }
 
   @Override

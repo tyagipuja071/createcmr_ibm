@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.dpl.DPLSearchAssessmentResult;
 import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -58,9 +59,9 @@ public class DPLCheckElement extends ValidatingElement {
       throws Exception {
 
     AppUser user = (AppUser) engineData.get("appUser");
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
     long reqId = requestData.getAdmin().getId().getReqId();
 
@@ -136,7 +137,7 @@ public class DPLCheckElement extends ValidatingElement {
                 engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
                 output.setOnError(true);
               }
-            } else if(!isPaygoUpgrade) {
+            } else if (!isPaygoUpgrade) {
               output.setOnError(true);
               engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
             }
@@ -255,7 +256,7 @@ public class DPLCheckElement extends ValidatingElement {
 
       entityManager.flush();
       // compute the overall score
-      recomputeDPLResult(user, entityManager, requestData);
+      DPLSearchAssessmentResult assessmentResult = recomputeDPLResult(user, entityManager, requestData);
 
       // Scorecard scorecard = requestData.getScorecard();
 
@@ -312,6 +313,15 @@ public class DPLCheckElement extends ValidatingElement {
         break;
       }
 
+      // watsonx assessment
+      if (assessmentResult != null && assessmentResult.isSuccess() && assessmentResult.isNoWatsonxMatches() && !validation.isSuccess()) {
+        details.append("\nDPL check failed but watsonx assessment found only FALSE matches.");
+        validation.setMessage("watsonx override");
+        validation.setSuccess(true);
+        output.setOnError(false);
+
+      }
+
       if ("U".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getEmbargoCd()) && !"N".equals(data.getEmbargoCd())) {
         validation.setSuccess(false);
         output.setOnError(true);
@@ -337,8 +347,9 @@ public class DPLCheckElement extends ValidatingElement {
     return output;
   }
 
-  private void recomputeDPLResult(AppUser user, EntityManager entityManager, RequestData requestData) {
+  private DPLSearchAssessmentResult recomputeDPLResult(AppUser user, EntityManager entityManager, RequestData requestData) {
 
+    DPLSearchAssessmentResult assessmentResult = new DPLSearchAssessmentResult();
     Scorecard scorecard = requestData.getScorecard();
     long reqId = requestData.getAdmin().getId().getReqId();
 
@@ -404,7 +415,7 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("mainCustNam2", requestData.getAdmin().getMainCustNm2());
 
       try {
-        dplService.doProcess(entityManager, null, params);
+        assessmentResult = (DPLSearchAssessmentResult) dplService.doProcess(entityManager, null, params);
       } catch (Exception e) {
         log.warn("DPL results not attached to the request", e);
       }
@@ -413,6 +424,8 @@ public class DPLCheckElement extends ValidatingElement {
     log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
 
     updateEntity(scorecard, entityManager);
+
+    return assessmentResult;
   }
 
   private boolean isDPLApprovalPresent(EntityManager entityManager, String cmrIssuingCntry, String reqType) {

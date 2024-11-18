@@ -60,8 +60,6 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 
-
-
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
  * handles the creation of relevant records in AUTOMATION_RESULTS and
@@ -159,10 +157,9 @@ public class AutomationEngine {
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
     AppUser appUser = createAutomationAppUser();
-    
+
     prepareDnBImportForExternalRequests(entityManager, reqId, requestData, appUser);
-    
-       
+
     // check child request status first
     long childReqId = requestData.getAdmin().getChildReqId();
     if (childReqId > 0 && isChildPending(entityManager, childReqId)) {
@@ -282,9 +279,7 @@ public class AutomationEngine {
       }
 
       // handle the special ALL types (approvals)
-
       if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType) || isPaygoUpgrade) {
-
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
 
@@ -307,10 +302,6 @@ public class AutomationEngine {
                 + " has occured. Please check concerned logs for the same.");
             break;
           }
-        }
-
-        if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
-          isUsOtherChecksFailed = true;
         }
 
         if ("897".equals(requestData.getData().getCmrIssuingCntry()) && !"GBL_DPL_CHECK".equals(result.getProcessCode()) && result.isOnError()) {
@@ -384,11 +375,14 @@ public class AutomationEngine {
       lastElementIndex++;
     }
 
-    if ("897".equals(requestData.getData().getCmrIssuingCntry()) && scorecard != null) {
-      if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
-        isUsWatsonxSkipToPcp = true;
-      }
-    }
+    // do not put this here
+    // if ("897".equals(requestData.getData().getCmrIssuingCntry()) && scorecard
+    // != null) {
+    // if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can
+    // proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
+    // isUsWatsonxSkipToPcp = true;
+    // }
+    // }
 
     boolean sccIsValid = false;
     if ("897".equals(requestData.getData().getCmrIssuingCntry()) && scorecard != null) {
@@ -1033,7 +1027,7 @@ public class AutomationEngine {
       mail.send(host);
     }
   }
-  
+
   private void prepareDnBImportForExternalRequests(EntityManager entityManager, long reqId, RequestData requestData, AppUser appUser)
       throws Exception {
     // CREATCMR-12637 - Redhat customer name issue
@@ -1051,6 +1045,12 @@ public class AutomationEngine {
       int splitLength2 = handler.getName2Length() == 0 ? 30 : handler.getName2Length();
 
       DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+      
+   // Check for null and return if dnbData is null
+      if (dnbData == null) {
+          LOG.warn("D&B data is null for DUNS number: " + dunsNo);
+          return;
+      }
 
       String mainCustNm1 = dnbData.getCompanyName();
       String mainCustNm2 = null;
@@ -1121,15 +1121,20 @@ public class AutomationEngine {
           requestData.getData().setVat(vat);
         }
         String taxCd1 = DnBUtil.getTaxCode1(country, dnbOrgIds);
-        requestData.getData().setTaxCd1(taxCd1);
+        if (!StringUtils.isBlank(taxCd1)) {
+          requestData.getData().setTaxCd1(taxCd1);
+        }
         LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
       }
       LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + requestData.getData().getIsicCd() + "]");
       requestData.getData().setIsicCd(dnbData.getIbmIsic());
       requestData.getData().setSubIndustryCd(getSubindCode(dnbData.getIbmIsic(), entityManager));
       LOG.debug("- ISIC: " + requestData.getData().getIsicCd() + "  Subindustry: " + requestData.getData().getSubIndustryCd());
+
+      requestData.getScorecard().setFindDnbResult("Accepted");
       entityManager.merge(requestData.getAdmin());
       entityManager.merge(requestData.getData());
+      entityManager.merge(requestData.getScorecard());
 
       // add a comment
       ReqCmtLog comment = new ReqCmtLog();
@@ -1161,5 +1166,4 @@ public class AutomationEngine {
     return query.getSingleResult(String.class);
   }
 
-  
 }
