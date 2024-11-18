@@ -1022,6 +1022,12 @@ public class AutomationEngine {
       int splitLength2 = handler.getName2Length() == 0 ? 30 : handler.getName2Length();
 
       DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+      
+   // Check for null and return if dnbData is null
+      if (dnbData == null) {
+          LOG.warn("D&B data is null for DUNS number: " + dunsNo);
+          return;
+      }
 
       String mainCustNm1 = dnbData.getCompanyName();
       String mainCustNm2 = null;
