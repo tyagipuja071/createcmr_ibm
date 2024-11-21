@@ -143,13 +143,24 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
         entityManager.merge(scorecard);
         entityManager.flush();
-      } else if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)) {
-        // reqData.getAdmin().setReqStatus("PCP");
-        scorecard.setDplAssessmentResult("N");
-        scorecard.setDplAssessmentBy("watsonx");
-        scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
-        scorecard.setDplAssessmentCmt("watsonx DPL assessment was a FALSE match. Assessment set to 'Not a DPL match'");
-        assessmentResult.setNoWatsonxMatches(true);
+      } else if ("897".equals(reqData.getData().getCmrIssuingCntry())) {
+        if ("FALSE".equalsIgnoreCase(watsonxOutput)) {
+          scorecard.setDplAssessmentResult("N");
+          scorecard.setDplAssessmentBy("watsonx");
+          scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+          scorecard.setDplAssessmentCmt("watsonx DPL assessment was a FALSE match. Assessment set to 'Not a DPL match'");
+          assessmentResult.setNoWatsonxMatches(true);
+        } else if (watsonxOutput != null) {
+          scorecard.setDplAssessmentResult("U");
+          scorecard.setDplAssessmentBy("watsonx");
+          scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+          String assessment = (scorecard.getDplAssessmentCmt() != null ? scorecard.getDplAssessmentCmt() + "\n" : "") + "watsonx assessment: "
+              + watsonxOutput;
+          if (assessment.length() > 2000) {
+            assessment = assessment.substring(0, 2000);
+          }
+          scorecard.setDplAssessmentCmt(assessment);
+        }
         entityManager.merge(scorecard);
         entityManager.flush();
       }
@@ -201,7 +212,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     } catch (Exception e) {
       success = false;
     }
-    assessmentResult.setSuccess(success);
+    assessmentResult.setSuccess(true);
     return assessmentResult;
 
   }
