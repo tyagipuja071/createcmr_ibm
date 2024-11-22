@@ -82,21 +82,21 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     scorecard.setDnbMatchingResult("");
     Boolean override = false;
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
-    }  
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
+    }
     // CREATCMR-8553: if the address matches with mailing address in DNB, show
     // mailing address in automation details.
     Boolean matchWithDnbMailingAddr = false;
 
     // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ
-    // the requester choose override dnb and did NZBN API in UI, automation will use this flag to skip DNB matching for this case
+    // the requester choose override dnb and did NZBN API in UI, automation will
+    // use this flag to skip DNB matching for this case
     if (SystemLocation.NEW_ZEALAND.equals(data.getCmrIssuingCntry()) && data.getUsSicmen() != null && data.getUsSicmen().equalsIgnoreCase("DNBO")) {
       LOG.debug("DNB Overriden from UI - NZ");
       result.setResults("Overriden");
-      result.setDetails(
-          "D&B matches were chosen to be overridden by the requester.");
+      result.setDetails("D&B matches were chosen to be overridden by the requester.");
       // engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were
       // chosen to be overridden by the requester.");
       return result;
@@ -133,7 +133,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) && !isPaygoUpgrade) {
+          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry()))
+              && !isPaygoUpgrade) {
             result.setOnError(shouldThrowError);
           } else {
             result.setOnError(false);
@@ -153,13 +154,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setOnError(false);
             result.setResults("DnB Matches not found for PayGo.");
             result.setDetails("DnB Matches not found for PayGo.");
-          }
-          else if (payGoAddredited && !hasValidMatches && "PAYG".equals(admin.getReqReason())) {
+          } else if (payGoAddredited && !hasValidMatches && "PAYG".equals(admin.getReqReason())) {
             LOG.debug("DnB Matches not found for PayGo.");
             result.setOnError(true);
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
             result.setResults("No Matches");
-           }
+          }
         } else {
           // actions to be performed only when matches with high confidence are
           // found
@@ -207,8 +207,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                     && ((!orgIdFound && engineData.isVatVerified()) || (orgIdFound && isOrgIdMatched))) {
                   // found the perfect match here
                   if (!isTaxCdMatch) {
-                engineData.setVatVerified(true, "VAT Verified");
-                LOG.debug("VAT verified");
+                    engineData.setVatVerified(true, "VAT Verified");
+                    LOG.debug("VAT verified");
                   }
                   // perfectMatch = dnbRecord;
                   // break;
@@ -286,10 +286,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               }
             }
 
-         // CREATCMR-9938 (KVK Implementation)
+            // CREATCMR-9938 (KVK Implementation)
 
-            if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
-                && "LOCAL".equalsIgnoreCase(data.getCustGrp())
+            if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()) && "LOCAL".equalsIgnoreCase(data.getCustGrp())
                 && "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
               boolean taxCd2Found = false;
               String taxCd2Val = null;
@@ -317,8 +316,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                   for (DnbOrganizationId orgId : dnbOrgIdList) {
                     String dnbOrgId = orgId.getOrganizationIdCode();
                     String dnbOrgType = orgId.getOrganizationIdType();
-                    if (dnbOrgType.equalsIgnoreCase("Trade Register Number (NL)")
-                        && StringUtils.isNotEmpty(dnbOrgId)) {
+                    if (dnbOrgType.equalsIgnoreCase("Trade Register Number (NL)") && StringUtils.isNotEmpty(dnbOrgId)) {
                       taxCd2Val = dnbOrgId;
                       taxCd2Found = true;
                     }
@@ -337,8 +335,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                     admin.setPaygoProcessIndc("Y");
                   }
 
-                }
-                else
+                } else
 
                 {
                   if (!data.getTaxCd2().equalsIgnoreCase(taxCd2Val)) {
@@ -353,7 +350,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
               }
             }
-            
+
             // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
             // Supporting doc provided requires cmde review
             if (((SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()) && AuIsicScenarioList.contains(data.getCustSubGrp()))
@@ -466,9 +463,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             } else if (isPaygoUpgrade) {
               result.setResults("Name/Address not matched");
               result.setDetails("Matches against D&B were found but no record matched the request data.");
-            }else{
+            } else {
               result.setDetails("Matches against D&B were found but no record matched the request data.");
-              
+
             }
             if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !isPaygoUpgrade) {
               result.setOnError(true);
@@ -523,7 +520,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           result.setOnError(false);
         }
       }
-      
+
       AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (automationUtil != null && automationUtil instanceof SingaporeUtil && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
         SingaporeUtil singaporeUtil = (SingaporeUtil) automationUtil;
@@ -777,6 +774,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             setEntityValue(addr, addressInfoField[1], null);
           } else {
             setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue());
+            if (!StringUtils.isBlank(match.getId().getMatchKeyValue()) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+              setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue().toUpperCase());
+            }
           }
         }
       }
@@ -785,6 +785,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         setEntityValue(admin, field, null);
       } else {
         setEntityValue(admin, field, match.getId().getMatchKeyValue());
+        if (!StringUtils.isBlank(match.getId().getMatchKeyValue()) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+          setEntityValue(admin, field, match.getId().getMatchKeyValue().toUpperCase());
+        }
       }
     }
     return true;

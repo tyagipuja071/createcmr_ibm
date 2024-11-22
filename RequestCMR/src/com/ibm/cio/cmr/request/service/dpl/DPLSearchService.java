@@ -105,7 +105,8 @@ public class DPLSearchService extends BaseSimpleService<Object> {
    * @return
    * @throws Exception
    */
-  private Boolean attachResultsToRequest(EntityManager entityManager, ParamContainer params) throws Exception {
+  private DPLSearchAssessmentResult attachResultsToRequest(EntityManager entityManager, ParamContainer params) throws Exception {
+    DPLSearchAssessmentResult assessmentResult = new DPLSearchAssessmentResult();
     Long reqId = (Long) params.getParam("reqId");
     if (reqId == null) {
       throw new Exception("Request ID is required.");
@@ -118,7 +119,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     boolean success = true;
     try {
       List<DPLSearchResults> results = getPlainDPLSearchResults(entityManager, params);
-
+      assessmentResult.setResults(results);
       int resultCount = 0;
       for (DPLSearchResults result : results) {
         if (result.getDeniedPartyRecords() != null) {
@@ -142,12 +143,26 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
         entityManager.merge(scorecard);
         entityManager.flush();
-      }
-      
-      if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)) {
-        reqData.getAdmin().setReqStatus("PCP");
-        scorecard.setDplAssessmentResult("N");
-        scorecard.setDplAssessmentCmt("The request can proceed to PCP status");
+      } else if ("897".equals(reqData.getData().getCmrIssuingCntry())) {
+        if ("FALSE".equalsIgnoreCase(watsonxOutput)) {
+          scorecard.setDplAssessmentResult("N");
+          scorecard.setDplAssessmentBy("watsonx");
+          scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+          scorecard.setDplAssessmentCmt("watsonx DPL assessment was a FALSE match. Assessment set to 'Not a DPL match'");
+          assessmentResult.setNoWatsonxMatches(true);
+        } else if (watsonxOutput != null) {
+          scorecard.setDplAssessmentResult("U");
+          scorecard.setDplAssessmentBy("watsonx");
+          scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+          String assessment = (scorecard.getDplAssessmentCmt() != null ? scorecard.getDplAssessmentCmt() + "\n" : "") + "watsonx assessment: "
+              + watsonxOutput;
+          if (assessment.length() > 2000) {
+            assessment = assessment.substring(0, 2000);
+          }
+          scorecard.setDplAssessmentCmt(assessment);
+        }
+        entityManager.merge(scorecard);
+        entityManager.flush();
       }
 
       AttachmentService attachmentService = new AttachmentService();
@@ -191,13 +206,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
           } catch (Exception e) {
             LOG.warn("Unable to save DPL attachment.", e);
             success = false;
+          }
         }
-      }
       }
     } catch (Exception e) {
       success = false;
     }
-    return success;
+    assessmentResult.setSuccess(true);
+    return assessmentResult;
 
   }
 
