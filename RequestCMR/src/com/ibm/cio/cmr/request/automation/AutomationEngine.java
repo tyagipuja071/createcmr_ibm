@@ -395,21 +395,8 @@ public class AutomationEngine {
       }
     } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
       checkNZBNAPI(stopExecution, actionsOnError);
-    }    
-
-    boolean sccIsValid = false;
-    if ("897".equals(requestData.getData().getCmrIssuingCntry()) && scorecard != null) {
-      String setPPNFlag = USHandler.validateForSCC(entityManager, reqId);
-      if ("N".equals(setPPNFlag)) {
-        sccIsValid = true;
-      }
-      if ("N".equals(scorecard.getDplAssessmentResult()) && "The request can proceed to PCP status".equals(scorecard.getDplAssessmentCmt())) {
-        isUsWatsonxSkipToPcp = true;
-      }
-    } else if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
-      checkNZBNAPI(stopExecution, actionsOnError);
     }
-
+ 
     if ("796".equals(requestData.getData().getCmrIssuingCntry())) {
       checkNZBNAPI(stopExecution, actionsOnError);
     }
