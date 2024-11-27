@@ -63,6 +63,7 @@ public class DnBUtil {
   private static Map<String, Map<String, String>> orgIdMap = new HashMap<>();
   public static final String CODE_VAT = "VAT";
   public static final String CODE_TAX_CODE_1 = "TAX_CD1";
+  public static final String CODE_TAX_CODE_2 = "TAX_CD2";
   public static final String CODE_SIREN = "SIREN";
 
   static {
@@ -163,7 +164,7 @@ public class DnBUtil {
     registerDnBVATCode("DZ", 2080);
 
     // Tax Cd1
-    registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
+    registerDnBTaxCd2Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
     registerDnBTaxCd1Code("GB", 2541); // UK CRO Number
     registerDnBTaxCd1Code("IE", 9134); // Ireland CRO Number
@@ -524,6 +525,18 @@ public class DnBUtil {
   }
 
   /**
+   * Extracts the relevant TAX_CD2 value from the list of
+   * {@link DnbOrganizationId}
+   *
+   * @param country
+   * @param ids
+   * @return
+   */
+  public static String getTaxCode2(String country, List<DnbOrganizationId> ids) {
+    return getCodeValue(country, CODE_TAX_CODE_2, ids);
+  }
+
+  /**
    * Gets the specific value from the list of {@link DnbOrganizationId} that
    * matches the codeKey
    *
@@ -551,7 +564,7 @@ public class DnBUtil {
     if (orgIdMap.get(country) == null) {
       orgIdMap.put(country, new HashMap<String, String>());
     }
-    orgIdMap.get(country).put("VAT", StringUtils.leftPad("" + dnbCodeId, 6, '0'));
+    orgIdMap.get(country).put(CODE_VAT, StringUtils.leftPad("" + dnbCodeId, 6, '0'));
   }
 
   /**
@@ -564,7 +577,20 @@ public class DnBUtil {
     if (orgIdMap.get(country) == null) {
       orgIdMap.put(country, new HashMap<String, String>());
     }
-    orgIdMap.get(country).put("TAX_CD1", StringUtils.leftPad("" + dnbCodeId, 6, '0'));
+    orgIdMap.get(country).put(CODE_TAX_CODE_1, StringUtils.leftPad("" + dnbCodeId, 6, '0'));
+  }
+
+  /**
+   * Sets the D&B code as the Tax Code 2 equivalent
+   *
+   * @param country
+   * @param dnbCodeId
+   */
+  private static void registerDnBTaxCd2Code(String country, int dnbCodeId) {
+    if (orgIdMap.get(country) == null) {
+      orgIdMap.put(country, new HashMap<String, String>());
+    }
+    orgIdMap.get(country).put(CODE_TAX_CODE_2, StringUtils.leftPad("" + dnbCodeId, 6, '0'));
   }
 
   /**
@@ -1007,7 +1033,8 @@ public class DnBUtil {
 
     return query.exists();
   }
-  //creatcmr-9798
+
+  // creatcmr-9798
   public static boolean isDnbExempt(EntityManager entityManager, String serviceId) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_EXEMPT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
