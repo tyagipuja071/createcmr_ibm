@@ -319,17 +319,18 @@ function addHandlersForSWISS() {
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
-      /* setMubotyOnPostalCodeIMS(value);
-       reloadSORTLList()*/
+     /*
+       * setMubotyOnPostalCodeIMS(value); reloadSORTLList()
+       */
       getSBOandAssignFirstValue();
     });
   }
 
   if (_PostalCodeHandler == null) {
     _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
-      //setMubotyOnPostalCodeIMS(value);
+      // setMubotyOnPostalCodeIMS(value);
       setPreferredLangAddr(value);
-      //  reloadSORTLList()
+    // reloadSORTLList()
       getSBOandAssignFirstValue();
     });
   }
@@ -1888,26 +1889,24 @@ function loadSORTLListForCurrentScenario(isuCd, clientTier, ims, postCd) {
 }
 
 
-/*function setISUDropdown() {
-  var dropdownValues = COMnGOVnPRIn3PAISUs;
-
-  if (!checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']) && (FormManager.getActualValue('reqType') == 'C')) return;
-
-  var isuCd = FormManager.getActualValue('isuCd');
-
-  if (isuCd == '32') {
-    dropdownValues = [...dropdownValues, '32']
-  };
-
-  FormManager.limitDropdownValues(FormManager.getField('isuCd'), dropdownValues);
-}*/
 /*
-function setRequestInitialState() {
-  var isuCd = FormManager.getActualValue('isuCd');
-
-  if (isuCd != '' && initialISU == '') initialISU = isuCd;
-}
-*/
+ * function setISUDropdown() { var dropdownValues = COMnGOVnPRIn3PAISUs;
+ * 
+ * if (!checkIfItIsScenario(['COM', 'GOV', 'PRI', '3PA']) &&
+ * (FormManager.getActualValue('reqType') == 'C')) return;
+ * 
+ * var isuCd = FormManager.getActualValue('isuCd');
+ * 
+ * if(isuCd == '32') { dropdownValues = [...dropdownValues, '32'] };
+ * 
+ * FormManager.limitDropdownValues(FormManager.getField('isuCd'), dropdownValues ); }
+ */
+/*
+ * function setRequestInitialState() { var isuCd =
+ * FormManager.getActualValue('isuCd');
+ * 
+ * if(isuCd != '' && initialISU == '') initialISU = isuCd; }
+ */
 
 function getSBOonAddressSave() {
   var addrType = FormManager.getActualValue('addrType');
@@ -2040,7 +2039,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addAfterConfigForSWISS, GEOHandler.SWISS);
-  //GEOHandler.addAfterConfig(setRequestInitialState, GEOHandler.SWISS);
+  // GEOHandler.addAfterConfig(setRequestInitialState, GEOHandler.SWISS);
 
   // GEOHandler.addAfterTemplateLoad(setCurrencyCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCustClassCd, GEOHandler.SWISS);
@@ -2059,14 +2058,15 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addEmbargoCdValidator, GEOHandler.SWISS, null, true);
   // GEOHandler.registerValidator(addVatValidatorForCustLangCd,
   // GEOHandler.SWISS, null, true);
-  var countryUse = null;
-  if (typeof (_pagemodel) != 'undefined') {
-    countryUse = _pagemodel.countryUse;
-  }
-  if (countryUse != '848LI') {
+  // var countryUse = null;
+  // if (typeof (_pagemodel) != 'undefined') {
+   // countryUse = _pagemodel.countryUse;
+ // }
+ // if (countryUse != '848LI') {
 
-    GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SWITZERLAND, 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [SysLoc.SWITZERLAND], null, true);
-  }
+   // GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SWITZERLAND,
+    // 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [SysLoc.SWITZERLAND], null, true);
+  // }
   GEOHandler.registerValidator(addCrossBorderValidatorFrSWISS, SysLoc.SWITZERLAND, null, true);
   GEOHandler.registerValidator(resetAddrTypeValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.SWISS, null, true);
@@ -2092,12 +2092,15 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(onPostalCodeChangeHandler, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setPreferredLangAddr, GEOHandler.SWISS);
   GEOHandler.registerValidator(addVatIndValidator, GEOHandler.SWISS);
-  //GEOHandler.registerValidator(validateISUandCTCCombination, GEOHandler.SWISS);
+  // GEOHandler.registerValidator(validateISUandCTCCombination,
+  // GEOHandler.SWISS);
   GEOHandler.registerValidator(validateSortl, GEOHandler.SWISS, null, true);
 
-  //GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario, GEOHandler.SWISS);
-  //GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
-  //  GEOHandler.addAfterTemplateLoad(setISUDropdown, GEOHandler.SWISS);
+  // GEOHandler.addAfterTemplateLoad(setIsuInitialValueBasedOnSubScenario,
+  // GEOHandler.SWISS);
+  // GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS,
+  // GEOHandler.SWISS);
+// GEOHandler.addAfterTemplateLoad(setISUDropdown, GEOHandler.SWISS);
 
   // GEOHandler.addAfterConfig(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(setSBOonAddressSave, GEOHandler.SWISS);
