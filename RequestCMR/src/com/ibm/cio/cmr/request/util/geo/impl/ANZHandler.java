@@ -448,6 +448,7 @@ public class ANZHandler extends GEOHandler {
         && ("796".equals(data.getCmrIssuingCntry()) || "616".equals(data.getCmrIssuingCntry()))) {
       admin.setOldCustNm1(mainRecord.getCmrName1Plain());
       admin.setOldCustNm2(mainRecord.getCmrName2Plain());
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
     }
   }
 
