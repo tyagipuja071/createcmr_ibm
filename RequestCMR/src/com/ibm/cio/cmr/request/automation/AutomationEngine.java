@@ -1114,7 +1114,11 @@ public class AutomationEngine {
         if (!StringUtils.isBlank(taxCd1)) {
           requestData.getData().setTaxCd1(taxCd1);
         }
-        LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
+        String taxCd2 = DnBUtil.getTaxCode2(country, dnbOrgIds);
+        if (!StringUtils.isBlank(taxCd2)) {
+          requestData.getData().setTaxCd2(taxCd2);
+        }
+        LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1 + " Tax Code 2: " + taxCd2);
       }
       LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + requestData.getData().getIsicCd() + "]");
       requestData.getData().setIsicCd(dnbData.getIbmIsic());
