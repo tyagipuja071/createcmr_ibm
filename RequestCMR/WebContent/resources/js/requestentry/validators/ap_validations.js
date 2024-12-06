@@ -2779,7 +2779,6 @@ function onIsicChange() {
   // FormManager.enable('isicCd');
   // }
 }
-
 function setPrivate() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'XAQST' || custSubGrp == 'XMKTP' || custSubGrp == 'XBLUM') {
