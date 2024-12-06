@@ -150,6 +150,7 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
+  setDefaultArCodeKR();
   if (reqType == 'C') {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
@@ -1260,6 +1261,17 @@ function addCustNmAndStAddrKRLenghtValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
+
+function setDefaultArCodeKR() {
+  var reqType = FormManager.getActualValue('reqType');
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'IBM Collection Responsibility' ], 'MAIN_IBM_TAB');
 }
 
 dojo.addOnLoad(function() {
