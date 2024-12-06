@@ -26,7 +26,7 @@ function afterConfigTW() {
   var custGrp = FormManager.getActualValue('custGrp');
   var invoiceSplitCd = FormManager.getActualValue('invoiceSplitCd');
   var custPrefLang = FormManager.getField('custPrefLang');
-  var collectionCd = FormManager.getField('collectionCd');
+  var collectionCd = FormManager.getActualValue('collectionCd');
   var role = null;
   var taxLocation = null;
   FormManager.readOnly('capInd');
@@ -53,7 +53,7 @@ function afterConfigTW() {
       FormManager.setValue('custPrefLang', 'M');
     }
     if (reqType == 'C') {
-      if (!FormManager.getField('collectionCd') || collectionCd == '') {
+      if (collectionCd == null || collectionCd == '') {
         FormManager.setValue('collectionCd', '00FO');
       }
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
@@ -82,7 +82,6 @@ function afterConfigTW() {
       FormManager.removeValidator('covId', Validators.REQUIRED);
       FormManager.removeValidator('dunsNo', Validators.REQUIRED);
       FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-      FormManager.removeValidator('collectionCd', Validators.REQUIRED);
       FormManager.removeValidator('mrcCd', Validators.REQUIRED);
 
       FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
@@ -108,6 +107,8 @@ function afterConfigTW() {
     FormManager.removeValidator('gbgId', Validators.REQUIRED);
     FormManager.removeValidator('geoLocationCd', Validators.REQUIRED);
     FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
+
+    FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'IBM Collection Responsibility' ], 'MAIN_IBM_TAB');
   }
 
   if (custSubGrp == 'LOECO' || custSubGrp == 'LOINT' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF' || custSubGrp == 'LOPRI') {
@@ -238,7 +239,6 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
     FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
     FormManager.removeValidator('sitePartyId', Validators.REQUIRED);
     FormManager.removeValidator('dunsNo', Validators.REQUIRED);
     FormManager.removeValidator('customerIdCd', Validators.REQUIRED);
