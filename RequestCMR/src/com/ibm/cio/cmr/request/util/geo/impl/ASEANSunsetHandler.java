@@ -1081,6 +1081,15 @@ public class ASEANSunsetHandler extends APHandler {
   }
 
   @Override
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    super.setDataValuesOnImport(admin, data, results, mainRecord);
+    List<String> aseanCountries = Arrays.asList(SystemLocation.THAILAND, SystemLocation.MALAYSIA, SystemLocation.INDONESIA);
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && aseanCountries.contains(data.getCmrIssuingCntry())) {
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
+    }
+  }
+
+  @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     LOG.info("setAddressValuesOnImport");
 
