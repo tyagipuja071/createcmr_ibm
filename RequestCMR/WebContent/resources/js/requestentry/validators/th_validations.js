@@ -2525,7 +2525,7 @@ function handleObseleteExpiredDataForUpdate() {
 		FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
 		FormManager.removeValidator('isbuCd', Validators.REQUIRED);
 		FormManager.removeValidator('covId', Validators.REQUIRED);
-		FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+		
 		FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
 		FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
 		FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -3499,7 +3499,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterConfig(updateIndustryClass, [SysLoc.THAILAND]);
 	GEOHandler.addAfterConfig(updateProvCd, [SysLoc.THAILAND]);
 	GEOHandler.addAfterConfig(updateRegionCd, [SysLoc.THAILAND]);
-	GEOHandler.addAfterConfig(setCollectionCd, [SysLoc.THAILAND]);
+	
 	GEOHandler.addAfterConfig(onSubIndustryChange, [SysLoc.THAILAND]);
 	GEOHandler.enableCustomerNamesOnAddress([SysLoc.THAILAND]);
 	GEOHandler.addAddrFunction(updateMainCustomerNames, [SysLoc.THAILAND]);
