@@ -1875,8 +1875,21 @@ function setCollCdFrAU(cntry, addressMode, saving, finalSave, force) {
         FormManager.setValue('collectionCd', '00PZ');
       }
     }
+    FormManager.enable('collectionCd');
   }
 }
+  
+  function setDefaultARForAU() {
+    console.log('>>>> setDefaultARForAU >>>>');
+    if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+      return;
+    }
+    var collectionCd = FormManager.getActualValue('collectionCd');
+    
+    if (!collectionCd) {
+      FormManager.setValue('collectionCd', '0000');
+    }
+  }
 
 var _govIndcHandler = null;
 function addGovIndcHanlder() {
@@ -3121,6 +3134,8 @@ function addAfterConfigAU() {
   addHandlersForAU();
   handleObseleteExpiredDataForUpdate();
   setRepTeamMemberNo();
+  setMrcCd();
+  setDefaultARForAU();
   // setMrcCd();
 }
 
