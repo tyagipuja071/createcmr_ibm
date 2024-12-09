@@ -560,6 +560,19 @@ function addSalesRepNameNoCntryValidator() {
   }
 }
 
+function setDefaultARForNZ() {
+  console.log('>>>> setDefaultARForNZ >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+  FormManager.enable('collectionCd');
+}
+
 function included(cmrIssuCntry) {
   var excludedCntry = ["615", "652", "744", "790", "736", "738", "643", "749", "778", "818", "834", "852", "856", "646", "714", "720", "616", "796"];
 
@@ -2972,6 +2985,7 @@ function addAfterConfigNZ() {
   removeStateValidatorForHkMoNZ();
   //  setCTCIsuByClusterANZ();
   handleObseleteExpiredDataForUpdate();
+  setDefaultARForNZ();
 }
 
 function addressFunctions() {

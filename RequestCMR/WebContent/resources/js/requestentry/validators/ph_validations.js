@@ -1549,7 +1549,7 @@ function setDefaultArCodePH() {
   if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
     FormManager.setValue('collectionCd', '0000');
   }
-
+	FormManager.enable('collectionCd');
   FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
 }
 
