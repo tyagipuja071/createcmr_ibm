@@ -78,9 +78,6 @@ public class EvaluationParser {
     evalLine = evalLine.replaceAll("var\\$_\\$0\\.size\\(\\) == 0", "COVERAGE = BLANK");
     evalLine = evalLine.replaceAll("var\\$_\\$1\\.size\\(\\) == 0", "COVERAGE = BLANK");
     evalLine = evalLine.replaceAll("var\\$_\\$2\\.size\\(\\) == 0", "COVERAGE = BLANK");
-    evalLine = evalLine.replaceAll("var\\$_\\$0\\.size\\(\\) == 1", "COVERAGE = BLANK");
-    evalLine = evalLine.replaceAll("var\\$_\\$1\\.size\\(\\) == 1", "COVERAGE = BLANK");
-    evalLine = evalLine.replaceAll("var\\$_\\$1\\.size\\(\\) == 2", "COVERAGE = BLANK");
 
     evalLine = evalLine.replaceAll("==", "=");
     evalLine = evalLine.replaceAll(" null ", " BLANK ");

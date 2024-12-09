@@ -32,7 +32,7 @@
   </cmr:chk-section>
   -->
 
-     <cmr:chk-section name="Section A: Diversion Risk Profile (DRP) Screening Checklist" >
+    <cmr:chk-section name="Section A: Diversion Risk Profile (DRP) Screening Checklist" >
      <cmr:chk-entry>
      To prevent delivery to parties who may direct products to unauthorized destinations and/or end users/uses. Some indicators of red flags include, but are not limited to:
      </cmr:chk-entry>

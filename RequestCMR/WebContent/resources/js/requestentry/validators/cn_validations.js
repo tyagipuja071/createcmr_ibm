@@ -3366,6 +3366,132 @@ function clearPreviousSortl() {
 	}
 }
 
+// CREATCMR-8581
+
+function checkCmrUpdateBeforeImport() {
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+
+				var cntry = FormManager.getActualValue('cmrIssuingCntry');
+				var cmrNo = FormManager.getActualValue('cmrNo');
+				var reqId = FormManager.getActualValue('reqId');
+				var reqType = FormManager.getActualValue('reqType');
+				var uptsrdc = '';
+				var lastupts = '';
+
+				if (reqType == 'C') {
+					// console.log('reqType = ' + reqType);
+					return new ValidationResult(null, true);
+				}
+
+				var resultsCC = cmr.query('GETUPTSRDC', {
+					COUNTRY: cntry,
+					CMRNO: cmrNo,
+					MANDT: cmr.MANDT
+				});
+
+				if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+					uptsrdc = resultsCC.ret1;
+					// console.log('lastupdatets in RDC = ' + uptsrdc);
+				}
+
+				var results11 = cmr.query('GETUPTSADDR', {
+					REQ_ID: reqId
+				});
+				if (results11 != null && results11 != undefined && results11.ret1 != '') {
+					lastupts = results11.ret1;
+					// console.log('lastupdatets in CreateCMR = ' + lastupts);
+				}
+
+				if (lastupts != '' && uptsrdc != '') {
+					if (uptsrdc > lastupts) {
+						return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+					} else {
+						return new ValidationResult(null, true);
+					}
+				} else {
+					return new ValidationResult(null, true);
+				}
+			}
+		};
+	})(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function checkForCompanyProofAttachment() {
+	var id = FormManager.getActualValue('reqId');
+	var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+		ID: id
+	});
+	if (ret == null || ret.ret1 == null) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function setCoverage2H2024() {
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	if (['NRMLC', 'AQSTN'].includes(custSubGrp)) {
+		FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+		FormManager.setValue('searchTerm', '');
+		FormManager.readOnly('searchTerm');
+		FormManager.enable('inacCd');
+		FormManager.enable('inacType');
+	}
+	if (['EMBSA', 'CROSS'].includes(custSubGrp) && FormManager.getActualValue('searchTerm') == '') {
+		FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+	}
+}
+
+var custSubGrpHandler = null;
+var scenarioChanged = false;
+var previousSelection = null;
+var currentSelection = null;
+var isPrvsSlctnBlank = true;
+
+function clearPreviousSortl() {
+		// first change to custSubGrp
+	if (FormManager.getActualValue('custSubGrp') && _pagemodel['custSubGrp'] == null && (localStorage.getItem("oldCustGrp") == '' || localStorage.getItem("oldCustGrp") == null)) {
+	if (['CROSS', 'EMBSA'].includes(FormManager.getActualValue('custSubGrp'))) {
+					FormManager.setValue('searchTerm', '');
+				} else if (['NRMLC', 'AQSTN'].includes(FormManager.getActualValue('custSubGrp'))) {
+					FormManager.removeValidator('inacType', Validators.REQUIRED);
+					FormManager.removeValidator('inacCd', Validators.REQUIRED);
+					FormManager.setValue('inacCd', '');
+					FormManager.setValue('inacType', '');
+				}
+		localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
+	}
+	if (custSubGrpHandler == null) {
+		custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+			if (!['CROSS', 'EMBSA', 'AQSTN', 'NRMLC'].includes(FormManager.getActualValue('custSubGrp'))) {
+				return;
+			}
+			currentSelection = FormManager.getActualValue('custSubGrp');
+			previousSelection = localStorage.getItem("oldCustGrp");
+			if (previousSelection != null && previousSelection != '' && previousSelection != undefined) {
+				isPrvsSlctnBlank = false;
+			}
+			if ((!isPrvsSlctnBlank && previousSelection != currentSelection && _pagemodel['custSubGrp'] == null) || (!isPrvsSlctnBlank && previousSelection == _pagemodel['custSubGrp'] && previousSelection != currentSelection)) {
+				scenarioChanged = true;
+			} else if ((!isPrvsSlctnBlank && (previousSelection == currentSelection && currentSelection == _pagemodel['custSubGrp']))) {
+				scenarioChanged = false;
+			}
+			if (scenarioChanged) {
+				if (['CROSS', 'EMBSA'].includes(FormManager.getActualValue('custSubGrp'))) {
+					FormManager.setValue('searchTerm', '');
+				} else if (['NRMLC', 'AQSTN'].includes(FormManager.getActualValue('custSubGrp'))) {
+					FormManager.removeValidator('inacType', Validators.REQUIRED);
+					FormManager.removeValidator('inacCd', Validators.REQUIRED);
+					FormManager.setValue('inacCd', '');
+					FormManager.setValue('inacType', '');
+				}
+			}
+			localStorage.setItem("oldCustGrp", FormManager.getActualValue('custSubGrp'));
+		});
+	}
+}
 dojo.addOnLoad(function() {
 	GEOHandler.CN = [SysLoc.CHINA];
 	console.log('adding CN validators...');

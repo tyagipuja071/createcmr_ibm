@@ -444,10 +444,10 @@ public class ANZHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
-        && ("796".equals(data.getCmrIssuingCntry()) || "616".equals(data.getCmrIssuingCntry()))) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "796".equals(data.getCmrIssuingCntry())) {
       admin.setOldCustNm1(mainRecord.getCmrName1Plain());
       admin.setOldCustNm2(mainRecord.getCmrName2Plain());
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
     }
   }
 
@@ -530,6 +530,7 @@ public class ANZHandler extends GEOHandler {
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // TODO Auto-generated method stub
     request.setSORTL(data.getApCustClusterId());
+
   }
 
   @Override

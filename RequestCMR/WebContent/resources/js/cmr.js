@@ -306,6 +306,14 @@ var cmr = {
         btn.setAttribute('value', 'OK');
       }
     }
+    var btn = dojo.byId("messagesOverlayButtonOK");
+    if (btn) {
+      if (buttonLabel && buttonLabel.OK) {
+        btn.setAttribute('value', buttonLabel.OK);
+      } else {
+        btn.setAttribute('value', 'OK');
+      }
+    }
     ibmweb.queue.push(function() {
       return dojo.query("div#dialog_messagesOverlay .dijitDialogCloseIcon").length == 1;
     }, function() {
@@ -636,7 +644,11 @@ var cmr = {
         window.setTimeout('cmr.userSessionCheck()', 1000 * 60);
       },
       error : function(error, ioargs) {
-        cmr.showAlert('Your session has expired due to inactivity. <br>Please click OK to go back to the login page.', 'Session Expired', 'dummyRefreshThePage()');
+        const url = window.location.href;
+        if (url.includes("logout")) {
+          return;
+        }
+        cmr.showAlert('Your session has expired due to inactivity. <br>Please log in again to continue using the application!', 'Session Expired', 'sessionLogout()');
         // window.setTimeout('cmr.userSessionCheck()', 1000);
       }
     });
@@ -997,6 +1009,20 @@ function _openRequest(reqId) {
 }
 function dummyRefreshThePage() {
   window.location = '' + window.location.href;// cmr.CONTEXT_ROOT + '/timeout';
+}
+function sessionLogout() {
+    const url = window.location.href;
+    if (url.includes("logout")) {
+      return;
+    }
+    
+    const urlReqIdx = url.indexOf("request/");
+    if (urlReqIdx > 0)  {
+      const reqId = url.substring(urlReqIdx + 8).match("[0-9]+")[0];
+      window.location = '' + cmr.CONTEXT_ROOT + '/logout' + "?r=" + reqId;
+      return;
+    }
+    window.location = '' + cmr.CONTEXT_ROOT + '/logout';
 }
 /**
  * Object.freeze - From FF 4, IE 9, CH 7 Freezes an object: that is, prevents

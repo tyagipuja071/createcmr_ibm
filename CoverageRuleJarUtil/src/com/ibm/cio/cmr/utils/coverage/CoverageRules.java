@@ -50,12 +50,12 @@ public class CoverageRules {
    */
   public static void main(String[] args) throws Exception {
     LOG.info("Starting..");
-    CoverageRules cov = new CoverageRules("1H2023");
-    String zipFile = "C:/ci/shared/data/batch/coverage/zip/1H2023.jar";
-    cov.initializeFrom(zipFile);
+    CoverageRules cov = new CoverageRules("1H2024");
+    String zipFile = "C:/ci/shared/data/batch/coverage/zip/1H2024.jar";
+    // cov.initializeFrom(zipFile);
     cov.initialize();
 
-    String id = "T0001732";
+    String id = "T0007995";
     List<Rule> rules1 = cov.findRule(id);
     if (rules1 != null) {
       System.out.println("Rules for " + id);

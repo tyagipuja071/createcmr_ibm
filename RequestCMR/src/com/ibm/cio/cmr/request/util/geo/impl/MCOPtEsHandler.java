@@ -169,6 +169,8 @@ public class MCOPtEsHandler extends MCOHandler {
                     addr.setCmrStreetAddressCont(record.getCmrName3());
                     addr.setCmrName3(null);
   
+                    addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                    
                     if (!StringUtils.isBlank(record.getCmrPOBox())) {
                       String poBox = record.getCmrPOBox().trim();
                       setPoBox(addr, poBox);
@@ -176,34 +178,34 @@ public class MCOPtEsHandler extends MCOHandler {
   
                     if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                       addr.setCmrAddrSeq("00001");
+                    } 
+                    converted.add(addr);
+                    }
+                  }
+                } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+                  record.setCmrAddrTypeCode("PG01");
+                  addrType = record.getCmrAddrTypeCode();
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+                    
+                      addr.setCmrStreetAddressCont(record.getCmrName4());
+                      addr.setCmrName3(record.getCmrName3());
+  
+                      addr.setCmrName2Plain(record.getCmrName2Plain());
+                      addr.setCmrOffice(record.getCmrOffice());                  
+  
+                    if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                      
+                        addr.setCmrPOBox(record.getCmrPOBox());                     
+                    }
+  
+                    if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                      addr.setCmrAddrSeq("00001");
                     }
                     converted.add(addr);
                   }
-                }
-              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
-                record.setCmrAddrTypeCode("PG01");
-                addrType = record.getCmrAddrTypeCode();
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-                  
-                    addr.setCmrStreetAddressCont(record.getCmrName4());
-                    addr.setCmrName3(record.getCmrName3());
-
-                    addr.setCmrName2Plain(record.getCmrName2Plain());
-                    addr.setCmrOffice(record.getCmrOffice());                  
-
-                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    
-                      addr.setCmrPOBox(record.getCmrPOBox());                     
-                  }
-
-                  if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-                    addr.setCmrAddrSeq("00001");
-                  }
-                  converted.add(addr);
-                }
-              } 
+                } 
             }
           }
           // add unmapped addresses
@@ -1227,13 +1229,14 @@ public class MCOPtEsHandler extends MCOHandler {
             String seqNo = "";// 1
             String street = ""; // 4
             String addressCont = ""; // 5
-            String attPerson = ""; // 6
-            String localPostal = ""; // 7
-            String localCity = ""; // 8
-            String crossCity = ""; // 9
+            String attPerson = ""; // 13 For Pt : except ZS01 & ZP01 -12
+            String localPostal = ""; // 9
+            String localCity = ""; // 6
+            String crossCity = ""; // 7
+            String stateProv = ""; // 8
             String cbPostal = ""; // 10
-            String phoneNo = ""; // 12
-            String poBox = ""; // 13
+            String phoneNo = ""; // 14
+            String poBox = ""; // 12
             String landCountry = ""; // 11
             String dataCmrNo = ""; // 0
             String dataEnterpriseNo = ""; // 5
@@ -1261,25 +1264,28 @@ public class MCOPtEsHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(5);
               addressCont = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(6);
+              currCell = (XSSFCell) row.getCell(13);
               attPerson = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(7);
+              currCell = (XSSFCell) row.getCell(9);
               localPostal = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(8);
+              currCell = (XSSFCell) row.getCell(6);
               localCity = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(9);
+              currCell = (XSSFCell) row.getCell(7);
               crossCity = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              stateProv = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
               cbPostal = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(12);
+              currCell = (XSSFCell) row.getCell(14);
               phoneNo = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(13);
+              currCell = (XSSFCell) row.getCell(12);
               poBox = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(11);
@@ -1313,20 +1319,37 @@ public class MCOPtEsHandler extends MCOHandler {
             checkList = Arrays.asList(addressCont, poBox, attPerson);
             count = checkList.stream().filter(field -> !field.isEmpty()).count();
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(13);
+              currCell = (XSSFCell) row.getCell(12);
               poBox = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                poBox = df.formatCellValue(row.getCell(13));
+                poBox = df.formatCellValue(row.getCell(12));
+              }
+            }
+            if (country.equals("822")
+                && (!"Billing Address".equalsIgnoreCase(sheet.getSheetName()) && !"Mailing Address".equalsIgnoreCase(sheet.getSheetName()))) {
+              currCell = (XSSFCell) row.getCell(12);
+              attPerson = validateColValFromCell(currCell);
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                attPerson = df.formatCellValue(row.getCell(12));
               }
             }
 
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(12);
+            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(14);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNo = df.formatCellValue(row.getCell(12));
+                phoneNo = df.formatCellValue(row.getCell(14));
+              }
+            }
+            if ("Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(13);
+              phoneNo = validateColValFromCell(currCell);
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                phoneNo = df.formatCellValue(row.getCell(13));
               }
             }
 
@@ -1355,6 +1378,17 @@ public class MCOPtEsHandler extends MCOHandler {
               LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
               error.addError((row.getRowNum() + 1), "City",
                   "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+              validations.add(error);
+            }
+            String pattern = "^[a-zA-Z0-9]*$";
+            if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+              LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+              error.addError(row.getRowNum(), "State/Province",
+                  "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+              validations.add(error);
+            } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCountry)) {
+              LOG.trace("State/Province and Landed country both should be filled");
+              error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
               validations.add(error);
             }
             if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {

@@ -164,7 +164,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         entityManager.merge(scorecard);
         entityManager.flush();
       }
-      
+
       if ("897".equals(reqData.getData().getCmrIssuingCntry()) && "FALSE".equalsIgnoreCase(watsonxOutput)) {
         scorecard.setDplAssessmentResult("N");
         scorecard.setDplAssessmentCmt("The request can proceed to PCP status");

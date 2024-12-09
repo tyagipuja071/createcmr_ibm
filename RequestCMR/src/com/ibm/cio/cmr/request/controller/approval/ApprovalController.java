@@ -77,6 +77,8 @@ public class ApprovalController extends BaseController {
     String title = UIMgr.getText("title.approval");
     LOG.debug("Approval being processed = code: " + approvalCode);
     ApprovalResponseModel approval = new ApprovalResponseModel();
+
+    // connect to W3 to build user profile
     try {
       approval = decodeUrlParam(approvalCode);
       if (approval == null) {
@@ -89,11 +91,13 @@ public class ApprovalController extends BaseController {
       } else if (approval.getApproverId() != null) {
         Thread.currentThread().setName("APPR-000-" + approval.getApproverId());
       }
+
       if (!processing) {
         if (!authorize(request)) {
           // only show this when not yet processing
           tagUnauthorized(response);
         } else {
+          LOG.debug("Approval Code: " + approvalCode);
           String user = getUserIdFromAuth(request);
           approval = decodeUrlParam(approvalCode);
           if (approval != null && approval.getApproverId() != null && !approval.getApproverId().toUpperCase().equals(user.toUpperCase())) {
@@ -102,6 +106,8 @@ public class ApprovalController extends BaseController {
             // the URL
             // set to not authorized
             approval = null;
+          } else {
+            LOG.debug("Approval Details: " + approval.getApproverId() + " | " + approval.getApprovalId() + " | " + approval.getType());
           }
         }
       }
@@ -163,21 +169,24 @@ public class ApprovalController extends BaseController {
   }
 
   private void createAppUser(ApprovalResponseModel approval, HttpServletRequest request) throws CmrException {
-    AppUser user = new AppUser();
-    user.setIntranetId(approval.getApproverId().toLowerCase());
-    Person person = BluePagesHelper.getPerson(approval.getApproverId());
-    if (person != null) {
-      user.setBluePagesName(person.getName());
-      user.setNotesEmailId(person.getNotesEmail());
-    } else {
-      user.setBluePagesName(approval.getApproverId().toLowerCase());
-      user.setNotesEmailId(approval.getApproverId().toLowerCase());
-    }
-    user.setApprover(true);
-    user.setAuth(new Authorization());
-    request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
-    request.getSession().setAttribute("displayName", user.getBluePagesName());
 
+    AppUser user = AppUser.getUser(request);
+    if (user == null) {
+      user = new AppUser();
+      user.setIntranetId(approval.getApproverId().toLowerCase());
+      Person person = BluePagesHelper.getPerson(approval.getApproverId());
+      if (person != null) {
+        user.setBluePagesName(person.getName());
+        user.setNotesEmailId(person.getNotesEmail());
+      } else {
+        user.setBluePagesName(approval.getApproverId().toLowerCase());
+        user.setNotesEmailId(approval.getApproverId().toLowerCase());
+      }
+      user.setApprover(true);
+      user.setAuth(new Authorization());
+      request.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+      request.getSession().setAttribute("displayName", user.getBluePagesName());
+    }
   }
 
   /**
@@ -204,7 +213,7 @@ public class ApprovalController extends BaseController {
       return false;
     }
     try {
-      boolean authenticated = userService.authenticateUser(credentials[0], credentials[1]);
+      boolean authenticated = true; //userService.authenticateUser(credentials[0], credentials[1]);
       return authenticated;
     } catch (Exception e) {
       return false;

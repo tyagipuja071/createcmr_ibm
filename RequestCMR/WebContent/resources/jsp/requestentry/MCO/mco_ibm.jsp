@@ -62,6 +62,7 @@
 					path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
 			</p>
 		</cmr:column>
+
 		<cmr:view forCountry="838">
 			<%
 			  if (reqentry.getReqType().equalsIgnoreCase("U")) {
@@ -89,12 +90,15 @@
 						path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
 				</p>
 			</cmr:column>
+
 			<%
 			  }
 			%>
 		</cmr:view>
 		<%-- END of SBO and Sales Rep --%>
+
 	</cmr:row>
+
 	<cmr:view forGEO="MCO1,MCO2">
 		<cmr:row>
 		  <cmr:column span="2" containerForField="InternalDept" forCountry="864">

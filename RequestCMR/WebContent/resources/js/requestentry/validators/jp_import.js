@@ -110,8 +110,7 @@ function doImportCRISRecord(result) {
     FormManager.setValue('saveRejectScore', 'cmr');
     FormManager.setValue('findCmrRejCmt', result.comment);
     FormManager.setValue('findCmrRejReason', result.reason);
-    cmr.showAlert('You have chosen to reject search results. The request will be saved and the action will be recorded.', 'Warning',
-        'forceSaveRequestReject()');
+    cmr.showAlert('You have chosen to reject search results. The request will be saved and the action will be recorded.', 'Warning', 'forceSaveRequestReject()');
   }
 }
 
@@ -144,8 +143,8 @@ function continueCRISImport(type, id) {
   var addrType = type == 'E' ? 'ZE01' : (type == 'C' ? 'ZC01' : 'ZS01');
   var addrSeq = '1';
   cmr.showProgress('Importing ' + typeDesc + ' record with ' + typeDesc + ' No.' + id + '.  This process might take a while. Please wait..');
-  document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/crisimport?addressOnly=' + addressOnly + '&addrType=' + addrType
-      + '&addrSeq=' + addrSeq + '&cmrNum=' + id + '&system=cmr&searchIssuingCntry=760&skipAddress=false');
+  document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/crisimport?addressOnly=' + addressOnly + '&addrType=' + addrType + '&addrSeq=' + addrSeq + '&cmrNum=' + id
+      + '&system=cmr&searchIssuingCntry=760&skipAddress=false');
   document.forms['frmCMR'].submit();
 }
 

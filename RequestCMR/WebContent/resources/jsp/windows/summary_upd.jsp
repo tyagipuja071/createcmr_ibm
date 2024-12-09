@@ -357,7 +357,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           </cmr:column>
         </cmr:row>
       </cmr:view>
-    </cmr:form>
+		</cmr:form>
   </div>
   <cmr:windowClose>
     <cmr:button label="${ui.btn.refresh}" onClick="window.location = window.location.href" pad="true" highlight="true" />

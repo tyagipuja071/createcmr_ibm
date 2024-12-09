@@ -228,6 +228,10 @@ public class ISASunsetHandler extends APHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+        && ("744".equals(data.getCmrIssuingCntry()) || "834".equals(data.getCmrIssuingCntry()))) {
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
+    }
     super.setDataValuesOnImport(admin, data, results, mainRecord);
   }
 

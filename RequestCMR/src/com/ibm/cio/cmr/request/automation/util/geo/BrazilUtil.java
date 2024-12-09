@@ -135,7 +135,7 @@ public class BrazilUtil extends AutomationUtil {
       AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    String custGrp= data.getCustGrp();
+   String custGrp= data.getCustGrp();
    String custSubGrp= data.getCustSubGrp();
    String custType=admin.getCustType();
    RequestEntryModel model = requestData.createModelFromRequest();
@@ -228,12 +228,12 @@ public class BrazilUtil extends AutomationUtil {
           
         }
 
-        LOG.debug("\n Setting ISU CTC based on GBG. (GBG Found)");
-        details.append("\n Setting ISU CTC based on GBG. (GBG Found) \n");
-
-        setIsuAndCtc(overrides,data,details,isu,ctc);   
-    
-        LOG.debug( "ISU : " + isu + " " + "CTC : " + ctc + " ");
+          LOG.debug("\n Setting ISU CTC based on GBG. (GBG Found)");
+          details.append("\n Setting ISU CTC based on GBG. (GBG Found) \n");
+          
+          setIsuAndCtc(overrides,data,details,isu,ctc);   
+          
+          LOG.debug( "ISU : " + isu + " " + "CTC : " + ctc + " ");
 
       }
     } else {

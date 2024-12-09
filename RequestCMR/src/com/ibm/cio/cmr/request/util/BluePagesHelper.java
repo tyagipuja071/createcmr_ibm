@@ -636,7 +636,7 @@ public class BluePagesHelper {
     }
     return false;
   }
-  
+
   public static boolean isUserInJPBlueGroup(String intranetId) {
     cwa2 bpAPI = BluePagesHelper.getCWA2();
     String groups = SystemParameters.getString("JP_BLUE_GROUP");

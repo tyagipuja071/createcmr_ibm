@@ -1022,6 +1022,11 @@ public class JPHandler extends GEOHandler {
       data.setBillToCustNo(mainRecord.getBillingCustNo());
     }
 
+    if ("U".equals(admin.getReqType())) {
+      data.setCreditToCustNo(mainRecord.getCmrCreditToCustNo());
+      data.setBillToCustNo(mainRecord.getBillingCustNo());
+    }
+
     data.setTier2(mainRecord.getTier2());
     // data.setAbbrevNm(mainRecord.getCmrName3() == null ?
     // mainRecord.getCmrName3() : mainRecord.getCmrName3().trim());
@@ -4028,7 +4033,6 @@ public class JPHandler extends GEOHandler {
     salesPayment.setPayCycleCd6(jpPayCyclesStr6.isEmpty() ? null : jpPayCyclesStr6);
     salesPayment.setPayCycleCd7(jpPayCyclesStr7.isEmpty() ? null : jpPayCyclesStr7);
     salesPayment.setPayCycleCd8(jpPayCyclesStr8.isEmpty() ? null : jpPayCyclesStr8);
-
   }
 
   private static void updateSalesPayment(EntityManager rdcMgr, SalesPayment salesPayment, Kna1 kna1, Data data, String userId) throws Exception {
@@ -4099,73 +4103,6 @@ public class JPHandler extends GEOHandler {
     salesPayment.setPayCycleCd6(jpPayCyclesStr6.isEmpty() ? null : jpPayCyclesStr6);
     salesPayment.setPayCycleCd7(jpPayCyclesStr7.isEmpty() ? null : jpPayCyclesStr7);
     salesPayment.setPayCycleCd8(jpPayCyclesStr8.isEmpty() ? null : jpPayCyclesStr8);
-  }
-
-  private String importIbmRelatedCmr(EntityManager entityManager, HttpServletRequest request, RequestEntryModel reqentry, ParamContainer params,
-      ImportCMRModel searchModel, String addrType, String addrTypeParam) throws Exception {
-    String companyNo = getCompanyNoByIbmRelatedCmr(entityManager, SystemConfiguration.getValue("MANDT"), searchModel.getCmrNum());
-    // retrieve company address via ibm related cmr no
-    if (companyNo != null && !companyNo.isEmpty()) {
-      addrType = "ZC01";
-      reqentry.setCustType("EA");
-      searchModel.setCmrNum(companyNo);
-    }
-    return addrType;
-  }
-
-  private String getCompanyNoByIbmRelatedCmr(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
-    if (StringUtils.isEmpty(cmrNo)) {
-      return null;
-    }
-    String sql = ExternalizedQuery.getSql("JP.GET.COMPANY.BY.IBMCMR");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CMR", cmrNo);
-    query.setParameter("KATR6", SystemLocation.JAPAN);
-    query.setParameter("MANDT", mandt);
-    query.setForReadOnly(true);
-    String compnyNo = query.getSingleResult(String.class);
-    return compnyNo;
-  }
-
-  private static Kna1 getKna1ByType(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception {
-    if (StringUtils.isEmpty(cmrNo)) {
-      return null;
-    }
-    String sql = ExternalizedQuery.getSql("JP.GET.KNA1.BY_CMR_TYPE");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CMR", cmrNo);
-    query.setParameter("KATR6", SystemLocation.JAPAN);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("KTOKD", addrType);
-    query.setForReadOnly(true);
-    return query.getSingleResult(Kna1.class);
-  }
-
-  private void setAbbrevBeforeAddrSave(EntityManager entityManager, Addr addr) {
-    DataPK pk = new DataPK();
-    pk.setReqId(addr.getId().getReqId());
-    Data data = entityManager.find(Data.class, pk);
-    String custSubGrp = data.getCustSubGrp() == null ? "" : data.getCustSubGrp();
-    String accountAbbNm = "";
-    if ("BQICL".equals(custSubGrp) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
-      if (addr.getCustNm3() != null) {
-        if (addr.getCustNm3().length() > 22) {
-          accountAbbNm = addr.getCustNm3().substring(0, 22);
-        }
-        data.setAbbrevNm(accountAbbNm.toUpperCase());
-        entityManager.merge(data);
-        entityManager.flush();
-      }
-    }
-  }
-
-  private List<Addr> getAddresses(EntityManager entityManager, Long reqId) {
-    List<Addr> addresses = null;
-    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    addresses = query.getResults(Addr.class);
-    return addresses;
   }
 
   private static void handleCmrNo2(EntityManager entityManager, String mandt, String kunnr, String cmrNo2, Kna1 kna1) throws Exception {
@@ -4276,6 +4213,64 @@ public class JPHandler extends GEOHandler {
     return query.getSingleResult(Knb1.class);
   }
 
+  private String importIbmRelatedCmr(EntityManager entityManager, HttpServletRequest request, RequestEntryModel reqentry, ParamContainer params,
+      ImportCMRModel searchModel, String addrType, String addrTypeParam) throws Exception {
+    String companyNo = getCompanyNoByIbmRelatedCmr(entityManager, SystemConfiguration.getValue("MANDT"), searchModel.getCmrNum());
+    // retrieve company address via ibm related cmr no
+    if (companyNo != null && !companyNo.isEmpty()) {
+      addrType = "ZC01";
+      reqentry.setCustType("EA");
+      searchModel.setCmrNum(companyNo);
+    }
+    return addrType;
+  }
+
+  private String getCompanyNoByIbmRelatedCmr(EntityManager entityManager, String mandt, String cmrNo) throws Exception {
+    if (StringUtils.isEmpty(cmrNo)) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("JP.GET.COMPANY.BY.IBMCMR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setForReadOnly(true);
+    String compnyNo = query.getSingleResult(String.class);
+    return compnyNo;
+  }
+
+  private static Kna1 getKna1ByType(EntityManager entityManager, String mandt, String cmrNo, String addrType) throws Exception {
+    if (StringUtils.isEmpty(cmrNo)) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("JP.GET.KNA1.BY_CMR_TYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR", cmrNo);
+    query.setParameter("KATR6", SystemLocation.JAPAN);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KTOKD", addrType);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Kna1.class);
+  }
+
+  private void setAbbrevBeforeAddrSave(EntityManager entityManager, Addr addr) {
+    DataPK pk = new DataPK();
+    pk.setReqId(addr.getId().getReqId());
+    Data data = entityManager.find(Data.class, pk);
+    String custSubGrp = data.getCustSubGrp() == null ? "" : data.getCustSubGrp();
+    String accountAbbNm = "";
+    if ("BQICL".equals(custSubGrp) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
+      if (addr.getCustNm3() != null) {
+        if (addr.getCustNm3().length() > 22) {
+          accountAbbNm = addr.getCustNm3().substring(0, 22);
+        }
+        data.setAbbrevNm(accountAbbNm.toUpperCase());
+        entityManager.merge(data);
+        entityManager.flush();
+      }
+    }
+  }
+
   public static void addJpSrwzLogicOnPRC(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
     // in order to skip TC -
     // 1, set req status COM
@@ -4323,6 +4318,15 @@ public class JPHandler extends GEOHandler {
     // super
   }
 
+  private List<Addr> getAddresses(EntityManager entityManager, Long reqId) {
+    List<Addr> addresses = null;
+    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    addresses = query.getResults(Addr.class);
+    return addresses;
+  }
+
   private static String getRolByKtokd(EntityManager entityManager, String companyOrAccountCMRNO, String ktokd) throws Exception {
     if (ktokd == null) {
       return "";
@@ -4338,29 +4342,6 @@ public class JPHandler extends GEOHandler {
       }
     }
     return rol;
-  }
-
-  @Override
-  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
-    List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CUST_PREF_LANG", "SUB_INDUSTRY_CD", "ISIC_CD", "TAX_CD1", "CMR_OWNER", "ISU_CD", "CLIENT_TIER",
-        "INAC_CD", "INAC_TYPE", "COMPANY", "PPSCEID", "COLL_BO_ID", "COLLECTOR_NO", "SALES_BO_CD", "EMAIL1", "EMAIL2", "EMAIL3", "COV_DESC", "COV_ID",
-        "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO", "JSIC_CD", "SECONDARY_LOCN_NO",
-        "OEM_IND", "LEASING_COMP_INDC", "EDUC_ALLOW_CD", "CUST_ACCT_TYP", "CUST_CLASS", "IIN_IND", "VALUE_ADD_REM", "CHANNEL_CD", "SI_IND", "CRS_CD",
-        "CREDIT_CD", "GOVERNMENT", "OUTSOURCING_SERV", "ZSERIES_SW", "CMR_NO_2", "CLIENT_TIER", "SEARCH_TERM", "MRC_CD", "REP_TEAM_MEMBER_NO",
-        "SALES_TEAM_CD", "SALES_BO_CD", "ORG_NO", "CHARGE_CD", "SO_PRJ_CD", "CS_DIV", "BILLING_PROC_CD", "INVOICE_SPLIT_CD", "CREDIT_TO_CUST_NO",
-        "CS_BO", "TIER_2", "BILL_TO_CUST_NO", "ADMIN_DEPT_LN", "IDENT_CLIENT", "TERRITORY_CD"));
-
-    return fields;
-  }
-
-  private boolean isNormlCreditToImport(RequestEntryModel reqEntry) {
-    String creditToCustNo = StringUtils.isNotEmpty(reqEntry.getCreditToCustNo()) ? reqEntry.getCreditToCustNo() : "";
-    String billToCustNo = StringUtils.isNotEmpty(reqEntry.getBillToCustNo()) ? reqEntry.getBillToCustNo() : "";
-    if ("NORML".equals(reqEntry.getCustSubGrp()) && !creditToCustNo.equals("") && billToCustNo.equals("")) {
-      return true;
-    }
-    return false;
   }
 
   private void logValidationErrorSingleByte(TemplateValidation error, Row row, String templateColumn) {
@@ -8078,6 +8059,27 @@ public class JPHandler extends GEOHandler {
         }
       } // end if
     } // end for
+  }
+ @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CUST_PREF_LANG", "SUB_INDUSTRY_CD", "ISIC_CD", "TAX_CD1", "CMR_OWNER", "ISU_CD", "CLIENT_TIER",
+        "INAC_CD", "INAC_TYPE", "COMPANY", "PPSCEID", "COLL_BO_ID", "COLLECTOR_NO", "SALES_BO_CD", "EMAIL1", "EMAIL2", "EMAIL3", "COV_DESC", "COV_ID",
+        "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO", "JSIC_CD", "SECONDARY_LOCN_NO",
+        "OEM_IND", "LEASING_COMP_INDC", "EDUC_ALLOW_CD", "CUST_ACCT_TYP", "CUST_CLASS", "IIN_IND", "VALUE_ADD_REM", "CHANNEL_CD", "SI_IND", "CRS_CD",
+        "CREDIT_CD", "GOVERNMENT", "OUTSOURCING_SERV", "ZSERIES_SW", "CMR_NO_2", "CLIENT_TIER", "SEARCH_TERM", "MRC_CD", "REP_TEAM_MEMBER_NO",
+        "SALES_TEAM_CD", "SALES_BO_CD", "ORG_NO", "CHARGE_CD", "SO_PRJ_CD", "CS_DIV", "BILLING_PROC_CD", "INVOICE_SPLIT_CD", "CREDIT_TO_CUST_NO",
+        "CS_BO", "TIER_2", "BILL_TO_CUST_NO", "ADMIN_DEPT_LN", "IDENT_CLIENT", "TERRITORY_CD"));
+
+    return fields;
+  }
+  private boolean isNormlCreditToImport(RequestEntryModel reqEntry) {
+    String creditToCustNo = StringUtils.isNotEmpty(reqEntry.getCreditToCustNo()) ? reqEntry.getCreditToCustNo() : "";
+    String billToCustNo = StringUtils.isNotEmpty(reqEntry.getBillToCustNo()) ? reqEntry.getBillToCustNo() : "";
+    if ("NORML".equals(reqEntry.getCustSubGrp()) && !creditToCustNo.equals("") && billToCustNo.equals("")) {
+      return true;
+    }
+    return false;
   }
 
 }

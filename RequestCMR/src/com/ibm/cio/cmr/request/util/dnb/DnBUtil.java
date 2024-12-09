@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.util.dnb;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +63,7 @@ public class DnBUtil {
   private static Map<String, Map<String, String>> orgIdMap = new HashMap<>();
   public static final String CODE_VAT = "VAT";
   public static final String CODE_TAX_CODE_1 = "TAX_CD1";
+  public static final String CODE_TAX_CODE_2 = "TAX_CD2";
   public static final String CODE_SIREN = "SIREN";
 
   static {
@@ -121,7 +123,7 @@ public class DnBUtil {
     registerDnBVATCode("MU", 9394); // Business Registration Number (Mauritius)
     registerDnBVATCode("NA", 15168); // Tax Registration Number (ZA)
     registerDnBVATCode("NO", 1699); // Register of Business Enterprises Number
-    registerDnBVATCode("NZ", 33961); // Business Registration Number (NZ)
+    registerDnBVATCode("NZ", 33961); // New Zealand Company Number
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
     // registerDnBVATCode("AU", 17890); // Business Registration Number
     // (Australia)
@@ -162,7 +164,7 @@ public class DnBUtil {
     registerDnBVATCode("DZ", 2080);
 
     // Tax Cd1
-    registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
+    registerDnBTaxCd2Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
     registerDnBTaxCd1Code("GB", 2541); // UK CRO Number
     registerDnBTaxCd1Code("IE", 9134); // Ireland CRO Number
@@ -287,8 +289,8 @@ public class DnBUtil {
     if (SystemLocation.CHINA.equalsIgnoreCase(issuingCntry)) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
-    if (cmrRecord.getCmrState() == null
-        && (SystemLocation.AUSTRIA.equalsIgnoreCase(issuingCntry) || SystemLocation.SWITZERLAND.equalsIgnoreCase(issuingCntry))) {
+    if (cmrRecord.getCmrState() == null && Arrays.asList(SystemLocation.NORWAY, SystemLocation.FINLAND, SystemLocation.DENMARK, SystemLocation.SWEDEN,
+        SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND).contains(issuingCntry)) {
       cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
     cmrRecord.setCmrPostalCode(company.getPrimaryPostalCode() != null ? company.getPrimaryPostalCode() : company.getMailingPostalCode());
@@ -523,6 +525,18 @@ public class DnBUtil {
   }
 
   /**
+   * Extracts the relevant TAX_CD2 value from the list of
+   * {@link DnbOrganizationId}
+   *
+   * @param country
+   * @param ids
+   * @return
+   */
+  public static String getTaxCode2(String country, List<DnbOrganizationId> ids) {
+    return getCodeValue(country, CODE_TAX_CODE_2, ids);
+  }
+
+  /**
    * Gets the specific value from the list of {@link DnbOrganizationId} that
    * matches the codeKey
    *
@@ -550,7 +564,7 @@ public class DnBUtil {
     if (orgIdMap.get(country) == null) {
       orgIdMap.put(country, new HashMap<String, String>());
     }
-    orgIdMap.get(country).put("VAT", StringUtils.leftPad("" + dnbCodeId, 6, '0'));
+    orgIdMap.get(country).put(CODE_VAT, StringUtils.leftPad("" + dnbCodeId, 6, '0'));
   }
 
   /**
@@ -563,7 +577,20 @@ public class DnBUtil {
     if (orgIdMap.get(country) == null) {
       orgIdMap.put(country, new HashMap<String, String>());
     }
-    orgIdMap.get(country).put("TAX_CD1", StringUtils.leftPad("" + dnbCodeId, 6, '0'));
+    orgIdMap.get(country).put(CODE_TAX_CODE_1, StringUtils.leftPad("" + dnbCodeId, 6, '0'));
+  }
+
+  /**
+   * Sets the D&B code as the Tax Code 2 equivalent
+   *
+   * @param country
+   * @param dnbCodeId
+   */
+  private static void registerDnBTaxCd2Code(String country, int dnbCodeId) {
+    if (orgIdMap.get(country) == null) {
+      orgIdMap.put(country, new HashMap<String, String>());
+    }
+    orgIdMap.get(country).put(CODE_TAX_CODE_2, StringUtils.leftPad("" + dnbCodeId, 6, '0'));
   }
 
   /**
@@ -655,6 +682,7 @@ public class DnBUtil {
       boolean useTradestyleName, boolean allowLongNameAddress) {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
     int maxLength = 60;
+    String regex = "\\s+$";
     if (handler != null) {
       maxLength = handler.getName1Length() + handler.getName2Length();
     }
@@ -674,6 +702,8 @@ public class DnBUtil {
       dnbName = dnbName.trim();
       String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
       String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+      dnbName = dnbName.replaceAll(regex, "");
+      compareName = compareName.replaceAll(regex, "");
       if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
         if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 12
             && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 12)) {
@@ -870,13 +900,16 @@ public class DnBUtil {
    * @return
    */
   public static boolean hasValidMatches(MatchingResponse<DnBMatchingResponse> response) {
+    LOG.debug("DnBUtil.hasValidMatches");
     if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
       for (DnBMatchingResponse dnbRecord : response.getMatches()) {
         if (dnbRecord.getConfidenceCode() > 7) {
+          LOG.debug("dnbRecord.getConfidenceCode() --> " + dnbRecord.getConfidenceCode());
           return true;
         }
       }
     }
+    LOG.debug("dnbRecord.getConfidenceCode() --> will return FALSE");
     return false;
   }
 
@@ -910,10 +943,13 @@ public class DnBUtil {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
     boolean isTaxCdMatch = false;
-    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    // AutomationUtil countryUtil =
+    // AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
     if (countryUtil != null) {
       isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
     }
@@ -993,11 +1029,12 @@ public class DnBUtil {
   public static boolean isDnbOverrideAttachmentProvided(EntityManager entityManager, long reqId) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("ID", reqId);
+    query.setParameter("ID", String.valueOf(reqId));
 
     return query.exists();
   }
-  //creatcmr-9798
+
+  // creatcmr-9798
   public static boolean isDnbExempt(EntityManager entityManager, String serviceId) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_EXEMPT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

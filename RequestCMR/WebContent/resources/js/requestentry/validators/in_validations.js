@@ -139,6 +139,7 @@ function addAfterConfigAP() {
     FormManager.enable('territoryCd');
     FormManager.enable('IndustryClass');
     FormManager.enable('subIndustryCd');
+    FormManager.enable('vat');
   }
    
   var clusterId = FormManager.getActualValue('apCustClusterId');
@@ -641,7 +642,7 @@ function onCustSubGrpChange() {
     }
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
-    setCollectionCd();   
+    setDefaultARForIN();   
     lockFieldsWithDefaultValuesByScenarioSubType(); 
   });
 }
@@ -871,42 +872,6 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   
 }
 
-function setCollectionCd() {
-  console.log('>>>> setCollectionCd >>>>');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  var isbuCd = FormManager.getActualValue('isbuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var collCd = null;
-  if (isbuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISBU : '%' + isbuCd + '%'
-    };
-    var result = cmr.query('GET.ARCODELIST.BYISBU', qParams);
-    if (result.length > 0) {
-      if (result != null && result[0].ret1 != result[0].ret2) {
-        collCd = result[0].ret1;
-        if (collCd != null) {
-          FormManager.setValue('collectionCd', collCd);
-        }
-      }
-    }
-  }
-}
-
-
 function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
   console.log(">>>> setAbbrevNmLocnOnAddressSave >>>>");
   var reqType = null;
@@ -932,6 +897,18 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
       autoSetAbbrevNmLocnLogic();
       
     }
+  }
+}
+
+function setDefaultARForIN() {
+  console.log('>>>> setDefaultARForIN >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
   }
 }
 
@@ -1161,7 +1138,7 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.setValue('isicCd', isicCdInDB);
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
-  } else {
+  } else if (reqType == 'U' && role == 'REQUESTER') {
     switch (custSubGrp) {
       case 'PRIV':
         // ISIC = 9500, - lock field
@@ -1954,8 +1931,9 @@ function setAddressDetailsForViewAP() {
 function lockCustMainNames() {
   console.log('>>>> lockCustMainNames >>>>');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER' || FormManager.getActualValue('viewOnlyPage') == 'true')
+  if (role == 'REQUESTER' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
+  }  
   if (cmr.addressMode == 'updateAddress') {
     FormManager.readOnly('custNm1');
     FormManager.readOnly('custNm2');
@@ -2220,6 +2198,7 @@ function validateGSTForIndia() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
 
 function lockFieldsForIndia(){
   console.log('>>>> lockFieldsForIndia >>>>');
@@ -2582,7 +2561,7 @@ function handleObseleteExpiredDataForUpdate() {
    return;
  }
  // lock all the coverage fields and remove validator
- if (reqType == 'U') {
+ if (reqType == 'U' && role == 'REQUESTER') {
    FormManager.readOnly('repTeamMemberNo');
    FormManager.readOnly('repTeamMemberName');
    FormManager.readOnly('isbuCd');

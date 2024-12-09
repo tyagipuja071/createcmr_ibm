@@ -657,12 +657,12 @@ function addISUHandlerIT() {
       }
     });
   }
+}
 
+function addIsicCdHandler() {
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      if (typeof (_pagemodel) != 'undefined' && _pagemodel['isicCd'] != FormManager.getActualValue('isicCd')) {
-        setDeafultSBOLogicComm();
-      }
+      setDeafultSBOLogicComm();
     });
   }
 }
@@ -688,7 +688,7 @@ function setClientTierValuesIT(isuCd) {
   } else {
     FormManager.setValue('clientTier', '');
   }
-  // setDeafultSBOLogicComm();
+  setDeafultSBOLogicComm();
 }
 
 var _addrTypesIL = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ];
@@ -4807,7 +4807,6 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     // }
 
     if ((isuCd == '34' && clientTier == 'Q')
-        || (isuCd == '27' && clientTier == 'E')
         || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
             || custSubGrp == 'CROIN' || custSubGrp == 'IBMIT' || custSubGrp == 'XIBM')) {
       FormManager.removeValidator('affiliate', Validators.REQUIRED);
@@ -5131,8 +5130,8 @@ function clientTierCodeValidator() {
   var isuCode = FormManager.getActualValue('isuCd');
   var clientTierCode = FormManager.getActualValue('clientTier');
   var reqType = FormManager.getActualValue('reqType');
-  var activeIsuCd = [ '27', '34', '36' ];
-  var activeCtc = [ 'Q', 'Y', 'E' ];
+  var activeIsuCd = [ '27', '34', '36', '32' ];
+  var activeCtc = [ 'Q', 'Y', 'E', 'T' ];
 
   if (!activeIsuCd.includes(isuCode)) {
     if (clientTierCode == '') {
@@ -5193,6 +5192,20 @@ function clientTierCodeValidator() {
         type : 'text',
         name : 'clientTier'
       }, false, 'Client Tier can only accept \'Y\'.');
+    }
+  } else if (isuCode == '32') {
+    if (clientTierCode == '' || clientTierCode != 'T') {
+      return new ValidationResult({
+        id : 'isuCd',
+        type : 'text',
+        name : 'isuCd'
+      }, false, 'ISU Cd 32 has been obsolete');
+    } else {
+      return new ValidationResult({
+        id : 'clientTier',
+        type : 'text',
+        name : 'clientTier'
+      }, false, 'ISU Cd 32 & Client Tier T has been obsolete');
     }
   } else {
     if (activeCtc.includes(clientTierCode) || clientTierCode == '') {
@@ -5457,15 +5470,6 @@ function sboSalesRepCodeValidator() {
         name : 'salesBusOffCd'
       }, false, 'SORTL can only accept \'PA\'\ \'PB\'\ \'PC\'\ \'PD\'\ \'PE\'\ \'PF\'\  \'PG\'\ \'PH\'\ \'PI\'\ \'PJ\'\ \'PK\'\ \'PL\'\ \'PM\'\ \'PN\'\ \'PO\'\ \'PP\'\ for ISU CTC 34Q.');
     }
-  } else if (isuCtc == '27E') {
-    if (!(sbo == 'NM' || sbo == 'RP' || sbo == 'GJ' || sbo == 'GK' || sbo == 'NG' || sbo == 'NC' || sbo == 'KA' || sbo == 'KF' || sbo == 'NB' || sbo == 'GH' || sbo == 'KC' || sbo == 'KB'
-        || sbo == 'DU' || sbo == 'KE' || sbo == 'KD' || sbo == 'NI')) {
-      return new ValidationResult({
-        id : 'salesBusOffCd',
-        type : 'text',
-        name : 'salesBusOffCd'
-      }, false, 'SORTL can only accept \'NM\'\ \'RP\'\ \'GJ\'\ \'GK\'\ \'NG\'\ \'NC\'\ \'KA\'\ \'KF\'\ \'NB\'\ \'GH\'\ \'KC\'\ \'KB\'\ \'DU\'\ \'KE\'\ \'KD\'\ \'NI\'\ for ISU CTC 27E.');
-    }
   } else if (isuCtc == '36Y') {
     if (!(sbo == 'FL' || sbo == 'FM' || sbo == 'FP' || sbo == 'FQ' || sbo == 'FR' || sbo == 'FS' || sbo == 'FT' || sbo == 'FV' || sbo == 'FW' || sbo == 'FX' || sbo == 'FY' || sbo == 'FZ')) {
       return new ValidationResult({
@@ -5530,6 +5534,13 @@ function sboSalesRepCodeValidator() {
   // \'11\'\ \'12\'\ \'13\'\ \'14\'\ for ISU CTC 8B.');
   // }
   // }
+  else if (isuCtc == '32T' || isuCd == '32') {
+    return new ValidationResult({
+      id : 'isuCd',
+      type : 'text',
+      name : 'isuCd'
+    }, false, 'ISU 32 & Client Tier T has been obsolete.');
+  }
 }
 
 function getSoldToLanded() {
@@ -5607,6 +5618,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValuesIT, [ SysLoc.ITALY ]);
   // GEOHandler.addAfterTemplateLoad(setDeafultISUCtcChange, [ SysLoc.ITALY ]);
   GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
+  GEOHandler.addAfterConfig(addIsicCdHandler, [ SysLoc.ITALY ]);
   // GEOHandler.addAfterConfig(setClientTierValuesIT, [ SysLoc.ITALY ]);
   // GEOHandler.addAfterConfig(setDeafultSBOLogicComm, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ITALY ], null, true);

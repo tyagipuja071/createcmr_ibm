@@ -88,6 +88,8 @@ function processRequestAction() {
       FormManager.setValue('hasError', 'Y');
     }
     doSaveRequest();
+    var formattedDate = moment(new Date(), "YYYY-MM-DD HH:mm:SS.sss").format("YYYY-MM-DD");
+    localStorage.setItem('checklistSaveDate',formattedDate);
 
   } else if (action == YourActions.Validate) {
     cmr.showProgress('Checking request data..');
@@ -340,9 +342,15 @@ function processRequestAction() {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
       var result = FormManager.getActualValue('dplChkResult');
+      var reqReason = FormManager.getActualValue('reqReason');
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+      if (cntry == '641' && reqReason == 'TREC') {
+        doYourAction();
+      }
       // if DPL check status is not 'All Passed', ask for confirmation to
       // proceed
-      if (result == '' || (result.toUpperCase() != 'AP' && result.toUpperCase() != 'NR')) {
+      else if (result == '' || (result.toUpperCase() != 'AP' && result.toUpperCase() != 'NR')) {
         cmr.showConfirm('doYourAction()', 'This request has not passed all DPL checks. Are you sure you want to process this request?', 'Warning', null, {
           OK : 'Yes',
           CANCEL : 'No'
@@ -1345,6 +1353,8 @@ function connectToCmrServices() {
         FormManager.setValue('covId', data.coverageType + data.coverageID);
         FormManager.setValue('covDesc', data.coverageDesc);
         dojo.byId('covDescCont').innerHTML = data.coverageDesc != null ? data.coverageDesc : '(no description available)';
+
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
         if (data.clientTier == null || data.clientTier.trim() == '') {
           /*
            * 1490262: Client Tier Code is set to Unassigned after Retrieving
@@ -1353,7 +1363,14 @@ function connectToCmrServices() {
           /* jz: do not set anything */
           // FormManager.setValue('clientTier', '');
         } else {
-          FormManager.setValue('clientTier', data.clientTier);
+          if (custSubGrp != 'PRIV' && custSubGrp != 'ECO' && (FormManager.getActualValue('cmrIssuingCntry') == '649')) {
+            FormManager.setValue('clientTier', '');
+            FormManager.enable('clientTier');
+          }
+          if (custSubGrp != 'PRIV' && custSubGrp != 'ECOSYSTEM' && (FormManager.getActualValue('cmrIssuingCntry') == '897')) {
+            FormManager.setValue('clientTier', '');
+            FormManager.enable('clientTier');
+          }
         }
       }
       if (data.buyingGroupError) {
@@ -1385,6 +1402,16 @@ function connectToCmrServices() {
         if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
           setClusterIDAfterRetrieveAction(data.glcCode);
         }
+        if (cmrCntry == SysLoc.NEW_ZEALAND && reqType == 'C' && (custSubGrp == 'NRMLC' || custSubGrp == 'AQSTN')) {
+          setClusterIDAfterRetrieveAction(data.glcCode);
+        }
+        /*
+         * if (cmrCntry == SysLoc.USA && reqType == 'C' &&
+         * data.globalBuyingGroupID == null && custSubGrp != 'ECOSYSTEM' &&
+         * custSubGrp != 'PRIV') { FormManager.setValue('isuCd', '27');
+         * FormManager.setValue('clientTier', 'E');
+         * FormManager.readOnly('isuCd'); FormManager.readOnly('clientTier'); }
+         */
       }
       if (data.dunsError) {
         // errorMsg += (showError ? ', ' : '') + 'DUNS No.';
@@ -2902,6 +2929,7 @@ function checkRetrievedForNZ() {
     }
   }
 }
+
 // CREATCMR-8430: do DNB check for NZ update
 function matchDnBForNZUpdate() {
   console.log('>>> matchDnBForNZUpdate >>>');

@@ -980,6 +980,12 @@ public class ItalyHandler extends BaseSOFHandler {
       data.setSpecialTaxCd(cExt.getItIVA());
     }
 
+    if (!StringUtils.isEmpty(taxCode)) {
+      data.setSpecialTaxCd(taxCode);
+    } else if (cExt != null) {
+      data.setSpecialTaxCd(cExt.getItIVA());
+    }
+
     if (!"IT".equals(countryLanded)) {
       data.setTaxCd1("");
       if (!StringUtils.isEmpty(vat) && vat.length() > 2) {
@@ -1760,17 +1766,12 @@ public class ItalyHandler extends BaseSOFHandler {
   private CmrtCustExt getBillingCustExtFields(String cmr) {
     EntityManager entityManager = JpaManager.getEntityManager();
     CmrtCustExt cmrtCExt = null;
-    try {
-      if (entityManager != null) {
-        String sql = ExternalizedQuery.getSql("ITALY.GET.BILLINGFIELDS");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        query.setParameter("CNTRY", SystemLocation.ITALY);
-        query.setParameter("CMR", cmr);
-        cmrtCExt = query.getSingleResult(CmrtCustExt.class);
-      }
-    } finally {
-      entityManager.clear();
-      entityManager.close();
+    if (entityManager != null) {
+      String sql = ExternalizedQuery.getSql("ITALY.GET.BILLINGFIELDS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", SystemLocation.ITALY);
+      query.setParameter("CMR", cmr);
+      cmrtCExt = query.getSingleResult(CmrtCustExt.class);
     }
     return cmrtCExt;
   }
@@ -1924,6 +1925,11 @@ public class ItalyHandler extends BaseSOFHandler {
               error.addError((row.getRowNum() + 1), "Client Tier",
                   ":Note that Client Tier should be 'E' for the selected ISU code. Please fix and upload the template again.<br>");
             }
+          } else if ((!StringUtils.isBlank(isu) && isu.startsWith("32")) || (!StringUtils.isBlank(clientTier) && "T".contains(clientTier))) {
+            LOG.trace(
+                "The row " + (rowIndex + 1) + ":Note that ISU 32 & Client Tier T has been obsolete.. Please fix and upload the template again.");
+            error.addError((rowIndex + 1), "Client Tier",
+                ":Note that ISU 32 & Client Tier T has been obsolete. Please fix and upload the template again.<br>");
           } else if (!StringUtils.isBlank(isu) && "36".equals(isu)) {
             if (!"Y".contains(clientTier) || StringUtils.isBlank(clientTier)) {
               LOG.trace("The row " + (row.getRowNum() + 1)

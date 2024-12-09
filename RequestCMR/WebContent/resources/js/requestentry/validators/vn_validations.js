@@ -7415,6 +7415,171 @@ function inacValidation(){
   }
 }
 
+var _checklistBtnHandler = [];
+function addChecklistBtnHandler() {
+  for (var i = 0; i <= 11; i++) {
+    _checklistBtnHandler[i] = null;
+    if (_checklistBtnHandler[i] == null) {
+      _checklistBtnHandler[i] = dojo.connect(FormManager.getField('dijit_form_RadioButton_' + i), 'onClick', function (value) {
+        freeTxtFieldShowHide(Number(value.target.id.split("_").pop()));
+      });
+    }
+  }
+}
+
+function freeTxtFieldShowHide(buttonNo) {
+  var shouldDisplay = false;
+  
+  if (buttonNo == 2) {
+    shouldDisplay = true;
+  } else {
+    shouldDisplay = false;
+  }
+  var element = document.getElementById('checklist_txt_field_' + 1);
+  var textFieldElement = document.getElementsByName('freeTxtField' + 1)[0];
+  if (shouldDisplay) {
+    element.style.display = 'block';
+  } else {
+    element.style.display = 'none';
+    textFieldElement.value = '';
+  }
+}
+
+function getCheckListFieldNo(buttonNo) {
+  return ((buttonNo - (buttonNo % 2)) / 2) + 5;
+}
+
+function checkChecklistButtons() {
+    if (document.getElementById('dijit_form_RadioButton_' + 2).checked) {
+      document.getElementById('checklist_txt_field_' + 1).style.display = 'block';
+    }
+}
+
+function setChecklistStatus() {
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
+  var textBoxes = checklist.query('input[type="text"]');
+
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var noOfTextBoxes = textBoxes.length;
+
+      for (var i = 0; i < noOfTextBoxes; i++) {
+        if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+      }
+
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
+}
+
+function addChecklistValidator() {
+	FormManager.addFormValidator((function() {
+		return {
+			validate: function() {
+				var qParams = {
+					REQ_ID: FormManager.getActualValue('reqId'),
+				};
+				var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', qParams);
+				landCntry = result.ret1;
+				if (landCntry == 'MM') {
+					console.log('validating checklist..');
+					var checklist = dojo.query('table.checklist');
+
+					var questions = checklist.query('input[type="radio"]');
+					var textBoxes = checklist.query('input[type="text"]');
+					if (questions.length > 0) {
+						var noOfQuestions = questions.length / 2;
+						var noOfTextBoxes = textBoxes.length;
+
+						for (var i = 0; i < noOfTextBoxes; i++) {
+							if (checklist.query('input[type="text"]')[i].value.trimEnd() == '' && ((i < 3 || i >= 10) || ((i >= 3 || i < 10) && document.getElementById('checklist_txt_field_' + (i + 3)).style.display == 'block'))) {
+								return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+							}
+						}
+
+						var checkCount = 0;
+						for (var i = 0; i < questions.length; i++) {
+							if (questions[i].checked) {
+								checkCount++;
+							}
+						}
+						if (noOfQuestions != checkCount) {
+							return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+						}
+
+						// add check for checklist on DB
+						var reqId = FormManager.getActualValue('reqId');
+						var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+							REQID: reqId
+						});
+						if (!record || !record.sectionA1) {
+							return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+						}
+					}
+				}
+				return new ValidationResult(null, true);
+			}
+		};
+	})(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
+}
+
+function updateChecklist() {
+	var qParams = {
+		REQ_ID: FormManager.getActualValue('reqId'),
+	};
+	var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', qParams);
+	landCntry = result.ret1;
+  var subHeaders = dojo.query('th.subheader'); 
+	var ques = dojo.query('table.checklist-questions');
+
+	if (landCntry != 'KH') {
+		ques[4].hidden = true;
+		ques[5].hidden = true;
+		for(i = 4;i<=8;i++){
+			subHeaders[i].hidden = true;
+		}
+   dojo.byId('dijit_form_TextBox_3').hidden = true; 
+   dojo.byId('dijit_form_TextBox_4').hidden = true; 
+	} else {
+		ques[4].hidden = false;
+		ques[5].hidden = false;
+		for(i = 5;i<=8;i++){
+			subHeaders[i].hidden = false;
+		}
+	 dojo.byId('dijit_form_TextBox_3').hidden = false;
+   dojo.byId('dijit_form_TextBox_4').hidden = false; 
+	}
+
+}
+
+
+function initChecklistDate() {
+    FormManager.setValue('dijit_form_TextBox_4',localStorage.getItem('checklistSaveDate'));
+    FormManager.readOnly('dijit_form_TextBox_4');  
+}
+
 function setKUKLAvaluesVN() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -7535,4 +7700,12 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.VIETNAM], null, true);
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [SysLoc.VIETNAM]);
   GEOHandler.addAfterTemplateLoad(clearClusterFieldsOnScenarioChange, [SysLoc.VIETNAM]);
+  
+  GEOHandler.addAfterConfig(setChecklistStatus, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(addChecklistValidator, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(addChecklistBtnHandler, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(checkChecklistButtons, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(updateChecklist, [SysLoc.VIETNAM]);
+  GEOHandler.addAfterConfig(initChecklistDate, [SysLoc.VIETNAM]);
+
 });

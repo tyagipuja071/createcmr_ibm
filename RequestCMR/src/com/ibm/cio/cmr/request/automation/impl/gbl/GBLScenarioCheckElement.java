@@ -55,7 +55,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       isPaygoUpgrade = true;
     }
     if ("Y".equals(admin.getScenarioVerifiedIndc()) || isPaygoUpgrade) {
-      log.debug("Skip processing of element");
+      log.debug("***Skip processing of element");
       result.setDetails("Skip processing of element");
       result.setOnError(false);
       output.setSuccess(true);
@@ -74,30 +74,32 @@ public class GBLScenarioCheckElement extends ValidatingElement {
           boolean foundCloseMatch = checkDunsMatchOnPrivates(requestData, engineData, "ZS01");
           log.debug("checking for close match");
           if (foundCloseMatch) {
+            admin.setReqReason("DUPD");
             output.setSuccess(false);
-            output.setMessage("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
-            result.setDetails("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
+            output.setMessage("Resend request for Company or Private Individual");
+            result.setDetails("Request should be re-submitted as a company or private individual.");
             result.setOnError(true);
-            result.setResults("DUNS closely matching name and address in 'Private Household leads to automatic rejection.");
-            engineData.addRejectionComment("DUPD", "The request should be re-submitted as a company or private individual.", "",
+            result.setResults(output.getMessage());
+            engineData.addRejectionComment("DUPD", "DUNS closely matching name and address in 'Private Household leads to automatic rejection", "",
                 "");
             log.debug("DUNS closely matching name and address in 'Private Household leads to automatic rejection");
             return result;
           }
         }
-       } else {
+      } else {
         log.debug("***DnB Exempted");
         result.setDetails("DnB Exempted");
         result.setOnError(false);
         output.setSuccess(true);
         output.setMessage("DnB Exempted");
-      }  
+      }
       if (countryUtil != null) {
-        log.debug("Perform country util checks");
+        log.debug("***Perform country util checks");
 
         boolean countryCheck = false;
         countryCheck = countryUtil.performScenarioValidation(entityManager, requestData, engineData, result, details, output);
         if (countryCheck) {
+          log.debug("***countryCheck is true");
           output.setSuccess(true);
           output.setMessage("Scenario Valid");
           details.insert(0, "Scenario Checks Performed Successfully.\n" + (details.length() > 0 ? "Details:\n" : ""));
@@ -141,11 +143,13 @@ public class GBLScenarioCheckElement extends ValidatingElement {
           Data data = requestData.getData();
           // call a method to check customer name and address
           boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
+          log.debug("GBLScenarioCheckElement (closelyMatches) of request id " + data.getId().getReqId() + " = " + closelyMatches);
           if (closelyMatches) {
             return true;
           }
         }
       }
+      log.debug("GBLScenarioCheckElement.checkDunsMatchOnPrivates --> FALSE");
     }
     return false;
   }

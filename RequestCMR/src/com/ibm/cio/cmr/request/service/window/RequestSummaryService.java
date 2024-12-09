@@ -1475,9 +1475,6 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     } catch (Exception e) {
       LOG.error("An error has occured in retrieving tax info values coming from the CROS query service.");
       e.printStackTrace();
-    } finally {
-      em.clear();
-      em.close();
     }
 
     return taxInfo;
@@ -1576,9 +1573,6 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     } catch (Exception e) {
       LOG.error("An error has occured in retrieving contact info detail values coming from the query service.");
       e.printStackTrace();
-    } finally {
-      em.clear();
-      em.close();
     }
 
     return contactLstDto;

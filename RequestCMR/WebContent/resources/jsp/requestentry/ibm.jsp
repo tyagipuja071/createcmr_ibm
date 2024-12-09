@@ -1,7 +1,7 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %> 
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
@@ -225,7 +225,7 @@ dojo.addOnLoad(function(){
           <cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
-
+      
       <cmr:column span="2" containerForField="IndustryClass" forCountry="858" >
         <p>
           <label style="">IndustryClass:</label>

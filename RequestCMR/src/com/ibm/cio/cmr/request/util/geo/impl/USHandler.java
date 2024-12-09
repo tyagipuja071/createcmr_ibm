@@ -1239,7 +1239,8 @@ public class USHandler extends GEOHandler {
       if ("KYN".equalsIgnoreCase(data.getCustSubGrp())
           || ("BYMODEL".equalsIgnoreCase(data.getCustSubGrp()) && "KYN".equalsIgnoreCase(data.getRestrictTo()))) {
         admin.setMainCustNm1("KYNDRYL INC");
-      } 
+      }
+      
     }
 
     if (admin != null && "CSP".equals(admin.getReqReason())) {
@@ -1281,6 +1282,11 @@ public class USHandler extends GEOHandler {
         data.setSearchTerm("");
       }
 
+      // CREATCMR-7145
+      if ("KYN".equals(data.getCustSubGrp())) {
+        data.setCustClass("11");
+      }
+
     }
 
     data.setTaxExemptStatus1(data.getSpecialTaxCd());
@@ -1290,10 +1296,23 @@ public class USHandler extends GEOHandler {
     String scc = getSCCByReqId(entityManager, data.getId().getReqId());
     data.setCompanyNm(scc);
     // CREATCMR-6342
-    
-    if("U".equals(admin.getReqType())){
-    	data.setCustSubGrp("");
+
+    // CREATCMR-7581
+    if (!StringUtils.isEmpty(admin.getMainCustNm2())) {
+      if (admin.getMainCustNm1().length() > 25) {
+        String custNm1 = admin.getMainCustNm1().substring(0, 25);
+        admin.setMainCustNm1(custNm1);
+      }
+      if (admin.getMainCustNm2().length() > 24) {
+        String custNm2 = admin.getMainCustNm2().substring(0, 24);
+        admin.setMainCustNm2(custNm2);
+      }
     }
+
+    if ("U".equals(admin.getReqType())) {
+      data.setCustSubGrp("");
+    }
+    
     // CREATCMR-9433
     if (StringUtils.isEmpty(data.getVatInd())){
       data.setVatInd("N");

@@ -47,7 +47,6 @@ import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class UKIUtil extends AutomationUtil {
-
   private static final Logger LOG = Logger.getLogger(UKIUtil.class);
   public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
   public static final String SCENARIO_COMMERCIAL = "COMME";
@@ -86,6 +85,16 @@ public class UKIUtil extends AutomationUtil {
     custNm1 = zi01.getCustNm1();
     custNm2 = !StringUtils.isBlank(zi01.getCustNm2()) ? " " + zi01.getCustNm2() : "";
     String customerNameZI01 = custNm1 + custNm2;
+    String custGrp = data.getCustGrp();
+    // CREATCMR-6244 LandCntry UK(GB)
+    if (zs01 != null) {
+      String landCntry = zs01.getLandCntry();
+      if (data.getVat() != null && !data.getVat().isEmpty() && landCntry.equals("GB") && !data.getCmrIssuingCntry().equals("866") && custGrp != null
+          && StringUtils.isNotEmpty(custGrp) && ("CROSS".equals(custGrp))) {
+        engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+        details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+      }
+    }
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -123,6 +132,12 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
 
+    String[] scenariosToBeChecked = { "IBMEM", "PRICU" };
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      doPrivatePersonChecks(entityManager, engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details,
+          Arrays.asList(scenariosToBeChecked).contains(scenario), requestData);
+    }
+
     if (SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
@@ -132,7 +147,7 @@ public class UKIUtil extends AutomationUtil {
     case SCENARIO_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case SCENARIO_PRIVATE_PERSON:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false);
+      break;
     case SCENARIO_INTERNAL:
       if (!customerName.contains("IBM") && !customerNameZI01.contains("IBM")) {
         details.append("Mailing and Billing addresses should have IBM in them.");
@@ -175,8 +190,8 @@ public class UKIUtil extends AutomationUtil {
           String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
           person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
           if (person == null) {
-            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
-            details.append("Employee details not found in IBM People.").append("\n");
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+            details.append("Employee details not found in IBM BluePages.").append("\n");
             return false;
           } else {
             details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
@@ -221,7 +236,8 @@ public class UKIUtil extends AutomationUtil {
       case "Company Registration Number":
         if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
           // UPDATE
-          // Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+          // Addr soldTo =
+          // requestData.getAddress(CmrConstants.RDC_SOLD_TO);
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
           boolean matchesDnb = false;
           if (matches != null) {
@@ -229,7 +245,8 @@ public class UKIUtil extends AutomationUtil {
             matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
           }
           if (!matchesDnb) {
-            // resultCodes.add("R"); // commenting because of CMR-7134
+            // resultCodes.add("R"); // commenting because of
+            // CMR-7134
             cmdeReview = true;
             details.append("Company Registration Number on the request did not match D&B\n");
           } else {
@@ -247,7 +264,29 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "VAT #":
-        // noop, for switch handling only
+        if (requestData.getAddress("ZS01").getLandCntry().equals("GB") && !data.getCmrIssuingCntry().equals("866")) {
+          if (!AutomationUtil.isTaxManagerEmeaUpdateCheck(entityManager, engineData, requestData)) {
+            engineData.addNegativeCheckStatus("_vatUK", " request need to be send to CMDE queue for further review. ");
+            details.append("Landed Country UK. The request need to be send to CMDE queue for further review.\n");
+          }
+        } else {
+          if (!StringUtils.isBlank(change.getNewData())) {
+            soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
+          }
+        }
         break;
       case "INAC/NAC Code":
       case "ISU Code":
@@ -311,6 +350,7 @@ public class UKIUtil extends AutomationUtil {
         details.append(" - " + field + "\n");
       }
     }
+
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;
@@ -515,7 +555,8 @@ public class UKIUtil extends AutomationUtil {
       boolean highQualityMatchExists = false;
       List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
       if (response != null && response.size() > 0) {
-        // actions to be performed only when matches with high confidence are
+        // actions to be performed only when matches with high
+        // confidence are
         // found
         String custNmTrimmed = getCustomerFullName(zi01);
         if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}\\.+$") || custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}/.+$")) {
@@ -586,7 +627,6 @@ public class UKIUtil extends AutomationUtil {
         }
       }
     }
-
     // List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210",
     // "7221", "7229", "7250", "7123", "9802");
     // if (!(SCENARIO_INTERNAL.equals(scenario) ||
@@ -631,7 +671,6 @@ public class UKIUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("_crnMissing", "CRN is a mandatory field.");
       }
     }
-
     results.setDetails(details.toString());
     LOG.debug(results.getDetails());
     return results;
@@ -842,7 +881,8 @@ public class UKIUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       String repTeamCd = "";
       String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-      // 2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the
+      // 2P0 in repTeamCd refers to 2.0 for distinguishing and fetching
+      // the
       // values according to CREATCMR-4530 logic.
       repTeamCd = isuCtc + "2P0";
       PreparedQuery query = new PreparedQuery(entityManager, sql);

@@ -242,4 +242,100 @@ public class SlackAlertsUtil {
       LOG.warn("Error in posting to slack: " + e.getMessage());
     }
   }
+
+  /**
+   * Posts the input to the designated slack channel
+   * 
+   * @param slackInput
+   * @throws IOException
+   */
+  private static void postToBatchSlack(JSONObject slackInput) {
+    String alertUrl = SystemParameters.getString("SLACK.BATCHES.ALERTS");
+    if (StringUtils.isBlank(alertUrl)) {
+      LOG.warn("Slack Batches Alerts URL is missing");
+      return;
+    }
+    try {
+      URL url = new URL(alertUrl);
+      HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+      conn.setDoInput(true);
+      conn.setDoOutput(true);
+      conn.setRequestMethod("POST");
+      conn.addRequestProperty("Content-Type", "application/json");
+
+      try (OutputStream out = conn.getOutputStream()) {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(slackInput.toString().getBytes())) {
+          LOG.debug("Writing to slack alert channel..");
+          IOUtils.copy(bis, out);
+        }
+      }
+
+      try (InputStream is = conn.getInputStream()) {
+        if (is != null) {
+          try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            IOUtils.copy(is, bos);
+            String response = bos.toString();
+            LOG.debug("Slack Response: " + response);
+          }
+        }
+      }
+      try (InputStream is = conn.getErrorStream()) {
+        if (is != null) {
+          try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            IOUtils.copy(is, bos);
+            String response = bos.toString();
+            LOG.debug("Slack Error Response: " + response);
+          }
+        }
+      }
+    } catch (Throwable e) {
+      LOG.warn("Error in posting to slack: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Posts a batch alert to slack
+   * 
+   * @param application
+   * @param identifier
+   * @param e
+   * @throws IOException
+   */
+  public static void recordBatchAlert(String application, String identifier, String... message) {
+    JSONObject jsonMsg = createBatchAlertMessage(application, identifier, message);
+    postToBatchSlack(jsonMsg);
+  }
+
+  /**
+   * Formats the details into a {@link JSONObject} message for posting to slack
+   * 
+   * @param application
+   * @param identifier
+   * @param e
+   * @return
+   */
+  private static JSONObject createBatchAlertMessage(String application, String identifier, String... messages) {
+    JSONObject json = new JSONObject();
+    JSONObject headerSection = new JSONObject();
+    JSONArray blocks = new JSONArray();
+    headerSection.put("type", "section");
+    JSONObject headerText = new JSONObject();
+    headerText.put("type", "mrkdwn");
+    headerText.put("text", ":warning: " + SystemConfiguration.getValue("SYSTEM_TYPE", ""));
+    headerSection.put("text", headerText);
+    // blocks.add(headerSection);
+
+    for (String msg : messages) {
+      JSONObject section = new JSONObject();
+      section.put("type", "section");
+      JSONObject text = new JSONObject();
+      text.put("type", "mrkdwn");
+      text.put("text", msg);
+      section.put("text", text);
+      blocks.add(section);
+    }
+
+    json.put("blocks", blocks);
+    return json;
+  }
 }

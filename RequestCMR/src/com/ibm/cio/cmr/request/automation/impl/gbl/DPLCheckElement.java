@@ -59,12 +59,12 @@ public class DPLCheckElement extends ValidatingElement {
       throws Exception {
 
     AppUser user = (AppUser) engineData.get("appUser");
-
-    long reqId = requestData.getAdmin().getId().getReqId();
     boolean isPaygoUpgrade = false;
     if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
       isPaygoUpgrade = true;
     }
+    long reqId = requestData.getAdmin().getId().getReqId();
+
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
     StringBuilder details = new StringBuilder();
@@ -189,7 +189,6 @@ public class DPLCheckElement extends ValidatingElement {
             entityManager.merge(addr);
           } else {
             Boolean isPrivate = isPrivate(data);
-
             Boolean errorStatus = false;
             try {
               dplResult = addrService.dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),

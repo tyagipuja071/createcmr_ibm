@@ -24,13 +24,15 @@ public class LicensesPK extends BaseEntityPk implements Serializable {
   /**
    * Request Identifier
    */
-  @Column(name = "REQ_ID")
+  @Column(
+      name = "REQ_ID")
   private long reqId;
 
   /**
    * Software License Number
    */
-  @Column(name = "LICENSE_NUM")
+  @Column(
+      name = "LICENSE_NUM")
   private String licenseNum;
 
   public long getReqId() {

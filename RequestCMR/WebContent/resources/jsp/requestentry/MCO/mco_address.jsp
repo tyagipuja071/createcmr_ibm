@@ -170,7 +170,7 @@
     </p>
   </cmr:column>
   </div>
-  <cmr:column span="2" exceptForGEO="MCO1,MCO2">
+  <cmr:column span="2">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:

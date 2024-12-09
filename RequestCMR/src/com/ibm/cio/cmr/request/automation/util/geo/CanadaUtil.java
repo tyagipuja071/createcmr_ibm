@@ -45,7 +45,9 @@ import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -72,6 +74,7 @@ public class CanadaUtil extends AutomationUtil {
   private static final String SCENARIO_BUSINESS_PARTNER = "BUSP";
   private static final String SCENARIO_PRIVATE_HOUSEHOLD = "PRIV";
   private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_IBM_EMPLOYEE = "IBME";
   private static final String SCENARIO_OEM = "OEM";
   private static final String SCENARIO_STRATEGIC_OUTSOURCING = "SOCUS";
   private static final String SCENARIO_GOVERNMENT = "GOVT";
@@ -85,7 +88,7 @@ public class CanadaUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department / Attn.", "Street con't",
       "Customer Name 2", "Phone #", "PostBox", "State/Province", "Transport Zone");
 
-  private static final List<String> CARIB_CNTRIES = Arrays.asList("BS", "BB", "BM", "GY", "CW", "KY", "JM", "AW", "LC", "SR", "TT");
+  private static final List<String> CARIB_CNTRIES = Arrays.asList("BS", "BB", "BM", "GY", "KY", "JM", "AW", "LC", "SR", "TT", "CW");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -121,6 +124,30 @@ public class CanadaUtil extends AutomationUtil {
           valid = false;
           engineData.addRejectionComment("LAND", "Invalid Landed Country.", "Landed country is not Canada", "");
           details.append("Landed Country is not Canada").append("\n");
+        }
+        break;
+      case SCENARIO_IBM_EMPLOYEE:
+        Person person = null;
+        if (StringUtils.isNotBlank(admin.getMainCustNm1())) {
+          try {
+            String mainCustName = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
+            person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
+            if (person == null) {
+              engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+              details.append("Employee details not found in IBM People.").append("\n");
+              return false;
+            } else {
+              details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
+            }
+          } catch (Exception e) {
+            LOG.error("Not able to check name against bluepages", e);
+            engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+            return false;
+          }
+        } else {
+          LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+          return false;
         }
         break;
       case SCENARIO_GOVERNMENT:
@@ -509,7 +536,6 @@ public class CanadaUtil extends AutomationUtil {
     if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqType())) {
       isPaygoUpgrade = true;
     }
-
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
@@ -539,8 +565,13 @@ public class CanadaUtil extends AutomationUtil {
           }
           setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
         } else if (ECOSYSTEM_LIST.contains(coverageId)) {
-          isu = "34";
-          ctc = "Y";
+          if (StringUtils.isBlank(data.getIsuCd())) {
+            isu = "27";
+            ctc = "E";
+          } else {
+            isu = "34";
+            ctc = "Y";
+          }
           setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
         } else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
           isu = ""; // apply logic to set isu based on sub industry code
@@ -794,26 +825,22 @@ public class CanadaUtil extends AutomationUtil {
 
       LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
       boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-
       boolean isPaygoUpgrade = false;
       if ("U".equals(admin.getReqType()) && "PAYG".equals(admin.getReqReason())) {
         isPaygoUpgrade = true;
       }
-
       if (changes.isLegalNameChanged() && !payGoAddredited) {
         engineData.addNegativeCheckStatus("_legalNameChanged", "Legal Name change should be validated.");
         details.append("Legal Name change should be validated.\n");
         validation.setSuccess(false);
         validation.setMessage("Not Validated");
       }
-
       if (changes.isLegalNameChanged() && isPaygoUpgrade) {
         engineData.addNegativeCheckStatus("_legalNameChanged", "Legal Name change should be validated.");
         details.append("Legal Name change should be validated.\n");
         validation.setSuccess(false);
         validation.setMessage("Not Validated");
       }
-
       if (cmdeReview) {
         engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
         details.append("Updates to one or more fields cannot be validated.\n");
@@ -875,7 +902,7 @@ public class CanadaUtil extends AutomationUtil {
           }
           for (Addr addr : addresses) {
             if ("N".equals(addr.getImportInd())) {
-
+              // new address
               if (addrType.startsWith("ZP")) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new " + addrType + "(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
@@ -1221,6 +1248,32 @@ public class CanadaUtil extends AutomationUtil {
   }
 
   @Override
+  public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    String bgId = data.getBgId();
+    String gbgId = data.getGbgId();
+    String country = data.getCmrIssuingCntry();
+    String sql = ExternalizedQuery.getSql("QUERY.GET_GBG_FROM_LOV");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CD", gbgId);
+    query.setParameter("COUNTRY", country);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    LOG.debug("perform coverage based on GBG-------------");
+    LOG.debug("result--------" + result);
+    if (result != null || bgId.equals("DB502GQG")) {
+      LOG.debug("Setting isu ctc to 5K based on gbg matching.");
+      details.append("Setting isu ctc to 5K based on gbg matching.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "5K");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "");
+    }
+    LOG.debug("isu" + data.getIsuCd());
+    LOG.debug("client tier" + data.getClientTier());
+  }
+
+  @Override
   public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
@@ -1254,7 +1307,7 @@ public class CanadaUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     String isu = "";
     String ctc = "";
-    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId) && !scenario.equalsIgnoreCase("ECO")) {
+    if (!isPaygoUpgrade && StringUtils.isNotBlank(coverageId)) {
 
       String firstChar = coverageId.substring(0, 1);
 
@@ -1263,22 +1316,22 @@ public class CanadaUtil extends AutomationUtil {
 
       if (("T").equalsIgnoreCase(firstChar)) {
         if (StringUtils.isBlank(data.getGbgId())) {
-          if (scenario.equalsIgnoreCase("ECO")) {
+          if ("ECO".equalsIgnoreCase(scenario)) {
             isu = "36";
             ctc = "Y";
-          } else if (scenario.equalsIgnoreCase("PRIV")) {
+          } else if ("PRIV".equalsIgnoreCase(scenario)) {
             isu = "21";
             ctc = " ";
-          } else if (!scenario.equalsIgnoreCase("ECO") && !scenario.equalsIgnoreCase("PRIV")) {
+          } else if (!("ECO".equalsIgnoreCase(scenario) && !"PRIV".equalsIgnoreCase(scenario))) {
             isu = "27";
             ctc = "E";
           }
 
         } else {
-          if (scenario.equalsIgnoreCase("ECO")) {
+          if ("ECO".equalsIgnoreCase(scenario)) {
             isu = "36";
             ctc = "Y";
-          } else if (scenario.equalsIgnoreCase("PRIV")) {
+          } else if ("PRIV".equalsIgnoreCase(scenario)) {
             isu = "21";
             ctc = " ";
           } else {
@@ -1305,25 +1358,27 @@ public class CanadaUtil extends AutomationUtil {
 
         setISUCTCBasedOnCoverage(details, overrides, coverageId, data, isu, ctc);
       } /*
-         * else if (ECOSYSTEM_LIST.contains(coverageId)) { if
-         * (StringUtils.isBlank(data.getGbgId())) { if
-         * (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc = "Y"; } else if
-         * (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc = " "; } else
-         * if (!scenario.equalsIgnoreCase("ECO") &&
-         * !scenario.equalsIgnoreCase("PRIV")) { isu = "27"; ctc = "E"; }
+         * else if (ECOSYSTEM_LIST . contains ( coverageId )) { if (StringUtils
+         * . isBlank (data . getGbgId ())) { if (scenario . equalsIgnoreCase (
+         * "ECO" )) { isu = "36"; ctc = "Y"; } else if (scenario .
+         * equalsIgnoreCase ( "PRIV" )) { isu = "21"; ctc = " "; } else if (!
+         * scenario . equalsIgnoreCase ( "ECO") && !scenario . equalsIgnoreCase
+         * ( "PRIV" )) { isu = "27"; ctc = "E"; }
          * 
-         * } else { if (scenario.equalsIgnoreCase("ECO")) { isu = "36"; ctc =
-         * "Y"; } else if (scenario.equalsIgnoreCase("PRIV")) { isu = "21"; ctc
-         * = " "; } else if (!scenario.equalsIgnoreCase("ECO") &&
-         * !scenario.equalsIgnoreCase("PRIV")) { isu = data.getIsuCd(); ctc =
-         * data.getClientTier(); } } setISUCTCBasedOnCoverage(details,
+         * } else { if (scenario . equalsIgnoreCase ( "ECO" )) { isu = "36"; ctc
+         * = "Y"; } else if (scenario . equalsIgnoreCase ( "PRIV" )) { isu =
+         * "21"; ctc = " "; } else if (! scenario . equalsIgnoreCase ( "ECO") &&
+         * !scenario . equalsIgnoreCase ( "PRIV" )) { isu = data. getIsuCd ();
+         * ctc = data. getClientTier (); } } setISUCTCBasedOnCoverage ( details,
          * overrides, coverageId, data, isu, ctc); }
          */
-      else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
-        if (scenario.equalsIgnoreCase("ECO")) {
+      else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar))
+
+      {
+        if ("ECO".equalsIgnoreCase(scenario)) {
           isu = "36";
           ctc = "Y";
-        } else if (scenario.equalsIgnoreCase("PRIV")) {
+        } else if ("PRIV".equalsIgnoreCase(scenario)) {
           isu = "21";
           ctc = " ";
         } else {
@@ -1387,10 +1442,10 @@ public class CanadaUtil extends AutomationUtil {
   private void setISUCTCBasedOnCoverage(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String isu, String ctc) {
     LOG.debug("Setting ISU CTC based on coverage...");
     details.append("Setting ISU based on Coverage ").append(coverageId).append(" to ").append(isu).append("\n");
-    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isu);
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
 
     details.append("Setting CTC based on Coverage ").append(coverageId).append(" to ").append(ctc).append("\n");
-    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), ctc);
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", isu, ctc);
   }
 
   /**
@@ -1443,7 +1498,8 @@ public class CanadaUtil extends AutomationUtil {
               details.append("Updates to address fields for " + addrType + " need to be verified.").append("\n");
               validation.setMessage("Review needed");
               validation.setSuccess(false);
-            } else {
+            }
+            {
               validation.setMessage("Rejected");
               validation.setSuccess(false);
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
