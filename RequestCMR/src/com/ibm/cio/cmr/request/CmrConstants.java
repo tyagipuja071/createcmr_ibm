@@ -956,8 +956,9 @@ public class CmrConstants {
   public static final List<String> AP_COUNTRIES = Arrays.asList("615", "749", "818", "852", "856", "834", "744", "652", "643", "778");
 
   public static final List<String> ANZ_COUNTRIES = Arrays.asList("616", "796");
-  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806",
-      "846", "706");
+
+  public static final List<String> CROSS_BORDER_COUNTRIES_GROUP1 = Arrays.asList("866", "754", "724", "848", "618", "788", "624", "678", "702", "806","846","706");
+
   public static final String VAT_ACKNOWLEDGE_YES = "Yes";
   public static final String VAT_ACKNOWLEDGE_NA = "N/A";
   public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");

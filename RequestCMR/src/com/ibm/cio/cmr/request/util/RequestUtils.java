@@ -13,8 +13,12 @@ import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +46,7 @@ import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
@@ -65,6 +70,7 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileParser;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
+import com.ibm.cio.cmr.request.util.oauth.OAuthUtils;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.StandardCityServiceClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -92,6 +98,7 @@ public class RequestUtils {
   public static final String STATUS_INPUT_REQUIRED = "Input Required";
   public static final String US_CMRISSUINGCOUNTRY = "897";
   private static Map<String, String> rejectionReasons = new HashMap<String, String>();
+  private static final String STATUS_CPR_72 = "CMR is now unblocked for 72 hours, you will receive completion email once it is blocked back.";
   public static final List<String> EMEA_CNTRY_DACH = Arrays.asList("724", "618", "848");
 
   public static void refresh() {
@@ -346,7 +353,7 @@ public class RequestUtils {
    */
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, boolean excludeRequester,
       boolean legacyDirect) {
-    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM");
+    List<String> reqStatusFrMailNotif = Arrays.asList("PRJ", "COM", "CPR");
     if (!reqStatusFrMailNotif.contains(admin.getReqStatus())) {
       return;
     }
@@ -582,7 +589,13 @@ public class RequestUtils {
       params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
     }
     params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
-    params.add(histContent); // {8}
+
+    if ("CPR".equalsIgnoreCase(admin.getReqStatus())) {
+      params.add(STATUS_CPR_72); // {8}
+    } else {
+      params.add(histContent); // {8}
+    }
+
     params.add(directUrlLink); // {9}
     params.add(rejectReason); // {10}
     params.add(embeddedLink); // {11}
@@ -1899,6 +1912,8 @@ public class RequestUtils {
       if (cmrNo.startsWith("P")) {
         // prospect imported
         admin.setProspLegalInd("Y");
+        // CREATCMR - 10267
+        data.setCapInd("Y");
       } else if (SystemLocation.TAIWAN.equals(data.getCmrIssuingCntry()) || SystemLocation.KOREA.equals(data.getCmrIssuingCntry())) {
         if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(data.getOrdBlk())) {
           admin.setProspLegalInd("Y");
@@ -1952,6 +1967,92 @@ public class RequestUtils {
     }
 
     return legacy;
+  }
+
+  /**
+   * Performs logout actions by cleaning up sessions and cookies. TODO: should
+   * this method be in another class?
+   * 
+   * @param request
+   */
+  public static void performLogoutActivities(HttpServletRequest request) {
+    OAuthUtils.ssoTokenCleanUP(request);
+    AppUser.remove(request);
+    request.getSession().invalidate();
+  }
+
+  public static Boolean filterPreviousURI(String previousURI) {
+    if (StringUtils.isBlank(previousURI)) {
+      return false;
+    }
+
+    if (previousURI.matches("(.*)/request/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)/massrequest/[0-9]+(.*)")) {
+      return true;
+    }
+
+    if (previousURI.matches("(.*)CreateCMR/approval/(.*)")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public static long extractRequestId(HttpServletRequest request) {
+
+    String reqIdParam = request.getParameter("reqId");
+    if (reqIdParam != null && StringUtils.isNumeric(reqIdParam) && !"0".equals(reqIdParam)) {
+      return Long.parseLong(reqIdParam);
+    }
+
+    Object reqIdAtt = request.getAttribute("reqId");
+
+    if (reqIdAtt != null && StringUtils.isNumeric(reqIdAtt.toString()) && !"0".equals(reqIdAtt.toString())) {
+      return Long.parseLong(reqIdAtt.toString());
+    }
+
+    String url = request.getRequestURI();
+
+    if (url != null) {
+      if (url.contains("?")) {
+        url = url.substring(0, url.indexOf("?"));
+      }
+      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
+        String reqId = url.substring(url.lastIndexOf("/") + 1);
+        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+          return Long.parseLong(reqId);
+        }
+      }
+    }
+
+    url = request.getHeader("referer");
+
+    if (url != null) {
+      if (url.contains("?")) {
+        url = url.substring(0, url.indexOf("?"));
+      }
+      if (url.matches(".*/request/[0-9]{1,}") || url.matches(".*/massrequest/[0-9]{1,}")) {
+        String reqId = url.substring(url.lastIndexOf("/") + 1);
+        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+          return Long.parseLong(reqId);
+        }
+      }
+    }
+
+    url = request.getHeader("referer");
+
+    if (url != null) {
+      if (url.matches("(.*)logout\\?r=([0-9]+)")) {
+        String reqId = url.substring(url.lastIndexOf("?r=") + 3);
+        if (StringUtils.isNumeric(reqId) && !"0".equals(reqId)) {
+          return Long.parseLong(reqId);
+        }
+      }
+    }
+    return 0;
   }
 
   public static boolean fromBPPortal(long reqId) {

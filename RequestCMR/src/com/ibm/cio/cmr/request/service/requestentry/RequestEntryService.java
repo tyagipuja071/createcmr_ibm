@@ -560,15 +560,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     if (transitionToNext && "PCP".equals(trans.getNewReqStatus())) {
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setProcessedTs(null);
-      // if (geoHandler != null &&
-      // LAHandler.isLACountry(model.getCmrIssuingCntry())) {
-      // boolean crosCompleted = reqIsCrosCompleted(entityManager,
-      // admin.getId().getReqId());
-      // if (crosCompleted) {
-      // this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
-      // admin.setReqStatus("PCO");
-      // }
-      // }
+//     if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
+//        boolean crosCompleted = reqIsCrosCompleted(entityManager, admin.getId().getReqId());
+//        if (crosCompleted) {
+//          this.log.debug("Setting to PCO:" + trans.getNewReqStatus());
+//          admin.setReqStatus("PCO");
+//        }
+//      }
 
       if (geoHandler != null
           && (SystemLocation.HONG_KONG.equals(model.getCmrIssuingCntry()) || SystemLocation.MACAO.equals(model.getCmrIssuingCntry()))) {
@@ -623,7 +621,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
         && CmrConstants.Create_Update_CMR().equals(model.getAction())) {
-      LAHandler.doDPLNotDone(String.valueOf(model.getReqId()), entityManager, model.getAction(), admin, lockedBy, lockedByNm, processingStatus);
+      if ("631".equals(data.getCmrIssuingCntry()) && !admin.getMainCustNm1().equals(admin.getOldCustNm1())) {
+        // do not throw error if customer name is change for brazil
+      } else {
+        LAHandler.doDPLNotDone(String.valueOf(model.getReqId()), entityManager, model.getAction(), admin, lockedBy, lockedByNm, processingStatus);
+      }
     }
 
     if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
@@ -660,7 +662,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     if (addr == null)
       addr = new Addr();
     boolean iscrossBorder = isCrossBorder(entityManager, model.getCmrIssuingCntry(), addr.getLandCntry());
-
     if (StringUtils.isBlank(scorecard.getVatAcknowledge()) && (CmrConstants.CROSS_BORDER_COUNTRIES_GROUP1.contains(model.getCmrIssuingCntry())
         || SystemLocation.SPAIN.equals(model.getCmrIssuingCntry()))) {
 
@@ -1047,7 +1048,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         to.setLocationNo(data.getLocationNumber());
       }
 
-      if (PageManager.fromGeo("EMEA", "758")) {
+      if (PageManager.fromGeo("EMEA", data.getCmrIssuingCntry())) {
         this.log.debug("Getting payment mode and location no...");
         to.setPaymentMode(data.getModeOfPayment());
       }
@@ -2083,6 +2084,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
   private boolean reqIsWtaasCompleted(EntityManager entityManager, Long reqId) {
     String sql = ExternalizedQuery.getSql("GCG.GETCOUNT_COM_NOTIFY");
+    String logMessage = (entityManager == null) ? "EntityManager is null" : "EntityManager is valid";
+
+    log.info("reqIsWtaasCompleted: SQL QUERY VALUE --> " + sql);
+    log.info("reqIsWtaasCompleted: REQUEST ID VALUE --> " + reqId);
+    log.info("reqIsWtaasCompleted: " + logMessage);
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     int count = query.getSingleResult(Integer.class);

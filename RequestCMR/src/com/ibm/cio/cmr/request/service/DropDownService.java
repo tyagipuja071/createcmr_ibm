@@ -144,9 +144,12 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         blankOption.setId("");
         blankOption.setName("");
         model.addItems(blankOption); // blank option
+
         DropdownItemModel item = null;
+
         List<String> codes = new ArrayList<String>();
         for (Object obj : results) {
+
           row = (Object[]) obj;
           if (!codes.contains(row[0].toString())) {
             item = new DropdownItemModel();

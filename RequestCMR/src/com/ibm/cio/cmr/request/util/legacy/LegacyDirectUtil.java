@@ -571,7 +571,7 @@ public class LegacyDirectUtil {
     boolean closeEm = false;
     if (entityManager == null) {
       entityManager = JpaManager.getEntityManager();
-      closeEm = true;
+       closeEm = true;
     }
 
     boolean isLD = false;

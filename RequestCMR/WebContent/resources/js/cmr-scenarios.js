@@ -4,7 +4,7 @@
  * Contains the code for the TemplateService which handles CMR Scenarios
  */
 
-var TemplateService = (function() {
+var TemplateService = (function () {
   console.log('Using generic scenarios framework');
   var currentTemplate = null;
 
@@ -14,25 +14,25 @@ var TemplateService = (function() {
   var READONLY_CLEARVALUE = '$';
   var EDITABLE_CLEARVALUE = '@';
   var BLANK_CUSTOMIZABLE = "~";
-  var ADDRESS_TYPES = [ 'ZS01', 'ZI01', 'ZP01', 'ZD01', 'ZS02', 'ZP02', 'CTYA', 'CTYB', 'CTYC', 'CTYD', 'CTYE', 'CTYF', 'CTYG', 'CTYH', 'EDUC', 'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01' ];
+  var ADDRESS_TYPES = ['ZS01', 'ZI01', 'ZP01', 'ZD01', 'ZS02', 'ZP02', 'CTYA', 'CTYB', 'CTYC', 'CTYD', 'CTYE', 'CTYF', 'CTYG', 'CTYH', 'EDUC', 'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01'];
 
   // CREATCMR-4293
-  var CMR_ISSUING_CNTRY_ARRAY = [ '358', '359', '363', '373', '382', '383', '603', '607', '610', '618', '620', '624', '626', '635', '636', '637', '642', '644', '645', '651', '656', '662', '666',
-      '667', '668', '669', '670', '675', '677', '678', '680', '691', '692', '693', '694', '695', '698', '699', '700', '702', '704', '705', '706', '707', '708', '717', '718', '724', '725', '726',
-      '729', '740', '741', '745', '752', '753', '754', '755', '758', '762', '764', '767', '768', '769', '770', '772', '780', '782', '787', '788', '804', '805', '806', '808', '810', '820', '821',
-      '822', '823', '825', '826', '827', '831', '832', '833', '835', '838', '840', '841', '842', '846', '848', '849', '850', '851', '857', '862', '864', '865', '866', '876', '879', '880', '881',
-      '883', '889' ];
+  var CMR_ISSUING_CNTRY_ARRAY = ['358', '359', '363', '373', '382', '383', '603', '607', '610', '618', '620', '624', '626', '635', '636', '637', '642', '644', '645', '651', '656', '662', '666',
+    '667', '668', '669', '670', '675', '677', '678', '680', '691', '692', '693', '694', '695', '698', '699', '700', '702', '704', '705', '706', '707', '708', '717', '718', '724', '725', '726',
+    '729', '740', '741', '745', '752', '753', '754', '755', '758', '762', '764', '767', '768', '769', '770', '772', '780', '782', '787', '788', '804', '805', '806', '808', '810', '820', '821',
+    '822', '823', '825', '826', '827', '831', '832', '833', '835', '838', '840', '841', '842', '846', '848', '849', '850', '851', '857', '862', '864', '865', '866', '876', '879', '880', '881',
+    '883', '889'];
 
-  var CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY = [ 'AFBP', 'BEBUS', 'BUSPR', 'BUSSM', 'BUSVA', 'CBBUS', 'CHBUS', 'CRBUS', 'CROBP', 'CSBP', 'DKBUS', 'EEBUS', 'ELBP', 'EXBP', 'FIBUS', 'FOBUS', 'GLBUS',
-      'ISBUS', 'JOBP', 'JOXBP', 'LIBUS', 'LSBP', 'LSXBP', 'LTBUS', 'LUBUS', 'LVBUS', 'MEBP', 'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP',
-      'ZAXBP' ];
+  var CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY = ['AFBP', 'BEBUS', 'BUSPR', 'BUSSM', 'BUSVA', 'CBBUS', 'CHBUS', 'CRBUS', 'CROBP', 'CSBP', 'DKBUS', 'EEBUS', 'ELBP', 'EXBP', 'FIBUS', 'FOBUS', 'GLBUS',
+    'ISBUS', 'JOBP', 'JOXBP', 'LIBUS', 'LSBP', 'LSXBP', 'LTBUS', 'LUBUS', 'LVBUS', 'MEBP', 'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP',
+    'ZAXBP'];
 
-  var CUST_SUB_GRP_FOR_INTERNAL_ARRAY = [ 'AFINT', 'BEINT', 'CBINT', 'CBTER', 'CHINT', 'CRINT', 'CROIN', 'CSINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT', 'GLINT', 'INTER', 'INTIN', 'INTSM', 'INTVA',
-      'ISINT', 'JOINT', 'JOXIN', 'LIINT', 'LSINT', 'LSXIN', 'LTINT', 'LUINT', 'LVINT', 'MEINT', 'NAINT', 'NAXIN', 'PKINT', 'PKXIN', 'PSINT', 'RSINT', 'RSXIN', 'SZINT', 'SZXIN', 'XINT', 'XINTE',
-      'XINTR', 'ZAINT', 'ZAXIN' ];
+  var CUST_SUB_GRP_FOR_INTERNAL_ARRAY = ['AFINT', 'BEINT', 'CBINT', 'CBTER', 'CHINT', 'CRINT', 'CROIN', 'CSINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT', 'GLINT', 'INTER', 'INTIN', 'INTSM', 'INTVA',
+    'ISINT', 'JOINT', 'JOXIN', 'LIINT', 'LSINT', 'LSXIN', 'LTINT', 'LUINT', 'LVINT', 'MEINT', 'NAINT', 'NAXIN', 'PKINT', 'PKXIN', 'PSINT', 'RSINT', 'RSXIN', 'SZINT', 'SZXIN', 'XINT', 'XINTE',
+    'XINTR', 'ZAINT', 'ZAXIN'];
   // CREATCMR-4293
 
-  var getUserRole = function() {
+  var getUserRole = function () {
     var role = null;
     if (typeof (_pagemodel) != 'undefined') {
       role = _pagemodel.userRole;
@@ -42,16 +42,16 @@ var TemplateService = (function() {
 
   var currentChosenScenario = '';
 
-  var limitDropdownValues = function(field, values) {
+  var limitDropdownValues = function (field, values) {
     if (values && values.length == 0) {
       var model = {
-        identifier : "id",
-        label : "name",
-        items : []
+        identifier: "id",
+        label: "name",
+        items: []
       };
       var tempStore = new dojo.data.ItemFileReadStore({
-        data : model,
-        clearOnClose : true
+        data: model,
+        clearOnClose: true
       });
       field.store = tempStore;
       return;
@@ -66,9 +66,9 @@ var TemplateService = (function() {
       field.set('value', '');
     }
     var model = {
-      identifier : "id",
-      label : "name",
-      items : []
+      identifier: "id",
+      label: "name",
+      items: []
     };
 
     var item = null;
@@ -76,30 +76,30 @@ var TemplateService = (function() {
       item = loadedStore._arrayOfAllItems[i];
       if (values.indexOf(item.id[0]) >= 0) {
         model.items.push({
-          id : item.id[0],
-          name : item.name[0]
+          id: item.id[0],
+          name: item.name[0]
         });
       }
     }
     var tempStore = new dojo.data.ItemFileReadStore({
-      data : model,
-      clearOnClose : true
+      data: model,
+      clearOnClose: true
     });
     field.store = tempStore;
   };
   return {
-    initLoad : function() {
+    initLoad: function () {
       initialLoad = true;
     },
-    initLoaded : function() {
+    initLoaded: function () {
       return initialLoad;
     },
-    init : function() {
+    init: function () {
       // add the onchange for address types
       console.log('Template Service init...');
       for (var i = 0; i < ADDRESS_TYPES.length; i++) {
         if (dijit.byId('addrType_' + ADDRESS_TYPES[i])) {
-          dojo.connect(dijit.byId('addrType_' + ADDRESS_TYPES[i]), 'onClick', function(evt) {
+          dojo.connect(dijit.byId('addrType_' + ADDRESS_TYPES[i]), 'onClick', function (evt) {
             var currentTemplate = TemplateService.getCurrentTemplate();
             if (currentTemplate && evt.target.checked) {
               TemplateService.loadAddressTemplate(currentTemplate, 'reqentry', evt.target.value);
@@ -113,28 +113,28 @@ var TemplateService = (function() {
         }
       }
     },
-    fill : function(formId) {
+    fill: function (formId) {
       // get the template from TemplatesController
       dojo.xhrGet({
-        url : cmr.CONTEXT_ROOT + '/templates.json',
-        handleAs : 'json',
-        method : 'GET',
-        content : dojo.formToObject(formId),
-        timeout : 50000,
-        load : function(data, ioargs) {
+        url: cmr.CONTEXT_ROOT + '/templates.json',
+        handleAs: 'json',
+        method: 'GET',
+        content: dojo.formToObject(formId),
+        timeout: 50000,
+        load: function (data, ioargs) {
           console.log(data);
           if (data && data.template) {
             TemplateService.loadTemplate(data.template, formId);
           }
         },
-        error : function(error, ioargs) {
+        error: function (error, ioargs) {
           console.log(error);
           // NOOP
         }
       });
     },
 
-    loadTemplate : function(template, formId) {
+    loadTemplate: function (template, formId) {
       // template is of type Template, with a list of TemplatedFields
       if (PageManager.isReadOnly()) {
         console.log('Page is read only, skip template load.');
@@ -279,7 +279,7 @@ var TemplateService = (function() {
                 }
               }
 
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+              FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
 
             } else if (name == 'isicCd' && (values[0].indexOf('%') >= 0 || values[0].indexOf('LOV') == 0 || values[0].indexOf('^') >= 0 || values[0].indexOf('-') > 0)) {
 
@@ -299,7 +299,7 @@ var TemplateService = (function() {
               FilteringDropdown['val_isicCd'] = null;
               FilteringDropdown.loadItems('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&isicCd=' + values[0] + '&nocache=y');
 
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+              FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
               FormManager.enable(name);
 
               // 3. load subindustry
@@ -310,7 +310,7 @@ var TemplateService = (function() {
               FilteringDropdown.loadOnChange('subIndustryCd', 'subIndustryCd_spinner', 'bds', 'fieldId=Subindustry&cmrIssuingCntry=_cmrIssuingCntry&nocache=y&isicCd=_isicCd', 'isicCd');
 
               subIndLabel = dojo.byId('cmr-fld-lbl-Subindustry') ? dojo.byId('cmr-fld-lbl-Subindustry').innerHTML : 'Subindustry';
-              FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ subIndLabel ], field.parentTab);
+              FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [subIndLabel], field.parentTab);
               FormManager.readOnly('subIndustryCd');
             } else if (values[0].startsWith("COPY:")) {
               // COPY: format copies the value of the specified field to this
@@ -335,7 +335,7 @@ var TemplateService = (function() {
                   }
                 }
                 if (max && !isNaN(max) && Number(max) > 0) {
-                  FormManager.addValidator(name, Validators.MAXLENGTH, [ label, Number(max) ], field.parentTab);
+                  FormManager.addValidator(name, Validators.MAXLENGTH, [label, Number(max)], field.parentTab);
                 }
               }
             } else if (values[0] == READONLY_CLEARVALUE) {
@@ -369,20 +369,20 @@ var TemplateService = (function() {
 
               // check the REQ_IND from scenarios and implement
               switch (required) {
-              case 'R':
-                FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
-                FormManager.enable(name);
-                break;
-              case 'O':
-                FormManager.enable(name);
-                break;
-              case 'D':
-                FormManager.readOnly(name);
-                break;
-              case 'G':
-                FormManager.setValue(name, '');
-                FormManager.disable(name);
-                break;
+                case 'R':
+                  FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
+                  FormManager.enable(name);
+                  break;
+                case 'O':
+                  FormManager.enable(name);
+                  break;
+                case 'D':
+                  FormManager.readOnly(name);
+                  break;
+                case 'G':
+                  FormManager.setValue(name, '');
+                  FormManager.disable(name);
+                  break;
               }
 
               if (lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor')) {
@@ -398,7 +398,7 @@ var TemplateService = (function() {
               }
 
               if (type == 'text' && FormManager.getField(name).store == null && 'R' == required) {
-                FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+                FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
               }
             } else {
 
@@ -456,7 +456,6 @@ var TemplateService = (function() {
 
                       // CREATCMR-4293
                       var ctc = '';
-                      var enterprise = '';
                       var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 
                       if (CMR_ISSUING_CNTRY_ARRAY.includes(cmrIssuingCntry)) {
@@ -475,14 +474,6 @@ var TemplateService = (function() {
                           FormManager.setValue(name, ctc);
                         }
                       }
-                      if (cmrIssuingCntry == '864' || cmrIssuingCntry == '862') {
-                        if (name == 'enterprise') {
-                          if (_pagemodel.enterprise == null) {
-                            enterprise = '';
-                          }
-                          FormManager.setValue(name, enterprise);
-                        }
-                      }
                       // CREATCMR-4293
 
                     }
@@ -492,7 +483,7 @@ var TemplateService = (function() {
                     FormManager.readOnly(name);
                   } else {
                     // this is editable, add the mandatory validator
-                    FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+                    FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
                     FormManager.enable(name);
                   }
 
@@ -507,23 +498,23 @@ var TemplateService = (function() {
               }
               // check the REQ_IND from scenarios and implement
               switch (required) {
-              case 'R':
-                if (!(lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor'))) {
-                  FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
-                  FormManager.enable(name);
-                }
-                break;
-              case 'O':
-                if (!(lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor'))) {
-                  FormManager.enable(name);
-                }
-                break;
-              case 'D':
-                FormManager.readOnly(name);
-                break;
-              case 'G':
-                FormManager.disable(name);
-                break;
+                case 'R':
+                  if (!(lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor'))) {
+                    FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
+                    FormManager.enable(name);
+                  }
+                  break;
+                case 'O':
+                  if (!(lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor'))) {
+                    FormManager.enable(name);
+                  }
+                  break;
+                case 'D':
+                  FormManager.readOnly(name);
+                  break;
+                case 'G':
+                  FormManager.disable(name);
+                  break;
               }
             }
           } else if (values && values.length > 1) {
@@ -549,13 +540,13 @@ var TemplateService = (function() {
                 console.log(">>>>>> DROPDOWN VALUES BEING ADDED >>> VALIDATORS");
                 var fieldTemp = FormManager.getField(name);
                 limitDropdownValues(fieldTemp, values);
-                FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+                FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
                 FormManager.enable(name);
               }
             } else {
               if (dojo.byId('templatevalue-' + name) == null) {
                 var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="'
-                    + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
+                  + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
                 var widget = dojo.byId('widget_' + name);
                 if (!widget) {
                   widget = dojo.byId(name);
@@ -575,7 +566,7 @@ var TemplateService = (function() {
               }
 
               // add the mandatory validation
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+              FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
             }
 
           } else {
@@ -592,19 +583,19 @@ var TemplateService = (function() {
 
             // check the REQ_IND from scenarios and implement
             switch (required) {
-            case 'R':
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
-              FormManager.enable(name);
-              break;
-            case 'O':
-              FormManager.enable(name);
-              break;
-            case 'D':
-              FormManager.readOnly(name);
-              break;
-            case 'G':
-              FormManager.disable(name);
-              break;
+              case 'R':
+                FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
+                FormManager.enable(name);
+                break;
+              case 'O':
+                FormManager.enable(name);
+                break;
+              case 'D':
+                FormManager.readOnly(name);
+                break;
+              case 'G':
+                FormManager.disable(name);
+                break;
             }
 
             if (type == 'checkbox') {
@@ -621,7 +612,7 @@ var TemplateService = (function() {
           }
           // add the invalid value validator for dropdowns
           if (FormManager.getField(name).store != null) {
-            FormManager.addValidator(name, Validators.INVALID_VALUE, [ label ], field.parentTab);
+            FormManager.addValidator(name, Validators.INVALID_VALUE, [label], field.parentTab);
           }
 
           // add the maxlength validator for text fields
@@ -631,17 +622,16 @@ var TemplateService = (function() {
               max = field.get('maxlength');
             }
             if (max && !isNaN(max) && Number(max) > 0) {
-              FormManager.addValidator(name, Validators.MAXLENGTH, [ label, Number(max) ], field.parentTab);
+              FormManager.addValidator(name, Validators.MAXLENGTH, [label, Number(max)], field.parentTab);
             }
           }
 
-          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755' || FormManager
-              .getActualValue('cmrIssuingCntry') == '864' || FormManager.getActualValue('cmrIssuingCntry') == '862')
-              && name == 'enterprise') {
+          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755')
+            && name == 'enterprise') {
             // SKIP for CMR-2617 Germany
             // SKIP for CMR-2001 Austria
           } else if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
-            FormManager.addValidator(name, Validators.DIGIT, [ label ], field.parentTab);
+            FormManager.addValidator(name, Validators.DIGIT, [label], field.parentTab);
           }
 
         }
@@ -662,19 +652,27 @@ var TemplateService = (function() {
         }
 
         if (scenarioChanged == true) {
+          var custSubGrp = FormManager.getActualValue('custSubGrp');
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+          if ((custSubGrp != 'ECO' && custSubGrp != 'PRIV') && (role == 'Requester' || role == 'Viewer') && cmrIssuingCntry == '649') {
+            FormManager.setValue('isuCd', '');
+            FormManager.setValue('clientTier', '');
+            FormManager.enable('isuCd');
+            FormManager.enable('clientTier');
+          }
           if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry')) || FormManager.getActualValue('cmrIssuingCntry') == '649') {
             if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp')) || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))
-                || scenario == 'PRIV' || scenario == 'ECO') {
+              || scenario == 'PRIV' || scenario == 'ECO') {
               var isuCd = FormManager.getActualValue('isuCd');
-              if (isuCd == '8B' || isuCd == '21') {
+              if (isuCd == '8B') {
                 FormManager.setValue('clientTier', '');
               }
-              if (isuCd == '21') {
+              if (isuCd == '21' && FormManager.getActualValue('cmrIssuingCntry') == '649') {
                 FormManager.setValue('clientTier', '');
                 FormManager.readOnly('isuCd');
                 FormManager.readOnly('clientTier');
               }
-              if (isuCd == '36') {
+              if (isuCd == '36' && FormManager.getActualValue('cmrIssuingCntry') == '649') {
                 FormManager.setValue('clientTier', 'Y');
                 FormManager.readOnly('isuCd');
                 FormManager.readOnly('clientTier');
@@ -686,7 +684,7 @@ var TemplateService = (function() {
 
       }
     },
-    loadAddressTemplate : function(template, formId, addrType) {
+    loadAddressTemplate: function (template, formId, addrType) {
       if (PageManager.isReadOnly()) {
         return;
       }
@@ -758,7 +756,7 @@ var TemplateService = (function() {
           var driver = template.driver;
           var driverFieldName = driver.fieldName;
           scenario = FormManager.getActualValue(driverFieldName);
-          var cmrCountries = [ '666', '862', '726' ];
+          var cmrCountries = ['666', '862', '726'];
           var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
           if ((typeof (_pagemodel) != 'undefined' && _pagemodel[driverFieldName] != scenario) && !cmrCountries.includes(cmrIssuingCntry)) {
             scenarioChanged = true;
@@ -783,7 +781,7 @@ var TemplateService = (function() {
               // special case for allow any. do not set to readOnly and set to
               // mandatory
               FormManager.enable(name);
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+              FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
 
             } else if (values[0] == READONLY_CLEARVALUE) {
               // $ value means clear the field and not allow input
@@ -843,7 +841,7 @@ var TemplateService = (function() {
                   FormManager.readOnly(name);
                 } else {
                   // this is editable, add the mandatory validator
-                  FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+                  FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
                   FormManager.enable(name);
                 }
                 if (FormManager.getField(name).store != null) {
@@ -870,13 +868,13 @@ var TemplateService = (function() {
               if (create) {
                 var fieldTemp = FormManager.getField(name);
                 limitDropdownValues(fieldTemp, values);
-                FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+                FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
                 FormManager.enable(name);
               }
             } else {
               if (dojo.byId('templatevalue-' + name) == null) {
                 var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="'
-                    + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
+                  + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
                 var widget = dojo.byId('widget_' + name);
                 if (!widget) {
                   widget = dojo.byId(name);
@@ -891,7 +889,7 @@ var TemplateService = (function() {
               }
               FormManager.readOnly(name);
 
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+              FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
             }
 
           } else {
@@ -907,20 +905,20 @@ var TemplateService = (function() {
 
             // check the REQ_IND from scenarios and implement
             switch (required) {
-            case 'R':
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
-              FormManager.enable(name);
-              break;
-            case 'O':
-              FormManager.enable(name);
-              break;
-            case 'D':
-              FormManager.readOnly(name);
-              break;
-            case 'G':
-              FormManager.setValue(name, '');
-              FormManager.disable(name);
-              break;
+              case 'R':
+                FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
+                FormManager.enable(name);
+                break;
+              case 'O':
+                FormManager.enable(name);
+                break;
+              case 'D':
+                FormManager.readOnly(name);
+                break;
+              case 'G':
+                FormManager.setValue(name, '');
+                FormManager.disable(name);
+                break;
             }
 
             if (type == 'checkbox') {
@@ -932,12 +930,12 @@ var TemplateService = (function() {
             }
 
             if (type == 'text' && FormManager.getField(name).store == null && 'R' == required) {
-              FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+              FormManager.addValidator(name, Validators.REQUIRED, [label], field.parentTab);
             }
           }
           var label = dojo.byId('cmr-fld-lbl-' + id) ? dojo.byId('cmr-fld-lbl-' + id).innerHTML : id;
           if (FormManager.getField(name).store != null) {
-            FormManager.addValidator(name, Validators.INVALID_VALUE, [ label ], field.parentTab);
+            FormManager.addValidator(name, Validators.INVALID_VALUE, [label], field.parentTab);
           }
           // add the maxlength validator for text fields
           if (type == 'text') {
@@ -946,11 +944,11 @@ var TemplateService = (function() {
               max = field.get('maxlength');
             }
             if (max && !isNaN(max) && Number(max) > 0) {
-              FormManager.addValidator(name, Validators.MAXLENGTH, [ label, Number(max) ], field.parentTab);
+              FormManager.addValidator(name, Validators.MAXLENGTH, [label, Number(max)], field.parentTab);
             }
           }
         }
-        var cmrCountries = [ '666', '862', '726' ];
+        var cmrCountries = ['666', '862', '726'];
         var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         var scenarioChanged = false;
         if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario && !cmrCountries.includes(cmrIssuingCntry)) {
@@ -968,7 +966,7 @@ var TemplateService = (function() {
         }
       }
     },
-    isHandled : function(fieldName) {
+    isHandled: function (fieldName) {
       if (currentTemplate == null) {
         return false;
       }
@@ -979,7 +977,7 @@ var TemplateService = (function() {
         }
       }
     },
-    isFieldReadOnly : function(fieldName) {
+    isFieldReadOnly: function (fieldName) {
       if (currentTemplate == null) {
         return false;
       }
@@ -1015,21 +1013,21 @@ var TemplateService = (function() {
       }
       return false;
     },
-    getCurrentTemplate : function() {
+    getCurrentTemplate: function () {
       return currentTemplate;
     },
-    chooseTemplateValue : function() {
+    chooseTemplateValue: function () {
       if (cmr.templateOptions && cmr.templateOptions.field) {
         FormManager.setValue(cmr.templateOptions.field, FormManager.getActualValue('templatevalues'));
       }
       cmr.hideModal('templateValueModal');
       cmr.templateOptions = null;
     },
-    openChoices : function(button) {
+    openChoices: function (button) {
       cmr.templateOptions = {
-        field : button.getAttribute('fieldId'),
-        values : button.getAttribute('values'),
-        id : button.getAttribute('field')
+        field: button.getAttribute('fieldId'),
+        values: button.getAttribute('values'),
+        id: button.getAttribute('field')
       };
       cmr.showModal('templateValueModal');
     }
@@ -1037,7 +1035,7 @@ var TemplateService = (function() {
 }());
 
 function findTab(id) {
-  var tabs = [ 'GENERAL_REQ_TAB', 'TYPE_REQ_TAB', 'NAME_REQ_TAB', 'CUST_REQ_TAB', 'IBM_REQ_TAB', 'TAXINFO_REQ_TAB' ];
+  var tabs = ['GENERAL_REQ_TAB', 'TYPE_REQ_TAB', 'NAME_REQ_TAB', 'CUST_REQ_TAB', 'IBM_REQ_TAB', 'TAXINFO_REQ_TAB'];
   for (var i = 0; i < tabs.length; i++) {
     if (dojo.query('#' + tabs[i]).query('#' + id).length > 0) {
       return tabs[i];

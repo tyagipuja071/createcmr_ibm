@@ -174,7 +174,7 @@ public class BELUXHandler extends BaseSOFHandler {
                 newRecord.setCmrName3(null);
                 newRecord.setCmrName4(null);
                 newRecord.setCmrSapNumber(null);
-                mapCmrtAddr2FindCMRRec(entityManager, newRecord, cmrAddr);
+                mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
                 newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
                 if ("ZS02".equals(newRecord.getCmrAddrTypeCode())) {
                   newRecord.setCmrSitePartyID(null);
@@ -496,7 +496,7 @@ public class BELUXHandler extends BaseSOFHandler {
     return output;
   }
 
-  private void mapCmrtAddr2FindCMRRec(EntityManager entityManager, FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
+  private void mapCmrtAddr2FindCMRRec(FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
     if (cmrtAddr == null) {
       return;
     }
@@ -631,7 +631,7 @@ public class BELUXHandler extends BaseSOFHandler {
       }
     } else {
       if (!StringUtils.isBlank(countryNm)) {
-        String countryCd = getCountryCode(entityManager, countryNm);
+        String countryCd = getCountryCode(countryNm);
         zs02Addr.setCmrCountryLanded(countryCd);
       }
     }
@@ -2318,7 +2318,7 @@ public class BELUXHandler extends BaseSOFHandler {
       String ordBlk = validateColValFromCell(currCell);
       if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "D".equals(ordBlk) || "P".equals(ordBlk) || "J".equals(ordBlk))) {
         LOG.trace("Order Block Code should only @, D, P, J. >> ");
-        error.addError(row.getRowNum() + 1, "Order Block Code", "Order Block Code should be only @, D, P, J. ");
+        error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, D, P, J. ");
       }
       currCell = row.getCell(stcOrdBlkIndex);
       String stcOrdBlk = validateColValFromCell(currCell);
@@ -2333,6 +2333,11 @@ public class BELUXHandler extends BaseSOFHandler {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
         error.addError((row.getRowNum() + 1), "CMR No.",
             "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+      }
+
+      if (is93CMR(cmrNo)) {
+        LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
+        error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
       }
 
       currCell = row.getCell(7);
@@ -2368,7 +2373,6 @@ public class BELUXHandler extends BaseSOFHandler {
       if (error.hasErrors()) {
         validations.add(error);
       }
-
     }
 
     for (String name : countryAddrss) {
@@ -2383,6 +2387,8 @@ public class BELUXHandler extends BaseSOFHandler {
         String name3 = ""; // 4
         String attPerson = ""; // 5
         String pobox = ""; // 7
+        String stateProv = ""; // 10
+        String landCntry = ""; // 12
         int addrFldCnt1 = 0;
 
         currCell = row.getCell(4);
@@ -2391,6 +2397,10 @@ public class BELUXHandler extends BaseSOFHandler {
         attPerson = validateColValFromCell(currCell);
         currCell = row.getCell(7);
         pobox = validateColValFromCell(currCell);
+        currCell = row.getCell(10);
+        stateProv = validateColValFromCell(currCell);
+        currCell = row.getCell(12);
+        landCntry = validateColValFromCell(currCell);
 
         if (!StringUtils.isEmpty(name3)) {
           addrFldCnt1++;
@@ -2402,14 +2412,24 @@ public class BELUXHandler extends BaseSOFHandler {
           addrFldCnt1++;
         }
 
+        String pattern = "^[a-zA-Z0-9]*$";
+        if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+          LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+          errorAddr.addError(row.getRowNum(), "State/Province",
+              "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+        } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+          LOG.trace("State/Province and Landed country both should be filled");
+          errorAddr.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+        }
+
         if (addrFldCnt1 > 1) {
           LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
-          errorAddr.addError((row.getRowNum() + 1), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
-          validations.add(errorAddr);
+          errorAddr.addError((rowIndex + 1), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
         }
+        validations.add(errorAddr);
+
       }
     }
-
   }
 
   private static boolean isDivCMR(String cmrNo) {
@@ -2433,7 +2453,6 @@ public class BELUXHandler extends BaseSOFHandler {
         isDivestiture = true;
       }
     }
-    entityManager.clear();
     entityManager.close();
     return isDivestiture;
   }
@@ -2462,7 +2481,6 @@ public class BELUXHandler extends BaseSOFHandler {
         is93cmr = true;
       }
     }
-    entityManager.clear();
     entityManager.close();
     return is93cmr;
   }

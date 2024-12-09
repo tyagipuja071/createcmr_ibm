@@ -25,13 +25,9 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
  * @author Jeffrey Zamora
  */
 @Entity
-@Table(
-    name = "PROLIF_CHECKLIST",
-    schema = "CREQCMR")
+@Table(name = "PROLIF_CHECKLIST", schema = "CREQCMR")
 @EntityListeners({ TrimListener.class, ChangeLogListener.class })
-@ChangeLogDetails(
-    childTable = true,
-    reqId = "id.reqId")
+@ChangeLogDetails(childTable = true, reqId = "id.reqId")
 public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 

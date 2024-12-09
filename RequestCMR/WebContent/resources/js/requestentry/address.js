@@ -196,6 +196,7 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
   };
   var result = cmr.query('ADDRDETAIL', qParams);
   cmr.addrdetails = result;
+  cmr.currentAddrSeq = addrSeq;
   cmr.showModal('AddressDetailsModal');
   openAddressDetails.addrType = addrType;
   if (nordx_cntries.indexOf(cntry) > -1 && (addrType == 'ZP02' || addrType == 'ZI01') && (reqType == 'U' || reqType == 'X')) {
@@ -329,7 +330,13 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #addressType_view', details.ret35 && details.ret35 != '' ? details.ret35 : details.ret2);
 
   _assignDetailsValue('#AddressDetailsModal #stateProv_view', details.ret11 + '-' + details.ret36);
-  _assignDetailsValue('#AddressDetailsModal #county_view', details.ret37);
+  if (FormManager.getActualValue('cmrIssuingCntry') == '897') {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret45);
+  } else  if (FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754' || FormManager.getActualValue('cmrIssuingCntry') == '724') {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret11 + '-' + details.ret36);
+  } else {
+    _assignDetailsValue('#AddressDetailsModal #county_view', details.ret37);
+  }
   _assignDetailsValue('#AddressDetailsModal #landCntry_view', details.ret13 + '-' + details.ret38);
   _assignDetailsValue('#AddressDetailsModal #transportZone_view', details.ret24);
 
@@ -401,18 +408,29 @@ function AddressDetailsModal_onLoad() {
   // FormManager.setValue('cnCustContJobTitle', details.ret66);
   // FormManager.setValue('cnCustContPhone2', details.ret67);
 
+// China related 
   if (FormManager.getActualValue('cmrIssuingCntry') == '641') {
-    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', details.ret59);
-    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', details.ret60);
-    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', details.ret61);
-    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', details.ret62);
-    _assignDetailsValue('#AddressDetailsModal #cnCity_view', details.ret63);
-    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
-    _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
-    _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
-    _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
+		var qParams = {
+			REQ_ID: FormManager.getActualValue('reqId'),
+			ADDR_TYPE: cmr.addrdetails.ret2,
+			ADDR_SEQ: cmr.currentAddrSeq .replace(/^0+/, ''),
+		};
+		var record = cmr.query('INTL_ADDR_DETAILS', qParams);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', record.ret1);
+    _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', record.ret2);
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt2_view', (record.ret3 != undefined ? record.ret3 : '' )+ (record.ret4 != undefined ? record.ret4 : '' ));
+    _assignDetailsValue('#AddressDetailsModal #cnAddrTxt_view', record.ret5);
+    _assignDetailsValue('#AddressDetailsModal #cnCity_view', record.ret6);
+    _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', record.ret7);
+   // _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
+   // _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
+    //_assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
-  
+
+  if (FormManager.getActualValue('cmrIssuingCntry') == '736' || FormManager.getActualValue('cmrIssuingCntry') == '738') {
+    _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
+  }
+
   if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
     _assignDetailsValue('#AddressDetailsModal #cnCustName1_view', details.ret59);
     _assignDetailsValue('#AddressDetailsModal #cnCustName2_view', details.ret60);
@@ -610,6 +628,14 @@ function doAddToAddressList() {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var asean_isa_cntries = [ '643', '744', '736', '738', '796', '778', '749', '834', '818', '852', '856', '616', '652', '615' ];
+  var ero_countries = ['641'];
+  var reqReason = FormManager.getActualValue('reqReason');
+  
+  if (ero_countries.indexOf(cntry) >= 0 && reqReason == 'TREC' && _pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+    cmr.showAlert('This is a Temporary Embargo Removal Request. Updation or creation of new records is not allowed.');
+    return;
+  }
+  
   // CREATCMR-5741 no TGME Addr Std
   // if (GEOHandler.isTGMERequired(cntry)) {
   // var tgmeResult = tgmePreSave();
@@ -1111,6 +1137,10 @@ function addEditAddressModal_onLoad() {
         }
       }
       
+      if (FormManager.getActualValue('cmrIssuingCntry') == '736' || FormManager.getActualValue('cmrIssuingCntry') == '738') {
+        FormManager.setValue('contact', details.ret71);
+      }
+
       if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
         FormManager.setValue('locationCode', details.ret56);
       }
@@ -1256,6 +1286,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('contact', details.ret71);
       FormManager.setValue('rol', details.ret72);
     }
+
     var cemeaCountries = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
         '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
 
@@ -1298,7 +1329,7 @@ function addEditAddressModal_onLoad() {
     }
 
     // IERP: China specific address load
-    if (FormManager.getActualValue('cmrIssuingCntry') == '641' && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
+    if ((FormManager.getActualValue('cmrIssuingCntry') == '641' || FormManager.getActualValue('cmrIssuingCntry') == '760') && (cmr.addressMode == 'copyAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'removeAddress')) {
       FormManager.setValue('cnCustName1', details.ret59);
       cmr.oldcncustname = details.ret59;
       FormManager.setValue('cnCustName2', details.ret60);
@@ -1618,6 +1649,9 @@ function doCopyAddr(reqId, addrType, addrSeq, mandt, name, type) {
     MANDT : mandt,
   };
   var result = cmr.query('ADDRDETAIL', qParams);
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if(FormManager.getActualValue)
   cmr.addrdetails = result;
   cmr.addressMode = 'copyAddress';
   cmr.showModal('addEditAddressModal');

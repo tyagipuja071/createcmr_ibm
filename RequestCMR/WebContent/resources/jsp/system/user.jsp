@@ -215,8 +215,8 @@
         </cmr:row>
         <cmr:row topPad="10" addBackground="false">
           <cmr:column span="6">
-                    <cmr:grid usePaging="false" url="/userrolelist.json" id="userRoleListGrid" hasCheckbox="false" checkBoxKeys="userId,roleId,subRoleId"
-      span="6" height="200">
+            <cmr:grid usePaging="false" url="/userrolelist.json" id="userRoleListGrid" hasCheckbox="false" checkBoxKeys="userId,roleId,subRoleId"
+              span="6" height="200">
               <cmr:gridParam fieldId="userId" value="${user.userId}" />
               <cmr:gridCol width="12%" field="roleDesc" header="Role" />
               <cmr:gridCol width="12%" field="subRoleDesc" header="Sub-role" />

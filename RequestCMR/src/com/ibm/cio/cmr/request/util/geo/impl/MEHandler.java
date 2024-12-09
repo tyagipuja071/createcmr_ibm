@@ -1519,6 +1519,14 @@ public class MEHandler extends BaseSOFHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Customer Classification Code", "Customer Classification Code"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustClass(), "Customer Classification Code", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "Customer Classification Code", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBpAcctTyp(), newData.getBpAcctTyp())
         && SystemLocation.ABU_DHABI.equals(cmrCountry)) {
       update = new UpdatedDataModel();
@@ -2316,11 +2324,31 @@ public class MEHandler extends BaseSOFHandler {
           }
           String name3 = ""; // 4
           String pobox = ""; // 8
+          String stateProv = ""; // 10
+          String landCntry = ""; // 11
 
           currCell = row.getCell(4);
           name3 = validateColValFromCell(currCell);
           currCell = row.getCell(8);
           pobox = validateColValFromCell(currCell);
+          currCell = row.getCell(10);
+          stateProv = validateColValFromCell(currCell);
+          currCell = row.getCell(11);
+          landCntry = validateColValFromCell(currCell);
+
+          String pattern = "^[a-zA-Z0-9]*$";
+          if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+            TemplateValidation errorAddr = new TemplateValidation(name);
+            LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+            errorAddr.addError(row.getRowNum(), "State/Province",
+                "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+            validations.add(errorAddr);
+          } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landCntry)) {
+            TemplateValidation errorAddr = new TemplateValidation(name);
+            LOG.trace("State/Province and Landed country both should be filled");
+            errorAddr.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+            validations.add(errorAddr);
+          }
 
           if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
             TemplateValidation errorAddr = new TemplateValidation(name);

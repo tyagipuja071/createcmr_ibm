@@ -154,9 +154,6 @@ public class CNHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
-      data.setClientTier("");
-    }
   }
 
   @Override
@@ -856,6 +853,7 @@ public class CNHandler extends GEOHandler {
         // that we know that are whole words, that means we need to convert it
         // to the value on our list.
         String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
+        city1Upper = city1Upper.split(",")[0];
         city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
         String state = addr.getStateProv() != null ? addr.getStateProv().toUpperCase() : "";
         String cmtMsg = "Your address city value on address type " + addr.getId().getAddrType() + ", sequence number " + addr.getId().getAddrSeq()
@@ -1492,6 +1490,11 @@ public class CNHandler extends GEOHandler {
 
     iAddr = query.getSingleResult(IntlAddr.class);
 
+    // try with removed padded zeros in addr seq
+    if (iAddr == null) {
+      query.setParameter("ADDR_SEQ", StringUtils.stripStart(addr.getId().getAddrSeq(), "0"));
+      iAddr = query.getSingleResult(IntlAddr.class);
+    }
     return iAddr;
   }
 

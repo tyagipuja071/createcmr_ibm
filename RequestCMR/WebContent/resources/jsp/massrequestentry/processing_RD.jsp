@@ -61,6 +61,7 @@
         <cmr:gridCol width="*" field="name" header="Name" />
         <cmr:gridCol width="10%" field="orderBlock" header="Order Block" />
         <cmr:gridCol width="10%" field="deleted" header="Inactive" />
+        <cmr:gridCol width="10%" field="dplChkResult" header="Dpl Check Result" />
       </cmr:grid>
       <%
         } else {

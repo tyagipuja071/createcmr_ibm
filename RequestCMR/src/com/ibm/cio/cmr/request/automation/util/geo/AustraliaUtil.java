@@ -60,6 +60,8 @@ public class AustraliaUtil extends AutomationUtil {
   public static final String SCENARIO_BLUEMIX = "BLUMX";
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
+  private static final String SCENARIO_PRIVATE_CUSOMER_CROSS = "XPRIV";
+
   private static final String SCENARIO_DUMMY = "DUMMY";
   private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_ECOSYS = "ECSYS";
@@ -151,7 +153,6 @@ public class AustraliaUtil extends AutomationUtil {
     } else {
       eleResults.append("Error On Field Calculation.");
     }
-
     // for P2L Conversions - checking of mandatory fields
     if ("Y".equalsIgnoreCase(admin.getProspLegalInd()) && StringUtils.isNotBlank(admin.getSourceSystId())) {
       if ("NRMLC".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -490,8 +491,9 @@ public class AustraliaUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false,
-          requestData);
+      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
+    case SCENARIO_PRIVATE_CUSOMER_CROSS:
+      return doPrivatePersonChecks(entityManager, engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_ECOSYS:
     case SCENARIO_CROSS_ECOSYS:
       addToNotifyListANZ(entityManager, data.getId().getReqId());
@@ -589,13 +591,14 @@ public class AustraliaUtil extends AutomationUtil {
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
     List<Addr> addresses = null;
+    Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
-    Addr soldTo = requestData.getAddress("ZS01");
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
           addresses = requestData.getAddresses();
+         
         } else {
           addresses = requestData.getAddresses(addrType);
         }

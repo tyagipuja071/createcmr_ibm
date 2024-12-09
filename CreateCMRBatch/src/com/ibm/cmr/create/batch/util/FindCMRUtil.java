@@ -303,6 +303,7 @@ public class FindCMRUtil {
     request.setAppId("findcmr");
     request.setSvcId(SystemConfiguration.getSystemProperty("service.id"));
     request.setSvcPwd(SystemConfiguration.getSystemProperty("service.password"));
+
 		LOG.debug("Calling CI SERVICES");
     SearchServicesClient client = new SearchServicesClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"));
     JSONArray results = client.sendRequest(request);

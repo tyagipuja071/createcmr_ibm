@@ -1894,11 +1894,24 @@ public class IsraelHandler extends EMEAHandler {
             error.addError(rowIndex + 1, "<br>City", sheetName + " City should be in Latin characters.");
           }
         }
+
         // end validate Mailing Billing Shipping hebrew fields
 
         // Validate Postal Code
         String postalCd = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, row, sheetName));
         String landedCntry = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName));
+
+        // validate State Prov
+        String stateProv = row.getCell(9).getRichStringCellValue().getString();
+        String pattern = "^[a-zA-Z0-9]*$";
+        if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+          LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+          error.addError(row.getRowNum(), "State/Province",
+              "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+        } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedCntry)) {
+          LOG.trace("State/Province and Landed country both should be filled");
+          error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
+        }
 
         if (validateHebrewField || (sheetName.equals("Installing") || sheetName.equals("EPL"))) {
           String errKna1 = validateMassKna1AddrSeqExist(cmrNo, addrSeqNo, sheetName);
@@ -2290,19 +2303,19 @@ public class IsraelHandler extends EMEAHandler {
             bankNoInitial = "0";
           }
 
-          if (StringUtils.isNotEmpty(realCtyCd) && StringUtils.isNotEmpty(bankNoInitial)) {
-            int salesRepInt = Integer.parseInt(userSalesRep);
-            int minRange = 220;
-            int maxRange = 239;
+         if (StringUtils.isNotEmpty(realCtyCd) && StringUtils.isNotEmpty(bankNoInitial)) {
+          int salesRepInt = Integer.parseInt(userSalesRep);
+          int minRange = 220;
+          int maxRange = 239;
 
-            if (realCtyCd.equals("755") && bankNoInitial.equals("0") || realCtyCd.equals("756") && bankNoInitial.equals("9")) {
-              if (salesRepInt >= minRange && salesRepInt <= maxRange) {
-                errMessage = "Invalid Sales Rep value.  Sales Rep cannot be from 000220-000239 range. Please change it.";
-              }
-            } else if (realCtyCd.equals("756") && bankNoInitial.equals("0")) {
-              if (salesRepInt < minRange || salesRepInt > maxRange) {
-                errMessage = "Invalid Sales Rep value. Sales Rep must be from 000220-000239 range. Please change it.";
-              }
+          if (realCtyCd.equals("755") && bankNoInitial.equals("0") || realCtyCd.equals("756") && bankNoInitial.equals("9")) {
+            if (salesRepInt >= minRange && salesRepInt <= maxRange) {
+              errMessage = "Invalid Sales Rep value.  Sales Rep cannot be from 000220-000239 range. Please change it.";
+            }
+          } else if (realCtyCd.equals("756") && bankNoInitial.equals("0")) {
+            if (salesRepInt < minRange || salesRepInt > maxRange) {
+              errMessage = "Invalid Sales Rep value. Sales Rep must be from 000220-000239 range. Please change it.";
+            }
             }
           }
         }
@@ -2310,10 +2323,8 @@ public class IsraelHandler extends EMEAHandler {
         entityManager.clear();
         entityManager.close();
       }
-
     }
     return errMessage;
-
   }
 
   private boolean containsHebrewChar(String str) {

@@ -110,8 +110,8 @@ function addHandlersForZA() {
       _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
    if (typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
         setIsuCtcCBMEA();
-        retainImportedValues();
         setDefaultEntCBMEA();
+        setSalesRepSORTL();
     }
       });
     }
@@ -122,7 +122,7 @@ function addHandlersForZA() {
                 calledByIsuHandler = true;
                 calledByCtcHandler = false;
                 // setCtcSalesRepSBO(value);
-                retainImportedValues();
+                setSalesRepSORTL();
                 setEnterpriseBehaviour();
             }
             if (_oldIsuCd != FormManager.getActualValue('isuCd') || typeof(_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != FormManager.getActualValue('custSubGrp')) {
@@ -139,7 +139,7 @@ function addHandlersForZA() {
                 calledByIsuHandler = false;
                 calledByCtcHandler = true;
                 // setCtcSalesRepSBO(FormManager.getField('isuCd'));
-                retainImportedValues();
+                setSalesRepSORTL();
                 setEnterpriseBehaviour();
             } else if (FormManager.getActualValue('reqType') == 'U') {
                 calledByIsuHandler = false;
@@ -257,6 +257,7 @@ function setSalesRepSORTL() {
     var cntryRegion = FormManager.getActualValue('countryUse');
     var isuCtc = isu.concat(clientTier)
     if (reqType == 'C') {
+     
         if (cntryRegion == '864') {
             FormManager.setValue('repTeamMemberNo', 'SALES9');
             FormManager.setValue('salesBusOffCd', '4961');
@@ -1194,11 +1195,6 @@ function retainImportedValues(fromAddress, scenario, scenarioChanged) {
         } else {
             FormManager.setValue('inacCd', '');
         }
-    }
-    var salesBusOffCd = FormManager.getActualValue('salesBusOffCd');
-    var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
-    if(salesBusOffCd == null || salesBusOffCd == '' || repTeamMemberNo == null || repTeamMemberNo == ''){
-      setCtcSalesRepSBO();
     }
 }
 
@@ -2282,20 +2278,15 @@ function setDefaultEntCBMEA() {
                 };
                 var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
                 var enterprise = results.ret1;
-                if(enterprise != null && enterprise != undefined) {
                 FormManager.setValue('enterprise', enterprise);
-                }
-            }
-            if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '34Q' || isuCtc == '28') {
-              FormManager.setValue('enterprise', '');
             }
         } else if (SOUTH_AFRICA_LC.includes(landCntry)) {
             // SOUTH AFRICA MEA REGION
-            if (landCntry == 'LS' && isuCtc == '27E') {
+            if (landCntry == 'LS') {
                 FormManager.setValue('enterprise', '910510');
-            } else if (landCntry == 'NA' && isuCtc == '27E') {
+            } else if (landCntry == 'NA') {
                 FormManager.setValue('enterprise', '909813');
-            } else if (landCntry == 'SZ' && isuCtc == '27E') {
+            } else if (landCntry == 'SZ') {
                 FormManager.setValue('enterprise', '910509');
             } else {
                 var qParams = {
@@ -2306,13 +2297,9 @@ function setDefaultEntCBMEA() {
                 };
                 var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
                 var enterprise = results.ret1;
-                if(enterprise != null && enterprise != undefined) {
                 FormManager.setValue('enterprise', enterprise);
-                }
             }
-            if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '12' || isuCtc == '28' || isuCtc == '4F' || isuCtc == '34Q') {
-              FormManager.setValue('enterprise', '');
-            }
+
         } else if (CEWA_LC.includes(landCntry)) {
             // CEWA MEA REGION
             var qParams = {
@@ -2322,12 +2309,8 @@ function setDefaultEntCBMEA() {
             };
             var results = cmr.query('GET.ENTERPRISEVALUE.BYLANDCNTRY', qParams);
             var enterprise = results.ret1;
-            if(enterprise != null && enterprise != undefined) {
-              FormManager.setValue('enterprise', enterprise);
-            }
-            if(isuCtc == '5K' || isuCtc == '36Y') {
-              FormManager.setValue('enterprise', '');
-            }
+            FormManager.setValue('enterprise', enterprise);
+
         } else if (ME_LC.includes(landCntry)) {
           var noSubCountriesME = ['KW', 'OM', 'IQ', 'SY', 'YE', 'JO', 'PS', 'LB', 'BH', 'LY', 'TN', 'MA', 'PK', 'AF'];
           var enterprise='';
@@ -2350,15 +2333,7 @@ function setDefaultEntCBMEA() {
             var results = cmr.query('GET.ENTERPRISEVALUE.BYSUBINDUSTRY', qParams);
              enterprise = results.ret1;
             }
-          if(enterprise != null && enterprise != undefined) {
             FormManager.setValue('enterprise', enterprise);
-          }
-          if(isuCtc == '5K' || isuCtc == '36Y') {
-            FormManager.setValue('enterprise', '');
-          }
-        }
-        if(isuCtc == '5K' || isuCtc == '36Y' || isuCtc == '04' || isuCtc == '12' || isuCtc == '28' || isuCtc == '4F') {
-          FormManager.setValue('enterprise', '');
         }
     }
 }
@@ -2493,7 +2468,7 @@ function enterpriseValidatorMea() {
                 if (result != null && result.ret1 != undefined) {
                     landCntry = result.ret1;
                 }
-                if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || !(CEWA_LC.includes(landCntry) || ME_LC.includes(landCntry) || TURKEY_LC.includes(landCntry) || SOUTH_AFRICA_LC.includes(landCntry))) {
+                if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || !crossSubTypes.includes(custSubGrp) || landCntry == '' || enterprise == '' || !(CEWA_LC.includes(landCntry) || ME_LC.includes(landCntry) || TURKEY_LC.includes(landCntry) || SOUTH_AFRICA_LC.includes(landCntry))) {
                     return;
                 }
                 if (TURKEY_LC.includes(landCntry)) {
@@ -2523,16 +2498,7 @@ function enterpriseValidatorMea() {
                                 name: 'enterprise'
                             }, false, 'Enterprise can only accept : \'911703\'\ \'911716\'\ \'911704\'\ ');
                         }
-                    } else if (isuCtc == '36Y') {
-                      var enterprise34Q = ['908030', '912103', '912104'];
-                      if (!enterprise34Q.includes(enterprise)) {
-                          return new ValidationResult({
-                              id: 'enterprise',
-                              type: 'text',
-                              name: 'enterprise'
-                          }, false, 'Enterprise can only accept : \'908030\'\ \'912103\'\ \'912104\'\ ');
-                      }
-                  }  else if (isuCtc == '5K' || isuCtc == '04' || isuCtc == '28') {
+                    } else if (isuCtc == '5k' || isuCtc == '04' || isuCtc == '28') {
                         if (enterprise != '') {
                             return new ValidationResult({
                                 id: 'enterprise',
@@ -2567,7 +2533,7 @@ function enterpriseValidatorMea() {
                                 name: 'enterprise'
                             }, false, 'Enterprise can only accept : \'BUILD1\'\, \'DISTR1\'\ , \'SRVCE1\'\ ');
                         }
-                    } else if (isuCtc == '5K') {
+                    } else if (isuCtc == '5k') {
                         if (enterprise != '') {
                             return new ValidationResult({
                                 id: 'enterprise',
@@ -2902,7 +2868,8 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
                 }, false, 'Enterprise can only accept : \'912088\'\ \'912090\'\ \'912089\'\ ');
             }
         }
-    } else if (landCntry == 'EG') {
+    }
+    if (landCntry == 'EG') {
         if (isuCtc == '34Q') {
           var enterprise34Q = ['912088', '911831', '911835', '911275', '911833'];
             if (['D', 'J', 'K', 'L', 'R', 'T', 'W'].includes(subIndustryCd) && !(enterprise == '911836'|| enterprise34Q.includes(enterprise))) {
@@ -2993,7 +2960,7 @@ function enterpriseMEValidator(landCntry, isuCtc, subIndustryCd, enterprise) {
             }
         }
     }
-    if (isuCtc == '5K') {
+    if (isuCtc == '5k') {
         if (enterprise != '') {
             return new ValidationResult({
                 id: 'enterprise',
@@ -3119,22 +3086,26 @@ function setDefaultEnterpriseBasedOnSubInd(value) {
     var ctc = FormManager.getActualValue('clientTier');
     var isuCtc = isuCd + ctc;
     var isuCtcForBlankEntp = ['04', '12', '28', '4F', '5K'];
-    var reqId = FormManager.getActualValue('reqId');
-    var landCntry = '';
-    var result = cmr.query('LANDCNTRY.IT', {
-        REQID: reqId
-    });
-    if (result != null && result.ret1 != undefined) {
-        landCntry = result.ret1;
-    }
-    var MEA_COUNTRIES_CB = ['TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
-    if (reqType == 'U' || MEA_COUNTRIES_CB.includes(landCntry) || landCntry == '' || landCntry == undefined) {
+    if (reqType == 'U') {
         return;
     }
     if (isuCtc != '27E') {
         FormManager.setValue('enterprise', '');
         return;
     } else {
+
+        var reqId = FormManager.getActualValue('reqId');
+        var landCntry = '';
+        var result = cmr.query('LANDCNTRY.IT', {
+            REQID: reqId
+        });
+        if (result != null && result.ret1 != undefined) {
+            landCntry = result.ret1;
+        }
+        var MEA_COUNTRIES_CB = ['TR', 'DZ', 'TN', 'LY', 'AO', 'BW', 'CV', 'CD', 'MG', 'MW', 'MU', 'MZ', 'ST', 'SC', 'ZM', 'ZW', 'GH', 'LR', 'NG', 'SL', 'BI', 'ER', 'ET', 'DJ', 'KE', 'RW', 'SO', 'SD', 'TZ', 'UG', 'BJ', 'BF', 'CM', 'CF', 'TD', 'CG', 'GQ', 'GA', 'GM', 'GN', 'GW', 'CI', 'ML', 'MR', 'NE', 'SN', 'TG', 'LY', 'TN', 'MA', 'PK', 'AF', 'EG', 'BH', 'AE', 'AE', 'IQ', 'JO', 'PS', 'KW', 'LB', 'OM', 'QA', 'SA', 'YE', 'SY'];
+        if (MEA_COUNTRIES_CB.includes(landCntry)) {
+            return;
+        }
         if (subInd != null || subInd != undefined || subInd != '') {
             subInd = subInd[0];
         }

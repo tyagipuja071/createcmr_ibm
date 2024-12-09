@@ -178,6 +178,10 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyseqNoformat = StringUtils.leftPad(seqNo, 5, '0');
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
+            /*
+             * if (StringUtils.isBlank(legacyAddressSeq)) { continue; }
+             */
+
             if (StringUtils.isBlank(legacyAddressSeq)) {
               if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
                 record.setCmrAddrTypeCode("PG01");
@@ -1336,8 +1340,9 @@ public class NORDXHandler extends BaseSOFHandler {
               String streetCon = "";// 7
               String postCd = "";// 8
               String city = "";// 9
-              String landedCntry = "";// 10
-              String poBox = "";// 11
+              String stateProv = ""; // 10
+              String landedCntry = "";// 11
+              String poBox = "";// 12
 
               currCell = (XSSFCell) row.getCell(2);
               custNm = validateColValFromCell(currCell);
@@ -1356,8 +1361,10 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(9);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
-              landedCntry = validateColValFromCell(currCell);
+              stateProv = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
+              landedCntry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
               poBox = validateColValFromCell(currCell);
 
               if ("Installing,Shipping,EPL".contains(name)) {
@@ -1471,6 +1478,16 @@ public class NORDXHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "PO BOX",
                     ":Note that PO Box only accept digits. Please fix and upload the template again.<br>");
 
+              }
+
+              String pattern = "^[a-zA-Z0-9]*$";
+              if (!StringUtils.isBlank(stateProv) && ((stateProv.length() > 3 || !stateProv.matches(pattern)) && !"@".equals(stateProv))) {
+                LOG.trace("State/Province should be limited to up to 3 characters and should be alphanumeric or @");
+                error.addError(row.getRowNum(), "State/Province",
+                    "State/Province should be limited to up to 3 characters and should be alphanumeric or @.\n");
+              } else if (!StringUtils.isBlank(stateProv) && StringUtils.isBlank(landedCntry)) {
+                LOG.trace("State/Province and Landed country both should be filled");
+                error.addError(row.getRowNum(), "State/Province", "State/Province and Landed country both should be filled together.\n");
               }
 
               if (StringUtils.isBlank(poBox)) {
@@ -3014,5 +3031,20 @@ public class NORDXHandler extends BaseSOFHandler {
 
     return addrSeq;
   }
+
+  // private boolean isAllClientTierAllowed(String country, String isuCd) {
+  // boolean isAllClientTierAllowed = true;
+  // if (country.equals("678") && (isuCd == "5K" || isuCd == "19")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("806") && (isuCd == "5K" || isuCd == "04")) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("846") && Arrays.asList("5K", "5E", "1R",
+  // "04").contains(isuCd)) {
+  // isAllClientTierAllowed = false;
+  // } else if (country.equals("702") && isuCd.equals("5K")) {
+  // isAllClientTierAllowed = false;
+  // }
+  // return isAllClientTierAllowed;
+  // }
 
 }

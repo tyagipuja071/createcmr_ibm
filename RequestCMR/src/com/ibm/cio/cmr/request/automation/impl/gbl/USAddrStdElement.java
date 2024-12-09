@@ -186,15 +186,18 @@ public class USAddrStdElement extends OverridingElement {
           }
         }
 
-        if (!StringUtils.isBlank(tgmeData.getStateProvinceCode())) {
-          LOG.debug("State is : " + tgmeData.getStateProvinceCode());
-          details.append("State/Province Code: " + tgmeData.getStateProvinceCode() + "\n");
-          if (!tgmeData.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase())) {
-            // overrides.addOverride(getProcessCode(),
-            // addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(),
-            // data1.getStateProvinceCode());
-          }
-        }
+        // if (!StringUtils.isBlank(tgmeData.getStateProvinceCode())) {
+        // LOG.debug("State is : " + tgmeData.getStateProvinceCode());
+        // details.append("State/Province Code: " +
+        // tgmeData.getStateProvinceCode() + "\n");
+        // if
+        // (!tgmeData.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase()))
+        // {
+        // // overrides.addOverride(getProcessCode(),
+        // // addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(),
+        // // data1.getStateProvinceCode());
+        // }
+        // }
 
         // if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
         // LOG.debug("State Code determined from TGME: " +

@@ -77,7 +77,7 @@ public class ASEANSunsetHandler extends APHandler {
   private static Map<String, String> ASEAN_SEQ_1 = new HashMap<>();
   private static Map<String, String> ASEAN_SEQ_2 = new HashMap<>();
 
-  private static final String GRP1_SOLD_TO_FIXED_SEQ = "AA";
+  protected static final String GRP1_SOLD_TO_FIXED_SEQ = "AA";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.BRUNEI, "BN");

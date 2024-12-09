@@ -139,6 +139,7 @@ function addAfterConfigAP() {
     FormManager.enable('territoryCd');
     FormManager.enable('IndustryClass');
     FormManager.enable('subIndustryCd');
+    FormManager.enable('vat');
   }
    
   var clusterId = FormManager.getActualValue('apCustClusterId');
@@ -1161,7 +1162,7 @@ function setIsicCdIfCmrResultAccepted(value) {
     FormManager.setValue('isicCd', isicCdInDB);
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
-  } else {
+  } else if (reqType == 'U' && role == 'REQUESTER') {
     switch (custSubGrp) {
       case 'PRIV':
         // ISIC = 9500, - lock field
@@ -1954,8 +1955,9 @@ function setAddressDetailsForViewAP() {
 function lockCustMainNames() {
   console.log('>>>> lockCustMainNames >>>>');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER' || FormManager.getActualValue('viewOnlyPage') == 'true')
+  if (role == 'REQUESTER' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
+  }  
   if (cmr.addressMode == 'updateAddress') {
     FormManager.readOnly('custNm1');
     FormManager.readOnly('custNm2');
@@ -2220,6 +2222,7 @@ function validateGSTForIndia() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
 
 function lockFieldsForIndia(){
   console.log('>>>> lockFieldsForIndia >>>>');
@@ -2582,7 +2585,7 @@ function handleObseleteExpiredDataForUpdate() {
    return;
  }
  // lock all the coverage fields and remove validator
- if (reqType == 'U') {
+ if (reqType == 'U' && role == 'REQUESTER') {
    FormManager.readOnly('repTeamMemberNo');
    FormManager.readOnly('repTeamMemberName');
    FormManager.readOnly('isbuCd');

@@ -957,11 +957,13 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setIsuCd(isuClientTier);
       }
     }
+
     /*
      * if (!StringUtils.isEmpty(data.getIsuCd()) &&
      * ("5K".equals(data.getIsuCd()) || "28".equals(data.getIsuCd()))) {
      * legacyCust.setIsuCd(data.getIsuCd() + "7"); }
      */
+
   }
 
   @Override

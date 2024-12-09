@@ -835,7 +835,6 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
     try {
       // 1. Get request to process
       String sqlName = "";
-
       if (SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
         sqlName = "BATCH.LD.GET.MASS_UPDT_RDC_IT";
       } else {
@@ -920,7 +919,7 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
               if (isForErrorTests(entityManager, admin)) {
                 response = processMassUpdateError(admin, request.getCmrNo());
               } else {
-                this.serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
+                this.serviceClient.setReadTimeout(60 * 60 * 1000); // 30 mins
                 response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
               }
 
@@ -964,11 +963,17 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
                 comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                     + " was SUCCESSFULLY processed:\n");
-                LOG.debug(comment.toString());
+                LOG.info("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                    + " was SUCCESSFULLY processed:\n");
                 for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
-                  LOG.debug(comment.toString());
+                  if (comment.length() > 9900) {
+                    LOG.info("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    LOG.info(" address type: " + pRecord.getAddressType() + "\n");
+                  } else {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
+
                 }
               }
             } else {

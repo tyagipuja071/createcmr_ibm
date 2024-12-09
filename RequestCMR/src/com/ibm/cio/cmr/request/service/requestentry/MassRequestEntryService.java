@@ -1111,7 +1111,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
       admin.setWarnMsgSentDt(null);
 
-      // POOJA TYAGI
       // setDisableProc(model, admin); // FOR LA and EMEA
       if (StringUtils.isEmpty(admin.getLockInd())) {
         admin.setLockInd(CmrConstants.YES_NO.N.toString());
@@ -5312,7 +5311,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     }
                   } else if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
-                    if (!validateLAMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) {
+                    if (!validateLAMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) { // chie1
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
                   } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
@@ -5546,29 +5545,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
   }
 
-  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
-      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
-    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
-
-    for (Row cmrRow : dataSheet) {
-      int seqNo = cmrRow.getRowNum() + 1;
-
-      if (seqNo > 1) {
-        // 4. then for every sheet, get the fields
-        addrModel = new MassUpdateAddressModel();
-        addrModel.setParReqId(reqId);
-        addrModel.setSeqNo(seqNo);
-        addrModel.setIterationId(newIterId);
-        addrModel.setAddrType(tab.getTypeCode());
-        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
-        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
-          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
-          addrModels.add(addrModel);
-        }
-      }
-    }
-  }
-
   private void createAddrModelsFromMapForUKI(long reqId, int newIterId, String cmrIssuingCntry, Map<String, List<String>> cmrPhoneMap,
       List<MassUpdateAddressModel> addrModels) {
     if (!cmrPhoneMap.isEmpty() && (cmrIssuingCntry.equals(SystemLocation.UNITED_KINGDOM) || cmrIssuingCntry.equals(SystemLocation.IRELAND))) {
@@ -5623,6 +5599,29 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("RCUXA", cmr);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     return query;
+  }
+
+  private void addressSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
+      Map<String, List<String>> cmrPhoneMap, List<MassUpdateAddressModel> addrModels, TemplateTab tab, Sheet dataSheet) throws Exception {
+    MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+    for (Row cmrRow : dataSheet) {
+      int seqNo = cmrRow.getRowNum() + 1;
+
+      if (seqNo > 1) {
+        // 4. then for every sheet, get the fields
+        addrModel = new MassUpdateAddressModel();
+        addrModel.setParReqId(reqId);
+        addrModel.setSeqNo(seqNo);
+        addrModel.setIterationId(newIterId);
+        addrModel.setAddrType(tab.getTypeCode());
+        addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+        if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+          setAddrModelCustPhoneAndRemoveFromMap(cmrIssuingCntry, cmrPhoneMap, addrModel);
+          addrModels.add(addrModel);
+        }
+      }
+    }
   }
 
   private void dataSheetIteration(EntityManager entityManager, long reqId, int newIterId, String cmrIssuingCntry,
@@ -6136,6 +6135,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   // 4. then for every sheet, get the fields
                   model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
 
+//                  if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+//                    models.add(model);
+//                    modelList.add(model);
+//                  }
+                  
                   for (MassUpdateModel dataModel : modelList) {
                     if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0
                         && dataModel.getSeqNo() >= model.getSeqNo()) {

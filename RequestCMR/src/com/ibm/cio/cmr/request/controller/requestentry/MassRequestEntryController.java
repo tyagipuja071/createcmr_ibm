@@ -540,8 +540,7 @@ public class MassRequestEntryController extends BaseController {
   }
 
   @RequestMapping(
-      value = "/massrequest/download",
-      method = RequestMethod.POST)
+      value = "/massrequest/download", method = RequestMethod.POST)
   public void downloadMassFile(HttpServletRequest request, HttpServletResponse response) throws Exception {
     String token = request.getParameter("dlTokenId");
     String reqId = request.getParameter("dlReqId");
@@ -685,8 +684,7 @@ public class MassRequestEntryController extends BaseController {
               String type = "";
               try {
                 type = MIME_TYPES.getContentType(docLink);
-              } catch (Exception e) {
-              }
+              } catch (Exception e) {}
               if (StringUtils.isEmpty(type)) {
                 type = "application/octet-stream";
               }
@@ -738,8 +736,7 @@ public class MassRequestEntryController extends BaseController {
                   String type = "";
                   try {
                     type = MIME_TYPES.getContentType(docLink);
-                  } catch (Exception e) {
-                  }
+                  } catch (Exception e) {}
                   if (StringUtils.isEmpty(type)) {
                     type = "application/octet-stream";
                   }
@@ -773,8 +770,7 @@ public class MassRequestEntryController extends BaseController {
   }
 
   @RequestMapping(
-      value = "/massrequest/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+      value = "/massrequest/process", method = { RequestMethod.POST, RequestMethod.GET })
   public void processMassFile(HttpServletRequest request, HttpServletResponse response) throws CmrException {
     try {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -826,8 +822,7 @@ public class MassRequestEntryController extends BaseController {
   }
 
   @RequestMapping(
-      value = "/reactivaterequest/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+      value = "/reactivaterequest/process", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap maintainCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
       @RequestParam("cmrList") String cmrList, @RequestParam("reqType") String reqType, MassUpdateModel model) throws CmrException {
 

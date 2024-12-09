@@ -458,6 +458,7 @@ public class CanadaHandler extends GEOHandler {
     } else if (StringUtils.isNotBlank(data.getVat())){
       data.setVatInd("T");
     }  
+    
   }
 
   @Override

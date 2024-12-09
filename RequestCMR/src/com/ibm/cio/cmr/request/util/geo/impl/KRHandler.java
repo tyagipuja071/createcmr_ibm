@@ -109,7 +109,12 @@ public class KRHandler extends GEOHandler {
 
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
 
-    data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "");
+    if (mainRecord.getCmrAccRecvBo() == null || mainRecord.getCmrAccRecvBo() == "") {
+      data.setCollectionCd("0000");
+    } else {
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo());
+    }
+
     data.setOrdBlk(mainRecord.getCmrOrderBlock() != null ? mainRecord.getCmrOrderBlock() : "");
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // ?Representative(CEO) name in business license?

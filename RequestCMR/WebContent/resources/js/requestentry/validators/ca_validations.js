@@ -370,6 +370,12 @@ function toggleCATaxFields() {
 }
 
 function toggleCATaxFieldsByProvCd(provCd) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'PRIV' || custSubGrp == 'ECO') {
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }
+
   if (provCd == 'QC') {
     // Show QST
     FormManager.clearValue('PSTExempt');
@@ -434,8 +440,14 @@ function clearCATaxFields() {
     if (dijit.byId('PSTExempt')) {
       FormManager.getField('PSTExempt').set('checked', false);
     }
+
     FormManager.disable('PSTExempt');
     return;
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'PRIV' || custSubGrp == 'ECO') {
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
   }
   FormManager.clearValue('PSTExempt');
   FormManager.getField('PSTExempt').set('checked', false);
@@ -726,7 +738,6 @@ function addFieldHandlers() {
       if (!value) {
         value = FormManager.getActualValue('isuCd');
       }
-      setIsuCtcFor5k();
     });
   }
 
@@ -1356,6 +1367,8 @@ function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
       arFaar = '051Z';
     } else if (scenario == 'USA') {
       arFaar = '120V';
+    } else if (scenario == 'IBME') {
+      arFaar = '051Z';
     }
     FormManager.setValue('adminDeptCd', arFaar);
     _scenarioArFaar = arFaar;
@@ -1499,6 +1512,15 @@ function addressQuotationValidator() {
 
 }
 
+function setVatInd() {
+  var vat = FormManager.getActualValue('vat');
+  if (vat && dojo.string.trim(vat) != '') {
+    FormManager.setValue('vatInd', 'T');
+  } else if (vat && dojo.string.trim(vat) == '') {
+    FormManager.setValue('vatInd', 'N');
+  }
+}
+
 function setCustClass() {
 	var custGrp = FormManager.getActualValue('custGrp');
 	if (custGrp == "CROSS") {
@@ -1532,8 +1554,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLogic, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterConfig(setIsuCtcFor5k, [ SysLoc.CANADA ]);
-  GEOHandler.addAfterTemplateLoad(setIsuCtcFor5k, [ SysLoc.CANADA ]);
 
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);

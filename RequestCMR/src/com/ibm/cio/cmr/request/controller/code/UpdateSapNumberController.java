@@ -68,8 +68,7 @@ public class UpdateSapNumberController extends BaseController {
    * @return
    */
   @RequestMapping(
-      value = "/code/updatesapno",
-      method = RequestMethod.GET)
+      value = "/code/updatesapno", method = RequestMethod.GET)
   public @ResponseBody ModelAndView showAttachmentList(HttpServletRequest request) {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
@@ -92,8 +91,7 @@ public class UpdateSapNumberController extends BaseController {
    * @throws CmrException
    */
   @RequestMapping(
-      value = "/code/updatesapno/addressList/get",
-      method = RequestMethod.GET)
+      value = "/code/updatesapno/addressList/get", method = RequestMethod.GET)
   public @ResponseBody ModelMap doUpdateSapNumber(HttpServletRequest request) throws CmrException {
     ModelMap map = new ModelMap();
     String reqId = request.getParameter("reqId");

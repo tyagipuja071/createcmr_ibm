@@ -79,6 +79,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
+  private static final String GRP_VAT_PATTERN = "^177\\d{5}-\\d-\\d{2}$";
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.ABU_DHABI, "AE");
     LANDED_CNTRY_MAP.put(SystemLocation.ALBANIA, "AL");
@@ -1169,6 +1170,12 @@ public class CEMEAHandler extends BaseSOFHandler {
         data.setSalesBusOffCd(mainRecord.getCmrSortl());
       }
     }
+    // CREATCMR - 10129
+    if (SystemLocation.HUNGARY.equals(data.getCmrIssuingCntry())) {
+      data.setTaxCd3(mainRecord.getCmrTaxJurisCd());
+      data.setTaxCd1(mainRecord.getCmrBusinessReg());
+
+    }
   }
 
   private boolean loadDuplicateCMR(Data data, String dupCntry, String dupCmrNo) throws Exception {
@@ -1637,6 +1644,15 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getCompany(), "Company", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getCompany(), "Company", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd3(), newData.getTaxCd3())
+        && SystemLocation.HUNGARY.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Group VAT ID", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxCd3(), "Group VAT ID", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxCd3(), "Group VAT ID", cmrCountry));
       results.add(update);
     }
 
@@ -2340,6 +2356,9 @@ public class CEMEAHandler extends BaseSOFHandler {
               int isuCdIndex = 6; //
               int ctcIndex = 7; //
               int fiscalCdIndex = 15; // default index
+              int vatIndex = 15;
+              int grpVatIndex = 16;
+              int domesticTaxIndex = 17;
 
               for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
                 currCell = (XSSFCell) row.getCell(cellIndex);
@@ -2365,12 +2384,53 @@ public class CEMEAHandler extends BaseSOFHandler {
                   fiscalCdIndex = cellIndex;
                   break;
                 }
+                if ("VAT".equals(cellVal)) {
+                  vatIndex = cellIndex;
+                  break;
+                }
+                if ("Group VAT ID".equals(cellVal)) {
+                  grpVatIndex = cellIndex;
+                  break;
+                }
+                if ("omestic TAX ID".equals(cellVal)) {
+                  domesticTaxIndex = cellIndex;
+                  break;
+                }
               }
 
               currCell = (XSSFCell) row.getCell(ordBlkIndex);
               String ordBlk = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(stcOrdBlkIndex);
               String stcOrdBlk = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(vatIndex);
+              String vat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(grpVatIndex);
+              String grpVat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(domesticTaxIndex);
+              String domesticTax = validateColValFromCell(currCell);
+
+              if ("740".equals(country)) {
+                if (StringUtils.isNotBlank(vat) && !"@".equals(vat) && vat.length() == 10 && !vat.matches("HU[0-9]{8}")) {
+                  LOG.trace("VAT format for Hungary should be HU99999999 ");
+                  error.addError((row.getRowNum() + 1), "VAT", "VAT format for Hungary should be HU99999999.<br> ");
+                }
+                if (StringUtils.isNotBlank(grpVat) && !"@".equals(grpVat) && !grpVat.matches(GRP_VAT_PATTERN)) {
+                  error.addError((row.getRowNum() + 1), "Group VAT ID",
+                      "Group VAT ID should start with 177 and format should be 177nnnnn-n-nn.<br> ");
+                }
+                String trimmedDomesticTax = domesticTax.trim();
+                if (StringUtils.isNotBlank(trimmedDomesticTax)  // Ensure it's not blank
+                	    && !"@".equals(trimmedDomesticTax)  // Ensure it's not equal to "@"
+                	    && (!trimmedDomesticTax.matches("^[0-9]{8}-[0-9]{1}-[0-9]{2}$")  // If format is incorrect
+                	        || trimmedDomesticTax.startsWith("177"))) { // Rejects if it
+                                                               // starts with
+                                                               // 177
+                  LOG.trace("Domestic TAX ID format should be nnnnnnnn-n-nn and should not start with 177.");
+                  error.addError((row.getRowNum() + 1), "Domestic TAX ID",
+                      "Domestic TAX ID format should be nnnnnnnn-n-nn and should not start with 177.<br>");
+                }
+
+              }
               if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
                 LOG.trace("Order Block Code should only @, E, R, J. >> ");
                 error.addError((row.getRowNum() + 1), "Order Block Code", "Order Block Code should be only @, E, R, J.<br> ");

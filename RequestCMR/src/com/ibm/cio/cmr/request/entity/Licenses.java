@@ -33,147 +33,159 @@ public class Licenses extends BaseEntity<LicensesPK> implements Serializable {
   public void setId(LicensesPK id) {
     this.id = id;
   }
-
-  /**
+  
+  /** 
    * Departure Country
-   */
+   */ 
   @Column(name = "DEP_CNTRY")
   private String depCntry;
 
-  /**
+  /** 
    * Tax Category
-   */
+   */ 
   @Column(name = "TAX_CAT")
   private String taxCat;
 
-  /**
+  /** 
    * Validity Date From
-   */
+   */ 
   @Column(name = "VALID_FROM")
   private String validFrom;
 
-  /**
+  /** 
    * Validity Date To
-   */
+   */ 
   @Column(name = "VALID_TO")
   private String validTo;
 
-  /**
+  /** 
    * Tax Exemption Confirmation
-   */
+   */ 
   @Column(name = "TAX_EXEMPT_CONF")
   private String taxExemptConf;
 
-  /**
+  /** 
    * Current Indicator
-   */
+   */ 
   @Column(name = "CURRENT_INDC")
   private String currentIndc;
 
-  /**
+  /** 
    * Created By
-   */
+   */ 
   @Column(name = "CREATE_BY")
   private String createBy;
 
-  /**
+  /** 
    * Create Timestamp
-   */
+   */ 
   @Column(name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createTs;
 
-  /**
+  /** 
    * Last Update By
-   */
+   */ 
   @Column(name = "LAST_UPDT_BY")
   private String lastUpdtBy;
 
-  /**
+  /** 
    * Last Update Timestamp
-   */
+   */ 
   @Column(name = "LAST_UPDT_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date lastUpdtTs;
 
-  public String getDepCntry() {
+  public String getDepCntry(){
     return this.depCntry;
   }
 
-  public void setDepCntry(String depCntry) {
+  public void setDepCntry(String depCntry){
     this.depCntry = depCntry;
   }
 
-  public String getTaxCat() {
+
+  public String getTaxCat(){
     return this.taxCat;
   }
 
-  public void setTaxCat(String taxCat) {
+  public void setTaxCat(String taxCat){
     this.taxCat = taxCat;
   }
 
-  public String getValidFrom() {
+
+  public String getValidFrom(){
     return this.validFrom;
   }
 
-  public void setValidFrom(String validFrom) {
+  public void setValidFrom(String validFrom){
     this.validFrom = validFrom;
   }
 
-  public String getValidTo() {
+
+  public String getValidTo(){
     return this.validTo;
   }
 
-  public void setValidTo(String validTo) {
+  public void setValidTo(String validTo){
     this.validTo = validTo;
   }
 
-  public String getTaxExemptConf() {
+
+  public String getTaxExemptConf(){
     return this.taxExemptConf;
   }
 
-  public void setTaxExemptConf(String taxExemptConf) {
+  public void setTaxExemptConf(String taxExemptConf){
     this.taxExemptConf = taxExemptConf;
   }
 
-  public String getCurrentIndc() {
+
+  public String getCurrentIndc(){
     return this.currentIndc;
   }
 
-  public void setCurrentIndc(String currentIndc) {
+  public void setCurrentIndc(String currentIndc){
     this.currentIndc = currentIndc;
   }
 
-  public String getCreateBy() {
+
+  public String getCreateBy(){
     return this.createBy;
   }
 
-  public void setCreateBy(String createBy) {
+  public void setCreateBy(String createBy){
     this.createBy = createBy;
   }
 
-  public Date getCreateTs() {
+
+  public Date getCreateTs(){
     return this.createTs;
   }
 
-  public void setCreateTs(Date createTs) {
+  public void setCreateTs(Date createTs){
     this.createTs = createTs;
   }
 
-  public String getLastUpdtBy() {
+
+  public String getLastUpdtBy(){
     return this.lastUpdtBy;
   }
 
-  public void setLastUpdtBy(String lastUpdtBy) {
+  public void setLastUpdtBy(String lastUpdtBy){
     this.lastUpdtBy = lastUpdtBy;
   }
 
-  public Date getLastUpdtTs() {
+
+  public Date getLastUpdtTs(){
     return this.lastUpdtTs;
   }
 
-  public void setLastUpdtTs(Date lastUpdtTs) {
+  public void setLastUpdtTs(Date lastUpdtTs){
     this.lastUpdtTs = lastUpdtTs;
   }
+
+
+
 
 }

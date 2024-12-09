@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -121,6 +122,7 @@ public class USUtil extends AutomationUtil {
   public static final String SC_DOMINO = "DOM";
   public static final String SC_HILTON = "HILT";
   public static final String SC_FLORIDA = "FPL";
+  public static final String SC_IBME = "IBMEM";
   public static final String SC_REST_OIO = "OIO";
   public static final String SC_REST_OEMHW = "OEMHW";
   public static final String SC_REST_OEMSW = "OEM-SW";
@@ -135,6 +137,7 @@ public class USUtil extends AutomationUtil {
   public static final String SC_REST_ICC = "ICC";
   public static final String SC_REST_SVMP = "SVMP";
   public static final String SC_REST_KYN = "KYN";
+
   // IGS
   public static final String SC_IGSF = "IGSF";
   public static final String SC_IGS = "IGS";
@@ -462,93 +465,176 @@ public class USUtil extends AutomationUtil {
         }
       }
 
-      // set ISU CTC if not found
-      if (StringUtils.isBlank(data.getIsuCd())) {
-        details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 34-Q.").append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "34");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
-      }
+      if (StringUtils.isBlank(data.getGbgId())) {
 
-      if (StringUtils.isNotEmpty(data.getIsicCd())) {
-        if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
+        if ("PRIV".equalsIgnoreCase(scenarioSubType)) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
+        } else if ("ECOSYSTEM".equalsIgnoreCase(scenarioSubType)) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
+        } else {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 27-E.").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "27");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "E");
         }
 
-        if ("C".equals(admin.getReqType())
-            && (data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
-            && StringUtils.isNotBlank(scenarioSubType) && !FEDERAL_SCENARIOS.contains(scenarioSubType)
-            && StringUtils.isNotBlank(admin.getSourceSystId()) && !admin.getSourceSystId().equals("FedCMR")) {
-          if (SC_BP_END_USER.equals(scenarioSubType)) {
-            details.append("Federal ISIC found on the request for BP@EU. Treating as validated.\n");
-            // engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC
-            // found on the request for non-Federal scenario.");
-          } else {
-            details.append("Federal ISIC found on the request for non-Federal scenario.\n");
-            engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
+      } else {
+
+        if ("PRIV".equalsIgnoreCase(scenarioSubType)) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 21-Blank.").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "21");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), " ");
+        } else if ("ECOSYSTEM".equalsIgnoreCase(scenarioSubType)) {
+          details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 36-Y. ").append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "36");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
+        } else {
+
+          String coverageId = data.getCovId();
+          String firstChar = coverageId.substring(0, 1);
+
+          if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
+            Map<String, String> industryCodeISUMap = new HashMap<String, String>();
+            String isu = ""; // apply logic to set isu based on sub industry
+                             // code
+            String ctc = "";
+            String subIndustryCd = data != null && data.getSubIndustryCd() != null ? data.getSubIndustryCd() : "";
+            String firstCharSubIndustry = StringUtils.isNotEmpty(subIndustryCd) ? subIndustryCd.substring(0, 1) : "";
+            industryCodeISUMap.put("A", "3T");
+            industryCodeISUMap.put("U", "12");
+            industryCodeISUMap.put("K", "05");
+            industryCodeISUMap.put("R", "1R");
+            industryCodeISUMap.put("D", "18");
+
+            industryCodeISUMap.put("W", "18");
+            industryCodeISUMap.put("T", "19");
+            industryCodeISUMap.put("F", "04");
+            industryCodeISUMap.put("S", "4F");
+            industryCodeISUMap.put("N", "31");
+
+            industryCodeISUMap.put("J", "4A");
+            industryCodeISUMap.put("V", "14");
+            industryCodeISUMap.put("L", "5E");
+            industryCodeISUMap.put("P", "15");
+            industryCodeISUMap.put("M", "4D");
+
+            industryCodeISUMap.put("Y", "28");
+            industryCodeISUMap.put("G", "28");
+            industryCodeISUMap.put("E", "40");
+            industryCodeISUMap.put("H", "11");
+            industryCodeISUMap.put("X", "8C");
+
+            industryCodeISUMap.put("B", "5B");
+            industryCodeISUMap.put("C", "5B");
+
+            if (industryCodeISUMap.containsKey(firstCharSubIndustry)) {
+              isu = industryCodeISUMap.get(firstCharSubIndustry);
+            }
+            if (StringUtils.isBlank(ctc)) {
+              details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to " + isu + "- blank").append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", ctc, ctc);
+
+            }
+
+          }
+
+          else if (("T").equalsIgnoreCase(firstChar)) {
+            details.append("\nISU/Client Tier blank on the request. Setting ISU-CTC to 34-Q.").append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "34");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "Q");
+
           }
         }
+
       }
 
-      // if scenario is OEMSW or OEMHW set isic to 357X
-      if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType) || SC_REST_TPD.equals(scenarioSubType)
-          || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
-        if (SC_REST_TPD.equals(scenarioSubType) || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "357X");
+      // set ISU CTC if not found
+      if (StringUtils.isBlank(data.getIsuCd())) {
+
+        if (StringUtils.isNotEmpty(data.getIsicCd())) {
+          if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
+          }
+
+          if ("C".equals(admin.getReqType())
+              && (data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
+              && StringUtils.isNotBlank(scenarioSubType) && !FEDERAL_SCENARIOS.contains(scenarioSubType)
+              && StringUtils.isNotBlank(admin.getSourceSystId()) && !admin.getSourceSystId().equals("FedCMR")) {
+            if (SC_BP_END_USER.equals(scenarioSubType)) {
+              details.append("Federal ISIC found on the request for BP@EU. Treating as validated.\n");
+              // engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC
+              // found on the request for non-Federal scenario.");
+            } else {
+              details.append("Federal ISIC found on the request for non-Federal scenario.\n");
+              engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
+            }
+          }
         }
+
+        // if scenario is OEMSW or OEMHW set isic to 357X
+        if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType) || SC_REST_TPD.equals(scenarioSubType)
+            || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
+          if (SC_REST_TPD.equals(scenarioSubType) || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "357X");
+          }
+        }
+
+        // if scenario is KYN
+        if (SC_REST_KYN.equals(scenarioSubType)) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7229");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "RESTRICT_TO", data.getRestrictTo(), "KYN");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "BD");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "7229");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "AFFILIATE", data.getAffiliate(), "6500871");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COMPANY", data.getCompany(), "12641341");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_CD", data.getInacCd(), "6272");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_TYPE", data.getInacType(), "I");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "SD3");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IJ9");
+        }
+
+        // CREATCMR-6342
+        // if (CG_BY_MODEL.equals(data.getCustGrp()) &&
+        // StringUtils.isNotEmpty(data.getMiscBillCd())) {
+        // String miscBillCode = "";
+        // miscBillCode = data.getMiscBillCd().toUpperCase();
+        // if (miscBillCode.matches(".*[ABMNH]+.*")) {
+        // miscBillCode = miscBillCode.replaceAll("[ABMNH]", "");
+        // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+        // "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
+        // }
+        // }
+        // CREATCMR-6342
+
+        // CREATCMR-7584
+        // if ("X".equals(data.getSpecialTaxCd())) {
+        // details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt
+        // Status value.").append("\n");
+        // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+        // "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
+        // }
+
+      } else if ("U".equals(admin.getReqType())) {
+        eleResults.append("Skipped");
+        details.append("Skipping BO codes computations for update requests.");
       }
 
-      // if scenario is KYN
-      if (SC_REST_KYN.equals(scenarioSubType)) {
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7229");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "RESTRICT_TO", data.getRestrictTo(), "KYN");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "BD");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "7229");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "AFFILIATE", data.getAffiliate(), "6500871");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COMPANY", data.getCompany(), "12641341");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_CD", data.getInacCd(), "6272");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_TYPE", data.getInacType(), "I");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "SD3");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IJ9");
+      if (results == null || (results != null && results.isOnError())) {
+        eleResults.append("Error On Field Calculation.");
       }
-
-      // CREATCMR-6342
-      // if (CG_BY_MODEL.equals(data.getCustGrp()) &&
-      // StringUtils.isNotEmpty(data.getMiscBillCd())) {
-      // String miscBillCode = "";
-      // miscBillCode = data.getMiscBillCd().toUpperCase();
-      // if (miscBillCode.matches(".*[ABMNH]+.*")) {
-      // miscBillCode = miscBillCode.replaceAll("[ABMNH]", "");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
-      // }
-      // }
-      // CREATCMR-6342
-
-      // CREATCMR-7584
-      // if ("X".equals(data.getSpecialTaxCd())) {
-      // details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt
-      // Status value.").append("\n");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
-      // }
-
-    } else if ("U".equals(admin.getReqType())) {
-      eleResults.append("Skipped");
-      details.append("Skipping BO codes computations for update requests.");
+      // computation end
+      results.setResults(eleResults.toString());
+      results.setDetails(details.toString());
+      results.setProcessOutput(overrides);
     }
-
-    if (results == null || (results != null && results.isOnError())) {
-      eleResults.append("Error On Field Calculation.");
-    }
-    // computation end
-    results.setResults(eleResults.toString());
-    results.setDetails(details.toString());
-    results.setProcessOutput(overrides);
-
     return results;
   }
 
@@ -565,7 +651,7 @@ public class USUtil extends AutomationUtil {
     String[] skipCompanyChecksScenarioList = { SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL, SC_DUMMY,
         SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
-        SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
+        SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD, SC_IBME };
     String scenarioSubType = "";
     if (StringUtils.isNotEmpty(admin.getSourceSystId()) && admin.getSourceSystId().equals("FedCMR")) {
       Addr zs01 = requestData.getAddress("ZS01");
@@ -626,6 +712,31 @@ public class USUtil extends AutomationUtil {
           setDummyGBGMatchForInternal(engineData);
         }
 
+      }
+    }
+
+    if (SC_IBME.equals(data.getCustSubGrp())) {
+      Person person = null;
+      if (StringUtils.isNotBlank(admin.getMainCustNm1())) {
+        try {
+          String mainCustName = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
+          person = BluePagesHelper.getPersonByName(mainCustName, data.getCmrIssuingCntry());
+          if (person == null) {
+            engineData.addRejectionComment("OTH", "Employee details not found in IBM People.", "", "");
+            details.append("Employee details not found in IBM People.").append("\n");
+            return false;
+          } else {
+            details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").").append("\n");
+          }
+        } catch (Exception e) {
+          LOG.error("Not able to check name against bluepages", e);
+          engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
+          return false;
+        }
+      } else {
+        LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+        engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+        return false;
       }
     }
 
@@ -913,6 +1024,7 @@ public class USUtil extends AutomationUtil {
         } else if ("897".equalsIgnoreCase(data.getCmrIssuingCntry()) && !changes.isLegalNameChanged() && isPaygoUpgrade) {
           hasNegativeCheck = validateLegalNameChange(requestData, failedChecks);
         }
+
       } finally {
         cedpManager.clear();
         cedpManager.close();
@@ -1378,6 +1490,7 @@ public class USUtil extends AutomationUtil {
             validation.setSuccess(true);
           } else {
             // company proof
+            // CREATCMR-9466
             if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
               validation.setMessage("Validated");
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
@@ -1401,9 +1514,11 @@ public class USUtil extends AutomationUtil {
               }
               LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
             }
+            // CREATCMR-9466
           }
         } else {
           // company proof
+          // CREATCMR-9466
           if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
             validation.setMessage("Validated");
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -1427,9 +1542,11 @@ public class USUtil extends AutomationUtil {
             }
             LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
           }
+          // CREATCMR-9466
         }
       } else {
         // company proof
+        // CREATCMR-9466
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
           validation.setMessage("Validated");
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
@@ -1452,6 +1569,7 @@ public class USUtil extends AutomationUtil {
           }
           LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
         }
+        // CREATCMR-9466
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");
@@ -1879,8 +1997,8 @@ public class USUtil extends AutomationUtil {
     revCmrModel.setMiscBilling(usDetails.getMiscBilling());
     revCmrModel.setUsSicmen(usDetails.getSicmen());
 
-    revCmrModel.setIsuCd("34");
-    revCmrModel.setClientTier("Q");
+    // revCmrModel.setIsuCd("34");
+    // revCmrModel.setClientTier("Q");
 
     // if scenario is OEMSW or OEMHW set isic to 357X
     // if (SC_REST_OEMSW.equals(scenario) || SC_REST_OEMHW.equals(scenario) ||
@@ -2232,7 +2350,6 @@ public class USUtil extends AutomationUtil {
     return false;
   }
 
-  @Override
   public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covType, String covId, String covDesc, String gbgId) throws Exception {
@@ -2264,7 +2381,7 @@ public class USUtil extends AutomationUtil {
           } else if ("PRIV".equalsIgnoreCase(scenario)) {
             isu = "21";
             ctc = " ";
-          } else if (!"ECOSYSTEM".equalsIgnoreCase(scenario) && !"PRIV".equalsIgnoreCase(scenario)) {
+          } else if (!"ECOSYSTEM".equalsIgnoreCase(scenario) && !("PRIV").equalsIgnoreCase(scenario)) {
             isu = "27";
             ctc = "E";
           }
@@ -2316,7 +2433,7 @@ public class USUtil extends AutomationUtil {
          * overrides, coverageId, data, isu, ctc); }
          */
       else if (("A").equalsIgnoreCase(firstChar) || ("I").equalsIgnoreCase(firstChar)) {
-        if (scenario.equalsIgnoreCase("ECO")) {
+        if ("ECO".equalsIgnoreCase(scenario)) {
           isu = "36";
           ctc = "Y";
         } else if ("PRIV".equalsIgnoreCase(scenario)) {
@@ -2379,6 +2496,15 @@ public class USUtil extends AutomationUtil {
        */
     return true;
 
+  }
+
+  private void setISUCTCBasedOnCoverage(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String isu, String ctc) {
+    LOG.debug("Setting ISU CTC based on coverage...");
+    details.append("Setting ISU based on Coverage ").append(coverageId).append(" to ").append(isu).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", isu, isu);
+
+    details.append("Setting CTC based on Coverage ").append(coverageId).append(" to ").append(ctc).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", isu, ctc);
   }
 
   @Override
@@ -2521,15 +2647,6 @@ public class USUtil extends AutomationUtil {
 
     return flag;
 
-  }
-
-  private void setISUCTCBasedOnCoverage(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String isu, String ctc) {
-    LOG.debug("Setting ISU CTC based on coverage...");
-    details.append("Setting ISU based on Coverage ").append(coverageId).append(" to ").append(isu).append("\n");
-    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isu);
-
-    details.append("Setting CTC based on Coverage ").append(coverageId).append(" to ").append(ctc).append("\n");
-    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), ctc);
   }
 
   public static String getcGem(EntityManager entityManager, String cmrNo) {
