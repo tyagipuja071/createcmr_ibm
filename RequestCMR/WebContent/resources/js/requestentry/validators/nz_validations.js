@@ -547,6 +547,19 @@ function addSalesRepNameNoCntryValidator() {
   }
 }
 
+function setDefaultARForNZ() {
+  console.log('>>>> setDefaultARForNZ >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+  FormManager.enable('collectionCd');
+}
+
 function included(cmrIssuCntry) {
   var excludedCntry = ["615", "652", "744", "790", "736", "738", "643", "749", "778", "818", "834", "852", "856", "646", "714", "720", "616", "796"];
 
@@ -2138,7 +2151,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
+    
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
@@ -2162,7 +2175,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
     FormManager.removeValidator('isbuCd', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+    
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
     FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -2960,6 +2973,7 @@ function addAfterConfigNZ() {
   removeStateValidatorForHkMoNZ();
 // setCTCIsuByClusterANZ();
   handleObseleteExpiredDataForUpdate();
+  setDefaultARForNZ();
 }
 
 function addressFunctions() {

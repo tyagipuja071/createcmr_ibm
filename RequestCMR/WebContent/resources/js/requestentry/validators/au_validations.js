@@ -633,40 +633,6 @@ function setDefaultValueforCustomerServiceCode() {
   }
 }
 
-function setCollectionCd() {
-  console.log('>>>> setCollectionCd >>>>');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  var isbuCd = FormManager.getActualValue('isbuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var collCd = null;
-  if (isbuCd != '') {
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      ISBU: '%' + isbuCd + '%'
-    };
-    var result = cmr.query('GET.ARCODELIST.BYISBU', qParams);
-    if (result.length > 0) {
-      if (result != null && result[0].ret1 != result[0].ret2) {
-        collCd = result[0].ret1;
-        if (collCd != null) {
-          FormManager.setValue('collectionCd', collCd);
-        }
-      }
-    }
-  }
-}
-
 function addSalesRepNameNoCntryValidator() {
   console.log(">>>repTeamMemberNo<<<===" + FormManager.getActualValue('repTeamMemberNo'));
   console.log(">>>repTeamMemberNo---pID<<<===" + localStorage.getItem("pID"));
@@ -692,6 +658,19 @@ function addSalesRepNameNoCntryValidator() {
       };
     })(), 'MAIN_IBM_TAB', 'frmCMR');
   }
+}
+
+function setDefaultARForAU() {
+  console.log('>>>> setDefaultARForPH >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+  FormManager.enable('collectionCd');
 }
 
 function included(cmrIssuCntry) {
@@ -1820,6 +1799,9 @@ function removeStateValidatorForHkMoNZ() {
 }
 
   function setCollCdFrAU(cntry, addressMode, saving, finalSave, force) {
+    if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+      return;
+    }
     console.log('>>>> setCollCdFrAU >>>>');
     var reqType = FormManager.getActualValue('reqType');
     var record = null;
@@ -2688,7 +2670,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
+    
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
@@ -2712,7 +2694,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
     FormManager.removeValidator('isbuCd', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+    
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
     FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -3138,7 +3120,6 @@ function addAfterConfigAU() {
   updateIndustryClass();
   updateProvCd();
   updateRegionCd();
-  setCollectionCd();
   setCollCdFrAU();
   onIsuCdChangeAseanAnzIsa();
 // setCTCIsuByClusterANZ();
@@ -3154,6 +3135,7 @@ function addAfterConfigAU() {
   handleObseleteExpiredDataForUpdate(); 
   setRepTeamMemberNo();
   setMrcCd();
+  setDefaultARForAU();
 }
 
 function addressFunctions() {
