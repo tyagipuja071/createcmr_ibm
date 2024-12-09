@@ -102,6 +102,7 @@ function addAfterConfigAP() {
   if (cntry == '796' && reqType == 'C') {
     setLockIsicNZfromDNB();
     setDefaultValueforCustomerServiceCode();
+    setDefaultARForNZ();
   }
 
   if (cntry == '796' && reqType == 'U') {
@@ -510,6 +511,18 @@ function setDefaultValueforCustomerServiceCode() {
     FormManager.setValue('engineeringBo', '9920');
     FormManager.readOnly('engineeringBo');
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
+  }
+}
+
+function setDefaultARForNZ() {
+  console.log('>>>> setDefaultARForNZ >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+  
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
   }
 }
 
