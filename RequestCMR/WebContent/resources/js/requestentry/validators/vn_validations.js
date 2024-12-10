@@ -7576,8 +7576,27 @@ function updateChecklist() {
 
 
 function initChecklistDate() {
-    FormManager.setValue('dijit_form_TextBox_4',localStorage.getItem('checklistSaveDate'));
-    FormManager.readOnly('dijit_form_TextBox_4');  
+  FormManager.setValue('dijit_form_TextBox_4', localStorage.getItem('checklistSaveDate'));
+  FormManager.readOnly('dijit_form_TextBox_4');
+}
+
+function checkAccRcvBoLengthValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+        if (collectionCd.length < 4) {
+          return new ValidationResult({
+            id: 'collectionCd',
+            type: 'text',
+            name: 'collectionCd'
+          }, false, 'AR Code should be 4 characters in length.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function setKUKLAvaluesVN() {
@@ -7696,6 +7715,7 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(setRepTeamMemberNo, [SysLoc.VIETNAM]);
   GEOHandler.addAfterTemplateLoad(setRepTeamMemberNo, [SysLoc.VIETNAM]);
   GEOHandler.addAfterConfig(addCustGrpHandler, [SysLoc.VIETNAM]);
+  GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.VIETNAM], null, true);
   // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.VIETNAM], null, true);
   GEOHandler.addAfterTemplateLoad(clearInacOnScenarioChange, [SysLoc.VIETNAM]);
