@@ -445,6 +445,26 @@ function setVatValidator() {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'Unify Number' ], 'MAIN_CUST_TAB');
   }
 }
+
+function checkAccRcvBoLengthValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+        if (collectionCd.length < 4) {
+          return new ValidationResult({
+            id: 'collectionCd',
+            type: 'text',
+            name: 'collectionCd'
+          }, false, 'IBM Collection Responsibility should be 4 characters in length.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function setChecklistStatus() {
   console.log('validating checklist..');
   var checklist = dojo.query('table.checklist');
@@ -1200,6 +1220,7 @@ dojo.addOnLoad(function() {
   
   // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.TW,null,true);
+  GEOHandler.registerValidator(checkAccRcvBoLengthValidator, GEOHandler.TW);
   
   // CREATCMR-6825
   GEOHandler.registerValidator(checkCustomerNameForKYND, GEOHandler.TW, null, true);
