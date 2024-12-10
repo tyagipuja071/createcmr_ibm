@@ -1389,8 +1389,6 @@ function onCustSubGrpChange() {
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
 
-    setDefaultARForPH();
-
     // CREATCMR-7885
     // CREATCMR-7878
 
@@ -1546,12 +1544,34 @@ function setDefaultArCodePH() {
   var reqType = FormManager.getActualValue('reqType');
   var collectionCd = FormManager.getActualValue('collectionCd');
 
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+
   if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
     FormManager.setValue('collectionCd', '0000');
   }
-  
-	FormManager.enable('collectionCd');
-  FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
+
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['AR Code'], 'MAIN_IBM_TAB');
+}
+
+function checkAccRcvBoLengthValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+        if (collectionCd.length < 4) {
+          return new ValidationResult({
+            id: 'collectionCd',
+            type: 'text',
+            name: 'collectionCd'
+          }, false, 'AR Code should be 4 characters in length.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -1581,19 +1601,6 @@ function addSalesRepNameNoCntryValidator() {
   } else {
 
   }
-}
-
-function setDefaultARForPH() {
-  console.log('>>>> setDefaultARForPH >>>>');
-  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
-    return;
-  }
-  var collectionCd = FormManager.getActualValue('collectionCd');
-
-  if (!collectionCd) {
-    FormManager.setValue('collectionCd', '0000');
-  }
-  FormManager.enable('collectionCd');
 }
 
 function included(cmrIssuCntry) {
@@ -8389,4 +8396,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [SysLoc.INDIA]);
   GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
+
+  GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.PHILIPPINES]);
 });
