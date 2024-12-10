@@ -910,6 +910,7 @@ function setDefaultARForIN() {
   if (!collectionCd) {
     FormManager.setValue('collectionCd', '0000');
   }
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['AR Code'], 'MAIN_IBM_TAB');
 }
 
 function autoSetAbbrevNmLocnLogic() {
@@ -2224,8 +2225,7 @@ function lockFieldsForIndia(){
   FormManager.resetValidations('busnType');
 
   FormManager.readOnly('cmrNoPrefix');
-  FormManager.resetValidations('collectionCd');
-
+  
   FormManager.readOnly('repTeamMemberNo');
   FormManager.resetValidations('repTeamMemberNo');
 
@@ -2590,7 +2590,7 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
    FormManager.removeValidator('covId', Validators.REQUIRED);
-   FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+   
    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
    FormManager.removeValidator('creditCd', Validators.REQUIRED);
