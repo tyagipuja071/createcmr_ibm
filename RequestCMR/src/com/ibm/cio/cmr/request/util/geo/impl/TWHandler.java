@@ -86,8 +86,13 @@ public class TWHandler extends GEOHandler {
     data.setDunsNo(mainRecord.getCmrDuns() == null ? mainRecord.getCmrDuns() : mainRecord.getCmrDuns().trim());
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode() == null ? mainRecord.getInvoiceSplitCode() : mainRecord.getInvoiceSplitCode().trim());
-    data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "");
     data.setOrdBlk(mainRecord.getCmrOrderBlock() != null ? mainRecord.getCmrOrderBlock() : "");
+
+    if (mainRecord.getCmrAccRecvBo() == null || mainRecord.getCmrAccRecvBo() == "") {
+      data.setCollectionCd("00F0");
+    } else {
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo());
+    }
 
     // jira 2567
     String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();

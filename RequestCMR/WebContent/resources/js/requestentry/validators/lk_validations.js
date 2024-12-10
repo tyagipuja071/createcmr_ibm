@@ -243,6 +243,8 @@ function addAfterConfigAP() {
     console.log(">>> SG-834 >>> Lock ISIC For D&B Import.");
     FormManager.readOnly('isicCd');
   }
+
+  setDefaultArCodeLK();
 }
 
 function setInacByCluster() {
@@ -981,8 +983,6 @@ function onCustSubGrpChange() {
 
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
-    setCollectionCd();
-
     // CREATCMR-7885
     // CREATCMR-7878
 
@@ -1254,44 +1254,15 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   }
 }
 
-function setCollectionCd() {
-  console.log('>>>> setCollectionCd >>>>');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
+function setDefaultArCodeLK() {
+	var reqType = FormManager.getActualValue('reqType');
+	var collectionCd = FormManager.getActualValue('collectionCd');
 
-  if (cmrIssuCntry == '834' && custGrp == 'CROSS') {
-    FormManager.setValue('collectionCd', 'S013');
-    if (role == 'REQUESTER')
-      FormManager.readOnly('collectionCd');
-    return;
-  }
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+	if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
+		FormManager.setValue('collectionCd', '0000');
+	}
 
-  var isbuCd = FormManager.getActualValue('isbuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var collCd = null;
-  if (isbuCd != '') {
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-      ISBU: '%' + isbuCd + '%'
-    };
-    var result = cmr.query('GET.ARCODELIST.BYISBU', qParams);
-    if (result.length > 0) {
-      if (result != null && result[0].ret1 != result[0].ret2) {
-        collCd = result[0].ret1;
-        if (collCd != null) {
-          FormManager.setValue('collectionCd', collCd);
-        }
-      }
-    }
-  }
+	FormManager.addValidator('collectionCd', Validators.REQUIRED, ['IBM Collection Responsibilit'], 'MAIN_IBM_TAB');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -3543,9 +3514,6 @@ function onISBUCdChange() {
   _isbuHandler = dojo.connect(FormManager.getField('isbuCd'), 'onChange', function (value) {
     if (!value) {
       return;
-    }
-    if (value != null && value.length > 1) {
-      setCollectionCd();
     }
   });
   if (_isuHandler && _isuHandler[0]) {
@@ -7345,7 +7313,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setCollectionCd, GEOHandler.AP, [SysLoc.AUSTRALIA, SysLoc.INDIA]);
   GEOHandler.addAfterConfig(onSubIndustryChange, GEOHandler.AP);
   GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ISA);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
