@@ -2885,7 +2885,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(updateIndustryClass, SysLoc.INDIA);
   GEOHandler.addAfterConfig(updateProvCd, SysLoc.INDIA);
   GEOHandler.addAfterConfig(updateRegionCd, SysLoc.INDIA);
-  GEOHandler.addAfterConfig(setCollectionCd, SysLoc.INDIA);
+  
   GEOHandler.addAfterConfig(custSubGrpHandler, SysLoc.INDIA);
   
   GEOHandler.addAfterConfig(setCollCdFrIndia, SysLoc.INDIA);
