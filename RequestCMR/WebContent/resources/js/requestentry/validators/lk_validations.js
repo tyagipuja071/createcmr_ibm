@@ -1285,6 +1285,9 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
 }
 
 function setDefaultArCodeLK() {
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
 	var reqType = FormManager.getActualValue('reqType');
 	var collectionCd = FormManager.getActualValue('collectionCd');
 
@@ -1292,7 +1295,7 @@ function setDefaultArCodeLK() {
 		FormManager.setValue('collectionCd', '0000');
 	}
 
-	FormManager.addValidator('collectionCd', Validators.REQUIRED, ['IBM Collection Responsibilit'], 'MAIN_IBM_TAB');
+	FormManager.addValidator('collectionCd', Validators.REQUIRED, ['IBM Collection Responsibility'], 'MAIN_IBM_TAB');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -4423,9 +4426,7 @@ function lockFieldsForIndia() {
     FormManager.resetValidations('busnType');
 
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
-    FormManager.resetValidations('collectionCd');
-
+    
     FormManager.readOnly('repTeamMemberNo');
     FormManager.resetValidations('repTeamMemberNo');
 
@@ -5072,7 +5073,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
     FormManager.removeValidator('isbuCd', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+    
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
     FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -5714,7 +5715,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       break;
     case 'BLUMX':
       // cluster/QTC/ISU: default as 00002/Z/34 - lock field
@@ -5733,7 +5734,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Bluemix use only');
       FormManager.readOnly('abbrevNm');
@@ -5757,7 +5758,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Market place use only');
       FormManager.readOnly('abbrevNm');
@@ -5783,7 +5784,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00IL - lock field
       FormManager.setValue('collectionCd', '00IL');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Internal use only');
       FormManager.readOnly('abbrevNm');
@@ -5808,7 +5809,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00IL - lock field
       FormManager.setValue('collectionCd', '00IL');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'IGF DUMMY use only');
       FormManager.readOnly('abbrevNm');
@@ -5819,7 +5820,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Acquisition use only');
       FormManager.readOnly('abbrevNm');
@@ -5832,7 +5833,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       // cluster/QTC/ISU
       // CREATCMR-7884
 // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
@@ -5853,7 +5854,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5864,7 +5865,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['09199']);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
@@ -5891,7 +5892,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       // cluster/QTC/ISU:
       // CREATCMR-7884
 // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
@@ -5925,7 +5926,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5947,7 +5948,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5957,7 +5958,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Acquisition use only');
       FormManager.readOnly('abbrevNm');
@@ -5980,7 +5981,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Bluemix use only');
       FormManager.readOnly('abbrevNm');
@@ -5993,7 +5994,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       // cluster/QTC/ISU:
       // CREATCMR-7884
 // FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
@@ -6026,7 +6027,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Market place use only');
       FormManager.readOnly('abbrevNm');
