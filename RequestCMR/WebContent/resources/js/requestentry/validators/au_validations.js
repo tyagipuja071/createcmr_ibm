@@ -660,6 +660,19 @@ function addSalesRepNameNoCntryValidator() {
   }
 }
 
+function setDefaultARForAU() {
+  console.log('>>>> setDefaultARForAU >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+  FormManager.enable('collectionCd');
+}
+
 function included(cmrIssuCntry) {
   var excludedCntry = ["615", "652", "744", "790", "736", "738", "643", "749", "778", "818", "834", "852", "856", "646", "714", "720", "616", "796"];
 
@@ -1786,110 +1799,97 @@ function removeStateValidatorForHkMoNZ() {
   }
 }
 
-function setCollCdFrAU(cntry, addressMode, saving, finalSave, force) {
-  console.log('>>>> setCollCdFrAU >>>>');
-  var reqType = FormManager.getActualValue('reqType');
-  var record = null;
-  var addrType = null;
-  var custNm1 = null;
-  var provCd = null;
-  if (reqType == 'U') {
-    return;
-  }
-  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-
-    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-      if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-        record = _allAddressData[i];
-      }
-      addrType = record.addrType[0];
-      custNm1 = record.custNm1[0];
-      provCd = record.stateProv[0];
-    }
-  }
-  if (FormManager.getActualValue('addrType') == 'ZS01' || (addrType != null && addrType == 'ZS01')) {
-    var regEx1 = /^[A-C]/;
-    var regEx2 = /^[D-K]/;
-    var regEx3 = /^[L-R]/;
-    var regEx4 = /^[S-Z]/;
-    var regEx5 = /^[A-Q]/;
-    var regEx6 = /^[R-Z]/;
-    var regEx7 = /^[A-Z]/;
-
-    // var result = null;
-    // var zs01ReqId = FormManager.getActualValue('reqId');
-    // var qParams = {
-    // REQ_ID : zs01ReqId,
-    // };
-    // if(cmr.addressMode == 'newAddress' || cmr.addressMode ==
-    // 'copyAddress'){
-    // result = cmr.query('GET.CUSTNM_PROV_BYADRTYP', qParams);
-    // if(result != null && result.ret1 != null){
-    // custNm1 = result.ret1;
-    // provCd = result.ret2;
-    // }
-    if (custNm1 == null || custNm1 == '' || cmr.addressMode == 'updateAddress')
-      custNm1 = FormManager.getActualValue('custNm1');
-    if (provCd == null || provCd == '' || cmr.addressMode == 'updateAddress')
-      provCd = FormManager.getActualValue('stateProv');
-    // }
-    // else{
-    // custNm1 = FormManager.getActualValue('custNm1');
-    // provCd = FormManager.getActualValue('stateProv');
-    // }
-    if (['NSW', 'NT', 'ACT'].indexOf(provCd) >= 0) {
-      if (regEx1.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00JC');
-      }
-      if (regEx2.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00JD');
-      }
-      if (regEx3.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00I2');
-      }
-      if (regEx4.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00JK');
-      }
-    }
-    if (['VIC', 'TAS'].indexOf(provCd) >= 0) {
-      if (regEx5.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00J1');
-      }
-      if (regEx6.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00A2');
-      }
-    }
-    if (provCd == 'QLD') {
-      if (regEx7.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00OS');
-      }
-    }
-    if (provCd == 'SA') {
-      if (regEx7.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00GG');
-      }
-    }
-    if (provCd == 'WA') {
-      if (regEx7.test(custNm1)) {
-        FormManager.setValue('collectionCd', '00PZ');
-      }
-    }
-    FormManager.enable('collectionCd');
-  }
-}
-  
-  function setDefaultARForAU() {
-    console.log('>>>> setDefaultARForAU >>>>');
-    if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+  function setCollCdFrAU(cntry, addressMode, saving, finalSave, force) {
+    console.log('>>>> setCollCdFrAU >>>>');
+    var reqType = FormManager.getActualValue('reqType');
+    var record = null;
+    var addrType = null;
+    var custNm1 = null;
+    var provCd = null;
+    if (reqType == 'U') {
       return;
     }
-    var collectionCd = FormManager.getActualValue('collectionCd');
-    
-    if (!collectionCd) {
-      FormManager.setValue('collectionCd', '0000');
+    if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+  
+      for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+        record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+        if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+          record = _allAddressData[i];
+        }
+        addrType = record.addrType[0];
+        custNm1 = record.custNm1[0];
+        provCd = record.stateProv[0];
+      }
     }
-  }
+    if (FormManager.getActualValue('addrType') == 'ZS01' || (addrType != null && addrType == 'ZS01')) {
+      var regEx1 = /^[A-C]/;
+      var regEx2 = /^[D-K]/;
+      var regEx3 = /^[L-R]/;
+      var regEx4 = /^[S-Z]/;
+      var regEx5 = /^[A-Q]/;
+      var regEx6 = /^[R-Z]/;
+      var regEx7 = /^[A-Z]/;
+  
+      // var result = null;
+      // var zs01ReqId = FormManager.getActualValue('reqId');
+      // var qParams = {
+      // REQ_ID : zs01ReqId,
+      // };
+      // if(cmr.addressMode == 'newAddress' || cmr.addressMode ==
+      // 'copyAddress'){
+      // result = cmr.query('GET.CUSTNM_PROV_BYADRTYP', qParams);
+      // if(result != null && result.ret1 != null){
+      // custNm1 = result.ret1;
+      // provCd = result.ret2;
+      // }
+      if (custNm1 == null || custNm1 == '' || cmr.addressMode == 'updateAddress')
+        custNm1 = FormManager.getActualValue('custNm1');
+      if (provCd == null || provCd == '' || cmr.addressMode == 'updateAddress')
+        provCd = FormManager.getActualValue('stateProv');
+      // }
+      // else{
+      // custNm1 = FormManager.getActualValue('custNm1');
+      // provCd = FormManager.getActualValue('stateProv');
+      // }
+      if (['NSW', 'NT', 'ACT'].indexOf(provCd) >= 0) {
+        if (regEx1.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00JC');
+        }
+        if (regEx2.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00JD');
+        }
+        if (regEx3.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00I2');
+        }
+        if (regEx4.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00JK');
+        }
+      }
+      if (['VIC', 'TAS'].indexOf(provCd) >= 0) {
+        if (regEx5.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00J1');
+        }
+        if (regEx6.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00A2');
+        }
+      }
+      if (provCd == 'QLD') {
+        if (regEx7.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00OS');
+        }
+      }
+      if (provCd == 'SA') {
+        if (regEx7.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00GG');
+        }
+      }
+      if (provCd == 'WA') {
+        if (regEx7.test(custNm1)) {
+          FormManager.setValue('collectionCd', '00PZ');
+        }
+      }
+    }
+}
 
 var _govIndcHandler = null;
 function addGovIndcHanlder() {
@@ -3109,12 +3109,12 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
-// function setMrcCd() {
-// if (FormManager.getActualValue('mrcCd') == '3') {
-// return;
-// }
-// FormManager.setValue('mrcCd', '3');
-// }
+function setMrcCd() {
+  if (FormManager.getActualValue('mrcCd') == '3') {
+    return;
+  }
+  FormManager.setValue('mrcCd', '3');
+}
 
 function addAfterConfigAU() {
   updateIndustryClass();
@@ -3135,8 +3135,7 @@ function addAfterConfigAU() {
   handleObseleteExpiredDataForUpdate();
   setRepTeamMemberNo();
   setMrcCd();
-  setDefaultARForAU();
-  // setMrcCd();
+	setDefaultARForAU();
 }
 
 function addressFunctions() {
