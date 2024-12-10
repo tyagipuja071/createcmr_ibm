@@ -1544,11 +1544,34 @@ function setDefaultArCodePH() {
   var reqType = FormManager.getActualValue('reqType');
   var collectionCd = FormManager.getActualValue('collectionCd');
 
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+
   if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
     FormManager.setValue('collectionCd', '0000');
   }
 
-  FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['AR Code'], 'MAIN_IBM_TAB');
+}
+
+function checkAccRcvBoLengthValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+        if (collectionCd.length < 4) {
+          return new ValidationResult({
+            id: 'collectionCd',
+            type: 'text',
+            name: 'collectionCd'
+          }, false, 'AR Code should be 4 characters in length.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -8375,4 +8398,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, [SysLoc.INDIA]);
   GEOHandler.addAfterTemplateLoad(prospectFilter, SysLoc.AUSTRALIA);
   GEOHandler.addAfterConfig(prospectFilter, SysLoc.AUSTRALIA);
+
+  GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.PHILIPPINES]);
 });
