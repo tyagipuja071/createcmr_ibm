@@ -1801,6 +1801,9 @@ function removeStateValidatorForHkMoNZ() {
 
   function setCollCdFrAU(cntry, addressMode, saving, finalSave, force) {
     console.log('>>>> setCollCdFrAU >>>>');
+    if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+      return;
+    }
     var reqType = FormManager.getActualValue('reqType');
     var record = null;
     var addrType = null;
@@ -1888,6 +1891,7 @@ function removeStateValidatorForHkMoNZ() {
           FormManager.setValue('collectionCd', '00PZ');
         }
       }
+      FormManager.enable('collectionCd');
     }
 }
 
