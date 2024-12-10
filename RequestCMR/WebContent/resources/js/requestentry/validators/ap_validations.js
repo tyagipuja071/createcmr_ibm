@@ -5859,62 +5859,60 @@ function addVatValidationforSingapore() {
 // CREATCMR-5258
 // CREATCMR -5269
 function handleObseleteExpiredDataForUpdate() {
-  console.log('>>>> handleObseleteExpiredDataForUpdate >>>>');
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  // lock all the coverage fields and remove validator
-  if (reqType == 'U' && cntry != SysLoc.HONG_KONG || cntry != SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('mrcCd');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('isuCd');
-    FormManager.readOnly('inacCd');
-    FormManager.readOnly('repTeamMemberNo');
-    FormManager.readOnly('repTeamMemberName');
-    FormManager.readOnly('isbuCd');
-    FormManager.readOnly('covId');
-    FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
-    FormManager.readOnly('engineeringBo');
-    FormManager.readOnly('commercialFinanced');
-    FormManager.readOnly('creditCd');
-    FormManager.readOnly('contactName2');
-    FormManager.readOnly('contactName3');
-    FormManager.readOnly('busnType');
-    FormManager.readOnly('taxCd2');
-    FormManager.readOnly('cmrOwner');
+ console.log('>>>> handleObseleteExpiredDataForUpdate >>>>');
+ var reqType = FormManager.getActualValue('reqType');
+ var cntry = FormManager.getActualValue('cmrIssuingCntry');
+ if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+   return;
+ }
+ // lock all the coverage fields and remove validator
+ if (reqType == 'U' &&  cntry != SysLoc.HONG_KONG || cntry !=  SysLoc.MACAO) {
+   FormManager.readOnly('apCustClusterId');
+   FormManager.readOnly('clientTier');
+   FormManager.readOnly('mrcCd');
+   FormManager.readOnly('inacType');
+   FormManager.readOnly('isuCd');
+   FormManager.readOnly('inacCd');
+   FormManager.readOnly('repTeamMemberNo');
+   FormManager.readOnly('repTeamMemberName');
+   FormManager.readOnly('isbuCd');
+   FormManager.readOnly('covId');
+   FormManager.readOnly('cmrNoPrefix');
+   FormManager.readOnly('engineeringBo');
+   FormManager.readOnly('commercialFinanced');
+   FormManager.readOnly('creditCd');
+   FormManager.readOnly('contactName2');
+   FormManager.readOnly('contactName3');
+   FormManager.readOnly('busnType');
+   FormManager.readOnly('taxCd2');
+   FormManager.readOnly('cmrOwner');
 
-    // setting all fields as not Mandt for update Req
-    FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
-    FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-    FormManager.removeValidator('taxCd2', Validators.REQUIRED);
-    FormManager.removeValidator('cmrOwner', Validators.REQUIRED);
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('isuCd', Validators.REQUIRED);
-    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
-    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
-    FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
-    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
-    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
-    FormManager.removeValidator('creditCd', Validators.REQUIRED);
-    FormManager.removeValidator('contactName2', Validators.REQUIRED);
-    FormManager.removeValidator('contactName3', Validators.REQUIRED);
-    FormManager.removeValidator('busnType', Validators.REQUIRED);
-  }
-  if (reqType == 'U' && cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO) {
-    FormManager.readOnly('apCustClusterId');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('inacType');
-    FormManager.readOnly('inacCd');
+// setting all fields as not Mandt for update Req
+   FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
+   FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+   FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+   FormManager.removeValidator('cmrOwner', Validators.REQUIRED);
+   FormManager.removeValidator('clientTier', Validators.REQUIRED);
+   FormManager.removeValidator('isuCd', Validators.REQUIRED);
+   FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+   FormManager.removeValidator('inacType', Validators.REQUIRED);
+   FormManager.removeValidator('inacCd', Validators.REQUIRED);   
+   FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+   FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
+   FormManager.removeValidator('isbuCd', Validators.REQUIRED);
+   FormManager.removeValidator('covId', Validators.REQUIRED);
+   FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
+   FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+   FormManager.removeValidator('creditCd', Validators.REQUIRED);
+   FormManager.removeValidator('contactName2', Validators.REQUIRED);
+   FormManager.removeValidator('contactName3', Validators.REQUIRED);
+   FormManager.removeValidator('busnType', Validators.REQUIRED);
+ } 
+ if (reqType == 'U' &&  cntry == SysLoc.HONG_KONG || cntry ==  SysLoc.MACAO) {
+   FormManager.readOnly('apCustClusterId');
+   FormManager.readOnly('clientTier');
+   FormManager.readOnly('inacType');
+   FormManager.readOnly('inacCd');
 
     // setting all fields as not Mandt for update Req
     FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);

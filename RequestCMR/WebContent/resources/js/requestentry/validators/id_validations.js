@@ -8563,6 +8563,25 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function checkAccRcvBoLengthValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+        if (collectionCd.length < 4) {
+          return new ValidationResult({
+            id: 'collectionCd',
+            type: 'text',
+            name: 'collectionCd'
+          }, false, 'AR Code should be 4 characters in length.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function setKUKLAvaluesID() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -8683,6 +8702,7 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(addressNameSameValidator, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addCompanyProofForSG, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(additionalAddrNmValidator, [SysLoc.SINGAPORE]);
+  GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.INDONESIA], null, true);
 
 
   GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND]);

@@ -3372,61 +3372,23 @@ function initChecklistMainAddressAndName() {
 	}
   }
 
-function setKUKLAvaluesTH() {
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var industryClass = FormManager.getActualValue('IndustryClass');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
+function checkAccRcvBoLengthValidator() {
+	FormManager.addFormValidator((function () {
+		return {
+			validate: function () {
+				var collectionCd = FormManager.getActualValue('collectionCd');
 
-  if (FormManager.getActualValue('reqType') == 'U') {
-    return
-  }
-
-  console.log('>>>> setKUKLAvaluesTH() >>>> set KUKLA values for TH >>>>');
-
-  var custSubGrp1 = new Set(['ASLOM', 'DUMMY', 'ECSYS', 'KYND', 'NRMLS', 'XASLM']);
-  var custSubGrp2 = new Set(['AQSTN', 'NRML', 'XAQST', 'CROSS']);
-  var custSubGrp3 = new Set(['BUSPR']);
-  var custSubGrp4 = new Set(['PRIV']);
-  var custSubGrp5 = new Set(['INTER']);
-
-  var industryClass1 = new Set(['G', 'H', 'Y']);
-  var industryClass2 = new Set(['E']);
-
-  var kuklaTH = [];
-  if (reqType == 'C') {
-    FormManager.readOnly('custClass');
-    var qParams = {
-      _qall: 'Y',
-      ISSUING_CNTRY: cntry,
-    };
-    var results = cmr.query('GET.AP_KUKLA', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        kuklaTH.push(results[i].ret1);
-      }
-    }
-
-    if (results != null) {
-      if (custSubGrp1.has(custSubGrp)) {
-        FormManager.setValue('custClass', kuklaTH[0]);
-      } else if (custSubGrp2.has(custSubGrp)) {
-        if (industryClass1.has(industryClass)) {
-          FormManager.setValue('custClass', kuklaTH[1]);
-        } else if (industryClass2.has(industryClass)) {
-          FormManager.setValue('custClass', kuklaTH[2]);
-        } else {
-          FormManager.setValue('custClass', kuklaTH[0]);
-        }
-      } else if (custSubGrp3.has(custSubGrp)) {
-        FormManager.setValue('custClass', kuklaTH[3]);
-      } else if (custSubGrp4.has(custSubGrp)) {
-        FormManager.setValue('custClass', kuklaTH[4]);
-      } else if (custSubGrp5.has(custSubGrp)) {
-        FormManager.setValue('custClass', kuklaTH[5]);
-      }
-    }
-  }
+				if (collectionCd.length < 4) {
+					return new ValidationResult({
+						id: 'collectionCd',
+						type: 'text',
+						name: 'collectionCd'
+					}, false, 'AR Code should be 4 characters in length.');
+				}
+				return new ValidationResult(null, true);
+			}
+		};
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function setKUKLAvaluesTH() {
@@ -3540,6 +3502,7 @@ dojo.addOnLoad(function() {
 
 	// CREATCMR-8581
 	GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.THAILAND], null, true);
+	GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.THAILAND], null, true);
 
 	GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.THAILAND], null, true);
 	GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [SysLoc.THAILAND]);

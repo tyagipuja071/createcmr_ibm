@@ -7303,6 +7303,25 @@ var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
 FilteringDropdown.loadItems('clientTier', 'clientTier_spinner', 'lov', 'fieldId=ClientTier&cmrIssuingCntry=' + cmrIssuingCntry);
 }
 
+function checkAccRcvBoLengthValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+        if (collectionCd.length < 4) {
+          return new ValidationResult({
+            id: 'collectionCd',
+            type: 'text',
+            name: 'collectionCd'
+          }, false, 'AR Code should be 4 characters in length.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function setKUKLAvaluesBD() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -7453,6 +7472,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addressNameSameValidator, [ SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addCompanyProofForSG, [ SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(additionalAddrNmValidator, [ SysLoc.SINGAPORE ]);
+  GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.BRUNEI], null, true);
 
 
   // checklist
