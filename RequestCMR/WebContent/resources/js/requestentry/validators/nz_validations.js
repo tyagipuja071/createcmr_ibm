@@ -2982,6 +2982,24 @@ function afterTemplateLoadFunctions() {
   setInacByCluster();
 }
 
+function addARCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+        
+          if (collectionCd.length < 4) {
+            return new ValidationResult({
+              id : 'collectionCd',
+              type : 'text',
+              name : 'collectionCd'
+            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+          }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function () {
   GEOHandler.setRevertIsicBehavior(false);
@@ -3020,5 +3038,5 @@ dojo.addOnLoad(function () {
   GEOHandler.registerValidator(checkNZLandedCountryForCrossWhenSFP, [SysLoc.NEW_ZEALAND], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(checkNZCustomerNameStartsForLocalInterDummy, [SysLoc.NEW_ZEALAND], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addCovBGValidator, [SysLoc.NEW_ZEALAND], null, true);
-  
+  GEOHandler.registerValidator(addARCodeValidator, [SysLoc.NEW_ZEALAND], null, true);
 });
