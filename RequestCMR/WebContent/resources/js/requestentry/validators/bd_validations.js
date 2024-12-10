@@ -37,8 +37,8 @@ function addHandlersForAP() {
     _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function (value) {
       // CREATCMR-7883-7884
       _inacHandlerANZSG = _inacHandlerANZSG + 1;
-//      setInacByCluster();
-    //  setInacNacValuesIN();
+// setInacByCluster();
+    // setInacNacValuesIN();
       setIsuOnIsic();
 
       filterInacCd('744', '10215', 'N', 'I529');
@@ -193,7 +193,7 @@ function addAfterConfigAP() {
     // CREATCMR-7883-7884
     _inacHandlerANZSG = 0;
     // setInacByCluster();
-    //setInacNacValuesIN();
+    // setInacNacValuesIN();
     filterInacCd('744', '10215', 'N', 'I529');
     applyClusterFilters();
   }
@@ -250,12 +250,12 @@ function addAfterConfigAP() {
 function setInacByCluster() {
   console.log('>>>> setInacByCluster >>>>');
   var _cluster = FormManager.getActualValue('apCustClusterId');
-//  if (oldClusterCd == null) {
-//    saveClusterVal();
-//  }
-//  if (_cluster == oldClusterCd) {
-//    return;
-//  }
+// if (oldClusterCd == null) {
+// saveClusterVal();
+// }
+// if (_cluster == oldClusterCd) {
+// return;
+// }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   // CREATCMR-7884
@@ -380,11 +380,11 @@ function setInacByCluster() {
     // CREATCMR-7884 for 796
     // CREATCMR-7885 for 834
     // if(cntry == '796' && _custSubGrpNZWithEmptyInac.includes(custSubGrp) ||
-    // (cntry == '834' && _clusterSGEmptyInac)){   
+    // (cntry == '834' && _clusterSGEmptyInac)){
     // CREATCMR-7885
     setInacCdTypeStatus();
     // CREATCMR-7883-7884
-    //clearInacOnClusterChange(_cluster);
+    // clearInacOnClusterChange(_cluster);
     return;
   }
 }
@@ -1002,16 +1002,46 @@ function applyClusterFilters() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-//  filterAvailableClustersByScenarioSubType('744', ['ECOSY'], ['10654', '10655', '10656', '10657']);
-//  filterAvailableClustersByScenarioSubType('744', ['NRML'], ['05224', '04477', '04490', '04467', '05225', '10193', '10194', '10195', '10196', '10197', '10198', '10199', '10200', '10201', '10202', '10203', '10204', '10205', '10206', '10207', '10208', '10209', '10210', '10211', '10212', '10213', '10214', '10215']);
-//  filterAvailableClustersByScenarioSubType('744', ['ESOSW'], ['05224', '04477', '04490', '04467', '05225', '09062', '10193', '10194', '10195', '10196', '10197', '10198', '10199', '10200', '10201', '10202', '10203', '10204', '10205', '10206', '10207', '10208', '10209', '10210', '10211', '10212',
-//    '10213', '10214', '10215', '10590', '10591', '10592', '10593', '10594', '10595', '10596', '10597', '10598', '10599', '10600', '10601', '10602', '10603', '10604', '10605', '10606', '10607', '10608', '10609', '10610', '10611', '10612',
-//    '10613', '10614', '10615', '10616', '10617', '10618', '10619', '10620', '10621', '10622', '10623', '10624', '10625', '10626', '10627', '10628', '10629', '10630', '10631', '10632', '10633', '10634', '10635', '10636', '10637', '10638',
-//    '10639', '10640', '10641', '10642', '10643', '10644', '10645', '10654', '10655', '10656', '10657']);
-//  filterAvailableClustersByScenarioSubType('744', ['KYNDR'], ['09062']);
-//  filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF', 'PRIV', 'INTER'], ['012D999']);
-//  filterAvailableClustersByScenarioSubType('744', ['NRMLC'], ['10590', '10591', '10592', '10593', '10594', '10595', '10596', '10597', '10598', '10599', '10600', '10601', '10602', '10603', '10604', '10605', '10606', '10607', '10608', '10609', '10610', '10611', '10612', '10613', '10614', '10615', '10616', '10617', '10618', '10619', '10620', '10621', '10622', '10623', '10624', '10625', '10626', '10627', '10628', '10629', '10630', '10631', '10632', '10633', '10634', '10635', '10636', '10637', '10638', '10639', '10640', '10641', '10642', '10643', '10644', '10645', '012D999']);
-//  filterAvailableClustersByScenarioSubType('744', ['AQSTN'], ['10590', '10591', '10592', '10593', '10594', '10595', '10596', '10597', '10598', '10599', '10600', '10601', '10602', '10603', '10604', '10605', '10606', '10607', '10608', '10609', '10610', '10611', '10612', '10613', '10614', '10615', '10616', '10617', '10618', '10619', '10620', '10621', '10622', '10623', '10624', '10625', '10626', '10627', '10628', '10629', '10630', '10631', '10632', '10633', '10634', '10635', '10636', '10637', '10638', '10639', '10640', '10641', '10642', '10643', '10644', '10645', '012D999']);
+// filterAvailableClustersByScenarioSubType('744', ['ECOSY'], ['10654', '10655',
+// '10656', '10657']);
+// filterAvailableClustersByScenarioSubType('744', ['NRML'], ['05224', '04477',
+// '04490', '04467', '05225', '10193', '10194', '10195', '10196', '10197',
+// '10198', '10199', '10200', '10201', '10202', '10203', '10204', '10205',
+// '10206', '10207', '10208', '10209', '10210', '10211', '10212', '10213',
+// '10214', '10215']);
+// filterAvailableClustersByScenarioSubType('744', ['ESOSW'], ['05224', '04477',
+// '04490', '04467', '05225', '09062', '10193', '10194', '10195', '10196',
+// '10197', '10198', '10199', '10200', '10201', '10202', '10203', '10204',
+// '10205', '10206', '10207', '10208', '10209', '10210', '10211', '10212',
+// '10213', '10214', '10215', '10590', '10591', '10592', '10593', '10594',
+// '10595', '10596', '10597', '10598', '10599', '10600', '10601', '10602',
+// '10603', '10604', '10605', '10606', '10607', '10608', '10609', '10610',
+// '10611', '10612',
+// '10613', '10614', '10615', '10616', '10617', '10618', '10619', '10620',
+// '10621', '10622', '10623', '10624', '10625', '10626', '10627', '10628',
+// '10629', '10630', '10631', '10632', '10633', '10634', '10635', '10636',
+// '10637', '10638',
+// '10639', '10640', '10641', '10642', '10643', '10644', '10645', '10654',
+// '10655', '10656', '10657']);
+// filterAvailableClustersByScenarioSubType('744', ['KYNDR'], ['09062']);
+// filterAvailableClustersByScenarioSubType('744', ['BLUMX', 'MKTPC', 'IGF',
+// 'PRIV', 'INTER'], ['012D999']);
+// filterAvailableClustersByScenarioSubType('744', ['NRMLC'], ['10590', '10591',
+// '10592', '10593', '10594', '10595', '10596', '10597', '10598', '10599',
+// '10600', '10601', '10602', '10603', '10604', '10605', '10606', '10607',
+// '10608', '10609', '10610', '10611', '10612', '10613', '10614', '10615',
+// '10616', '10617', '10618', '10619', '10620', '10621', '10622', '10623',
+// '10624', '10625', '10626', '10627', '10628', '10629', '10630', '10631',
+// '10632', '10633', '10634', '10635', '10636', '10637', '10638', '10639',
+// '10640', '10641', '10642', '10643', '10644', '10645', '012D999']);
+// filterAvailableClustersByScenarioSubType('744', ['AQSTN'], ['10590', '10591',
+// '10592', '10593', '10594', '10595', '10596', '10597', '10598', '10599',
+// '10600', '10601', '10602', '10603', '10604', '10605', '10606', '10607',
+// '10608', '10609', '10610', '10611', '10612', '10613', '10614', '10615',
+// '10616', '10617', '10618', '10619', '10620', '10621', '10622', '10623',
+// '10624', '10625', '10626', '10627', '10628', '10629', '10630', '10631',
+// '10632', '10633', '10634', '10635', '10636', '10637', '10638', '10639',
+// '10640', '10641', '10642', '10643', '10644', '10645', '012D999']);
 
 }
 
@@ -1021,11 +1051,11 @@ function resetFieldsAfterCustSubGrpChange() {
   if ((cntry == '616' || cntry == '834') && custSubGrp == 'KYNDR') {
     FormManager.setValue('isuCd', '5K');
   }
-//  else {
-//    FormManager.setValue('isuCd', '');
+// else {
+// FormManager.setValue('isuCd', '');
     // FormManager.setValue('inacType', '');
     // FormManager.setValue('inacCd', '');
-//  }
+// }
 }
 
 function filterAvailableClustersByScenarioSubType(cmrIssuCntry, custSubGrpArray, clusterArray) {
@@ -3297,10 +3327,10 @@ function setCTCIsuByClusterASEAN() {
         setCTCIsuByClusterPhVnTh(apClientTierValue, isuCdValue);
       }
 
-//      // CREATCMR-7887 Indonesia
-//      if (FormManager.getActualValue('cmrIssuingCntry') == '749') {
-//        setCTCIsuByClusterIndonesia();
-//      }
+// // CREATCMR-7887 Indonesia
+// if (FormManager.getActualValue('cmrIssuingCntry') == '749') {
+// setCTCIsuByClusterIndonesia();
+// }
       // CREATCMR-7886 Malaysia
       if (FormManager.getActualValue('cmrIssuingCntry') == '778') {
         setCTCIsuByClusterMY();
@@ -3318,11 +3348,11 @@ function setCTCIsuByClusterASEAN() {
   if (_clusterHandler && _clusterHandler[0]) {
     _clusterHandler[0].onChange();
   }
-//  // CREATCMR-7887 Indonesia
-//  if (FormManager.getActualValue('cmrIssuingCntry') == '749') {
-//    setCTCIsuByClusterIndonesia();
-//    _clusterHandlerINDONESIA = 1;
-//  }
+// // CREATCMR-7887 Indonesia
+// if (FormManager.getActualValue('cmrIssuingCntry') == '749') {
+// setCTCIsuByClusterIndonesia();
+// _clusterHandlerINDONESIA = 1;
+// }
   // CREATCMR-7886 Malaysia
   if (FormManager.getActualValue('cmrIssuingCntry') == '778') {
     setCTCIsuByClusterMY();
@@ -3461,7 +3491,8 @@ function removeStateValidatorForHkMoNZ() {
         // ], null);
         FormManager.removeValidator('stateProv', Validators.REQUIRED);
         if (landCntry == '' || FormManager.GETFIELD_VALIDATIONS['landCntry'].indexOf(Validators.REQUIRED) < 0)
-          //FormManager.addValidator('postCd', Validators.REQUIRED, ['Postal Code'], null);
+          // FormManager.addValidator('postCd', Validators.REQUIRED, ['Postal
+          // Code'], null);
         FormManager.addValidator('city1', Validators.REQUIRED, ['Suburb'], null);
       }
     }
@@ -5804,7 +5835,8 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('collectionCd');
       // cluster/QTC/ISU
       // CREATCMR-7884
-//      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['10114', '10115', '10116']);
+// FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
+// ['10114', '10115', '10116']);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['32']);
 
@@ -5848,8 +5880,8 @@ function setDefaultValueForNZCreate() {
 
       FormManager.setValue('inacType', 'I');
       FormManager.setValue('inacCd', '6272');
-//      FormManager.readOnly('inacType');
-//      FormManager.readOnly('inacCd');
+// FormManager.readOnly('inacType');
+// FormManager.readOnly('inacCd');
 
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5862,7 +5894,8 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('collectionCd');
       // cluster/QTC/ISU:
       // CREATCMR-7884
-//      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['01147', '09199', '08037', '10114', '10115', '10116', '10662', '10663']);
+// FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
+// ['01147', '09199', '08037', '10114', '10115', '10116', '10662', '10663']);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34', '5K', '36', '32']);
       // FormManager.setValue('apCustClusterId', '01147');
@@ -5877,11 +5910,12 @@ function setDefaultValueForNZCreate() {
     case 'ECSYS':
       // cluster/QTC/ISU: 08037/Y/36 - lock field
       // CREATCMR-7884
-//      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['08037']);
+// FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
+// ['08037']);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Y']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['36']);
-//      FormManager.setValue('apCustClusterId', '08037');
-//      FormManager.readOnly('apCustClusterId');
+// FormManager.setValue('apCustClusterId', '08037');
+// FormManager.readOnly('apCustClusterId');
       FormManager.setValue('clientTier', 'Y');
       FormManager.readOnly('clientTier');
       FormManager.setValue('isuCd', '36');
@@ -5898,7 +5932,9 @@ function setDefaultValueForNZCreate() {
     case 'CROSS':
       // cluster/QTC/ISU: 00002/Z/34 (setting default and secletable )
       // CREATCMR-7884
-//      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['00002', '01147', '09056', '08037', '10114', '10115', '10116', '10662', '10663']);
+// FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
+// ['00002', '01147', '09056', '08037', '10114', '10115', '10116', '10662',
+// '10663']);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Z', 'Q', '0', 'Y', 'T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34', '5K', '36', '32']);
       if (_pagemodel.apCustClusterId == null) {
@@ -5960,7 +5996,8 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('collectionCd');
       // cluster/QTC/ISU:
       // CREATCMR-7884
-//      FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['01147', '09056', '08037', '10114', '10115', '10116', '10662', '10663']);
+// FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'),
+// ['01147', '09056', '08037', '10114', '10115', '10116', '10662', '10663']);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34', '5K', '36', '32']);
       // FormManager.setValue('apCustClusterId', '01147');
@@ -6331,7 +6368,7 @@ function setCTCIsuByClusterBDLK() {
   } else if (custSubGrp == 'KYND') {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['5K']);
-//    FormManager.limitDropdownValues(FormManager.getField('inacType'), ['I']);
+// FormManager.limitDropdownValues(FormManager.getField('inacType'), ['I']);
     FormManager.setValue('clientTier', '0');
     FormManager.setValue('isuCd', '5K');
     FormManager.setValue('mrcCd', '3');
@@ -6849,28 +6886,30 @@ function clearInacOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-//var _oldClusterSelection = '';
-//function clearInacOnClusterChange(selectedCluster) {
-//  console.log('>>>> clearInacOnClusterChange >>>>');
-//  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+// var _oldClusterSelection = '';
+// function clearInacOnClusterChange(selectedCluster) {
+// console.log('>>>> clearInacOnClusterChange >>>>');
+// var cntry = FormManager.getActualValue('cmrIssuingCntry');
 //
-//  if (cntry == '856' || cntry == '852' || cntry == '818') {
-//    var viewOnly = FormManager.getActualValue('viewOnlyPage');
-//    if (viewOnly != '' && viewOnly == 'true') {
-//      return;
-//    }
-//    var scenario = FormManager.getActualValue('custSubGrp');
-//    var clearInacScenarios = ['XASLM', 'CROSS', 'ASLOM'];
-//    var noFilterInac = ['01251', '00000', '08047'];
+// if (cntry == '856' || cntry == '852' || cntry == '818') {
+// var viewOnly = FormManager.getActualValue('viewOnlyPage');
+// if (viewOnly != '' && viewOnly == 'true') {
+// return;
+// }
+// var scenario = FormManager.getActualValue('custSubGrp');
+// var clearInacScenarios = ['XASLM', 'CROSS', 'ASLOM'];
+// var noFilterInac = ['01251', '00000', '08047'];
 //
-//    var clusterValueChanged = _oldClusterSelection != selectedCluster && cmr.currentTab == 'IBM_REQ_TAB';
-//    if (clusterValueChanged && clearInacScenarios.includes(scenario) && noFilterInac.includes(selectedCluster)) {
-//      FormManager.setValue('inacCd', '');
-//      FormManager.setValue('inacType', '');
-//    }
-//    _oldClusterSelection = selectedCluster;
-//  }
-//}
+// var clusterValueChanged = _oldClusterSelection != selectedCluster &&
+// cmr.currentTab == 'IBM_REQ_TAB';
+// if (clusterValueChanged && clearInacScenarios.includes(scenario) &&
+// noFilterInac.includes(selectedCluster)) {
+// FormManager.setValue('inacCd', '');
+// FormManager.setValue('inacType', '');
+// }
+// _oldClusterSelection = selectedCluster;
+// }
+// }
 
 function clearClusterFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   console.log('>>>> clearClusterFieldsOnScenarioChange >>>>');
@@ -7306,6 +7345,25 @@ function setKUKLAvaluesBD() {
   }
 }
 
+function addARCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+          if (collectionCd.length < 4) {
+            return new ValidationResult({
+              id : 'collectionCd',
+              type : 'text',
+              name : 'collectionCd'
+            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+          }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function () {
   GEOHandler.AP = [SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
   SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA];
@@ -7385,8 +7443,8 @@ dojo.addOnLoad(function () {
   // CREATCMR-7878
   GEOHandler.addAfterTemplateLoad(setCTCIsuByClusterISA, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH]);
 
-//  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
-//  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
+// GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
+// GEOHandler.addAfterConfig(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
   GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
   GEOHandler.addAfterTemplateLoad(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
   GEOHandler.addAfterConfig(handleObseleteExpiredDataForUpdate, GEOHandler.AP);
@@ -7398,7 +7456,7 @@ dojo.addOnLoad(function () {
 
   // CREATCMR-8581
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.APAC_1, null, true);
- 
+  GEOHandler.registerValidator(addARCodeValidator, [ SysLoc.BANGLADESH ], null, true); 
 
   // CREATCMR-7883
   // CREATCMR-7885 : add SysLoc.SINGAPORE
