@@ -96,6 +96,12 @@ public class TWHandler extends GEOHandler {
       data.setCollectionCd(mainRecord.getCmrAccRecvBo());
     }
 
+    if (mainRecord.getCmrAccRecvBo() == null || mainRecord.getCmrAccRecvBo() == "") {
+      data.setCollectionCd("00F0");
+    } else {
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo());
+    }
+
     // jira 2567
     String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();
     if (!StringUtils.isEmpty(abbName) && abbName.length() > 21) {
