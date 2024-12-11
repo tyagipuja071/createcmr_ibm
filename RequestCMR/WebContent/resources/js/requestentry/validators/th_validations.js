@@ -157,6 +157,8 @@ function addAfterConfigAP() {
 	if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
 		FormManager.enable('clientTier');
 	}
+
+	setDefaultArCodeTH();
 }
 
 function saveClusterVal() {
@@ -611,6 +613,17 @@ function onCustSubGrpChange() {
 		setKUKLAvaluesTH();
 	});
 }
+
+function setDefaultArCodeTH() {
+	var reqType = FormManager.getActualValue('reqType');
+	var collectionCd = FormManager.getActualValue('collectionCd');
+  
+	if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
+	  FormManager.setValue('collectionCd', '0000');
+	}
+  
+	FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
+  }
 
 function addSalesRepNameNoCntryValidator() {
 	console.log(">>>repTeamMemberNo<<<===" + FormManager.getActualValue('repTeamMemberNo'));
@@ -2511,7 +2524,6 @@ function handleObseleteExpiredDataForUpdate() {
 		FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
 		FormManager.removeValidator('isbuCd', Validators.REQUIRED);
 		FormManager.removeValidator('covId', Validators.REQUIRED);
-		
 		FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
 		FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
 		FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -3447,7 +3459,6 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterConfig(updateIndustryClass, [SysLoc.THAILAND]);
 	GEOHandler.addAfterConfig(updateProvCd, [SysLoc.THAILAND]);
 	GEOHandler.addAfterConfig(updateRegionCd, [SysLoc.THAILAND]);
-	
 	GEOHandler.addAfterConfig(onSubIndustryChange, [SysLoc.THAILAND]);
 	GEOHandler.enableCustomerNamesOnAddress([SysLoc.THAILAND]);
 	GEOHandler.addAddrFunction(updateMainCustomerNames, [SysLoc.THAILAND]);

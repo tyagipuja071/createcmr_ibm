@@ -1473,7 +1473,7 @@ function setDefaultArCodeBN() {
     FormManager.setValue('collectionCd', '0000');
   }
 
-  FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['AR Code'], 'MAIN_IBM_TAB');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -5354,7 +5354,6 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
    FormManager.removeValidator('covId', Validators.REQUIRED);
-   FormManager.removeValidator('collectionCd', Validators.REQUIRED);
    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
    FormManager.removeValidator('creditCd', Validators.REQUIRED);

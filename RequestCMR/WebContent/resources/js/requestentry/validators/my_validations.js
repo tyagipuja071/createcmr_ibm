@@ -441,6 +441,8 @@ function addAfterConfigAP() {
     console.log(">>> SG-834 >>> Lock ISIC For D&B Import.");
     FormManager.readOnly('isicCd');
   }
+
+  setDefaultArCodeMY();
 }
 
 function saveClusterVal() {
@@ -1729,6 +1731,17 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
       }
     }
   }
+}
+
+function setDefaultArCodeMY() {
+  var reqType = FormManager.getActualValue('reqType');
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['AR Code'], 'MAIN_IBM_TAB');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -5927,7 +5940,6 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
     FormManager.removeValidator('isbuCd', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
-    
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
     FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -8668,7 +8680,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.AP);
-  
   GEOHandler.addAfterConfig(setCollCdFrAU, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(setCollCdFrIndia, [SysLoc.INDIA]);
   GEOHandler.addAfterConfig(onSubIndustryChange, GEOHandler.AP);

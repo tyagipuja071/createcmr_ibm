@@ -225,6 +225,7 @@ function addAfterConfigAP() {
   }
   
   inacValidation();
+  setDefaultArCodeVN();
 }
 
 function saveClusterVal() {
@@ -1125,6 +1126,17 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   if (!checkClusterSubScenarioChanged()) {
     return;
   }
+}
+
+function setDefaultArCodeVN() {
+  var reqType = FormManager.getActualValue('reqType');
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['AR Code'], 'MAIN_IBM_TAB');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -5040,7 +5052,6 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
     FormManager.removeValidator('isbuCd', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
-    
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
     FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -7655,7 +7666,6 @@ dojo.addOnLoad(function () {
   GEOHandler.addAfterConfig(updateIndustryClass, [SysLoc.VIETNAM]);
   GEOHandler.addAfterConfig(updateProvCd, [SysLoc.VIETNAM]);
   GEOHandler.addAfterConfig(updateRegionCd, [SysLoc.VIETNAM]);
-  
   GEOHandler.addAfterConfig(onSubIndustryChange, [SysLoc.VIETNAM]);
   GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, [SysLoc.VIETNAM]);
   GEOHandler.enableCustomerNamesOnAddress([SysLoc.VIETNAM]);
