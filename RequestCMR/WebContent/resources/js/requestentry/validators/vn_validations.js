@@ -4411,9 +4411,6 @@ function lockFieldsForIndia() {
     FormManager.resetValidations('busnType');
 
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
-    FormManager.resetValidations('collectionCd');
-
     FormManager.readOnly('repTeamMemberNo');
     FormManager.resetValidations('repTeamMemberNo');
 
@@ -5762,7 +5759,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       break;
     case 'BLUMX':
       // cluster/QTC/ISU: default as 00002/Z/34 - lock field
@@ -5781,7 +5778,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Bluemix use only');
       FormManager.readOnly('abbrevNm');
@@ -5805,7 +5802,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Market place use only');
       FormManager.readOnly('abbrevNm');
@@ -5831,7 +5828,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00IL - lock field
       FormManager.setValue('collectionCd', '00IL');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Internal use only');
       FormManager.readOnly('abbrevNm');
@@ -5856,7 +5853,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00IL - lock field
       FormManager.setValue('collectionCd', '00IL');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'IGF DUMMY use only');
       FormManager.readOnly('abbrevNm');
@@ -5867,7 +5864,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Acquisition use only');
       FormManager.readOnly('abbrevNm');
@@ -5880,7 +5877,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['32']);
       FormManager.setValue('clientTier', 'T');
@@ -5895,7 +5892,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5906,7 +5903,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.limitDropdownValues(FormManager.getField('apCustClusterId'), ['09199']);
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
@@ -5930,7 +5927,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34', '5K', '36', '32']);
       // FormManager.setValue('apCustClusterId', '01147');
@@ -5954,7 +5951,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5971,7 +5968,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('isicCd', isicCdInDB);
       break;
@@ -5981,7 +5978,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Acquisition use only');
       FormManager.readOnly('abbrevNm');
@@ -6004,7 +6001,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Bluemix use only');
       FormManager.readOnly('abbrevNm');
@@ -6017,7 +6014,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', '0', 'Y', 'T']);
       FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34', '5K', '36', '32']);
       // FormManager.setValue('apCustClusterId', '01147');
@@ -6046,7 +6043,7 @@ function setDefaultValueForNZCreate() {
       FormManager.readOnly('mrcCd');
       // Collection code = 00JC - lock field
       FormManager.setValue('collectionCd', '00JC');
-      FormManager.readOnly('collectionCd');
+      
 
       FormManager.setValue('abbrevNm', 'Market place use only');
       FormManager.readOnly('abbrevNm');
