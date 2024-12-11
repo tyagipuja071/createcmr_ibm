@@ -102,6 +102,7 @@ function addAfterConfigAP() {
   if (cntry == '796' && reqType == 'C') {
     setLockIsicNZfromDNB();
     setDefaultValueforCustomerServiceCode();
+    setDefaultARForNZ();
   }
 
   if (cntry == '796' && reqType == 'U') {
@@ -545,6 +546,20 @@ function addSalesRepNameNoCntryValidator() {
   } else {
 
   }
+}
+
+function setDefaultARForNZ() {
+  console.log('>>>> setDefaultARForNZ >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+  FormManager.enable('collectionCd');
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['IBM Collection Responsibility'], 'MAIN_IBM_TAB');
 }
 
 function included(cmrIssuCntry) {
@@ -2138,7 +2153,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.readOnly('isbuCd');
     FormManager.readOnly('covId');
     FormManager.readOnly('cmrNoPrefix');
-    FormManager.readOnly('collectionCd');
+    
     FormManager.readOnly('engineeringBo');
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('creditCd');
@@ -2162,7 +2177,7 @@ function handleObseleteExpiredDataForUpdate() {
     FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
     FormManager.removeValidator('isbuCd', Validators.REQUIRED);
     FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+    
     FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
     FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -2960,6 +2975,7 @@ function addAfterConfigNZ() {
   removeStateValidatorForHkMoNZ();
 // setCTCIsuByClusterANZ();
   handleObseleteExpiredDataForUpdate();
+  setDefaultARForNZ();
 }
 
 function addressFunctions() {
@@ -2993,7 +3009,7 @@ function addARCodeValidator() {
               id : 'collectionCd',
               type : 'text',
               name : 'collectionCd'
-            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+            }, false, 'Invalid IBM Collection Responsibility value. It should be exactly 4 characters.');
           }
         return new ValidationResult(null, true);
       }
