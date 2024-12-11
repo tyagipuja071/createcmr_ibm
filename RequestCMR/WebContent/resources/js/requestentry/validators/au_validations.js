@@ -3184,7 +3184,7 @@ function addARCodeValidator() {
               id : 'collectionCd',
               type : 'text',
               name : 'collectionCd'
-            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+            }, false, 'Invalid IBM Collection Responsibility value. It should be exactly 4 characters.');
           }
         return new ValidationResult(null, true);
       }
