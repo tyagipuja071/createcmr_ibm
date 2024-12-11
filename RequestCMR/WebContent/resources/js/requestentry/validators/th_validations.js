@@ -607,7 +607,6 @@ function onCustSubGrpChange() {
 
 		setISBUScenarioLogic();
 		autoSetAbbrevNmLocnLogic();
-		setDefaultARForTH();
 
 		setKUKLAvaluesTH();
 	});
@@ -645,19 +644,6 @@ function addSalesRepNameNoCntryValidator() {
 	} else {
 
 	}
-}
-
-function setDefaultARForTH() {
-  console.log('>>>> setDefaultARForTH >>>>');
-  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
-    return;
-  }
-  var collectionCd = FormManager.getActualValue('collectionCd');
-
-  if (!collectionCd) {
-    FormManager.setValue('collectionCd', '0000');
-  }
-  FormManager.enable('collectionCd');
 }
 
 function included(cmrIssuCntry) {
