@@ -2821,6 +2821,25 @@ function setKUKLAvaluesSG() {
   }
 }
 
+function addARCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+        
+          if (collectionCd.length < 4) {
+            return new ValidationResult({
+              id : 'collectionCd',
+              type : 'text',
+              name : 'collectionCd'
+            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+          }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
 	console.log('adding AP functions...');
 	console.log('the value of person full id is ' + localStorage.getItem("pID"));
@@ -2911,7 +2930,7 @@ dojo.addOnLoad(function() {
 	GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.SINGAPORE], null, true);
 	// CREATCMR-7653
 	GEOHandler.registerValidator(checkCustomerNameForKYND, [SysLoc.SINGAPORE], null, true);
-
+	GEOHandler.registerValidator(addARCodeValidator, [ SysLoc.SINGAPORE ], null, true);
 	// CREATCMR-7883
 	GEOHandler.addAfterTemplateLoad(lockCMRNumberPrefixforNoINTER, [SysLoc.SINGAPORE], null, true);
 

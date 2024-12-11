@@ -190,6 +190,12 @@ public abstract class APHandler extends GEOHandler {
     autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
     data.setIsuCd(mainRecord.getCmrIsu());
 
+    if (mainRecord.getCmrAccRecvBo() == null || mainRecord.getCmrAccRecvBo() == "") {
+      data.setCollectionCd("0000");
+    } else {
+      data.setCollectionCd(mainRecord.getCmrAccRecvBo());
+    }
+
     if (!prospectCmrChosen) {
       System.out.println("Value of Province Code is >>> " + this.currentRecord.get(WtaasQueryKeys.Data.SellBrnchOff));
       System.out.println("Value of MRC Cd  is >>> " + this.currentRecord.get(WtaasQueryKeys.Data.MrktRespCode));

@@ -3208,6 +3208,25 @@ function setInacByClusterTH() {
 	}
 }
 
+function checkAccRcvBoLengthValidator() {
+	FormManager.addFormValidator((function () {
+	  return {
+		validate: function () {
+		  var collectionCd = FormManager.getActualValue('collectionCd');
+  
+		  if (collectionCd.length < 4) {
+			return new ValidationResult({
+			  id: 'collectionCd',
+			  type: 'text',
+			  name: 'collectionCd'
+			}, false, 'AR Code should be 4 characters in length.');
+		  }
+		  return new ValidationResult(null, true);
+		}
+	  };
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
+  }
+
 function setKUKLAvaluesTH() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -3319,6 +3338,7 @@ dojo.addOnLoad(function() {
 
 	// CREATCMR-8581
 	GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.THAILAND], null, true);
+	GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.THAILAND], null, true);
 
 	GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.THAILAND], null, true);
 	GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [SysLoc.THAILAND]);
