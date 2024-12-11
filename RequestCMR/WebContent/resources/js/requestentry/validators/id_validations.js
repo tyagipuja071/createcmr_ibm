@@ -1453,7 +1453,6 @@ function onCustSubGrpChange() {
 
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
-    setDefaultARForID();
 
     // CREATCMR-7885
     // CREATCMR-7878
@@ -1758,19 +1757,6 @@ function addSalesRepNameNoCntryValidator() {
   } else {
 
   }
-}
-
-function setDefaultARForID() {
-  console.log('>>>> setDefaultARForID >>>>');
-  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
-    return;
-  }
-  var collectionCd = FormManager.getActualValue('collectionCd');
-
-  if (!collectionCd) {
-    FormManager.setValue('collectionCd', '0000');
-  }
-  FormManager.enable('collectionCd');
 }
 
 function included(cmrIssuCntry) {
