@@ -448,7 +448,7 @@ public class ANZHandler extends GEOHandler {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && anzCountries.contains(data.getCmrIssuingCntry())) {
       admin.setOldCustNm1(mainRecord.getCmrName1Plain());
       admin.setOldCustNm2(mainRecord.getCmrName2Plain());
-      data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
+      data.setCollectionCd(StringUtils.isNotBlank(mainRecord.getCmrAccRecvBo()) ? mainRecord.getCmrAccRecvBo() : "0000");
     }
   }
 
