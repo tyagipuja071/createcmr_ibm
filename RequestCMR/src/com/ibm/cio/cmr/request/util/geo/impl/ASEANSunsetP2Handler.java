@@ -161,7 +161,11 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
       List<String> aseanCountries = Arrays.asList(SystemLocation.SINGAPORE, SystemLocation.INDONESIA, SystemLocation.PHILIPPINES,
           SystemLocation.VIETNAM, SystemLocation.THAILAND, SystemLocation.BRUNEI, SystemLocation.MALAYSIA);
       if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && aseanCountries.contains(data.getCmrIssuingCntry())) {
-        data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
+        if (mainRecord.getCmrAccRecvBo() == null || mainRecord.getCmrAccRecvBo() == "") {
+          data.setCollectionCd("0000");
+        } else {
+          data.setCollectionCd(mainRecord.getCmrAccRecvBo());
+        }
       }
       LOG.info("AR CODE value from ASEANSunsetP2Handler ==> " + data.getCollectionCd());
 
