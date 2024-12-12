@@ -18,6 +18,7 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
   private static final Logger LOG = Logger.getLogger(ASEANSunsetP2Handler.class);
@@ -120,6 +121,7 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    LOG.info("setDataValuesOnImport in ASEANSunsetP2Handler");
     LOG.debug("Issuing Country: " + data.getCmrIssuingCntry());
     String processingType = PageManager.getProcessingType(data.getCmrIssuingCntry(), "U");
     LOG.info("ASEANSunsetP2Handler processing type: " + processingType);
@@ -155,6 +157,14 @@ public class ASEANSunsetP2Handler extends ASEANSunsetHandler {
       if (!StringUtils.isBlank(data.getAbbrevLocn()) && data.getAbbrevLocn().length() > 9) {
         data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 9));
       }
+
+      List<String> aseanCountries = Arrays.asList(SystemLocation.SINGAPORE, SystemLocation.INDONESIA, SystemLocation.PHILIPPINES,
+          SystemLocation.VIETNAM, SystemLocation.THAILAND, SystemLocation.BRUNEI, SystemLocation.MALAYSIA);
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && aseanCountries.contains(data.getCmrIssuingCntry())) {
+        data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
+      }
+      LOG.info("AR CODE value from ASEANSunsetP2Handler ==> " + data.getCollectionCd());
+
     } else {
       LOG.info("Phase 1 - MQ Logic");
       super.setDataValuesOnImport(admin, data, results, mainRecord);

@@ -1082,10 +1082,12 @@ public class ASEANSunsetHandler extends APHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    LOG.info("setDataValuesOnImport in ASEANSunsetHandler");
     super.setDataValuesOnImport(admin, data, results, mainRecord);
     List<String> aseanCountries = Arrays.asList(SystemLocation.THAILAND, SystemLocation.MALAYSIA, SystemLocation.INDONESIA);
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && aseanCountries.contains(data.getCmrIssuingCntry())) {
       data.setCollectionCd(mainRecord.getCmrAccRecvBo() != null ? mainRecord.getCmrAccRecvBo() : "0000");
+      LOG.info("AR CODE value from ASEANSunsetHandler ==> " + data.getCollectionCd());
     }
   }
 

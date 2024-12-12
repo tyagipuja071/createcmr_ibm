@@ -203,6 +203,7 @@ public abstract class APHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    LOG.info("setDataValuesOnImport in APHandler");
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     if (!prospectCmrChosen) {
       data.setApCustClusterId(this.currentRecord.get(WtaasQueryKeys.Data.ClusterNo));
