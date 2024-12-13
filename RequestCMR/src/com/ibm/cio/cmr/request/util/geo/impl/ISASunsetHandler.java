@@ -228,7 +228,18 @@ public class ISASunsetHandler extends APHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    LOG.info("setDataValuesOnImport in ISASunsetHandler");
     super.setDataValuesOnImport(admin, data, results, mainRecord);
+
+    List<String> isaCountries = Arrays.asList(SystemLocation.INDIA, SystemLocation.SRI_LANKA, SystemLocation.BANGLADESH);
+
+    if (isaCountries.contains(data.getCmrIssuingCntry())) {
+      if (mainRecord.getCmrAccRecvBo() == null || mainRecord.getCmrAccRecvBo() == "") {
+        data.setCollectionCd("0000");
+      } else {
+        data.setCollectionCd(mainRecord.getCmrAccRecvBo());
+      }
+    }
   }
 
   @Override

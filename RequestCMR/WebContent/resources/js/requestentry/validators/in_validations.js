@@ -641,7 +641,7 @@ function onCustSubGrpChange() {
     }
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
-    setCollectionCd();   
+    setDefaultARForIN();   
     lockFieldsWithDefaultValuesByScenarioSubType(); 
   });
 }
@@ -871,42 +871,6 @@ function lockFieldsWithDefaultValuesByScenarioSubType() {
   
 }
 
-function setCollectionCd() {
-  console.log('>>>> setCollectionCd >>>>');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  var isbuCd = FormManager.getActualValue('isbuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var collCd = null;
-  if (isbuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISBU : '%' + isbuCd + '%'
-    };
-    var result = cmr.query('GET.ARCODELIST.BYISBU', qParams);
-    if (result.length > 0) {
-      if (result != null && result[0].ret1 != result[0].ret2) {
-        collCd = result[0].ret1;
-        if (collCd != null) {
-          FormManager.setValue('collectionCd', collCd);
-        }
-      }
-    }
-  }
-}
-
-
 function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
   console.log(">>>> setAbbrevNmLocnOnAddressSave >>>>");
   var reqType = null;
@@ -933,6 +897,19 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
       
     }
   }
+}
+
+function setDefaultARForIN() {
+  console.log('>>>> setDefaultARForIN >>>>');
+  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
+    return;
+  }
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if (!collectionCd) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['AR Code'], 'MAIN_IBM_TAB');
 }
 
 function autoSetAbbrevNmLocnLogic() {
@@ -2245,8 +2222,7 @@ function lockFieldsForIndia(){
   FormManager.resetValidations('busnType');
 
   FormManager.readOnly('cmrNoPrefix');
-  FormManager.resetValidations('collectionCd');
-
+  
   FormManager.readOnly('repTeamMemberNo');
   FormManager.resetValidations('repTeamMemberNo');
 
@@ -2611,7 +2587,7 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
    FormManager.removeValidator('covId', Validators.REQUIRED);
-   FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+   
    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
    FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -2895,6 +2871,25 @@ function setKUKLAvaluesIN() {
   }
 }
 
+function addARCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+          if (collectionCd.length < 4) {
+            return new ValidationResult({
+              id : 'collectionCd',
+              type : 'text',
+              name : 'collectionCd'
+            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+          }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {  
   console.log('adding AP functions...');
   console.log('the value of person full id is ' + localStorage.getItem("pID"));
@@ -2906,7 +2901,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(updateIndustryClass, SysLoc.INDIA);
   GEOHandler.addAfterConfig(updateProvCd, SysLoc.INDIA);
   GEOHandler.addAfterConfig(updateRegionCd, SysLoc.INDIA);
-  GEOHandler.addAfterConfig(setCollectionCd, SysLoc.INDIA);
+  
   GEOHandler.addAfterConfig(custSubGrpHandler, SysLoc.INDIA);
   
   GEOHandler.addAfterConfig(setCollCdFrIndia, SysLoc.INDIA);
@@ -2977,6 +2972,7 @@ dojo.addOnLoad(function() {
   // ]);
   // GEOHandler.addAfterConfig(setClusterGlcCovIdMapNrmlc, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(validateRetrieveValues,  SysLoc.INDIA );
+  GEOHandler.registerValidator(addARCodeValidator, [ SysLoc.INDIA ] );
   GEOHandler.addAfterTemplateLoad(applyClusterFilters,  SysLoc.INDIA );
   GEOHandler.addAfterTemplateLoad(setInacNacFieldsRequiredIN, SysLoc.INDIA ); 
   GEOHandler.addAfterTemplateLoad(lockInacNacFieldsByScenarioSubType, SysLoc.INDIA);

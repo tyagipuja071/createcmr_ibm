@@ -157,6 +157,8 @@ function addAfterConfigAP() {
 	if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
 		FormManager.enable('clientTier');
 	}
+
+	setDefaultArCodeTH();
 }
 
 function saveClusterVal() {
@@ -607,41 +609,20 @@ function onCustSubGrpChange() {
 
 		setISBUScenarioLogic();
 		autoSetAbbrevNmLocnLogic();
-		setCollectionCd();
 
 		setKUKLAvaluesTH();
 	});
 }
 
-
-function setCollectionCd() {
-	console.log('>>>> setCollectionCd >>>>');
-	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-		return;
+function setDefaultArCodeTH() {
+	var reqType = FormManager.getActualValue('reqType');
+	var collectionCd = FormManager.getActualValue('collectionCd');
+  
+	if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
+	  FormManager.setValue('collectionCd', '0000');
 	}
-	if (FormManager.getActualValue('reqType') != 'C') {
-		return;
-	}
-
-	var isbuCd = FormManager.getActualValue('isbuCd');
-	var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	var collCd = null;
-	if (isbuCd != '') {
-		var qParams = {
-			_qall: 'Y',
-			ISSUING_CNTRY: cntry,
-			ISBU: '%' + isbuCd + '%'
-		};
-		var result = cmr.query('GET.ARCODELIST.BYISBU', qParams);
-		if (result.length > 0) {
-			if (result != null && result[0].ret1 != result[0].ret2) {
-				collCd = result[0].ret1;
-				if (collCd != null) {
-					FormManager.setValue('collectionCd', collCd);
-				}
-			}
-		}
-	}
+  
+	FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
 }
 
 function addSalesRepNameNoCntryValidator() {
@@ -2543,7 +2524,6 @@ function handleObseleteExpiredDataForUpdate() {
 		FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
 		FormManager.removeValidator('isbuCd', Validators.REQUIRED);
 		FormManager.removeValidator('covId', Validators.REQUIRED);
-		FormManager.removeValidator('collectionCd', Validators.REQUIRED);
 		FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
 		FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
 		FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -3208,6 +3188,25 @@ function setInacByClusterTH() {
 	}
 }
 
+function checkAccRcvBoLengthValidator() {
+	FormManager.addFormValidator((function () {
+	  return {
+		validate: function () {
+		  var collectionCd = FormManager.getActualValue('collectionCd');
+  
+		  if (collectionCd.length < 4) {
+			return new ValidationResult({
+			  id: 'collectionCd',
+			  type: 'text',
+			  name: 'collectionCd'
+			}, false, 'AR Code should be 4 characters in length.');
+		  }
+		  return new ValidationResult(null, true);
+		}
+	  };
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
+  }
+
 function setKUKLAvaluesTH() {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -3278,7 +3277,6 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterConfig(updateIndustryClass, [SysLoc.THAILAND]);
 	GEOHandler.addAfterConfig(updateProvCd, [SysLoc.THAILAND]);
 	GEOHandler.addAfterConfig(updateRegionCd, [SysLoc.THAILAND]);
-	GEOHandler.addAfterConfig(setCollectionCd, [SysLoc.THAILAND]);
 	GEOHandler.addAfterConfig(onSubIndustryChange, [SysLoc.THAILAND]);
 	GEOHandler.enableCustomerNamesOnAddress([SysLoc.THAILAND]);
 	GEOHandler.addAddrFunction(updateMainCustomerNames, [SysLoc.THAILAND]);
@@ -3319,6 +3317,7 @@ dojo.addOnLoad(function() {
 
 	// CREATCMR-8581
 	GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [SysLoc.THAILAND], null, true);
+	GEOHandler.registerValidator(checkAccRcvBoLengthValidator, [SysLoc.THAILAND], null, true);
 
 	GEOHandler.registerValidator(validateCustnameForKynd, [SysLoc.THAILAND], null, true);
 	GEOHandler.addAfterTemplateLoad(setDefaultOnScenarioChangeTH, [SysLoc.THAILAND]);

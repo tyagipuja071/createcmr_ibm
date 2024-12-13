@@ -150,6 +150,7 @@ function afterConfigKR() {
   handleObseleteExpiredDataForUpdate();
   // CREATCMR-788
   addressQuotationValidator();
+  setDefaultArCodeKR();
   if (reqType == 'C') {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('isuCd');
@@ -1211,6 +1212,36 @@ function addCustNmAndStAddrKRLenghtValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function setDefaultArCodeKR() {
+  var reqType = FormManager.getActualValue('reqType');
+  var collectionCd = FormManager.getActualValue('collectionCd');
+
+  if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
+    FormManager.setValue('collectionCd', '0000');
+  }
+
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'IBM Collection Responsibility' ], 'MAIN_IBM_TAB');
+}
+
+function checkAccRcvBoLengthValidator() {
+  FormManager.addFormValidator((function () {
+    return {
+      validate: function () {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+
+        if (collectionCd.length < 4) {
+          return new ValidationResult({
+            id: 'collectionCd',
+            type: 'text',
+            name: 'collectionCd'
+          }, false, 'IBM Collection Responsibility should be 4 characters in length.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -1230,6 +1261,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
   GEOHandler.registerValidator(validateCustnameForKynd, GEOHandler.KR);
+  GEOHandler.registerValidator(checkAccRcvBoLengthValidator, GEOHandler.KR);
 
   // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);

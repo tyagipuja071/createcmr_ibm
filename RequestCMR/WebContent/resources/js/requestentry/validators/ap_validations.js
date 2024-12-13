@@ -1152,8 +1152,17 @@ function onCustSubGrpChange() {
     }
     setISBUScenarioLogic();
     autoSetAbbrevNmLocnLogic();
-    setCollectionCd();
-    
+
+    // CREATCMR-7885
+    // CREATCMR-7878
+
+    if (FormManager.getActualValue('cmrIssuingCntry') == '834' || FormManager.getActualValue('cmrIssuingCntry') == '615' || FormManager.getActualValue('cmrIssuingCntry') == '652') {
+      console.log('No need to reset isuCd for 834/SG >>>>');
+    } else {
+      resetFieldsAfterCustSubGrpChange();
+    }
+
+
   });
 }
 
@@ -1164,46 +1173,6 @@ function resetFieldsAfterCustSubGrpChange() {
     FormManager.setValue('isuCd', '5K');
   } else {
     FormManager.setValue('isuCd', '');
-  }
-}
-
-function setCollectionCd() {
-  console.log('>>>> setCollectionCd >>>>');
-  var cmrIssuCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custGrp = FormManager.getActualValue('custGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  if (cmrIssuCntry == '834' && custGrp == 'CROSS') {
-    FormManager.setValue('collectionCd', 'S013');
-    if (role == 'REQUESTER')
-      FormManager.readOnly('collectionCd');
-    return;
-  }
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  var isbuCd = FormManager.getActualValue('isbuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var collCd = null;
-  if (isbuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISBU : '%' + isbuCd + '%'
-    };
-    var result = cmr.query('GET.ARCODELIST.BYISBU', qParams);
-    if (result.length > 0) {
-      if (result != null && result[0].ret1 != result[0].ret2) {
-        collCd = result[0].ret1;
-        if (collCd != null) {
-          FormManager.setValue('collectionCd', collCd);
-        }
-      }
-    }
   }
 }
 
@@ -3397,9 +3366,6 @@ function onISBUCdChange() {
     if (!value) {
       return;
     }
-    if (value != null && value.length > 1) {
-      setCollectionCd();
-    }
   });
   if (_isuHandler && _isuHandler[0]) {
     _isuHandler[0].onChange();
@@ -5025,7 +4991,6 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.readOnly('isbuCd');
    FormManager.readOnly('covId');
    FormManager.readOnly('cmrNoPrefix');
-   FormManager.readOnly('collectionCd');
    FormManager.readOnly('engineeringBo');
    FormManager.readOnly('commercialFinanced');
    FormManager.readOnly('creditCd');
@@ -5049,7 +5014,6 @@ function handleObseleteExpiredDataForUpdate() {
    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
    FormManager.removeValidator('isbuCd', Validators.REQUIRED);
    FormManager.removeValidator('covId', Validators.REQUIRED);
-   FormManager.removeValidator('collectionCd', Validators.REQUIRED);
    FormManager.removeValidator('engineeringBo', Validators.REQUIRED);
    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
    FormManager.removeValidator('creditCd', Validators.REQUIRED);
@@ -7433,9 +7397,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setCollectionCd, GEOHandler.AP, [ SysLoc.AUSTRALIA, SysLoc.INDIA ]);
-  GEOHandler.addAfterConfig(setCollCdFrAU, [ SysLoc.AUSTRALIA ]);
-  GEOHandler.addAfterConfig(setCollCdFrIndia, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(setCollCdFrAU, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterConfig(setCollCdFrIndia, [SysLoc.INDIA]);
   GEOHandler.addAfterConfig(onSubIndustryChange, GEOHandler.AP);
   GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ASEAN);
   GEOHandler.addAfterConfig(onIsuCdChangeAseanAnzIsa, GEOHandler.ANZ);
