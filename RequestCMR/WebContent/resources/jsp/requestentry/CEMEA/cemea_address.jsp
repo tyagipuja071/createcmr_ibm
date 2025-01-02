@@ -49,7 +49,7 @@
       <cmr:view exceptForCountry="618,740">
         <cmr:info text="${ui.info.custNm2CEMEA}" />
       </cmr:view>
-            <cmr:view forCountry="618">
+      <cmr:view forCountry="618">
         <cmr:info text="${ui.info.nameAustria}" />
       </cmr:view>
     </cmr:label>
@@ -161,7 +161,7 @@
         </cmr:label>
         <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
       </p>
-    </cmr:column>
+      </cmr:column>
 </cmr:row>
 
 <cmr:row>

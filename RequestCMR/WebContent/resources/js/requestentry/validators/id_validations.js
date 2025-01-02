@@ -5255,9 +5255,6 @@ function lockFieldsForIndia() {
     FormManager.resetValidations('busnType');
 
     FormManager.readOnly('cmrNoPrefix');
-    
-    FormManager.resetValidations('collectionCd');
-
     FormManager.readOnly('repTeamMemberNo');
     FormManager.resetValidations('repTeamMemberNo');
 

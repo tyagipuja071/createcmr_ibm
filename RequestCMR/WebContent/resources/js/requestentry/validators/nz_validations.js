@@ -514,18 +514,6 @@ function setDefaultValueforCustomerServiceCode() {
   }
 }
 
-function setDefaultARForNZ() {
-  console.log('>>>> setDefaultARForNZ >>>>');
-  if (FormManager.getActualValue('viewOnlyPage') === 'true') {
-    return;
-  }
-  var collectionCd = FormManager.getActualValue('collectionCd');
-  
-  if (!collectionCd) {
-    FormManager.setValue('collectionCd', '0000');
-  }
-}
-
 function addSalesRepNameNoCntryValidator() {
   console.log(">>>repTeamMemberNo<<<===" + FormManager.getActualValue('repTeamMemberNo'));
   console.log(">>>repTeamMemberNo---pID<<<===" + localStorage.getItem("pID"));
@@ -571,6 +559,7 @@ function setDefaultARForNZ() {
     FormManager.setValue('collectionCd', '0000');
   }
   FormManager.enable('collectionCd');
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['IBM Collection Responsibility'], 'MAIN_IBM_TAB');
 }
 
 function included(cmrIssuCntry) {
@@ -3019,7 +3008,7 @@ function addARCodeValidator() {
               id : 'collectionCd',
               type : 'text',
               name : 'collectionCd'
-            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+            }, false, 'Invalid IBM Collection Responsibility value. It should be exactly 4 characters.');
           }
         return new ValidationResult(null, true);
       }

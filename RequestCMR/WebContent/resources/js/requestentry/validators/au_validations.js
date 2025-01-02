@@ -671,6 +671,7 @@ function setDefaultARForAU() {
     FormManager.setValue('collectionCd', '0000');
   }
   FormManager.enable('collectionCd');
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, ['IBM Collection Responsibility'], 'MAIN_IBM_TAB');
 }
 
 function included(cmrIssuCntry) {
@@ -1672,7 +1673,6 @@ function updateRegionCd() {
     _provNmHandler[0].onChange();
   }
 }
-
 
 function setCTCIsuByClusterANZ() {
   console.log('>>>> setCTCIsuByClusterANZ >>>>');
@@ -3139,7 +3139,7 @@ function addAfterConfigAU() {
   handleObseleteExpiredDataForUpdate();
   setRepTeamMemberNo();
   setMrcCd();
-	setDefaultARForAU();
+  setDefaultARForAU();
 }
 
 function addressFunctions() {
@@ -3185,7 +3185,7 @@ function addARCodeValidator() {
               id : 'collectionCd',
               type : 'text',
               name : 'collectionCd'
-            }, false, 'Invalid AR Code value. It should be exactly 4 characters.');
+            }, false, 'Invalid IBM Collection Responsibility value. It should be exactly 4 characters.');
           }
         return new ValidationResult(null, true);
       }

@@ -325,6 +325,8 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   private String cmrTaxJurisCd;
 
+  private String cmrTaxJurisCd;
+
   public String getCmrStxlTxtVal() {
     return cmrStxlTxtVal;
   }
