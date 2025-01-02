@@ -621,9 +621,9 @@ function setDefaultArCodeTH() {
 	if ((reqType == 'C') && (collectionCd == null || collectionCd == '')) {
 	  FormManager.setValue('collectionCd', '0000');
 	}
-  
-	FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
-  }
+
+  FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'AR Code' ], 'MAIN_IBM_TAB');
+}
 
 function addSalesRepNameNoCntryValidator() {
 	console.log(">>>repTeamMemberNo<<<===" + FormManager.getActualValue('repTeamMemberNo'));
