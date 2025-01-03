@@ -50,12 +50,12 @@ public class CoverageRules {
    */
   public static void main(String[] args) throws Exception {
     LOG.info("Starting..");
-    CoverageRules cov = new CoverageRules("1H2024");
-    String zipFile = "C:/ci/shared/data/batch/coverage/zip/1H2024.jar";
-    // cov.initializeFrom(zipFile);
+    CoverageRules cov = new CoverageRules("1H2025");
+    String zipFile = "C:/ci/shared/data/batch/coverage/zip/1H2025.jar";
+    cov.initializeFrom(zipFile);
     cov.initialize();
 
-    String id = "T0007995";
+    String id = "A0004412";
     List<Rule> rules1 = cov.findRule(id);
     if (rules1 != null) {
       System.out.println("Rules for " + id);
@@ -342,6 +342,9 @@ public class CoverageRules {
     // throw new IllegalArgumentException("Coverage " + coverageTypeAndId + "
     // not found in current rules.");
     // }
+    if (rule == null) {
+      return Collections.emptyList();
+    }
     Collections.sort(rule);
     return rule;
   }
