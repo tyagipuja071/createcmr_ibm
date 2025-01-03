@@ -303,3 +303,5 @@
                       <script src="${resourcesPath}/js/requestentry/validators/br_validations.js?${cmrv}"
                         type="text/javascript"></script>
                     </cmr:view>
+                    <script src="${resourcesPath}/js/requestentry/validators/isu_ctc_validator.js?${cmrv}" type="text/javascript"></script>
+                    
