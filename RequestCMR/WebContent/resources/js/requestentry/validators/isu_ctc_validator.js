@@ -109,7 +109,7 @@ function clientTierCodeValidator() {
       }, false, 'Client Tier can only accept blank.');
     }
   } else {
-    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'E' || clientTierCode == '') {
+    if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == 'E' || clientTierCode == '' || clientTierCode == 'W') {
       $("#clientTierSpan").html('');
 
       return new ValidationResult(null, true);
@@ -121,7 +121,7 @@ function clientTierCodeValidator() {
         id : 'clientTier',
         type : 'text',
         name : 'clientTier'
-      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'E\' or blank.');
+      }, false, 'Client Tier can only accept \'Q\', \'Y\', \'E\', \'W\' or blank.');
     }
   }
 }
