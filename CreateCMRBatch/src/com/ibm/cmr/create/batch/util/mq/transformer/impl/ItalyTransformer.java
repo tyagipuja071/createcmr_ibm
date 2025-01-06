@@ -1063,7 +1063,7 @@ public class ItalyTransformer extends EMEATransformer {
       updateFiscalDataForDoubleUpdates(entityManager, data, cmrObjects, crossBorder);
     }
 
-    List<String> isuCdList = Arrays.asList("34", "36", "32");
+    List<String> isuCdList = Arrays.asList("34", "36", "32", "33");
     if (!StringUtils.isEmpty(data.getIsuCd()) && !isuCdList.contains(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     } else {
