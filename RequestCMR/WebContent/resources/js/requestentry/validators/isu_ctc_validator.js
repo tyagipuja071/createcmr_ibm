@@ -125,3 +125,24 @@ function clientTierCodeValidator() {
     }
   }
 }
+
+function validatorISUCTCES(){
+  console.log('Adding global ctc validator for ES');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : clientTierCodeValidator
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+};
+
+function validatorISUCTCEntGR() {
+  return clientTierCodeValidator();
+}
+
+function validateIsuClientTier() {
+  return clientTierCodeValidator();
+}
+
+function validatorISUCTCEntMT() {
+  return clientTierCodeValidator();
+}

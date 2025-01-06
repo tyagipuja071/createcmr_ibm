@@ -988,7 +988,11 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   }
 
   public void setSearchTerm(String searchTerm) {
-    this.searchTerm = searchTerm;
+    if (searchTerm != null && searchTerm.toLowerCase().contains("not app")) {
+      this.searchTerm = "000000";
+    } else {
+      this.searchTerm = searchTerm;
+    }
   }
 
   public String getSensitiveFlag() {
