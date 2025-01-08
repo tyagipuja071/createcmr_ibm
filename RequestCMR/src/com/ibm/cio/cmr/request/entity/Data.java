@@ -1468,11 +1468,11 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
     if (salesBusOffCd == null) {
       return;
     }
-    if (salesBusOffCd.length() <= 10) {
-      this.salesBusOffCd = salesBusOffCd;
+    if (salesBusOffCd.toLowerCase().contains("not")) {
+      this.salesBusOffCd = "000000";
     } else {
-      if (salesBusOffCd.toLowerCase().contains("not app")) {
-        this.salesBusOffCd = "000000";
+      if (salesBusOffCd.length() <= 10) {
+        this.salesBusOffCd = salesBusOffCd;
       } else {
         this.salesBusOffCd = salesBusOffCd.substring(0, 10);
       }
