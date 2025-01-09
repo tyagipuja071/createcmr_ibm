@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -415,8 +414,8 @@ public class GermanyUtil extends AutomationUtil {
     }
     return valid;
   }
-  
-    @Override
+
+  @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
 
@@ -465,9 +464,9 @@ public class GermanyUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    boolean isPaygoUpgrade=false; 
-    if("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())){
-      isPaygoUpgrade=true;
+    boolean isPaygoUpgrade = false;
+    if ("U".equals(admin.getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
+      isPaygoUpgrade = true;
     }
     if (!isPaygoUpgrade && ("3PA".contains(data.getCustSubGrp()) || "X3PA".contains(data.getCustSubGrp()))) {
       Addr zi01 = requestData.getAddress("ZI01");
@@ -701,7 +700,7 @@ public class GermanyUtil extends AutomationUtil {
           data.getCmrIssuingCntry());
       if (queryResults != null && !queryResults.isEmpty()) {
         for (DACHFieldContainer result : queryResults) {
-          DACHFieldContainer queryResult = (DACHFieldContainer) result;
+          DACHFieldContainer queryResult = result;
           String containerCtc = StringUtils.isBlank(container.getClientTierCd()) ? "" : container.getClientTierCd();
           String containerIsu = StringUtils.isBlank(container.getIsuCd()) ? "" : container.getIsuCd();
           String queryIsu = queryResult.getIsuCd();
@@ -732,14 +731,14 @@ public class GermanyUtil extends AutomationUtil {
        * COVERAGE_CALCULATED); results.setResults("Calculated"); } else
        */
       if (!isCoverageCalculated) {
-        String sboReq = data.getSalesBusOffCd();
+        String sboReq = data.getSearchTerm();
         if (!StringUtils.isBlank(sboReq)) {
-          String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
+          String msg = "No valid SBO mapping from request data. Using SORTL " + sboReq + " from request.";
           details.append(msg);
           results.setResults("Calculated");
           results.setDetails(details.toString());
         } else {
-          String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
+          String msg = "Coverage cannot be calculated. No valid SORTL mapping from request data.";
           details.append(msg);
           results.setResults("Cannot Calculate");
           results.setDetails(details.toString());
@@ -913,7 +912,7 @@ public class GermanyUtil extends AutomationUtil {
           LOG.debug("Updates to the Abbreviated Name field  are skipped.");
         }
       } else if (changes.isDataChanged("PPS CEID")) {
-    	  cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
+        cmdeReview = validatePpsCeidForUpdateRequest(engineData, data, detail, resultCodes, changes.getDataChange("PPS CEID"), "R");
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -932,14 +931,14 @@ public class GermanyUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("R")) {
-    	output.setOnError(true);
-    	validation.setSuccess(false);
-    	validation.setMessage("Rejected");
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
     } else if (cmdeReview) {
-    	engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-        detail.append("Updates to one or more fields cannot be validated.\n");
-        validation.setSuccess(false);
-        validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      detail.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else if (isNegativeCheckNeedeed) {
       validation.setSuccess(false);
       validation.setMessage("Not validated");
@@ -1144,8 +1143,7 @@ public class GermanyUtil extends AutomationUtil {
                   isNegativeCheckNeedeed = false;
                   break;
 
-                } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) && shipTo != null
-                    && (changes.isAddressChanged(addrType))) {
+                } else if (CmrConstants.RDC_SHIP_TO.equals(addrType) && shipTo != null && (changes.isAddressChanged(addrType))) {
                   validation.setSuccess(true);
                   LOG.debug("Updates to relevant addresses is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
@@ -1153,7 +1151,7 @@ public class GermanyUtil extends AutomationUtil {
                   isNegativeCheckNeedeed = false;
                   break;
 
-                 } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
+                } else if (!isRelevantAddressFieldUpdated(changes, addr)) {
                   validation.setSuccess(true);
                   LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
                   detail.append("Updates to relevant addresses found but have been marked as Verified.");
@@ -1302,7 +1300,7 @@ public class GermanyUtil extends AutomationUtil {
     return false;
   }
 
- public static HashMap<String, String> getSORTLFromPostalCodeMapping1H2024(String subIndustryCd, String postCd, String isuCd, String clientTier) {
+  public static HashMap<String, String> getSORTLFromPostalCodeMapping1H2024(String subIndustryCd, String postCd, String isuCd, String clientTier) {
     HashMap<String, String> response = new HashMap<String, String>();
     response.put(MATCHING, "");
     response.put(POSTAL_CD_RANGE, "");

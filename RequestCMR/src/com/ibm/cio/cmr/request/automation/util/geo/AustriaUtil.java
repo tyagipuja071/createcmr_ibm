@@ -551,14 +551,14 @@ public class AustriaUtil extends AutomationUtil {
        * COVERAGE_CALCULATED); results.setResults("Calculated"); } else
        */
       if (!isCoverageCalculated) {
-        String sboReq = data.getSalesBusOffCd();
+        String sboReq = data.getSearchTerm();
         if (!StringUtils.isBlank(sboReq)) {
-          String msg = "No valid SBO mapping from request data. Using SBO " + sboReq + " from request.";
+          String msg = "No valid SBO mapping from request data. Using SORTL " + sboReq + " from request.";
           details.append(msg);
           results.setResults("Calculated");
           results.setDetails(details.toString());
         } else {
-          String msg = "Coverage cannot be calculated. No valid SBO mapping from request data.";
+          String msg = "Coverage cannot be calculated. No valid SORTL mapping from request data.";
           details.append(msg);
           results.setResults("Cannot Calculate");
           results.setDetails(details.toString());
