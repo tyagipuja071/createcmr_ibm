@@ -1376,14 +1376,15 @@ function addFieldValidationForProcessorItaly() {
     FormManager.addValidator('specialTaxCd', Validators.REQUIRED, [ 'Tax Code/ Code IVA' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
 
+    FormManager.resetValidations('enterprise');
+    FormManager.resetValidations('affiliate');
     if (checkImportIndc != 'Y'
         && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'PRICU' || custSubType == 'PRISM' || custSubType == 'PRIVA' || custSubType == 'GOVST'
             || custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType == 'CROGO' || custSubType == 'UNIVE' || custSubType == 'UNISM' || custSubType == 'UNIVA' || custSubType == 'CROUN'
             || custSubType == 'LOCEN' || custSubType == 'LOCSM' || custSubType == 'LOCVA' || custSubType == 'CROLC' || custSubType == 'COMME' || custSubType == 'COMSM' || custSubType == 'COMVA'
             || custSubType == 'CROCM' || custSubType == 'NGOIT' || custSubType == 'NGOSM' || custSubType == 'NGOVA' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
-      FormManager.resetValidations('enterprise');
-      FormManager.resetValidations('affiliate');
-      if ("" != FormManager.getActualValue('isuCd') && ("34" != FormManager.getActualValue('isuCd') || "21" != FormManager.getActualValue('isuCd') || "27" != FormManager.getActualValue('isuCd'))) {
+      if ("" != FormManager.getActualValue('isuCd') && ("34" !=  FormManager.getActualValue('isuCd') || "21" != FormManager.getActualValue('isuCd') || "27" != FormManager.getActualValue('isuCd'))) {
+        console.log('required from addFieldValidationForProcessorItaly isu: '+FormManager.getActualValue('isuCd'));
         FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
         FormManager.enable('enterprise');
@@ -2845,6 +2846,7 @@ function setAffiliateEnterpriseRequired() {
     var checkImportIndc = getImportedIndcForItaly();
     if (checkImportIndc != 'Y') {
       var isu = FormManager.getActualValue('isuCd');
+      console.log('isu: '+isu);
       FormManager.resetValidations('enterprise');
       FormManager.resetValidations('affiliate');
       FormManager.resetValidations('inacCd');
@@ -2867,6 +2869,7 @@ function setAffiliateEnterpriseRequired() {
           FormManager.enable('affiliate');
           FormManager.enable('inacCd');
         } else {
+          console.log('required from setAffiliateEnterpriseRequired');
           FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number/ CODICE ENTERPRISE' ], 'MAIN_IBM_TAB');
           FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate Number' ], 'MAIN_IBM_TAB');
           FormManager.enable('enterprise');
@@ -4806,6 +4809,8 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     // FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
     // }
 
+    FormManager.resetValidations('enterprise');
+    FormManager.resetValidations('affiliate');
     if ((isuCd == '34' && clientTier == 'Q')
         || (isuCd == '27' && clientTier == 'E')
         || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
@@ -4813,6 +4818,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
       FormManager.removeValidator('affiliate', Validators.REQUIRED);
       FormManager.removeValidator('enterprise', Validators.REQUIRED);
     } else {
+      console.log('required from ibmFieldsBehaviourInCreateByScratchIT');
       FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
     }

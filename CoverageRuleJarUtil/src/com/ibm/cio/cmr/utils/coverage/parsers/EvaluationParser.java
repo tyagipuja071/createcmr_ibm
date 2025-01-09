@@ -36,7 +36,6 @@ public class EvaluationParser {
     String evalLine = irlEvalLine.trim();
 
     evalLine = trimCode(evalLine);
-
     evalLine = minimizeFunctions(evalLine);
 
     return parseMinimizedEvalLine(evalLine);
@@ -79,8 +78,8 @@ public class EvaluationParser {
     evalLine = evalLine.replaceAll("var\\$_\\$1\\.size\\(\\) == 0", "COVERAGE = BLANK");
     evalLine = evalLine.replaceAll("var\\$_\\$2\\.size\\(\\) == 0", "COVERAGE = BLANK");
     evalLine = evalLine.replaceAll("var\\$_\\$0\\.size\\(\\) == 1", "COVERAGE = BLANK");
-    evalLine = evalLine.replaceAll("var\\$_\\$1\\.size\\(\\) == 1", "COVERAGE = BLANK");
     evalLine = evalLine.replaceAll("var\\$_\\$1\\.size\\(\\) == 2", "COVERAGE = BLANK");
+    evalLine = evalLine.replaceAll("var\\$_\\$1\\.size\\(\\) == 1", "COVERAGE = BLANK");
 
     evalLine = evalLine.replaceAll("==", "=");
     evalLine = evalLine.replaceAll(" null ", " BLANK ");
@@ -109,8 +108,12 @@ public class EvaluationParser {
     StartsWithEndsWithContainer cont = extractILOGStartsOrEndsWith(evalLine);
     if (cont.matched) {
       do {
+        evalLine = evalLine.replaceAll("\\{\"\\( \\)\"\\}", "{\" \"}");
         evalLine = evalLine.replace(cont.match, cont.replacement);
 
+        if (halt) {
+          throw new RuntimeException();
+        }
         cont = extractILOGStartsOrEndsWith(evalLine);
 
       } while (cont.matched);
@@ -200,6 +203,9 @@ public class EvaluationParser {
       if (matchPhrase.contains("('  ')")) {
         matchPhrase = matchPhrase.replace("('  ')", "\"\"");
       }
+      if (matchPhrase.contains("( )")) {
+        matchPhrase = matchPhrase.replace("( )", "\" \"");
+      }
       matchPhrase = matchPhrase.substring(0, matchPhrase.indexOf(")") + 1);
       cont.match = matchPhrase;
 
@@ -213,9 +219,13 @@ public class EvaluationParser {
       }
       cont.replacement = cont.field + oper + cont.value1 + (cont.value2 != null ? "-" + cont.value2 : "");
     }
-
+    if (oper.equals(" sew ")) {
+      halt = false;
+    }
     return cont;
   }
+
+  public static boolean halt = false;
 
   /**
    * Extracts an instance of a call to ILOG's <em>isParseCode</em> call
