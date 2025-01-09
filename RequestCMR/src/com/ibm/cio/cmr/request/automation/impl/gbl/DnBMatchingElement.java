@@ -167,14 +167,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           boolean orgIdFound = false;
           boolean isTaxCdMatch = false;
           AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
-          if (countryUtil != null) {
+          if (countryUtil != null ) {
             isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
           }
 
           // process records and overrides
           DnBMatchingResponse highestCloseMatch = null;
           DnBMatchingResponse perfectMatch = null;
-
+          if (data.getDunsNo() == null || data.getDunsNo().trim().isEmpty()) {
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
 
             // CREATCMR-6958
@@ -274,7 +274,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
           }
-
+          }
           Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
@@ -287,7 +287,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
             // CREATCMR-9938 (KVK Implementation)
-
+            if (data.getDunsNo() == null || data.getDunsNo().trim().isEmpty()) {
             if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()) && "LOCAL".equalsIgnoreCase(data.getCustGrp())
                 && "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
               boolean taxCd2Found = false;
@@ -349,6 +349,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 }
 
               }
+            }
             }
 
             // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
