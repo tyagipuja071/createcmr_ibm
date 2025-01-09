@@ -62,6 +62,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     Addr zs01 = requestData.getAddress("ZS01");
 
     StringBuilder details = new StringBuilder();
+    if (data.getDunsNo() == null || data.getDunsNo().trim().isEmpty()) { 
     try {
       String landCntry;
       if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
@@ -178,6 +179,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
       }
     } finally {
       ChangeLogListener.clearManager();
+    }
     }
     output.setResults(validation.getMessage());
     output.setProcessOutput(validation);
