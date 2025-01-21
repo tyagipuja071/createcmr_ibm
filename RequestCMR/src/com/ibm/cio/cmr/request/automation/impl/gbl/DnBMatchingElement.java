@@ -80,16 +80,26 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     MatchingOutput output = new MatchingOutput();
     Scorecard scorecard = requestData.getScorecard();
     scorecard.setDnbMatchingResult("");
+    String dunsNo = requestData.getData().getDunsNo();
+    String sourceSystId = requestData.getAdmin().getSourceSystId();
     Boolean override = false;
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     boolean isPaygoUpgrade = false;
     if ("U".equals(requestData.getAdmin().getReqType()) && "PAYG".equals(requestData.getAdmin().getReqReason())) {
       isPaygoUpgrade = true;
     }
+    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)){
+      LOG.debug("DNB Overriden ");
+      result.setResults("Overriden");
+      result.setDetails("D&B matches were chosen to be overridden by the requester.");
+      return result;
+    }
+    
+    
     // CREATCMR-8553: if the address matches with mailing address in DNB, show
     // mailing address in automation details.
     Boolean matchWithDnbMailingAddr = false;
-
+   
     // CREATCMR-8430: use usSicmen to save the dnboverride flag for NZ
     // the requester choose override dnb and did NZBN API in UI, automation will
     // use this flag to skip DNB matching for this case
@@ -173,8 +183,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
           // process records and overrides
           DnBMatchingResponse highestCloseMatch = null;
-          DnBMatchingResponse perfectMatch = null;
-          if (data.getDunsNo() == null || data.getDunsNo().trim().isEmpty()) {
+          DnBMatchingResponse perfectMatch = null;          
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
 
             // CREATCMR-6958
@@ -274,7 +283,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
           }
-          }
+          
           Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
@@ -286,8 +295,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               }
             }
 
-            // CREATCMR-9938 (KVK Implementation)
-            if (data.getDunsNo() == null || data.getDunsNo().trim().isEmpty()) {
+            // CREATCMR-9938 (KVK Implementation)            
             if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()) && "LOCAL".equalsIgnoreCase(data.getCustGrp())
                 && "COMME".equalsIgnoreCase(data.getCustSubGrp()) && payGoAddredited) {
               boolean taxCd2Found = false;
@@ -350,7 +358,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
               }
             }
-            }
+            
 
             // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
             // Supporting doc provided requires cmde review
