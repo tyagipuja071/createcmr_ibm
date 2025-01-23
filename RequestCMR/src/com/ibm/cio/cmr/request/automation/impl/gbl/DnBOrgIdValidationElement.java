@@ -54,9 +54,19 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String dunsNo = requestData.getData().getDunsNo();
+    String sourceSystId = requestData.getAdmin().getSourceSystId();
     AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
     ValidationOutput output = new ValidationOutput();
-
+    
+    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)){
+      LOG.debug("DNB Overriden ");
+      result.setResults("Overriden");
+      result.setDetails("D&B matches were chosen to be overridden by the requester.");
+      return result;
+    }
+    
+    
     if ("U".equals(admin.getReqType()) && engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL)) {
       output.setSuccess(true);
       output.setMessage("Skipped");

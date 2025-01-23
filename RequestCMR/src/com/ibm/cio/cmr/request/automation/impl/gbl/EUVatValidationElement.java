@@ -55,13 +55,25 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     long reqId = requestData.getAdmin().getId().getReqId();
-
+    String dunsNo = requestData.getData().getDunsNo();
+    String sourceSystId = requestData.getAdmin().getSourceSystId();
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
 
-    Addr zs01 = requestData.getAddress("ZS01");
+    Addr zs01 = requestData.getAddress("ZS01");    
+    
+    if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)) {
+      LOG.debug("EU VAT validation Overriden ");
+      validation.setSuccess(true);
+      validation.setMessage("Skipped.");
+      output.setDetails("EU VAT validation Overriden ");
+      output.setResults("Overriden");   
+      output.setProcessOutput(validation);
+      return output;
+    }
 
     StringBuilder details = new StringBuilder();
+    if (data.getDunsNo() == null || data.getDunsNo().trim().isEmpty()) { 
     try {
       String landCntry;
       if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
@@ -172,6 +184,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
       }
     } finally {
       ChangeLogListener.clearManager();
+    }
     }
     output.setResults(validation.getMessage());
     output.setProcessOutput(validation);
