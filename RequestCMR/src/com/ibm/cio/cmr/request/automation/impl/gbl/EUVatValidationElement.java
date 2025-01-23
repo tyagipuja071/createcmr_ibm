@@ -60,12 +60,15 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
 
-    Addr zs01 = requestData.getAddress("ZS01");
-    
+    Addr zs01 = requestData.getAddress("ZS01");    
     
     if (!StringUtils.isBlank(dunsNo) && !StringUtils.isBlank(sourceSystId)) {
       LOG.debug("EU VAT validation Overriden ");
-      output.setResults("Overriden");      
+      validation.setSuccess(true);
+      validation.setMessage("Skipped.");
+      output.setDetails("EU VAT validation Overriden ");
+      output.setResults("Overriden");   
+      output.setProcessOutput(validation);
       return output;
     }
 
