@@ -92,6 +92,24 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       LOG.debug("DNB Overriden ");
       result.setResults("Overriden");
       result.setDetails("D&B matches were chosen to be overridden by the requester.");
+      
+      if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+        LOG.debug("DNB Overriden");
+        result.setResults("Overriden");
+        result.setDetails(
+            "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
+        admin.setCompVerifiedIndc("O");
+        override = true;
+        if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())
+            && !(SystemLocation.INDIA.equals(data.getCmrIssuingCntry()) && !(StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)))) {
+          List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
+          if ((dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry()))) {
+            engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+          }
+          return result;
+        }
+      }
+      
       return result;
     }
     

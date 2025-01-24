@@ -63,6 +63,21 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
       LOG.debug("DNB Overriden ");
       result.setResults("Overriden");
       result.setDetails("D&B matches were chosen to be overridden by the requester.");
+      
+      if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+        result.setResults("Overriden");
+        output.setSuccess(true);
+        output.setMessage("Overriden");
+        result.setProcessOutput(output);
+        result.setDetails(
+            "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
+        List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
+        if (dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry())) {
+          engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+        }
+        return result;
+      }
+      
       return result;
     }
     
