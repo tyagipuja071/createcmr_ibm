@@ -92,24 +92,25 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       LOG.debug("DNB Overriden ");
       result.setResults("Overriden");
       result.setDetails("D&B matches were chosen to be overridden by the requester.");
-      
-      if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-        LOG.debug("DNB Overriden");
-        result.setResults("Overriden");
-        result.setDetails(
-            "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
-        admin.setCompVerifiedIndc("O");
-        override = true;
-        if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())
-            && !(SystemLocation.INDIA.equals(data.getCmrIssuingCntry()) && !(StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)))) {
-          List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
-          if ((dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry()))) {
-            engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
-          }
-          return result;
-        }
+      if (soldTo != null) {
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
+      List<DnBMatchingResponse> dnbMatches = response.getMatches();
+      // save the highest matched record
+      DnBMatchingResponse attachRecord = null;
+     
+        attachRecord = dnbMatches.get(0);
+    
+      ImportDnBService dnbService = new ImportDnBService();
+      AppUser user = (AppUser) engineData.get("appUser");
+      LOG.debug("Saving DnB Highest match attachment for DUNS " + attachRecord.getDunsNo() + "..");
+      try {
+        dnbService.saveDnBAttachment(entityManager, user, admin.getId().getReqId(), attachRecord.getDunsNo(), "DnBHighestMatch",
+            attachRecord.getConfidenceCode());
+      } catch (Exception e) {
+        // ignore attachment issues
+        LOG.warn("Error in saving D&B attachment", e);
       }
-      
+      }
       return result;
     }
     
