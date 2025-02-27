@@ -92,6 +92,25 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       LOG.debug("DNB Overriden ");
       result.setResults("Overriden");
       result.setDetails("D&B matches were chosen to be overridden by the requester.");
+      if (soldTo != null) {
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
+      List<DnBMatchingResponse> dnbMatches = response.getMatches();
+      // save the highest matched record
+      DnBMatchingResponse attachRecord = null;
+     
+        attachRecord = dnbMatches.get(0);
+    
+      ImportDnBService dnbService = new ImportDnBService();
+      AppUser user = (AppUser) engineData.get("appUser");
+      LOG.debug("Saving DnB Highest match attachment for DUNS " + attachRecord.getDunsNo() + "..");
+      try {
+        dnbService.saveDnBAttachment(entityManager, user, admin.getId().getReqId(), attachRecord.getDunsNo(), "DnBHighestMatch",
+            attachRecord.getConfidenceCode());
+      } catch (Exception e) {
+        // ignore attachment issues
+        LOG.warn("Error in saving D&B attachment", e);
+      }
+      }
       return result;
     }
     
