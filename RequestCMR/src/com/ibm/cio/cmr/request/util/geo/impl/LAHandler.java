@@ -2346,7 +2346,10 @@ public class LAHandler extends GEOHandler {
         salesBusOffCd = salesBusOffCd.substring(0, 3);
       }
       data.setInstallBranchOff(salesBusOffCd);
-ngUtils.isBlank(cmrIssuingCntry) && isBRIssuingCountry(cmrIssuingCntry)) {
+    }
+
+    boolean isLeasingBr = false;
+    if (!StringUtils.isBlank(cmrIssuingCntry) && isBRIssuingCountry(cmrIssuingCntry)) {
       String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", admin.getId().getReqId());
