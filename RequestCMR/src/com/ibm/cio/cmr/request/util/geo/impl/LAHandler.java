@@ -2339,8 +2339,8 @@ public class LAHandler extends GEOHandler {
 
     }
 
-    /* 1165068 */
-    if (isMXIssuingCountry(issuingCntry) || isSSAIssu    if ((isMXIssuingCountry(issuingCntry) || isSSAIssuingCountry(issuingCntry))) {
+   /* 1165068 */
+    if ((isMXIssuingCountry(issuingCntry) || isSSAIssuingCountry(issuingCntry))) {
       String salesBusOffCd = data.getSalesBusOffCd();
       if (salesBusOffCd != null && salesBusOffCd.length() > 3) {
         salesBusOffCd = salesBusOffCd.substring(0, 3);
