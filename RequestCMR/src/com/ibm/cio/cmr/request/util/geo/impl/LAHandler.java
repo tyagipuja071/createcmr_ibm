@@ -1890,6 +1890,7 @@ public class LAHandler extends GEOHandler {
     String custType = admin.getCustType();
     String issuingCntry = data.getCmrIssuingCntry();
     String reqType = admin.getReqType();
+    String isProspectCmr = admin.getProspLegalInd();
 
     final SimpleDateFormat NUCCHECKDATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     String nucDateToParse = NUCCHECKDATE_FORMAT.format(new Date());
@@ -2339,8 +2340,12 @@ public class LAHandler extends GEOHandler {
     }
 
     /* 1165068 */
-    if (isMXIssuingCountry(issuingCntry) || isSSAIssuingCountry(issuingCntry)) {
-      data.setInstallBranchOff(data.getSalesBusOffCd());
+    if (isMXIssuingCountry(issuingCntry) || isSSAIssu    if ((isMXIssuingCountry(issuingCntry) || isSSAIssuingCountry(issuingCntry))) {
+      String salesBusOffCd = data.getSalesBusOffCd();
+      if (salesBusOffCd != null && salesBusOffCd.length() > 3) {
+        salesBusOffCd = salesBusOffCd.substring(0, 3);
+      }
+      data.setInstallBranchOff(salesBusOffCd);
     }
 
     boolean isLeasingBr = false;
