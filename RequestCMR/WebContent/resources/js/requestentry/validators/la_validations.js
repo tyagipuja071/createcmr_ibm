@@ -2952,7 +2952,7 @@ function makeMrcSboOptionalForProspectLA() {
         if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
           FormManager.resetValidations('mrcCd');
           FormManager.resetValidations('salesBusOffCd');
-          FormManager.setValue('isuCd', '');
+         // FormManager.setValue('isuCd', '');
           FormManager.setValue('mrcCd', '');
           FormManager.setValue('salesBusOffCd', '');
           FormManager.enable('isuCd');
