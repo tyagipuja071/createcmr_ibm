@@ -843,6 +843,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       // addr.setCustNm3(cmr.getCmrName3());
       // addr.setCustNm4(cmr.getCmrName4());
       addr.setAddrTxt(cmr.getCmrStreetAddress());
+      if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
+        addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
+      }
       addr.setImportInd(CmrConstants.YES_NO.Y.toString());
 
       if (!StringUtils.isBlank(cmr.getCmrCustPhone()) && cmr.getCmrCustPhone().length() > 16) {
