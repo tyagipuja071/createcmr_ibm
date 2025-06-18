@@ -718,6 +718,7 @@ public class ISASunsetHandler extends APHandler {
       }
       LOG.info("ISA getCmrAddrSeq: " + record.getCmrAddrSeq());
       LOG.info("ISA getCmrName4: " + record.getCmrName4());
+      LOG.info("ISA getCmrName3: " + record.getCmrName3());
       LOG.info("ISA getCmrStreetAddress: " + record.getCmrStreetAddress());
       LOG.info("ISA getCmrCity: " + record.getCmrCity());
       LOG.info("ISA getCmrName4: " + record.getCmrName4());
