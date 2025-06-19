@@ -3161,6 +3161,7 @@ public class LAHandler extends GEOHandler {
   private String getLocationCd(String issuingCntry, String city, String stateProv) {
     EntityManager entityManager = JpaManager.getEntityManager();
     String txt = "";
+    try {
     String sql = ExternalizedQuery.getSql("GET.GEO_CITIES.ID_BY_DESC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CITY_DESC", city);
@@ -3176,6 +3177,10 @@ public class LAHandler extends GEOHandler {
         }
 
       }
+    }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
     }
 
     if (txt != null && StringUtils.isNotEmpty(txt) && txt.length() >= 5) {
