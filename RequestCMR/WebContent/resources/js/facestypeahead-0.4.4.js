@@ -612,8 +612,8 @@ if (!Function.prototype.bind) {
       moreResultsLabel : 'See more Faces (${count})',
       moreResultsLabel2 : 'See more Faces (over ${count})',
       moreResultsUrl : '//w3-services1.w3-969.ibm.com/myw3/unified-profile/v1#${query}',
-      host : protocol + '//w3-unifiedprofile-search.dal1a.cirrus.ibm.com',
-      imageHost : protocol + '//w3-unifiedprofile-api.dal1a.cirrus.ibm.com/v3',
+      host : protocol + '//w3-unified-profile-search.ibm.com',
+      imageHost : protocol + '//w3-ui-unified-profile-proxy.w3-ui.dal.app.cirrus.ibm.com/up-api-proxy/v3',
       largeImageSize : 50,
       smallImageSize : 32,
       url : function(host) {
@@ -629,7 +629,7 @@ if (!Function.prototype.bind) {
       // 'user': 'finleyt@us.ibm.com',
       },
       onclick : function(person) {
-        location.href = protocol + '//w3-unifiedprofile-api.dal1a.cirrus.ibm.com/v3/image/' + person.uid;
+        location.href = protocol + '//w3-ui-unified-profile-proxy.w3-ui.dal.app.cirrus.ibm.com/up-api-proxy/v3/image/' + person.uid;
         // Alternative: opens Connections profile
         // location.href =
         // 'http://w3.ibm.com/connections/profiles/html/profileView.do?email=' +
