@@ -12,7 +12,7 @@
 
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
-<script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/angular-sanitize-1.8.3.fixed.min.js"></script>
 <script src="${resourcesPath}/js/system/system.js?${cmrv}"></script>
  <%
   boolean admin = AppUser.getUser(request).isAdmin();

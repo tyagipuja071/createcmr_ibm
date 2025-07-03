@@ -16,7 +16,7 @@
 <link href="${resourcesPath}/css/ext/data.css" rel="stylesheet" title="www" type="text/css" />
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
-<script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/angular-sanitize-1.8.3.fixed.min.js"></script>
 
 <script>
   

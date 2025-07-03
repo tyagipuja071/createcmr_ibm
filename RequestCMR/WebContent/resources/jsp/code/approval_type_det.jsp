@@ -16,7 +16,7 @@
 <script src="${resourcesPath}/js/system/dbmap.js?${cmrv}" type="text/javascript"></script>
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
-<script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/angular-sanitize-1.8.3.fixed.min.js"></script>
 <%
   ApprovalTypeModel model = (ApprovalTypeModel)request.getAttribute("typ");
   boolean newEntry = BaseModel.STATE_NEW == model.getState();

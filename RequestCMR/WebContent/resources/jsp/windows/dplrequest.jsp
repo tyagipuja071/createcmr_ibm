@@ -8,7 +8,7 @@
 
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
-<script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/angular-sanitize-1.8.3.fixed.min.js"></script>
 <link href="${resourcesPath}/css/ext/data.css" rel="stylesheet" title="www" type="text/css" />
 <link rel="stylesheet" href="${resourcesPath}/css/quick_search.css?${cmrv}"/>
 

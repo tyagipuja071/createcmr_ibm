@@ -10,7 +10,7 @@
 <link href="//1.www.s81c.com/common/v17e/css/data.css" rel="stylesheet" title="www" type="text/css" />
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
-<script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/angular-sanitize-1.8.3.fixed.min.js"></script>
 <script src="${resourcesPath}/js/ext/jquery-3.6.0.js"></script>
 <script src="${resourcesPath}/js/ext/typeahead.bundle.js"></script>
 <script src="${resourcesPath}/js/ext/dnb_utilities.js"></script>
