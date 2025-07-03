@@ -15,7 +15,7 @@
 <script src="${resourcesPath}/js/system/system.js?${cmrv}"></script>
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
-<script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/angular-sanitize-1.8.3.fixed.min.js"></script>
 <link rel="stylesheet" href="${resourcesPath}/css/auto_config.css?${cmrv}"/>
 
 <div ng-app="ConfigApp" ng-controller="ConfigController" ng-cloak>
